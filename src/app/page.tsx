@@ -1,17 +1,10 @@
-import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
+import { Outfit, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
 
-const fraunces = Fraunces({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-display",
-});
-
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-body",
 });
 
 const mono = JetBrains_Mono({
@@ -24,8 +17,7 @@ type Project = {
   title: string;
   category: string;
   coords: string; // signature detail — a nod to the drone/aerial practice
-  year: string;
-  size: "large" | "small";
+  date: string;
   imageUrl?: string; // swap in real Drive-sourced thumbnails
 };
 
@@ -34,65 +26,52 @@ const projects: Project[] = [
     title: "Adunni",
     category: "Editorial Portraits",
     coords: "01°17′S 36°49′E",
-    year: "2025",
-    size: "large",
+    date: "Mar 2025",
   },
   {
     title: "Kicks Kenya",
     category: "Product Photography",
     coords: "01°17′S 36°49′E",
-    year: "2025",
-    size: "small",
+    date: "Jan 2025",
   },
   {
     title: "Tatu Boys Secondary",
     category: "Aerial / Drone",
     coords: "01°22′S 36°55′E",
-    year: "2024",
-    size: "small",
+    date: "Nov 2024",
   },
   {
     title: "Community & Environment",
     category: "Documentary",
     coords: "01°17′S 36°49′E",
-    year: "2024",
-    size: "large",
+    date: "Aug 2024",
   },
 ];
 
+// Uniform card, equal size across the grid
 function ProjectCard({ project }: { project: Project }) {
-  const isLarge = project.size === "large";
   return (
-    <Link
-      href="#"
-      className={`group relative block overflow-hidden border border-[#2A2822] ${
-        isLarge ? "md:col-span-2 aspect-[16/10]" : "aspect-[4/5]"
-      }`}
-    >
-      {/* Placeholder surface — replace with real gallery cover images */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#1c1a15] to-[#0e0d0b] transition-transform duration-700 ease-out group-hover:scale-105" />
+    <Link href="#" className="group block">
+      <div className="relative aspect-[4/5] overflow-hidden border border-[#E5E2DA] bg-[#F0EDE4]">
+        {/* Placeholder surface — replace with real gallery cover images */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#EFEDE6] to-[#E2DED2] transition-transform duration-700 ease-out group-hover:scale-105" />
+        <div className="absolute bottom-0 left-0 h-px w-0 bg-[#A9752C] transition-all duration-500 group-hover:w-full" />
+      </div>
 
-      <div className="relative flex h-full flex-col justify-between p-6 md:p-8">
-        <div className="flex items-start justify-between font-mono text-[11px] uppercase tracking-wider text-[#948C7C]">
-          <span>{project.coords}</span>
-          <span>{project.year}</span>
-        </div>
-
+      <div className="mt-4 flex items-start justify-between gap-4">
         <div>
-          <p className="mb-2 font-mono text-[11px] uppercase tracking-wider text-[#C4923D]">
+          <p className="font-mono text-[11px] uppercase tracking-wider text-[#A9752C]">
             {project.category}
           </p>
-          <h3
-            className={`font-[family-name:var(--font-display)] italic text-[#F3EFE6] ${
-              isLarge ? "text-4xl md:text-5xl" : "text-2xl md:text-3xl"
-            }`}
-          >
+          <h3 className="mt-1 font-[family-name:var(--font-display)] text-2xl font-medium text-[#141311]">
             {project.title}
           </h3>
         </div>
+        <div className="shrink-0 text-right font-mono text-[11px] uppercase tracking-wider text-[#8a8676]">
+          <p>{project.date}</p>
+          <p className="mt-1">{project.coords}</p>
+        </div>
       </div>
-
-      <div className="absolute bottom-0 left-0 h-px w-0 bg-[#C4923D] transition-all duration-500 group-hover:w-full" />
     </Link>
   );
 }
@@ -100,104 +79,138 @@ function ProjectCard({ project }: { project: Project }) {
 export default function WorkPage() {
   return (
     <div
-      className={`${fraunces.variable} ${inter.variable} ${mono.variable} min-h-screen bg-[#0B0B0A] font-[family-name:var(--font-body)] text-[#F3EFE6]`}
+      className={`${outfit.variable} ${mono.variable} min-h-screen bg-[#FAFAF8] font-[family-name:var(--font-display)] text-[#141311]`}
     >
       {/* NAV */}
-      <header className="flex items-center justify-between border-b border-[#2A2822] px-6 py-5 md:px-10">
-        <Link
-          href="/"
-          className="font-[family-name:var(--font-display)] text-lg italic"
-        >
-          Sombo Kipsang
+      <header className="flex items-center justify-between border-b border-[#E5E2DA] px-6 py-5 md:px-10">
+        <Link href="/" className="text-lg font-semibold">
+          KIPSMTHN
         </Link>
-        <nav className="hidden gap-8 font-mono text-[11px] uppercase tracking-wider text-[#948C7C] md:flex">
-          <Link href="/work" className="text-[#F3EFE6]">
+        <nav className="hidden gap-8 font-mono text-[11px] uppercase tracking-wider text-[#8a8676] md:flex">
+          <Link href="/work" className="text-[#141311]">
             Work
           </Link>
-          <Link href="/about" className="hover:text-[#F3EFE6]">
+          <Link href="/about" className="hover:text-[#141311]">
             About
           </Link>
-          <Link href="/services" className="hover:text-[#F3EFE6]">
+          <Link href="/services" className="hover:text-[#141311]">
             Services
           </Link>
-          <Link href="/contact" className="hover:text-[#F3EFE6]">
+          <Link href="/contact" className="hover:text-[#141311]">
             Contact
           </Link>
         </nav>
         <Link
           href="/sign-in"
-          className="font-mono text-[11px] uppercase tracking-wider text-[#948C7C] hover:text-[#F3EFE6]"
+          className="font-mono text-[11px] uppercase tracking-wider text-[#8a8676] hover:text-[#141311]"
         >
           Client Login
         </Link>
       </header>
 
       {/* HERO */}
-      <section className="relative overflow-hidden px-6 pb-16 pt-20 md:px-10 md:pb-24 md:pt-28">
-        {/* faint aerial-grid motif behind the headline */}
+      <section className="relative overflow-hidden px-6 pb-20 pt-24 md:px-10 md:pb-28 md:pt-32">
         <div
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
           style={{
             backgroundImage:
-              "linear-gradient(#F3EFE6 1px, transparent 1px), linear-gradient(90deg, #F3EFE6 1px, transparent 1px)",
+              "linear-gradient(#141311 1px, transparent 1px), linear-gradient(90deg, #141311 1px, transparent 1px)",
             backgroundSize: "64px 64px",
           }}
         />
-        <p className="relative mb-6 font-mono text-[11px] uppercase tracking-wider text-[#948C7C]">
+        <p className="relative mb-6 font-mono text-[11px] uppercase tracking-wider text-[#8a8676]">
           Nairobi · Creative Direction &amp; Visual Storytelling
         </p>
-        <h1 className="relative max-w-3xl font-[family-name:var(--font-display)] text-5xl leading-[1.05] md:text-7xl">
+        <h1 className="relative max-w-4xl text-6xl font-medium leading-[1.05] md:text-8xl">
           Stories, shot
           <br />
-          <span className="italic text-[#C4923D]">from the ground up.</span>
+          <span className="font-normal text-[#A9752C]">from the ground up.</span>
         </h1>
-        <p className="relative mt-6 max-w-md text-sm text-[#948C7C] md:text-base">
-          Editorial portraiture, product photography, aerial documentation,
-          and documentary work — across East Africa&rsquo;s startup and
-          creative ecosystems.
-        </p>
         <a
-          href="#grid"
-          className="relative mt-10 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-[#F3EFE6]"
+          href="#portfolio"
+          className="relative mt-10 inline-flex items-center gap-2 border border-[#141311] px-8 py-3 font-mono text-[11px] uppercase tracking-wider text-[#141311] transition-colors hover:border-[#A9752C] hover:text-[#A9752C]"
         >
-          View the work
-          <span className="translate-y-px">↓</span>
+          Our work
         </a>
       </section>
 
       {/* PORTFOLIO GRID */}
-      <section id="grid" className="grid grid-cols-1 gap-px bg-[#2A2822] px-6 md:grid-cols-2 md:px-10">
+      <section
+        id="portfolio"
+        className="grid grid-cols-1 gap-x-8 gap-y-14 px-6 pb-24 sm:grid-cols-2 md:px-10 lg:grid-cols-3"
+      >
         {projects.map((project) => (
           <ProjectCard key={project.title} project={project} />
         ))}
       </section>
 
       {/* CLOSING CTA */}
-      <section className="border-t border-[#2A2822] px-6 py-24 text-center md:px-10">
-        <h2 className="font-[family-name:var(--font-display)] text-3xl italic md:text-5xl">
-          Have a project in mind?
+      <section className="border-t border-[#E5E2DA] px-6 py-24 text-center md:px-10">
+        <p className="mx-auto max-w-xl text-sm text-[#8a8676] md:text-base">
+          Looking to bring a project to life? Let&rsquo;s talk through what
+          you need and how it comes together.
+        </p>
+        <h2 className="mt-4 text-3xl font-medium md:text-5xl">
+          Ready when you are.
         </h2>
         <Link
           href="/contact"
-          className="mt-8 inline-block border border-[#C4923D] px-8 py-3 font-mono text-[11px] uppercase tracking-wider text-[#C4923D] transition-colors hover:bg-[#C4923D] hover:text-[#0B0B0A]"
+          className="mt-8 inline-block border border-[#A9752C] px-8 py-3 font-mono text-[11px] uppercase tracking-wider text-[#A9752C] transition-colors hover:bg-[#A9752C] hover:text-[#FAFAF8]"
         >
-          Start a conversation
+          Contact us
         </Link>
       </section>
 
       {/* FOOTER */}
-      <footer className="flex flex-col gap-4 border-t border-[#2A2822] px-6 py-10 font-mono text-[11px] uppercase tracking-wider text-[#948C7C] md:flex-row md:items-center md:justify-between md:px-10">
-        <span>© {new Date().getFullYear()} Sombo Kipsang — Nairobi, Kenya</span>
-        <div className="flex gap-6">
-          <Link href="/work" className="hover:text-[#F3EFE6]">
-            Work
-          </Link>
-          <Link href="/about" className="hover:text-[#F3EFE6]">
-            About
-          </Link>
-          <Link href="/contact" className="hover:text-[#F3EFE6]">
-            Contact
-          </Link>
+      <footer className="border-t border-[#E5E2DA] px-6 py-16 md:px-10">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
+          <div>
+            <p className="text-xl font-semibold">KIPSMTHN</p>
+            <p className="mt-4 text-sm text-[#8a8676]">
+              Subscribe for new work and availability.
+            </p>
+            <form className="mt-4 flex border-b border-[#E5E2DA] pb-2">
+              <input
+                type="email"
+                placeholder="Email address"
+                className="w-full bg-transparent text-sm text-[#141311] placeholder:text-[#b3ae9e] focus:outline-none"
+              />
+              <button
+                type="submit"
+                className="font-mono text-[11px] uppercase tracking-wider text-[#A9752C]"
+              >
+                Send
+              </button>
+            </form>
+          </div>
+
+          <div className="font-mono text-[11px] uppercase tracking-wider text-[#8a8676]">
+            <p className="mb-4 text-[#141311]">Menu</p>
+            <div className="flex flex-col gap-2">
+              <Link href="/work" className="hover:text-[#141311]">Work</Link>
+              <Link href="/about" className="hover:text-[#141311]">About</Link>
+              <Link href="/services" className="hover:text-[#141311]">Services</Link>
+              <Link href="/contact" className="hover:text-[#141311]">Contact</Link>
+            </div>
+          </div>
+
+          <div className="font-mono text-[11px] uppercase tracking-wider text-[#8a8676]">
+            <p className="mb-4 text-[#141311]">Legal</p>
+            <div className="flex flex-col gap-2">
+              <a href="#" className="hover:text-[#141311]">Privacy Policy</a>
+              <a href="#" className="hover:text-[#141311]">Terms</a>
+            </div>
+          </div>
+
+          <div className="font-mono text-[11px] uppercase tracking-wider text-[#8a8676]">
+            <p className="mb-4 text-[#141311]">Nairobi, Kenya</p>
+            <p>Available for commissions</p>
+            <p className="mt-1">and freelance work</p>
+          </div>
+        </div>
+
+        <div className="mt-16 flex flex-col gap-4 border-t border-[#E5E2DA] pt-8 font-mono text-[11px] uppercase tracking-wider text-[#b3ae9e] md:flex-row md:items-center md:justify-between">
+          <span>© {new Date().getFullYear()} KIPSMTHN. All rights reserved.</span>
         </div>
       </footer>
     </div>

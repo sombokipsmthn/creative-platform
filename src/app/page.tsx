@@ -13,8 +13,10 @@ const resolveImage = (source?: string, fallbackUrl?: string) => {
 
 const portfolioMedia = {
   hero: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1600&q=80',
-  about: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
-  projects: [
+  // 💡 Pulls live LinkedIn Profile Picture
+  about: 'https://unavatar.io/linkedin/sombo09?fallback=https://github.com/sombokipsmthn.png',
+  projects: [ 
+
     {
       id: '01',
       title: 'UNDP Timbuktoo & EdTech Fellowship',

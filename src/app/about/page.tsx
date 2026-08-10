@@ -3,19 +3,20 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
+import PartnerLogos from '@/components/PartnerLogos';
 
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80';
   if (source.startsWith('http://') || source.startsWith('https://')) return source;
   return `https://lh3.googleusercontent.com/d/${source}`;
 };
-
 const aboutMedia = {
-  portrait: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
+  // 💡 Pulls live LinkedIn Profile Picture (with fallback to GitHub profile pic)
+  portrait: 'https://unavatar.io/linkedin/sombo09?fallback=https://github.com/sombokipsmthn.png',
   behindScenes: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80',
 };
 
-// Verified Press Articles & International Foundation Credits
+
 const pressFeatures = [
   {
     publication: 'Friedrich-Ebert-Stiftung (FES Kenya)',
@@ -61,47 +62,55 @@ const pressFeatures = [
   },
 ];
 
+// 💡 Career Timeline with Verified Company Domains & High-Res Logos
 const careerTimeline = [
   {
     period: '04/2025 - Present',
     role: 'Visual Storytelling & Media Producer',
     organization: 'BURN Manufacturing USA LLC',
+    domain: 'burnmfg.com',
     desc: 'Producing visual storytelling and impact documentaries highlighting clean energy technology across African markets. Collaborating with product teams on web platform UX.',
   },
   {
     period: '03/2023 - 02/2026',
     role: 'Visual Production Lead – Innovation Programs',
     organization: 'iHUB / ccHUB',
+    domain: 'cchub.africa',
     desc: 'Leading visual storytelling across UNDP Timbuktoo, Mastercard Foundation EdTech Fellowship, Safaricom Spark, and ccHUB Creative Economy Practice Program.',
   },
   {
     period: '03/2025 - 11/2025',
     role: 'Visual Storytelling Producer – Venture Studio',
     organization: 'Delta40 Venture Studio',
+    domain: 'delta40.studio',
     desc: 'Documenting climate-tech startups, energy, mobility, and circular economy scale summits in partnership with BESTSELLER Foundation and Lemelson Foundation.',
   },
   {
     period: '05/2020 - 11/2024',
     role: 'Visual Storytelling Consultant',
     organization: 'GrowthAfrica & GIZ',
+    domain: 'growthafrica.com',
     desc: 'Media documentation across JICA NINJA Accelerator and Deep Dive Africa, covering cohort founders, demo days, and investor readiness milestones.',
   },
   {
     period: '10/2023 - 06/2024',
     role: 'Content Strategy & Production Lead',
     organization: 'OBY Afrika',
+    domain: 'obyafrika.com',
     desc: 'Led digital content workflows and creative campaigns for accounts including Estee Lauder, Bata Kenya, Bet-Afrique, and Standard Chartered.',
   },
   {
     period: '10/2021 - 02/2022',
     role: 'Creative Director & Photographer',
     organization: 'Shop Zetu / Vivo Woman',
+    domain: 'shopzetu.com',
     desc: 'Built out Zetu Studios and shaped East Africa’s leading fashion e-commerce marketplace visual identity.',
   },
   {
     period: '02/2021 - 08/2023',
     role: 'E-Commerce Photographer',
     organization: 'Copia Kenya',
+    domain: 'copia.co.ke',
     desc: 'Managed large-scale catalogue photography for Copia’s entire e-commerce product catalogue.',
   },
 ];
@@ -181,7 +190,18 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 3. VERIFIED PRESS & PUBLIC MEDIA FEATURES */}
+      {/* 3. ORGANIZATIONS & PARTNERS LOGO GRID */}
+      <section className="py-16 px-6 max-w-7xl mx-auto space-y-8 border-y border-slate-200 dark:border-zinc-800/80">
+        <div>
+          <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Trusted Ecosystem Network</span>
+          <h2 className="text-2xl font-light text-slate-900 dark:text-white mt-1">Organizations & Partners Documented</h2>
+        </div>
+
+        {/* Real Logo Engine */}
+        <PartnerLogos />
+      </section>
+
+      {/* 4. VERIFIED PRESS & PUBLIC MEDIA FEATURES */}
       <section className="py-20 px-6 max-w-7xl mx-auto space-y-12">
         <div className="border-b border-slate-200 dark:border-zinc-800 pb-6">
           <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Press & Public Mentions</span>
@@ -217,7 +237,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 4. FOUR CORE PILLARS */}
+      {/* 5. FOUR CORE PILLARS */}
       <section className="py-20 px-6 max-w-7xl mx-auto space-y-12 border-t border-slate-200 dark:border-zinc-800">
         <div className="border-b border-slate-200 dark:border-zinc-800 pb-6">
           <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Capabilities</span>
@@ -235,7 +255,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 5. CAREER TIMELINE */}
+      {/* 6. CAREER TIMELINE WITH HIGH-RES COMPANY LOGOS */}
       <section className="py-20 px-6 max-w-7xl mx-auto space-y-12">
         <div className="border-b border-slate-200 dark:border-zinc-800 pb-6">
           <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Track Record</span>
@@ -246,12 +266,27 @@ export default function AboutPage() {
           {careerTimeline.map((item, idx) => (
             <div
               key={idx}
-              className="p-8 bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800/80 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm dark:shadow-none"
+              className="p-8 bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800/80 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm dark:shadow-none hover:border-purple-600/50 transition-all"
             >
-              <div className="space-y-2 max-w-2xl">
-                <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
-                  {item.organization}
-                </span>
+              <div className="space-y-3 max-w-2xl">
+                <div className="flex items-center gap-3">
+                  {/* High-Res Logo Badge */}
+                  <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-center shrink-0">
+                    <Image
+                      src={`https://www.google.com/s2/favicons?domain=${item.domain}&sz=128`}
+                      alt={`${item.organization} Logo`}
+                      width={20}
+                      height={20}
+                      className="object-contain"
+                      unoptimized
+                    />
+                  </div>
+
+                  <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold uppercase">
+                    {item.organization}
+                  </span>
+                </div>
+
                 <h3 className="text-xl font-medium text-slate-900 dark:text-white">{item.role}</h3>
                 <p className="text-xs text-slate-600 dark:text-zinc-300 font-light leading-relaxed">{item.desc}</p>
               </div>
@@ -264,7 +299,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 6. ACADEMIC & AWARDS RECOGNITION */}
+      {/* 7. ACADEMIC & AWARDS RECOGNITION */}
       <section className="py-16 px-6 max-w-7xl mx-auto">
         <div className="p-8 md:p-12 border border-purple-500/30 bg-purple-100/50 dark:bg-purple-950/20 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
@@ -291,7 +326,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* 7. FOOTER */}
+      {/* 8. FOOTER */}
       <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">

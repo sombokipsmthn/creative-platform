@@ -17,7 +17,7 @@ export default function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800/50 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-        {/* Brand Logo in ALL CAPS */}
+        {/* Brand Logo */}
         <Link href="/" className="group flex items-center gap-3">
           <span className="text-xl font-bold tracking-wider text-slate-900 dark:text-white font-sans uppercase">
             KIPSMTHN<span className="text-purple-600 dark:text-purple-500">.</span>
@@ -48,7 +48,7 @@ export default function Header() {
             })}
           </div>
 
-          {/* Client Access Portal CTA */}
+          {/* Client Access Portal Link */}
           <Link
             href="/portal"
             className="px-4 py-2 text-xs font-mono uppercase tracking-widest font-semibold text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-600/20 dark:border dark:border-purple-500/50 dark:hover:bg-purple-600 rounded-full transition-all duration-300 shadow-[0_0_15px_rgba(124,58,237,0.2)]"

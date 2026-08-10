@@ -84,15 +84,15 @@ export default function HomePage() {
 
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs font-mono uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-          Kipsmthn Platform • Nairobi, Kenya
+          KIPSMTHN Platform • Nairobi, Kenya
         </div>
 
         <div className="space-y-4 max-w-5xl mx-auto">
-          <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
             FEATURED CREATOR: SOMBORIOT KIPCHILAT
           </p>
           <h1 className="text-5xl md:text-8xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.05]">
-            Creative Director & <span className="font-normal text-purple-600 dark:text-purple-400">Ecosystem Storytelling</span> Specialist
+            CREATIVE DIRECTOR & <span className="font-normal text-purple-600 dark:text-purple-400">ECOSYSTEM STORYTELLING</span> SPECIALIST
           </h1>
           <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
             Documenting African startup ecosystems, venture studios, accelerator programs, and clean-tech innovation through photography, film, and digital media.
@@ -102,7 +102,7 @@ export default function HomePage() {
         <div className="flex flex-wrap justify-center items-center gap-4 pt-2">
           <Link
             href="/contact"
-            className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs tracking-widest uppercase rounded-sm transition-all shadow-[0_0_30px_rgba(124,58,237,0.35)]"
+            className="px-8 py-4 btn-primary font-medium text-xs tracking-widest uppercase rounded-sm transition-all shadow-[0_0_30px_rgba(124,58,237,0.35)]"
           >
             Start a Collaboration
           </Link>
@@ -110,7 +110,7 @@ export default function HomePage() {
             href="https://www.linkedin.com/in/sombo09/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 text-slate-800 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+            className="px-6 py-4 btn-secondary font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
           >
             LinkedIn ↗
           </a>
@@ -118,7 +118,7 @@ export default function HomePage() {
             href="https://www.youtube.com/@kraftdigital7749"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 text-slate-800 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+            className="px-6 py-4 btn-secondary font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
           >
             YouTube / Kraft Digital ↗
           </a>
@@ -126,7 +126,7 @@ export default function HomePage() {
             href="https://linktr.ee/kipsmthn"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+            className="px-6 py-4 btn-secondary font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
           >
             Linktree
           </a>
@@ -137,7 +137,7 @@ export default function HomePage() {
           <div className="relative aspect-[16/10] bg-slate-900 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
             <Image
               src={resolveImage(portfolioMedia.hero)}
-              alt="Somboriot Kipchilat Portfolio on Kipsmthn"
+              alt="Somboriot Kipchilat Portfolio on KIPSMTHN"
               fill
               priority
               className="object-cover opacity-85"
@@ -147,8 +147,8 @@ export default function HomePage() {
 
             <div className="absolute inset-0 flex flex-col justify-between p-8 text-left">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold tracking-wider text-white font-sans">
-                  Kipsmthn<span className="text-purple-500">.</span>
+                <span className="text-xs font-bold tracking-wider text-white font-sans uppercase">
+                  KIPSMTHN<span className="text-purple-500">.</span>
                 </span>
                 <span className="px-3 py-1 bg-purple-600/30 border border-purple-500/50 text-purple-200 text-[10px] font-mono rounded-full">
                   Microsoft Imagine Cup Winner
@@ -170,7 +170,7 @@ export default function HomePage() {
       {/* 2. PARTNERS TICKER */}
       <section className="py-12 border-y border-slate-200 dark:border-zinc-900 bg-slate-100/60 dark:bg-zinc-950/60 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 space-y-4">
-          <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+          <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
             Programs, Venture Studios & Brands Documented
           </p>
           <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-slate-700 dark:text-zinc-300">
@@ -187,7 +187,7 @@ export default function HomePage() {
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 dark:border-zinc-800 pb-6">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Ecosystem Work</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Ecosystem Work</span>
             <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Featured Programs & Productions</h2>
           </div>
           <a
@@ -203,7 +203,7 @@ export default function HomePage() {
           {portfolioMedia.projects.map((project) => (
             <div
               key={project.id}
-              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 ${
+              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 shadow-md dark:shadow-none ${
                 project.featured ? 'md:col-span-2' : ''
               }`}
             >
@@ -215,13 +215,15 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent dark:from-zinc-950 opacity-85" />
+                {/* High Contrast Gradient Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
               </div>
 
-              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end">
+              {/* OVERLAY TEXT */}
+              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-12">
                 <div className="space-y-2 max-w-xl">
                   <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-1 bg-purple-600/20 border border-purple-500/40 text-purple-300 text-[10px] font-mono uppercase tracking-widest rounded-sm">
+                    <span className="px-2.5 py-1 bg-purple-600/30 border border-purple-400/50 text-purple-200 text-[10px] font-mono uppercase tracking-widest rounded-sm font-semibold">
                       {project.category}
                     </span>
                     <span className="text-xs text-zinc-300 font-mono">{project.year}</span>
@@ -230,10 +232,10 @@ export default function HomePage() {
                     {project.title}
                   </h3>
                   <p className="text-xs text-zinc-200 font-light leading-relaxed">{project.desc}</p>
-                  <p className="text-[11px] text-purple-300 font-mono">Partner: {project.client}</p>
+                  <p className="text-[11px] text-purple-300 font-mono font-semibold">Partner: {project.client}</p>
                 </div>
 
-                <div className="w-10 h-10 rounded-full border border-white/20 bg-black/60 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all">
+                <div className="w-10 h-10 rounded-full border border-white/30 bg-black/70 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all shrink-0">
                   ↗
                 </div>
               </div>
@@ -246,7 +248,7 @@ export default function HomePage() {
       <section className="py-12 px-6 max-w-7xl mx-auto">
         <div className="relative border border-slate-200 dark:border-zinc-800 bg-gradient-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full">
+            <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
               Somboriot Kipchilat — Nairobi, Kenya
             </span>
             <h2 className="text-4xl md:text-6xl font-light text-slate-900 dark:text-white">The Person Behind the Story</h2>
@@ -262,10 +264,10 @@ export default function HomePage() {
             </div>
 
             <div className="flex gap-4 pt-2">
-              <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-6 py-3 bg-purple-600 text-white text-xs uppercase font-medium tracking-widest rounded-full hover:bg-purple-700 transition-colors">
+              <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-6 py-3 btn-primary text-xs uppercase font-medium tracking-widest rounded-full">
                 Connect on LinkedIn ↗
               </a>
-              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-6 py-3 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-300 text-xs uppercase font-medium tracking-widest rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors">
+              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-6 py-3 btn-secondary text-xs uppercase font-medium tracking-widest rounded-full">
                 Instagram ↗
               </a>
             </div>
@@ -288,7 +290,7 @@ export default function HomePage() {
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 dark:border-zinc-800 pb-6">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Core Expertise</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Core Expertise</span>
             <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Production & Storytelling Services</h2>
           </div>
           <p className="text-xs text-slate-600 dark:text-zinc-400 max-w-sm font-light">
@@ -303,7 +305,7 @@ export default function HomePage() {
                 <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950">
                   <Image src={resolveImage(s.image)} alt={s.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                 </div>
-                <span className="text-xs font-mono text-purple-600 dark:text-purple-500">{s.num}</span>
+                <span className="text-xs font-mono text-purple-600 dark:text-purple-500 font-bold">{s.num}</span>
                 <h3 className="text-xl font-medium text-slate-900 dark:text-white">{s.title}</h3>
                 <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">{s.desc}</p>
               </div>
@@ -323,7 +325,7 @@ export default function HomePage() {
       {/* 6. PERSPECTIVE FAN ARC GALLERY */}
       <section className="py-28 px-6 max-w-7xl mx-auto space-y-16 text-center border-t border-slate-200 dark:border-zinc-800">
         <div className="space-y-4 max-w-2xl mx-auto">
-          <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Media Vault</span>
+          <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Media Vault</span>
           <h2 className="text-4xl md:text-5xl font-light text-slate-900 dark:text-white">Curious What Else We&apos;ve Captured?</h2>
           <p className="text-xs text-slate-600 dark:text-zinc-400 font-light">
             Explore short-form video content, social storytelling, and tech documentaries on Kraft Digital.
@@ -367,8 +369,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans">
-                Kipsmthn<span className="text-purple-500">.</span>
+              <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
+                KIPSMTHN<span className="text-purple-500">.</span>
               </h2>
               <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
             </div>
@@ -377,24 +379,24 @@ export default function HomePage() {
               <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-purple-600 text-white">
                 LinkedIn
               </a>
-              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                 Instagram
               </a>
-              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                 YouTube
               </a>
-              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                 Linktree
               </a>
-              <Link href="/portal" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+              <Link href="/portal" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                 Client Delivery Portal
               </Link>
             </div>
           </div>
 
-          {/* Copyright Bottom Bar with Theme Toggle Button */}
+          {/* Copyright Bottom Bar */}
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
-            <p>© {new Date().getFullYear()} Kipsmthn Platform. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
             
             <div className="flex items-center gap-6">
               <ThemeToggle />

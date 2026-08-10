@@ -3,14 +3,12 @@ import type { Metadata } from 'next';
 import { Outfit, Montserrat } from 'next/font/google';
 import './globals.css';
 
-// 1. Main Display Font: Outfit
 const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
   weight: ['300', '400', '500', '600', '700'],
 });
 
-// 2. Support Typography Font: Montserrat
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-montserrat',
@@ -28,9 +26,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${montserrat.variable} dark`}>
+    <html
+      lang="en"
+      className={`${outfit.variable} ${montserrat.variable} dark`}
+      suppressHydrationWarning
+    >
       <head>
-        {/* Inline Theme Persistence Script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -46,7 +47,8 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans antialiased selection:bg-purple-600 selection:text-white transition-colors duration-300">
+      {/* 💡 Clean body tag without hardcoded dark:bg classes */}
+      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
         {children}
       </body>
     </html>

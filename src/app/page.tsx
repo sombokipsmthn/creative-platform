@@ -370,7 +370,9 @@ export default function HomePage() {
               <Link href="/portal" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                 Client Delivery Portal
               </Link>
-            </div>
+<Link href="/admin/login" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full font-bold hover:text-purple-600 dark:hover:text-purple-400">
+  Creator Dashboard
+</Link>            </div>
           </div>
 
           {/* Copyright Bottom Bar */}

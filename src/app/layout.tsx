@@ -1,7 +1,14 @@
 // src/app/layout.tsx
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Outfit, Montserrat } from 'next/font/google';
 import './globals.css';
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#09090b',
+};
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -32,6 +39,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Inline Theme Persistence Script */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -47,7 +55,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      {/* 💡 Clean body tag without hardcoded dark:bg classes */}
+      {/* 💡 REQUIRED ROOT BODY TAG */}
       <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
         {children}
       </body>

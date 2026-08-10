@@ -1,7 +1,7 @@
 // src/app/icon.tsx
 import { ImageResponse } from 'next/og';
 
-export const runtime = 'edge';
+export const runtime = 'nodejs'; // 
 
 export const size = {
   width: 32,

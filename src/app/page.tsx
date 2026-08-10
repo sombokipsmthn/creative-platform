@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
+import PartnerLogos from '@/components/PartnerLogos';
 
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
@@ -59,19 +60,6 @@ const portfolioMedia = {
     'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
   ],
 };
-
-const ecosystemPartners = [
-  'iHUB / ccHUB',
-  'UNDP Timbuktoo',
-  'Mastercard Foundation',
-  'Safaricom Spark',
-  'BURN Manufacturing',
-  'Delta40 Studio',
-  'JICA NINJA',
-  'GrowthAfrica',
-  'Shop Zetu',
-  'Estee Lauder',
-];
 
 export default function HomePage() {
   return (
@@ -170,21 +158,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. PARTNERS TICKER */}
-      <section className="py-12 border-y border-slate-200 dark:border-zinc-900 bg-slate-100/60 dark:bg-zinc-950/60 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 space-y-4">
-          <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
-            Programs, Venture Studios & Brands Documented
-          </p>
-          <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-slate-700 dark:text-zinc-300">
-            {ecosystemPartners.map((partner) => (
-              <span key={partner} className="px-3 py-1 bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-sm">
-                {partner}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* 2. REAL OFFICIAL PARTNER LOGOS */}
+      <PartnerLogos />
 
       {/* 3. FEATURED CASE STUDIES */}
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
@@ -396,6 +371,7 @@ export default function HomePage() {
             </div>
           </div>
 
+          {/* Copyright Bottom Bar */}
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
             

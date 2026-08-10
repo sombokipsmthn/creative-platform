@@ -1,6 +1,4 @@
 // src/app/admin/page.tsx
-import Link from 'next/link';
-
 export default function AdminDashboardPage() {
   const creatorConfig = {
     platformName: 'KIPSMTHN PLATFORM',
@@ -104,6 +102,16 @@ export default function AdminDashboardPage() {
             <span className="text-sm text-slate-600 dark:text-zinc-400">{creatorConfig.location}</span>
             <span className="text-sm text-slate-600 dark:text-zinc-400">{creatorConfig.baseCurrency}</span>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {coreMetrics.map((metric) => (
+            <div key={metric.label} className="rounded-xl border border-slate-200 dark:border-zinc-800 p-5">
+              <p className="text-sm text-slate-600 dark:text-zinc-400">{metric.label}</p>
+              <p className={`mt-2 text-2xl font-semibold ${metric.color}`}>{metric.value}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">{metric.detail}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

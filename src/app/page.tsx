@@ -92,10 +92,11 @@ export default function HomePage() {
             FEATURED CREATOR: SOMBORIOT KIPCHILAT
           </p>
 
-          {/* 💡 TITLE IN SMALL CAPS */}
-          <h1 className="text-3xl md:text-5xl font-light tracking-tight text-slate-900 dark:text-white leading-tight max-w-4xl mx-auto lowercase [font-variant:small-caps]">
-  Creative Director & <span className="font-normal text-purple-600 dark:text-purple-400">Ecosystem Storytelling</span> Specialist
-</h1>
+          {/* 💡 REFINED SMALL CAPS HERO TITLE */}
+          <h1 className="heading-editorial text-slate-900 dark:text-white max-w-4xl mx-auto">
+            Creative Director & <span className="font-normal text-purple-600 dark:text-purple-400">Ecosystem Storytelling</span> Specialist
+          </h1>
+
           <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
             Documenting African startup ecosystems, venture studios, accelerator programs, and clean-tech innovation through photography, film, and digital media.
           </p>
@@ -365,7 +366,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. FOOTER WITH EMBEDDED THEME TOGGLE */}
+      {/* 7. FOOTER */}
       <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
@@ -395,7 +396,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Copyright Bottom Bar */}
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
             

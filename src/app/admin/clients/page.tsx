@@ -419,7 +419,7 @@ export default function AdminClientsPage() {
                     <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Feedback Stage</label>
                     <select
                       value={feedbackStatus}
-                      onChange={(e) => setFeedbackStatus(e.target.value as any)}
+                      onChange={(e) => setFeedbackStatus(e.target.value as Client['feedbackStatus'])}
                       className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     >
                       <option value="AWAITING_FEEDBACK">Awaiting Client Feedback 💬</option>
@@ -433,7 +433,7 @@ export default function AdminClientsPage() {
                     <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Contract Status</label>
                     <select
                       value={contractStatus}
-                      onChange={(e) => setContractStatus(e.target.value as any)}
+                      onChange={(e) => setContractStatus(e.target.value as Client['contractStatus'])}
                       className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     >
                       <option value="NOT_SENT">Not Sent</option>
@@ -446,7 +446,7 @@ export default function AdminClientsPage() {
                     <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">KRA eTIMS Invoice</label>
                     <select
                       value={etimsInvoiceStatus}
-                      onChange={(e) => setEtimsInvoiceStatus(e.target.value as any)}
+                      onChange={(e) => setEtimsInvoiceStatus(e.target.value as Client['etimsInvoiceStatus'])}
                       className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     >
                       <option value="NOT_SENT">Not Generated</option>
@@ -459,7 +459,7 @@ export default function AdminClientsPage() {
                     <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Withholding Tax Cert</label>
                     <select
                       value={taxCertificateStatus}
-                      onChange={(e) => setTaxCertificateStatus(e.target.value as any)}
+                      onChange={(e) => setTaxCertificateStatus(e.target.value as Client['taxCertificateStatus'])}
                       className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     >
                       <option value="NOT_RECEIVED">Pending Tax Cert ⚠️</option>
@@ -522,7 +522,7 @@ export default function AdminClientsPage() {
                     <select
                       value={selectedClient.feedbackStatus}
                       onChange={(e) => {
-                        const val = e.target.value as any;
+                        const val = e.target.value as Client['feedbackStatus'];
                         setClients(clients.map(c => c.id === selectedClient.id ? { ...c, feedbackStatus: val } : c));
                         setSelectedClient({ ...selectedClient, feedbackStatus: val });
                       }}
@@ -540,7 +540,7 @@ export default function AdminClientsPage() {
                     <select
                       value={selectedClient.contractStatus}
                       onChange={(e) => {
-                        const val = e.target.value as any;
+                        const val = e.target.value as Client['contractStatus'];
                         setClients(clients.map(c => c.id === selectedClient.id ? { ...c, contractStatus: val } : c));
                         setSelectedClient({ ...selectedClient, contractStatus: val });
                       }}
@@ -557,7 +557,7 @@ export default function AdminClientsPage() {
                     <select
                       value={selectedClient.etimsInvoiceStatus}
                       onChange={(e) => {
-                        const val = e.target.value as any;
+                        const val = e.target.value as Client['etimsInvoiceStatus'];
                         setClients(clients.map(c => c.id === selectedClient.id ? { ...c, etimsInvoiceStatus: val } : c));
                         setSelectedClient({ ...selectedClient, etimsInvoiceStatus: val });
                       }}
@@ -574,7 +574,7 @@ export default function AdminClientsPage() {
                     <select
                       value={selectedClient.taxCertificateStatus}
                       onChange={(e) => {
-                        const val = e.target.value as any;
+                        const val = e.target.value as Client['taxCertificateStatus'];
                         setClients(clients.map(c => c.id === selectedClient.id ? { ...c, taxCertificateStatus: val } : c));
                         setSelectedClient({ ...selectedClient, taxCertificateStatus: val });
                       }}

@@ -162,7 +162,7 @@ export default function AdminGalleryManagerPage() {
               >
                 <div className="space-y-4">
                   {/* Cover Photo */}
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-950">
+                  <div className="relative aspect-video w-full overflow-hidden bg-zinc-950">
                     <Image src={gal.coverImage} alt={gal.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute top-4 left-4 flex gap-2">
                       <span className="px-3 py-1 bg-black/70 backdrop-blur-md border border-white/10 text-purple-300 text-[10px] font-mono uppercase rounded-full">

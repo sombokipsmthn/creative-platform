@@ -2,7 +2,6 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 
 export default function AdminSettingsPage() {
   // Configurable Parameters State
@@ -20,10 +19,6 @@ export default function AdminSettingsPage() {
   const [brandHandle, setBrandHandle] = useState('SOMBO / kipsmthn');
   const [customDomain, setCustomDomain] = useState('kipsmthn.com');
   const [accentColor, setAccentColor] = useState('#7c3aed');
-
-  const [notifyOnSelections, setNotifyOnSelections] = useState(true);
-  const [notifyOnComments, setNotifyOnComments] = useState(true);
-  const [notifyOnTaxCert, setNotifyOnTaxCert] = useState(true);
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();

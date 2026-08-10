@@ -1,48 +1,47 @@
 // src/components/ThemeToggle.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useSyncExternalStore } from 'react';
+
+function subscribe(callback: () => void) {
+  window.addEventListener('storage', callback);
+  return () => window.removeEventListener('storage', callback);
+}
+
+function getSnapshot() {
+  return typeof window !== 'undefined'
+    ? localStorage.getItem('theme') || 'dark'
+    : 'dark';
+}
+
+function getServerSnapshot() {
+  return 'dark';
+}
 
 export default function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-
-  useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'light') {
-      setIsDark(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      setIsDark(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  if (!mounted) {
-    return <div className="w-9 h-9 rounded-full border border-purple-500/30 bg-zinc-900/60" />;
-  }
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const isDark = theme === 'dark';
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
+    const nextTheme = isDark ? 'light' : 'dark';
+    
+    localStorage.setItem('theme', nextTheme);
+    if (nextTheme === 'dark') {
       document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
     }
+
+    window.dispatchEvent(new Event('storage'));
   };
 
   return (
     <button
       onClick={toggleTheme}
       type="button"
-      title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-      className="relative z-50 w-9 h-9 flex items-center justify-center rounded-full border border-purple-500/40 bg-zinc-900/80 hover:bg-purple-600/30 text-white transition-all shadow-md shrink-0 cursor-pointer"
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-purple-500/40 bg-purple-950/30 text-purple-300 hover:bg-purple-600 hover:text-white transition-all text-xs font-mono cursor-pointer shadow-sm"
     >
-      <span className="text-base select-none">{isDark ? '☀️' : '🌙'}</span>
+      <span>{isDark ? '☀️ Light Mode' : '🌙 Dark Mode'}</span>
     </button>
   );
 }

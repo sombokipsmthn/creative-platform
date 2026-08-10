@@ -1,241 +1,408 @@
-// src/app/admin/page.tsx
+// src/app/page.tsx
 import Link from 'next/link';
+import Image from 'next/image';
+import Header from '@/components/Header';
+import ThemeToggle from '@/components/ThemeToggle';
 
-export default function AdminDashboardPage() {
-  const creatorConfig = {
-    platformName: 'Kipsmthn Platform',
-    creatorName: 'Somboriot Kipchilat',
-    kraPin: 'A012345678X',
-    location: 'Nairobi, Kenya',
-    baseCurrency: 'KES',
-  };
+const resolveImage = (source?: string, fallbackUrl?: string) => {
+  if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
+  if (source.startsWith('http://') || source.startsWith('https://')) return source;
+  return `https://lh3.googleusercontent.com/d/${source}`;
+};
 
-  const coreMetrics = [
+const portfolioMedia = {
+  hero: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1600&q=80',
+  about: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
+  projects: [
     {
-      label: 'Awaiting Feedback',
-      value: '2 Clients',
-      detail: 'UNDP Summit & Delta40 Studio',
-      alert: true,
-      color: 'text-amber-400',
+      id: '01',
+      title: 'UNDP Timbuktoo & EdTech Fellowship',
+      client: 'iHUB / ccHUB',
+      category: 'Ecosystem Storytelling & Program Documentation',
+      year: '2023 - 2026',
+      desc: 'Documenting founders, accelerator cohorts, and international ecosystem milestones across Africa.',
+      image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+      featured: true,
     },
     {
-      label: 'Pending Tax Certs',
-      value: '3 Certs',
-      detail: 'KRA Withholding Tax pending',
-      alert: true,
-      color: 'text-red-400',
+      id: '02',
+      title: 'Clean Energy Impact Series',
+      client: 'BURN Manufacturing USA',
+      category: 'Visual Storytelling & Media Production',
+      year: '2025 - Present',
+      desc: 'Impact video production, photography, and digital web UX improvements across African clean energy markets.',
+      image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80',
+      featured: false,
     },
     {
-      label: 'Contracts Pending',
-      value: '1 Unsigned',
-      detail: 'Delta40 Venture Contract',
-      alert: false,
-      color: 'text-purple-400',
-    },
-    {
-      label: 'eTIMS Invoices',
-      value: '2 Shared',
-      detail: 'KES 1.8M invoiced via eTIMS',
-      alert: false,
-      color: 'text-emerald-400',
-    },
-  ];
-
-  const storageMetrics = [
-    { label: 'Active Pipeline Value', value: 'KES 4.2M', sub: '$32,500 USD' },
-    { label: 'Cloudflare R2 Storage', value: '142.8 GB', sub: '$0 Egress Bandwidth Fees' },
-    { label: 'Total Client Partners', value: '12 Active', sub: 'iHUB, ccHUB, BURN, Delta40' },
-    { label: 'High-Res Downloads', value: '84 ZIPs', sub: 'Issued via 4-Digit PINs' },
-  ];
-
-  const actionRequiredAlerts = [
-    {
-      title: 'KRA Withholding Tax Cert Pending',
-      client: 'UNDP Timbuktoo / ccHUB',
-      desc: 'eTIMS Invoice #042 shared. WHT tax certificate pending from client accounts.',
-      action: 'Remind Client',
-      type: 'tax',
-      href: '/admin/clients',
-    },
-    {
-      title: 'Awaiting Proofing Selections',
+      id: '03',
+      title: 'Circular Economy & Climate Tech Summits',
       client: 'Delta40 Venture Studio',
-      desc: 'Gallery published. Client has favorited 8 photos out of 20 max limit.',
-      action: 'View Proofs',
-      type: 'feedback',
-      href: '/portal/g/xK9_mQ2pL7v',
+      category: 'Venture Studio Media',
+      year: '2025',
+      desc: 'Capturing climate-tech founders across energy, mobility, and circular economy scale programs.',
+      image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80',
+      featured: false,
     },
-    {
-      title: 'Contract Pending Signature',
-      client: 'Delta40 Venture Studio',
-      desc: 'Master Agreement sent on Feb 8. Awaiting digital signature.',
-      action: 'Check Contract',
-      type: 'contract',
-      href: '/admin/clients',
-    },
-  ];
+  ],
+  services: [
+    { num: '01', title: 'Startup Ecosystem Storytelling', desc: 'Translating accelerator programs, founder journeys, and innovation initiatives into compelling visual narratives.', tags: ['Program Documentation', 'Founder Spotlights', 'Impact Reporting', 'Demo Days'], image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80' },
+    { num: '02', title: 'Accelerator & Venture Media', desc: 'End-to-end coverage for donor programs, venture studios, and innovation hubs across Africa.', tags: ['iHUB/ccHUB', 'Delta40 Studio', 'GrowthAfrica', 'UNDP Timbuktoo'], image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=800&q=80' },
+    { num: '03', title: 'E-Commerce & Brand Media', desc: 'High-scale product photography, creative direction, and digital marketing strategy for retail leaders.', tags: ['Shop Zetu', 'Copia Kenya', 'Home 254', 'Estee Lauder'], image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80' },
+    { num: '04', title: 'Short-Form & Social Storytelling', desc: 'Engaging video, motion content, and brand narratives built for multi-platform digital reach.', tags: ['Kraft Digital', 'YouTube', 'Instagram Reels', 'Campaign Assets'], image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80' },
+  ],
+  curvedGallery: [
+    'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=600&q=80',
+  ],
+};
 
-  const recentActivity = [
-    { client: 'UNDP Timbuktoo Team', action: 'Favorited 14 retouched photos', project: 'UNDP Summit 2026', time: '20 mins ago' },
-    { client: 'BURN Manufacturing USA', action: 'Downloaded Full Gallery ZIP (High-Res)', project: 'Clean Energy Series 2025', time: '2 hours ago' },
-    { client: 'Delta40 Venture Studio', action: 'Left 3 feedback notes on proofs', project: 'Climate Tech Summit', time: 'Yesterday' },
-  ];
+const ecosystemPartners = [
+  'iHUB / ccHUB',
+  'UNDP Timbuktoo',
+  'Mastercard Foundation',
+  'Safaricom Spark',
+  'BURN Manufacturing',
+  'Delta40 Studio',
+  'JICA NINJA',
+  'GrowthAfrica',
+  'Shop Zetu',
+  'Estee Lauder',
+];
 
+export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 p-6 md:p-12 font-sans selection:bg-purple-600 selection:text-white">
-      <div className="max-w-7xl mx-auto space-y-10">
-        
-        {/* Creator Header Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-800/80 pb-6">
-          <div>
-            <div className="flex items-center gap-3">
-              <p className="text-xs font-mono uppercase tracking-widest text-purple-400">{creatorConfig.platformName}</p>
-              <span className="px-2.5 py-0.5 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[10px] font-mono rounded-full">
-                Creator: {creatorConfig.creatorName}
-              </span>
-              <span className="px-2.5 py-0.5 bg-zinc-900 border border-zinc-800 text-zinc-400 text-[10px] font-mono rounded-full">
-                KRA PIN: {creatorConfig.kraPin}
-              </span>
-            </div>
-            <h1 className="text-3xl font-light text-white mt-1">Creator Command Center</h1>
-          </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
+      <Header />
 
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/admin/projects"
-              className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-[0_0_20px_rgba(124,58,237,0.3)]"
-            >
-              + Create Client Gallery
-            </Link>
-            <Link
-              href="/admin/clients"
-              className="px-5 py-2.5 border border-zinc-700 text-zinc-300 text-xs font-mono uppercase tracking-widest rounded-lg hover:bg-zinc-800 transition-colors"
-            >
-              Client CRM & Tax
-            </Link>
-          </div>
+      {/* 1. HERO SECTION */}
+      <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto text-center space-y-8">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-600/15 blur-[160px] pointer-events-none rounded-full" />
+
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs font-mono uppercase tracking-widest">
+          <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+          KIPSMTHN Platform • Nairobi, Kenya
         </div>
 
-        {/* 1. TOP OPERATIONAL DATA POINTS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {coreMetrics.map((m, i) => (
-            <div key={i} className="p-6 border border-zinc-800/80 bg-zinc-950/60 rounded-2xl space-y-2 relative overflow-hidden">
+        <div className="space-y-4 max-w-5xl mx-auto">
+          <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+            FEATURED CREATOR: Somboriot Kipchilat
+          </p>
+          <h1 className="text-5xl md:text-8xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.05]">
+            Creative Director & <span className="font-normal text-purple-600 dark:text-purple-400">Ecosystem Storytelling</span> Specialist
+          </h1>
+          <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
+            Documenting African startup ecosystems, venture studios, accelerator programs, and clean-tech innovation through photography, film, and digital media.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap justify-center items-center gap-4 pt-2">
+          <Link
+            href="/contact"
+            className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white font-medium text-xs tracking-widest uppercase rounded-sm transition-all shadow-[0_0_30px_rgba(124,58,237,0.35)]"
+          >
+            Start a Collaboration
+          </Link>
+          <a
+            href="https://www.linkedin.com/in/sombo09/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 text-slate-800 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+          >
+            LinkedIn ↗
+          </a>
+          <a
+            href="https://www.youtube.com/@kraftdigital7749"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 text-slate-800 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+          >
+            YouTube / Kraft Digital ↗
+          </a>
+          <a
+            href="https://linktr.ee/kipsmthn"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+          >
+            Linktree
+          </a>
+        </div>
+
+        {/* Laptop Hero Showcase Frame */}
+        <div className="pt-8 max-w-5xl mx-auto">
+          <div className="relative aspect-[16/10] bg-slate-900 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
+            <Image
+              src={resolveImage(portfolioMedia.hero)}
+              alt="Somboriot Kipchilat Portfolio on KIPSMTHN"
+              fill
+              priority
+              className="object-cover opacity-85"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/40 dark:from-[#09090b]" />
+
+            <div className="absolute inset-0 flex flex-col justify-between p-8 text-left">
               <div className="flex justify-between items-center">
-                <p className="text-xs text-zinc-400 font-mono uppercase tracking-wider">{m.label}</p>
-                {m.alert && <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />}
+                <span className="text-xs font-bold tracking-wider text-white font-sans uppercase">
+                  KIPSMTHN<span className="text-purple-500">.</span>
+                </span>
+                <span className="px-3 py-1 bg-purple-600/30 border border-purple-500/50 text-purple-200 text-[10px] font-mono rounded-full">
+                  Microsoft Imagine Cup Winner
+                </span>
               </div>
-              <p className={`text-3xl font-light ${m.color}`}>{m.value}</p>
-              <p className="text-[11px] text-zinc-500 font-mono">{m.detail}</p>
+
+              <div className="space-y-2 max-w-lg">
+                <p className="text-xs font-mono text-purple-400 uppercase">African Innovation & Startup Stories</p>
+                <h2 className="text-3xl md:text-5xl font-light text-white">Documenting Founders & Impact</h2>
+                <p className="text-xs text-zinc-300 font-light">
+                  Supporting iHUB, ccHUB, UNDP Timbuktoo, Safaricom Spark, and Delta40 Studio.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. PARTNERS TICKER */}
+      <section className="py-12 border-y border-slate-200 dark:border-zinc-900 bg-slate-100/60 dark:bg-zinc-950/60 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 space-y-4">
+          <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+            Programs, Venture Studios & Brands Documented
+          </p>
+          <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-slate-700 dark:text-zinc-300">
+            {ecosystemPartners.map((partner) => (
+              <span key={partner} className="px-3 py-1 bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-sm">
+                {partner}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. FEATURED CASE STUDIES */}
+      <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 dark:border-zinc-800 pb-6">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Ecosystem Work</span>
+            <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Featured Programs & Productions</h2>
+          </div>
+          <a
+            href="https://www.linkedin.com/in/sombo09/"
+            target="_blank"
+            className="text-xs font-mono uppercase tracking-widest text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+          >
+            LinkedIn Credentials →
+          </a>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {portfolioMedia.projects.map((project) => (
+            <div
+              key={project.id}
+              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 ${
+                project.featured ? 'md:col-span-2' : ''
+              }`}
+            >
+              <div className={`relative w-full ${project.featured ? 'aspect-[21/9]' : 'aspect-[4/3]'} overflow-hidden`}>
+                <Image
+                  src={resolveImage(project.image)}
+                  alt={project.title}
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent dark:from-zinc-950 opacity-85" />
+              </div>
+
+              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end">
+                <div className="space-y-2 max-w-xl">
+                  <div className="flex items-center gap-3">
+                    <span className="px-2.5 py-1 bg-purple-600/20 border border-purple-500/40 text-purple-300 text-[10px] font-mono uppercase tracking-widest rounded-sm">
+                      {project.category}
+                    </span>
+                    <span className="text-xs text-zinc-300 font-mono">{project.year}</span>
+                  </div>
+                  <h3 className="text-xl md:text-2xl font-medium text-white group-hover:text-purple-300 transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs text-zinc-200 font-light leading-relaxed">{project.desc}</p>
+                  <p className="text-[11px] text-purple-300 font-mono">Partner: {project.client}</p>
+                </div>
+
+                <div className="w-10 h-10 rounded-full border border-white/20 bg-black/60 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all">
+                  ↗
+                </div>
+              </div>
             </div>
           ))}
         </div>
+      </section>
 
-        {/* 2. ACTION REQUIRED ALERT CENTER */}
-        <div className="border border-purple-500/30 bg-gradient-to-r from-purple-950/30 via-zinc-950 to-zinc-950 rounded-2xl p-6 md:p-8 space-y-6 shadow-2xl">
-          <div className="flex justify-between items-center border-b border-zinc-800/80 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
-              <h2 className="text-lg font-medium text-white">Action Required ({actionRequiredAlerts.length})</h2>
+      {/* 4. ABOUT & AWARDS BANNER */}
+      <section className="py-12 px-6 max-w-7xl mx-auto">
+        <div className="relative border border-slate-200 dark:border-zinc-800 bg-gradient-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-6">
+            <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full">
+              Somboriot Kipchilat — Nairobi, Kenya
+            </span>
+            <h2 className="text-4xl md:text-6xl font-light text-slate-900 dark:text-white">The Person Behind the Story</h2>
+            <p className="text-sm text-slate-700 dark:text-zinc-300 font-light leading-relaxed">
+              Extensive experience producing visual narratives across donor programs, startup accelerators, and venture studios. Former National Winner & World Citizenship Finalist at the Microsoft Imagine Cup in Russia.
+            </p>
+
+            <div className="space-y-2 border-t border-slate-200 dark:border-zinc-800 pt-4 text-xs text-slate-600 dark:text-zinc-400 font-mono">
+              <p className="text-purple-600 dark:text-purple-400 font-semibold">🏆 Recognition & Honors:</p>
+              <p>• World Citizenship Winner – Microsoft Imagine Cup (Russia)</p>
+              <p>• National Final Winner – Microsoft Imagine Cup</p>
+              <p>• BSc – Jomo Kenyatta University of Agriculture & Technology</p>
             </div>
-            <span className="text-xs font-mono text-purple-400">Tasks Needing Your Attention</span>
+
+            <div className="flex gap-4 pt-2">
+              <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-6 py-3 bg-purple-600 text-white text-xs uppercase font-medium tracking-widest rounded-full hover:bg-purple-700 transition-colors">
+                Connect on LinkedIn ↗
+              </a>
+              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-6 py-3 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-300 text-xs uppercase font-medium tracking-widest rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors">
+                Instagram ↗
+              </a>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {actionRequiredAlerts.map((alert, i) => (
-              <div key={i} className="p-5 bg-zinc-900/60 border border-zinc-800/80 rounded-xl space-y-3 flex flex-col justify-between">
-                <div className="space-y-1.5">
-                  <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-300 text-[10px] font-mono rounded-full uppercase">
-                    {alert.client}
+          <div className="relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden border border-purple-500/30">
+            <Image
+              src={resolveImage(portfolioMedia.about)}
+              alt="Somboriot Kipchilat"
+              fill
+              className="object-cover"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-purple-900/20 mix-blend-overlay" />
+          </div>
+        </div>
+      </section>
+
+      {/* 5. CORE EXPERTISE & SERVICES */}
+      <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 dark:border-zinc-800 pb-6">
+          <div>
+            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Core Expertise</span>
+            <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Production & Storytelling Services</h2>
+          </div>
+          <p className="text-xs text-slate-600 dark:text-zinc-400 max-w-sm font-light">
+            Providing end-to-end visual storytelling, studio photography, video production, and brand narrative design.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {portfolioMedia.services.map((s) => (
+            <div key={s.num} className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-2xl p-6 space-y-6 hover:border-purple-600/50 transition-all group flex flex-col justify-between shadow-sm dark:shadow-none">
+              <div className="space-y-4">
+                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                  <Image src={resolveImage(s.image)} alt={s.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                </div>
+                <span className="text-xs font-mono text-purple-600 dark:text-purple-500">{s.num}</span>
+                <h3 className="text-xl font-medium text-slate-900 dark:text-white">{s.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">{s.desc}</p>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                {s.tags.map((t) => (
+                  <span key={t} className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] text-slate-700 dark:text-zinc-400 font-mono rounded-sm">
+                    {t}
                   </span>
-                  <h3 className="text-sm font-medium text-white">{alert.title}</h3>
-                  <p className="text-xs text-zinc-400 font-light leading-relaxed">{alert.desc}</p>
-                </div>
-
-                <Link
-                  href={alert.href}
-                  className="inline-block w-full text-center py-2 bg-zinc-800 hover:bg-purple-600 text-white text-xs font-mono rounded-lg transition-colors"
-                >
-                  {alert.action} →
-                </Link>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 3. FINANCIAL & INFRASTRUCTURE DATA POINTS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {storageMetrics.map((s, i) => (
-            <div key={i} className="p-6 border border-zinc-800/80 bg-zinc-900/20 rounded-2xl space-y-1">
-              <p className="text-xs text-zinc-500 font-mono uppercase">{s.label}</p>
-              <p className="text-2xl font-light text-white">{s.value}</p>
-              <p className="text-[11px] text-purple-400 font-mono">{s.sub}</p>
             </div>
           ))}
         </div>
+      </section>
 
-        {/* 4. ADMIN NAVIGATION MODULES */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link
-            href="/admin/clients"
-            className="p-8 border border-zinc-800/80 bg-zinc-900/30 hover:border-purple-600/60 rounded-2xl transition-all group space-y-3"
+      {/* 6. PERSPECTIVE FAN ARC GALLERY */}
+      <section className="py-28 px-6 max-w-7xl mx-auto space-y-16 text-center border-t border-slate-200 dark:border-zinc-800">
+        <div className="space-y-4 max-w-2xl mx-auto">
+          <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Media Vault</span>
+          <h2 className="text-4xl md:text-5xl font-light text-slate-900 dark:text-white">Curious What Else We&apos;ve Captured?</h2>
+          <p className="text-xs text-slate-600 dark:text-zinc-400 font-light">
+            Explore short-form video content, social storytelling, and tech documentaries on Kraft Digital.
+          </p>
+          <a
+            href="https://www.youtube.com/@kraftdigital7749"
+            target="_blank"
+            className="inline-block px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-black font-medium text-xs uppercase tracking-widest rounded-full hover:bg-purple-600 hover:text-white transition-colors"
           >
-            <span className="text-xs font-mono text-purple-400">01 / CRM & Compliance</span>
-            <h2 className="text-2xl font-medium text-white group-hover:text-purple-400 transition-colors">
-              Client CRM & KRA Tax →
-            </h2>
-            <p className="text-xs text-zinc-400 font-light leading-relaxed">
-              Track KRA eTIMS invoices, Withholding Tax certificates, contracts, and client feedback stages.
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/projects"
-            className="p-8 border border-zinc-800/80 bg-zinc-900/30 hover:border-purple-600/60 rounded-2xl transition-all group space-y-3"
-          >
-            <span className="text-xs font-mono text-purple-400">02 / Proofing Engine</span>
-            <h2 className="text-2xl font-medium text-white group-hover:text-purple-400 transition-colors">
-              Gallery Builder →
-            </h2>
-            <p className="text-xs text-zinc-400 font-light leading-relaxed">
-              Create client galleries, set 4-digit PINs, configure proofing limits, and download rules.
-            </p>
-          </Link>
-
-          <Link
-            href="/admin/settings"
-            className="p-8 border border-zinc-800/80 bg-zinc-900/30 hover:border-purple-600/60 rounded-2xl transition-all group space-y-3"
-          >
-            <span className="text-xs font-mono text-purple-400">03 / Configuration</span>
-            <h2 className="text-2xl font-medium text-white group-hover:text-purple-400 transition-colors">
-              Platform Settings →
-            </h2>
-            <p className="text-xs text-zinc-400 font-light leading-relaxed">
-              Customize KRA PIN, default currencies, WHT rates, selection limits, and custom domains.
-            </p>
-          </Link>
+            Watch Kraft Digital on YouTube ↗
+          </a>
         </div>
 
-        {/* 5. RECENT ACTIVITY FEED */}
-        <div className="border border-zinc-800/80 bg-zinc-950/60 rounded-2xl p-8 space-y-6">
-          <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
-            <h3 className="text-lg font-medium text-white">Live Client Portal Activity</h3>
-            <span className="text-xs font-mono text-purple-400">Real-Time Feedback</span>
+        <div className="flex justify-center items-center gap-3 overflow-x-auto py-8">
+          {[
+            { rot: '-rotate-12 translate-y-6', img: portfolioMedia.curvedGallery[0] },
+            { rot: '-rotate-6 translate-y-2', img: portfolioMedia.curvedGallery[1] },
+            { rot: 'rotate-0', img: portfolioMedia.curvedGallery[2] },
+            { rot: 'rotate-6 translate-y-2', img: portfolioMedia.curvedGallery[3] },
+            { rot: 'rotate-12 translate-y-6', img: portfolioMedia.curvedGallery[4] },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className={`relative w-40 md:w-56 aspect-[3/5] rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
+            >
+              <Image
+                src={resolveImage(item.img)}
+                alt="Portfolio item"
+                fill
+                priority={i === 0}
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 7. FOOTER WITH EMBEDDED THEME TOGGLE */}
+      <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
+                KIPSMTHN<span className="text-purple-500">.</span>
+              </h2>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-purple-600 text-white">
+                LinkedIn
+              </a>
+              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+                Instagram
+              </a>
+              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+                YouTube
+              </a>
+              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+                Linktree
+              </a>
+              <Link href="/portal" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
+                Client Delivery Portal
+              </Link>
+            </div>
           </div>
 
-          <div className="space-y-4">
-            {recentActivity.map((act, i) => (
-              <div key={i} className="p-4 bg-zinc-900/40 border border-zinc-800/80 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
-                <div className="space-y-1">
-                  <p className="text-xs font-medium text-white">{act.client} — <span className="text-purple-400">{act.action}</span></p>
-                  <p className="text-[11px] text-zinc-500 font-mono">Project: {act.project}</p>
-                </div>
-                <span className="text-[11px] font-mono text-zinc-500">{act.time}</span>
-              </div>
-            ))}
+          {/* Copyright Bottom Bar */}
+          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
+            <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
+            
+            <div className="flex items-center gap-6">
+              <ThemeToggle />
+              <span className="text-slate-500 dark:text-zinc-500">Nairobi, Kenya</span>
+            </div>
           </div>
         </div>
-
-      </div>
+      </footer>
     </div>
   );
 }

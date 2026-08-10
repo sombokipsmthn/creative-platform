@@ -1,7 +1,8 @@
 // src/app/page.tsx
 import Link from 'next/link';
 import Image from 'next/image';
-import Header from '@/components/Header';
+import Header from '@/components/header';
+import ThemeToggle from '@/components/ThemeToggle';
 
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
@@ -74,26 +75,26 @@ const ecosystemPartners = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
 
       {/* 1. HERO SECTION */}
       <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto text-center space-y-8">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-600/15 blur-[160px] pointer-events-none rounded-full" />
 
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-950/30 text-purple-300 text-xs font-mono uppercase tracking-widest">
+        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs font-mono uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
           Kipsmthn Platform • Nairobi, Kenya
         </div>
 
         <div className="space-y-4 max-w-5xl mx-auto">
-          <p className="text-xs font-mono text-purple-400 uppercase tracking-widest">
+          <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest">
             FEATURED CREATOR: SOMBORIOT KIPCHILAT
           </p>
-          <h1 className="text-5xl md:text-8xl font-light tracking-tight text-white leading-[1.05]">
-            CREATIVE DIRECTOR & <span className="font-normal text-purple-400">ECOSYSTEM STORYTELLING</span> SPECIALIST
+          <h1 className="text-5xl md:text-8xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.05]">
+            Creative Director & <span className="font-normal text-purple-600 dark:text-purple-400">Ecosystem Storytelling</span> Specialist
           </h1>
-          <p className="text-sm md:text-base text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
+          <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
             Documenting African startup ecosystems, venture studios, accelerator programs, and clean-tech innovation through photography, film, and digital media.
           </p>
         </div>
@@ -109,7 +110,7 @@ export default function HomePage() {
             href="https://www.linkedin.com/in/sombo09/"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-4 border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 text-slate-800 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
           >
             LinkedIn ↗
           </a>
@@ -117,7 +118,7 @@ export default function HomePage() {
             href="https://www.youtube.com/@kraftdigital7749"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-4 border border-zinc-800 bg-zinc-900/40 text-zinc-300 hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/40 text-slate-800 dark:text-zinc-300 hover:text-purple-600 dark:hover:text-white hover:border-purple-500/50 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
           >
             YouTube / Kraft Digital ↗
           </a>
@@ -125,7 +126,7 @@ export default function HomePage() {
             href="https://linktr.ee/kipsmthn"
             target="_blank"
             rel="noopener noreferrer"
-            className="px-6 py-4 border border-zinc-800 text-zinc-400 hover:text-purple-400 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
+            className="px-6 py-4 border border-slate-300 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 font-medium text-xs tracking-widest uppercase rounded-sm transition-all"
           >
             Linktree
           </a>
@@ -133,7 +134,7 @@ export default function HomePage() {
 
         {/* Laptop Hero Showcase Frame */}
         <div className="pt-8 max-w-5xl mx-auto">
-          <div className="relative aspect-[16/10] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-[0_0_80px_rgba(124,58,237,0.2)]">
+          <div className="relative aspect-[16/10] bg-slate-900 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
             <Image
               src={resolveImage(portfolioMedia.hero)}
               alt="Somboriot Kipchilat Portfolio on Kipsmthn"
@@ -142,7 +143,7 @@ export default function HomePage() {
               className="object-cover opacity-85"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/40 dark:from-[#09090b]" />
 
             <div className="absolute inset-0 flex flex-col justify-between p-8 text-left">
               <div className="flex justify-between items-center">
@@ -167,14 +168,14 @@ export default function HomePage() {
       </section>
 
       {/* 2. PARTNERS TICKER */}
-      <section className="py-12 border-y border-zinc-900 bg-zinc-950/60 overflow-hidden">
+      <section className="py-12 border-y border-slate-200 dark:border-zinc-900 bg-slate-100/60 dark:bg-zinc-950/60 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 space-y-4">
-          <p className="text-[10px] font-mono text-purple-400 uppercase tracking-widest">
+          <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest">
             Programs, Venture Studios & Brands Documented
           </p>
-          <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-zinc-300">
+          <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-slate-700 dark:text-zinc-300">
             {ecosystemPartners.map((partner) => (
-              <span key={partner} className="px-3 py-1 bg-zinc-900/60 border border-zinc-800 rounded-sm">
+              <span key={partner} className="px-3 py-1 bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-sm">
                 {partner}
               </span>
             ))}
@@ -184,15 +185,15 @@ export default function HomePage() {
 
       {/* 3. FEATURED CASE STUDIES */}
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 dark:border-zinc-800 pb-6">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Ecosystem Work</span>
-            <h2 className="text-3xl md:text-4xl font-light text-white mt-1">Featured Programs & Productions</h2>
+            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Ecosystem Work</span>
+            <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Featured Programs & Productions</h2>
           </div>
           <a
             href="https://www.linkedin.com/in/sombo09/"
             target="_blank"
-            className="text-xs font-mono uppercase tracking-widest text-zinc-400 hover:text-purple-400 transition-colors"
+            className="text-xs font-mono uppercase tracking-widest text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
           >
             LinkedIn Credentials →
           </a>
@@ -202,7 +203,7 @@ export default function HomePage() {
           {portfolioMedia.projects.map((project) => (
             <div
               key={project.id}
-              className={`group relative border border-zinc-800/80 bg-zinc-900/30 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 ${
+              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 ${
                 project.featured ? 'md:col-span-2' : ''
               }`}
             >
@@ -214,7 +215,7 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-85" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent dark:from-zinc-950 opacity-85" />
               </div>
 
               <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end">
@@ -223,16 +224,16 @@ export default function HomePage() {
                     <span className="px-2.5 py-1 bg-purple-600/20 border border-purple-500/40 text-purple-300 text-[10px] font-mono uppercase tracking-widest rounded-sm">
                       {project.category}
                     </span>
-                    <span className="text-xs text-zinc-400 font-mono">{project.year}</span>
+                    <span className="text-xs text-zinc-300 font-mono">{project.year}</span>
                   </div>
-                  <h3 className="text-xl md:text-2xl font-medium text-white group-hover:text-purple-400 transition-colors">
+                  <h3 className="text-xl md:text-2xl font-medium text-white group-hover:text-purple-300 transition-colors">
                     {project.title}
                   </h3>
-                  <p className="text-xs text-zinc-300 font-light leading-relaxed">{project.desc}</p>
-                  <p className="text-[11px] text-purple-400 font-mono">Partner: {project.client}</p>
+                  <p className="text-xs text-zinc-200 font-light leading-relaxed">{project.desc}</p>
+                  <p className="text-[11px] text-purple-300 font-mono">Partner: {project.client}</p>
                 </div>
 
-                <div className="w-10 h-10 rounded-full border border-zinc-700 bg-zinc-950/80 flex items-center justify-center text-zinc-300 group-hover:bg-purple-600 group-hover:border-purple-600 group-hover:text-white transition-all">
+                <div className="w-10 h-10 rounded-full border border-white/20 bg-black/60 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all">
                   ↗
                 </div>
               </div>
@@ -243,18 +244,18 @@ export default function HomePage() {
 
       {/* 4. ABOUT & AWARDS BANNER */}
       <section className="py-12 px-6 max-w-7xl mx-auto">
-        <div className="relative border border-zinc-800 bg-gradient-to-r from-purple-950/40 via-zinc-900/60 to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="relative border border-slate-200 dark:border-zinc-800 bg-gradient-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
-            <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-300 text-xs font-mono rounded-full">
+            <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full">
               Somboriot Kipchilat — Nairobi, Kenya
             </span>
-            <h2 className="text-4xl md:text-6xl font-light text-white">The Person Behind the Story</h2>
-            <p className="text-sm text-zinc-300 font-light leading-relaxed">
+            <h2 className="text-4xl md:text-6xl font-light text-slate-900 dark:text-white">The Person Behind the Story</h2>
+            <p className="text-sm text-slate-700 dark:text-zinc-300 font-light leading-relaxed">
               Extensive experience producing visual narratives across donor programs, startup accelerators, and venture studios. Former National Winner & World Citizenship Finalist at the Microsoft Imagine Cup in Russia.
             </p>
 
-            <div className="space-y-2 border-t border-zinc-800 pt-4 text-xs text-zinc-400 font-mono">
-              <p className="text-purple-400 font-semibold">🏆 Recognition & Honors:</p>
+            <div className="space-y-2 border-t border-slate-200 dark:border-zinc-800 pt-4 text-xs text-slate-600 dark:text-zinc-400 font-mono">
+              <p className="text-purple-600 dark:text-purple-400 font-semibold">🏆 Recognition & Honors:</p>
               <p>• World Citizenship Winner – Microsoft Imagine Cup (Russia)</p>
               <p>• National Final Winner – Microsoft Imagine Cup</p>
               <p>• BSc – Jomo Kenyatta University of Agriculture & Technology</p>
@@ -264,7 +265,7 @@ export default function HomePage() {
               <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-6 py-3 bg-purple-600 text-white text-xs uppercase font-medium tracking-widest rounded-full hover:bg-purple-700 transition-colors">
                 Connect on LinkedIn ↗
               </a>
-              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-6 py-3 border border-zinc-700 text-zinc-300 text-xs uppercase font-medium tracking-widest rounded-full hover:bg-zinc-800 transition-colors">
+              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-6 py-3 border border-slate-300 dark:border-zinc-700 text-slate-800 dark:text-zinc-300 text-xs uppercase font-medium tracking-widest rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800 transition-colors">
                 Instagram ↗
               </a>
             </div>
@@ -285,31 +286,31 @@ export default function HomePage() {
 
       {/* 5. CORE EXPERTISE & SERVICES */}
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-zinc-800 pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-slate-200 dark:border-zinc-800 pb-6">
           <div>
-            <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Core Expertise</span>
-            <h2 className="text-3xl md:text-4xl font-light text-white mt-1">Production & Storytelling Services</h2>
+            <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Core Expertise</span>
+            <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Production & Storytelling Services</h2>
           </div>
-          <p className="text-xs text-zinc-400 max-w-sm font-light">
+          <p className="text-xs text-slate-600 dark:text-zinc-400 max-w-sm font-light">
             Providing end-to-end visual storytelling, studio photography, video production, and brand narrative design.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {portfolioMedia.services.map((s) => (
-            <div key={s.num} className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 space-y-6 hover:border-purple-600/50 transition-all group flex flex-col justify-between">
+            <div key={s.num} className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-2xl p-6 space-y-6 hover:border-purple-600/50 transition-all group flex flex-col justify-between shadow-sm dark:shadow-none">
               <div className="space-y-4">
-                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-zinc-950">
+                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950">
                   <Image src={resolveImage(s.image)} alt={s.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                 </div>
-                <span className="text-xs font-mono text-purple-500">{s.num}</span>
-                <h3 className="text-xl font-medium text-white">{s.title}</h3>
-                <p className="text-xs text-zinc-400 font-light leading-relaxed">{s.desc}</p>
+                <span className="text-xs font-mono text-purple-600 dark:text-purple-500">{s.num}</span>
+                <h3 className="text-xl font-medium text-slate-900 dark:text-white">{s.title}</h3>
+                <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">{s.desc}</p>
               </div>
 
               <div className="flex flex-wrap gap-1.5 pt-2">
                 {s.tags.map((t) => (
-                  <span key={t} className="px-2 py-0.5 bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 font-mono rounded-sm">
+                  <span key={t} className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] text-slate-700 dark:text-zinc-400 font-mono rounded-sm">
                     {t}
                   </span>
                 ))}
@@ -320,17 +321,17 @@ export default function HomePage() {
       </section>
 
       {/* 6. PERSPECTIVE FAN ARC GALLERY */}
-      <section className="py-28 px-6 max-w-7xl mx-auto space-y-16 text-center border-t border-zinc-800">
+      <section className="py-28 px-6 max-w-7xl mx-auto space-y-16 text-center border-t border-slate-200 dark:border-zinc-800">
         <div className="space-y-4 max-w-2xl mx-auto">
-          <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Media Vault</span>
-          <h2 className="text-4xl md:text-5xl font-light text-white">Curious What Else We've Captured?</h2>
-          <p className="text-xs text-zinc-400 font-light">
+          <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">Media Vault</span>
+          <h2 className="text-4xl md:text-5xl font-light text-slate-900 dark:text-white">Curious What Else We&apos;ve Captured?</h2>
+          <p className="text-xs text-slate-600 dark:text-zinc-400 font-light">
             Explore short-form video content, social storytelling, and tech documentaries on Kraft Digital.
           </p>
           <a
             href="https://www.youtube.com/@kraftdigital7749"
             target="_blank"
-            className="inline-block px-8 py-3 bg-white text-black font-medium text-xs uppercase tracking-widest rounded-full hover:bg-purple-400 hover:text-white transition-colors"
+            className="inline-block px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-black font-medium text-xs uppercase tracking-widest rounded-full hover:bg-purple-600 hover:text-white transition-colors"
           >
             Watch Kraft Digital on YouTube ↗
           </a>
@@ -346,7 +347,7 @@ export default function HomePage() {
           ].map((item, i) => (
             <div
               key={i}
-              className={`relative w-40 md:w-56 aspect-[3/5] rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
+              className={`relative w-40 md:w-56 aspect-[3/5] rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
             >
               <Image
                 src={resolveImage(item.img)}
@@ -361,39 +362,44 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 7. FOOTER */}
-      <footer className="bg-zinc-950 border-t border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
+      {/* 7. FOOTER WITH EMBEDDED THEME TOGGLE */}
+      <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h2 className="text-2xl md:text-3xl font-light text-white font-sans">
+              <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans">
                 Kipsmthn<span className="text-purple-500">.</span>
               </h2>
-              <p className="text-xs text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
               <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-purple-600 text-white">
                 LinkedIn
               </a>
-              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white">
+              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
                 Instagram
               </a>
-              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white">
+              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
                 YouTube
               </a>
-              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white">
+              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
                 Linktree
               </a>
-              <Link href="/portal" className="px-4 py-2 text-xs font-mono rounded-full bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white">
+              <Link href="/portal" className="px-4 py-2 text-xs font-mono rounded-full bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-zinc-300 hover:text-purple-600">
                 Client Delivery Portal
               </Link>
             </div>
           </div>
 
-          <div className="border-t border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-zinc-600 font-mono gap-2">
+          {/* Copyright Bottom Bar with Theme Toggle Button */}
+          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
             <p>© {new Date().getFullYear()} Kipsmthn Platform. All rights reserved.</p>
-            <p>Nairobi, Kenya</p>
+            
+            <div className="flex items-center gap-6">
+              <ThemeToggle />
+              <span className="text-slate-500 dark:text-zinc-500">Nairobi, Kenya</span>
+            </div>
           </div>
         </div>
       </footer>

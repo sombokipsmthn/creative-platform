@@ -101,6 +101,7 @@ export default function AdminClientsPage() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
 
+  // Form State
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -157,7 +158,7 @@ export default function AdminClientsPage() {
     setCompany('');
     setNotes('');
     setIsAddClientOpen(false);
-    alert(`Client "${name}" registered with KRA & Contract tracking!`);
+    alert(`Client &quot;${name}&quot; registered with KRA & Contract tracking!`);
   };
 
   const copyMagicLink = (token: string) => {
@@ -179,7 +180,7 @@ export default function AdminClientsPage() {
 
           <button
             onClick={() => setIsAddClientOpen(true)}
-            className="px-5 py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-[0_0_20px_rgba(124,58,237,0.3)]"
+            className="px-5 py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm"
           >
             <span>+ Register New Client</span>
           </button>
@@ -307,7 +308,7 @@ export default function AdminClientsPage() {
 
                 {client.notes && (
                   <p className="text-xs text-slate-500 dark:text-zinc-500 font-light italic">
-                    "{client.notes}"
+                    &quot;{client.notes}&quot;
                   </p>
                 )}
               </div>
@@ -315,7 +316,7 @@ export default function AdminClientsPage() {
               <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                 <button
                   onClick={() => setSelectedClient(client)}
-                  className="px-4 py-2.5 btn-secondary text-xs font-mono rounded-xl flex items-center gap-2"
+                  className="px-4 py-2.5 btn-secondary text-xs font-mono rounded-xl flex items-center gap-2 cursor-pointer"
                 >
                   <span>Edit Status / View ({client.galleries.length})</span>
                 </button>
@@ -323,7 +324,7 @@ export default function AdminClientsPage() {
                 {client.galleries.length > 0 && (
                   <button
                     onClick={() => copyMagicLink(client.galleries[0].token)}
-                    className="px-4 py-2.5 btn-primary text-xs font-mono rounded-xl flex items-center gap-2 shadow-sm"
+                    className="px-4 py-2.5 btn-primary text-xs font-mono rounded-xl flex items-center gap-2 shadow-sm cursor-pointer"
                   >
                     <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                       <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -337,7 +338,266 @@ export default function AdminClientsPage() {
           ))}
         </div>
 
-      </div>
+        {/* MODAL 1: REGISTER NEW CLIENT */}
+        {isAddClientOpen && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
+            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setIsAddClientOpen(false)}
+                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <div className="space-y-1">
+                <p className="text-xs font-mono uppercase text-purple-600 dark:text-purple-400 tracking-widest">CRM & Tax Setup</p>
+                <h2 className="text-2xl font-light text-slate-900 dark:text-white">Register New Client</h2>
+              </div>
+
+              <form onSubmit={handleCreateClient} className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Contact Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Jane Wanjiku"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Email Address *</label>
+                    <input
+                      type="email"
+                      placeholder="jane@company.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone Number</label>
+                    <input
+                      type="text"
+                      placeholder="+254 700 000 000"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Company / Organization</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Safaricom Spark"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Location</label>
+                    <input
+                      type="text"
+                      placeholder="Nairobi, Kenya"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Feedback Stage</label>
+                    <select
+                      value={feedbackStatus}
+                      onChange={(e) => setFeedbackStatus(e.target.value as any)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    >
+                      <option value="AWAITING_FEEDBACK">Awaiting Client Feedback 💬</option>
+                      <option value="FEEDBACK_RECEIVED">Feedback Received</option>
+                      <option value="IN_PRODUCTION">In Production / Retouching</option>
+                      <option value="COMPLETED">Completed & Delivered</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Contract Status</label>
+                    <select
+                      value={contractStatus}
+                      onChange={(e) => setContractStatus(e.target.value as any)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    >
+                      <option value="NOT_SENT">Not Sent</option>
+                      <option value="SENT">Sent for Signature ⏳</option>
+                      <option value="SIGNED">Signed & Active ✓</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">KRA eTIMS Invoice</label>
+                    <select
+                      value={etimsInvoiceStatus}
+                      onChange={(e) => setEtimsInvoiceStatus(e.target.value as any)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    >
+                      <option value="NOT_SENT">Not Generated</option>
+                      <option value="SENT">eTIMS Invoice Shared</option>
+                      <option value="PAID">Invoice Paid ✓</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Withholding Tax Cert</label>
+                    <select
+                      value={taxCertificateStatus}
+                      onChange={(e) => setTaxCertificateStatus(e.target.value as any)}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    >
+                      <option value="NOT_RECEIVED">Pending Tax Cert ⚠️</option>
+                      <option value="RECEIVED">Tax Cert Received ✓</option>
+                      <option value="NOT_APPLICABLE">Not Applicable</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Internal Notes</label>
+                  <textarea
+                    rows={2}
+                    placeholder="Project deliverables or billing notes..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="w-full px-4 py-2 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="w-full py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-md"
+                >
+                  + Add Client to CRM
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL 2: EDIT CLIENT STATUS / VIEW ASSIGNED GALLERIES */}
+        {selectedClient && (
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
+            <div className="max-w-2xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setSelectedClient(null)}
+                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+
+              <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-4">
+                <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
+                  {selectedClient.company}
+                </span>
+                <h2 className="text-2xl font-light text-slate-900 dark:text-white mt-2">{selectedClient.name}</h2>
+                <p className="text-xs font-mono text-slate-600 dark:text-zinc-400">
+                  {selectedClient.email} • {selectedClient.phone} • {selectedClient.location}
+                </p>
+              </div>
+
+              {/* Status Update Quick Toggles */}
+              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4 text-xs font-mono">
+                <p className="text-purple-600 dark:text-purple-400 font-bold uppercase text-[10px]">Update Business & Compliance Tracking</p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Feedback Status</label>
+                    <select
+                      value={selectedClient.feedbackStatus}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, feedbackStatus: val } : c));
+                        setSelectedClient({ ...selectedClient, feedbackStatus: val });
+                      }}
+                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
+                    >
+                      <option value="AWAITING_FEEDBACK">Awaiting Client Feedback 💬</option>
+                      <option value="FEEDBACK_RECEIVED">Feedback Received</option>
+                      <option value="IN_PRODUCTION">In Production</option>
+                      <option value="COMPLETED">Completed</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Contract Status</label>
+                    <select
+                      value={selectedClient.contractStatus}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, contractStatus: val } : c));
+                        setSelectedClient({ ...selectedClient, contractStatus: val });
+                      }}
+                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
+                    >
+                      <option value="NOT_SENT">Not Sent</option>
+                      <option value="SENT">Sent for Signature ⏳</option>
+                      <option value="SIGNED">Signed & Active ✓</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">KRA eTIMS Invoice</label>
+                    <select
+                      value={selectedClient.etimsInvoiceStatus}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, etimsInvoiceStatus: val } : c));
+                        setSelectedClient({ ...selectedClient, etimsInvoiceStatus: val });
+                      }}
+                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
+                    >
+                      <option value="NOT_SENT">Not Generated</option>
+                      <option value="SENT">eTIMS Invoice Shared</option>
+                      <option value="PAID">Invoice Paid ✓</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Withholding Tax Cert</label>
+                    <select
+                      value={selectedClient.taxCertificateStatus}
+                      onChange={(e) => {
+                        const val = e.target.value as any;
+                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, taxCertificateStatus: val } : c));
+                        setSelectedClient({ ...selectedClient, taxCertificateStatus: val });
+                      }}
+                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
+                    >
+                      <option value="NOT_RECEIVED">Pending Tax Cert ⚠️</option>
+                      <option value="RECEIVED">Tax Cert Received ✓</option>
+                      <option value="NOT_APPLICABLE">Not Applicable</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Internal Notes</label>
+                  <p className="text-xs text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">
+                    {selectedClient.notes || 'No internal notes.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+    </div>
     </div>
   );
 }

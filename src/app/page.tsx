@@ -80,7 +80,7 @@ export default function HomePage() {
 
       {/* 1. HERO SECTION */}
       <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto text-center space-y-8">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-600/15 blur-[160px] pointer-events-none rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs font-mono uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
@@ -91,9 +91,11 @@ export default function HomePage() {
           <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
             FEATURED CREATOR: SOMBORIOT KIPCHILAT
           </p>
-          <h1 className="text-5xl md:text-8xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.05]">
-            CREATIVE DIRECTOR & <span className="font-normal text-purple-600 dark:text-purple-400">ECOSYSTEM STORYTELLING</span> SPECIALIST
-          </h1>
+
+          {/* 💡 TITLE IN SMALL CAPS */}
+          <h1 className="text-3xl md:text-5xl font-light tracking-tight text-slate-900 dark:text-white leading-tight max-w-4xl mx-auto lowercase [font-variant:small-caps]">
+  Creative Director & <span className="font-normal text-purple-600 dark:text-purple-400">Ecosystem Storytelling</span> Specialist
+</h1>
           <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
             Documenting African startup ecosystems, venture studios, accelerator programs, and clean-tech innovation through photography, film, and digital media.
           </p>
@@ -102,7 +104,7 @@ export default function HomePage() {
         <div className="flex flex-wrap justify-center items-center gap-4 pt-2">
           <Link
             href="/contact"
-            className="px-8 py-4 btn-primary font-medium text-xs tracking-widest uppercase rounded-sm transition-all shadow-[0_0_30px_rgba(124,58,237,0.35)]"
+            className="px-8 py-4 btn-primary font-medium text-xs tracking-widest uppercase rounded-sm transition-all shadow-md"
           >
             Start a Collaboration
           </Link>
@@ -134,7 +136,7 @@ export default function HomePage() {
 
         {/* Laptop Hero Showcase Frame */}
         <div className="pt-8 max-w-5xl mx-auto">
-          <div className="relative aspect-[16/10] bg-slate-900 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
+          <div className="relative aspect-16/10 bg-slate-900 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
             <Image
               src={resolveImage(portfolioMedia.hero)}
               alt="Somboriot Kipchilat Portfolio on KIPSMTHN"
@@ -143,7 +145,7 @@ export default function HomePage() {
               className="object-cover opacity-85"
               unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-black/40 dark:from-[#09090b]" />
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950/90 via-transparent to-black/40 dark:from-[#09090b]" />
 
             <div className="absolute inset-0 flex flex-col justify-between p-8 text-left">
               <div className="flex justify-between items-center">
@@ -207,7 +209,7 @@ export default function HomePage() {
                 project.featured ? 'md:col-span-2' : ''
               }`}
             >
-              <div className={`relative w-full ${project.featured ? 'aspect-[21/9]' : 'aspect-[4/3]'} overflow-hidden`}>
+              <div className={`relative w-full ${project.featured ? 'aspect-21/9' : 'aspect-4/3'} overflow-hidden`}>
                 <Image
                   src={resolveImage(project.image)}
                   alt={project.title}
@@ -215,12 +217,11 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   unoptimized
                 />
-                {/* High Contrast Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/60 to-transparent" />
               </div>
 
               {/* OVERLAY TEXT */}
-              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end bg-gradient-to-t from-black/95 via-black/70 to-transparent pt-12">
+              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end bg-linear-to-t from-black/95 via-black/70 to-transparent pt-12">
                 <div className="space-y-2 max-w-xl">
                   <div className="flex items-center gap-3">
                     <span className="px-2.5 py-1 bg-purple-600/30 border border-purple-400/50 text-purple-200 text-[10px] font-mono uppercase tracking-widest rounded-sm font-semibold">
@@ -246,7 +247,7 @@ export default function HomePage() {
 
       {/* 4. ABOUT & AWARDS BANNER */}
       <section className="py-12 px-6 max-w-7xl mx-auto">
-        <div className="relative border border-slate-200 dark:border-zinc-800 bg-gradient-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="relative border border-slate-200 dark:border-zinc-800 bg-linear-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
               Somboriot Kipchilat — Nairobi, Kenya
@@ -302,7 +303,7 @@ export default function HomePage() {
           {portfolioMedia.services.map((s) => (
             <div key={s.num} className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-2xl p-6 space-y-6 hover:border-purple-600/50 transition-all group flex flex-col justify-between shadow-sm dark:shadow-none">
               <div className="space-y-4">
-                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                <div className="relative aspect-4/3 w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950">
                   <Image src={resolveImage(s.image)} alt={s.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                 </div>
                 <span className="text-xs font-mono text-purple-600 dark:text-purple-500 font-bold">{s.num}</span>
@@ -349,7 +350,7 @@ export default function HomePage() {
           ].map((item, i) => (
             <div
               key={i}
-              className={`relative w-40 md:w-56 aspect-[3/5] rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
+              className={`relative w-40 md:w-56 aspect-3/5 rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
             >
               <Image
                 src={resolveImage(item.img)}

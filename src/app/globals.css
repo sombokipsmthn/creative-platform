@@ -10,7 +10,7 @@
   --font-mono: var(--font-montserrat), sans-serif;
 }
 
-/* CSS Theme Variables */
+/* CSS Theme Variables for Light and Dark Modes */
 :root {
   --bg-page: #f8fafc;
   --bg-card: #ffffff;
@@ -43,45 +43,57 @@ html.dark {
   --btn-sec-hover: #3f3f46;
 }
 
-/* Body & Header strict theme binding */
-body {
-  background-color: var(--bg-page) !important;
-  color: var(--text-primary) !important;
-  transition: background-color 0.25s ease, color 0.25s ease;
-}
+@layer base {
+  /* Strict Body & Header Theme Binding */
+  body {
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary) !important;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
 
-header {
-  background-color: var(--header-bg) !important;
-  border-color: var(--border-subtle) !important;
-}
+  header {
+    background-color: var(--header-bg) !important;
+    border-color: var(--border-subtle) !important;
+  }
 
-/* 💡 UNIFIED GLOBAL BUTTON STYLES */
-.btn-primary {
-  background-color: #7c3aed !important;
-  color: #ffffff !important;
-  border: 1px solid #7c3aed !important;
-  transition: all 0.2s ease;
-}
-.btn-primary:hover {
-  background-color: #6d28d9 !important;
-  border-color: #6d28d9 !important;
-}
+  /* 💡 UNIFIED GLOBAL BUTTON STYLES FOR LIGHT & DARK MODES */
+  .btn-primary {
+    background-color: #7c3aed !important;
+    color: #ffffff !important;
+    border: 1px solid #7c3aed !important;
+    transition: all 0.2s ease;
+  }
+  .btn-primary:hover {
+    background-color: #6d28d9 !important;
+    border-color: #6d28d9 !important;
+  }
 
-.btn-secondary {
-  background-color: var(--btn-sec-bg) !important;
-  color: var(--btn-sec-text) !important;
-  border: 1px solid var(--btn-sec-border) !important;
-  transition: all 0.2s ease;
-}
-.btn-secondary:hover {
-  background-color: var(--btn-sec-hover) !important;
-}
+  .btn-secondary {
+    background-color: var(--btn-sec-bg) !important;
+    color: var(--btn-sec-text) !important;
+    border: 1px solid var(--btn-sec-border) !important;
+    transition: all 0.2s ease;
+  }
+  .btn-secondary:hover {
+    background-color: var(--btn-sec-hover) !important;
+  }
 
-/* Container & Input theme rules */
-html:not(.dark) input,
-html:not(.dark) select,
-html:not(.dark) textarea {
-  background-color: var(--bg-input) !important;
-  border-color: var(--border-subtle) !important;
-  color: var(--text-primary) !important;
+  /* 💡 PLATFORM-WIDE REFINED SMALL CAPS HEADLINE CLASS */
+  .heading-editorial {
+    font-size: clamp(2rem, 3.5vw, 3.25rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-transform: lowercase;
+    font-variant: small-caps;
+  }
+
+  /* Container & Input Theme Overrides */
+  html:not(.dark) input,
+  html:not(.dark) select,
+  html:not(.dark) textarea {
+    background-color: var(--bg-input) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+  }
 }

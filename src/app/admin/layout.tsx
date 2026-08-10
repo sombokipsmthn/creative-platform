@@ -8,7 +8,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const router = useRouter();
 
-  // If on login page, don't show the admin header
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
@@ -22,23 +21,22 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', href: '/admin' },
     { name: 'Client CRM', href: '/admin/clients' },
     { name: 'Gallery Builder', href: '/admin/projects' },
+    { name: 'Settings', href: '/admin/settings' },
   ];
 
   return (
     <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-600 selection:text-white">
-      {/* Creator Top Navigation Header */}
       <header className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link href="/admin" className="text-sm font-bold tracking-wider text-white">
-              SOMBO<span className="text-purple-500">.</span>
+              Kipsmthn<span className="text-purple-500">.</span>
             </Link>
             <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/40 text-purple-300 text-[10px] font-mono rounded-full">
-              Creator Backend
+              Creator: Somboriot Kipchilat
             </span>
           </div>
 
-          {/* Admin Links */}
           <nav className="flex items-center gap-6">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -75,7 +73,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </header>
 
-      {/* Main Admin Content */}
       <main>{children}</main>
     </div>
   );

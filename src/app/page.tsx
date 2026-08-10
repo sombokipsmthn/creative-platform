@@ -3,23 +3,15 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/Header';
 
-// 💡 Smart Image Resolver: Handles full URLs, Google Drive IDs, and Fallbacks
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
   if (source.startsWith('http://') || source.startsWith('https://')) return source;
-  // If it's a Google Drive ID
   return `https://lh3.googleusercontent.com/d/${source}`;
 };
 
-// 💡 Pre-loaded High-Res Creative Photos + Google Drive ID Slots
 const portfolioMedia = {
-  // Hero Mockup Image (Can be Google Drive ID OR direct Web URL)
   hero: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1600&q=80',
-  
-  // About Section Image
   about: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
-
-  // Featured Projects (Mix of Google Drive IDs or Web URLs)
   projects: [
     {
       id: '01',
@@ -52,16 +44,12 @@ const portfolioMedia = {
       featured: false,
     },
   ],
-
-  // Services Images
   services: [
     { num: '01', title: 'Startup Ecosystem Storytelling', desc: 'Translating accelerator programs, founder journeys, and innovation initiatives into compelling visual narratives.', tags: ['Program Documentation', 'Founder Spotlights', 'Impact Reporting', 'Demo Days'], image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=800&q=80' },
     { num: '02', title: 'Accelerator & Venture Media', desc: 'End-to-end coverage for donor programs, venture studios, and innovation hubs across Africa.', tags: ['iHUB/ccHUB', 'Delta40 Studio', 'GrowthAfrica', 'UNDP Timbuktoo'], image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=800&q=80' },
     { num: '03', title: 'E-Commerce & Brand Media', desc: 'High-scale product photography, creative direction, and digital marketing strategy for retail leaders.', tags: ['Shop Zetu', 'Copia Kenya', 'Home 254', 'Estee Lauder'], image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80' },
     { num: '04', title: 'Short-Form & Social Storytelling', desc: 'Engaging video, motion content, and brand narratives built for multi-platform digital reach.', tags: ['Kraft Digital', 'YouTube', 'Instagram Reels', 'Campaign Assets'], image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80' },
   ],
-
-  // Curved Perspective Gallery Images
   curvedGallery: [
     'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=600&q=80',
     'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80',
@@ -89,20 +77,18 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans selection:bg-purple-600 selection:text-white">
       <Header />
 
-      {/* ========================================================================= */}
       {/* 1. HERO SECTION */}
-      {/* ========================================================================= */}
       <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto text-center space-y-8">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-[160px] pointer-events-none rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-purple-600/15 blur-[160px] pointer-events-none rounded-full" />
 
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-950/30 text-purple-300 text-xs font-mono uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-          Nairobi, Kenya • Open for Global Ecosystem Projects
+          Kipsmthn Platform • Nairobi, Kenya
         </div>
 
         <div className="space-y-4 max-w-5xl mx-auto">
           <p className="text-xs font-mono text-purple-400 uppercase tracking-widest">
-            SOMBORIOT KIPCHILAT (SOMBO / kipsmthn)
+            FEATURED CREATOR: SOMBORIOT KIPCHILAT
           </p>
           <h1 className="text-5xl md:text-8xl font-light tracking-tight text-white leading-[1.05]">
             CREATIVE DIRECTOR & <span className="font-normal text-purple-400">ECOSYSTEM STORYTELLING</span> SPECIALIST
@@ -147,20 +133,21 @@ export default function HomePage() {
 
         {/* Laptop Hero Showcase Frame */}
         <div className="pt-8 max-w-5xl mx-auto">
-          <div className="relative aspect-16/10 bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-[0_0_80px_rgba(124,58,237,0.2)]">
+          <div className="relative aspect-[16/10] bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-[0_0_80px_rgba(124,58,237,0.2)]">
             <Image
               src={resolveImage(portfolioMedia.hero)}
-              alt="Somboriot Kipchilat Portfolio Showcase"
+              alt="Somboriot Kipchilat Portfolio on Kipsmthn"
               fill
+              priority
               className="object-cover opacity-85"
               unoptimized
             />
-            <div className="absolute inset-0 bg-linear-to-t from-[#09090b] via-transparent to-black/40" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#09090b] via-transparent to-black/40" />
 
             <div className="absolute inset-0 flex flex-col justify-between p-8 text-left">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold tracking-wider text-white">
-                  SOMBO<span className="text-purple-500">.</span>
+                <span className="text-xs font-bold tracking-wider text-white font-sans">
+                  Kipsmthn<span className="text-purple-500">.</span>
                 </span>
                 <span className="px-3 py-1 bg-purple-600/30 border border-purple-500/50 text-purple-200 text-[10px] font-mono rounded-full">
                   Microsoft Imagine Cup Winner
@@ -179,9 +166,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
       {/* 2. PARTNERS TICKER */}
-      {/* ========================================================================= */}
       <section className="py-12 border-y border-zinc-900 bg-zinc-950/60 overflow-hidden">
         <div className="max-w-7xl mx-auto px-6 space-y-4">
           <p className="text-[10px] font-mono text-purple-400 uppercase tracking-widest">
@@ -197,9 +182,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
       {/* 3. FEATURED CASE STUDIES */}
-      {/* ========================================================================= */}
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
           <div>
@@ -223,7 +206,7 @@ export default function HomePage() {
                 project.featured ? 'md:col-span-2' : ''
               }`}
             >
-              <div className={`relative w-full ${project.featured ? 'aspect-21/9' : 'aspect-4/3'} overflow-hidden`}>
+              <div className={`relative w-full ${project.featured ? 'aspect-[21/9]' : 'aspect-[4/3]'} overflow-hidden`}>
                 <Image
                   src={resolveImage(project.image)}
                   alt={project.title}
@@ -231,7 +214,7 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   unoptimized
                 />
-                <div className="absolute inset-0 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-85" />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-85" />
               </div>
 
               <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end">
@@ -258,11 +241,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
-      {/* 4. ABOUT & AWARDS */}
-      {/* ========================================================================= */}
+      {/* 4. ABOUT & AWARDS BANNER */}
       <section className="py-12 px-6 max-w-7xl mx-auto">
-        <div className="relative border border-zinc-800 bg-linear-to-r from-purple-950/40 via-zinc-900/60 to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="relative border border-zinc-800 bg-gradient-to-r from-purple-950/40 via-zinc-900/60 to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-300 text-xs font-mono rounded-full">
               Somboriot Kipchilat — Nairobi, Kenya
@@ -302,9 +283,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
       {/* 5. CORE EXPERTISE & SERVICES */}
-      {/* ========================================================================= */}
       <section className="py-24 px-6 max-w-7xl mx-auto space-y-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-zinc-800 pb-6">
           <div>
@@ -320,7 +299,7 @@ export default function HomePage() {
           {portfolioMedia.services.map((s) => (
             <div key={s.num} className="bg-zinc-900/40 border border-zinc-800/80 rounded-2xl p-6 space-y-6 hover:border-purple-600/50 transition-all group flex flex-col justify-between">
               <div className="space-y-4">
-                <div className="relative aspect-4/3 w-full rounded-xl overflow-hidden bg-zinc-950">
+                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-zinc-950">
                   <Image src={resolveImage(s.image)} alt={s.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
                 </div>
                 <span className="text-xs font-mono text-purple-500">{s.num}</span>
@@ -340,14 +319,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ========================================================================= */}
       {/* 6. PERSPECTIVE FAN ARC GALLERY */}
-      {/* ========================================================================= */}
       <section className="py-28 px-6 max-w-7xl mx-auto space-y-16 text-center border-t border-zinc-800">
         <div className="space-y-4 max-w-2xl mx-auto">
           <span className="text-xs font-mono uppercase tracking-widest text-purple-400">Media Vault</span>
-          {/* eslint-disable-next-line react/no-unescaped-entities */}
-          <h2 className="text-4xl md:text-5xl font-light text-white">Curious What Else I've Captured?</h2>
+          <h2 className="text-4xl md:text-5xl font-light text-white">Curious What Else We've Captured?</h2>
           <p className="text-xs text-zinc-400 font-light">
             Explore short-form video content, social storytelling, and tech documentaries on Kraft Digital.
           </p>
@@ -370,23 +346,28 @@ export default function HomePage() {
           ].map((item, i) => (
             <div
               key={i}
-              className={`relative w-40 md:w-56 aspect-3/5 rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
+              className={`relative w-40 md:w-56 aspect-[3/5] rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-900 transform ${item.rot} hover:scale-110 hover:z-20 hover:rotate-0 transition-all duration-300 shadow-2xl shrink-0`}
             >
-              <Image src={resolveImage(item.img)} alt="Portfolio item" fill className="object-cover" unoptimized />
+              <Image
+                src={resolveImage(item.img)}
+                alt="Portfolio item"
+                fill
+                priority={i === 0}
+                className="object-cover"
+                unoptimized
+              />
             </div>
           ))}
         </div>
       </section>
 
-      {/* ========================================================================= */}
       {/* 7. FOOTER */}
-      {/* ========================================================================= */}
       <footer className="bg-zinc-950 border-t border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h2 className="text-2xl md:text-3xl font-light text-white">
-                Somboriot Kipchilat
+              <h2 className="text-2xl md:text-3xl font-light text-white font-sans">
+                Kipsmthn<span className="text-purple-500">.</span>
               </h2>
               <p className="text-xs text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
             </div>
@@ -411,7 +392,7 @@ export default function HomePage() {
           </div>
 
           <div className="border-t border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-zinc-600 font-mono gap-2">
-            <p>© {new Date().getFullYear()} Somboriot Kipchilat (SOMBO / kipsmthn). All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Kipsmthn Platform. All rights reserved.</p>
             <p>Nairobi, Kenya</p>
           </div>
         </div>

@@ -1,7 +1,9 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from 'next';
 import { Outfit, Montserrat } from 'next/font/google';
+import Script from 'next/script'; // 👈 Import Next.js Script component
 import './globals.css';
+import { CreatorProvider } from '@/context/CreatorContext';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -23,7 +25,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Kipsmthn | Creative & Client Delivery Engine',
+  title: 'Kipsmthn | Multi-Tenant Creator Platform',
   description: 'Commercial Photography, Brand Films, Motion Graphics & Startup Ecosystem Storytelling.',
 };
 
@@ -38,9 +40,12 @@ export default function RootLayout({
       className={`${outfit.variable} ${montserrat.variable} dark`}
       suppressHydrationWarning
     >
-      <head>
-        {/* Inline Theme Persistence Script */}
-        <script
+      <head />
+      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+        {/* 💡 NEXT.JS SCRIPT COMPONENT WITH BEFORE-INTERACTIVE STRATEGY */}
+        <Script
+          id="theme-persistence"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
@@ -54,10 +59,11 @@ export default function RootLayout({
             `,
           }}
         />
-      </head>
-      {/* 💡 REQUIRED ROOT BODY TAG */}
-      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
-        {children}
+
+        {/* Multi-Tenant Creator Context */}
+        <CreatorProvider>
+          {children}
+        </CreatorProvider>
       </body>
     </html>
   );

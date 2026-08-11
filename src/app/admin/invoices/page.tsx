@@ -28,25 +28,25 @@ const categoryFilterTabs = [
 
 export default function AdminInvoicesPage() {
   const [docType, setDocType] = useState<'QUOTATION' | 'OFFICIAL TAX INVOICE'>('QUOTATION');
-  const [selectedClient, setSelectedClient] = useState('iHUB, Kenya');
-  const [quoteDate, setQuoteDate] = useState('2026-07-15');
+  const [selectedClient, setSelectedClient] = useState('Apex Global Studios');
+  const [quoteDate, setQuoteDate] = useState('2026-08-15');
   const [invoiceNumber, setInvoiceNumber] = useState('QT-2026-0159');
   const [vatPercent, setVatPercent] = useState(0);
 
-  // 💡 Dynamic Creator Profile & Banking Details (Pulled from Creator Signup Profile)
+  // 💡 DEMO CREATOR PROFILE & BANKING DETAILS
   const creatorProfile = {
-    name: 'Somboriot Kipchilat',
-    title: 'Creative Director & Ecosystem Storytelling Specialist',
-    email: 'somboriot@gmail.com',
-    phone: '+254 722 145 776',
-    kraPin: 'A012345678X',
+    name: 'Alex Mercer',
+    title: 'Lead Visual Director & Media Producer',
+    email: 'alex@creativestudio.com',
+    phone: '+254 700 000 000',
+    kraPin: 'P000000000X',
     location: 'Nairobi, Kenya',
     paymentDetails: {
-      bankName: 'Standard Chartered Bank Kenya',
-      accountName: 'Somboriot Kipchilat / KIPSMTHN Studio',
-      accountNumber: '010203040506',
+      bankName: 'Demo Commercial Bank Kenya',
+      accountName: 'Alex Mercer / KIPSMTHN Studio',
+      accountNumber: '1234567890',
       branch: 'Westlands Branch',
-      mpesaPaybill: 'Paybill 247247 (Acc: KIPSMTHN)',
+      mpesaPaybill: 'Paybill 123456 (Acc: DEMO)',
     },
   };
 
@@ -66,7 +66,6 @@ export default function AdminInvoicesPage() {
     { id: 'post_3', category: 'C. Post Production', name: 'Video Postproduction', qty: 5, days: 1, rate: 7000, notes: 'Coverage + Highlight video + Interviews' },
   ]);
 
-  // Modal State for searching & auto-filtering category
   const [activeCategoryForAdd, setActiveCategoryForAdd] = useState<string | null>(null);
   const [modalFilterCategory, setModalFilterCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -205,10 +204,10 @@ export default function AdminInvoicesPage() {
           </div>
         </div>
 
-        {/* PRINTABLE / EXPORTABLE PDF TEMPLATE */}
+        {/* PRINTABLE PDF TEMPLATE */}
         <div className="p-8 md:p-14 border border-slate-200 dark:border-zinc-800 bg-white text-slate-900 rounded-3xl shadow-2xl space-y-8 font-sans print:border-none print:shadow-none print:p-0 print:m-0">
           
-          {/* 💡 DYNAMIC CREATOR HEADER PULLED FROM CREATOR PROFILE */}
+          {/* CREATOR HEADER */}
           <div className="flex justify-between items-start border-b-2 border-purple-900 pb-6">
             <div className="space-y-1">
               <h2 className="text-2xl font-bold tracking-wider text-purple-950 uppercase font-sans">
@@ -239,11 +238,9 @@ export default function AdminInvoicesPage() {
                 onChange={(e) => setSelectedClient(e.target.value)}
                 className="w-full text-sm font-bold text-slate-900 bg-transparent border-b border-slate-300 focus:outline-none print:border-none"
               >
-                <option value="iHUB, Kenya">iHUB, Kenya</option>
-                <option value="BURN Manufacturing USA LLC">BURN Manufacturing USA LLC</option>
-                <option value="Delta40 Venture Studio">Delta40 Venture Studio</option>
-                <option value="UNDP Timbuktoo Platform">UNDP Timbuktoo Platform</option>
-                <option value="Mastercard Foundation">Mastercard Foundation</option>
+                <option value="Apex Global Studios">Apex Global Studios</option>
+                <option value="Vanguard Media Group">Vanguard Media Group</option>
+                <option value="Cipher Digital Studio">Cipher Digital Studio</option>
               </select>
               <p className="text-slate-500">Nairobi, Kenya</p>
             </div>
@@ -255,7 +252,7 @@ export default function AdminInvoicesPage() {
             </div>
           </div>
 
-          {/* Table with In-Line Add Items */}
+          {/* Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono border-collapse border border-slate-300">
               <thead>
@@ -305,7 +302,7 @@ export default function AdminInvoicesPage() {
                 {/* SECTION B: EQUIPMENT HIRE */}
                 <tr className="bg-slate-100 font-bold text-purple-950">
                   <td colSpan={6} className="p-2 border-b border-slate-300 uppercase">
-                    B. Equipment Hire (Per Day Rates - Production Inventory)
+                    B. Equipment Hire (Per Day Rates)
                   </td>
                 </tr>
 
@@ -461,7 +458,7 @@ export default function AdminInvoicesPage() {
 
           {/* Grand Totals & DYNAMIC BANKING / MPESA PAYMENT TERMS BOX */}
           <div className="flex flex-col md:flex-row justify-between items-start gap-8 pt-6 border-t-2 border-slate-300">
-            {/* 💡 DYNAMIC BANKING & MPESA DETAILS PULLED FROM CREATOR PROFILE */}
+            {/* 💡 DYNAMIC BANKING & MPESA DETAILS */}
             <div className="space-y-3 text-xs max-w-md">
               <p className="font-bold text-purple-950 font-mono uppercase">Payment Terms & Instructions:</p>
               <div className="p-4 bg-purple-50/60 rounded-xl border border-purple-200 text-slate-800 leading-relaxed font-mono space-y-2">

@@ -63,7 +63,7 @@ export default function CreatorLoginPage() {
               }}
               className="w-full p-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-xl focus:border-purple-600 focus:outline-none"
             />
-            {error && <p className="text-[11px] text-red-500">Invalid passphrase. Use "sombo2026" or "demo2026"</p>}
+            {error && <p className="text-[11px] text-red-500">Invalid passphrase. Use &quot;sombo2026&quot; or &quot;demo2026&quot;</p>}
           </div>
 
           <button

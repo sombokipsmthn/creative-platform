@@ -35,21 +35,20 @@ export default function HomePage() {
 
         <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs font-mono uppercase tracking-widest">
           <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-          {activeCreator.handle} • {activeCreator.location}
+          {activeCreator?.handle || 'KIPSMTHN'} • {activeCreator?.location || 'Nairobi, Kenya'}
         </div>
 
         <div className="space-y-4 max-w-5xl mx-auto">
           <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
-            FEATURED CREATOR: {activeCreator.name}
+            {activeCreator ? `FEATURED CREATOR: ${activeCreator.name}` : 'MULTI-TENANT CREATOR ENGINE'}
           </p>
 
-          {/* Small Caps Title */}
           <h1 className="heading-editorial text-slate-900 dark:text-white max-w-4xl mx-auto">
-            {activeCreator.title}
+            {activeCreator?.title || 'Creative Director & Ecosystem Storytelling Specialist'}
           </h1>
 
           <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed pt-2">
-            {activeCreator.bio}
+            {activeCreator?.bio || 'Documenting African startup ecosystems, venture studios, accelerator programs, and clean-tech innovation through photography, film, and digital media.'}
           </p>
         </div>
 
@@ -60,7 +59,7 @@ export default function HomePage() {
           >
             Start a Collaboration
           </Link>
-          {activeCreator.socials.linkedin && (
+          {activeCreator?.socials?.linkedin && (
             <a
               href={activeCreator.socials.linkedin}
               target="_blank"
@@ -70,7 +69,7 @@ export default function HomePage() {
               LinkedIn ↗
             </a>
           )}
-          {activeCreator.socials.youtube && (
+          {activeCreator?.socials?.youtube && (
             <a
               href={activeCreator.socials.youtube}
               target="_blank"
@@ -80,7 +79,7 @@ export default function HomePage() {
               YouTube / Kraft Digital ↗
             </a>
           )}
-          {activeCreator.socials.linktree && (
+          {activeCreator?.socials?.linktree && (
             <a
               href={activeCreator.socials.linktree}
               target="_blank"
@@ -96,19 +95,19 @@ export default function HomePage() {
         <div className="pt-8 max-w-5xl mx-auto">
           <div className="relative aspect-16/10 bg-slate-900 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-2xl">
             <Image
-              src={resolveImage(activeCreator.avatarUrl)}
-              alt={activeCreator.name}
+              src={resolveImage(activeCreator?.avatarUrl)}
+              alt={activeCreator?.name || 'KIPSMTHN'}
               fill
               priority
               className="object-cover opacity-85"
               unoptimized
             />
-            <div className="absolute inset-0 bg-linear-to-t from-slate-950/90 via-transparent to-black/40 dark:from-[#09090b]" />
+            <div className="absolute inset-0 bg-linear-to-trom-slate-950/90 via-transparent to-black/40 dark:from-[#09090b]" />
 
             <div className="absolute inset-0 flex flex-col justify-between p-8 text-left">
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold tracking-wider text-white font-sans uppercase">
-                  {activeCreator.handle}<span className="text-purple-500">.</span>
+                  {activeCreator?.handle || 'KIPSMTHN'}<span className="text-purple-500">.</span>
                 </span>
                 <span className="px-3 py-1 bg-purple-600/30 border border-purple-500/50 text-purple-200 text-[10px] font-mono rounded-full">
                   Verified Creator Profile
@@ -116,8 +115,8 @@ export default function HomePage() {
               </div>
 
               <div className="space-y-2 max-w-lg">
-                <p className="text-xs font-mono text-purple-400 uppercase">{activeCreator.title}</p>
-                <h2 className="text-3xl md:text-5xl font-light text-white">{activeCreator.name}</h2>
+                <p className="text-xs font-mono text-purple-400 uppercase">{activeCreator?.title || 'Ecosystem Storytelling'}</p>
+                <h2 className="text-3xl md:text-5xl font-light text-white">{activeCreator?.name || 'Somboriot Kipchilat'}</h2>
               </div>
             </div>
           </div>
@@ -134,7 +133,7 @@ export default function HomePage() {
             <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Featured Portfolio</span>
             <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white mt-1">Creator Productions</h2>
           </div>
-          {activeCreator.socials.linkedin && (
+          {activeCreator?.socials?.linkedin && (
             <a
               href={activeCreator.socials.linkedin}
               target="_blank"
@@ -145,16 +144,20 @@ export default function HomePage() {
           )}
         </div>
 
-        {activeCreator.projects.length === 0 ? (
+        {!activeCreator || activeCreator.projects.length === 0 ? (
           /* 💡 CLEAN ONBOARDING PLACEHOLDER FOR DEMO / NEW CREATORS */
           <div className="p-16 border-2 border-dashed border-slate-300 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-3xl text-center space-y-4 shadow-sm dark:shadow-none">
             <div className="w-12 h-12 mx-auto rounded-full bg-purple-600/20 flex items-center justify-center text-purple-600 dark:text-purple-400 font-mono text-xl font-bold">+</div>
             <h3 className="text-xl font-medium text-slate-900 dark:text-white">No Case Studies Published Yet</h3>
             <p className="text-xs text-slate-500 dark:text-zinc-400 max-w-md mx-auto font-mono">
-              You are logged in as <strong className="text-purple-600 dark:text-purple-400">{activeCreator.name}</strong>. Create your first gallery in the Gallery Builder to publish case studies to your portfolio!
+              {activeCreator ? (
+                <>You are logged in as <strong className="text-purple-600 dark:text-purple-400">{activeCreator.name}</strong>. Create your first gallery in the Gallery Builder to publish case studies!</>
+              ) : (
+                <>Log in to your creator account to publish case studies and client delivery galleries to your portfolio.</>
+              )}
             </p>
-            <Link href="/admin/projects" className="inline-block px-6 py-3 btn-primary text-xs font-mono uppercase tracking-widest rounded-full shadow-md">
-              + Create First Gallery in Builder
+            <Link href={activeCreator ? '/admin/projects' : '/admin/login'} className="inline-block px-6 py-3 btn-primary text-xs font-mono uppercase tracking-widest rounded-full shadow-md">
+              {activeCreator ? '+ Create First Gallery in Builder' : 'Creator Login →'}
             </Link>
           </div>
         ) : (
@@ -207,20 +210,20 @@ export default function HomePage() {
         <div className="relative border border-slate-200 dark:border-zinc-800 bg-linear-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6">
             <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
-              {activeCreator.name} — {activeCreator.location}
+              {activeCreator?.name || 'Somboriot Kipchilat'} — {activeCreator?.location || 'Nairobi, Kenya'}
             </span>
             <h2 className="text-4xl md:text-6xl font-light text-slate-900 dark:text-white">The Person Behind the Story</h2>
             <p className="text-sm text-slate-700 dark:text-zinc-300 font-light leading-relaxed">
-              {activeCreator.bio}
+              {activeCreator?.bio || 'Extensive experience producing visual narratives across donor programs, startup accelerators, and venture studios.'}
             </p>
 
             <div className="flex gap-4 pt-2">
-              {activeCreator.socials.linkedin && (
+              {activeCreator?.socials?.linkedin && (
                 <a href={activeCreator.socials.linkedin} target="_blank" className="px-6 py-3 btn-primary text-xs uppercase font-medium tracking-widest rounded-full">
                   Connect on LinkedIn ↗
                 </a>
               )}
-              {activeCreator.socials.instagram && (
+              {activeCreator?.socials?.instagram && (
                 <a href={activeCreator.socials.instagram} target="_blank" className="px-6 py-3 btn-secondary text-xs uppercase font-medium tracking-widest rounded-full">
                   Instagram ↗
                 </a>
@@ -230,8 +233,8 @@ export default function HomePage() {
 
           <div className="relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
             <Image
-              src={resolveImage(activeCreator.avatarUrl)}
-              alt={activeCreator.name}
+              src={resolveImage(activeCreator?.avatarUrl)}
+              alt={activeCreator?.name || 'KIPSMTHN'}
               fill
               className="object-cover"
               unoptimized
@@ -250,7 +253,7 @@ export default function HomePage() {
             Explore short-form video content, social storytelling, and tech documentaries on Kraft Digital.
           </p>
           <a
-            href={activeCreator.socials.youtube || 'https://www.youtube.com/@kraftdigital7749'}
+            href={activeCreator?.socials?.youtube || 'https://www.youtube.com/@kraftdigital7749'}
             target="_blank"
             className="inline-block px-8 py-3 bg-slate-900 dark:bg-white text-white dark:text-black font-medium text-xs uppercase tracking-widest rounded-full hover:bg-purple-600 hover:text-white transition-colors"
           >
@@ -289,28 +292,30 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
-                {activeCreator.handle}<span className="text-purple-500">.</span>
+                {activeCreator?.handle || 'KIPSMTHN'}<span className="text-purple-500">.</span>
               </h2>
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">{activeCreator.email} • {activeCreator.phone}</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">
+                {activeCreator?.email || 'somboriot@gmail.com'} • {activeCreator?.phone || '+254 722 145 776'}
+              </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              {activeCreator.socials.linkedin && (
+              {activeCreator?.socials?.linkedin && (
                 <a href={activeCreator.socials.linkedin} target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-purple-600 text-white">
                   LinkedIn
                 </a>
               )}
-              {activeCreator.socials.instagram && (
+              {activeCreator?.socials?.instagram && (
                 <a href={activeCreator.socials.instagram} target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                   Instagram
                 </a>
               )}
-              {activeCreator.socials.youtube && (
+              {activeCreator?.socials?.youtube && (
                 <a href={activeCreator.socials.youtube} target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                   YouTube
                 </a>
               )}
-              {activeCreator.socials.linktree && (
+              {activeCreator?.socials?.linktree && (
                 <a href={activeCreator.socials.linktree} target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                   Linktree
                 </a>
@@ -318,19 +323,19 @@ export default function HomePage() {
               <Link href="/portal" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
                 Client Portal
               </Link>
-              <Link href="/admin/login" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full font-bold hover:text-purple-600 dark:hover:text-purple-400">
-                Creator Dashboard
+              <Link href={activeCreator ? '/admin' : '/admin/login'} className="px-4 py-2 text-xs font-mono btn-secondary rounded-full font-bold hover:text-purple-600 dark:hover:text-purple-400">
+                {activeCreator ? 'Creator Dashboard' : 'Creator Login'}
               </Link>
             </div>
           </div>
 
           {/* Copyright Bottom Bar */}
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
-            <p>© {new Date().getFullYear()} {activeCreator.handle}. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} {activeCreator?.handle || 'KIPSMTHN Platform'}. All rights reserved.</p>
             
             <div className="flex items-center gap-6">
               <ThemeToggle />
-              <span className="text-slate-500 dark:text-zinc-500">{activeCreator.location}</span>
+              <span className="text-slate-500 dark:text-zinc-500">{activeCreator?.location || 'Nairobi, Kenya'}</span>
             </div>
           </div>
         </div>

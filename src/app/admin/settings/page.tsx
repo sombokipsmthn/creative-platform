@@ -176,7 +176,7 @@ export default function AdminSettingsPage() {
                   <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Position Style</label>
                   <select
                     value={watermarkPosition}
-                    onChange={(e) => setWatermarkPosition(e.target.value as any)}
+                    onChange={(e) => setWatermarkPosition(e.target.value as 'CENTER' | 'TILE' | 'BOTTOM_RIGHT')}
                     className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   >
                     <option value="TILE">Grid Tile Across Photo</option>

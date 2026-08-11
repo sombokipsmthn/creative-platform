@@ -1,5 +1,41 @@
 // src/db/users.ts
 
+export interface ProjectItem {
+  id: string;
+  title: string;
+  client: string;
+  category: string;
+  year: string;
+  desc: string;
+  image: string;
+  featured?: boolean;
+}
+
+export interface PressMention {
+  publication: string;
+  title: string;
+  link: string;
+  tag: string;
+  excerpt?: string;
+}
+
+export interface ClientRecord {
+  id: string;
+  name: string;
+  email: string;
+  token: string;
+  pin: string;
+  status: string;
+}
+
+export interface ExpenseRecord {
+  id: string;
+  merchant: string;
+  amountKes: number;
+  category: string;
+  date: string;
+}
+
 export interface UserAccount {
   id: string;
   name: string;
@@ -26,13 +62,12 @@ export interface UserAccount {
     linktree: string;
   };
   partners: string[];
-  projects: any[];
-  pressFeatures: any[];
-  clients: any[];
-  expenses: any[];
+  projects: ProjectItem[];
+  pressFeatures: PressMention[];
+  clients: ClientRecord[];
+  expenses: ExpenseRecord[];
 }
 
-// 💡 Pre-seeded Database Users (Somboriot & Alex)
 export const initialUsersDatabase: Record<string, UserAccount> = {
   sombo: {
     id: 'sombo',
@@ -59,18 +94,56 @@ export const initialUsersDatabase: Record<string, UserAccount> = {
       youtube: 'https://www.youtube.com/@kraftdigital7749',
       linktree: 'https://linktr.ee/kipsmthn',
     },
-    partners: [], // Stripped
-    projects: [], // Stripped
-    pressFeatures: [], // Stripped
-    clients: [], // Stripped
-    expenses: [], // Stripped
+    partners: ['iHUB / ccHUB', 'UNDP Timbuktoo', 'Mastercard Foundation', 'Safaricom Spark', 'BURN Manufacturing', 'Delta40 Studio', 'GrowthAfrica', 'HEVA Fund'],
+    projects: [
+      {
+        id: '01',
+        title: 'UNDP Timbuktoo & EdTech Fellowship',
+        client: 'iHUB / ccHUB',
+        category: 'Ecosystem Storytelling',
+        year: '2023 - 2026',
+        desc: 'Documenting founders, accelerator cohorts, and international ecosystem milestones across Africa.',
+        image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80',
+        featured: true,
+      },
+      {
+        id: '02',
+        title: 'Clean Energy Impact Series',
+        client: 'BURN Manufacturing USA',
+        category: 'Brand Films',
+        year: '2025 - Present',
+        desc: 'Impact video production, photography, and digital web UX improvements across African clean energy markets.',
+        image: 'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=1200&q=80',
+        featured: false,
+      },
+      {
+        id: '03',
+        title: 'Circular Economy & Climate Tech Summits',
+        client: 'Delta40 Venture Studio',
+        category: 'Venture Studio',
+        year: '2025',
+        desc: 'Capturing climate-tech founders across energy, mobility, and circular economy scale programs.',
+        image: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80',
+        featured: false,
+      },
+    ],
+    pressFeatures: [
+      { publication: 'Friedrich-Ebert-Stiftung (FES Kenya)', title: 'Social Justice & Democratic Governance', link: 'https://kenya.fes.de/', tag: 'Foundation Credits' },
+      { publication: 'Capital FM Kenya', title: 'Microsoft Imagine Cup National Winner', link: 'https://www.capitalfm.co.ke/campus/', tag: 'Global Press' },
+      { publication: 'HEVA Fund Official Press', title: 'Uhuru Market Brand Identity', link: 'https://www.hevafund.com/', tag: 'Design Feature' },
+    ],
+    clients: [
+      { id: 'c1', name: 'UNDP Timbuktoo & ccHUB', email: 'timbuktoo@undp.org', token: 'xK9_mQ2pL7v', pin: '4821', status: 'IN_REVIEW' },
+      { id: 'c2', name: 'BURN Manufacturing USA', email: 'media@burnmfg.com', token: 'burn_impact_2025', pin: '1234', status: 'FINAL_DELIVERY' },
+    ],
+    expenses: [],
   },
-  alex: {
-    id: 'alex',
-    name: 'Alex Mercer',
-    handle: 'ALEX_MERCER',
+  demo: {
+    id: 'demo',
+    name: 'Demo Creator', // 💡 Renamed from Alex Mercer to Demo Creator
+    handle: 'DEMO_CREATOR',
     title: 'Lead Visual Director',
-    email: 'alex@creativestudio.com',
+    email: 'demo@creativestudio.com',
     phone: '+254 700 000 000',
     location: 'Nairobi, Kenya',
     kraPin: 'P000000000X',
@@ -79,21 +152,21 @@ export const initialUsersDatabase: Record<string, UserAccount> = {
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
     paymentDetails: {
       bankName: 'Demo Bank Kenya',
-      accountName: 'Alex Mercer',
+      accountName: 'Demo Creator Account',
       accountNumber: '1234567890',
       branch: 'Westlands',
       mpesaPaybill: 'Paybill 123456',
     },
     socials: {
-      linkedin: 'https://linkedin.com/in/democreator',
-      instagram: 'https://instagram.com/democreator',
-      youtube: 'https://youtube.com/@democreator',
-      linktree: 'https://linktr.ee/democreator',
+      linkedin: '',
+      instagram: '',
+      youtube: '',
+      linktree: '',
     },
-    partners: [], // Stripped
-    projects: [], // Stripped
-    pressFeatures: [], // Stripped
-    clients: [], // Stripped
-    expenses: [], // Stripped
+    partners: [],
+    projects: [],
+    pressFeatures: [],
+    clients: [],
+    expenses: [],
   },
 };

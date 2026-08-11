@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { equipmentDatabase, EquipmentItem } from '@/db/equipmentData';
+import { useCreator } from '@/context/CreatorContext';
 
 interface InvoiceLineItem {
   id: string;
@@ -27,26 +28,27 @@ const categoryFilterTabs = [
 ];
 
 export default function AdminInvoicesPage() {
+  const { activeUser } = useCreator();
   const [docType, setDocType] = useState<'QUOTATION' | 'OFFICIAL TAX INVOICE'>('QUOTATION');
   const [selectedClient, setSelectedClient] = useState('Apex Global Studios');
   const [quoteDate, setQuoteDate] = useState('2026-08-15');
   const [invoiceNumber, setInvoiceNumber] = useState('QT-2026-0159');
   const [vatPercent, setVatPercent] = useState(0);
 
-  // 💡 DEMO CREATOR PROFILE & BANKING DETAILS
+  // 💡 DYNAMIC CREATOR PROFILE PULLED FROM ACTIVE USER SESSION
   const creatorProfile = {
-    name: 'Alex Mercer',
-    title: 'Lead Visual Director & Media Producer',
-    email: 'alex@creativestudio.com',
-    phone: '+254 700 000 000',
-    kraPin: 'P000000000X',
-    location: 'Nairobi, Kenya',
-    paymentDetails: {
-      bankName: 'Demo Commercial Bank Kenya',
-      accountName: 'Alex Mercer / KIPSMTHN Studio',
-      accountNumber: '1234567890',
-      branch: 'Westlands Branch',
-      mpesaPaybill: 'Paybill 123456 (Acc: DEMO)',
+    name: activeUser?.name || 'Creator Name',
+    title: activeUser?.title || 'Lead Visual Director',
+    email: activeUser?.email || 'creator@kipsmthn.com',
+    phone: activeUser?.phone || '+254 700 000 000',
+    kraPin: activeUser?.kraPin || 'KRA PIN Pending',
+    location: activeUser?.location || 'Nairobi, Kenya',
+    paymentDetails: activeUser?.paymentDetails || {
+      bankName: 'Bank Name Pending',
+      accountName: 'Creator Account',
+      accountNumber: 'Pending',
+      branch: 'Nairobi',
+      mpesaPaybill: 'Paybill Pending',
     },
   };
 
@@ -76,7 +78,7 @@ export default function AdminInvoicesPage() {
     setSearchQuery('');
   };
 
-  const updateLineItem = (id: string, field: keyof InvoiceLineItem, value: any) => {
+  const updateLineItem = (id: string, field: keyof InvoiceLineItem, value: string | number) => {
     setLineItems(
       lineItems.map((item) => (item.id === id ? { ...item, [field]: value } : item))
     );
@@ -87,8 +89,9 @@ export default function AdminInvoicesPage() {
   };
 
   const addGearFromCatalog = (item: EquipmentItem) => {
+    const randomSuffix = Math.random().toString(36).substring(2, 9);
     const newItem: InvoiceLineItem = {
-      id: `${item.id}_${Date.now()}`,
+      id: `${item.id}_${randomSuffix}`,
       category: activeCategoryForAdd || item.category,
       name: item.name,
       qty: 1,
@@ -102,8 +105,9 @@ export default function AdminInvoicesPage() {
   };
 
   const addCustomItemToCategory = (targetCategory: string) => {
+    const randomSuffix = Math.random().toString(36).substring(2, 9);
     const customItem: InvoiceLineItem = {
-      id: `custom_${Date.now()}`,
+      id: `custom_${randomSuffix}`,
       category: targetCategory,
       name: 'Custom Line Item',
       qty: 1,
@@ -114,7 +118,7 @@ export default function AdminInvoicesPage() {
     setLineItems([...lineItems, customItem]);
   };
 
-  // Section Subtotals
+  // Subtotals
   const profFeesSubtotal = lineItems
     .filter((i) => i.category === 'A. Professional Fees')
     .reduce((sum, item) => sum + item.qty * item.days * item.rate, 0);
@@ -274,7 +278,7 @@ export default function AdminInvoicesPage() {
                     <button
                       type="button"
                       onClick={() => openAddModalForSection('A. Professional Fees')}
-                      className="px-2.5 py-1 bg-purple-900 text-white text-[10px] rounded hover:bg-purple-800 cursor-pointer print:hidden font-mono"
+                      className="px-2.5 py-1 bg-purple-900 text-white text-[10px] rounded hover:bg-purple-800 cursor-pointer print:hidden"
                     >
                       + Add Professional Fee
                     </button>
@@ -458,7 +462,6 @@ export default function AdminInvoicesPage() {
 
           {/* Grand Totals & DYNAMIC BANKING / MPESA PAYMENT TERMS BOX */}
           <div className="flex flex-col md:flex-row justify-between items-start gap-8 pt-6 border-t-2 border-slate-300">
-            {/* 💡 DYNAMIC BANKING & MPESA DETAILS */}
             <div className="space-y-3 text-xs max-w-md">
               <p className="font-bold text-purple-950 font-mono uppercase">Payment Terms & Instructions:</p>
               <div className="p-4 bg-purple-50/60 rounded-xl border border-purple-200 text-slate-800 leading-relaxed font-mono space-y-2">

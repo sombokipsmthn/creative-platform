@@ -21,7 +21,7 @@ export default function CreatorOnboardingPage() {
   
   // Banking
   const [bankName, setBankName] = useState('KCB Bank Kenya');
-  const [accountName, setAccountName] = useState('');
+  const [accountName] = useState('');
   const [accountNumber, setAccountNumber] = useState('1234567890');
   const [mpesaPaybill, setMpesaPaybill] = useState('Paybill 522522');
 
@@ -61,6 +61,8 @@ export default function CreatorOnboardingPage() {
       projects: [], // Clean defaults
       pressFeatures: [], // Clean defaults
       clients: [], // Clean defaults
+      passcode: '',
+      expenses: [],
     };
 
     registerNewCreator(newCreatorProfile);

@@ -1,9 +1,9 @@
 // src/app/layout.tsx
 import type { Metadata, Viewport } from 'next';
 import { Outfit, Montserrat } from 'next/font/google';
-import Script from 'next/script'; // 👈 Import Next.js Script component
 import './globals.css';
 import { CreatorProvider } from '@/context/CreatorContext';
+import ThemeScript from '@/components/ThemeScript';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -40,27 +40,11 @@ export default function RootLayout({
       className={`${outfit.variable} ${montserrat.variable} dark`}
       suppressHydrationWarning
     >
-      <head />
+      <head>
+        {/* 💡 React 19 / Next.js 16 Safe Server HTML Injection */}
+        <ThemeScript />
+      </head>
       <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
-        {/* 💡 NEXT.JS SCRIPT COMPONENT WITH BEFORE-INTERACTIVE STRATEGY */}
-        <Script
-          id="theme-persistence"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                var theme = localStorage.getItem('theme');
-                if (theme === 'light') {
-                  document.documentElement.classList.remove('dark');
-                } else {
-                  document.documentElement.classList.add('dark');
-                }
-              })();
-            `,
-          }}
-        />
-
-        {/* Multi-Tenant Creator Context */}
         <CreatorProvider>
           {children}
         </CreatorProvider>

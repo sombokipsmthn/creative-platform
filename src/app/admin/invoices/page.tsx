@@ -27,6 +27,8 @@ const categoryFilterTabs = [
   'C. Post Production',
 ];
 
+const createRandomIdSuffix = () => Math.random().toString(36).substring(2, 9);
+
 export default function AdminInvoicesPage() {
   const { activeUser } = useCreator();
   const [docType, setDocType] = useState<'QUOTATION' | 'OFFICIAL TAX INVOICE'>('QUOTATION');
@@ -89,7 +91,7 @@ export default function AdminInvoicesPage() {
   };
 
   const addGearFromCatalog = (item: EquipmentItem) => {
-    const randomSuffix = Math.random().toString(36).substring(2, 9);
+    const randomSuffix = createRandomIdSuffix();
     const newItem: InvoiceLineItem = {
       id: `${item.id}_${randomSuffix}`,
       category: activeCategoryForAdd || item.category,
@@ -105,7 +107,7 @@ export default function AdminInvoicesPage() {
   };
 
   const addCustomItemToCategory = (targetCategory: string) => {
-    const randomSuffix = Math.random().toString(36).substring(2, 9);
+    const randomSuffix = createRandomIdSuffix();
     const customItem: InvoiceLineItem = {
       id: `custom_${randomSuffix}`,
       category: targetCategory,

@@ -20,10 +20,10 @@ type ClerkWebhookEvent = {
 };
 
 export async function POST(req: Request) {
-  const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
+  const webhookSecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
 
   if (!webhookSecret) {
-    console.error("Missing CLERK_WEBHOOK_SECRET");
+    console.error("Missing CLERK_WEBHOOK_SIGNING_SECRET");
 
     return NextResponse.json(
       { error: "Webhook secret is not configured" },

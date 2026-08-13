@@ -4,76 +4,73 @@
 import { useState } from 'react';
 import Image from 'next/image';
 
-interface Partner {
-  name: string;
-  domain: string;
-  category: string;
+interface PartnerLogosProps {
+  partnersList?: string[];
 }
 
-const partners: Partner[] = [
-  { name: 'iHUB / ccHUB', domain: 'cchub.africa', category: 'Innovation Hub' },
-  { name: 'UNDP Timbuktoo', domain: 'undp.org', category: 'Global Innovation' },
-  { name: 'Mastercard Foundation', domain: 'mastercardfdn.org', category: 'Education & Fellowship' },
-  { name: 'Safaricom Spark', domain: 'safaricom.co.ke', category: 'Accelerator' },
-  { name: 'BURN Manufacturing', domain: 'burnmfg.com', category: 'Clean Energy' },
-  { name: 'Delta40 Studio', domain: 'delta40.studio', category: 'Venture Studio' },
-  { name: 'GrowthAfrica', domain: 'growthafrica.com', category: 'Accelerator' },
-  { name: 'FES Kenya', domain: 'kenya.fes.de', category: 'Foundation' },
-  { name: 'HEVA Fund', domain: 'hevafund.com', category: 'Creative Economy' },
-  { name: 'Shop Zetu', domain: 'shopzetu.com', category: 'E-Commerce' },
-  { name: 'Estee Lauder', domain: 'esteelauder.com', category: 'Commercial Brand' },
-  { name: 'Bata Kenya', domain: 'bata.com', category: 'Commercial Brand' },
-  { name: 'Standard Chartered', domain: 'sc.com', category: 'Banking & Finance' },
-  { name: 'TEDx Parklands', domain: 'ted.com', category: 'Events & Media' },
-  { name: 'Branch International', domain: 'branch.co', category: 'Fintech' },
-];
+const partnerDomainMap: Record<string, string> = {
+  'iHUB / ccHUB': 'cchub.africa',
+  'UNDP Timbuktoo': 'undp.org',
+  'Mastercard Foundation': 'mastercardfdn.org',
+  'Safaricom Spark': 'safaricom.co.ke',
+  'BURN Manufacturing': 'burnmfg.com',
+  'Delta40 Studio': 'delta40.studio',
+  'GrowthAfrica': 'growthafrica.com',
+  'FES Kenya': 'kenya.fes.de',
+  'HEVA Fund': 'hevafund.com',
+  'Shop Zetu': 'shopzetu.com',
+  'Estee Lauder': 'esteelauder.com',
+};
 
-export default function PartnerLogos() {
+export default function PartnerLogos({ partnersList }: PartnerLogosProps) {
   const [failedLogos, setFailedLogos] = useState<Record<string, boolean>>({});
 
-  const handleImageError = (domain: string) => {
-    setFailedLogos((prev) => ({ ...prev, [domain]: true }));
+  if (!partnersList || partnersList.length === 0) {
+    return null; // 💡 NO CLIENT LOGOS WHEN LOGGED OUT
+  }
+
+  const handleImageError = (name: string) => {
+    setFailedLogos((prev) => ({ ...prev, [name]: true }));
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap justify-center md:justify-start gap-3">
-        {partners.map((p) => {
-          const hasFailed = failedLogos[p.domain];
-          return (
-            <div
-              key={p.domain}
-              className="flex items-center gap-3 px-3.5 py-2 bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800/80 rounded-xl shadow-xs hover:border-purple-600/50 transition-all group"
-            >
-              <div className="relative w-6 h-6 rounded-md overflow-hidden shrink-0 bg-slate-100 dark:bg-zinc-800 flex items-center justify-center">
+    <div className="py-12 border-y border-slate-200 dark:border-zinc-900 bg-slate-100/60 dark:bg-zinc-950/60 overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6 space-y-4">
+        <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
+          Creator Program & Brand Partners
+        </p>
+        <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-slate-700 dark:text-zinc-300">
+          {partnersList.map((partnerName) => {
+            const domain = partnerDomainMap[partnerName] || 'google.com';
+            const hasFailed = failedLogos[partnerName];
+
+            return (
+              <div
+                key={partnerName}
+                className="flex items-center gap-2.5 px-3 py-1.5 bg-white dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl"
+              >
                 {!hasFailed ? (
-                  <Image
-                    src={`https://www.google.com/s2/favicons?domain=${p.domain}&sz=128`}
-                    alt={`${p.name} Logo`}
-                    width={24}
-                    height={24}
-                    className="object-contain"
-                    onError={() => handleImageError(p.domain)}
-                    unoptimized
-                  />
+                  <div className="relative w-5 h-5 rounded overflow-hidden shrink-0">
+                    <Image
+                      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+                      alt={partnerName}
+                      width={20}
+                      height={20}
+                      className="object-contain"
+                      onError={() => handleImageError(partnerName)}
+                      unoptimized
+                    />
+                  </div>
                 ) : (
-                  /* Placeholder SVG Line Icon for Organization */
-                  <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                   </svg>
                 )}
+                <span>{partnerName}</span>
               </div>
-              <div className="flex flex-col text-left">
-                <span className="text-xs font-mono text-slate-900 dark:text-zinc-200 font-semibold group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                  {p.name}
-                </span>
-                <span className="text-[9px] font-mono text-slate-500 dark:text-zinc-500 uppercase">
-                  {p.category}
-                </span>
-              </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );

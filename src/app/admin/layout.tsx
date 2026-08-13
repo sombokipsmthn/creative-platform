@@ -3,21 +3,16 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
+import { UserButton } from '@clerk/nextjs';
+import { usePathname } from 'next/navigation';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
 
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
-
-  const handleLogout = () => {
-    document.cookie = 'creator_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    router.push('/admin/login');
-  };
 
   const navItems = [
     { name: 'Dashboard', href: '/admin' },
@@ -90,13 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Public Site ↗
             </Link>
 
-            {/* Logout */}
-            <button
-              onClick={handleLogout}
-              className="text-xs font-mono text-red-500 hover:text-red-400 transition-colors cursor-pointer"
-            >
-              Logout
-            </button>
+            <UserButton />
           </nav>
         </div>
       </header>

@@ -10,7 +10,7 @@ interface CreatorContextType {
   activeUser: UserAccount | null;
   activeCreator: UserAccount | null;
   usersDb: Record<string, UserAccount>;
-  loginUser: (userId: string) => void;
+  loginUser: (email: string) => boolean;
   logoutUser: () => void;
   registerUser: (newUser: UserAccount) => void;
   registerNewCreator: (newUser: UserAccount) => void;
@@ -41,13 +41,22 @@ export function CreatorProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timer);
   }, [usersDb]);
 
-  const loginUser = (userId: string) => {
-    if (usersDb[userId]) {
-      setActiveUser(usersDb[userId]);
-      document.cookie = `active_creator_id=${userId}; path=/; max-age=86400`;
-      document.cookie = `creator_session=authenticated; path=/; max-age=86400`;
-    }
-  };
+  const loginUser = (email: string) => {
+  const user = Object.values(usersDb).find(
+    (account) => account.email.toLowerCase() === email.toLowerCase()
+  );
+
+  if (user) {
+    setActiveUser(user);
+
+    document.cookie = `active_creator_id=${user.id}; path=/; max-age=86400`;
+    document.cookie = `creator_session=authenticated; path=/; max-age=86400`;
+
+    return true;
+  }
+
+  return false;
+};
 
   const logoutUser = () => {
     setActiveUser(null);

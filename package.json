@@ -34,8 +34,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5",
-    "xlsx": "^0.18.5"
+    "typescript": "^5"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true,

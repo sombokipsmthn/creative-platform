@@ -7,109 +7,182 @@ import { useCreator } from '@/context/CreatorContext';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+
   const { loginUser } = useCreator();
 
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
+
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setError('');
     setLoading(true);
 
     try {
-      const loggedIn = await loginUser(email, password);
+      // CreatorContext currently expects a string
+      loginUser(email);
 
-      if (loggedIn) {
-        router.push('/admin');
-      } else {
-        setError('Invalid email or password.');
-      }
-    } catch {
-      setError('Something went wrong. Please try again.');
+      router.push('/admin');
+
+    } catch (err) {
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] px-6">
-      <section className="w-full max-w-md bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 shadow-xl">
+    <main className="
+      min-h-screen
+      flex items-center justify-center
+      bg-slate-50 dark:bg-[#09090b]
+      px-6
+    ">
 
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold tracking-widest text-slate-900 dark:text-white">
+      <form
+        onSubmit={handleSubmit}
+        className="
+          w-full
+          max-w-md
+          bg-white
+          dark:bg-zinc-950
+          border
+          border-slate-200
+          dark:border-zinc-800
+          rounded-2xl
+          p-8
+          shadow-xl
+          space-y-6
+        "
+      >
+
+        <div className="text-center">
+
+          <h1 className="
+            text-3xl
+            font-bold
+            tracking-widest
+            text-slate-900
+            dark:text-white
+          ">
             KIPSMTHN<span className="text-purple-500">.</span>
           </h1>
 
-          <p className="mt-3 text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">
-            Creator Admin Portal
+
+          <p className="
+            mt-3
+            text-xs
+            font-mono
+            uppercase
+            tracking-[0.25em]
+            text-purple-500
+          ">
+            Creator Portal
           </p>
+
         </div>
 
 
-        <form onSubmit={handleSubmit} className="space-y-5">
 
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-widest mb-2 text-slate-500">
-              Email
-            </label>
-
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 px-4 py-3 text-sm outline-none focus:border-purple-500"
-              placeholder="creator@email.com"
-            />
+        {error && (
+          <div className="
+            text-sm
+            text-red-500
+            text-center
+            bg-red-50
+            dark:bg-red-950/20
+            rounded-lg
+            p-3
+          ">
+            {error}
           </div>
+        )}
 
 
-          <div>
-            <label className="block text-xs font-mono uppercase tracking-widest mb-2 text-slate-500">
-              Password
-            </label>
 
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 px-4 py-3 text-sm outline-none focus:border-purple-500"
-              placeholder="••••••••"
-            />
-          </div>
+        <div className="space-y-3">
+
+          <label className="
+            text-xs
+            font-mono
+            uppercase
+            tracking-widest
+            text-slate-500
+          ">
+            Creator Email
+          </label>
 
 
-          {error && (
-            <p className="text-center text-sm text-red-500">
-              {error}
-            </p>
-          )}
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="creator@email.com"
+            required
+            className="
+              w-full
+              px-4
+              py-3
+              rounded-xl
+              bg-slate-100
+              dark:bg-zinc-900
+              border
+              border-slate-200
+              dark:border-zinc-800
+              text-slate-900
+              dark:text-white
+              outline-none
+              focus:border-purple-500
+            "
+          />
 
+        </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-xl bg-purple-600 hover:bg-purple-700 text-white py-3 text-xs font-mono uppercase tracking-widest font-bold transition disabled:opacity-50"
-          >
-            {loading ? 'Signing In...' : 'Login'}
-          </button>
-
-        </form>
 
 
         <button
-          onClick={() => router.push('/')}
-          className="mt-6 w-full text-xs font-mono text-slate-500 hover:text-purple-600 transition"
+          type="submit"
+          disabled={loading}
+          className="
+            w-full
+            py-3
+            rounded-xl
+            bg-purple-600
+            hover:bg-purple-700
+            text-white
+            text-xs
+            font-mono
+            uppercase
+            tracking-widest
+            transition-all
+            disabled:opacity-50
+          "
         >
-          ← Back to Website
+          {loading ? 'Signing In...' : 'Access Dashboard'}
         </button>
 
-      </section>
+
+
+        <p className="
+          text-center
+          text-[10px]
+          font-mono
+          uppercase
+          tracking-widest
+          text-slate-400
+        ">
+          Kipsmthn Creator Management System
+        </p>
+
+
+      </form>
+
     </main>
   );
 }

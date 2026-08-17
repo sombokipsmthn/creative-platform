@@ -13,22 +13,31 @@ import {
 */
 
 export const users = pgTable("users", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
 
-  authUserId: text("auth_user_id").notNull().unique(),
+  authUserId: text("auth_user_id")
+    .notNull()
+    .unique(),
 
-  email: text("email").notNull().unique(),
+  email: text("email")
+    .notNull()
+    .unique(),
 
-  name: text("name").notNull(),
+  name: text("name")
+    .notNull(),
 
-  handle: text("handle").unique(),
+  handle: text("handle")
+    .unique(),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -38,14 +47,16 @@ export const users = pgTable("users", {
 
 export const clients = pgTable("clients", {
   id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .primaryKey(),
 
   creatorId: text("creator_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
 
-  name: text("name").notNull(),
+  name: text("name")
+    .notNull(),
 
   company: text("company"),
 
@@ -57,12 +68,19 @@ export const clients = pgTable("clients", {
 
   notes: text("notes"),
 
-  status: text("status").default("active").notNull(),
+  status: text("status")
+    .default("active")
+    .notNull(),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -71,11 +89,15 @@ export const clients = pgTable("clients", {
 */
 
 export const creatorProfiles = pgTable("creator_profiles", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
 
   userId: text("user_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
 
   bio: text("bio"),
 
@@ -85,10 +107,15 @@ export const creatorProfiles = pgTable("creator_profiles", {
 
   location: text("location"),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -97,26 +124,39 @@ export const creatorProfiles = pgTable("creator_profiles", {
 */
 
 export const projects = pgTable("projects", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
 
   creatorId: text("creator_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
 
-  clientId: text("client_id").references(() => clients.id, {
-    onDelete: "cascade",
-  }),
+  clientId: text("client_id")
+    .references(() => clients.id, {
+      onDelete: "cascade",
+    }),
 
-  name: text("name").notNull(),
+  name: text("name")
+    .notNull(),
 
   description: text("description"),
 
-  status: text("status").default("active").notNull(),
+  status: text("status")
+    .default("active")
+    .notNull(),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -125,40 +165,66 @@ export const projects = pgTable("projects", {
 */
 
 export const invoices = pgTable("invoices", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
 
   creatorId: text("creator_id")
     .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
 
   clientId: text("client_id")
     .notNull()
-    .references(() => clients.id, { onDelete: "cascade" }),
+    .references(() => clients.id, {
+      onDelete: "cascade",
+    }),
 
-  invoiceNumber: text("invoice_number").notNull(),
+  invoiceNumber: text("invoice_number")
+    .notNull(),
 
-  title: text("title").default("Invoice").notNull(),
+  title: text("title")
+    .default("Invoice")
+    .notNull(),
 
-  status: text("status").default("draft").notNull(),
+  status: text("status")
+    .default("draft")
+    .notNull(),
 
-  issueDate: timestamp("issue_date").defaultNow().notNull(),
+  issueDate: timestamp("issue_date")
+    .defaultNow()
+    .notNull(),
 
   dueDate: timestamp("due_date"),
 
   notes: text("notes"),
 
-  subtotal: integer("subtotal").default(0).notNull(),
+  subtotal: integer("subtotal")
+    .default(0)
+    .notNull(),
 
-  tax: integer("tax").default(0).notNull(),
+  tax: integer("tax")
+    .default(0)
+    .notNull(),
 
-  total: integer("total").default(0).notNull(),
+  total: integer("total")
+    .default(0)
+    .notNull(),
 
-  currency: text("currency").default("USD").notNull(),
+  currency: text("currency")
+    .default("USD")
+    .notNull(),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
 
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
 });
+
 
 /*
 |--------------------------------------------------------------------------
@@ -167,19 +233,76 @@ export const invoices = pgTable("invoices", {
 */
 
 export const invoiceItems = pgTable("invoice_items", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
 
   invoiceId: uuid("invoice_id")
     .notNull()
-    .references(() => invoices.id, { onDelete: "cascade" }),
+    .references(() => invoices.id, {
+      onDelete: "cascade",
+    }),
 
-  description: text("description").notNull(),
+  description: text("description")
+    .notNull(),
 
-  quantity: integer("quantity").default(1).notNull(),
+  quantity: integer("quantity")
+    .default(1)
+    .notNull(),
 
-  unitPrice: integer("unit_price").default(0).notNull(),
+  unitPrice: integer("unit_price")
+    .default(0)
+    .notNull(),
 
-  amount: integer("amount").default(0).notNull(),
+  amount: integer("amount")
+    .default(0)
+    .notNull(),
 
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Equipment Catalogue
+|--------------------------------------------------------------------------
+*/
+
+export const equipment = pgTable("equipment", {
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  name: text("name")
+    .notNull(),
+
+  category: text("category")
+    .notNull(),
+
+  subcategory: text("subcategory"),
+
+  brand: text("brand"),
+
+  description: text("description"),
+
+  specs: text("specs"),
+
+  dailyRate: integer("daily_rate")
+    .notNull(),
+
+  imageUrl: text("image_url"),
+
+  status: text("status")
+    .default("available")
+    .notNull(),
+
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
 });

@@ -29,6 +29,20 @@
       "when": 1786954076438,
       "tag": "0003_luxuriant_sue_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1786971554865,
+      "tag": "0004_premium_maverick",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786971994625,
+      "tag": "0005_calm_joshua_kane",
+      "breakpoints": true
     }
   ]
 }

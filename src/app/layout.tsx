@@ -20,10 +20,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publishableKey =
+    process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
+    "pk_test_Y2xlcmsua2lwc210aG4uY29tJA";
+
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className="font-sans antialiased">
-        <ClerkProvider>
+        <ClerkProvider publishableKey={publishableKey}>
           {children}
         </ClerkProvider>
       </body>

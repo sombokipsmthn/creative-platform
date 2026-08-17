@@ -13,7 +13,9 @@ import {
 */
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
 
   authUserId: text("auth_user_id").notNull().unique(),
 
@@ -35,7 +37,9 @@ export const users = pgTable("users", {
 */
 
 export const clients = pgTable("clients", {
-  id: text("id").primaryKey(),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
 
   creatorId: text("creator_id")
     .notNull()

@@ -17,10 +17,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: 'Dashboard', href: '/admin' },
     { name: 'Client CRM', href: '/admin/clients' },
+    { name: 'Invoices', href: '/admin/invoices' },
     { name: 'Gallery Builder', href: '/admin/projects' },
     { name: 'Expenses', href: '/admin/expenses' },
     { name: 'Settings', href: '/admin/settings' },
-    { name: 'Profile', href: '/admin/profile' }, // 👈 Added Profile link
+    { name: 'Profile', href: '/admin/profile' },
   ];
 
   return (

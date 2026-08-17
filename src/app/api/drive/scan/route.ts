@@ -29,7 +29,7 @@ export async function GET() {
         const files = data.files || [];
 
         // Format direct display URLs
-        const images = files.map((file: any) => ({
+        const images = files.map((file: { id: string; name: string }) => ({
           id: file.id,
           name: file.name.replace(/\.[^/.]+$/, ''), // Clean file extension
           url: `https://lh3.googleusercontent.com/d/${file.id}`,
@@ -44,7 +44,7 @@ export async function GET() {
       totalCount: allImages.length,
       images: allImages,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Drive Scan Error:', error);
     return NextResponse.json(
       { error: 'Failed to scan Google Drive folders' },

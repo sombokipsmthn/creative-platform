@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Show, UserButton } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCreator } from '@/context/CreatorContext';
@@ -10,7 +11,10 @@ export default function Header() {
   const pathname = usePathname();
   const { activeUser } = useCreator();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
   const navItems = [
     { name: 'Work', href: '/work' },
     { name: 'Services', href: '/services' },
@@ -28,12 +32,16 @@ export default function Header() {
             KIPSMTHN<span className="text-purple-500">.</span>
           </span>
 
+<<<<<<< HEAD
           {/* 💡 Shows creator name ONLY when logged in */}
           {activeUser && (
+=======
+          <Show when="signed-in">
+>>>>>>> origin/main
             <span className="text-[10px] font-mono tracking-widest text-purple-600 dark:text-purple-400 uppercase font-semibold border-l border-slate-200 dark:border-zinc-800 pl-3">
               {activeUser.name}
             </span>
-          )}
+          </Show>
         </Link>
 
         {/* 2. Widescreen Navigation Links (ONLY SHOWN WHEN A CREATOR IS LOGGED IN) */}
@@ -58,7 +66,11 @@ export default function Header() {
           </nav>
         )}
 
+<<<<<<< HEAD
         {/* 3. Action Buttons (Always Visible) */}
+=======
+        {/* 3. Widescreen Action Buttons */}
+>>>>>>> origin/main
         <div className="hidden lg:flex items-center gap-3">
           <Link
             href="/portal"
@@ -67,12 +79,39 @@ export default function Header() {
             Client Access
           </Link>
 
+<<<<<<< HEAD
           <Link
             href={activeUser ? '/admin' : '/admin/login'}
             className="px-4 py-2 text-xs font-mono uppercase tracking-widest font-semibold btn-secondary rounded-full transition-all duration-300"
           >
             {activeUser ? 'Dashboard' : 'Creator Login'}
           </Link>
+=======
+          <Show when="signed-out">
+            <Link
+              href="/sign-in"
+              className="px-4 py-2 text-xs font-mono uppercase tracking-widest font-semibold btn-secondary rounded-full transition-all duration-300"
+            >
+              Sign In
+            </Link>
+            <Link
+              href="/sign-up"
+              className="px-4 py-2 text-xs font-mono uppercase tracking-widest font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-full transition-all duration-300 shadow-sm"
+            >
+              Sign Up
+            </Link>
+          </Show>
+
+          <Show when="signed-in">
+            <Link
+              href="/admin"
+              className="px-4 py-2 text-xs font-mono uppercase tracking-widest font-semibold btn-secondary rounded-full transition-all duration-300"
+            >
+              Dashboard
+            </Link>
+            <UserButton />
+          </Show>
+>>>>>>> origin/main
         </div>
 
         {/* 4. Mobile Hamburger Button */}
@@ -126,6 +165,7 @@ export default function Header() {
               Client Access
             </Link>
 
+<<<<<<< HEAD
             <Link
               href={activeUser ? '/admin' : '/admin/login'}
               onClick={() => setIsMobileMenuOpen(false)}
@@ -133,6 +173,37 @@ export default function Header() {
             >
               {activeUser ? 'Dashboard' : 'Creator Login'}
             </Link>
+=======
+            <Show when="signed-out">
+              <Link
+                href="/sign-in"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full text-center py-3 text-xs font-mono uppercase tracking-widest font-semibold btn-secondary rounded-full"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/sign-up"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full text-center py-3 text-xs font-mono uppercase tracking-widest font-semibold text-white bg-purple-600 rounded-full shadow-md"
+              >
+                Sign Up
+              </Link>
+            </Show>
+
+            <Show when="signed-in">
+              <Link
+                href="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-full text-center py-3 text-xs font-mono uppercase tracking-widest font-semibold btn-secondary rounded-full"
+              >
+                Dashboard
+              </Link>
+              <div className="flex items-center justify-center py-2">
+                <UserButton />
+              </div>
+            </Show>
+>>>>>>> origin/main
           </div>
         </div>
       )}

@@ -3,25 +3,22 @@ import { equipment } from "./schema";
 import equipmentData from "./equipment.json";
 
 async function seed() {
-  if (equipmentData.length === 0) {
-    throw new Error("No equipment records found.");
-  }
-
   await db.insert(equipment).values(
     equipmentData.map((item) => ({
       name: item.Equipment,
       dailyRate: item["Cost (KES)"],
       category: item.Category,
-      subcategory: item.Subcategory,
-      brand: item.Brand,
-      specs: item["Key Features / Specs"],
+      subcategory: item.Subcategory ?? null,
+      brand: item.Brand ?? null,
+      specs: item["Key Features / Specs"] ?? null,
     }))
   );
 
-  console.log(`Equipment imported: ${equipmentData.length} records`);
+  console.log("Equipment imported successfully");
+  process.exit(0);
 }
 
 seed().catch((error) => {
-  console.error("Equipment import failed:", error);
+  console.error(error);
   process.exit(1);
 });

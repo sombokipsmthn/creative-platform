@@ -263,46 +263,145 @@ export const invoiceItems = pgTable("invoice_items", {
     .notNull(),
 });
 
-
 /*
 |--------------------------------------------------------------------------
-| Equipment Catalogue
+| Equipment
 |--------------------------------------------------------------------------
 */
 
 export const equipment = pgTable("equipment", {
-  id: uuid("id")
-    .defaultRandom()
-    .primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
 
-  name: text("name")
-    .notNull(),
+  name: text("name").notNull(),
 
-  category: text("category")
-    .notNull(),
+  dailyRate: integer("daily_rate").notNull(),
+
+  category: text("category").notNull(),
 
   subcategory: text("subcategory"),
 
   brand: text("brand"),
 
-  description: text("description"),
-
   specs: text("specs"),
 
-  dailyRate: integer("daily_rate")
-    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 
-  imageUrl: text("image_url"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+/*
+|--------------------------------------------------------------------------
+| Quotes
+|--------------------------------------------------------------------------
+*/
+
+export const quotes = pgTable("quotes", {
+
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  clientId: text("client_id")
+    .references(() => clients.id, {
+      onDelete: "cascade",
+    }),
+
+  projectName: text("project_name"),
+
+  title: text("title")
+    .notNull(),
 
   status: text("status")
-    .default("available")
+    .default("draft")
     .notNull(),
+
+  subtotal: integer("subtotal")
+    .default(0)
+    .notNull(),
+
+  tax: integer("tax")
+    .default(0)
+    .notNull(),
+
+  total: integer("total")
+    .default(0)
+    .notNull(),
+
+  currency: text("currency")
+    .default("KES")
+    .notNull(),
+
+  paymentTerms: text("payment_terms"),
+
+  validUntil: timestamp("valid_until"),
+
+
+quoteNumber: text("quote_number"),
+
+productionDays: integer("production_days")
+  .default(1),
+
+location: text("location"),
+
+clientContact: text("client_contact"),
+
+depositPercentage: integer("deposit_percentage")
+  .default(50),
+
+  notes: text("notes"),
 
   createdAt: timestamp("created_at")
     .defaultNow()
     .notNull(),
 
   updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
+
+});
+
+/*
+|--------------------------------------------------------------------------
+| Quote Items
+|--------------------------------------------------------------------------
+*/
+
+export const quoteItems = pgTable("quote_items", {
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  quoteId: uuid("quote_id")
+    .notNull()
+    .references(() => quotes.id, {
+      onDelete: "cascade",
+    }),
+
+  category: text("category")
+    .notNull(),
+
+  description: text("description")
+    .notNull(),
+
+  quantity: integer("quantity")
+    .default(1)
+    .notNull(),
+
+  unit: text("unit")
+    .default("unit")
+    .notNull(),
+
+  rate: integer("rate")
+    .default(0)
+    .notNull(),
+
+  amount: integer("amount")
+    .default(0)
+    .notNull(),
+
+  notes: text("notes"),
+
+  createdAt: timestamp("created_at")
     .defaultNow()
     .notNull(),
 });

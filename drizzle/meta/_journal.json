@@ -15,6 +15,20 @@
       "when": 1786480029330,
       "tag": "0001_young_mystique",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1786950684359,
+      "tag": "0002_flippant_the_order",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1786954076438,
+      "tag": "0003_luxuriant_sue_storm",
+      "breakpoints": true
     }
   ]
 }

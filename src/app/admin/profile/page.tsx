@@ -6,24 +6,25 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 export default function AdminProfilePage() {
+  // 💡 DEMO CREATOR PROFILE DEFAULT STATE
   const [profile, setProfile] = useState({
-    name: 'Somboriot Kipchilat',
-    title: 'Creative Director & Ecosystem Storytelling Specialist',
-    email: 'somboriot@gmail.com',
-    phone: '+254 722 145 776',
-    kraPin: 'A012345678X',
+    name: 'Alex Mercer',
+    title: 'Lead Visual Director & Media Producer',
+    email: 'alex@creativestudio.com',
+    phone: '+254 700 000 000',
+    kraPin: 'P000000000X',
     location: 'Nairobi, Kenya',
-    bio: 'Extensive experience producing visual narratives across donor programs, startup accelerators, and venture studios including iHUB, ccHUB, UNDP Timbuktoo, Mastercard Foundation, Safaricom Spark, Delta40 Studio, and BURN Manufacturing USA.',
-    linkedin: 'https://www.linkedin.com/in/sombo09/',
-    instagram: 'https://www.instagram.com/sombo_kipsmthn/',
-    youtube: 'https://www.youtube.com/@kraftdigital7749',
-    linktree: 'https://linktr.ee/kipsmthn',
-    avatarUrl: 'https://unavatar.io/linkedin/sombo09?fallback=https://github.com/sombokipsmthn.png',
+    bio: 'Lead visual director and media producer specializing in commercial campaigns, brand films, motion graphics, and digital platform delivery.',
+    linkedin: 'https://linkedin.com/in/democreator',
+    instagram: 'https://instagram.com/democreator',
+    youtube: 'https://youtube.com/@democreator',
+    linktree: 'https://linktr.ee/democreator',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
   });
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Creator Profile changes saved successfully!');
+    alert('Demo Creator Profile updated successfully!');
   };
 
   return (
@@ -40,7 +41,7 @@ export default function AdminProfilePage() {
           </div>
 
           <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
-            KIPSMTHN Multi-Tenant Creator #1
+            Demo Creator Profile #1
           </span>
         </div>
 
@@ -62,7 +63,7 @@ export default function AdminProfilePage() {
             <div className="space-y-2 text-center sm:text-left flex-1">
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
                 <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full font-semibold uppercase">
-                  Verified Creator
+                  Verified Demo Creator
                 </span>
                 <span className="text-xs font-mono text-slate-500 dark:text-zinc-400">KRA PIN: {profile.kraPin}</span>
               </div>
@@ -77,7 +78,7 @@ export default function AdminProfilePage() {
           <div className="p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-xl">
             <div className="border-b border-slate-200 dark:border-zinc-800 pb-3">
               <span className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">Personal & Professional Info</span>
-              <h3 className="text-lg font-light text-slate-900 dark:text-white">Edit Profile Details</h3>
+              <h3 className="text-lg font-light text-slate-900 dark:text-white">Edit Creator Profile</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -193,7 +194,7 @@ export default function AdminProfilePage() {
               type="submit"
               className="w-full py-4 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer"
             >
-              Save Creator Profile Changes
+              Save Profile Changes
             </button>
           </div>
         </form>

@@ -57,7 +57,6 @@ export default function AdminExpensesPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  // Form State
   const [merchant, setMerchant] = useState('');
   const [merchantKraPin, setMerchantKraPin] = useState('');
   const [category, setCategory] = useState<ExpenseReceipt['category']>('GEAR');
@@ -65,7 +64,6 @@ export default function AdminExpensesPage() {
   const [vatAmountKes, setVatAmountKes] = useState(0);
   const [date] = useState('2026-02-10');
 
-  // Simulated OCR Receipt Scan
   const handleSimulateScan = () => {
     setIsScanning(true);
     setTimeout(() => {
@@ -112,7 +110,7 @@ export default function AdminExpensesPage() {
     .filter((e) => e.status === 'CLAIMABLE')
     .reduce((sum, e) => sum + e.amountKes, 0);
 
-  const estimatedTaxShield = totalClaimable * 0.3; // 30% Tax Shield
+  const estimatedTaxShield = totalClaimable * 0.3;
 
   return (
     <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
@@ -125,8 +123,8 @@ export default function AdminExpensesPage() {
             <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full">
-            <span>🛡️ 30% KRA Income Tax Shield Active</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
+            <span>30% KRA Income Tax Shield Active</span>
           </div>
         </div>
 
@@ -153,7 +151,7 @@ export default function AdminExpensesPage() {
           </div>
         </div>
 
-        {/* SCANNER & ADD EXPENSE FORM */}
+        {/* SCANNER FORM */}
         <div className="p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-xl max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
             <div>
@@ -167,7 +165,11 @@ export default function AdminExpensesPage() {
               disabled={isScanning}
               className="px-5 py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
             >
-              <span>{isScanning ? 'Scanning Receipt...' : '📷 Scan Receipt Photo (OCR)'}</span>
+              <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span>{isScanning ? 'Scanning Receipt...' : 'Scan Receipt Photo (OCR)'}</span>
             </button>
           </div>
 
@@ -244,7 +246,7 @@ export default function AdminExpensesPage() {
           </form>
         </div>
 
-        {/* EXPENSES LIST & RECEIPTS */}
+        {/* EXPENSES LIST */}
         <div className="space-y-4">
           <h2 className="text-xl font-light text-slate-900 dark:text-white">Logged Receipts & Expenses ({expenses.length})</h2>
 
@@ -261,7 +263,7 @@ export default function AdminExpensesPage() {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
+                      <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase font-semibold">
                         {exp.category}
                       </span>
                       <span className={`px-2.5 py-0.5 text-[10px] font-mono rounded-full ${

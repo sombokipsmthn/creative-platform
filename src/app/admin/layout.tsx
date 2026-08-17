@@ -1,104 +1,111 @@
-// src/app/admin/layout.tsx
 'use client';
 
+import { UserButton, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
-import Image from 'next/image';
-import { UserButton } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
+
 import ThemeToggle from '@/components/ThemeToggle';
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
+  const { isLoaded, isSignedIn } = useUser();
 
-  if (pathname === '/admin/login') {
+  const isLoginPage = pathname === '/admin/login';
+
+  // Let the login page render without the admin shell.
+  if (isLoginPage) {
     return <>{children}</>;
+  }
+
+  // Clerk is still loading the session.
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
+        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+          Loading Creator Portal...
+        </p>
+      </div>
+    );
+  }
+
+  // Middleware normally handles this redirect.
+  // This is just a client-side fallback.
+  if (!isSignedIn) {
+    return null;
   }
 
   const navItems = [
     { name: 'Dashboard', href: '/admin' },
-    { name: 'Client CRM', href: '/admin/clients' },
+    { name: 'Clients', href: '/admin/clients' },
     { name: 'Invoices', href: '/admin/invoices' },
-    { name: 'Gallery Builder', href: '/admin/projects' },
-    { name: 'Expenses', href: '/admin/expenses' },
+    { name: 'Quotes', href: '/admin/quotes' },
+    { name: 'Equipment', href: '/admin/equipment' },
+    { name: 'Projects', href: '/admin/projects' },
     { name: 'Settings', href: '/admin/settings' },
-    { name: 'Profile', href: '/admin/profile' },
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
-      {/* Creator Top Navigation Header */}
-      <header className="border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100">
+
+      <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          
-          {/* Logo & Direct Link to Creator Profile */}
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="text-sm font-bold tracking-wider text-slate-900 dark:text-white uppercase font-sans">
-              KIPSMTHN<span className="text-purple-500">.</span>
-            </Link>
 
-            <Link
-              href="/admin/profile"
-              className="flex items-center gap-2 px-2.5 py-1 bg-purple-600/10 dark:bg-purple-600/20 border border-purple-500/30 dark:border-purple-500/40 rounded-full hover:border-purple-500 transition-all cursor-pointer group"
-            >
-              <div className="relative w-5 h-5 rounded-full overflow-hidden shrink-0 border border-purple-400/50">
-                <Image
-                  src="https://unavatar.io/linkedin/sombo09?fallback=https://github.com/sombokipsmthn.png"
-                  alt="Somboriot Kipchilat Avatar"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-              <span className="text-purple-700 dark:text-purple-300 text-[10px] font-mono font-semibold group-hover:underline">
-                Creator: Somboriot Kipchilat 👤
-              </span>
-            </Link>
-          </div>
+          <Link
+            href="/admin"
+            className="text-sm font-bold tracking-widest uppercase"
+          >
+            KIPSMTHN<span className="text-purple-500">.</span>
+          </Link>
 
-          {/* Navigation Links */}
-          <nav className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-6">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`text-xs font-mono uppercase tracking-wider transition-colors ${
-                      isActive
-                        ? 'text-purple-600 dark:text-purple-400 font-bold'
-                        : 'text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-white'
-                    }`}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
+          <nav className="hidden lg:flex items-center gap-6">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`text-xs font-mono uppercase tracking-widest transition ${
+                  pathname === item.href
+                    ? 'text-purple-600 font-bold'
+                    : 'text-slate-500 hover:text-purple-600'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
 
-            <div className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
+            <span className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
 
-            {/* Public Site Link */}
             <Link
               href="/"
-              className="text-xs font-mono text-slate-600 dark:text-zinc-400 hover:text-purple-600 dark:hover:text-white transition-colors"
+              className="text-xs font-mono text-slate-500 hover:text-purple-600"
             >
               Public Site ↗
             </Link>
 
-            <UserButton />
+           <UserButton />
           </nav>
+
+          <div className="lg:hidden">
+            <UserButton />
+          </div>
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main>{children}</main>
+      <main>
+        {children}
+      </main>
 
-      {/* Admin Footer */}
-      <footer className="border-t border-slate-200 dark:border-zinc-900 py-6 px-6 max-w-7xl mx-auto flex justify-between items-center text-[11px] font-mono text-slate-500 dark:text-zinc-500">
-        <p>© {new Date().getFullYear()} Kipsmthn Creator Portal</p>
+      <footer className="border-t border-slate-200 dark:border-zinc-900 py-6 px-6 mt-10 flex justify-between text-xs font-mono text-slate-500">
+        <span>
+          © {new Date().getFullYear()} KIPSMTHN Creator Portal
+        </span>
+
         <ThemeToggle />
       </footer>
+
     </div>
   );
 }

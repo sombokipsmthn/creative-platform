@@ -9,7 +9,10 @@ const publishableKey =
   process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
   process.env.CLERK_PUBLISHABLE_KEY;
 
-const isOwnerRoute = createRouteMatcher(["/admin(.*)", "/api/db-test"]);
+const isOwnerRoute = createRouteMatcher([
+  "/admin(.*)",
+  "/api/db-test",
+]);
 
 function forbiddenResponse(request: Request) {
   if (new URL(request.url).pathname.startsWith("/api/")) {
@@ -21,6 +24,10 @@ function forbiddenResponse(request: Request) {
 
 const customMiddleware = clerkMiddleware(
   async (auth, req) => {
+    if (req.nextUrl.pathname === '/admin/login') {
+      return;
+    }
+
     if (!isOwnerRoute(req)) {
       return;
     }

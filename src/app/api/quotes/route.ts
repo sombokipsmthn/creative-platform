@@ -98,7 +98,7 @@ export async function POST(
         .insert(quoteItems)
         .values(
 
-          items.map((item:any)=>({
+          items.map((item:{category:string;description:string;quantity:number;rate:number;amount:number})=>({
 
             quoteId,
 

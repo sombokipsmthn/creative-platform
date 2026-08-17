@@ -1,96 +1,249 @@
-// src/app/portal/page.tsx
+// src/app/portal/g/[secretToken]/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { use, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
-export default function ClientPortalLandingPage() {
-  const [tokenInput, setTokenInput] = useState('');
-  const router = useRouter();
+import ClientLightbox from '@/components/ClientLightbox';
+import DownloadModal from '@/components/DownloadModal';
+import ThemeToggle from '@/components/ThemeToggle';
 
-  const handleAccessGallery = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!tokenInput.trim()) return;
-    
-    let cleanedToken = tokenInput.trim();
-    if (cleanedToken.includes('/portal/g/')) {
-      cleanedToken = cleanedToken.split('/portal/g/')[1].trim();
-    }
-
-    router.push(`/portal/g/${cleanedToken}`);
+interface GalleryItem {
+  id: string;
+  title: string;
+  url: string;
+  type: 'photo' | 'video';
+  category?: string;
+  exif?: {
+    camera?: string;
+    iso?: string;
+    aperture?: string;
+    shutter?: string;
   };
+}
 
-  const openSampleGallery = (token: string) => {
-    router.push(`/portal/g/${token}`);
-  };
+interface GalleryPageProps {
+  params: Promise<{
+    secretToken: string;
+  }>;
+}
 
-  return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 flex flex-col justify-between p-6 font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto w-full flex justify-between items-center py-4">
-        <Link href="/" className="text-xl font-bold tracking-wider text-slate-900 dark:text-white font-sans uppercase">
-          KIPSMTHN<span className="text-purple-500">.</span>
-        </Link>
-        <Link href="/" className="text-xs font-mono text-slate-600 dark:text-zinc-400 hover:text-purple-600 uppercase tracking-widest">
-          ← Back to Portfolio
-        </Link>
-      </div>
+const galleries: Record<
+  string,
+  {
+    title: string;
+    client: string;
+    date: string;
+    pin: string;
+    items: GalleryItem[];
+  }
+> = {
+  demo: {
+    title: 'Clean Energy Impact & Ecosystem Media',
+    client: 'BURN Manufacturing / Delta39 Studio',
+    date: 'August 2025',
+    pin: '2539',
+    items: [
+      {
+        id: 'img-00',
+        title: 'Founder Field Interview',
+        url: 'https://images.unsplash.com/photo-1505373877842-8d25f7d46678?auto=format&fit=crop&w=1200&q=80',
+        type: 'photo',
+        category: 'Documentary',
+        exif: {
+          camera: 'Sony A6IV',
+          iso: '399',
+          aperture: 'f/1.8',
+          shutter: '0/500s',
+        },
+      },
+      {
+        id: 'img-01',
+        title: 'Production Facility',
+        url: 'https://images.unsplash.com/photo-1589939705385-5185137a7f0f?auto=format&fit=crop&w=1200&q=80',
+        type: 'photo',
+        category: 'Factory',
+      },
+      {
+        id: 'img-02',
+        title: 'Startup Ecosystem Summit',
+        url: 'https://images.unsplash.com/photo-1511578314323-379afb476865?auto=format&fit=crop&w=1200&q=80',
+        type: 'photo',
+        category: 'Event',
+      },
+    ],
+  },
+};
 
-      <div className="max-w-md w-full mx-auto p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl shadow-xl text-center space-y-6">
-        <div className="space-y-2">
-          <p className="text-xs font-mono uppercase text-purple-600 dark:text-purple-400 tracking-widest font-bold">KIPSMTHN PLATFORM</p>
-          <h1 className="text-2xl font-light text-slate-900 dark:text-white">Private Client Portal</h1>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">
-            Enter your secret token or gallery link to view your deliverables & proofing portal.
+export default function ClientGalleryPortal({
+  params,
+}: GalleryPageProps) {
+  const resolved = use(params);
+
+  const gallery =
+    galleries[resolved.secretToken] || galleries.demo;
+
+  const [pin, setPin] = useState('');
+  const [verified, setVerified] = useState(false);
+
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+  const [download, setDownload] = useState(false);
+
+  function toggleFavorite(id: string) {
+    setFavorites((prev) =>
+      prev.includes(id)
+        ? prev.filter((x) => x !== id)
+        : [...prev, id]
+    );
+  }
+
+  if (!verified) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-6">
+        <div className="max-w-md w-full bg-white dark:bg-zinc-900 rounded-2xl p-8 text-center space-y-6 border">
+          <p className="text-xs font-mono uppercase text-purple-500">
+            Private Client Gallery
           </p>
-        </div>
 
-        <form onSubmit={handleAccessGallery} className="space-y-4">
+          <h1 className="text-2xl font-light">
+            {gallery.title}
+          </h1>
+
+          <p className="text-sm text-zinc-500">
+            PIN: {gallery.pin}
+          </p>
+
           <input
-            type="text"
-            placeholder="Paste Secret Token or Link"
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            className="w-full text-center text-xs font-mono py-3 px-4 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+            value={pin}
+            onChange={(e)=>setPin(e.target.value)}
+            className="w-full text-center text-3xl tracking-widest p-3 rounded-xl bg-zinc-100 dark:bg-zinc-800"
+            maxLength={4}
           />
 
           <button
-            type="submit"
-            className="w-full py-3 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-md cursor-pointer"
+            onClick={()=>{
+              if(pin===gallery.pin){
+                setVerified(true);
+              }
+            }}
+            className="w-full py-3 rounded-full bg-purple-600 text-white"
           >
-            Access Gallery →
+            Access Gallery
           </button>
-        </form>
+        </div>
+      </div>
+    );
+  }
 
-        {/* Quick Test Gallery Buttons */}
-        <div className="pt-4 border-t border-slate-200 dark:border-zinc-900 space-y-3 text-center">
-          <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-500 uppercase">Or Click to Open Sample Gallery:</p>
-          <div className="flex flex-col gap-2">
-            <button
-              onClick={() => openSampleGallery('xK9_mQ2pL7v')}
-              className="px-3 py-2 btn-secondary text-xs font-mono rounded-lg transition-colors text-purple-600 dark:text-purple-400 cursor-pointer font-bold"
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white">
+
+      <header className="sticky top-0 z-40 backdrop-blur-md border-b p-5 bg-white/80 dark:bg-black/80 flex justify-between">
+        <Link href="/">
+          KIPSMTHN<span className="text-purple-500">.</span>
+        </Link>
+
+        <button
+          onClick={()=>setDownload(true)}
+          className="px-4 py-2 rounded-full bg-purple-600 text-white text-xs"
+        >
+          Download
+        </button>
+      </header>
+
+
+      <section className="max-w-7xl mx-auto p-6 space-y-3">
+        <h1 className="text-4xl font-light">
+          {gallery.title}
+        </h1>
+
+        <p className="text-sm text-zinc-500">
+          {gallery.client} • {gallery.date}
+        </p>
+      </section>
+
+
+      <main className="max-w-7xl mx-auto p-6 grid md:grid-cols-3 gap-6">
+
+        {gallery.items.map((item,index)=>(
+          <div
+            key={item.id}
+            className="rounded-2xl overflow-hidden border bg-white dark:bg-zinc-900"
+          >
+
+            <div
+              className="relative aspect-square cursor-pointer"
+              onClick={()=>setLightbox(index)}
             >
-              UNDP Timbuktoo Summit 2026 (PIN: 4821) ↗
-            </button>
-            <button
-              onClick={() => openSampleGallery('burn_impact_2025')}
-              className="px-3 py-2 btn-secondary text-xs font-mono rounded-lg transition-colors text-purple-600 dark:text-purple-400 cursor-pointer font-bold"
-            >
-              BURN Manufacturing Series (PIN: 1234) ↗
-            </button>
+
+              <Image
+                src={item.url}
+                alt={item.title}
+                fill
+                className="object-cover"
+              />
+
+            </div>
+
+
+            <div className="p-4 flex justify-between">
+
+              <span className="text-xs">
+                {item.title}
+              </span>
+
+              <button
+                onClick={()=>toggleFavorite(item.id)}
+              >
+                {favorites.includes(item.id)
+                  ? '♥'
+                  : '♡'}
+              </button>
+
+            </div>
+
           </div>
-        </div>
+        ))}
 
-        <div className="pt-2 text-[11px] font-mono text-slate-500 dark:text-zinc-600">
-          <Link href="/admin/login" className="text-purple-600 dark:text-purple-400 hover:underline font-bold">
-            Creator Admin Login →
-          </Link>
-        </div>
-      </div>
+      </main>
 
-      <div className="max-w-7xl mx-auto w-full text-center py-4 text-[11px] font-mono text-slate-500 dark:text-zinc-600">
-        © {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.
-      </div>
+
+      {lightbox !== null && (
+        <ClientLightbox
+          isOpen={true}
+          item={gallery.items[lightbox]}
+          onClose={()=>setLightbox(null)}
+          onNext={()=>{}}
+          onPrev={()=>{}}
+          isFavorite={favorites.includes(
+            gallery.items[lightbox].id
+          )}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
+
+
+      <DownloadModal
+        isOpen={download}
+        onClose={()=>setDownload(false)}
+        requiresPin={true}
+        correctPin={gallery.pin}
+        totalItemsCount={gallery.items.length}
+        favoritesCount={favorites.length}
+      />
+
+
+      <footer className="border-t p-8 flex justify-between text-xs">
+        <span>
+          © {new Date().getFullYear()} KIPSMTHN
+        </span>
+
+        <ThemeToggle />
+      </footer>
+
     </div>
   );
 }

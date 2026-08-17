@@ -3,6 +3,36 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
+interface Quote {
+  quoteNumber?: string;
+  status?: string;
+  client?: {
+    name?: string;
+    company?: string;
+    email?: string;
+    phone?: string;
+  };
+  projectName?: string;
+  title?: string;
+  location?: string;
+  productionDays?: number;
+  validUntil?: string;
+  items?: Array<{
+    id: string;
+    description: string;
+    quantity: number;
+    unit: string;
+    rate: number;
+    amount: number;
+    category: string;
+  }>;
+  currency: string;
+  subtotal: number;
+  tax: number;
+  total: number;
+  depositPercentage?: number;
+  paymentTerms?: string;
+}
 
 export default function QuoteDetailPage() {
 
@@ -11,7 +41,7 @@ export default function QuoteDetailPage() {
   const id = params.id as string;
 
 
-  const [quote, setQuote] = useState<any>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
 
 
@@ -64,8 +94,8 @@ export default function QuoteDetailPage() {
   const groupedItems =
     quote.items?.reduce(
       (
-        acc: any,
-        item: any
+        acc: Record<string, typeof quote.items>,
+        item: typeof quote.items[number]
       ) => {
 
         if (!acc[item.category]) {
@@ -81,7 +111,7 @@ export default function QuoteDetailPage() {
         return acc;
 
       },
-      {}
+      {} as Record<string, typeof quote.items>
     ) || {};
 
 
@@ -257,7 +287,7 @@ export default function QuoteDetailPage() {
 
 
               {groupedItems[category].map(
-                (item:any)=> (
+  (item: NonNullable<Quote['items']>[number]) => (
 
                 <div
                   key={item.id}

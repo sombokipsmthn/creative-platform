@@ -1,3 +1,4 @@
+
 import {
   pgTable,
   text,
@@ -13,7 +14,9 @@ import {
 */
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
 
   authUserId: text("auth_user_id")
     .notNull()
@@ -37,7 +40,6 @@ export const users = pgTable("users", {
     .defaultNow()
     .notNull(),
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -81,7 +83,6 @@ export const clients = pgTable("clients", {
     .notNull(),
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Creator Profiles
@@ -115,7 +116,6 @@ export const creatorProfiles = pgTable("creator_profiles", {
     .defaultNow()
     .notNull(),
 });
-
 
 /*
 |--------------------------------------------------------------------------
@@ -157,6 +157,114 @@ export const projects = pgTable("projects", {
     .notNull(),
 });
 
+/*
+|--------------------------------------------------------------------------
+| Quotes
+|--------------------------------------------------------------------------
+*/
+
+export const quotes = pgTable("quotes", {
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  creatorId: text("creator_id")
+    .notNull()
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
+
+  clientId: text("client_id")
+    .references(() => clients.id, {
+      onDelete: "cascade",
+    }),
+
+  projectName: text("project_name"),
+
+  title: text("title")
+    .notNull(),
+
+
+  status: text("status")
+    .default("draft")
+    .notNull(),
+
+  subtotal: integer("subtotal")
+    .default(0)
+    .notNull(),
+
+  discountType: text("discount_type")
+    .default("none")
+    .notNull(),
+
+  discountValue: integer("discount_value")
+    .default(0)
+    .notNull(),
+
+  discountAmount: integer("discount_amount")
+    .default(0)
+    .notNull(),
+
+  tax: integer("tax")
+    .default(0)
+    .notNull(),
+
+  total: integer("total")
+    .default(0)
+    .notNull(),
+
+  currency: text("currency")
+    .default("KES")
+    .notNull(),
+
+  paymentTerms: text("payment_terms"),
+
+  validUntil: timestamp("valid_until"),
+
+  quoteNumber: text("quote_number"),
+
+  productionDays: integer("production_days")
+    .default(1),
+
+  location: text("location"),
+
+  clientContact: text("client_contact"),
+
+  depositPercentage: integer("deposit_percentage")
+    .default(50),
+
+  notes: text("notes"),
+
+  /*
+   * Set when the quote has been converted into an invoice.
+   *
+   * This column intentionally does NOT declare a Drizzle FK
+   * because invoices.quoteId points back to quotes.id.
+   * Keeping the FK on invoices avoids the circular schema
+   * initializer problem.
+   */
+  invoiceId: uuid("invoice_id"),
+
+  /*
+   * Used for optimistic/version tracking.
+   */
+  version: integer("version")
+    .default(1)
+    .notNull(),
+
+  /*
+   * Soft-delete/archive support.
+   */
+  archivedAt: timestamp("archived_at"),
+
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -179,6 +287,16 @@ export const invoices = pgTable("invoices", {
     .notNull()
     .references(() => clients.id, {
       onDelete: "cascade",
+    }),
+
+  /*
+   * The invoice may have originated from a quote.
+   *
+   * This is the FK that establishes the database relationship.
+   */
+  quoteId: uuid("quote_id")
+    .references(() => quotes.id, {
+      onDelete: "set null",
     }),
 
   invoiceNumber: text("invoice_number")
@@ -225,7 +343,6 @@ export const invoices = pgTable("invoices", {
     .notNull(),
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | Invoice Items
@@ -270,85 +387,24 @@ export const invoiceItems = pgTable("invoice_items", {
 */
 
 export const equipment = pgTable("equipment", {
-  id: uuid("id").defaultRandom().primaryKey(),
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
 
-  name: text("name").notNull(),
+  name: text("name")
+    .notNull(),
 
-  dailyRate: integer("daily_rate").notNull(),
+  dailyRate: integer("daily_rate")
+    .notNull(),
 
-  category: text("category").notNull(),
+  category: text("category")
+    .notNull(),
 
   subcategory: text("subcategory"),
 
   brand: text("brand"),
 
   specs: text("specs"),
-
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
-/*
-|--------------------------------------------------------------------------
-| Quotes
-|--------------------------------------------------------------------------
-*/
-
-export const quotes = pgTable("quotes", {
-
-  id: uuid("id")
-    .defaultRandom()
-    .primaryKey(),
-
-  clientId: text("client_id")
-    .references(() => clients.id, {
-      onDelete: "cascade",
-    }),
-
-  projectName: text("project_name"),
-
-  title: text("title")
-    .notNull(),
-
-  status: text("status")
-    .default("draft")
-    .notNull(),
-
-  subtotal: integer("subtotal")
-    .default(0)
-    .notNull(),
-
-  tax: integer("tax")
-    .default(0)
-    .notNull(),
-
-  total: integer("total")
-    .default(0)
-    .notNull(),
-
-  currency: text("currency")
-    .default("KES")
-    .notNull(),
-
-  paymentTerms: text("payment_terms"),
-
-  validUntil: timestamp("valid_until"),
-
-
-quoteNumber: text("quote_number"),
-
-productionDays: integer("production_days")
-  .default(1),
-
-location: text("location"),
-
-clientContact: text("client_contact"),
-
-depositPercentage: integer("deposit_percentage")
-  .default(50),
-
-  notes: text("notes"),
 
   createdAt: timestamp("created_at")
     .defaultNow()
@@ -357,7 +413,6 @@ depositPercentage: integer("deposit_percentage")
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .notNull(),
-
 });
 
 /*

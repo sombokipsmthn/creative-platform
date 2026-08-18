@@ -1,341 +1,424 @@
-// src/components/QuotationDocument.tsx
+
 'use client';
 
 import React from 'react';
 
-export interface QuoteLineItem {
+type QuoteItem = {
+  id?: string;
+  category?: string;
+  description: string;
+  quantity: number;
+  unit?: string;
+  rate: number;
+  amount: number;
+  notes?: string | null;
+};
+
+type Client = {
+  id?: string;
+  name?: string;
+  company?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+};
+
+type Quote = {
   id: string;
-  section: string; // e.g. "A. Professional Fees (Core)", "Camera Package (Podcast Video)", etc.
-  category: 'professional' | 'camera' | 'audio' | 'lighting' | 'data' | 'logistics' | 'postproduction' | 'extra';
-  item: string;
-  qty: number;
-  days: number;
-  rate: number; // in KES or active currency
-  notes?: string;
-}
-
-export interface QuotationData {
-  quoteNumber: string;
-  date: string;
-  clientName: string;
-  clientCompany?: string;
-  clientLocation?: string;
-  projectFor: string;
+  quoteNumber?: string | null;
+  title: string;
+  projectName?: string | null;
+  status: string;
+  subtotal: number;
+  discountType?: string | null;
+  discountValue?: number | null;
+  discountAmount?: number | null;
+  tax: number;
+  total: number;
   currency: string;
-  vatRate: number; // e.g. 0 or 16
-  items: QuoteLineItem[];
-  paymentTerms?: string;
-  contactPhone?: string;
-  contactEmail?: string;
+  paymentTerms?: string | null;
+  validUntil?: string | null;
+  productionDays?: number | null;
+  location?: string | null;
+  clientContact?: string | null;
+  depositPercentage?: number | null;
+  notes?: string | null;
+  createdAt: string;
+  client?: Client | null;
+  items?: QuoteItem[];
+};
+
+type QuotationDocumentProps = {
+  quote: Quote;
+};
+
+function formatDate(date?: string | null) {
+  if (!date) return '—';
+
+  const parsed = new Date(date);
+
+  if (Number.isNaN(parsed.getTime())) {
+    return '—';
+  }
+
+  return parsed.toLocaleDateString('en-KE', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
-export function formatCurrency(amount: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'decimal',
-    minimumFractionDigits: 2,
+function formatAmount(
+  amount: number | null | undefined,
+  currency: string
+) {
+  return `${currency} ${Number(amount || 0).toLocaleString('en-KE', {
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
-  }).format(amount);
+  })}`;
 }
 
-export default function QuotationDocument({ data }: { data: QuotationData }) {
-  const {
-    date,
-    clientName,
-    clientCompany,
-    clientLocation,
-    projectFor,
-    currency = 'KES',
-    vatRate = 0,
-    items,
-    paymentTerms = 'A deposit of 50% is required upon booking and the other 50% payable upon delivery of all requirements. Payment details will be included with invoice before commencement of work.',
-    contactPhone = '+254 722 145 776',
-    contactEmail = 'somboriot@gmail.com',
-  } = data;
+function formatStatus(status?: string) {
+  return String(status || 'draft')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (character) => character.toUpperCase());
+}
 
-  // Calculate categorized subtotals for the Executive Summary
-  const professionalItems = items.filter((i) => i.category === 'professional');
-  const equipmentItems = items.filter((i) =>
-    ['camera', 'audio', 'lighting', 'data', 'extra'].includes(i.category)
-  );
-  const logisticsItems = items.filter((i) => i.category === 'logistics');
-  const postproductionItems = items.filter((i) => i.category === 'postproduction');
+export default function QuotationDocument({
+  quote,
+}: QuotationDocumentProps) {
+  const items = Array.isArray(quote.items) ? quote.items : [];
 
-  const calcSectionTotal = (list: QuoteLineItem[]) =>
-    list.reduce((sum, item) => sum + (item.qty || 0) * (item.days || 1) * (item.rate || 0), 0);
+  const discountAmount = Number(quote.discountAmount || 0);
 
-  const profTotal = calcSectionTotal(professionalItems);
-  const equipTotal = calcSectionTotal(equipmentItems);
-  const logisticsTotal = calcSectionTotal(logisticsItems);
-  const postTotal = calcSectionTotal(postproductionItems);
-
-  const subtotalExclVat = profTotal + equipTotal + logisticsTotal + postTotal;
-  const vatAmount = (subtotalExclVat * vatRate) / 100;
-  const grandTotal = subtotalExclVat + vatAmount;
-
-  // Group items by specific sectionName for the detailed table
-  const sectionsOrdered = [
-    { key: 'A. Professional Fees (Core)', cat: 'professional', title: 'A. Professional Fees (Core)', subtotalLabel: 'Subtotal - Professional Fees' },
-    { key: 'Camera Package (Podcast Video)', cat: 'camera', title: 'Camera Package (Podcast Video)' },
-    { key: 'Camera Package (Coverage Video)', cat: 'camera', title: 'Camera Package (Coverage Video)' },
-    { key: 'Camera Package (Photo)', cat: 'camera', title: 'Camera Package (Photo)', subtotalLabel: 'Subtotal - Camera Package' },
-    { key: 'Camera Package (Cinema)', cat: 'camera', title: 'Camera Package (Cinema & Aerial)' },
-    { key: 'Audio Package', cat: 'audio', title: 'Audio Package', subtotalLabel: 'Subtotal - Audio Package' },
-    { key: 'Lighting Package', cat: 'lighting', title: 'Lighting Package', subtotalLabel: 'Subtotal - Lighting Package' },
-    { key: 'Data & Storage', cat: 'data', title: 'Data & Storage', subtotalLabel: 'Subtotal - Data & Storage' },
-    { key: 'Extra costs', cat: 'extra', title: 'Extra costs', subtotalLabel: 'Equipment Total', isEquipFinal: true },
-    { key: 'C. Travel & Logistics', cat: 'logistics', title: 'C. Travel & Logistics', subtotalLabel: 'Subtotal - Travel & Logistics' },
-    { key: 'Postproduction (Per output billing)', cat: 'postproduction', title: 'Postproduction (Per output billing)', subtotalLabel: 'Postproduction Subtotal' },
-  ];
-
-  // Also collect any dynamic sections that might have been added
-  const renderedSectionKeys = new Set<string>();
+  const hasDiscount =
+    discountAmount > 0 ||
+    quote.discountType === 'percentage' ||
+    quote.discountType === 'fixed';
 
   return (
-    <div className="quotation-print-container bg-white text-slate-900 font-sans p-8 md:p-12 max-w-[850px] mx-auto shadow-xl border border-slate-200 print:border-none print:shadow-none print:p-0 print:m-0 print:max-w-none">
-      
-      {/* 1. Header Banner */}
-      <div className="flex items-start justify-between pb-6 border-b border-slate-200">
-        <div>
-          <h1 className="text-xl md:text-2xl font-bold tracking-wider text-[#6B21A8] uppercase">
-            SOMBORIOT KIPCHILAT
-          </h1>
+    <div className="bg-white text-slate-900 print:bg-white">
+      <div className="mx-auto max-w-5xl px-8 py-10 sm:px-12 sm:py-14 print:max-w-none print:px-0 print:py-0">
+        {/* HEADER */}
+        <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[10px] font-mono font-semibold uppercase tracking-[0.35em] text-purple-600">
+              Quotation
+            </p>
+
+            <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+              {quote.title || 'Quotation'}
+            </h1>
+
+            {quote.projectName && (
+              <p className="mt-2 text-sm text-slate-500">
+                {quote.projectName}
+              </p>
+            )}
+          </div>
+
+          <div className="text-left sm:text-right">
+            <p className="text-xs font-mono uppercase tracking-widest text-slate-400">
+              Quote
+            </p>
+
+            <p className="mt-1 text-lg font-medium">
+              {quote.quoteNumber || quote.id}
+            </p>
+
+            <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-600">
+              {formatStatus(quote.status)}
+            </div>
+          </div>
         </div>
 
-        <div className="text-right">
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-wider text-[#6B21A8] uppercase">
-            QUOTATION
-          </h2>
-          <p className="mt-2 text-xs font-semibold text-slate-700">
-            <span className="text-[#6B21A8] font-bold">DATE</span> {date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-          </p>
+        {/* META */}
+        <div className="grid grid-cols-1 gap-8 border-b border-slate-200 py-8 sm:grid-cols-2 lg:grid-cols-3">
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+              Prepared For
+            </p>
+
+            <div className="mt-2 space-y-1 text-sm">
+              <p className="font-medium">
+                {quote.client?.name || 'No client selected'}
+              </p>
+
+              {quote.client?.company && (
+                <p className="text-slate-500">
+                  {quote.client.company}
+                </p>
+              )}
+
+              {quote.client?.email && (
+                <p className="text-slate-500">
+                  {quote.client.email}
+                </p>
+              )}
+
+              {quote.client?.phone && (
+                <p className="text-slate-500">
+                  {quote.client.phone}
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+              Quote Details
+            </p>
+
+            <div className="mt-2 space-y-1 text-sm">
+              <div className="flex justify-between gap-6">
+                <span className="text-slate-500">Created</span>
+                <span>{formatDate(quote.createdAt)}</span>
+              </div>
+
+              <div className="flex justify-between gap-6">
+                <span className="text-slate-500">Valid Until</span>
+                <span>{formatDate(quote.validUntil)}</span>
+              </div>
+
+              {quote.productionDays && (
+                <div className="flex justify-between gap-6">
+                  <span className="text-slate-500">Production</span>
+                  <span>
+                    {quote.productionDays}{' '}
+                    {quote.productionDays === 1
+                      ? 'day'
+                      : 'days'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+              Production
+            </p>
+
+            <div className="mt-2 space-y-1 text-sm">
+              {quote.location && (
+                <div className="flex justify-between gap-6">
+                  <span className="text-slate-500">
+                    Location
+                  </span>
+                  <span className="text-right">
+                    {quote.location}
+                  </span>
+                </div>
+              )}
+
+              {quote.clientContact && (
+                <div className="flex justify-between gap-6">
+                  <span className="text-slate-500">
+                    Contact
+                  </span>
+                  <span className="text-right">
+                    {quote.clientContact}
+                  </span>
+                </div>
+              )}
+
+              {quote.depositPercentage != null && (
+                <div className="flex justify-between gap-6">
+                  <span className="text-slate-500">
+                    Deposit
+                  </span>
+                  <span>
+                    {quote.depositPercentage}%
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
 
-      {/* 2. Client & Project Info */}
-      <div className="grid grid-cols-2 gap-8 my-6 text-xs leading-relaxed">
-        <div>
-          <p className="font-bold text-slate-900 uppercase text-[11px] mb-1">TO</p>
-          <p className="font-bold text-slate-900 text-sm">{clientName || 'Tech Safari'}</p>
-          {clientCompany && <p className="text-slate-700 font-medium">{clientCompany}</p>}
-          {clientLocation && <p className="text-slate-600">{clientLocation}</p>}
-        </div>
+        {/* LINE ITEMS */}
+        <div className="py-8">
+          <div className="overflow-hidden rounded-xl border border-slate-200">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                  <th className="px-4 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    Description
+                  </th>
 
-        <div className="text-right">
-          <p className="text-slate-500 font-medium">
-            <span className="font-bold text-[#6B21A8] uppercase text-[11px]">FOR</span> {projectFor || 'Production Services'}
-          </p>
-        </div>
-      </div>
+                  <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    Qty
+                  </th>
 
-      {/* 3. Executive Summary Block */}
-      <div className="my-6 max-w-sm">
-        <table className="w-full border-collapse border border-slate-800 text-xs">
-          <thead>
-            <tr className="bg-purple-50/70 border-b border-slate-800">
-              <th className="border-r border-slate-800 px-3 py-1.5 text-left font-bold text-slate-900">
-                Summary
-              </th>
-              <th className="px-3 py-1.5 text-right font-bold text-slate-900">
-                Totals ({currency})
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-slate-800">
-              <td className="border-r border-slate-800 px-3 py-1 text-slate-800">Professional Fees</td>
-              <td className="px-3 py-1 text-right font-medium text-slate-900">{formatCurrency(profTotal)}</td>
-            </tr>
-            <tr className="border-b border-slate-800">
-              <td className="border-r border-slate-800 px-3 py-1 text-slate-800">Equipment</td>
-              <td className="px-3 py-1 text-right font-medium text-slate-900">{formatCurrency(equipTotal)}</td>
-            </tr>
-            <tr className="border-b border-slate-800">
-              <td className="border-r border-slate-800 px-3 py-1 text-slate-800">Travel & Logistics</td>
-              <td className="px-3 py-1 text-right font-medium text-slate-900">{formatCurrency(logisticsTotal)}</td>
-            </tr>
-            <tr className="border-b border-slate-800">
-              <td className="border-r border-slate-800 px-3 py-1 text-slate-800">Postproduction</td>
-              <td className="px-3 py-1 text-right font-medium text-slate-900">{formatCurrency(postTotal)}</td>
-            </tr>
-            <tr className="bg-purple-100/60 font-bold">
-              <td className="border-r border-slate-800 px-3 py-1.5 text-slate-900">Total</td>
-              <td className="px-3 py-1.5 text-right text-slate-900">{formatCurrency(subtotalExclVat)}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                  <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    Rate
+                  </th>
 
-      {/* 4. Detailed Line Items Table */}
-      <div className="my-6 overflow-x-auto">
-        <table className="w-full border-collapse border border-slate-800 text-xs">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-800 font-bold text-slate-900">
-              <th className="border-r border-slate-800 px-3 py-2 text-left">Item</th>
-              <th className="border-r border-slate-800 px-2 py-2 text-center w-12">Qty</th>
-              <th className="border-r border-slate-800 px-2 py-2 text-center w-12">Days</th>
-              <th className="border-r border-slate-800 px-3 py-2 text-right w-24">Rate ({currency})</th>
-              <th className="border-r border-slate-800 px-3 py-2 text-right w-28">Total ({currency})</th>
-              <th className="px-3 py-2 text-left w-48">Notes</th>
-            </tr>
-          </thead>
-          <tbody>
-            {sectionsOrdered.map((sec) => {
-              const secItems = items.filter((i) => i.section === sec.key);
-              if (secItems.length === 0 && !sec.isEquipFinal) return null;
-              renderedSectionKeys.add(sec.key);
+                  <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                    Amount
+                  </th>
+                </tr>
+              </thead>
 
-              const secSubtotal = calcSectionTotal(secItems);
-              // Camera package subtotal combined check
-              const isCameraPhotoSec = sec.key === 'Camera Package (Photo)';
-              const cameraAllItems = items.filter((i) => i.category === 'camera');
-              const cameraAllSubtotal = calcSectionTotal(cameraAllItems);
-
-              return (
-                <React.Fragment key={sec.key}>
-                  {/* Section Title Header Row */}
-                  <tr className="bg-purple-50/60 border-t border-b border-slate-800 font-bold text-slate-900">
-                    <td colSpan={6} className="px-3 py-1.5 text-[#6B21A8]">
-                      {sec.title}
+              <tbody>
+                {items.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className="px-4 py-10 text-center text-sm text-slate-400"
+                    >
+                      No quote items.
                     </td>
                   </tr>
+                ) : (
+                  items.map((item, index) => (
+                    <tr
+                      key={item.id || `${item.description}-${index}`}
+                      className="border-b border-slate-100 last:border-b-0"
+                    >
+                      <td className="px-4 py-4">
+                        <div>
+                          <p className="text-sm font-medium">
+                            {item.description}
+                          </p>
 
-                  {/* Section Items */}
-                  {secItems.map((item) => {
-                    const rowTotal = (item.qty || 0) * (item.days || 1) * (item.rate || 0);
-                    return (
-                      <tr key={item.id} className="border-b border-slate-300 hover:bg-slate-50/50">
-                        <td className="border-r border-slate-800 px-3 py-1.5 text-slate-900 font-medium">
-                          {item.item}
-                        </td>
-                        <td className="border-r border-slate-800 px-2 py-1.5 text-center text-slate-700">
-                          {item.qty}
-                        </td>
-                        <td className="border-r border-slate-800 px-2 py-1.5 text-center text-slate-700">
-                          {item.days}
-                        </td>
-                        <td className="border-r border-slate-800 px-3 py-1.5 text-right text-slate-800 font-mono">
-                          {formatCurrency(item.rate)}
-                        </td>
-                        <td className="border-r border-slate-800 px-3 py-1.5 text-right font-semibold text-slate-900 font-mono">
-                          {formatCurrency(rowTotal)}
-                        </td>
-                        <td className="px-3 py-1.5 text-slate-600 text-[11px] leading-tight">
-                          {item.notes || '—'}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          {item.category && (
+                            <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                              {item.category}
+                            </p>
+                          )}
 
-                  {/* Section Specific Subtotal Row */}
-                  {sec.subtotalLabel && !sec.isEquipFinal && (
-                    <tr className="border-b border-slate-800 bg-slate-100/80 font-bold text-slate-900">
-                      <td colSpan={4} className="border-r border-slate-800 px-3 py-1.5">
-                        {sec.subtotalLabel}
+                          {item.notes && (
+                            <p className="mt-1 text-xs text-slate-500">
+                              {item.notes}
+                            </p>
+                          )}
+                        </div>
                       </td>
-                      <td className="border-r border-slate-800 px-3 py-1.5 text-right font-mono">
-                        {formatCurrency(isCameraPhotoSec ? cameraAllSubtotal : secSubtotal)}
+
+                      <td className="px-4 py-4 text-right text-sm text-slate-600">
+                        {item.quantity}
+                        {item.unit && item.unit !== 'unit'
+                          ? ` ${item.unit}`
+                          : ''}
                       </td>
-                      <td className="px-3 py-1.5" />
+
+                      <td className="px-4 py-4 text-right text-sm text-slate-600">
+                        {formatAmount(
+                          item.rate,
+                          quote.currency
+                        )}
+                      </td>
+
+                      <td className="px-4 py-4 text-right text-sm font-medium">
+                        {formatAmount(
+                          item.amount,
+                          quote.currency
+                        )}
+                      </td>
                     </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* TOTALS */}
+        <div className="flex justify-end">
+          <div className="w-full max-w-sm space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Subtotal</span>
+              <span>
+                {formatAmount(
+                  quote.subtotal,
+                  quote.currency
+                )}
+              </span>
+            </div>
+
+            {hasDiscount && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">
+                  Discount
+                  {quote.discountType === 'percentage' &&
+                    quote.discountValue != null
+                    ? ` (${quote.discountValue}%)`
+                    : ''}
+                </span>
+
+                <span className="text-slate-600">
+                  -{' '}
+                  {formatAmount(
+                    discountAmount,
+                    quote.currency
                   )}
-
-                  {/* Equipment Total Row */}
-                  {sec.isEquipFinal && (
-                    <tr className="border-b border-slate-800 bg-purple-100/70 font-extrabold text-slate-900">
-                      <td colSpan={4} className="border-r border-slate-800 px-3 py-2 uppercase tracking-wide">
-                        Equipment Total
-                      </td>
-                      <td className="border-r border-slate-800 px-3 py-2 text-right font-mono text-sm">
-                        {formatCurrency(equipTotal)}
-                      </td>
-                      <td className="px-3 py-2" />
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-
-            {/* Custom or Unmatched Sections */}
-            {items
-              .filter((i) => !renderedSectionKeys.has(i.section))
-              .map((item) => {
-                const rowTotal = (item.qty || 0) * (item.days || 1) * (item.rate || 0);
-                return (
-                  <tr key={item.id} className="border-b border-slate-300">
-                    <td className="border-r border-slate-800 px-3 py-1.5 text-slate-900 font-medium">
-                      {item.item}
-                    </td>
-                    <td className="border-r border-slate-800 px-2 py-1.5 text-center">{item.qty}</td>
-                    <td className="border-r border-slate-800 px-2 py-1.5 text-center">{item.days}</td>
-                    <td className="border-r border-slate-800 px-3 py-1.5 text-right font-mono">
-                      {formatCurrency(item.rate)}
-                    </td>
-                    <td className="border-r border-slate-800 px-3 py-1.5 text-right font-semibold font-mono">
-                      {formatCurrency(rowTotal)}
-                    </td>
-                    <td className="px-3 py-1.5 text-slate-600 text-[11px]">{item.notes || '—'}</td>
-                  </tr>
-                );
-              })}
-
-            {/* Grand Total & VAT Rows */}
-            <tr className="border-t-2 border-slate-900 bg-slate-100/90 font-bold text-slate-900">
-              <td colSpan={4} className="border-r border-slate-800 px-3 py-2">
-                Total (Excl. VAT)
-              </td>
-              <td className="border-r border-slate-800 px-3 py-2 text-right font-mono text-sm">
-                {formatCurrency(subtotalExclVat)}
-              </td>
-              <td className="px-3 py-2" />
-            </tr>
-
-            {vatRate > 0 && (
-              <tr className="border-b border-slate-800 bg-slate-50 font-medium text-slate-900">
-                <td colSpan={4} className="border-r border-slate-800 px-3 py-1.5">
-                  VAT ({vatRate}%)
-                </td>
-                <td className="border-r border-slate-800 px-3 py-1.5 text-right font-mono">
-                  {formatCurrency(vatAmount)}
-                </td>
-                <td className="px-3 py-1.5 text-[11px] text-slate-500">Value Added Tax</td>
-              </tr>
+                </span>
+              </div>
             )}
 
-            <tr className="border-b-2 border-slate-900 bg-purple-200/80 font-extrabold text-slate-950 text-sm">
-              <td colSpan={4} className="border-r border-slate-800 px-3 py-2.5 uppercase tracking-wide">
-                Total (Incl. VAT)
-              </td>
-              <td className="border-r border-slate-800 px-3 py-2.5 text-right font-mono text-base text-[#6B21A8]">
-                {formatCurrency(grandTotal)}
-              </td>
-              <td className="px-3 py-2.5" />
-            </tr>
-          </tbody>
-        </table>
-      </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-slate-500">Tax</span>
+              <span>
+                {formatAmount(
+                  quote.tax,
+                  quote.currency
+                )}
+              </span>
+            </div>
 
-      {/* 5. Payment Terms & Contact Info Footer */}
-      <div className="mt-8 pt-6 border-t border-slate-200 text-xs space-y-3">
-        <div>
-          <h4 className="font-bold text-[#6B21A8] text-sm mb-1">Payment Terms</h4>
-          <p className="text-slate-700 leading-relaxed max-w-2xl">{paymentTerms}</p>
+            <div className="border-t border-slate-300 pt-4">
+              <div className="flex items-end justify-between gap-6">
+                <span className="text-sm font-medium uppercase tracking-wider">
+                  Total
+                </span>
+
+                <span className="text-2xl font-medium">
+                  {formatAmount(
+                    quote.total,
+                    quote.currency
+                  )}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="pt-2 text-slate-600">
-          <p>
-            If you have any questions concerning this quote kindly contact{' '}
-            <span className="font-semibold text-slate-900">{contactPhone}</span> |{' '}
-            <a href={`mailto:${contactEmail}`} className="text-[#6B21A8] underline font-semibold">
-              {contactEmail}
-            </a>
+        {/* TERMS */}
+        {(quote.paymentTerms || quote.notes) && (
+          <div className="mt-10 grid grid-cols-1 gap-8 border-t border-slate-200 pt-8 sm:grid-cols-2">
+            {quote.paymentTerms && (
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+                  Payment Terms
+                </p>
+
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                  {quote.paymentTerms}
+                </p>
+              </div>
+            )}
+
+            {quote.notes && (
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+                  Notes
+                </p>
+
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                  {quote.notes}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* FOOTER */}
+        <div className="mt-12 border-t border-slate-200 pt-6 text-center">
+          <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">
+            Thank you for the opportunity
           </p>
-          <p className="mt-2 font-serif italic text-slate-800 text-sm">Thank you for your business!</p>
         </div>
-      </div>
-
-      {/* Page indicator styling for print */}
-      <div className="mt-12 text-center text-[10px] text-slate-400 font-mono print:block">
-        Somboriot Kipchilat • Media & Production Services • Nairobi, Kenya
       </div>
     </div>
   );

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { users } from "@/db/schema";
+import { creatorProfiles, users } from "@/db/schema";
 
 export async function POST() {
   try {
@@ -11,60 +11,98 @@ export async function POST() {
 
     if (!userId) {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
-    const clerkUser = await currentUser();
+    /*
+     * IMPORTANT:
+     *
+     * This endpoint only SYNCs an existing local creator.
+     *
+     * It must NOT create a users row for a brand-new
+     * Clerk account.
+     *
+     * New users are created by:
+     *
+     *   /admin/onboarding
+     *        ↓
+     *   POST /api/onboarding
+     */
 
-    if (!clerkUser) {
-      return NextResponse.json(
-        { error: "Clerk user not found" },
-        { status: 404 }
-      );
+    const existingUsers = await db
+      .select()
+      .from(users)
+      .where(eq(users.authUserId, userId))
+      .limit(1);
+
+    const user = existingUsers[0];
+
+    /*
+     * No local account means this is a brand-new creator.
+     *
+     * Do NOT create the user here.
+     */
+    if (!user) {
+      return NextResponse.json({
+        needsOnboarding: true,
+        user: null,
+        profile: null,
+      });
     }
 
-    const email =
-      clerkUser.emailAddresses[0]?.emailAddress;
+    /*
+     * Existing local account.
+     *
+     * Load the creator profile associated with it.
+     */
+    const existingProfiles = await db
+      .select()
+      .from(creatorProfiles)
+      .where(eq(creatorProfiles.userId, user.id))
+      .limit(1);
 
-    if (!email) {
-      return NextResponse.json(
-        { error: "User email not found" },
-        { status: 400 }
-      );
+    const profile = existingProfiles[0] ?? null;
+
+    /*
+     * If the local user exists but has no creator profile,
+     * treat the account as incomplete and send it through
+     * onboarding.
+     */
+    if (!profile) {
+      return NextResponse.json({
+        needsOnboarding: true,
+        user,
+        profile: null,
+      });
     }
 
-    const name =
-      [clerkUser.firstName, clerkUser.lastName]
-        .filter(Boolean)
-        .join(" ")
-        .trim() || "Creator";
-
-    const existing = await db.query.users.findFirst({
-      where: eq(users.authUserId, userId),
+    /*
+     * Fully onboarded creator.
+     */
+    return NextResponse.json({
+      needsOnboarding: false,
+      user,
+      profile,
     });
-
-    if (existing) {
-      return NextResponse.json(existing);
-    }
-
-    const [user] = await db
-      .insert(users)
-      .values({
-        authUserId: userId,
-        email,
-        name,
-      })
-      .returning();
-
-    return NextResponse.json(user, { status: 201 });
   } catch (error) {
-    console.error("POST /api/users/sync error:", error);
+    console.error(
+      "POST /api/users/sync error:",
+      error
+    );
 
     return NextResponse.json(
-      { error: "Failed to sync user" },
-      { status: 500 }
+      {
+        error: "Failed to sync user",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }

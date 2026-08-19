@@ -1,4 +1,3 @@
-
 import {
   pgTable,
   text,
@@ -43,6 +42,49 @@ export const users = pgTable("users", {
 
 /*
 |--------------------------------------------------------------------------
+| Creator Profiles
+|--------------------------------------------------------------------------
+|
+| Additional public/business information for a creator.
+|
+| One user can have one creator profile.
+|
+*/
+
+export const creatorProfiles = pgTable(
+  "creator_profiles",
+  {
+    id: uuid("id")
+      .defaultRandom()
+      .primaryKey(),
+
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    bio: text("bio"),
+
+    avatarUrl: text("avatar_url"),
+
+    website: text("website"),
+
+    location: text("location"),
+
+    createdAt: timestamp("created_at")
+      .defaultNow()
+      .notNull(),
+
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull(),
+  }
+);
+
+/*
+|--------------------------------------------------------------------------
 | Clients
 |--------------------------------------------------------------------------
 */
@@ -73,40 +115,6 @@ export const clients = pgTable("clients", {
   status: text("status")
     .default("active")
     .notNull(),
-
-  createdAt: timestamp("created_at")
-    .defaultNow()
-    .notNull(),
-
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull(),
-});
-
-/*
-|--------------------------------------------------------------------------
-| Creator Profiles
-|--------------------------------------------------------------------------
-*/
-
-export const creatorProfiles = pgTable("creator_profiles", {
-  id: uuid("id")
-    .defaultRandom()
-    .primaryKey(),
-
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id, {
-      onDelete: "cascade",
-    }),
-
-  bio: text("bio"),
-
-  avatarUrl: text("avatar_url"),
-
-  website: text("website"),
-
-  location: text("location"),
 
   createdAt: timestamp("created_at")
     .defaultNow()
@@ -184,7 +192,6 @@ export const quotes = pgTable("quotes", {
   title: text("title")
     .notNull(),
 
-
   status: text("status")
     .default("draft")
     .notNull(),
@@ -240,8 +247,6 @@ export const quotes = pgTable("quotes", {
    *
    * This column intentionally does NOT declare a Drizzle FK
    * because invoices.quoteId points back to quotes.id.
-   * Keeping the FK on invoices avoids the circular schema
-   * initializer problem.
    */
   invoiceId: uuid("invoice_id"),
 

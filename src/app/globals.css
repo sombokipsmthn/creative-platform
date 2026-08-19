@@ -52,7 +52,6 @@ html.dark {
   }
 
   header {
-    background-color: var(--header-bg) !important;
     border-color: var(--border-subtle) !important;
   }
 

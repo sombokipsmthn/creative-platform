@@ -562,7 +562,7 @@ export default function EquipmentServicesSelector({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[420px] overflow-y-auto pr-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-105 overflow-y-auto pr-1">
         {filteredCatalog.map((item) => {
           const state =
             getItemState(item.id);

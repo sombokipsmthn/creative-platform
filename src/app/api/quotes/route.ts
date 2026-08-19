@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq, inArray } from "drizzle-orm";
@@ -155,16 +154,15 @@ function normalizeItems(items: unknown) {
   );
 }
 
-async function getOwnedClientIds(userId: string) {
-  const result = await db
-    .select({
-      clientId: clients.id,
-    })
-    .from(clients)
-    .where(eq(clients.creatorId, userId));
-
-  return result.map((client) => client.clientId);
-}
+/*
+|--------------------------------------------------------------------------
+| GET /api/quotes
+|--------------------------------------------------------------------------
+| Fetch quotes belonging directly to the authenticated creator.
+|
+| clientId is optional. A quote does NOT need a client to exist.
+|--------------------------------------------------------------------------
+*/
 
 export async function GET(req: Request) {
   try {
@@ -186,15 +184,17 @@ export async function GET(req: Request) {
     const clientId =
       searchParams.get("clientId");
 
-    const clientIds =
-      await getOwnedClientIds(user.id);
-
-    if (clientIds.length === 0) {
-      return NextResponse.json([]);
-    }
-
+    /*
+     * IMPORTANT:
+     *
+     * Quote ownership comes directly from
+     * quotes.creatorId.
+     *
+     * Do NOT require a client here because
+     * clientId is nullable.
+     */
     const conditions = [
-      inArray(quotes.clientId, clientIds),
+      eq(quotes.creatorId, user.id),
     ];
 
     if (status) {
@@ -207,10 +207,6 @@ export async function GET(req: Request) {
     }
 
     if (clientId) {
-      if (!clientIds.includes(clientId)) {
-        return NextResponse.json([]);
-      }
-
       conditions.push(
         eq(quotes.clientId, clientId)
       );
@@ -258,6 +254,7 @@ export async function GET(req: Request) {
         itemsByQuote.get(item.quoteId) ?? [];
 
       existing.push(item);
+
       itemsByQuote.set(
         item.quoteId,
         existing
@@ -288,6 +285,16 @@ export async function GET(req: Request) {
     );
   }
 }
+
+/*
+|--------------------------------------------------------------------------
+| POST /api/quotes
+|--------------------------------------------------------------------------
+| Create a quote owned directly by the authenticated creator.
+|
+| clientId remains optional.
+|--------------------------------------------------------------------------
+*/
 
 export async function POST(req: Request) {
   try {
@@ -331,7 +338,10 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!Array.isArray(items) || items.length === 0) {
+    if (
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
       return NextResponse.json(
         {
           error:
@@ -345,12 +355,24 @@ export async function POST(req: Request) {
 
     let client = null;
 
+    /*
+     * A client is optional.
+     *
+     * If clientId was supplied, verify that
+     * the client belongs to this creator.
+     */
     if (clientId) {
       client =
         await db.query.clients.findFirst({
           where: and(
-            eq(clients.id, String(clientId)),
-            eq(clients.creatorId, user.id)
+            eq(
+              clients.id,
+              String(clientId)
+            ),
+            eq(
+              clients.creatorId,
+              user.id
+            )
           ),
         });
 
@@ -395,11 +417,8 @@ export async function POST(req: Request) {
       normalizeStatus(status);
 
     /*
-     * A newly-created quote should normally be a
-     * draft. We allow "sent" here for compatibility
-     * with existing clients, but do not allow an API
-     * caller to create an already-accepted/invoiced
-     * quote through the creation endpoint.
+     * New quotes can only be created as
+     * draft or sent.
      */
     const creationStatus =
       normalizedStatus === "sent"
@@ -428,7 +447,14 @@ export async function POST(req: Request) {
     const [quote] = await db
       .insert(quotes)
       .values({
+        /*
+         * IMPORTANT:
+         *
+         * Ownership is stored directly on
+         * the quote.
+         */
         creatorId: user.id,
+
         clientId: clientId
           ? String(clientId)
           : null,

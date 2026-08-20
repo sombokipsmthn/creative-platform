@@ -1,242 +1,1536 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-
-type Quote = {
+type Equipment = {
   id: string;
-  title: string;
-  projectName?: string;
-  status: string;
-  total: number;
-  currency: string;
-  createdAt: string;
+  name: string;
+  dailyRate: number;
+  category: string;
+  subcategory?: string | null;
+  brand?: string | null;
+  specs?: string | null;
 };
 
+type QuoteItem = {
+  id: string;
+  type: "equipment" | "custom";
+  equipmentId?: string;
+  category: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  rate: number;
+  amount: number;
+  notes: string;
+};
 
-export default function QuotesPage() {
+type Client = {
+  id: string;
+  name: string;
+  company?: string | null;
+  email?: string | null;
+};
 
-  const [quotes, setQuotes] = useState<Quote[]>([]);
-  const [search, setSearch] = useState("");
+function createItem(
+  type: "equipment" | "custom" = "custom"
+): QuoteItem {
+  return {
+    id: crypto.randomUUID(),
+    type,
+    equipmentId: "",
+    category: "Production",
+    description: "",
+    quantity: 1,
+    unit: "unit",
+    rate: 0,
+    amount: 0,
+    notes: "",
+  };
+}
 
+function formatAmount(
+  amount: number,
+  currency = "KES"
+) {
+  return `${currency} ${Number(
+    amount || 0
+  ).toLocaleString("en-KE")}`;
+}
+
+export default function NewQuotePage() {
+  const router = useRouter();
+
+  const [equipment, setEquipment] = useState<
+    Equipment[]
+  >([]);
+
+  const [clients, setClients] = useState<
+    Client[]
+  >([]);
+
+  const [loadingEquipment, setLoadingEquipment] =
+    useState(true);
+
+  const [loadingClients, setLoadingClients] =
+    useState(true);
+
+  const [saving, setSaving] = useState(false);
+
+  const [error, setError] = useState("");
+
+  const [title, setTitle] = useState("");
+
+  const [projectName, setProjectName] =
+    useState("");
+
+  const [clientId, setClientId] =
+    useState("");
+
+  const [currency, setCurrency] =
+    useState("KES");
+
+  const [paymentTerms, setPaymentTerms] =
+    useState("");
+
+  const [validUntil, setValidUntil] =
+    useState("");
+
+  const [productionDays, setProductionDays] =
+    useState(1);
+
+  const [location, setLocation] =
+    useState("");
+
+  const [clientContact, setClientContact] =
+    useState("");
+
+  const [depositPercentage, setDepositPercentage] =
+    useState(50);
+
+  const [notes, setNotes] =
+    useState("");
+
+  const [discountType, setDiscountType] =
+    useState<"none" | "percentage" | "fixed">(
+      "none"
+    );
+
+  const [discountValue, setDiscountValue] =
+    useState(0);
+
+  const [tax, setTax] = useState(0);
+
+  const [items, setItems] = useState<
+    QuoteItem[]
+  >([createItem()]);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Load equipment
+  |--------------------------------------------------------------------------
+  */
 
   useEffect(() => {
+    let cancelled = false;
 
-    fetch("/api/quotes")
-      .then((res) => res.json())
-      .then((data) => {
-        setQuotes(data);
-      });
+    async function loadEquipment() {
+      try {
+        setLoadingEquipment(true);
 
+        const response = await fetch(
+          "/api/equipment",
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load equipment"
+          );
+        }
+
+        const data =
+          await response.json();
+
+        const equipmentData =
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data.equipment)
+              ? data.equipment
+              : [];
+
+        if (!cancelled) {
+          setEquipment(
+            equipmentData
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to load equipment:",
+          err
+        );
+
+        if (!cancelled) {
+          setError(
+            "Unable to load equipment. Custom line items are still available."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingEquipment(false);
+        }
+      }
+    }
+
+    loadEquipment();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-
-
-  const filteredQuotes = quotes.filter((quote) => {
-
-    const text =
-      `${quote.title} ${quote.projectName ?? ""}`
-        .toLowerCase();
-
-    return text.includes(search.toLowerCase());
-
-  });
-
-
-
-  return (
-
-    <div className="p-8 max-w-6xl mx-auto">
-
-
-      <div className="flex justify-between items-center mb-8">
-
-        <div>
-
-          <h1 className="text-3xl font-bold">
-            Quotes
-          </h1>
-
-          <p className="text-gray-600">
-            Production estimates and client proposals
-          </p>
-
-        </div>
-
-
-        <Link
-          href="/admin/quotes/new"
-          className="bg-black text-white px-5 py-3 rounded"
-        >
-          New Quote
-        </Link>
-
-
-      </div>
-
-
-
-      <input
-
-        className="border rounded p-3 w-full mb-6"
-
-        placeholder="Search quotes..."
-
-        value={search}
-
-        onChange={(e)=>setSearch(e.target.value)}
-
-      />
-
-
-
-
-      <div className="border rounded overflow-hidden">
-
-
-        <table className="w-full">
-
-
-          <thead className="bg-gray-100">
-
-            <tr>
-
-              <th className="text-left p-4">
-                Quote
-              </th>
-
-
-              <th className="text-left p-4">
-                Project
-              </th>
-
-
-              <th className="text-left p-4">
-                Status
-              </th>
-
-
-              <th className="text-right p-4">
-                Total
-              </th>
-
-
-              <th className="p-4">
-                Action
-              </th>
-
-
-            </tr>
-
-          </thead>
-
-
-
-          <tbody>
-
-
-            {filteredQuotes.map((quote)=>(
-
-
-              <tr
-                key={quote.id}
-                className="border-t"
-              >
-
-
-                <td className="p-4 font-semibold">
-
-                  {quote.title}
-
-                </td>
-
-
-
-                <td className="p-4">
-
-                  {quote.projectName || "-"}
-
-                </td>
-
-
-
-                <td className="p-4">
-
-                  <span className="px-3 py-1 rounded bg-gray-200">
-
-                    {quote.status}
-
-                  </span>
-
-                </td>
-
-
-
-                <td className="p-4 text-right">
-
-                  {quote.currency} {quote.total.toLocaleString()}
-
-                </td>
-
-
-
-                <td className="p-4 text-center">
-
-
-                  <Link
-
-                    href={`/admin/quotes/${quote.id}`}
-
-                    className="text-blue-600"
-
-                  >
-
-                    View
-
-                  </Link>
-
-
-                </td>
-
-
-              </tr>
-
-
-            ))}
-
-
-
-            {filteredQuotes.length === 0 && (
-
-              <tr>
-
-                <td
-                  colSpan={5}
-                  className="p-8 text-center text-gray-500"
-                >
-
-                  No quotes found
-
-                </td>
-
-              </tr>
-
-            )}
-
-
-
-          </tbody>
-
-
-        </table>
-
-
-      </div>
-
-
-    </div>
-
+  /*
+  |--------------------------------------------------------------------------
+  | Load clients
+  |--------------------------------------------------------------------------
+  */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadClients() {
+      try {
+        setLoadingClients(true);
+
+        const response = await fetch(
+          "/api/clients",
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load clients"
+          );
+        }
+
+        const data =
+          await response.json();
+
+        const clientData =
+          Array.isArray(data)
+            ? data
+            : Array.isArray(data.clients)
+              ? data.clients
+              : [];
+
+        if (!cancelled) {
+          setClients(
+            clientData
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to load clients:",
+          err
+        );
+
+        if (!cancelled) {
+          setError(
+            "Unable to load clients."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingClients(false);
+        }
+      }
+    }
+
+    loadClients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Totals
+  |--------------------------------------------------------------------------
+  */
+
+  const subtotal = useMemo(
+    () =>
+      items.reduce(
+        (sum, item) =>
+          sum +
+          Math.max(
+            0,
+            Number(item.quantity) || 0
+          ) *
+            Math.max(
+              0,
+              Number(item.rate) || 0
+            ),
+        0
+      ),
+    [items]
   );
 
+  const discountAmount = useMemo(() => {
+    const value = Math.max(
+      0,
+      Number(discountValue) || 0
+    );
+
+    if (
+      discountType === "percentage"
+    ) {
+      return Math.round(
+        subtotal *
+          Math.min(value, 100) /
+          100
+      );
+    }
+
+    if (
+      discountType === "fixed"
+    ) {
+      return Math.min(
+        value,
+        subtotal
+      );
+    }
+
+    return 0;
+  }, [
+    subtotal,
+    discountType,
+    discountValue,
+  ]);
+
+  const taxableSubtotal =
+    subtotal - discountAmount;
+
+  const total =
+    taxableSubtotal +
+    Math.max(
+      0,
+      Number(tax) || 0
+    );
+
+  /*
+  |--------------------------------------------------------------------------
+  | Equipment selection
+  |--------------------------------------------------------------------------
+  */
+
+  function handleEquipmentChange(
+    itemId: string,
+    equipmentId: string
+  ) {
+    const selectedEquipment =
+      equipment.find(
+        (item) =>
+          item.id === equipmentId
+      );
+
+    setItems((current) =>
+      current.map((item) => {
+        if (item.id !== itemId) {
+          return item;
+        }
+
+        /*
+         * Switching back to custom keeps the line
+         * item editable instead of deleting it.
+         */
+
+        if (!selectedEquipment) {
+          return {
+            ...item,
+            type: "custom",
+            equipmentId: "",
+          };
+        }
+
+        return {
+          ...item,
+
+          type: "equipment",
+
+          equipmentId:
+            selectedEquipment.id,
+
+          category:
+            selectedEquipment.category ||
+            "Equipment",
+
+          description:
+            selectedEquipment.name,
+
+          unit: "day",
+
+          rate:
+            Number(
+              selectedEquipment.dailyRate
+            ) || 0,
+
+          amount:
+            Math.max(
+              1,
+              Number(item.quantity) || 1
+            ) *
+            Math.max(
+              0,
+              Number(
+                selectedEquipment.dailyRate
+              ) || 0
+            ),
+
+          /*
+           * Keep existing notes instead of
+           * overwriting user-entered notes.
+           */
+          notes: item.notes,
+        };
+      })
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Quantity
+  |--------------------------------------------------------------------------
+  */
+
+  function updateQuantity(
+    itemId: string,
+    value: number
+  ) {
+    const quantity = Math.max(
+      1,
+      Number(value) || 1
+    );
+
+    setItems((current) =>
+      current.map((item) => ({
+        ...item,
+        ...(item.id === itemId
+          ? {
+              quantity,
+              amount:
+                quantity *
+                Math.max(
+                  0,
+                  Number(item.rate) || 0
+                ),
+            }
+          : {}),
+      }))
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Rate
+  |--------------------------------------------------------------------------
+  |
+  | Equipment rates are populated automatically,
+  | but remain editable so you can override the
+  | standard daily rate for a specific quote.
+  |
+  */
+
+  function updateRate(
+    itemId: string,
+    value: number
+  ) {
+    const rate = Math.max(
+      0,
+      Number(value) || 0
+    );
+
+    setItems((current) =>
+      current.map((item) => ({
+        ...item,
+        ...(item.id === itemId
+          ? {
+              rate,
+              amount:
+                Math.max(
+                  1,
+                  Number(
+                    item.quantity
+                  ) || 1
+                ) * rate,
+            }
+          : {}),
+      }))
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Custom field updates
+  |--------------------------------------------------------------------------
+  */
+
+  function updateItem(
+    itemId: string,
+    field: keyof QuoteItem,
+    value: string
+  ) {
+    setItems((current) =>
+      current.map((item) =>
+        item.id === itemId
+          ? {
+              ...item,
+              [field]: value,
+            }
+          : item
+      )
+    );
+  }
+
+  function addEquipmentItem() {
+    setItems((current) => [
+      ...current,
+      createItem("equipment"),
+    ]);
+  }
+
+  function addCustomItem() {
+    setItems((current) => [
+      ...current,
+      createItem("custom"),
+    ]);
+  }
+
+  function removeItem(itemId: string) {
+    setItems((current) => {
+      if (current.length === 1) {
+        return [createItem()];
+      }
+
+      return current.filter(
+        (item) =>
+          item.id !== itemId
+      );
+    });
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Save
+  |--------------------------------------------------------------------------
+  */
+
+  async function handleSubmit(
+    event: React.FormEvent
+  ) {
+    event.preventDefault();
+
+    setError("");
+
+    if (!title.trim()) {
+      setError(
+        "Quote title is required."
+      );
+      return;
+    }
+
+    if (items.length === 0) {
+      setError(
+        "Add at least one line item."
+      );
+      return;
+    }
+
+    const invalidItem =
+      items.find(
+        (item) =>
+          !item.description.trim()
+      );
+
+    if (invalidItem) {
+      setError(
+        "Every line item needs a description."
+      );
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const response =
+        await fetch(
+          "/api/quotes",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              clientId:
+                clientId || null,
+
+              title:
+                title.trim(),
+
+              projectName:
+                projectName.trim() ||
+                null,
+
+              currency,
+
+              paymentTerms:
+                paymentTerms.trim() ||
+                null,
+
+              validUntil:
+                validUntil ||
+                null,
+
+              productionDays,
+
+              location:
+                location.trim() ||
+                null,
+
+              clientContact:
+                clientContact.trim() ||
+                null,
+
+              depositPercentage,
+
+              notes:
+                notes.trim() ||
+                null,
+
+              status: "draft",
+
+              discountType,
+
+              discountValue,
+
+              tax,
+
+              items: items.map(
+                (item) => ({
+                  category:
+                    item.category,
+
+                  description:
+                    item.description.trim(),
+
+                  quantity:
+                    item.quantity,
+
+                  unit:
+                    item.unit,
+
+                  rate:
+                    item.rate,
+
+                  amount:
+                    item.quantity *
+                    item.rate,
+
+                  notes:
+                    item.notes.trim() ||
+                    null,
+
+                  /*
+                   * Preserve equipment relationship
+                   * for consumers that want to know the
+                   * source of the line item.
+                   *
+                   * The current quoteItems schema does
+                   * not require this field, so it is only
+                   * sent when an equipment item exists.
+                   */
+                  ...(item.equipmentId
+                    ? {
+                        equipmentId:
+                          item.equipmentId,
+                      }
+                    : {}),
+                })
+              ),
+            }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Failed to create quote"
+        );
+      }
+
+      router.push(
+        `/admin/quotes/${data.id}`
+      );
+    } catch (err) {
+      console.error(
+        "Failed to create quote:",
+        err
+      );
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to create quote."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen px-6 py-10">
+      <div className="max-w-6xl mx-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-8"
+        >
+          {/* HEADER */}
+
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <Link
+                href="/admin/quotes"
+                className="text-[10px] font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400"
+              >
+                ← Quotes
+              </Link>
+
+              <p className="mt-5 text-[10px] font-mono uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400 font-semibold">
+                Sales & Production
+              </p>
+
+              <h1 className="mt-2 text-4xl font-light tracking-tight text-slate-900 dark:text-white">
+                New Quote
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
+                Build a production estimate
+                from equipment and custom
+                services.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Link
+                href="/admin/quotes"
+                className="px-5 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-mono uppercase tracking-widest text-slate-600 dark:text-zinc-400"
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-mono uppercase tracking-widest font-semibold"
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save Draft"}
+              </button>
+            </div>
+          </div>
+
+          {/* ERROR */}
+
+          {error && (
+            <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-5 py-4">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            </div>
+          )}
+
+          {/* BASIC DETAILS */}
+
+          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+            <div className="mb-6">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+                Quote Details
+              </h2>
+
+              <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
+                Client and project information.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Quote Title *
+                </span>
+
+                <input
+                  value={title}
+                  onChange={(event) =>
+                    setTitle(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Production Quote"
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Client
+                </span>
+
+                <select
+                  value={clientId}
+                  onChange={(event) =>
+                    setClientId(
+                      event.target.value
+                    )
+                  }
+                  disabled={loadingClients}
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                >
+                  <option value="">
+                    {loadingClients
+                      ? "Loading clients..."
+                      : "Select client"}
+                  </option>
+
+                  {clients.map(
+                    (client) => (
+                      <option
+                        key={
+                          client.id
+                        }
+                        value={
+                          client.id
+                        }
+                      >
+                        {client.company
+                          ? `${client.company} — ${client.name}`
+                          : client.name}
+                      </option>
+                    )
+                  )}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Project
+                </span>
+
+                <input
+                  value={projectName}
+                  onChange={(event) =>
+                    setProjectName(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Project name"
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Currency
+                </span>
+
+                <select
+                  value={currency}
+                  onChange={(event) =>
+                    setCurrency(
+                      event.target.value
+                    )
+                  }
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                >
+                  <option value="KES">
+                    KES
+                  </option>
+                  <option value="USD">
+                    USD
+                  </option>
+                  <option value="EUR">
+                    EUR
+                  </option>
+                  <option value="GBP">
+                    GBP
+                  </option>
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Valid Until
+                </span>
+
+                <input
+                  type="date"
+                  value={validUntil}
+                  onChange={(event) =>
+                    setValidUntil(
+                      event.target.value
+                    )
+                  }
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Production Days
+                </span>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={productionDays}
+                  onChange={(event) =>
+                    setProductionDays(
+                      Math.max(
+                        1,
+                        Number(
+                          event.target.value
+                        ) || 1
+                      )
+                    )
+                  }
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Location
+                </span>
+
+                <input
+                  value={location}
+                  onChange={(event) =>
+                    setLocation(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Production location"
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                />
+              </label>
+
+              <label className="block">
+                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  Client Contact
+                </span>
+
+                <input
+                  value={clientContact}
+                  onChange={(event) =>
+                    setClientContact(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Contact person"
+                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                />
+              </label>
+            </div>
+          </section>
+
+          {/* LINE ITEMS */}
+
+          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+                    Line Items
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
+                    Select equipment from your
+                    equipment database or add
+                    custom services.
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={
+                      addEquipmentItem
+                    }
+                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-mono uppercase tracking-widest font-semibold"
+                  >
+                    + Equipment
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={
+                      addCustomItem
+                    }
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-mono uppercase tracking-widest"
+                  >
+                    + Custom Item
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="divide-y divide-slate-100 dark:divide-zinc-900">
+              {items.map(
+                (item, index) => (
+                  <div
+                    key={item.id}
+                    className="p-6"
+                  >
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-mono">
+                          {index + 1}
+                        </span>
+
+                        <span className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                          {item.type ===
+                          "equipment"
+                            ? "Equipment"
+                            : "Custom"}
+                        </span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeItem(
+                            item.id
+                          )
+                        }
+                        className="text-xs text-red-500 hover:text-red-700"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                      {/* EQUIPMENT */}
+
+                      <div className="lg:col-span-4">
+                        <label className="block">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                            Equipment
+                          </span>
+
+                          <select
+                            value={
+                              item.equipmentId ||
+                              ""
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              handleEquipmentChange(
+                                item.id,
+                                event
+                                  .target
+                                  .value
+                              )
+                            }
+                            disabled={
+                              loadingEquipment
+                            }
+                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                          >
+                            <option value="">
+                              {loadingEquipment
+                                ? "Loading equipment..."
+                                : "Custom item / no equipment"}
+                            </option>
+
+                            {equipment.map(
+                              (
+                                equipmentItem
+                              ) => (
+                                <option
+                                  key={
+                                    equipmentItem.id
+                                  }
+                                  value={
+                                    equipmentItem.id
+                                  }
+                                >
+                                  {equipmentItem.name}
+                                  {" — "}
+                                  {formatAmount(
+                                    equipmentItem.dailyRate,
+                                    currency
+                                  )}
+                                  /day
+                                </option>
+                              )
+                            )}
+                          </select>
+                        </label>
+                      </div>
+
+                      {/* DESCRIPTION */}
+
+                      <div className="lg:col-span-4">
+                        <label className="block">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                            Description
+                          </span>
+
+                          <input
+                            value={
+                              item.description
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateItem(
+                                item.id,
+                                "description",
+                                event
+                                  .target
+                                  .value
+                              )
+                            }
+                            placeholder="Description"
+                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                          />
+                        </label>
+                      </div>
+
+                      {/* QUANTITY */}
+
+                      <div className="lg:col-span-1">
+                        <label className="block">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                            Qty
+                          </span>
+
+                          <input
+                            type="number"
+                            min="1"
+                            value={
+                              item.quantity
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateQuantity(
+                                item.id,
+                                Number(
+                                  event
+                                    .target
+                                    .value
+                                )
+                              )
+                            }
+                            className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                          />
+                        </label>
+                      </div>
+
+                      {/* UNIT */}
+
+                      <div className="lg:col-span-1">
+                        <label className="block">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                            Unit
+                          </span>
+
+                          <input
+                            value={
+                              item.unit
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateItem(
+                                item.id,
+                                "unit",
+                                event
+                                  .target
+                                  .value
+                              )
+                            }
+                            className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                          />
+                        </label>
+                      </div>
+
+                      {/* RATE */}
+
+                      <div className="lg:col-span-2">
+                        <label className="block">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                            Rate
+                          </span>
+
+                          <input
+                            type="number"
+                            min="0"
+                            value={
+                              item.rate
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateRate(
+                                item.id,
+                                Number(
+                                  event
+                                    .target
+                                    .value
+                                )
+                              )
+                            }
+                            className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <label className="block">
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                          Category
+                        </span>
+
+                        <input
+                          value={
+                            item.category
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            updateItem(
+                              item.id,
+                              "category",
+                              event
+                                .target
+                                .value
+                            )
+                          }
+                          className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                          Notes
+                        </span>
+
+                        <input
+                          value={
+                            item.notes
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            updateItem(
+                              item.id,
+                              "notes",
+                              event
+                                .target
+                                .value
+                            )
+                          }
+                          placeholder="Optional notes"
+                          className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="mt-4 flex justify-end">
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">
+                        {formatAmount(
+                          item.quantity *
+                            item.rate,
+                          currency
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+
+            <div className="p-6 border-t border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={
+                  addEquipmentItem
+                }
+                className="px-4 py-3 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-mono uppercase tracking-widest"
+              >
+                + Add Equipment
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  addCustomItem
+                }
+                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-xs font-mono uppercase tracking-widest"
+              >
+                + Add Custom Line
+              </button>
+            </div>
+          </section>
+
+          {/* PRICING */}
+
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+                Terms
+              </h2>
+
+              <div className="mt-5 space-y-5">
+                <label className="block">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                    Payment Terms
+                  </span>
+
+                  <input
+                    value={paymentTerms}
+                    onChange={(event) =>
+                      setPaymentTerms(
+                        event.target.value
+                      )
+                    }
+                    placeholder="e.g. 50% deposit, balance on completion"
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                    Deposit %
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={
+                      depositPercentage
+                    }
+                    onChange={(event) =>
+                      setDepositPercentage(
+                        Math.min(
+                          100,
+                          Math.max(
+                            0,
+                            Number(
+                              event
+                                .target
+                                .value
+                            ) || 0
+                          )
+                        )
+                      )
+                    }
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                    Notes
+                  </span>
+
+                  <textarea
+                    value={notes}
+                    onChange={(event) =>
+                      setNotes(
+                        event.target.value
+                      )
+                    }
+                    rows={5}
+                    placeholder="Additional quote notes..."
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500 resize-none"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+                Pricing
+              </h2>
+
+              <div className="mt-5 space-y-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-500 dark:text-zinc-500">
+                    Subtotal
+                  </span>
+
+                  <span className="font-medium text-slate-900 dark:text-white">
+                    {formatAmount(
+                      subtotal,
+                      currency
+                    )}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                    Discount
+                  </span>
+
+                  <div className="mt-2 flex gap-2">
+                    <select
+                      value={
+                        discountType
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setDiscountType(
+                          event
+                            .target
+                            .value as
+                            | "none"
+                            | "percentage"
+                            | "fixed"
+                        )
+                      }
+                      className="px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
+                    >
+                      <option value="none">
+                        None
+                      </option>
+
+                      <option value="percentage">
+                        %
+                      </option>
+
+                      <option value="fixed">
+                        Fixed
+                      </option>
+                    </select>
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={
+                        discountValue
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setDiscountValue(
+                          Math.max(
+                            0,
+                            Number(
+                              event
+                                .target
+                                .value
+                            ) || 0
+                          )
+                        )
+                      }
+                      disabled={
+                        discountType ===
+                        "none"
+                      }
+                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500 dark:text-zinc-500">
+                    Discount amount
+                  </span>
+
+                  <span className="text-slate-900 dark:text-white">
+                    -{" "}
+                    {formatAmount(
+                      discountAmount,
+                      currency
+                    )}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                    Tax
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={tax}
+                    onChange={(event) =>
+                      setTax(
+                        Math.max(
+                          0,
+                          Number(
+                            event.target
+                              .value
+                          ) || 0
+                        )
+                      )
+                    }
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
+                  />
+                </div>
+
+                <div className="pt-5 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                    Total
+                  </span>
+
+                  <span className="text-2xl font-light text-purple-600 dark:text-purple-400">
+                    {formatAmount(
+                      total,
+                      currency
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* MOBILE SAVE */}
+
+          <div className="flex justify-end pb-10">
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-mono uppercase tracking-widest font-semibold"
+            >
+              {saving
+                ? "Saving..."
+                : "Save Quote Draft"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
 }

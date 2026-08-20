@@ -1,258 +1,495 @@
-// src/app/admin/onboarding/page.tsx
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useCreator, CreatorData } from '@/context/CreatorContext';
+import {
+  FormEvent,
+  useState,
+} from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { useUser } from "@clerk/nextjs";
+import {
+  ArrowRight,
+  Check,
+  ImagePlus,
+  Loader2,
+} from "lucide-react";
+
+type FormState = {
+  name: string;
+  handle: string;
+  bio: string;
+  website: string;
+  location: string;
+};
 
 export default function CreatorOnboardingPage() {
-  const [step, setStep] = useState(1);
-  const { registerNewCreator } = useCreator();
   const router = useRouter();
+  const { user, isLoaded } = useUser();
 
-  // Onboarding Form State
-  const [name, setName] = useState('');
-  const [title, setTitle] = useState('Creative Director & Visual Artist');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('+254 700 000 000');
-  const [kraPin, setKraPin] = useState('P000000000X');
-  const [location, setLocation] = useState('Nairobi, Kenya');
-  
-  // Banking
-  const [bankName, setBankName] = useState('KCB Bank Kenya');
-  const [accountName] = useState('');
-  const [accountNumber, setAccountNumber] = useState('1234567890');
-  const [mpesaPaybill, setMpesaPaybill] = useState('Paybill 522522');
+  const [form, setForm] = useState<FormState>({
+    name: "",
+    handle: "",
+    bio: "",
+    website: "",
+    location: "",
+  });
 
-  const handleFinishOnboarding = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email) {
-      alert('Please fill in your Creator Name and Email.');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const displayName = user
+    ? user.fullName ||
+      [user.firstName || "", user.lastName || ""]
+        .filter(Boolean)
+        .join(" ")
+    : "";
+  const email = user?.primaryEmailAddress?.emailAddress || "";
+  const suggestedHandle =
+    displayName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") ||
+    email
+      .split("@")[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9_-]/g, "");
+
+  function updateField(
+    field: keyof FormState,
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    if (!user) {
+      setError(
+        "Please sign in before completing your creator profile."
+      );
       return;
     }
 
-    const creatorId = `creator_${Date.now()}`;
-    const newCreatorProfile: CreatorData = {
-      id: creatorId,
-      name,
-      handle: `${name.toUpperCase().replace(/\s+/g, '_')}`,
-      title,
-      email,
-      phone,
-      location,
-      kraPin,
-      bio: `${title} based in ${location}.`,
-      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
-      paymentDetails: {
-        bankName,
-        accountName: accountName || name,
-        accountNumber,
-        branch: 'Nairobi Main',
-        mpesaPaybill,
-      },
-      socials: {
-        linkedin: `https://linkedin.com/in/${creatorId}`,
-        instagram: `https://instagram.com/${creatorId}`,
-        youtube: `https://youtube.com/@${creatorId}`,
-        linktree: `https://linktr.ee/${creatorId}`,
-      },
-      partners: ['Apex Global', 'Vanguard Studios'],
-      projects: [], // Clean defaults
-      pressFeatures: [], // Clean defaults
-      clients: [], // Clean defaults
-      passcode: '',
-      expenses: [],
-    };
+    const name = (form.name || displayName).trim();
 
-    registerNewCreator(newCreatorProfile);
-    alert(`🎉 Welcome to KIPSMTHN, ${name}! Your Creator Account is active.`);
-    router.push('/admin');
-  };
+    const handle = (form.handle || suggestedHandle)
+      .trim()
+      .toLowerCase()
+      .replace(/^@/, "")
+      .replace(/[^a-z0-9_-]/g, "");
+
+    if (!name) {
+      setError("Please enter your display name.");
+      return;
+    }
+
+    if (!handle) {
+      setError("Please choose a creator handle.");
+      return;
+    }
+
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await fetch(
+        "/api/onboarding",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name,
+            handle,
+            bio: form.bio.trim(),
+            website: form.website.trim(),
+            location: form.location.trim(),
+            avatarUrl: user.imageUrl || "",
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+            "Unable to save your creator profile."
+        );
+      }
+
+      router.push("/admin");
+      router.refresh();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!isLoaded) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-[#6D28D9]" />
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="w-full max-w-md rounded-3xl border border-gray-200 bg-white p-8 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#6D28D9] text-sm font-bold text-white">
+            K
+          </div>
+
+          <h1 className="mt-6 text-2xl font-semibold tracking-tight text-gray-900">
+            Sign in required
+          </h1>
+
+          <p className="mt-3 text-sm leading-6 text-gray-500">
+            Please sign in to continue setting up your
+            creator profile.
+          </p>
+
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/sign-in")
+            }
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-xl bg-[#6D28D9] px-5 text-sm font-medium text-white transition hover:bg-[#5B21B6]"
+          >
+            Go to sign in
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 flex items-center justify-center p-6 font-sans">
-      <div className="max-w-2xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-3xl space-y-8 shadow-2xl relative">
-        
-        {/* Onboarding Header */}
-        <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-4 text-center">
-          <span className="px-3 py-1 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase font-bold">
-            Step {step} of 3 — Creator Onboarding
-          </span>
-          <h1 className="text-3xl font-light text-slate-900 dark:text-white">Register on KIPSMTHN</h1>
-          <p className="text-xs text-slate-600 dark:text-zinc-400 font-mono">
-            Build your isolated creator portfolio, client CRM, and KRA invoicing engine.
+    <main className="min-h-screen bg-white text-gray-900">
+      <div className="mx-auto flex min-h-screen w-full max-w-7xl flex-col lg:flex-row">
+        {/* LEFT SIDE */}
+        <section className="flex flex-1 flex-col justify-between px-6 py-8 sm:px-10 lg:px-16 lg:py-12">
+          <div>
+            {/* BRAND */}
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#6D28D9] text-sm font-bold text-white">
+                K
+              </div>
+
+              <span className="text-sm font-semibold tracking-tight">
+                KIPSMTHN
+              </span>
+            </div>
+
+            <div className="mt-16 max-w-xl">
+              {/* EYEBROW */}
+              <div className="inline-flex items-center rounded-full border border-purple-100 bg-purple-50 px-3 py-1.5 text-xs font-medium text-[#6D28D9]">
+                Creator setup
+              </div>
+
+              {/* HEADING */}
+              <h1 className="mt-6 text-4xl font-semibold tracking-[-0.04em] text-gray-950 sm:text-5xl lg:text-6xl">
+                Build your creator profile.
+              </h1>
+
+              <p className="mt-6 max-w-lg text-base leading-7 text-gray-500">
+                This is the foundation for your public
+                portfolio and private creator workspace.
+                We&apos;ll use these details across your
+                profile, client experience, quotes,
+                invoices, and workspace.
+              </p>
+
+              {/* BENEFITS */}
+              <div className="mt-10 space-y-5">
+                {[
+                  {
+                    title:
+                      "Create your public identity",
+                    description:
+                      "Your name, handle, bio, and image will form the foundation of your creator profile.",
+                  },
+                  {
+                    title:
+                      "Prepare your client experience",
+                    description:
+                      "Your profile information will be available throughout the tools you use to work with clients.",
+                  },
+                  {
+                    title:
+                      "Build everything from one place",
+                    description:
+                      "You can continue adding your work, services, contact details, and other information after this step.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-50">
+                      <Check className="h-4 w-4 text-[#6D28D9]" />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-gray-800">
+                        {item.title}
+                      </p>
+
+                      <p className="mt-1 text-sm leading-6 text-gray-500">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-12 text-xs text-gray-400">
+            You can change these details later from your
+            creator workspace.
           </p>
-        </div>
+        </section>
 
-        {/* STEP 1: IDENTITY */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <h2 className="text-lg font-medium text-slate-900 dark:text-white font-mono">01 / Creator Identity</h2>
-            
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Creator Full Name *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Jane Wanjiku"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                />
+        {/* RIGHT SIDE */}
+        <section className="w-full px-6 pb-8 sm:px-10 lg:w-140 lg:border-l lg:border-gray-100 lg:px-12 lg:py-12">
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-3xl border border-gray-200 bg-white p-6 shadow-[0_12px_40px_rgba(0,0,0,0.04)] sm:p-8"
+          >
+            {/* FORM HEADER */}
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#6D28D9]">
+                Step 01
+              </p>
+
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-gray-950">
+                Your creator profile
+              </h2>
+
+              <p className="mt-2 text-sm leading-6 text-gray-500">
+                Start with the basics. You&apos;ll be
+                able to build out your full workspace
+                next.
+              </p>
+            </div>
+
+            {/* AVATAR */}
+            <div className="mt-8 flex items-center gap-4">
+              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-purple-50">
+                {user.imageUrl ? (
+                  <Image
+                    src={user.imageUrl}
+                    alt=""
+                    fill
+                    sizes="64px"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <ImagePlus className="h-5 w-5 text-[#6D28D9]" />
+                )}
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Professional Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Commercial Photographer & Director"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                />
-              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-800">
+                  Profile image
+                </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Email Address *</label>
-                  <input
-                    type="email"
-                    placeholder="jane@studio.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone Number</label>
-                  <input
-                    type="text"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
+                <p className="mt-1 text-xs leading-5 text-gray-500">
+                  Your Clerk profile image will be used
+                  automatically.
+                </p>
               </div>
             </div>
 
-            <button
-              onClick={() => setStep(2)}
-              className="w-full py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors cursor-pointer"
-            >
-              Next: KRA Tax & Banking Details →
-            </button>
-          </div>
-        )}
-
-        {/* STEP 2: TAX & BANKING */}
-        {step === 2 && (
-          <div className="space-y-6">
-            <h2 className="text-lg font-medium text-slate-900 dark:text-white font-mono">02 / KRA Tax & Invoicing Banking</h2>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Creator KRA PIN *</label>
-                  <input
-                    type="text"
-                    value={kraPin}
-                    onChange={(e) => setKraPin(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Location</label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Bank Name</label>
-                  <input
-                    type="text"
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Account Number</label>
-                  <input
-                    type="text"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">MPESA Paybill / Till Number</label>
-                <input
-                  type="text"
-                  value={mpesaPaybill}
-                  onChange={(e) => setMpesaPaybill(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="flex-1 py-3.5 btn-secondary text-xs font-mono uppercase tracking-widest rounded-lg cursor-pointer"
+            {/* NAME */}
+            <div className="mt-8">
+              <label
+                htmlFor="name"
+                className="text-sm font-medium text-gray-800"
               >
-                ← Back
-              </button>
-              <button
-                type="button"
-                onClick={() => setStep(3)}
-                className="flex-1 py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg cursor-pointer"
+                Display name
+              </label>
+
+              <input
+                id="name"
+                type="text"
+                value={form.name || displayName}
+                onChange={(event) =>
+                  updateField(
+                    "name",
+                    event.target.value
+                  )
+                }
+                placeholder="Your name"
+                autoComplete="name"
+                className="mt-2 h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100"
+              />
+            </div>
+
+            {/* HANDLE */}
+            <div className="mt-5">
+              <label
+                htmlFor="handle"
+                className="text-sm font-medium text-gray-800"
               >
-                Next: Launch Creator Account →
-              </button>
-            </div>
-          </div>
-        )}
+                Creator handle
+              </label>
 
-        {/* STEP 3: CONFIRM & LAUNCH */}
-        {step === 3 && (
-          <form onSubmit={handleFinishOnboarding} className="space-y-6 text-center">
-            <div className="p-6 bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-500/30 rounded-2xl space-y-3 font-mono text-xs">
-              <p className="font-bold text-purple-950 dark:text-purple-200 text-sm">Account Ready to Launch!</p>
-              <p>• Creator Name: <strong className="text-slate-900 dark:text-white">{name}</strong></p>
-              <p>• Email: <strong className="text-slate-900 dark:text-white">{email}</strong></p>
-              <p>• KRA PIN: <strong className="text-slate-900 dark:text-white">{kraPin}</strong></p>
-              <p className="text-[11px] text-slate-500 dark:text-zinc-400 pt-2">Your portfolio and admin dashboard will initialize with clean defaults.</p>
+              <div className="relative mt-2">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                  @
+                </span>
+
+                <input
+                  id="handle"
+                  type="text"
+                  value={form.handle || suggestedHandle}
+                  onChange={(event) =>
+                    updateField(
+                      "handle",
+                      event.target.value
+                    )
+                  }
+                  placeholder="your-handle"
+                  autoComplete="username"
+                  className="h-12 w-full rounded-xl border border-gray-200 bg-white pl-8 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100"
+                />
+              </div>
+
+              <p className="mt-2 text-xs text-gray-400">
+                Use letters, numbers, hyphens, or
+                underscores.
+              </p>
             </div>
 
+            {/* BIO */}
+            <div className="mt-5">
+              <label
+                htmlFor="bio"
+                className="text-sm font-medium text-gray-800"
+              >
+                Bio
+              </label>
+
+              <textarea
+                id="bio"
+                value={form.bio}
+                onChange={(event) =>
+                  updateField(
+                    "bio",
+                    event.target.value
+                  )
+                }
+                placeholder="Tell clients what you create..."
+                rows={4}
+                className="mt-2 w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm leading-6 text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100"
+              />
+            </div>
+
+            {/* WEBSITE */}
+            <div className="mt-5">
+              <label
+                htmlFor="website"
+                className="text-sm font-medium text-gray-800"
+              >
+                Website
+                <span className="ml-2 text-xs font-normal text-gray-400">
+                  Optional
+                </span>
+              </label>
+
+              <input
+                id="website"
+                type="url"
+                value={form.website}
+                onChange={(event) =>
+                  updateField(
+                    "website",
+                    event.target.value
+                  )
+                }
+                placeholder="https://yourwebsite.com"
+                autoComplete="url"
+                className="mt-2 h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100"
+              />
+            </div>
+
+            {/* LOCATION */}
+            <div className="mt-5">
+              <label
+                htmlFor="location"
+                className="text-sm font-medium text-gray-800"
+              >
+                Location
+                <span className="ml-2 text-xs font-normal text-gray-400">
+                  Optional
+                </span>
+              </label>
+
+              <input
+                id="location"
+                type="text"
+                value={form.location}
+                onChange={(event) =>
+                  updateField(
+                    "location",
+                    event.target.value
+                  )
+                }
+                placeholder="Nairobi, Kenya"
+                autoComplete="address-level2"
+                className="mt-2 h-12 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100"
+              />
+            </div>
+
+            {/* ERROR */}
+            {error && (
+              <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">
+                {error}
+              </div>
+            )}
+
+            {/* SUBMIT */}
             <button
               type="submit"
-              className="w-full py-4 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl transition-colors shadow-lg cursor-pointer font-bold"
+              disabled={saving}
+              className="mt-8 inline-flex h-12 w-full items-center justify-center rounded-xl bg-[#6D28D9] px-5 text-sm font-semibold text-white transition hover:bg-[#5B21B6] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              🚀 Launch Isolated Creator Account
+              {saving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating profile...
+                </>
+              ) : (
+                <>
+                  Continue to workspace
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </>
+              )}
             </button>
+
+            <p className="mt-4 text-center text-xs leading-5 text-gray-400">
+              You can update these details later from
+              your creator workspace.
+            </p>
           </form>
-        )}
-
-        <div className="text-center pt-2 text-[11px] font-mono text-slate-500">
-          <Link href="/admin/login" className="text-purple-600 dark:text-purple-400 hover:underline">
-            Already have an account? Login here →
-          </Link>
-        </div>
-
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

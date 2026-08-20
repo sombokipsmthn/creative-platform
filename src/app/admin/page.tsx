@@ -64,12 +64,13 @@ export default function AdminDashboardPage() {
     '';
 
   const avatar =
-    activeCreator?.avatarUrl ||
+    activeCreator?.profile?.avatarUrl ||
     user?.imageUrl ||
     '';
 
-  const projectCount =
-    activeCreator?.projects?.length ?? 0;
+  // Projects are not part of CreatorData yet.
+  // We will connect the real projects data separately.
+  const projectCount = 0;
 
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100">
@@ -164,7 +165,7 @@ export default function AdminDashboardPage() {
             </p>
 
             <p className="mt-3 text-xl font-light text-slate-900 dark:text-white">
-              {activeCreator?.location || 'Nairobi, Kenya'}
+              {activeCreator?.profile?.location || 'Nairobi, Kenya'}
             </p>
 
             <p className="mt-2 text-xs text-slate-500">

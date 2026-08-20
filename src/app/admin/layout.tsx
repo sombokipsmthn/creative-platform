@@ -1,9 +1,11 @@
+
 'use client';
 
-import { UserButton, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 
 export default function AdminLayout({
@@ -39,73 +41,70 @@ export default function AdminLayout({
   }
 
   const navItems = [
-    { name: 'Dashboard', href: '/admin' },
-    { name: 'Clients', href: '/admin/clients' },
-    { name: 'Invoices', href: '/admin/invoices' },
-    { name: 'Quotes', href: '/admin/quotes' },
-    { name: 'Equipment', href: '/admin/equipment' },
-    { name: 'Projects', href: '/admin/projects' },
-    { name: 'Settings', href: '/admin/settings' },
-  ];
+  { name: 'Dashboard', href: '/admin' },
+  { name: 'Clients', href: '/admin/clients' }, 
+  { name: 'Quotes', href: '/admin/quotes' },
+  { name: 'Invoices', href: '/admin/invoices' },
+  { name: 'Projects', href: '/admin/projects' },
+];
+
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100">
-
       <header className="sticky top-0 z-50 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-6">
+          {/* Brand */}
           <Link
             href="/admin"
-            className="text-sm font-bold tracking-widest uppercase"
+            className="shrink-0 text-sm font-bold tracking-widest uppercase"
           >
             KIPSMTHN<span className="text-purple-500">.</span>
           </Link>
 
+          {/* Desktop navigation */}
           <nav className="hidden lg:flex items-center gap-6">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`text-xs font-mono uppercase tracking-widest transition ${
-                  pathname === item.href
-                    ? 'text-purple-600 font-bold'
-                    : 'text-slate-500 hover:text-purple-600'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const isActive =
+                pathname === item.href ||
+                (item.href !== '/admin' &&
+                  pathname.startsWith(`${item.href}/`));
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-xs font-mono uppercase tracking-widest transition ${
+                    isActive
+                      ? 'text-purple-600 dark:text-purple-400 font-bold'
+                      : 'text-slate-500 hover:text-purple-600 dark:hover:text-purple-400'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
 
             <span className="h-4 w-px bg-slate-200 dark:bg-zinc-800" />
 
-            <Link
-              href="/"
-              className="text-xs font-mono text-slate-500 hover:text-purple-600"
-            >
-              Public Site ↗
-            </Link>
-
-           <UserButton />
+            <ProfileMenu />
           </nav>
 
+          {/* Mobile profile menu */}
           <div className="lg:hidden">
-            <UserButton />
+            <ProfileMenu />
           </div>
         </div>
       </header>
 
-      <main>
-        {children}
-      </main>
+      <main>{children}</main>
 
-      <footer className="border-t border-slate-200 dark:border-zinc-900 py-6 px-6 mt-10 flex justify-between text-xs font-mono text-slate-500">
+      <footer className="border-t border-slate-200 dark:border-zinc-900 py-6 px-6 mt-10 flex justify-between items-center text-xs font-mono text-slate-500">
         <span>
           © {new Date().getFullYear()} KIPSMTHN Creator Portal
         </span>
 
         <ThemeToggle />
       </footer>
-
     </div>
   );
 }

@@ -27,10 +27,21 @@ export type CatalogEquipment = {
 const CATEGORY_ICONS: Record<string, typeof Camera> = {
   "A. Professional Fees": User,
   "Professional Fees": User,
+  Cameras: Camera,
+  Lenses: Camera,
   "Camera Package": Camera,
+  Sound: Mic,
+  Audio: Mic,
   "Audio Package": Mic,
+  Lights: Lightbulb,
+  Lighting: Lightbulb,
+  Modifiers: Lightbulb,
   "Lighting Package": Lightbulb,
+  Stands: Move,
+  "Focus Pulling Systems": Move,
   "Grips & Motion": Move,
+  "Photography / Video Accessories": Move,
+  Drones: Plane,
   "Drones & Action": Plane,
   "C. Post Production": Clapperboard,
   "Post Production": Clapperboard,
@@ -260,12 +271,11 @@ export default function EquipmentCatalog({
                       <p className="mt-1 text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">
                         {item.brand}
                       </p>
-                      {item.specs && (
-                        <p className="mt-3 text-sm leading-6 text-slate-500 dark:text-zinc-400">
-                          {item.specs}
-                        </p>
-                      )}
                     </div>
+
+                    <p className="min-h-10 text-sm leading-relaxed text-slate-600 dark:text-zinc-400">
+                      {item.specs || "Production-ready equipment available for hire."}
+                    </p>
                   </div>
 
                   <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4 dark:border-zinc-800">
@@ -273,24 +283,20 @@ export default function EquipmentCatalog({
                       <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
                         Daily rate
                       </p>
-                      <p className="mt-1 text-xl font-light text-slate-900 dark:text-white">
+                      <p className="mt-1 text-xl font-medium text-slate-900 dark:text-white">
                         {formatKes(item.dailyRate)}
                       </p>
                     </div>
+
                     <button
                       type="button"
-                      aria-pressed={selected}
-                      aria-label={
-                        selected
-                          ? `Remove ${item.name} from kit`
-                          : `Add ${item.name} to kit`
-                      }
                       onClick={() => toggleSelected(item.id)}
-                      className={`rounded-full px-4 py-2 text-[10px] font-mono uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 ${
+                      className={`rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest transition ${
                         selected ? "btn-primary" : "btn-secondary"
                       }`}
+                      aria-pressed={selected}
                     >
-                      {selected ? "In kit" : "Add to kit"}
+                      {selected ? "Selected" : "Add to kit"}
                     </button>
                   </div>
                 </article>
@@ -301,43 +307,37 @@ export default function EquipmentCatalog({
       )}
 
       {selectedItems.length > 0 && (
-        <div
-          role="region"
-          aria-label="Selected production kit"
-          className="sticky bottom-4 z-40 rounded-2xl border border-purple-500/30 bg-white/95 p-4 shadow-xl backdrop-blur-md dark:bg-zinc-950/95 md:p-5"
-        >
+        <aside className="sticky bottom-4 z-20 rounded-3xl border border-purple-200 bg-white/95 p-5 shadow-xl backdrop-blur dark:border-purple-900/50 dark:bg-zinc-950/95">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">
-                Production kit
+              <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">
+                Selected kit
               </p>
-              <p className="mt-1 text-sm text-slate-700 dark:text-zinc-300">
-                {selectedItems.length} selected · {formatKes(kitTotal)} / day
+              <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
+                {selectedItems.length} item{selectedItems.length === 1 ? "" : "s"} · estimated daily equipment total
+              </p>
+              <p className="mt-1 text-2xl font-medium text-slate-900 dark:text-white">
+                {formatKes(kitTotal)}
               </p>
             </div>
+
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedIds([])}
-                className="rounded-full px-4 py-2.5 text-xs font-mono uppercase tracking-widest btn-secondary"
+                className="rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest btn-secondary"
               >
                 Clear kit
               </button>
-              <a
-                href={inquiryMailto(selectedItems)}
-                className="inline-flex items-center justify-center rounded-full px-5 py-2.5 text-xs font-mono uppercase tracking-widest btn-primary"
-              >
-                Request this kit
-              </a>
               <Link
-                href="/contact"
-                className="inline-flex items-center justify-center rounded-full px-5 py-2.5 text-xs font-mono uppercase tracking-widest btn-secondary"
+                href={inquiryMailto(selectedItems)}
+                className="rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest btn-primary"
               >
-                Contact
+                Request quote
               </Link>
             </div>
           </div>
-        </div>
+        </aside>
       )}
     </div>
   );

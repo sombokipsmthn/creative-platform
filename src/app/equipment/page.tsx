@@ -4,7 +4,9 @@ import ThemeToggle from "@/components/ThemeToggle";
 import EquipmentCatalog, {
   type CatalogEquipment,
 } from "@/components/EquipmentCatalog";
-import { equipmentDatabase } from "@/db/equipmentData";
+import { db } from "@/db";
+import { equipment } from "@/db/schema";
+import { asc } from "drizzle-orm";
 
 export const metadata = {
   title: "Production Equipment | KIPSMTHN",
@@ -12,44 +14,20 @@ export const metadata = {
     "Browse cameras, lighting, audio, grips, and drones available for production in Nairobi.",
 };
 
-function fromStaticCatalog(): CatalogEquipment[] {
-  return equipmentDatabase.map((item) => ({
+async function loadEquipment(): Promise<CatalogEquipment[]> {
+  const rows = await db
+    .select()
+    .from(equipment)
+    .orderBy(asc(equipment.category), asc(equipment.name));
+
+  return rows.map((item) => ({
     id: item.id,
     name: item.name,
-    brand: item.brand,
+    brand: item.brand || "KIPSMTHN",
     category: item.category,
-    specs: item.specs,
-    dailyRate: item.rateKes,
-    isPopular: item.isPopular,
+    specs: item.specs || "",
+    dailyRate: item.dailyRate,
   }));
-}
-
-async function loadEquipment(): Promise<CatalogEquipment[]> {
-  try {
-    const { db } = await import("@/db");
-    const { equipment } = await import("@/db/schema");
-    const { asc } = await import("drizzle-orm");
-
-    const rows = await db
-      .select()
-      .from(equipment)
-      .orderBy(asc(equipment.category), asc(equipment.name));
-
-    if (!rows.length) {
-      return fromStaticCatalog();
-    }
-
-    return rows.map((item) => ({
-      id: item.id,
-      name: item.name,
-      brand: item.brand || "KIPSMTHN",
-      category: item.category,
-      specs: item.specs || "",
-      dailyRate: item.dailyRate,
-    }));
-  } catch {
-    return fromStaticCatalog();
-  }
 }
 
 export default async function EquipmentPage() {

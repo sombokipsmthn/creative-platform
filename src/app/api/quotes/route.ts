@@ -49,7 +49,7 @@ async function getCurrentUser() {
   return user ?? null;
 }
 
-function normalizeStatus(status: unknown) {
+export function normalizeStatus(status: unknown) {
   const value = String(status ?? "draft")
     .trim()
     .toLowerCase();
@@ -67,7 +67,7 @@ function normalizeStatus(status: unknown) {
     : "draft";
 }
 
-function normalizeCurrency(currency: unknown) {
+export function normalizeCurrency(currency: unknown) {
   const value = String(currency ?? "KES")
     .trim()
     .toUpperCase();
@@ -75,7 +75,7 @@ function normalizeCurrency(currency: unknown) {
   return value || "KES";
 }
 
-function calculateTotals({
+export function calculateTotals({
   items,
   tax,
 }: {
@@ -105,7 +105,7 @@ function calculateTotals({
   };
 }
 
-function normalizeItems(items: unknown) {
+export function normalizeItems(items: unknown) {
   if (!Array.isArray(items)) {
     return [];
   }

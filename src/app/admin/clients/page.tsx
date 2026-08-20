@@ -1,603 +1,466 @@
 // src/app/admin/clients/page.tsx
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 
-interface AssignedGallery {
-  id: string;
-  title: string;
-  token: string;
-  pin: string;
-  status: string;
-  selectsCount: number;
-}
+type ClientStatus = 'active' | 'inactive' | 'archived';
 
-interface Client {
+type Client = {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  company: string;
-  location: string;
+  company?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  notes?: string | null;
+  status: ClientStatus | string;
   createdAt: string;
-  notes: string;
-  feedbackStatus: 'AWAITING_FEEDBACK' | 'FEEDBACK_RECEIVED' | 'IN_PRODUCTION' | 'COMPLETED';
-  contractStatus: 'NOT_SENT' | 'SENT' | 'SIGNED';
-  etimsInvoiceStatus: 'NOT_SENT' | 'SENT' | 'PAID';
-  taxCertificateStatus: 'NOT_RECEIVED' | 'RECEIVED' | 'NOT_APPLICABLE';
-  galleries: AssignedGallery[];
+  updatedAt: string;
+};
+
+const emptyForm = {
+  name: '',
+  email: '',
+  phone: '',
+  company: '',
+  website: '',
+  notes: '',
+  status: 'active' as ClientStatus,
+};
+
+function formatDate(value?: string | null) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+
+  return date.toLocaleDateString('en-KE', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+function statusLabel(status: string) {
+  return status.replace(/_/g, ' ');
+}
+
+function statusClass(status: string) {
+  if (status === 'active') {
+    return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
+  }
+
+  if (status === 'archived') {
+    return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
+  }
+
+  return 'bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-300';
 }
 
 export default function AdminClientsPage() {
-  const [clients, setClients] = useState<Client[]>([
-    {
-      id: 'cli_01',
-      name: 'UNDP Timbuktoo & ccHUB Team',
-      email: 'timbuktoo@undp.org',
-      phone: '+254 700 000 111',
-      company: 'iHUB / ccHUB',
-      location: 'Nairobi, Kenya',
-      createdAt: 'Jan 2026',
-      notes: 'Ecosystem storytelling program for Timbuktoo and Mastercard EdTech Fellowship.',
-      feedbackStatus: 'AWAITING_FEEDBACK',
-      contractStatus: 'SIGNED',
-      etimsInvoiceStatus: 'SENT',
-      taxCertificateStatus: 'NOT_RECEIVED',
-      galleries: [
-        {
-          id: 'gal_01',
-          title: 'UNDP Timbuktoo Summit 2026',
-          token: 'xK9_mQ2pL7v',
-          pin: '4821',
-          status: 'IN_REVIEW',
-          selectsCount: 14,
-        },
-      ],
-    },
-    {
-      id: 'cli_02',
-      name: 'BURN Communications Team',
-      email: 'media@burnmfg.com',
-      phone: '+254 722 000 222',
-      company: 'BURN Manufacturing USA LLC',
-      location: 'Nairobi & USA',
-      createdAt: 'Dec 2025',
-      notes: 'Clean energy impact storytelling across African markets.',
-      feedbackStatus: 'COMPLETED',
-      contractStatus: 'SIGNED',
-      etimsInvoiceStatus: 'PAID',
-      taxCertificateStatus: 'RECEIVED',
-      galleries: [
-        {
-          id: 'gal_02',
-          title: 'Clean Energy Impact Series 2025',
-          token: 'burn_impact_2025',
-          pin: '1234',
-          status: 'FINAL_DELIVERY',
-          selectsCount: 42,
-        },
-      ],
-    },
-    {
-      id: 'cli_03',
-      name: 'Delta40 Venture Team',
-      email: 'innovate@delta40.studio',
-      phone: '+254 711 333 444',
-      company: 'Delta40 Venture Studio',
-      location: 'Nairobi, Kenya',
-      createdAt: 'Feb 2026',
-      notes: 'Climate-tech, mobility, and circular economy scale programs.',
-      feedbackStatus: 'AWAITING_FEEDBACK',
-      contractStatus: 'SENT',
-      etimsInvoiceStatus: 'NOT_SENT',
-      taxCertificateStatus: 'NOT_RECEIVED',
-      galleries: [],
-    },
-  ]);
-
+  const [clients, setClients] = useState<Client[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterCategory, setFilterCategory] = useState<'ALL' | 'AWAITING_FEEDBACK' | 'PENDING_TAX_CERT' | 'PENDING_CONTRACT'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | ClientStatus>('ALL');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [error, setError] = useState('');
 
-  // Form State
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [company, setCompany] = useState('');
-  const [location, setLocation] = useState('Nairobi, Kenya');
-  const [notes, setNotes] = useState('');
-  const [feedbackStatus, setFeedbackStatus] = useState<Client['feedbackStatus']>('AWAITING_FEEDBACK');
-  const [contractStatus, setContractStatus] = useState<Client['contractStatus']>('NOT_SENT');
-  const [etimsInvoiceStatus, setEtimsInvoiceStatus] = useState<Client['etimsInvoiceStatus']>('NOT_SENT');
-  const [taxCertificateStatus, setTaxCertificateStatus] = useState<Client['taxCertificateStatus']>('NOT_RECEIVED');
+  useEffect(() => {
+    let cancelled = false;
 
-  const filteredClients = clients.filter((c) => {
-    const matchesSearch =
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchQuery.toLowerCase());
+    async function loadClients() {
+      try {
+        setLoading(true);
+        setError('');
 
-    if (!matchesSearch) return false;
+        const response = await fetch('/api/clients', { cache: 'no-store' });
 
-    if (filterCategory === 'AWAITING_FEEDBACK') return c.feedbackStatus === 'AWAITING_FEEDBACK';
-    if (filterCategory === 'PENDING_TAX_CERT') return c.taxCertificateStatus === 'NOT_RECEIVED';
-    if (filterCategory === 'PENDING_CONTRACT') return c.contractStatus !== 'SIGNED';
+        if (!response.ok) {
+          throw new Error('Failed to load clients');
+        }
 
-    return true;
-  });
+        const data = await response.json();
 
-  const handleCreateClient = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email) {
-      alert('Please fill in Contact Name and Email.');
+        if (!cancelled) {
+          setClients(Array.isArray(data) ? data : []);
+        }
+      } catch (err) {
+        console.error('Failed to load clients:', err);
+        if (!cancelled) {
+          setError('Unable to load clients. Please try again.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadClients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredClients = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return clients.filter((client) => {
+      const matchesSearch =
+        !query ||
+        [client.name, client.company, client.email, client.phone, client.website]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(query);
+
+      const matchesStatus =
+        filterStatus === 'ALL' || client.status === filterStatus;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [clients, filterStatus, searchQuery]);
+
+  const activeCount = clients.filter((client) => client.status === 'active').length;
+  const inactiveCount = clients.filter((client) => client.status === 'inactive').length;
+  const archivedCount = clients.filter((client) => client.status === 'archived').length;
+
+  function openCreateModal() {
+    setForm(emptyForm);
+    setError('');
+    setIsAddClientOpen(true);
+  }
+
+  function closeCreateModal() {
+    if (!saving) {
+      setIsAddClientOpen(false);
+      setForm(emptyForm);
+    }
+  }
+
+  async function handleCreateClient(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!form.name.trim()) {
+      setError('Client name is required.');
       return;
     }
 
-    const newClient: Client = {
-      id: `cli_${Date.now()}`,
-      name,
-      email,
-      phone: phone || '+254 700 000 000',
-      company: company || name,
-      location: location || 'Nairobi, Kenya',
-      createdAt: 'Just now',
-      notes,
-      feedbackStatus,
-      contractStatus,
-      etimsInvoiceStatus,
-      taxCertificateStatus,
-      galleries: [],
-    };
+    try {
+      setSaving(true);
+      setError('');
 
-    setClients([newClient, ...clients]);
-    setName('');
-    setEmail('');
-    setPhone('');
-    setCompany('');
-    setNotes('');
-    setIsAddClientOpen(false);
-    alert(`Client &quot;${name}&quot; registered with KRA & Contract tracking!`);
-  };
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
 
-  const copyMagicLink = (token: string) => {
-    const link = `${window.location.origin}/portal/g/${token}`;
-    navigator.clipboard.writeText(link);
-    alert(`Client Portal Access Link copied:\n${link}`);
-  };
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to create client');
+      }
+
+      setClients((current) => [data, ...current]);
+      setIsAddClientOpen(false);
+      setForm(emptyForm);
+    } catch (err) {
+      console.error('Failed to create client:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create client.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function updateClientStatus(status: ClientStatus) {
+    if (!selectedClient) return;
+
+    try {
+      setUpdating(true);
+      setError('');
+
+      const response = await fetch(`/api/clients/${selectedClient.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || 'Failed to update client');
+      }
+
+      setClients((current) =>
+        current.map((client) => (client.id === data.id ? data : client))
+      );
+      setSelectedClient(data);
+    } catch (err) {
+      console.error('Failed to update client:', err);
+      setError(err instanceof Error ? err.message : 'Failed to update client.');
+    } finally {
+      setUpdating(false);
+    }
+  }
 
   return (
     <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
       <div className="max-w-7xl mx-auto space-y-10">
-        
-        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
           <div>
-            <Link href="/admin" className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
-            <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">Client CRM & KRA Tax Compliance</h1>
+            <Link href="/admin" className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline">
+              ← Back to Dashboard
+            </Link>
+            <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">Client CRM</h1>
+            <p className="text-xs text-slate-500 dark:text-zinc-500 font-mono mt-2">
+              Database-backed client records and workflow status.
+            </p>
           </div>
 
           <button
-            onClick={() => setIsAddClientOpen(true)}
+            onClick={openCreateModal}
             className="px-5 py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm"
           >
             <span>+ Register New Client</span>
           </button>
         </div>
 
-        {/* CRM Business Metrics Bar */}
+        {error && !isAddClientOpen && !selectedClient && (
+          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-mono uppercase">Awaiting Feedback</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {clients.filter((c) => c.feedbackStatus === 'AWAITING_FEEDBACK').length}
-            </p>
-          </div>
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
-            <p className="text-xs text-red-600 dark:text-red-400 font-mono uppercase">Pending Tax Certs</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {clients.filter((c) => c.taxCertificateStatus === 'NOT_RECEIVED').length}
-            </p>
-          </div>
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
-            <p className="text-xs text-purple-600 dark:text-purple-400 font-mono uppercase">Contracts Signed</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {clients.filter((c) => c.contractStatus === 'SIGNED').length}
-            </p>
-          </div>
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
-            <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono uppercase">eTIMS Invoices Shared</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {clients.filter((c) => c.etimsInvoiceStatus !== 'NOT_SENT').length}
-            </p>
-          </div>
-        </div>
-
-        {/* Toolbar & Filter Pills */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 dark:bg-zinc-900/40 p-4 border border-slate-200 dark:border-zinc-800/80 rounded-2xl">
-          <input
-            type="text"
-            placeholder="Search clients by name, company, or email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:w-80 px-4 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-xl focus:border-purple-600 focus:outline-none"
-          />
-
-          <div className="flex flex-wrap gap-2 text-xs font-mono">
-            <button
-              onClick={() => setFilterCategory('ALL')}
-              className={`px-3 py-1.5 rounded-lg border transition-all ${
-                filterCategory === 'ALL' ? 'bg-purple-600 border-purple-500 text-white' : 'btn-secondary'
-              }`}
-            >
-              All ({clients.length})
-            </button>
-            <button
-              onClick={() => setFilterCategory('AWAITING_FEEDBACK')}
-              className={`px-3 py-1.5 rounded-lg border transition-all ${
-                filterCategory === 'AWAITING_FEEDBACK' ? 'bg-amber-600 border-amber-500 text-white' : 'btn-secondary'
-              }`}
-            >
-              Awaiting Feedback ({clients.filter((c) => c.feedbackStatus === 'AWAITING_FEEDBACK').length})
-            </button>
-            <button
-              onClick={() => setFilterCategory('PENDING_TAX_CERT')}
-              className={`px-3 py-1.5 rounded-lg border transition-all ${
-                filterCategory === 'PENDING_TAX_CERT' ? 'bg-red-600 border-red-500 text-white' : 'btn-secondary'
-              }`}
-            >
-              Pending Tax Certs ({clients.filter((c) => c.taxCertificateStatus === 'NOT_RECEIVED').length})
-            </button>
-            <button
-              onClick={() => setFilterCategory('PENDING_CONTRACT')}
-              className={`px-3 py-1.5 rounded-lg border transition-all ${
-                filterCategory === 'PENDING_CONTRACT' ? 'bg-purple-600 border-purple-500 text-white' : 'btn-secondary'
-              }`}
-            >
-              Contracts Pending ({clients.filter((c) => c.contractStatus !== 'SIGNED').length})
-            </button>
-          </div>
-        </div>
-
-        {/* Client Cards List */}
-        <div className="grid grid-cols-1 gap-4">
-          {filteredClients.map((client) => (
-            <div
-              key={client.id}
-              className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/20 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
-            >
-              <div className="space-y-3 max-w-2xl">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
-                    {client.company}
-                  </span>
-
-                  {client.feedbackStatus === 'AWAITING_FEEDBACK' && (
-                    <span className="px-2.5 py-0.5 bg-amber-500/20 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-[10px] font-mono rounded-full">
-                      💬 Awaiting Feedback
-                    </span>
-                  )}
-
-                  <span className={`px-2.5 py-0.5 border text-[10px] font-mono rounded-full ${
-                    client.contractStatus === 'SIGNED' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400'
-                  }`}>
-                    Contract: {client.contractStatus === 'SIGNED' ? 'Signed ✓' : client.contractStatus === 'SENT' ? 'Sent ⏳' : 'Not Sent'}
-                  </span>
-
-                  <span className={`px-2.5 py-0.5 border text-[10px] font-mono rounded-full ${
-                    client.etimsInvoiceStatus === 'PAID' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : client.etimsInvoiceStatus === 'SENT' ? 'bg-purple-600/20 border-purple-500/30 text-purple-700 dark:text-purple-300' : 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400'
-                  }`}>
-                    eTIMS Invoice: {client.etimsInvoiceStatus}
-                  </span>
-
-                  <span className={`px-2.5 py-0.5 border text-[10px] font-mono rounded-full ${
-                    client.taxCertificateStatus === 'RECEIVED' ? 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300' : client.taxCertificateStatus === 'NOT_RECEIVED' ? 'bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-300' : 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400'
-                  }`}>
-                    Tax Cert: {client.taxCertificateStatus === 'RECEIVED' ? 'Received ✓' : 'Pending ⚠️'}
-                  </span>
-                </div>
-
-                <h3 className="text-xl font-medium text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                  {client.name}
-                </h3>
-
-                <p className="text-xs text-slate-600 dark:text-zinc-400 font-mono">
-                  {client.email} • {client.phone} • {client.location}
-                </p>
-
-                {client.notes && (
-                  <p className="text-xs text-slate-500 dark:text-zinc-500 font-light italic">
-                    &quot;{client.notes}&quot;
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                <button
-                  onClick={() => setSelectedClient(client)}
-                  className="px-4 py-2.5 btn-secondary text-xs font-mono rounded-xl flex items-center gap-2 cursor-pointer"
-                >
-                  <span>Edit Status / View ({client.galleries.length})</span>
-                </button>
-
-                {client.galleries.length > 0 && (
-                  <button
-                    onClick={() => copyMagicLink(client.galleries[0].token)}
-                    className="px-4 py-2.5 btn-primary text-xs font-mono rounded-xl flex items-center gap-2 shadow-sm cursor-pointer"
-                  >
-                    <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                    </svg>
-                    <span>Copy Portal Link</span>
-                  </button>
-                )}
-              </div>
+          {[
+            ['Total Clients', clients.length, 'text-slate-500 dark:text-zinc-400'],
+            ['Active', activeCount, 'text-emerald-600 dark:text-emerald-400'],
+            ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
+            ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
+          ].map(([label, count, color]) => (
+            <div key={String(label)} className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl shadow-sm dark:shadow-none">
+              <p className={`text-xs ${color} font-mono uppercase`}>{label}</p>
+              <p className="text-3xl font-light text-slate-900 dark:text-white mt-1">{count}</p>
             </div>
           ))}
         </div>
 
-        {/* MODAL 1: REGISTER NEW CLIENT */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 dark:bg-zinc-900/40 p-4 border border-slate-200 dark:border-zinc-800/80 rounded-2xl">
+          <input
+            type="text"
+            placeholder="Search clients by name, company, email, phone..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            className="w-full md:w-96 px-4 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-xl focus:border-purple-600 focus:outline-none"
+          />
+
+          <div className="flex flex-wrap gap-2 text-xs font-mono">
+            {(
+              [
+                ['ALL', clients.length],
+                ['active', activeCount],
+                ['inactive', inactiveCount],
+                ['archived', archivedCount],
+              ] as const
+            ).map(([status, count]) => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-3 py-1.5 rounded-lg border transition-all ${
+                  filterStatus === status
+                    ? 'bg-purple-600 border-purple-500 text-white'
+                    : 'btn-secondary'
+                }`}
+              >
+                {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
+            <p className="text-xs font-mono text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading clients…</p>
+          </div>
+        ) : filteredClients.length === 0 ? (
+          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-2xl">
+            <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
+            <button onClick={openCreateModal} className="mt-4 px-4 py-2 btn-primary text-xs font-mono rounded-lg">
+              Register your first client
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {filteredClients.map((client) => (
+              <div
+                key={client.id}
+                className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/20 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
+              >
+                <div className="space-y-3 max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {client.company && (
+                      <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
+                        {client.company}
+                      </span>
+                    )}
+                    <span className={`px-2.5 py-0.5 border text-[10px] font-mono rounded-full uppercase ${statusClass(client.status)}`}>
+                      {statusLabel(client.status)}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-medium text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                    {client.name}
+                  </h3>
+
+                  <div className="text-xs text-slate-600 dark:text-zinc-400 font-mono flex flex-wrap gap-x-2 gap-y-1">
+                    {client.email && <span>{client.email}</span>}
+                    {client.phone && <span>• {client.phone}</span>}
+                    {client.website && <span>• {client.website}</span>}
+                  </div>
+
+                  {client.notes && (
+                    <p className="text-xs text-slate-500 dark:text-zinc-500 font-light italic">“{client.notes}”</p>
+                  )}
+
+                  <p className="text-[10px] text-slate-400 dark:text-zinc-600 font-mono uppercase">
+                    Added {formatDate(client.createdAt)}
+                  </p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setError('');
+                    setSelectedClient(client);
+                  }}
+                  className="px-4 py-2.5 btn-secondary text-xs font-mono rounded-xl cursor-pointer"
+                >
+                  View / Edit
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {isAddClientOpen && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
             <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-              <button
-                onClick={() => setIsAddClientOpen(false)}
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-              >
-                ✕
-              </button>
+              <button onClick={closeCreateModal} disabled={saving} className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50">✕</button>
 
               <div className="space-y-1">
-                <p className="text-xs font-mono uppercase text-purple-600 dark:text-purple-400 tracking-widest">CRM & Tax Setup</p>
-                <h2 className="text-2xl font-light text-slate-900 dark:text-white">Register New Client</h2>
+                <p className="text-xs font-mono uppercase text-purple-600 dark:text-purple-400 tracking-widest">CRM</p>
+                <h2 className="text-2xl font-light">Register New Client</h2>
               </div>
+
+              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateClient} className="space-y-4">
                 <div className="space-y-1">
                   <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Contact Name *</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Jane Wanjiku"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
+                  <input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Email Address *</label>
-                    <input
-                      type="email"
-                      placeholder="jane@company.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    />
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Email</label>
+                    <input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
                   </div>
-
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone Number</label>
-                    <input
-                      type="text"
-                      placeholder="+254 700 000 000"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    />
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone</label>
+                    <input type="text" placeholder="+254 700 000 000" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Company / Organization</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Safaricom Spark"
-                      value={company}
-                      onChange={(e) => setCompany(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    />
+                    <input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
                   </div>
-
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Location</label>
-                    <input
-                      type="text"
-                      placeholder="Nairobi, Kenya"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Feedback Stage</label>
-                    <select
-                      value={feedbackStatus}
-                      onChange={(e) => setFeedbackStatus(e.target.value as Client['feedbackStatus'])}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    >
-                      <option value="AWAITING_FEEDBACK">Awaiting Client Feedback 💬</option>
-                      <option value="FEEDBACK_RECEIVED">Feedback Received</option>
-                      <option value="IN_PRODUCTION">In Production / Retouching</option>
-                      <option value="COMPLETED">Completed & Delivered</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Contract Status</label>
-                    <select
-                      value={contractStatus}
-                      onChange={(e) => setContractStatus(e.target.value as Client['contractStatus'])}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    >
-                      <option value="NOT_SENT">Not Sent</option>
-                      <option value="SENT">Sent for Signature ⏳</option>
-                      <option value="SIGNED">Signed & Active ✓</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">KRA eTIMS Invoice</label>
-                    <select
-                      value={etimsInvoiceStatus}
-                      onChange={(e) => setEtimsInvoiceStatus(e.target.value as Client['etimsInvoiceStatus'])}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    >
-                      <option value="NOT_SENT">Not Generated</option>
-                      <option value="SENT">eTIMS Invoice Shared</option>
-                      <option value="PAID">Invoice Paid ✓</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Withholding Tax Cert</label>
-                    <select
-                      value={taxCertificateStatus}
-                      onChange={(e) => setTaxCertificateStatus(e.target.value as Client['taxCertificateStatus'])}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                    >
-                      <option value="NOT_RECEIVED">Pending Tax Cert ⚠️</option>
-                      <option value="RECEIVED">Tax Cert Received ✓</option>
-                      <option value="NOT_APPLICABLE">Not Applicable</option>
-                    </select>
+                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Website</label>
+                    <input type="url" placeholder="https://company.com" value={form.website} onChange={(event) => setForm({ ...form, website: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Internal Notes</label>
-                  <textarea
-                    rows={2}
-                    placeholder="Project deliverables or billing notes..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-4 py-2 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
+                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Status</label>
+                  <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="archived">Archived</option>
+                  </select>
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-md"
-                >
-                  + Add Client to CRM
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Internal Notes</label>
+                  <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="w-full px-4 py-2 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                </div>
+
+                <button type="submit" disabled={saving} className="w-full py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-md disabled:opacity-50">
+                  {saving ? 'Saving Client…' : '+ Add Client to CRM'}
                 </button>
               </form>
             </div>
           </div>
         )}
 
-        {/* MODAL 2: EDIT CLIENT STATUS / VIEW ASSIGNED GALLERIES */}
         {selectedClient && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-2xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-              <button
-                onClick={() => setSelectedClient(null)}
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-              >
-                ✕
-              </button>
+            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+              <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white">✕</button>
 
-              <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-4">
-                <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
-                  {selectedClient.company}
-                </span>
-                <h2 className="text-2xl font-light text-slate-900 dark:text-white mt-2">{selectedClient.name}</h2>
-                <p className="text-xs font-mono text-slate-600 dark:text-zinc-400">
-                  {selectedClient.email} • {selectedClient.phone} • {selectedClient.location}
+              <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
+                {selectedClient.company && <span className="inline-flex px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">{selectedClient.company}</span>}
+                <h2 className="text-2xl font-light">{selectedClient.name}</h2>
+                <p className="text-xs font-mono text-slate-600 dark:text-zinc-400 break-words">
+                  {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}
                 </p>
               </div>
 
-              {/* Status Update Quick Toggles */}
-              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4 text-xs font-mono">
-                <p className="text-purple-600 dark:text-purple-400 font-bold uppercase text-[10px]">Update Business & Compliance Tracking</p>
+              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Feedback Status</label>
-                    <select
-                      value={selectedClient.feedbackStatus}
-                      onChange={(e) => {
-                        const val = e.target.value as Client['feedbackStatus'];
-                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, feedbackStatus: val } : c));
-                        setSelectedClient({ ...selectedClient, feedbackStatus: val });
-                      }}
-                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
-                    >
-                      <option value="AWAITING_FEEDBACK">Awaiting Client Feedback 💬</option>
-                      <option value="FEEDBACK_RECEIVED">Feedback Received</option>
-                      <option value="IN_PRODUCTION">In Production</option>
-                      <option value="COMPLETED">Completed</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Contract Status</label>
-                    <select
-                      value={selectedClient.contractStatus}
-                      onChange={(e) => {
-                        const val = e.target.value as Client['contractStatus'];
-                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, contractStatus: val } : c));
-                        setSelectedClient({ ...selectedClient, contractStatus: val });
-                      }}
-                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
-                    >
-                      <option value="NOT_SENT">Not Sent</option>
-                      <option value="SENT">Sent for Signature ⏳</option>
-                      <option value="SIGNED">Signed & Active ✓</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">KRA eTIMS Invoice</label>
-                    <select
-                      value={selectedClient.etimsInvoiceStatus}
-                      onChange={(e) => {
-                        const val = e.target.value as Client['etimsInvoiceStatus'];
-                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, etimsInvoiceStatus: val } : c));
-                        setSelectedClient({ ...selectedClient, etimsInvoiceStatus: val });
-                      }}
-                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
-                    >
-                      <option value="NOT_SENT">Not Generated</option>
-                      <option value="SENT">eTIMS Invoice Shared</option>
-                      <option value="PAID">Invoice Paid ✓</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Withholding Tax Cert</label>
-                    <select
-                      value={selectedClient.taxCertificateStatus}
-                      onChange={(e) => {
-                        const val = e.target.value as Client['taxCertificateStatus'];
-                        setClients(clients.map(c => c.id === selectedClient.id ? { ...c, taxCertificateStatus: val } : c));
-                        setSelectedClient({ ...selectedClient, taxCertificateStatus: val });
-                      }}
-                      className="w-full p-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-slate-900 dark:text-white rounded-lg"
-                    >
-                      <option value="NOT_RECEIVED">Pending Tax Cert ⚠️</option>
-                      <option value="RECEIVED">Tax Cert Received ✓</option>
-                      <option value="NOT_APPLICABLE">Not Applicable</option>
-                    </select>
-                  </div>
+              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
+                <div>
+                  <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Client Status</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-500 mt-1">Changes are saved directly to the database.</p>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-slate-600 dark:text-zinc-400 text-[10px] uppercase">Internal Notes</label>
-                  <p className="text-xs text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">
-                    {selectedClient.notes || 'No internal notes.'}
-                  </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {(['active', 'inactive', 'archived'] as ClientStatus[]).map((status) => (
+                    <button
+                      key={status}
+                      disabled={updating || selectedClient.status === status}
+                      onClick={() => updateClientStatus(status)}
+                      className={`px-3 py-2.5 border rounded-lg text-[10px] font-mono uppercase transition-all disabled:opacity-50 ${
+                        selectedClient.status === status
+                          ? statusClass(status)
+                          : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-600 dark:text-zinc-400 hover:border-purple-500'
+                      }`}
+                    >
+                      {statusLabel(status)}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-500 uppercase">Internal Notes</p>
+                <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-600">
+                <div>Created {formatDate(selectedClient.createdAt)}</div>
+                <div className="text-right">Updated {formatDate(selectedClient.updatedAt)}</div>
               </div>
             </div>
           </div>
         )}
-    </div>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,6 @@
-
-
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { asc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
 
@@ -69,9 +67,7 @@ export async function GET(req: Request) {
     }
 
     if (category) {
-      conditions.push(
-        eq(equipment.category, category)
-      );
+      conditions.push(eq(equipment.category, category));
     }
 
     const results = await db
@@ -79,7 +75,7 @@ export async function GET(req: Request) {
       .from(equipment)
       .where(
         conditions.length > 0
-          ? or(...conditions)
+          ? and(...conditions)
           : undefined
       )
       .orderBy(
@@ -117,28 +113,19 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-
     const normalized = normalizeEquipment(body);
 
     if (!normalized.name) {
       return NextResponse.json(
-        {
-          error: "name is required",
-        },
-        {
-          status: 400,
-        }
+        { error: "name is required" },
+        { status: 400 }
       );
     }
 
     if (!normalized.category) {
       return NextResponse.json(
-        {
-          error: "category is required",
-        },
-        {
-          status: 400,
-        }
+        { error: "category is required" },
+        { status: 400 }
       );
     }
 
@@ -148,17 +135,10 @@ export async function POST(req: Request) {
       .returning();
 
     if (!createdEquipment) {
-      throw new Error(
-        "Equipment was not created"
-      );
+      throw new Error("Equipment was not created");
     }
 
-    return NextResponse.json(
-      createdEquipment,
-      {
-        status: 201,
-      }
-    );
+    return NextResponse.json(createdEquipment, { status: 201 });
   } catch (error) {
     console.error(
       "POST /api/equipment error:",
@@ -166,12 +146,8 @@ export async function POST(req: Request) {
     );
 
     return NextResponse.json(
-      {
-        error: "Failed to create equipment",
-      },
-      {
-        status: 500,
-      }
+      { error: "Failed to create equipment" },
+      { status: 500 }
     );
   }
 }

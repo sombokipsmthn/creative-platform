@@ -4,6 +4,7 @@ import {
   timestamp,
   uuid,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 /*
@@ -30,6 +31,28 @@ export const users = pgTable("users", {
 
   handle: text("handle")
     .unique(),
+
+  /*
+   * Onboarding lifecycle.
+   *
+   * incomplete
+   * complete
+   */
+  onboardingStatus: text("onboarding_status")
+    .default("incomplete")
+    .notNull(),
+
+  /*
+   * Current onboarding step.
+   *
+   * 1 = Profile
+   * 2 = Services
+   * 3 = Business
+   * 4 = Finished
+   */
+  onboardingStep: integer("onboarding_step")
+    .default(1)
+    .notNull(),
 
   createdAt: timestamp("created_at")
     .defaultNow()
@@ -85,8 +108,121 @@ export const creatorProfiles = pgTable(
 
 /*
 |--------------------------------------------------------------------------
+| Creator Services
+|--------------------------------------------------------------------------
+|
+| Services offered by the creator.
+|
+| Used by onboarding and later by the quotation/CRM system.
+|
+*/
+
+export const creatorServices = pgTable(
+  "creator_services",
+  {
+    id: uuid("id")
+      .defaultRandom()
+      .primaryKey(),
+
+    creatorId: text("creator_id")
+      .notNull()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    name: text("name")
+      .notNull(),
+
+    description: text("description"),
+
+    category: text("category"),
+
+    defaultRate: integer("default_rate")
+      .default(0)
+      .notNull(),
+
+    currency: text("currency")
+      .default("KES")
+      .notNull(),
+
+    createdAt: timestamp("created_at")
+      .defaultNow()
+      .notNull(),
+
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull(),
+  }
+);
+
+/*
+|--------------------------------------------------------------------------
+| Creator Business Profiles
+|--------------------------------------------------------------------------
+|
+| Business and tax information for the creator.
+|
+| This is intentionally separate from creator_profiles because
+| public profile information and financial/business information
+| have different purposes and security considerations.
+|
+*/
+
+export const creatorBusinessProfiles = pgTable(
+  "creator_business_profiles",
+  {
+    id: uuid("id")
+      .defaultRandom()
+      .primaryKey(),
+
+    userId: text("user_id")
+      .notNull()
+      .unique()
+      .references(() => users.id, {
+        onDelete: "cascade",
+      }),
+
+    businessName: text("business_name"),
+
+    phone: text("phone"),
+
+    kraPin: text("kra_pin"),
+
+    vatRegistered: boolean("vat_registered")
+      .default(false)
+      .notNull(),
+
+    vatNumber: text("vat_number"),
+
+    currency: text("currency")
+      .default("KES")
+      .notNull(),
+
+    depositPercentage: integer("deposit_percentage")
+      .default(50)
+      .notNull(),
+
+    whtRate: integer("wht_rate")
+      .default(0)
+      .notNull(),
+
+    createdAt: timestamp("created_at")
+      .defaultNow()
+      .notNull(),
+
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .notNull(),
+  }
+);
+
+/*
+|--------------------------------------------------------------------------
 | Clients
 |--------------------------------------------------------------------------
+|
+| CRM record for a creator's client.
+|
 */
 
 export const clients = pgTable("clients", {
@@ -110,10 +246,43 @@ export const clients = pgTable("clients", {
 
   website: text("website"),
 
+  location: text("location"),
+
   notes: text("notes"),
 
+  /*
+   * General client record status.
+   */
   status: text("status")
     .default("active")
+    .notNull(),
+
+  /*
+   * CRM workflow status.
+   */
+  feedbackStatus: text("feedback_status")
+    .default("AWAITING_FEEDBACK")
+    .notNull(),
+
+  /*
+   * Contract workflow.
+   */
+  contractStatus: text("contract_status")
+    .default("NOT_SENT")
+    .notNull(),
+
+  /*
+   * eTIMS invoice workflow.
+   */
+  etimsInvoiceStatus: text("etims_invoice_status")
+    .default("NOT_SENT")
+    .notNull(),
+
+  /*
+   * Withholding tax certificate.
+   */
+  taxCertificateStatus: text("tax_certificate_status")
+    .default("NOT_RECEIVED")
     .notNull(),
 
   createdAt: timestamp("created_at")
@@ -245,13 +414,13 @@ export const quotes = pgTable("quotes", {
   /*
    * Set when the quote has been converted into an invoice.
    *
-   * This column intentionally does NOT declare a Drizzle FK
-   * because invoices.quoteId points back to quotes.id.
+   * No FK is declared here because invoices.quoteId points
+   * back to quotes.id.
    */
   invoiceId: uuid("invoice_id"),
 
   /*
-   * Used for optimistic/version tracking.
+   * Optimistic/version tracking.
    */
   version: integer("version")
     .default(1)
@@ -295,9 +464,7 @@ export const invoices = pgTable("invoices", {
     }),
 
   /*
-   * The invoice may have originated from a quote.
-   *
-   * This is the FK that establishes the database relationship.
+   * Optional source quote.
    */
   quoteId: uuid("quote_id")
     .references(() => quotes.id, {

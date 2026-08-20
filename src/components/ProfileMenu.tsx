@@ -5,6 +5,7 @@ import {
   useClerk,
   useUser,
 } from '@clerk/nextjs';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 
@@ -76,12 +77,10 @@ export default function ProfileMenu() {
     'C';
 
   async function handleSignOut() {
-    setOpen(false);
-
-    await signOut({
-      redirectUrl: '/admin/login',
-    });
-  }
+  await signOut({
+    redirectUrl: "/",
+  });
+}
 
   return (
     <div
@@ -97,9 +96,11 @@ export default function ProfileMenu() {
         className="flex items-center gap-2 rounded-full outline-none transition focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       >
         {user.imageUrl ? (
-          <img
+          <Image
             src={user.imageUrl}
             alt={fullName}
+            width={36}
+            height={36}
             className="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-zinc-700"
           />
         ) : (
@@ -133,14 +134,16 @@ export default function ProfileMenu() {
         <div
           role="menu"
           aria-label="Profile menu"
-          className="absolute right-0 top-[calc(100%+0.75rem)] z-[60] w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-black/30"
+          className="absolute right-0 top-[calc(100%+0.75rem)] z-60 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-black/30"
         >
           <div className="border-b border-slate-100 px-4 py-4 dark:border-zinc-800">
             <div className="flex items-center gap-3">
               {user.imageUrl ? (
-                <img
+                <Image
                   src={user.imageUrl}
                   alt={fullName}
+                  width={44}
+                  height={44}
                   className="h-11 w-11 rounded-full object-cover border border-slate-200 dark:border-zinc-700"
                 />
               ) : (

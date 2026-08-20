@@ -155,21 +155,12 @@ export function CreatorProvider({
        *
        * It tells us that onboarding is required.
        */
-      if (data.needsOnboarding) {
-        setActiveUser(null);
-        setUsersDb({});
-        setLoading(false);
-
-        if (
-          typeof window !== "undefined" &&
-          window.location.pathname !==
-            "/admin/onboarding"
-        ) {
-          router.push("/admin/onboarding");
-        }
-
-        return;
-      }
+  if (data.needsOnboarding) {
+  setActiveUser(null);
+  setUsersDb({});
+  setLoading(false);
+  return;
+}
 
       /*
        * -------------------------------------------------------
@@ -217,7 +208,7 @@ export function CreatorProvider({
     } finally {
       setLoading(false);
     }
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, [isLoaded, isSignedIn, user?.id, router]);
 
   /*
    * -------------------------------------------------------

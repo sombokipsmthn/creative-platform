@@ -1,98 +1,47 @@
 import {
-  clerkClient,
   clerkMiddleware,
   createRouteMatcher,
 } from "@clerk/nextjs/server";
 
-import {
-  NextFetchEvent,
-  NextRequest,
-  NextResponse,
-} from "next/server";
-
-
-const publishableKey =
-  process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-  process.env.CLERK_PUBLISHABLE_KEY;
-
-
-/*
-|--------------------------------------------------------------------------
-| ROUTE ACCESS CONTROL
-|--------------------------------------------------------------------------
-*/
-
-// Admin dashboard routes
-const isOwnerRoute = createRouteMatcher([
+const isAdminRoute = createRouteMatcher([
   "/admin(.*)",
-  "/api/db-test",
 ]);
 
-
-// Creator onboarding must be public to authenticated users
-// because new creators do not exist in the DB yet.
 const isOnboardingRoute = createRouteMatcher([
   "/admin/onboarding(.*)",
 ]);
 
-
-// Auth pages should always remain accessible
 const isAuthRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
 ]);
 
-
-function forbiddenResponse(request: Request) {
-  const pathname = new URL(request.url).pathname;
-
-  console.log(
-    "FORBIDDEN ACCESS REDIRECT:",
-    pathname
-  );
-
-  if (pathname.startsWith("/api/")) {
-    return NextResponse.json(
-      {
-        error: "Forbidden",
-      },
-      {
-        status: 403,
-      }
-    );
-  }
-
-  return NextResponse.redirect(
-    new URL("/", request.url)
-  );
-}
-
-
-
 const customMiddleware = clerkMiddleware(
   async (auth, req) => {
-
-
     /*
-    |--------------------------------------------------------------------------
-    | PUBLIC AUTH ROUTES
-    |--------------------------------------------------------------------------
-    */
+     * -------------------------------------------------------
+     * PUBLIC AUTH ROUTES
+     * -------------------------------------------------------
+     *
+     * Sign-in and sign-up must remain publicly accessible.
+     */
 
     if (isAuthRoute(req)) {
       return;
     }
 
-
     /*
-    |--------------------------------------------------------------------------
-    | CREATOR ONBOARDING
-    |--------------------------------------------------------------------------
-    |
-    | New users land here after Clerk signup.
-    | Do NOT apply admin restrictions.
-    |
-    */
+     * -------------------------------------------------------
+     * CREATOR ONBOARDING
+     * -------------------------------------------------------
+     *
+     * Onboarding requires a valid Clerk session, but does not
+     * require the creator to already have a completed local
+     * account.
+     *
+     * The onboarding API is responsible for creating/
+     * retrieving the local creator account.
+     */
 
     if (isOnboardingRoute(req)) {
       const {
@@ -100,133 +49,72 @@ const customMiddleware = clerkMiddleware(
         redirectToSignIn,
       } = await auth();
 
+      if (!userId) {
+        return redirectToSignIn();
+      }
+
+      return;
+    }
+
+    /*
+     * -------------------------------------------------------
+     * CREATOR ADMIN PORTAL
+     * -------------------------------------------------------
+     *
+     * The creator portal is for authenticated creators.
+     *
+     * IMPORTANT:
+     *
+     * Do NOT use ADMIN_EMAIL here.
+     *
+     * ADMIN_EMAIL was previously being used as an owner-only
+     * authorization gate. That caused a completed creator
+     * onboarding flow to do this:
+     *
+     *   /admin/onboarding
+     *        ↓
+     *   /admin
+     *        ↓
+     *   ADMIN_EMAIL check
+     *        ↓
+     *   /
+     *
+     * Authentication and creator authorization are separate
+     * concerns. Clerk authentication is enforced here, while
+     * the application/database determines whether the user
+     * has a creator account and what they can access.
+     */
+
+    if (isAdminRoute(req)) {
+      const {
+        userId,
+        redirectToSignIn,
+      } = await auth();
 
       if (!userId) {
         return redirectToSignIn();
       }
 
-
       return;
     }
-
-
 
     /*
-    |--------------------------------------------------------------------------
-    | OWNER ADMIN ROUTES
-    |--------------------------------------------------------------------------
-    */
+     * -------------------------------------------------------
+     * ALL OTHER ROUTES
+     * -------------------------------------------------------
+     *
+     * Public routes continue normally.
+     */
 
-    if (!isOwnerRoute(req)) {
-      return;
-    }
-
-
-    const {
-      redirectToSignIn,
-      userId,
-    } = await auth();
-
-
-
-    if (!userId) {
-      return redirectToSignIn();
-    }
-
-
-
-    const adminEmail =
-      process.env.ADMIN_EMAIL
-        ?.trim()
-        .toLowerCase();
-
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | DEV SAFETY
-    |--------------------------------------------------------------------------
-    */
-
-    if (!adminEmail) {
-      return;
-    }
-
-
-
-    try {
-
-      const clerk =
-        await clerkClient();
-
-
-      const user =
-        await clerk.users.getUser(userId);
-
-
-
-      const email =
-        user.primaryEmailAddress
-          ?.emailAddress
-          .toLowerCase();
-
-
-
-      if (
-        email &&
-        email !== adminEmail
-      ) {
-        return forbiddenResponse(req);
-      }
-
-
-    } catch (error) {
-
-      console.error(
-        "Unable to verify admin access",
-        error
-      );
-
-      return;
-
-    }
-
-
-  },
-
-  publishableKey
-    ? {
-        publishableKey,
-      }
-    : undefined
+    return;
+  }
 );
 
-
-
-export default function middleware(
-  req: NextRequest,
-  event: NextFetchEvent
-) {
-
-  if (!publishableKey) {
-    return NextResponse.next();
-  }
-
-
-  return customMiddleware(
-    req,
-    event
-  );
-
-}
-
-
+export default customMiddleware;
 
 export const config = {
-
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpeg?|jpg|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    "/(api|trpc)(.*)",
+    "/((?!_next|.*\\..*).*)",
+    "/api/(.*)",
   ],
-
 };

@@ -1,18 +1,35 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import {
+  auth,
+} from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { creatorProfiles, users } from "@/db/schema";
+import {
+  creatorProfiles,
+  users,
+} from "@/db/schema";
+
+import {
+  getOrCreateLocalUser,
+} from "@/lib/auth/get-or-create-local-user";
 
 export async function POST() {
   try {
-    const { userId } = await auth();
+    const { userId } =
+      await auth();
+
+    /*
+     * -------------------------------------------------------
+     * REQUIRE CLERK AUTHENTICATION
+     * -------------------------------------------------------
+     */
 
     if (!userId) {
       return NextResponse.json(
         {
-          error: "Unauthorized",
+          error:
+            "Unauthorized",
         },
         {
           status: 401,
@@ -20,74 +37,92 @@ export async function POST() {
       );
     }
 
-    /*
-     * IMPORTANT:
-     *
-     * This endpoint only SYNCs an existing local creator.
-     *
-     * It must NOT create a users row for a brand-new
-     * Clerk account.
-     *
-     * New users are created by:
-     *
-     *   /admin/onboarding
-     *        ↓
-     *   POST /api/onboarding
-     */
-
-    const existingUsers = await db
-      .select()
-      .from(users)
-      .where(eq(users.authUserId, userId))
-      .limit(1);
-
-    const user = existingUsers[0];
+    console.log(
+      "Creator sync: checking Clerk user",
+      userId
+    );
 
     /*
-     * No local account means this is a brand-new creator.
+     * -------------------------------------------------------
+     * GET OR CREATE LOCAL USER
+     * -------------------------------------------------------
      *
-     * Do NOT create the user here.
-     */
-    if (!user) {
-      return NextResponse.json({
-        needsOnboarding: true,
-        user: null,
-        profile: null,
-      });
-    }
-
-    /*
-     * Existing local account.
+     * A Clerk account is not useful to the application
+     * until there is a corresponding local users row.
      *
-     * Load the creator profile associated with it.
+     * This function safely handles both:
+     *
+     * 1. Existing local users
+     * 2. Brand-new Clerk users
      */
-    const existingProfiles = await db
-      .select()
-      .from(creatorProfiles)
-      .where(eq(creatorProfiles.userId, user.id))
-      .limit(1);
 
-    const profile = existingProfiles[0] ?? null;
+    const user =
+      await getOrCreateLocalUser(
+        userId
+      );
+
+    console.log(
+      "Creator sync: local user confirmed",
+      {
+        id: user.id,
+
+        authUserId:
+          user.authUserId,
+
+        onboardingStatus:
+          user.onboardingStatus,
+
+        onboardingStep:
+          user.onboardingStep,
+      }
+    );
 
     /*
-     * If the local user exists but has no creator profile,
-     * treat the account as incomplete and send it through
-     * onboarding.
+     * -------------------------------------------------------
+     * FIND CREATOR PROFILE
+     * -------------------------------------------------------
      */
-    if (!profile) {
-      return NextResponse.json({
-        needsOnboarding: true,
-        user,
-        profile: null,
-      });
-    }
+
+    const existingProfiles =
+      await db
+        .select()
+        .from(
+          creatorProfiles
+        )
+        .where(
+          eq(
+            creatorProfiles.userId,
+            user.id
+          )
+        )
+        .limit(1);
+
+    const profile =
+      existingProfiles[0] ??
+      null;
 
     /*
-     * Fully onboarded creator.
+     * -------------------------------------------------------
+     * DETERMINE ONBOARDING STATE
+     * -------------------------------------------------------
      */
+
+    const needsOnboarding =
+      !profile ||
+      user.onboardingStatus !==
+        "complete";
+
+    /*
+     * -------------------------------------------------------
+     * RESPONSE
+     * -------------------------------------------------------
+     */
+
     return NextResponse.json({
-      needsOnboarding: false,
+      needsOnboarding,
+
       user,
+
       profile,
     });
   } catch (error) {
@@ -98,7 +133,10 @@ export async function POST() {
 
     return NextResponse.json(
       {
-        error: "Failed to sync user",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to sync user",
       },
       {
         status: 500,

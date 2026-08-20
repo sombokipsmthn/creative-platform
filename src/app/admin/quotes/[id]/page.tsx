@@ -2,12 +2,7 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 /* =========================================================
    TYPES
@@ -312,9 +307,7 @@ function formatDate(date?: string | null) {
   });
 }
 
-function toDateInputValue(
-  date?: string | null
-) {
+function toDateInputValue(date?: string | null) {
   if (!date) return '';
 
   const parsed = new Date(date);
@@ -332,39 +325,29 @@ function formatAmount(
 ) {
   const value = Number(amount || 0);
 
-  return `${currency} ${value.toLocaleString(
-    'en-KE',
-    {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }
-  )}`;
+  return `${currency} ${value.toLocaleString('en-KE', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 function toNumber(value: unknown) {
   const number = Number(value);
 
-  return Number.isFinite(number)
-    ? number
-    : 0;
+  return Number.isFinite(number) ? number : 0;
 }
 
 function calculateItemAmount(
   quantity: number,
   rate: number
 ) {
-  return (
-    toNumber(quantity) *
-    toNumber(rate)
-  );
+  return toNumber(quantity) * toNumber(rate);
 }
 
 function formatStatus(status: string) {
   return status
     .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) =>
-      letter.toUpperCase()
-    );
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 /* =========================================================
@@ -372,13 +355,10 @@ function formatStatus(status: string) {
 ========================================================= */
 
 const inputClass =
-  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-500/10';
+  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder hover focus focus focus focus/10';
 
 const compactInputClass =
-  'w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-500/10';
-
-const selectClass =
-  'w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none transition hover:border-slate-300 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-500/10';
+  'w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder hover focus focus focus focus/10';
 
 const labelClass =
   'mb-2 block text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-slate-400';
@@ -391,52 +371,40 @@ const sectionLabelClass =
 ========================================================= */
 
 export default function QuoteDetailPage() {
-  const params =
-    useParams<{ id: string }>();
-
+  const params = useParams<{ id: string }>();
   const router = useRouter();
 
   const quoteId = params?.id;
 
-  const [quote, setQuote] =
-    useState<Quote | null>(null);
+  const [quote, setQuote] = useState<Quote | null>(null);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [actionLoading, setActionLoading] = useState('');
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const [saving, setSaving] =
-    useState(false);
-
-  const [actionLoading, setActionLoading] =
-    useState('');
-
-  const [error, setError] =
-    useState('');
-
-  const [success, setSuccess] =
-    useState('');
-
-  const [
-    equipmentSearch,
-    setEquipmentSearch,
-  ] = useState('');
-
-  const [
-    openEquipmentId,
-    setOpenEquipmentId,
-  ] = useState<string | null>(null);
+  const [equipmentSearch, setEquipmentSearch] = useState('');
+  const [openEquipmentId, setOpenEquipmentId] =
+    useState<string | null>(null);
 
   /* =======================================================
      LOAD QUOTE
   ======================================================= */
 
-  const loadQuote = useCallback(
-    async () => {
-      if (!quoteId) return;
+  useEffect(() => {
+    if (!quoteId) {
+      return;
+    }
 
+    let cancelled = false;
+
+    async function fetchQuote() {
       try {
-        setLoading(true);
-        setError('');
+        if (!cancelled) {
+          setLoading(true);
+          setError('');
+        }
 
         const response = await fetch(
           `/api/quotes/${quoteId}`,
@@ -445,40 +413,45 @@ export default function QuoteDetailPage() {
           }
         );
 
-        const data =
-          await response
-            .json()
-            .catch(() => null);
+        const data = await response
+          .json()
+          .catch(() => null);
 
         if (!response.ok) {
           throw new Error(
-            data?.error ||
-              'Failed to load quote'
+            data?.error || 'Failed to load quote'
           );
         }
 
-        setQuote(data);
+        if (!cancelled) {
+          setQuote(data);
+        }
       } catch (err) {
         console.error(
           'Failed to load quote:',
           err
         );
 
-        setError(
-          err instanceof Error
-            ? err.message
-            : 'Unable to load quote.'
-        );
+        if (!cancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : 'Unable to load quote.'
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    },
-    [quoteId]
-  );
+    }
 
-  useEffect(() => {
-    loadQuote();
-  }, [loadQuote]);
+    void fetchQuote();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [quoteId]);
 
   /* =======================================================
      QUOTE FIELD UPDATES
@@ -533,33 +506,31 @@ export default function QuoteDetailPage() {
     setQuote((current) => {
       if (!current) return current;
 
-      const items = (
-        current.items || []
-      ).map((item) => {
-        if (item.id !== itemId) {
-          return item;
+      const items = (current.items || []).map(
+        (item) => {
+          if (item.id !== itemId) {
+            return item;
+          }
+
+          const updated = {
+            ...item,
+            [field]: value,
+          };
+
+          if (
+            field === 'quantity' ||
+            field === 'rate'
+          ) {
+            updated.amount =
+              calculateItemAmount(
+                toNumber(updated.quantity),
+                toNumber(updated.rate)
+              );
+          }
+
+          return updated;
         }
-
-        const updated = {
-          ...item,
-          [field]: value,
-        };
-
-        if (
-          field === 'quantity' ||
-          field === 'rate'
-        ) {
-          updated.amount =
-            calculateItemAmount(
-              toNumber(
-                updated.quantity
-              ),
-              toNumber(updated.rate)
-            );
-        }
-
-        return updated;
-      });
+      );
 
       return {
         ...current,
@@ -593,19 +564,14 @@ export default function QuoteDetailPage() {
     });
   }
 
-  function removeItem(
-    itemId: string
-  ) {
+  function removeItem(itemId: string) {
     setQuote((current) => {
       if (!current) return current;
 
       return {
         ...current,
-        items: (
-          current.items || []
-        ).filter(
-          (item) =>
-            item.id !== itemId
+        items: (current.items || []).filter(
+          (item) => item.id !== itemId
         ),
       };
     });
@@ -620,28 +586,24 @@ export default function QuoteDetailPage() {
 
       return {
         ...current,
-        items: (
-          current.items || []
-        ).map((item) => {
-          if (item.id !== itemId) {
-            return item;
-          }
+        items: (current.items || []).map(
+          (item) => {
+            if (item.id !== itemId) {
+              return item;
+            }
 
-          return {
-            ...item,
-            category:
-              equipment.category,
-            description:
-              equipment.name,
-            unit: equipment.unit,
-            rate: equipment.rate,
-            amount:
-              equipment.rate *
-              toNumber(
-                item.quantity || 1
-              ),
-          };
-        }),
+            return {
+              ...item,
+              category: equipment.category,
+              description: equipment.name,
+              unit: equipment.unit,
+              rate: equipment.rate,
+              amount:
+                equipment.rate *
+                toNumber(item.quantity || 1),
+            };
+          }
+        ),
       };
     });
 
@@ -653,79 +615,70 @@ export default function QuoteDetailPage() {
      TOTALS
   ======================================================= */
 
-  const calculatedTotals =
-    useMemo(() => {
-      if (!quote) {
-        return {
-          subtotal: 0,
-          discountAmount: 0,
-          tax: 0,
-          total: 0,
-        };
-      }
-
-      const subtotal = (
-        quote.items || []
-      ).reduce(
-        (sum, item) =>
-          sum +
-          calculateItemAmount(
-            item.quantity,
-            item.rate
-          ),
-        0
-      );
-
-      let discountAmount = 0;
-
-      if (
-        quote.discountType ===
-        'percentage'
-      ) {
-        discountAmount =
-          subtotal *
-          (toNumber(
-            quote.discountValue
-          ) /
-            100);
-      }
-
-      if (
-        quote.discountType ===
-        'fixed'
-      ) {
-        discountAmount = toNumber(
-          quote.discountValue
-        );
-      }
-
-      discountAmount = Math.min(
-        subtotal,
-        Math.max(
-          0,
-          discountAmount
-        )
-      );
-
-      const taxableAmount =
-        subtotal -
-        discountAmount;
-
-      const tax = Math.max(
-        0,
-        toNumber(quote.tax)
-      );
-
-      const total =
-        taxableAmount + tax;
-
+  const calculatedTotals = useMemo(() => {
+    if (!quote) {
       return {
-        subtotal,
-        discountAmount,
-        tax,
-        total,
+        subtotal: 0,
+        discountAmount: 0,
+        tax: 0,
+        total: 0,
       };
-    }, [quote]);
+    }
+
+    const subtotal = (quote.items || []).reduce(
+      (sum, item) =>
+        sum +
+        calculateItemAmount(
+          item.quantity,
+          item.rate
+        ),
+      0
+    );
+
+    let discountAmount = 0;
+
+    if (
+      quote.discountType ===
+      'percentage'
+    ) {
+      discountAmount =
+        subtotal *
+        (toNumber(quote.discountValue) /
+          100);
+    }
+
+    if (
+      quote.discountType ===
+      'fixed'
+    ) {
+      discountAmount = toNumber(
+        quote.discountValue
+      );
+    }
+
+    discountAmount = Math.min(
+      subtotal,
+      Math.max(0, discountAmount)
+    );
+
+    const taxableAmount =
+      subtotal - discountAmount;
+
+    const tax = Math.max(
+      0,
+      toNumber(quote.tax)
+    );
+
+    const total =
+      taxableAmount + tax;
+
+    return {
+      subtotal,
+      discountAmount,
+      tax,
+      total,
+    };
+  }, [quote]);
 
   /* =======================================================
      SAVE
@@ -787,10 +740,9 @@ export default function QuoteDetailPage() {
         }
       );
 
-      const data =
-        await response
-          .json()
-          .catch(() => null);
+      const data = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -851,10 +803,9 @@ export default function QuoteDetailPage() {
         }
       );
 
-      const data =
-        await response
-          .json()
-          .catch(() => null);
+      const data = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -931,10 +882,9 @@ export default function QuoteDetailPage() {
         }
       );
 
-      const data =
-        await response
-          .json()
-          .catch(() => null);
+      const data = await response
+        .json()
+        .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
@@ -990,27 +940,26 @@ export default function QuoteDetailPage() {
      EQUIPMENT SEARCH
   ======================================================= */
 
-  const filteredEquipment =
-    useMemo(() => {
-      const query =
-        equipmentSearch
-          .trim()
-          .toLowerCase();
+  const filteredEquipment = useMemo(() => {
+    const query =
+      equipmentSearch
+        .trim()
+        .toLowerCase();
 
-      if (!query) {
-        return equipmentCatalogue;
-      }
+    if (!query) {
+      return equipmentCatalogue;
+    }
 
-      return equipmentCatalogue.filter(
-        (equipment) =>
-          equipment.name
-            .toLowerCase()
-            .includes(query) ||
-          equipment.category
-            .toLowerCase()
-            .includes(query)
-      );
-    }, [equipmentSearch]);
+    return equipmentCatalogue.filter(
+      (equipment) =>
+        equipment.name
+          .toLowerCase()
+          .includes(query) ||
+        equipment.category
+          .toLowerCase()
+          .includes(query)
+    );
+  }, [equipmentSearch]);
 
   /* =======================================================
      LOADING
@@ -1022,7 +971,7 @@ export default function QuoteDetailPage() {
         <div className="mx-auto max-w-6xl">
           <div className="rounded-2xl border border-slate-200 bg-white px-6 py-20 text-center shadow-sm">
             <div
-              className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-purple-500"
+              className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200"
               style={{
                 borderTopColor: PURPLE,
               }}
@@ -1090,17 +1039,13 @@ export default function QuoteDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8 print:bg-white print:p-0">
-
       {/* ===================================================
           TOP TOOLBAR
       =================================================== */}
 
       <div className="mx-auto mb-6 max-w-7xl print:hidden">
-
         <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-
           <div className="flex items-center gap-4">
-
             <Link
               href="/admin/quotes"
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600"
@@ -1119,11 +1064,9 @@ export default function QuoteDetailPage() {
                   'New quotation'}
               </p>
             </div>
-
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-
             <button
               type="button"
               onClick={printQuote}
@@ -1212,7 +1155,6 @@ export default function QuoteDetailPage() {
                 View Invoice →
               </Link>
             )}
-
           </div>
         </div>
 
@@ -1227,7 +1169,6 @@ export default function QuoteDetailPage() {
             {success}
           </div>
         )}
-
       </div>
 
       {/* ===================================================
@@ -1238,17 +1179,13 @@ export default function QuoteDetailPage() {
         id="quote-preview"
         className="mx-auto max-w-6xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm print:max-w-none print:rounded-none print:border-0 print:shadow-none"
       >
-
         {/* =================================================
             DOCUMENT HEADER
         ================================================= */}
 
         <section className="px-6 pb-8 pt-7 sm:px-10 sm:pb-10 sm:pt-9 lg:px-14">
-
           <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
-
             <div className="flex items-center gap-3">
-
               <div
                 className="flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white"
                 style={{
@@ -1267,11 +1204,9 @@ export default function QuoteDetailPage() {
                   Creative Production
                 </p>
               </div>
-
             </div>
 
             <div className="sm:text-right">
-
               <p className={sectionLabelClass}>
                 Quotation
               </p>
@@ -1297,11 +1232,8 @@ export default function QuoteDetailPage() {
                   quote.createdAt
                 )}
               </p>
-
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -1309,13 +1241,10 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <section className="border-y border-slate-100 bg-white px-6 py-8 sm:px-10 lg:px-14">
-
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.25fr_0.75fr]">
-
             {/* PROJECT */}
 
             <div>
-
               <p className={sectionLabelClass}>
                 Project Quotation
               </p>
@@ -1346,19 +1275,16 @@ export default function QuoteDetailPage() {
                 placeholder="Project name"
                 className={`mt-3 ${inputClass}`}
               />
-
             </div>
 
             {/* CLIENT */}
 
             <div>
-
               <p className={sectionLabelClass}>
                 Prepared For
               </p>
 
               <div className="mt-3 space-y-2">
-
                 <input
                   value={
                     quote.client?.name ||
@@ -1390,7 +1316,6 @@ export default function QuoteDetailPage() {
                 />
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-
                   <input
                     value={
                       quote.client
@@ -1399,8 +1324,7 @@ export default function QuoteDetailPage() {
                     onChange={(event) =>
                       updateClientField(
                         'email',
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                     placeholder="Email"
@@ -1416,22 +1340,16 @@ export default function QuoteDetailPage() {
                     onChange={(event) =>
                       updateClientField(
                         'phone',
-                        event.target
-                          .value
+                        event.target.value
                       )
                     }
                     placeholder="Phone"
                     className={inputClass}
                   />
-
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -1439,9 +1357,7 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <section className="bg-slate-50 px-6 py-6 sm:px-10 lg:px-14">
-
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-
             <div>
               <label className={labelClass}>
                 Issue Date
@@ -1513,7 +1429,6 @@ export default function QuoteDetailPage() {
               </label>
 
               <div className="flex items-center gap-2">
-
                 <input
                   type="number"
                   min="1"
@@ -1539,7 +1454,6 @@ export default function QuoteDetailPage() {
                 <span className="text-xs text-slate-400">
                   days
                 </span>
-
               </div>
             </div>
 
@@ -1549,7 +1463,6 @@ export default function QuoteDetailPage() {
               </label>
 
               <div className="flex items-center gap-2">
-
                 <input
                   type="number"
                   min="0"
@@ -1579,7 +1492,6 @@ export default function QuoteDetailPage() {
                 <span className="text-xs text-slate-400">
                   %
                 </span>
-
               </div>
             </div>
 
@@ -1616,9 +1528,7 @@ export default function QuoteDetailPage() {
                 )}
               </select>
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -1626,9 +1536,7 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <section className="px-6 py-8 sm:px-10 lg:px-14">
-
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-
             <div>
               <label className={labelClass}>
                 Project
@@ -1690,9 +1598,7 @@ export default function QuoteDetailPage() {
                 className={inputClass}
               />
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -1700,9 +1606,7 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <section className="px-6 pb-8 sm:px-10 lg:px-14">
-
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-
             <div>
               <p className={sectionLabelClass}>
                 Project Scope
@@ -1726,15 +1630,12 @@ export default function QuoteDetailPage() {
             >
               + Add Item
             </button>
-
           </div>
 
           {/* TABLE */}
 
           <div className="overflow-hidden rounded-2xl border border-slate-200">
-
             <div className="hidden grid-cols-[42px_minmax(240px,1.8fr)_150px_90px_130px_140px_42px] bg-slate-50 px-4 py-3 text-[9px] font-mono uppercase tracking-[0.18em] text-slate-400 md:grid">
-
               <div>#</div>
 
               <div>
@@ -1758,14 +1659,11 @@ export default function QuoteDetailPage() {
               </div>
 
               <div />
-
             </div>
 
             <div className="divide-y divide-slate-100">
-
               {(quote.items || []).map(
                 (item, index) => {
-
                   const isOpen =
                     openEquipmentId ===
                     item.id;
@@ -1775,9 +1673,7 @@ export default function QuoteDetailPage() {
                       key={item.id}
                       className="relative p-4"
                     >
-
                       <div className="grid grid-cols-1 gap-4 md:grid-cols-[42px_minmax(240px,1.8fr)_150px_90px_130px_140px_42px] md:items-start">
-
                         {/* NUMBER */}
 
                         <div className="hidden pt-3 text-xs font-mono text-slate-400 md:block">
@@ -1792,14 +1688,12 @@ export default function QuoteDetailPage() {
                         {/* EQUIPMENT */}
 
                         <div className="relative">
-
                           <label className="mb-1.5 block text-[9px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
                             Item /
                             Equipment
                           </label>
 
                           <div className="relative">
-
                             <input
                               value={
                                 isOpen
@@ -1843,12 +1737,10 @@ export default function QuoteDetailPage() {
                             <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
                               ⌄
                             </span>
-
                           </div>
 
                           {isOpen && (
                             <>
-
                               <button
                                 type="button"
                                 aria-label="Close equipment menu"
@@ -1861,7 +1753,6 @@ export default function QuoteDetailPage() {
                               />
 
                               <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 max-h-72 overflow-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
-
                                 {filteredEquipment.length ===
                                 0 ? (
                                   <div className="px-3 py-6 text-center">
@@ -1895,7 +1786,6 @@ export default function QuoteDetailPage() {
                                         }
                                         className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition hover:bg-purple-50"
                                       >
-
                                         <div>
                                           <p className="text-sm font-medium text-slate-800">
                                             {
@@ -1920,14 +1810,11 @@ export default function QuoteDetailPage() {
                                             quote.currency
                                           )}
                                         </span>
-
                                       </button>
                                     )
                                   )
                                 )}
-
                               </div>
-
                             </>
                           )}
 
@@ -1947,7 +1834,6 @@ export default function QuoteDetailPage() {
                             placeholder="Optional item note"
                             className="mt-2 w-full border-0 bg-transparent px-1 text-xs text-slate-400 outline-none placeholder:text-slate-300 focus:text-slate-600"
                           />
-
                         </div>
 
                         {/* CATEGORY */}
@@ -2082,7 +1968,6 @@ export default function QuoteDetailPage() {
                         {/* TOTAL */}
 
                         <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-3 md:block md:bg-transparent md:px-0 md:py-2 md:text-right">
-
                           <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
                             Total
                           </span>
@@ -2096,13 +1981,11 @@ export default function QuoteDetailPage() {
                               quote.currency
                             )}
                           </span>
-
                         </div>
 
                         {/* DELETE */}
 
                         <div className="flex items-center justify-end">
-
                           <button
                             type="button"
                             onClick={() =>
@@ -2115,21 +1998,16 @@ export default function QuoteDetailPage() {
                           >
                             ×
                           </button>
-
                         </div>
-
                       </div>
-
                     </div>
                   );
                 }
               )}
 
-              {(
-                quote.items || []
-              ).length === 0 && (
+              {(quote.items || [])
+                .length === 0 && (
                 <div className="px-6 py-14 text-center">
-
                   <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-500">
                     +
                   </div>
@@ -2155,14 +2033,10 @@ export default function QuoteDetailPage() {
                   >
                     Add First Item
                   </button>
-
                 </div>
               )}
-
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -2170,11 +2044,8 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <section className="border-t border-slate-100 px-6 py-8 sm:px-10 lg:px-14">
-
           <div className="flex justify-end">
-
             <div className="w-full max-w-md">
-
               <div className="flex items-center justify-between py-2.5 text-sm">
                 <span className="text-slate-500">
                   Subtotal
@@ -2189,9 +2060,7 @@ export default function QuoteDetailPage() {
               </div>
 
               <div className="flex items-center justify-between gap-4 py-2.5 text-sm">
-
                 <div className="flex items-center gap-2">
-
                   <span className="text-slate-500">
                     Discount
                   </span>
@@ -2243,7 +2112,6 @@ export default function QuoteDetailPage() {
                       className="w-20 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-right text-xs outline-none focus:border-purple-400 print:hidden"
                     />
                   )}
-
                 </div>
 
                 <span className="font-medium text-red-500">
@@ -2258,13 +2126,10 @@ export default function QuoteDetailPage() {
                         quote.currency
                       )}
                 </span>
-
               </div>
 
               <div className="flex items-center justify-between py-2.5 text-sm">
-
                 <div className="flex items-center gap-2">
-
                   <span className="text-slate-500">
                     Tax
                   </span>
@@ -2286,7 +2151,6 @@ export default function QuoteDetailPage() {
                     }
                     className="w-24 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-right text-xs outline-none focus:border-purple-400 print:hidden"
                   />
-
                 </div>
 
                 <span className="font-medium text-slate-800">
@@ -2295,7 +2159,6 @@ export default function QuoteDetailPage() {
                     quote.currency
                   )}
                 </span>
-
               </div>
 
               <div
@@ -2307,7 +2170,6 @@ export default function QuoteDetailPage() {
               />
 
               <div className="flex items-end justify-between">
-
                 <div>
                   <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">
                     Grand Total
@@ -2326,16 +2188,13 @@ export default function QuoteDetailPage() {
                     quote.currency
                   )}
                 </p>
-
               </div>
 
               {quote.depositPercentage &&
                 quote.depositPercentage >
                   0 && (
                   <div className="mt-4 rounded-xl bg-purple-50 px-4 py-3">
-
                     <div className="flex items-center justify-between">
-
                       <span className="text-xs font-medium text-purple-700">
                         Deposit (
                         {
@@ -2354,16 +2213,11 @@ export default function QuoteDetailPage() {
                           quote.currency
                         )}
                       </span>
-
                     </div>
-
                   </div>
                 )}
-
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -2371,11 +2225,8 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <section className="border-t border-slate-100 bg-slate-50 px-6 py-8 sm:px-10 lg:px-14">
-
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-
               <label className={labelClass}>
                 Payment Terms
               </label>
@@ -2395,11 +2246,9 @@ export default function QuoteDetailPage() {
                 rows={5}
                 className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-600 outline-none placeholder:text-slate-300"
               />
-
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5">
-
               <label className={labelClass}>
                 Client Contact
               </label>
@@ -2419,11 +2268,9 @@ export default function QuoteDetailPage() {
                 rows={5}
                 className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-600 outline-none placeholder:text-slate-300"
               />
-
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-5 md:col-span-2">
-
               <label className={labelClass}>
                 Notes
               </label>
@@ -2442,11 +2289,8 @@ export default function QuoteDetailPage() {
                 rows={4}
                 className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-600 outline-none placeholder:text-slate-300"
               />
-
             </div>
-
           </div>
-
         </section>
 
         {/* =================================================
@@ -2454,13 +2298,9 @@ export default function QuoteDetailPage() {
         ================================================= */}
 
         <footer className="border-t border-slate-100 px-6 py-8 sm:px-10 lg:px-14">
-
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-
             <div>
-
               <div className="flex items-center gap-2">
-
                 <div
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white"
                   style={{
@@ -2474,7 +2314,6 @@ export default function QuoteDetailPage() {
                 <p className="text-xs font-bold tracking-[0.2em] text-slate-800">
                   KIPSMTHN
                 </p>
-
               </div>
 
               <p className="mt-2 text-xs text-slate-400">
@@ -2486,11 +2325,9 @@ export default function QuoteDetailPage() {
                 opportunity to work
                 together.
               </p>
-
             </div>
 
             <div className="sm:text-right">
-
               <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
                 Quotation
               </p>
@@ -2499,13 +2336,9 @@ export default function QuoteDetailPage() {
                 {quote.quoteNumber ||
                   quote.id}
               </p>
-
             </div>
-
           </div>
-
         </footer>
-
       </main>
 
       {/* ===================================================
@@ -2556,7 +2389,6 @@ export default function QuoteDetailPage() {
           }
         }
       `}</style>
-
     </div>
   );
 }

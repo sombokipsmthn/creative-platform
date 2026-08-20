@@ -1,5 +1,4 @@
-
-"use client";
+"use client"
 
 import Image from "next/image";
 import Link from "next/link";
@@ -54,6 +53,7 @@ const capabilities = [
       "Designed for large creative files and client delivery, with cloud object storage and high-resolution download workflows.",
   },
 ];
+
 
 const workflow = [
   {

@@ -414,24 +414,6 @@ export default function AdminClientsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">
-                    Website
-                  </label>
-
-                  <input
-                    type="url"
-                    placeholder="https://company.com"
-                    value={website}
-                    onChange={(event) =>
-                      setWebsite(
-                        event.target.value
-                      )
-                    }
-                    className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
                   <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Status</label>
                   <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none">
                     <option value="active">Active</option>

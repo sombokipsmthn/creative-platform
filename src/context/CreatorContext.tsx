@@ -1,30 +1,55 @@
-'use client';
+"use client";
 
 import {
   createContext,
   useContext,
+  useCallback,
   useEffect,
   useState,
   type ReactNode,
-} from 'react';
-import { useUser } from '@clerk/nextjs';
+} from "react";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
-import { initialUsersDatabase, UserAccount } from '@/db/users';
-
-export type CreatorData = UserAccount;
-
-interface CreatorContextType {
-  activeUser: UserAccount | null;
-  activeCreator: UserAccount | null;
-  usersDb: Record<string, UserAccount>;
-  registerUser: (newUser: UserAccount) => void;
-  registerNewCreator: (newUser: UserAccount) => void;
-  updateActiveProfile: (updated: Partial<UserAccount>) => void;
+export interface CreatorProfile {
+  id: string;
+  userId: string;
+  bio: string | null;
+  avatarUrl: string | null;
+  website: string | null;
+  location: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-const CreatorContext = createContext<CreatorContextType | undefined>(
-  undefined
-);
+export interface CreatorData {
+  id: string;
+  authUserId: string;
+  email: string;
+  name: string;
+  handle: string | null;
+  createdAt: string | Date;
+  updatedAt: string | Date;
+  profile: CreatorProfile | null;
+}
+
+interface CreatorContextType {
+  activeUser: CreatorData | null;
+  activeCreator: CreatorData | null;
+  usersDb: Record<string, CreatorData>;
+  loading: boolean;
+  registerUser: (creator: CreatorData) => void;
+  registerNewCreator: (creator: CreatorData) => void;
+  updateActiveProfile: (
+    updated: Partial<CreatorProfile>
+  ) => void;
+  refreshCreator: () => Promise<void>;
+}
+
+const CreatorContext =
+  createContext<CreatorContextType | undefined>(
+    undefined
+  );
 
 export function CreatorProvider({
   children,
@@ -32,122 +57,277 @@ export function CreatorProvider({
   children: ReactNode;
 }) {
   const { isLoaded, isSignedIn, user } = useUser();
-
-  const [usersDb, setUsersDb] =
-    useState<Record<string, UserAccount>>(initialUsersDatabase);
+  const router = useRouter();
 
   const [activeUser, setActiveUser] =
-    useState<UserAccount | null>(null);
+    useState<CreatorData | null>(null);
 
-  useEffect(() => {
-    if (!isLoaded) return;
+  const [usersDb, setUsersDb] = useState<
+    Record<string, CreatorData>
+  >({});
 
-    if (!isSignedIn || !user) {
+  const [loading, setLoading] = useState(true);
+
+  const syncCreator = useCallback(async function syncCreator() {
+    /*
+     * -------------------------------------------------------
+     * DO NOT SYNC WHILE ONBOARDING
+     * -------------------------------------------------------
+     *
+     * CreatorProvider wraps the entire application.
+     * A brand-new Clerk user must be allowed to reach
+     * /admin/onboarding without being redirected repeatedly.
+     */
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname === "/admin/onboarding"
+    ) {
       setActiveUser(null);
+      setUsersDb({});
+      setLoading(false);
       return;
     }
 
-    const email =
-      user.primaryEmailAddress?.emailAddress?.toLowerCase() ?? '';
+    /*
+     * Clerk has not finished loading yet.
+     */
+    if (!isLoaded) {
+      return;
+    }
 
-    // Use a functional updater to avoid depending on `usersDb` and
-    // to prevent this effect from re-running when usersDb changes.
-    setUsersDb((prev) => {
-      const matchingUser = Object.values(prev).find(
-        (account) => account.email.toLowerCase() === email
+    /*
+     * User is signed out.
+     */
+    if (!isSignedIn || !user?.id) {
+      setActiveUser(null);
+      setUsersDb({});
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      /*
+       * -------------------------------------------------------
+       * SYNC LOCAL CREATOR ACCOUNT
+       * -------------------------------------------------------
+       */
+      const response = await fetch(
+        "/api/users/sync",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          cache: "no-store",
+        }
       );
 
-      if (matchingUser) {
-        setActiveUser(matchingUser);
-        return prev;
+      /*
+       * Handle HTTP errors explicitly.
+       *
+       * This makes API problems much easier to diagnose
+       * than a generic JSON parsing/fetch error.
+       */
+      if (!response.ok) {
+        const text = await response.text();
+
+        console.error(
+          "Creator sync HTTP error:",
+          response.status,
+          text
+        );
+
+        throw new Error(
+          `Creator sync failed with HTTP ${response.status}`
+        );
       }
 
-      const templateUser = Object.values(initialUsersDatabase)[0];
+      const data = await response.json();
 
-      const fallbackUser: UserAccount = {
-        ...templateUser,
-        id: user.id,
-        name:
-          user.fullName || user.firstName || email.split('@')[0] || 'Creator',
-        email,
-        avatarUrl: user.imageUrl,
-      };
+      /*
+       * -------------------------------------------------------
+       * NEW CLERK USER
+       * -------------------------------------------------------
+       *
+       * /api/users/sync does not create a database user.
+       *
+       * It tells us that onboarding is required.
+       */
+      if (data.needsOnboarding) {
+        setActiveUser(null);
+        setUsersDb({});
+        setLoading(false);
 
-      setActiveUser(fallbackUser);
-
-      return {
-        ...prev,
-        [fallbackUser.id]: fallbackUser,
-      };
-    });
-  }, [isLoaded, isSignedIn, user]);
-
-  useEffect(() => {
-    if (!isLoaded || isSignedIn) return;
-    setActiveUser(null);
-  }, [isLoaded, isSignedIn]);
-
-  const registerUser = useCallback((newUser: UserAccount) => {
-    setUsersDb((previous) => ({
-      ...previous,
-      [newUser.id]: newUser,
-    }));
-
-    setActiveUser(newUser);
-  }, []);
-
-  const registerNewCreator = registerUser;
-
-  const updateActiveProfile = useCallback(
-    (updated: Partial<UserAccount>) => {
-      setUsersDb((previous) => {
-        const id = (activeUser && activeUser.id) || (updated as any).id;
-        if (!id) return previous;
-        const existing = previous[id] ?? activeUser ?? {} as UserAccount;
-        const updatedUser: UserAccount = {
-          ...existing,
-          ...updated,
-        };
-
-        // update active user if it's the same id
-        if (activeUser?.id === updatedUser.id) {
-          setActiveUser(updatedUser);
+        if (
+          typeof window !== "undefined" &&
+          window.location.pathname !==
+            "/admin/onboarding"
+        ) {
+          router.push("/admin/onboarding");
         }
 
-        return {
-          ...previous,
-          [updatedUser.id]: updatedUser,
-        };
+        return;
+      }
+
+      /*
+       * -------------------------------------------------------
+       * NO LOCAL CREATOR
+       * -------------------------------------------------------
+       */
+      if (!data.user) {
+        setActiveUser(null);
+        setUsersDb({});
+        setLoading(false);
+        return;
+      }
+
+      /*
+       * -------------------------------------------------------
+       * EXISTING CREATOR
+       * -------------------------------------------------------
+       */
+      const creator: CreatorData = {
+        ...data.user,
+        profile: data.profile ?? null,
+      };
+
+      setActiveUser(creator);
+
+      setUsersDb({
+        [creator.id]: creator,
       });
-    },
-    [activeUser]
-  );
+    } catch (error) {
+      /*
+       * IMPORTANT:
+       *
+       * Do not redirect here.
+       *
+       * If the API temporarily fails, redirecting would
+       * create another possible navigation loop.
+       */
+      console.error(
+        "CreatorContext sync error:",
+        error
+      );
 
-  const contextValue = useMemo(
-    () => ({
-      activeUser,
-      activeCreator: activeUser,
-      usersDb,
-      registerUser,
-      registerNewCreator,
-      updateActiveProfile,
-    }),
-    [activeUser, usersDb, registerUser, registerNewCreator, updateActiveProfile]
-  );
+      setActiveUser(null);
+      setUsersDb({});
+    } finally {
+      setLoading(false);
+    }
+  }, [isLoaded, isSignedIn, user?.id]);
 
+  /*
+   * -------------------------------------------------------
+   * INITIAL / AUTH CHANGE SYNC
+   * -------------------------------------------------------
+   */
+  useEffect(() => {
+    if (!isLoaded) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void syncCreator();
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [
+    isLoaded,
+    syncCreator,
+  ]);
+
+  /*
+   * -------------------------------------------------------
+   * REGISTER USER
+   * -------------------------------------------------------
+   *
+   * Used after successful onboarding.
+   */
+  function registerUser(
+    creator: CreatorData
+  ) {
+    setUsersDb((current) => ({
+      ...current,
+      [creator.id]: creator,
+    }));
+
+    setActiveUser(creator);
+  }
+
+  /*
+   * -------------------------------------------------------
+   * UPDATE ACTIVE PROFILE
+   * -------------------------------------------------------
+   */
+  function updateActiveProfile(
+    updated: Partial<CreatorProfile>
+  ) {
+    setActiveUser((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const updatedCreator: CreatorData = {
+        ...current,
+        profile: current.profile
+          ? {
+              ...current.profile,
+              ...updated,
+            }
+          : null,
+      };
+
+      setUsersDb((users) => ({
+        ...users,
+        [updatedCreator.id]:
+          updatedCreator,
+      }));
+
+      return updatedCreator;
+    });
+  }
+
+  /*
+   * -------------------------------------------------------
+   * CONTEXT
+   * -------------------------------------------------------
+   */
   return (
-    <CreatorContext.Provider value={contextValue}>
+    <CreatorContext.Provider
+      value={{
+        activeUser,
+        activeCreator: activeUser,
+        usersDb,
+        loading,
+        registerUser,
+        registerNewCreator: registerUser,
+        updateActiveProfile,
+        refreshCreator: syncCreator,
+      }}
+    >
       {children}
     </CreatorContext.Provider>
   );
 }
 
+/*
+ * ---------------------------------------------------------
+ * HOOK
+ * ---------------------------------------------------------
+ */
 export function useCreator() {
-  const context = useContext(CreatorContext);
+  const context = useContext(
+    CreatorContext
+  );
 
   if (!context) {
     throw new Error(
-      'useCreator must be used within a CreatorProvider'
+      "useCreator must be used within a CreatorProvider"
     );
   }
 

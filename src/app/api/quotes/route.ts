@@ -6,18 +6,24 @@ import { desc } from "drizzle-orm";
 
 // GET ALL QUOTES
 
-export async function GET() {
+export async function GET(request: Request) {
 
   try {
+    const { searchParams } = new URL(request.url);
+
+    const limitParam = Number(searchParams.get("limit") ?? 100);
+    const offsetParam = Number(searchParams.get("offset") ?? 0);
+    const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 1000) : 100;
+    const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
 
     const result = await db
       .select()
       .from(quotes)
-      .orderBy(desc(quotes.createdAt));
-
+      .orderBy(desc(quotes.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     return NextResponse.json(result);
-
 
   } catch (error) {
 

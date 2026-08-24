@@ -50,82 +50,93 @@ export function CreatorProvider({
     const email =
       user.primaryEmailAddress?.emailAddress?.toLowerCase() ?? '';
 
-    const matchingUser = Object.values(usersDb).find(
-      (account) =>
-        account.email.toLowerCase() === email
-    );
+    // Use a functional updater to avoid depending on `usersDb` and
+    // to prevent this effect from re-running when usersDb changes.
+    setUsersDb((prev) => {
+      const matchingUser = Object.values(prev).find(
+        (account) => account.email.toLowerCase() === email
+      );
 
-    if (matchingUser) {
-      setActiveUser(matchingUser);
-      return;
-    }
+      if (matchingUser) {
+        setActiveUser(matchingUser);
+        return prev;
+      }
 
-    const templateUser =
-      Object.values(initialUsersDatabase)[0];
+      const templateUser = Object.values(initialUsersDatabase)[0];
 
-    const fallbackUser: UserAccount = {
-      ...templateUser,
-      id: user.id,
-      name:
-        user.fullName ||
-        user.firstName ||
-        email.split('@')[0] ||
-        'Creator',
-      email,
-      avatarUrl: user.imageUrl,
-    };
+      const fallbackUser: UserAccount = {
+        ...templateUser,
+        id: user.id,
+        name:
+          user.fullName || user.firstName || email.split('@')[0] || 'Creator',
+        email,
+        avatarUrl: user.imageUrl,
+      };
 
-    setUsersDb((previous) => ({
-      ...previous,
-      [fallbackUser.id]: fallbackUser,
-    }));
+      setActiveUser(fallbackUser);
 
-    setActiveUser(fallbackUser);
-  }, [isLoaded, isSignedIn, user, usersDb]);
+      return {
+        ...prev,
+        [fallbackUser.id]: fallbackUser,
+      };
+    });
+  }, [isLoaded, isSignedIn, user]);
 
   useEffect(() => {
     if (!isLoaded || isSignedIn) return;
     setActiveUser(null);
   }, [isLoaded, isSignedIn]);
 
-  const registerUser = (newUser: UserAccount) => {
+  const registerUser = useCallback((newUser: UserAccount) => {
     setUsersDb((previous) => ({
       ...previous,
       [newUser.id]: newUser,
     }));
 
     setActiveUser(newUser);
-  };
+  }, []);
 
-  const updateActiveProfile = (
-    updated: Partial<UserAccount>
-  ) => {
-    if (!activeUser) return;
+  const registerNewCreator = registerUser;
 
-    const updatedUser: UserAccount = {
-      ...activeUser,
-      ...updated,
-    };
+  const updateActiveProfile = useCallback(
+    (updated: Partial<UserAccount>) => {
+      setUsersDb((previous) => {
+        const id = (activeUser && activeUser.id) || (updated as any).id;
+        if (!id) return previous;
+        const existing = previous[id] ?? activeUser ?? {} as UserAccount;
+        const updatedUser: UserAccount = {
+          ...existing,
+          ...updated,
+        };
 
-    setActiveUser(updatedUser);
+        // update active user if it's the same id
+        if (activeUser?.id === updatedUser.id) {
+          setActiveUser(updatedUser);
+        }
 
-    setUsersDb((previous) => ({
-      ...previous,
-      [updatedUser.id]: updatedUser,
-    }));
-  };
+        return {
+          ...previous,
+          [updatedUser.id]: updatedUser,
+        };
+      });
+    },
+    [activeUser]
+  );
+
+  const contextValue = useMemo(
+    () => ({
+      activeUser,
+      activeCreator: activeUser,
+      usersDb,
+      registerUser,
+      registerNewCreator,
+      updateActiveProfile,
+    }),
+    [activeUser, usersDb, registerUser, registerNewCreator, updateActiveProfile]
+  );
 
   return (
-    <CreatorContext.Provider
-      value={{
-        activeUser,
-        activeCreator: activeUser,
-        usersDb,
-        registerUser,
-        registerNewCreator: registerUser,
-        updateActiveProfile,
-      }}
-    >
+    <CreatorContext.Provider value={contextValue}>
       {children}
     </CreatorContext.Provider>
   );

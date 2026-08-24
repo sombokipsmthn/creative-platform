@@ -91,6 +91,12 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const clientId = searchParams.get("clientId");
 
+    // Basic pagination to prevent unbounded result sets
+    const limitParam = Number(searchParams.get("limit") ?? 100);
+    const offsetParam = Number(searchParams.get("offset") ?? 0);
+    const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 1000) : 100;
+    const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
+
     const whereCondition = clientId
       ? and(
           eq(invoices.creatorId, user.id),
@@ -109,7 +115,9 @@ export async function GET(req: Request) {
         eq(invoices.clientId, clients.id)
       )
       .where(whereCondition)
-      .orderBy(desc(invoices.createdAt));
+      .orderBy(desc(invoices.createdAt))
+      .limit(limit)
+      .offset(offset);
 
     type InvoiceRow = typeof invoices.$inferSelect;
     type ClientRow = typeof clients.$inferSelect | null;
@@ -132,14 +140,22 @@ export async function GET(req: Request) {
             )
         : [];
 
+    // Build a map once to avoid O(N*M) filtering for each invoice
+    const itemsByInvoice: Record<string, InvoiceItemRow[]> = items.reduce(
+      (acc: Record<string, InvoiceItemRow[]>, item: InvoiceItemRow) => {
+        const id = String(item.invoiceId);
+        if (!acc[id]) acc[id] = [];
+        acc[id].push(item);
+        return acc;
+      },
+      {}
+    );
+
     const response = results.map(
       ({ invoice, client }: { invoice: InvoiceRow; client: ClientRow }) => ({
         ...invoice,
         client,
-        items: items.filter(
-          (item: InvoiceItemRow) =>
-            item.invoiceId === invoice.id
-        ),
+        items: itemsByInvoice[String(invoice.id)] ?? [],
       })
     );
 

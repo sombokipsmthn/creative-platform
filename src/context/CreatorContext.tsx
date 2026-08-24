@@ -9,7 +9,6 @@ import {
   type ReactNode,
 } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
 
 export interface CreatorProfile {
   id: string;
@@ -57,7 +56,6 @@ export function CreatorProvider({
   children: ReactNode;
 }) {
   const { isLoaded, isSignedIn, user } = useUser();
-  const router = useRouter();
 
   const [activeUser, setActiveUser] =
     useState<CreatorData | null>(null);
@@ -208,7 +206,7 @@ export function CreatorProvider({
     } finally {
       setLoading(false);
     }
-  }, [isLoaded, isSignedIn, user?.id, router]);
+  }, [isLoaded, isSignedIn, user?.id]);
 
   /*
    * -------------------------------------------------------

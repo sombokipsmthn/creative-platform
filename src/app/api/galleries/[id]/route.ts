@@ -21,21 +21,6 @@ async function getCreator() {
   return getOrCreateLocalUser(userId);
 }
 
-async function ownsGallery(
-  galleryId: string,
-  creatorId: string
-) {
-  const result = await db.execute(sql`
-    SELECT *
-    FROM galleries
-    WHERE id = ${galleryId}
-      AND creator_id = ${creatorId}
-    LIMIT 1
-  `);
-
-  return result.rows[0] ?? null;
-}
-
 export async function GET(
   _request: Request,
   context: Context
@@ -52,10 +37,37 @@ export async function GET(
 
     const { id } = await context.params;
 
-    const gallery = await ownsGallery(
-      id,
-      creator.id
-    );
+    const galleryResult = await db.execute(sql`
+      SELECT
+        g.*,
+        c.name AS client_name,
+        c.email AS client_email,
+        c.company AS client_company,
+        p.name AS project_name,
+        COALESCE(
+          cp.display_url,
+          (
+            SELECT photo.display_url
+            FROM gallery_photos photo
+            WHERE photo.gallery_id = g.id
+              AND photo.is_hidden = false
+            ORDER BY photo.sort_order ASC, photo.created_at ASC
+            LIMIT 1
+          )
+        ) AS cover_url
+      FROM galleries g
+      LEFT JOIN clients c
+        ON c.id = g.client_id
+      LEFT JOIN projects p
+        ON p.id = g.project_id
+      LEFT JOIN gallery_photos cp
+        ON cp.id = g.cover_photo_id
+      WHERE g.id = ${id}
+        AND g.creator_id = ${creator.id}
+      LIMIT 1
+    `);
+
+    const gallery = galleryResult.rows[0];
 
     if (!gallery) {
       return NextResponse.json(
@@ -65,19 +77,28 @@ export async function GET(
     }
 
     const collections = await db.execute(sql`
-      SELECT *
-      FROM gallery_collections
-      WHERE gallery_id = ${id}
-      ORDER BY sort_order ASC, created_at ASC
+      SELECT
+        c.*,
+        (
+          SELECT COUNT(*)::int
+          FROM gallery_photos p
+          WHERE p.collection_id = c.id
+        ) AS photo_count
+      FROM gallery_collections c
+      WHERE c.gallery_id = ${id}
+      ORDER BY c.sort_order ASC, c.created_at ASC
     `);
 
     const photos = await db.execute(sql`
-      SELECT *
-      FROM gallery_photos
-      WHERE gallery_id = ${id}
-      ORDER BY collection_id NULLS FIRST,
-               sort_order ASC,
-               created_at ASC
+      SELECT
+        p.*,
+        c.title AS collection_title
+      FROM gallery_photos p
+      LEFT JOIN gallery_collections c
+        ON c.id = p.collection_id
+      WHERE p.gallery_id = ${id}
+      ORDER BY p.sort_order ASC,
+               p.created_at ASC
     `);
 
     return NextResponse.json({
@@ -111,95 +132,88 @@ export async function PATCH(
 
     const { id } = await context.params;
 
-    const gallery = await ownsGallery(
-      id,
-      creator.id
-    );
+    const body = await request.json();
 
-    if (!gallery) {
+    const currentGallery = await db.execute(sql`
+      SELECT *
+      FROM galleries
+      WHERE id = ${id}
+        AND creator_id = ${creator.id}
+      LIMIT 1
+    `);
+
+    if (!currentGallery.rows[0]) {
       return NextResponse.json(
         { error: "Gallery not found." },
         { status: 404 }
       );
     }
 
-    const body = await request.json();
+    const title =
+      typeof body.title === "string" && body.title.trim().length > 0
+        ? body.title.trim()
+        : undefined;
 
-    const fields = {
-      title:
-        typeof body.title === "string"
-          ? body.title.trim()
-          : undefined,
+    const description =
+      body.description !== undefined ? body.description : undefined;
 
-      description:
-        body.description !== undefined
-          ? body.description
-          : undefined,
+    const category =
+      body.category !== undefined ? body.category : undefined;
 
-      category:
-        body.category !== undefined
-          ? body.category
-          : undefined,
+    const clientId =
+      body.clientId !== undefined ? (body.clientId || null) : undefined;
 
-      accessPin:
-        body.accessPin !== undefined
-          ? body.accessPin
-          : undefined,
+    const projectId =
+      body.projectId !== undefined ? (body.projectId || null) : undefined;
 
-      allowDownloads:
-        body.allowDownloads !== undefined
-          ? Boolean(body.allowDownloads)
-          : undefined,
+    const slug =
+      typeof body.slug === "string" && body.slug.trim().length > 0
+        ? body.slug.trim().toLowerCase().replace(/[^a-z0-9-_]+/g, "-")
+        : undefined;
 
-      allowFavorites:
-        body.allowFavorites !== undefined
-          ? Boolean(body.allowFavorites)
-          : undefined,
+    const accessPin =
+      body.accessPin !== undefined ? body.accessPin : undefined;
 
-      allowSelections:
-        body.allowSelections !== undefined
-          ? Boolean(body.allowSelections)
-          : undefined,
-    };
+    const status =
+      body.status === "published" || body.status === "draft"
+        ? body.status
+        : undefined;
+
+    const coverPhotoId =
+      body.coverPhotoId !== undefined ? (body.coverPhotoId || null) : undefined;
+
+    const allowDownloads =
+      body.allowDownloads !== undefined ? Boolean(body.allowDownloads) : undefined;
+
+    const allowFavorites =
+      body.allowFavorites !== undefined ? Boolean(body.allowFavorites) : undefined;
+
+    const allowSelections =
+      body.allowSelections !== undefined ? Boolean(body.allowSelections) : undefined;
+
+    const publishedAt =
+      status === "published"
+        ? sql`COALESCE(published_at, now())`
+        : status === "draft"
+        ? sql`NULL`
+        : sql`published_at`;
 
     const result = await db.execute(sql`
       UPDATE galleries
       SET
-        title = COALESCE(
-          ${fields.title ?? null},
-          title
-        ),
-
-        description = COALESCE(
-          ${fields.description ?? null},
-          description
-        ),
-
-        category = COALESCE(
-          ${fields.category ?? null},
-          category
-        ),
-
-        access_pin = COALESCE(
-          ${fields.accessPin ?? null},
-          access_pin
-        ),
-
-        allow_downloads = COALESCE(
-          ${fields.allowDownloads ?? null},
-          allow_downloads
-        ),
-
-        allow_favorites = COALESCE(
-          ${fields.allowFavorites ?? null},
-          allow_favorites
-        ),
-
-        allow_selections = COALESCE(
-          ${fields.allowSelections ?? null},
-          allow_selections
-        ),
-
+        title = COALESCE(${title ?? null}, title),
+        description = ${description !== undefined ? description : sql`description`},
+        category = ${category !== undefined ? category : sql`category`},
+        client_id = ${clientId !== undefined ? clientId : sql`client_id`},
+        project_id = ${projectId !== undefined ? projectId : sql`project_id`},
+        slug = COALESCE(${slug ?? null}, slug),
+        access_pin = ${accessPin !== undefined ? accessPin : sql`access_pin`},
+        status = COALESCE(${status ?? null}, status),
+        cover_photo_id = ${coverPhotoId !== undefined ? coverPhotoId : sql`cover_photo_id`},
+        allow_downloads = COALESCE(${allowDownloads ?? null}, allow_downloads),
+        allow_favorites = COALESCE(${allowFavorites ?? null}, allow_favorites),
+        allow_selections = COALESCE(${allowSelections ?? null}, allow_selections),
+        published_at = ${publishedAt},
         updated_at = now()
       WHERE id = ${id}
         AND creator_id = ${creator.id}
@@ -214,6 +228,50 @@ export async function PATCH(
 
     return NextResponse.json(
       { error: "Unable to update gallery." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  context: Context
+) {
+  try {
+    const creator = await getCreator();
+
+    if (!creator) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const { id } = await context.params;
+
+    const result = await db.execute(sql`
+      DELETE FROM galleries
+      WHERE id = ${id}
+        AND creator_id = ${creator.id}
+      RETURNING id
+    `);
+
+    if (!result.rows[0]) {
+      return NextResponse.json(
+        { error: "Gallery not found." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      id,
+    });
+  } catch (error) {
+    console.error("DELETE /api/galleries/[id]", error);
+
+    return NextResponse.json(
+      { error: "Unable to delete gallery." },
       { status: 500 }
     );
   }

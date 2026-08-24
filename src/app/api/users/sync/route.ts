@@ -7,7 +7,6 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import {
   creatorProfiles,
-  users,
 } from "@/db/schema";
 
 import {

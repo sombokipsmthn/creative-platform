@@ -18,7 +18,6 @@ import {
   Receipt,
   Send,
   TrendingUp,
-  Users,
   Video,
   Wallet,
 } from "lucide-react";
@@ -232,8 +231,8 @@ export default function CommandCenterPage() {
           HEADER
       ===================================================== */}
 
-      <header className="border-b border-black/[0.06] bg-white">
-        <div className="mx-auto flex max-w-[1500px] items-center justify-between px-6 py-5">
+      <header className="border-b border-black/6 bg-white">
+        <div className="mx-auto flex max-w-375 items-center justify-between px-6 py-5">
           <div>
             <div className="mb-1 flex items-center gap-2 text-sm text-gray-500">
               <Link
@@ -258,7 +257,7 @@ export default function CommandCenterPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="flex h-10 items-center gap-2 rounded-lg border border-black/[0.08] bg-white px-4 text-sm font-medium transition hover:bg-gray-50">
+            <button className="flex h-10 items-center gap-2 rounded-lg border border-black/8 bg-white px-4 text-sm font-medium transition hover:bg-gray-50">
               <CalendarDays size={16} />
               Calendar
             </button>
@@ -275,7 +274,7 @@ export default function CommandCenterPage() {
           CONTENT
       ===================================================== */}
 
-      <div className="mx-auto max-w-[1500px] px-6 py-6">
+      <div className="mx-auto max-w-375 px-6 py-6">
         {/* ===================================================
             ATTENTION CARDS
         =================================================== */}
@@ -333,7 +332,7 @@ export default function CommandCenterPage() {
                 action="View calendar"
               />
 
-              <div className="divide-y divide-black/[0.06]">
+              <div className="divide-y divide-black/6">
                 <TodayItem
                   time="09:00"
                   title="Send revised quotation"
@@ -377,7 +376,7 @@ export default function CommandCenterPage() {
                 action="Open inbox"
               />
 
-              <div className="divide-y divide-black/[0.06]">
+              <div className="divide-y divide-black/6">
                 {activities.map((activity) => (
                   <ActivityRow
                     key={activity.id}
@@ -400,9 +399,9 @@ export default function CommandCenterPage() {
               />
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
+                <table className="w-full min-w-175">
                   <thead>
-                    <tr className="border-b border-black/[0.06] text-left text-xs font-medium uppercase tracking-wide text-gray-400">
+                    <tr className="border-b border-black/6 text-left text-xs font-medium uppercase tracking-wide text-gray-400">
                       <th className="px-6 py-3">Client</th>
                       <th className="px-6 py-3">Project</th>
                       <th className="px-6 py-3">Status</th>
@@ -417,7 +416,7 @@ export default function CommandCenterPage() {
                     {projects.map((project) => (
                       <tr
                         key={project.id}
-                        className="border-b border-black/[0.05] last:border-0"
+                        className="border-b border-black/5 last:border-0"
                       >
                         <td className="px-6 py-4">
                           <div className="text-sm font-medium">
@@ -553,7 +552,7 @@ export default function CommandCenterPage() {
                 action="View clients"
               />
 
-              <div className="divide-y divide-black/[0.06]">
+              <div className="divide-y divide-black/6">
                 <ClientActivity
                   client="Bandari Beauty"
                   message="Approved revised quotation"
@@ -636,7 +635,7 @@ export default function CommandCenterPage() {
           />
 
           <div className="overflow-x-auto p-5">
-            <div className="flex min-w-[1000px] items-center gap-2">
+            <div className="flex min-w-250 items-center gap-2">
               <WorkflowStage
                 number="01"
                 title="Lead"
@@ -740,7 +739,7 @@ function MetricCard({
   return (
     <a
       href={href}
-      className="group rounded-xl border border-black/[0.07] bg-white p-5 transition hover:-translate-y-0.5 hover:border-black/[0.12] hover:shadow-sm"
+      className="group rounded-xl border border-black/[0.07] bg-white p-5 transition hover:-translate-y-0.5 hover:border-black/12 hover:shadow-sm"
     >
       <div className="flex items-start justify-between">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gray-100">
@@ -776,7 +775,7 @@ function SectionHeader({
   action: string;
 }) {
   return (
-    <div className="flex items-center justify-between border-b border-black/[0.06] px-6 py-5">
+    <div className="flex items-center justify-between border-b border-black/6 px-6 py-5">
       <div>
         <h2 className="text-sm font-semibold">{title}</h2>
 
@@ -812,7 +811,7 @@ function TodayItem({
         {time}
       </div>
 
-      <div className="h-8 w-px bg-black/[0.08]" />
+      <div className="h-8 w-px bg-black/8" />
 
       <div className="flex-1">
         <div className="flex items-center gap-2">
@@ -894,7 +893,7 @@ function FinanceCard({
   icon: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-black/[0.06] p-4">
+    <div className="rounded-lg border border-black/6 p-4">
       <div className="flex items-center justify-between">
         <span className="text-gray-400">{icon}</span>
 
@@ -988,7 +987,7 @@ function SocialRow({
   account: SocialAccount;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-black/[0.06] p-3">
+    <div className="flex items-center gap-3 rounded-lg border border-black/6 p-3">
       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-xs font-semibold">
         {account.platform.slice(0, 1)}
       </div>

@@ -42,15 +42,33 @@ export async function GET() {
       SELECT
         g.*,
         c.name AS client_name,
+        COALESCE(
+          cp.display_url,
+          (
+            SELECT p.display_url
+            FROM gallery_photos p
+            WHERE p.gallery_id = g.id
+              AND p.is_hidden = false
+            ORDER BY p.sort_order ASC, p.created_at ASC
+            LIMIT 1
+          )
+        ) AS cover_url,
         (
           SELECT COUNT(*)
           FROM gallery_photos p
           WHERE p.gallery_id = g.id
             AND p.is_hidden = false
-        )::int AS photo_count
+        )::int AS photo_count,
+        (
+          SELECT COUNT(*)
+          FROM gallery_collections col
+          WHERE col.gallery_id = g.id
+        )::int AS collections_count
       FROM galleries g
       LEFT JOIN clients c
         ON c.id = g.client_id
+      LEFT JOIN gallery_photos cp
+        ON cp.id = g.cover_photo_id
       WHERE g.creator_id = ${creator.id}
       ORDER BY g.created_at DESC
     `);

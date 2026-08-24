@@ -732,10 +732,6 @@ export async function POST(req: Request) {
         )
       );
 
-    const calculatedTotal =
-      calculatedSubtotal +
-      calculatedTax;
-
     const finalSubtotal =
       subtotal !== undefined
         ? Math.max(

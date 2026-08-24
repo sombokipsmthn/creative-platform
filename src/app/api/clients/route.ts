@@ -1,9 +1,58 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
+import type { InferInsertModel } from "drizzle-orm";
 
 import { db } from "@/db";
 import { clients, users } from "@/db/schema";
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+
+function cleanString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function getStatus(value: unknown): string {
+  const status = cleanString(value);
+
+  return status ?? "active";
+}
+
+function getFeedbackStatus(value: unknown): string {
+  const status = cleanString(value);
+
+  return status ?? "AWAITING_FEEDBACK";
+}
+
+function getContractStatus(value: unknown): string {
+  const status = cleanString(value);
+
+  return status ?? "NOT_SENT";
+}
+
+function getEtimsInvoiceStatus(value: unknown): string {
+  const status = cleanString(value);
+
+  return status ?? "NOT_SENT";
+}
+
+function getTaxCertificateStatus(value: unknown): string {
+  const status = cleanString(value);
+
+  return status ?? "NOT_RECEIVED";
+}
+
+/* =========================================================
+   CURRENT USER
+   ========================================================= */
 
 async function getCurrentUser() {
   try {
@@ -13,8 +62,14 @@ async function getCurrentUser() {
 
     let userId: string | null = null;
 
+    /*
+     * In production / Clerk environments, use Clerk.
+     * In local development without Clerk configured,
+     * use the existing development user.
+     */
     if (clerkKey) {
       const authResult = await auth();
+
       userId = authResult.userId;
     } else {
       userId = "dev_admin_user";
@@ -28,6 +83,10 @@ async function getCurrentUser() {
       where: eq(users.authUserId, userId),
     });
 
+    /*
+     * Development fallback:
+     * create the local creator record if it does not exist.
+     */
     if (!user) {
       try {
         const [created] = await db
@@ -44,122 +103,31 @@ async function getCurrentUser() {
           .onConflictDoNothing()
           .returning();
 
-        user =
-          created ??
-          (await db.query.users.findFirst({
-            where: eq(users.authUserId, userId),
-          }));
-      } catch {
-        user = {
-          id: "creator_01",
-          authUserId: userId,
-          email:
-            process.env.ADMIN_EMAIL ||
-            "creator@kipsmthn.com",
-          name: "Somboriot Kipchilat",
-          handle: "kipsmthn",
-          onboardingStatus: "incomplete",
-          onboardingStep: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
+        user = created ?? undefined;
+      } catch (error) {
+        console.error(
+          "Failed to create development user:",
+          error
+        );
       }
     }
 
     return user ?? null;
   } catch (error) {
-    console.warn("User auth fallback:", error);
+    console.error(
+      "getCurrentUser error:",
+      error
+    );
 
-    return {
-      id: "creator_01",
-      authUserId: "dev_admin_user",
-      email:
-        process.env.ADMIN_EMAIL ||
-        "creator@kipsmthn.com",
-      name: "Somboriot Kipchilat",
-      handle: "kipsmthn",
-      onboardingStatus: "incomplete",
-      onboardingStep: 1,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-  }
-}
-
-function cleanString(value: unknown) {
-  if (typeof value !== "string") {
     return null;
   }
-
-  const trimmed = value.trim();
-
-  return trimmed.length > 0 ? trimmed : null;
 }
 
-const FEEDBACK_STATUSES = [
-  "AWAITING_FEEDBACK",
-  "FEEDBACK_RECEIVED",
-  "IN_PRODUCTION",
-  "COMPLETED",
-] as const;
-
-const CONTRACT_STATUSES = [
-  "NOT_SENT",
-  "SENT",
-  "SIGNED",
-] as const;
-
-const ETIMS_INVOICE_STATUSES = [
-  "NOT_SENT",
-  "SENT",
-  "PAID",
-] as const;
-
-const TAX_CERTIFICATE_STATUSES = [
-  "NOT_RECEIVED",
-  "RECEIVED",
-  "NOT_APPLICABLE",
-] as const;
-
-function getFeedbackStatus(value: unknown) {
-  const status = cleanString(value);
-
-  return FEEDBACK_STATUSES.includes(
-    status as (typeof FEEDBACK_STATUSES)[number]
-  )
-    ? status
-    : "AWAITING_FEEDBACK";
-}
-
-function getContractStatus(value: unknown) {
-  const status = cleanString(value);
-
-  return CONTRACT_STATUSES.includes(
-    status as (typeof CONTRACT_STATUSES)[number]
-  )
-    ? status
-    : "NOT_SENT";
-}
-
-function getEtimsInvoiceStatus(value: unknown) {
-  const status = cleanString(value);
-
-  return ETIMS_INVOICE_STATUSES.includes(
-    status as (typeof ETIMS_INVOICE_STATUSES)[number]
-  )
-    ? status
-    : "NOT_SENT";
-}
-
-function getTaxCertificateStatus(value: unknown) {
-  const status = cleanString(value);
-
-  return TAX_CERTIFICATE_STATUSES.includes(
-    status as (typeof TAX_CERTIFICATE_STATUSES)[number]
-  )
-    ? status
-    : "NOT_RECEIVED";
-}
+/* =========================================================
+   GET
+   =========================================================
+   Returns all clients belonging to the current creator.
+   ========================================================= */
 
 export async function GET() {
   try {
@@ -167,19 +135,22 @@ export async function GET() {
 
     if (!user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
-    const results = await db
-      .select()
-      .from(clients)
-      .where(eq(clients.creatorId, user.id));
+    const results = await db.query.clients.findMany({
+      where: eq(clients.creatorId, user.id),
+      orderBy: (clients, { desc }) =>
+        desc(clients.createdAt),
+    });
 
-    return NextResponse.json(
-      Array.isArray(results) ? results : []
-    );
+    return NextResponse.json(results);
   } catch (error) {
     console.error(
       "GET /api/clients error:",
@@ -187,20 +158,39 @@ export async function GET() {
     );
 
     return NextResponse.json(
-      { error: "Failed to fetch clients" },
-      { status: 500 }
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch clients",
+      },
+      {
+        status: 500,
+      }
     );
   }
 }
 
-export async function POST(request: Request) {
+/* =========================================================
+   POST
+   =========================================================
+   Creates a new client.
+   ========================================================= */
+
+export async function POST(
+  request: Request
+) {
   try {
     const user = await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        }
       );
     }
 
@@ -210,37 +200,17 @@ export async function POST(request: Request) {
 
     if (!name) {
       return NextResponse.json(
-        { error: "Client name is required" },
-        { status: 400 }
+        {
+          error: "Client name is required",
+        },
+        {
+          status: 400,
+        }
       );
     }
 
     const status =
-      cleanString(body?.status) ||
-      "active";
-
-    const allowedStatuses = [
-      "active",
-      "inactive",
-      "archived",
-    ];
-
-    if (!allowedStatuses.includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid client status" },
-        { status: 400 }
-      );
-    }
-
-    /*
-     * ---------------------------------------------------
-     * CLIENT WORKFLOW STATUSES
-     * ---------------------------------------------------
-     *
-     * These are intentionally stored on the client record
-     * because they represent the current CRM state of the
-     * client relationship.
-     */
+      getStatus(body?.status);
 
     const feedbackStatus =
       getFeedbackStatus(
@@ -262,48 +232,74 @@ export async function POST(request: Request) {
         body?.taxCertificateStatus
       );
 
+    /*
+     * Explicitly type the object against the
+     * Drizzle insert model.
+     *
+     * This prevents the overloaded `.values()`
+     * call from incorrectly inferring the inline
+     * object as the array overload.
+     */
+    const clientInsert: InferInsertModel<
+      typeof clients
+    > = {
+      id: crypto.randomUUID(),
+
+      creatorId: user.id,
+
+      name,
+
+      company:
+        cleanString(body?.company),
+
+      email:
+        cleanString(body?.email),
+
+      phone:
+        cleanString(body?.phone),
+
+      website:
+        cleanString(body?.website),
+
+      location:
+        cleanString(body?.location),
+
+      notes:
+        cleanString(body?.notes),
+
+      status,
+
+      feedbackStatus,
+
+      contractStatus,
+
+      etimsInvoiceStatus,
+
+      taxCertificateStatus,
+    };
+
     const [client] = await db
       .insert(clients)
-      .values({
-        id: crypto.randomUUID(),
-
-        creatorId: user.id,
-
-        name,
-
-        company:
-          cleanString(body?.company),
-
-        email:
-          cleanString(body?.email),
-
-        phone:
-          cleanString(body?.phone),
-
-        website:
-          cleanString(body?.website),
-
-        location:
-          cleanString(body?.location),
-
-        notes:
-          cleanString(body?.notes),
-
-        status,
-
-        feedbackStatus,
-
-        contractStatus,
-
-        etimsInvoiceStatus,
-
-        taxCertificateStatus,
-      })
+      .values(clientInsert)
       .returning();
+
+    if (!client) {
+      return NextResponse.json(
+        {
+          error:
+            "Client could not be created",
+        },
+        {
+          status: 500,
+        }
+      );
+    }
 
     return NextResponse.json(
       client,
-      { status: 201 }
+      {
+        status: 201,
+      }
     );
   } catch (error) {
     console.error(
@@ -318,7 +314,9 @@ export async function POST(request: Request) {
             ? error.message
             : "Failed to create client",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }

@@ -5,6 +5,7 @@ import {
   uuid,
   integer,
   boolean,
+  bigint,
 } from "drizzle-orm/pg-core";
 
 /*
@@ -629,6 +630,185 @@ export const quoteItems = pgTable("quote_items", {
   notes: text("notes"),
 
   createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+});
+
+/*
+|--------------------------------------------------------------------------
+| Galleries
+|--------------------------------------------------------------------------
+*/
+
+export const galleries = pgTable("galleries", {
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  creatorId: text("creator_id")
+    .notNull()
+    .references(() => users.id, {
+      onDelete: "cascade",
+    }),
+
+  clientId: text("client_id")
+    .references(() => clients.id, {
+      onDelete: "set null",
+    }),
+
+  projectId: uuid("project_id")
+    .references(() => projects.id, {
+      onDelete: "set null",
+    }),
+
+  title: text("title")
+    .notNull(),
+
+  description: text("description"),
+
+  category: text("category"),
+
+  slug: text("slug")
+    .notNull()
+    .unique(),
+
+  accessPin: text("access_pin"),
+
+  status: text("status")
+    .default("draft")
+    .notNull(),
+
+  coverPhotoId: uuid("cover_photo_id"),
+
+  allowDownloads: boolean("allow_downloads")
+    .default(true)
+    .notNull(),
+
+  allowFavorites: boolean("allow_favorites")
+    .default(true)
+    .notNull(),
+
+  allowSelections: boolean("allow_selections")
+    .default(true)
+    .notNull(),
+
+  publishedAt: timestamp("published_at"),
+
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
+});
+
+/*
+|--------------------------------------------------------------------------
+| Gallery Collections
+|--------------------------------------------------------------------------
+*/
+
+export const galleryCollections = pgTable("gallery_collections", {
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  galleryId: uuid("gallery_id")
+    .notNull()
+    .references(() => galleries.id, {
+      onDelete: "cascade",
+    }),
+
+  title: text("title")
+    .notNull(),
+
+  description: text("description"),
+
+  sortOrder: integer("sort_order")
+    .default(0)
+    .notNull(),
+
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull(),
+});
+
+/*
+|--------------------------------------------------------------------------
+| Gallery Photos
+|--------------------------------------------------------------------------
+*/
+
+export const galleryPhotos = pgTable("gallery_photos", {
+  id: uuid("id")
+    .defaultRandom()
+    .primaryKey(),
+
+  galleryId: uuid("gallery_id")
+    .notNull()
+    .references(() => galleries.id, {
+      onDelete: "cascade",
+    }),
+
+  collectionId: uuid("collection_id")
+    .references(() => galleryCollections.id, {
+      onDelete: "set null",
+    }),
+
+  filename: text("filename")
+    .notNull(),
+
+  originalUrl: text("original_url")
+    .notNull(),
+
+  displayUrl: text("display_url")
+    .notNull(),
+
+  thumbnailUrl: text("thumbnail_url")
+    .notNull(),
+
+  storagePath: text("storage_path"),
+
+  mimeType: text("mime_type"),
+
+  fileSize: bigint("file_size", { mode: "number" }),
+
+  width: integer("width"),
+
+  height: integer("height"),
+
+  captureDate: timestamp("capture_date"),
+
+  sortOrder: integer("sort_order")
+    .default(0)
+    .notNull(),
+
+  isHidden: boolean("is_hidden")
+    .default(false)
+    .notNull(),
+
+  isFavorite: boolean("is_favorite")
+    .default(false)
+    .notNull(),
+
+  isSelected: boolean("is_selected")
+    .default(false)
+    .notNull(),
+
+  downloadCount: integer("download_count")
+    .default(0)
+    .notNull(),
+
+  createdAt: timestamp("created_at")
+    .defaultNow()
+    .notNull(),
+
+  updatedAt: timestamp("updated_at")
     .defaultNow()
     .notNull(),
 });

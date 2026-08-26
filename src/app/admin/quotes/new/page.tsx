@@ -32,6 +32,8 @@ type Client = {
   name: string;
   company?: string | null;
   email?: string | null;
+  phone?: string | null;
+  kraPin?: string | null;
 };
 
 function createItem(
@@ -801,11 +803,23 @@ export default function NewQuotePage() {
 
                 <select
                   value={clientId}
-                  onChange={(event) =>
-                    setClientId(
-                      event.target.value
-                    )
-                  }
+                  onChange={(event) => {
+                    const id = event.target.value;
+                    setClientId(id);
+                    
+                    if (id) {
+                      const client = clients.find(c => c.id === id);
+                      if (client) {
+                        const contactParts = [client.name, client.phone, client.email].filter(Boolean);
+                        setClientContact(contactParts.join(' • '));
+                        if (!paymentTerms) {
+                          setPaymentTerms('50% deposit, balance on completion');
+                        }
+                      }
+                    } else {
+                      setClientContact('');
+                    }
+                  }}
                   disabled={loadingClients}
                   className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                 >
@@ -1314,16 +1328,32 @@ export default function NewQuotePage() {
                     Payment Terms
                   </span>
 
-                  <input
-                    value={paymentTerms}
-                    onChange={(event) =>
-                      setPaymentTerms(
-                        event.target.value
-                      )
-                    }
-                    placeholder="e.g. 50% deposit, balance on completion"
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                  />
+                  <div className="relative">
+                    <input
+                      value={paymentTerms}
+                      onChange={(event) =>
+                        setPaymentTerms(
+                          event.target.value
+                        )
+                      }
+                      placeholder="e.g. 50% deposit, balance on completion"
+                      className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                      <select 
+                        className="bg-slate-100 dark:bg-zinc-800 text-xs text-slate-600 dark:text-zinc-300 rounded px-2 py-1 outline-none"
+                        onChange={(e) => {
+                          if (e.target.value) setPaymentTerms(e.target.value);
+                          e.target.value = '';
+                        }}
+                      >
+                        <option value="">Templates...</option>
+                        <option value="50% upfront, 50% on completion">50% upfront, 50% on completion</option>
+                        <option value="100% upfront">100% upfront</option>
+                        <option value="Net 30">Net 30</option>
+                      </select>
+                    </div>
+                  </div>
                 </label>
 
                 <label className="block">

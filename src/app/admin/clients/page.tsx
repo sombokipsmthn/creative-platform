@@ -12,6 +12,7 @@ type Client = {
   company?: string | null;
   email?: string | null;
   phone?: string | null;
+  kraPin?: string | null;
   website?: string | null;
   notes?: string | null;
   status: ClientStatus | string;
@@ -24,6 +25,7 @@ const emptyForm = {
   email: '',
   phone: '',
   company: '',
+  kraPin: '',
   website: '',
   notes: '',
   status: 'active' as ClientStatus,
@@ -408,9 +410,27 @@ export default function AdminClientsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Website</label>
-                    <input type="url" placeholder="https://company.com" value={form.website} onChange={(event) => setForm({ ...form, website: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                    <input 
+                      type="url" 
+                      placeholder="https://company.com" 
+                      value={form.website} 
+                      onChange={(event) => setForm({ ...form, website: event.target.value })} 
+                      onBlur={(e) => {
+                        let val = e.target.value.trim();
+                        if (val && !/^https?:\/\//i.test(val)) {
+                          val = 'https://' + val;
+                          setForm({ ...form, website: val });
+                        }
+                      }}
+                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" 
+                    />
                   </div>
 
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">KRA PIN</label>
+                  <input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
                 </div>
 
                 <div className="space-y-1">
@@ -447,6 +467,11 @@ export default function AdminClientsPage() {
                 <p className="text-xs font-mono text-slate-600 dark:text-zinc-400 break-words">
                   {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}
                 </p>
+                {selectedClient.kraPin && (
+                  <p className="text-xs font-mono text-slate-500 dark:text-zinc-500 mt-1">
+                    KRA PIN: {selectedClient.kraPin}
+                  </p>
+                )}
 
               </div>
 

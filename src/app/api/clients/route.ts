@@ -258,6 +258,9 @@ export async function POST(
       phone:
         cleanString(body?.phone),
 
+      kraPin:
+        cleanString(body?.kraPin),
+
       website:
         cleanString(body?.website),
 

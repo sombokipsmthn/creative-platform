@@ -24,10 +24,7 @@ type Preset = {
 function hashIp(request: Request) {
   const forwarded = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
   const ip = forwarded || request.headers.get("x-real-ip") || "unknown";
-  return crypto
-    .createHash("sha256")
-    .update(`${process.env.DOWNLOAD_TRACKING_SALT || "gallery"}:${ip}`)
-    .digest("hex");
+  return crypto.createHash("sha256").update(`${process.env.DOWNLOAD_TRACKING_SALT || "gallery"}:${ip}`).digest("hex");
 }
 
 function safeName(value: string) {
@@ -83,10 +80,7 @@ async function getWatermark(galleryId: string) {
   };
 }
 
-async function getSource(
-  photo: Record<string, unknown>,
-  variant: Preset["variant"],
-) {
+async function getSource(photo: Record<string, unknown>, variant: Preset["variant"]) {
   const isR2 = getGalleryStorageProvider() === "r2";
   const keyMap: Record<Preset["variant"], string> = {
     original: "original_path",
@@ -105,15 +99,13 @@ async function getSource(
   const url = photo[urlMap[variant]] as string | null;
   if (!path && !url) return null;
 
-  const storage = getGalleryStorage();
-  return storage.getObject(isR2 ? String(path) : String(url));
+  return getGalleryStorage().getObject(isR2 ? String(path) : String(url));
 }
 
 export async function POST(request: Request, context: Context) {
   try {
     const { slug } = await context.params;
     const gallery = await getGallery(slug);
-
     if (!gallery) return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
     if (gallery.allow_downloads === false) return NextResponse.json({ error: "Downloads are disabled." }, { status: 403 });
     if (gallery.expires_at && new Date(String(gallery.expires_at)).getTime() <= Date.now()) {
@@ -129,8 +121,7 @@ export async function POST(request: Request, context: Context) {
 
     if (!photoIds.length && body.scope === "selected") {
       const selected = await db.execute(sql`
-        SELECT photo_id
-        FROM gallery_photo_actions
+        SELECT photo_id FROM gallery_photo_actions
         WHERE session_id = ${session.id}
           AND gallery_id = ${gallery.id}
           AND is_selected = true
@@ -140,8 +131,7 @@ export async function POST(request: Request, context: Context) {
 
     if (!photoIds.length && body.scope === "favorites") {
       const favorites = await db.execute(sql`
-        SELECT photo_id
-        FROM gallery_photo_actions
+        SELECT photo_id FROM gallery_photo_actions
         WHERE session_id = ${session.id}
           AND gallery_id = ${gallery.id}
           AND is_favorite = true
@@ -149,18 +139,22 @@ export async function POST(request: Request, context: Context) {
       photoIds = favorites.rows.map((row) => String(row.photo_id));
     }
 
-    if (!photoIds.length) {
-      return NextResponse.json({ error: "No photos selected for download." }, { status: 400 });
-    }
-
-    const photos = await db.execute(sql`
-      SELECT *
-      FROM gallery_photos
-      WHERE gallery_id = ${gallery.id}
-        AND is_hidden = false
-        AND id = ANY(${photoIds}::uuid[])
-      ORDER BY sort_order ASC
-    `);
+    const photos = photoIds.length
+      ? await db.execute(sql`
+          SELECT * FROM gallery_photos
+          WHERE gallery_id = ${gallery.id}
+            AND is_hidden = false
+            AND id = ANY(${photoIds}::uuid[])
+          ORDER BY sort_order ASC
+        `)
+      : body.scope === "all"
+        ? await db.execute(sql`
+            SELECT * FROM gallery_photos
+            WHERE gallery_id = ${gallery.id}
+              AND is_hidden = false
+            ORDER BY sort_order ASC
+          `)
+        : { rows: [] };
 
     if (!photos.rows.length) return NextResponse.json({ error: "No downloadable photos found." }, { status: 404 });
 
@@ -173,12 +167,7 @@ export async function POST(request: Request, context: Context) {
 
       let output = source.body;
       let extension = "jpg";
-
-      const needsTransform =
-        preset.variant !== "original" ||
-        Boolean(preset.max_width) ||
-        preset.format !== "jpg" ||
-        preset.include_watermark;
+      const needsTransform = preset.variant !== "original" || Boolean(preset.max_width) || preset.format !== "jpg" || preset.include_watermark;
 
       if (needsTransform) {
         output = await renderDownloadVariant(source.body, {
@@ -205,33 +194,18 @@ export async function POST(request: Request, context: Context) {
     for (const photo of downloadedPhotos) {
       await db.execute(sql`
         INSERT INTO gallery_downloads (
-          gallery_id,
-          photo_id,
-          preset_id,
-          session_id,
-          download_type,
-          filename,
-          bytes,
-          ip_hash,
-          user_agent
+          gallery_id, photo_id, preset_id, session_id, download_type,
+          filename, bytes, ip_hash, user_agent
         )
         VALUES (
-          ${gallery.id},
-          ${photo.id},
-          ${preset.id || null},
-          ${session.id},
-          ${downloadType},
-          ${photo.filename},
-          ${photo.bytes},
-          ${ipHash},
-          ${userAgent}
+          ${gallery.id}, ${photo.id}, ${preset.id || null}, ${session.id}, ${downloadType},
+          ${photo.filename}, ${photo.bytes}, ${ipHash}, ${userAgent}
         )
       `);
 
       await db.execute(sql`
         UPDATE gallery_photos
-        SET download_count = download_count + 1,
-            updated_at = now()
+        SET download_count = download_count + 1, updated_at = now()
         WHERE id = ${photo.id}
       `);
     }
@@ -254,24 +228,12 @@ export async function POST(request: Request, context: Context) {
 
     await db.execute(sql`
       INSERT INTO gallery_downloads (
-        gallery_id,
-        preset_id,
-        session_id,
-        download_type,
-        filename,
-        bytes,
-        ip_hash,
-        user_agent
+        gallery_id, preset_id, session_id, download_type,
+        filename, bytes, ip_hash, user_agent
       )
       VALUES (
-        ${gallery.id},
-        ${preset.id || null},
-        ${session.id},
-        'zip',
-        ${archiveName},
-        ${zip.byteLength},
-        ${ipHash},
-        ${userAgent}
+        ${gallery.id}, ${preset.id || null}, ${session.id}, 'zip',
+        ${archiveName}, ${zip.byteLength}, ${ipHash}, ${userAgent}
       )
     `);
 

@@ -24,6 +24,7 @@ const emptyForm = {
   name: '',
   email: '',
   phone: '',
+  phoneCountry: '+254',
   company: '',
   kraPin: '',
   website: '',
@@ -133,7 +134,8 @@ export default function AdminClientsPage() {
   const archivedCount = clients.filter((client) => client.status === 'archived').length;
 
   function openCreateModal() {
-    setForm(emptyForm);
+    // Prefill Kenyan country code for the phone field and default phone value
+    setForm({ ...emptyForm, phoneCountry: '+254', phone: '+254 ' });
     setError('');
     setIsAddClientOpen(true);
   }
@@ -143,6 +145,16 @@ export default function AdminClientsPage() {
       setIsAddClientOpen(false);
       setForm(emptyForm);
     }
+  }
+
+  function handlePhoneCountryChange(code: string) {
+    setForm((prev) => {
+      const current = prev.phone || '';
+      // Remove any existing leading +<digits> and optional spacing/dashes
+      const stripped = current.replace(/^\+?[\d\s-]*/, '').trim();
+      const newPhone = code + (stripped ? ' ' + stripped : ' ');
+      return { ...prev, phoneCountry: code, phone: newPhone };
+    });
   }
 
   async function handleCreateClient(event: React.FormEvent<HTMLFormElement>) {
@@ -397,7 +409,16 @@ export default function AdminClientsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone</label>
-                    <input type="text" placeholder="+254 700 000 000" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                    <div className="flex items-center gap-2">
+                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="px-3 py-2 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg">
+                        <option value="+254">🇰🇪 +254 (Kenya)</option>
+                        <option value="+1">🇺🇸 +1 (USA)</option>
+                        <option value="+44">🇬🇧 +44 (UK)</option>
+                        <option value="+27">🇿🇦 +27 (South Africa)</option>
+                        <option value="+254">Other</option>
+                      </select>
+                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                    </div>
                   </div>
 
                 </div>
@@ -415,6 +436,11 @@ export default function AdminClientsPage() {
                       placeholder="https://company.com" 
                       value={form.website} 
                       onChange={(event) => setForm({ ...form, website: event.target.value })} 
+                      onFocus={() => {
+                        if (!form.website || form.website.trim() === '') {
+                          setForm({ ...form, website: 'https://' });
+                        }
+                      }}
                       onBlur={(e) => {
                         let val = e.target.value.trim();
                         if (val && !/^https?:\/\//i.test(val)) {

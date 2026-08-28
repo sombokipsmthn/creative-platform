@@ -15,46 +15,7 @@ type RouteContext = {
   }>;
 };
 
-async function getCurrentUser() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return null;
-  }
-
-  let user = await db.query.users.findFirst({
-    where: eq(users.authUserId, userId),
-  });
-
-  if (!user) {
-    try {
-      const [createdUser] = await db
-        .insert(users)
-        .values({
-          authUserId: userId,
-          email:
-            process.env.ADMIN_EMAIL ||
-            `clerk-${userId}@kipsmthn.com`,
-          name: "Creator",
-        })
-        .onConflictDoNothing({
-          target: users.authUserId,
-        })
-        .returning();
-
-      user =
-        createdUser ??
-        (await db.query.users.findFirst({
-          where: eq(users.authUserId, userId),
-        }));
-    } catch {
-      return null;
-    }
-  }
-
-  return user ?? null;
-}
-
+import { getCurrentUser } from "@/lib/auth/get-current-user";
 const STATUS_TRANSITIONS: Record<
   string,
   string[]

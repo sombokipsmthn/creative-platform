@@ -30,6 +30,11 @@
   "devDependencies": {
     "webpack": "^5.110.1",
     "webpack-cli": "^5.1.4",
+    "@noop/webpack-shim": "0.0.0"
+  ,
+  "bin": {
+    "webpack": "src/lib/webpack-shim.js"
+  },
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.43",
     "@types/pg": "^8.21.0",

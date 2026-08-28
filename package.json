@@ -28,13 +28,6 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "webpack": "^5.110.1",
-    "webpack-cli": "^5.1.4",
-    "@noop/webpack-shim": "0.0.0"
-  ,
-  "bin": {
-    "webpack": "src/lib/webpack-shim.js"
-  },
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.43",
     "@types/pg": "^8.21.0",
@@ -46,7 +39,12 @@
     "eslint-config-next": "16.3.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^5",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "webpack": "^5.110.1",
+    "webpack-cli": "^5.1.4"
+  },
+  "bin": {
+    "webpack": "src/lib/webpack-shim.js"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true,

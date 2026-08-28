@@ -84,6 +84,9 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description"),
   status: text("status").default("active").notNull(),
+  // Optional scheduling fields for calendar views
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

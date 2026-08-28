@@ -20,6 +20,9 @@ export function ProductionCalendar() {
   const month = currentDate.getMonth() + 1;
   const year = currentDate.getFullYear();
 
+  // explicit types for date arrays to satisfy TS checks
+  type Day = Date;
+
   useEffect(() => {
     async function fetchProjects() {
       setLoading(true);
@@ -77,16 +80,16 @@ export function ProductionCalendar() {
           <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading calendar...</div>
         ) : (
           <div className="grid grid-cols-7 gap-px bg-slate-100 dark:bg-zinc-900">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day: string) => (
               <div key={day} className="bg-white py-2 text-center text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:bg-zinc-950 dark:text-zinc-500">
                 {day}
               </div>
             ))}
             {/* Padding for first day of month */}
-            {Array.from({ length: daysInMonth[0].getDay() }).map((_, i) => (
+            {Array.from({ length: daysInMonth[0].getDay() }).map((_, i: number) => (
               <div key={`pad-${i}`} className="h-24 bg-slate-50/50 dark:bg-zinc-950/50" />
             ))}
-            {daysInMonth.map((day, i) => {
+            {daysInMonth.map((day: Day, i: number) => {
               const dayProjects = projects.filter(p => {
                 const start = new Date(p.startDate);
                 const end = new Date(p.endDate);

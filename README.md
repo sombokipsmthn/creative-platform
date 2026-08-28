@@ -1,36 +1,175 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KIPSMTHN Creative Platform
 
-## Getting Started
+> A unified platform for creative professionals to manage their work, clients, projects, production workflows, and client delivery.
 
-First, run the development server:
+## What is Creative Platform?
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**KIPSMTHN Creative Platform** is a creative business platform built for photography, video, brand films, and visual storytelling.
+
+It brings the different parts of running a creative production business into one place — from presenting work and managing clients to creating quotes, tracking projects, invoicing, and delivering finished work through private galleries.
+
+The platform is designed around the needs of independent creatives and production studios, with a focus on simplifying the journey from **client inquiry to project delivery**.
+
+---
+
+## Features
+
+### 🌐 Public Portfolio
+
+A public-facing website for:
+
+- Showcasing creative work
+- Presenting services
+- Introducing the creator/studio
+- Providing a way for potential clients to get in touch
+
+### 👥 Client Management
+
+A central place to manage client relationships and associated projects.
+
+### 📋 Quotes & Invoices
+
+Tools for creating and managing production quotations and invoices, including:
+
+- Production services
+- Equipment
+- Day rates
+- Deposits
+- Discounts
+- Taxes
+- Multiple currencies
+
+### 🎬 Project Management
+
+Projects provide a connection between clients, creative work, and the wider production workflow.
+
+### 📸 Client Galleries
+
+Private client delivery galleries designed for:
+
+- Viewing finished work
+- Favorites
+- Selections
+- Proofing
+- Comments
+- Downloads
+- PIN-protected access
+
+### 🎒 Equipment Management
+
+An equipment catalogue that supports production planning and quotation workflows, including day-rate pricing for different categories of production equipment.
+
+### 💼 Business Management
+
+Additional tools for managing:
+
+- Expenses
+- Creator profile
+- Branding
+- Watermarks
+- Templates
+- Presets
+- Business preferences
+
+---
+
+## Architecture
+
+Creative Platform is built around three connected experiences:
+
+```text
+             CREATIVE PLATFORM
+                    │
+       ┌────────────┼────────────┐
+       │            │            │
+       ▼            ▼            ▼
+    PUBLIC        CREATOR       CLIENT
+    WEBSITE       DASHBOARD     PORTAL
+       │            │            │
+    Portfolio       CRM        Galleries
+    Services       Quotes      Proofing
+    Work           Invoices    Favorites
+    Contact        Projects    Downloads
+                   Expenses
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The platform uses a shared backend and database so that clients, projects, quotes, invoices, and creative deliveries can eventually work together as one connected workflow.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The underlying architecture also uses creator ownership relationships, allowing the platform to evolve from its current single-creator implementation toward a multi-creator platform.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Technology
 
-To learn more about Next.js, take a look at the following resources:
+Creative Platform is built with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js** — application framework
+- **React** — user interface
+- **TypeScript** — application language
+- **Tailwind CSS** — styling
+- **Drizzle ORM** — database layer
+- **PostgreSQL** — database
+- **Clerk** — authentication
+- **Framer Motion** — animation
+- **Lucide React** — icons
+- **Vercel** — hosting target
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## Project Goals
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The goal is to create a single operating platform for creative production businesses.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The long-term vision is to connect the entire workflow:
+
+```text
+Client
+   ↓
+Project
+   ↓
+Quote
+   ↓
+Production
+   ↓
+Gallery
+   ↓
+Proofing
+   ↓
+Approval
+   ↓
+Invoice
+   ↓
+Delivery
+```
+
+Instead of relying on disconnected tools for each stage, Creative Platform aims to provide one connected system for managing the creative business and its client relationships.
+
+---
+
+## Current Status
+
+**Active Development**
+
+The platform already has working foundations for:
+
+- Public website
+- Authentication
+- Creator dashboard
+- Client management interface
+- Quotation workflow
+- Invoice management
+- Equipment management
+- Client gallery interface
+- Database infrastructure
+
+Several areas are still being developed, particularly the transition from prototype interfaces and demo data to fully database-backed production workflows.
+
+The gallery system is also being expanded toward a complete professional client delivery and proofing experience.
+
+---
+
+## Vision
+
+Creative Platform is being built to become the digital backbone of a modern creative studio — connecting **business management, production, and client delivery** in one platform.
+
+**From first inquiry to final delivery.**

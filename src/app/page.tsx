@@ -156,6 +156,16 @@ const faqs = [
   },
 ];
 
+export const metadata = {
+  title: 'KIPSMTHN — Creative infrastructure for creators',
+  description: 'KIPSMTHN connects portfolio, client delivery, quoting and invoicing for independent creators in Nairobi.',
+  openGraph: {
+    title: 'KIPSMTHN — Creative infrastructure for creators',
+    description: 'KIPSMTHN connects portfolio, client delivery, quoting and invoicing for independent creators in Nairobi.',
+    images: ['/og-image.svg'],
+  },
+};
+
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
@@ -248,14 +258,13 @@ export default function HomePage() {
 
           <div className="relative mt-10 aspect-2/1 overflow-hidden bg-slate-200">
             <Image
-              src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=2200&q=85"
-              alt="Creative studio"
+              src="/team-photo.jpg"
+              alt="Kips and the team at the studio"
               fill
               priority
-              unoptimized
               className="object-cover"
             />
-
+ 
             <div className="absolute bottom-4 left-4 max-w-xs bg-white/95 px-4 py-3 backdrop-blur">
               <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
                 One creative workspace
@@ -263,10 +272,43 @@ export default function HomePage() {
               <p className="mt-1 text-sm font-medium">
                 Portfolio → Client → Project → Delivery → Payment
               </p>
+              <p className="mt-2 text-xs text-gray-500">Response time: We reply to enquiries within 24 hours.</p>
             </div>
+          </div>
+
+          {/* Sticky mobile call to action */}
+          <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50">
+            <a href="/sign-up" className="w-full rounded-full bg-purple-600 px-4 py-3 text-center text-sm font-medium text-white shadow-lg">Get started — create your workspace</a>
           </div>
         </div>
       </section>
+
+      {/* Structured data: Breadcrumbs + LocalBusiness */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{__html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://kipsmthn.com/" }
+            ]
+          },
+          {
+            "@type": "LocalBusiness",
+            "@id": "https://kipsmthn.com/#business",
+            "name": "KIPSMTHN",
+            "image": "https://kipsmthn.com/site-icon.svg",
+            "address": {
+              "@type": "PostalAddress",
+              "addressLocality": "Nairobi",
+              "addressCountry": "KE"
+            },
+            "telephone": "+254700000000",
+            "url": "https://kipsmthn.com/",
+            "openingHours": "Mo-Fr 09:00-17:00"
+          }
+        ]
+      })}} />
 
       {/* PLATFORM INTRO */}
       <section
@@ -300,6 +342,34 @@ export default function HomePage() {
       </section>
 
       {/* CAPABILITIES */}
+
+      {/* CASE STUDIES */}
+      <section className="px-5 py-16 lg:px-8 lg:py-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10">
+            <p className="text-xs uppercase tracking-[0.24em] text-purple-600">Case studies</p>
+            <h2 className="mt-5 text-3xl font-light sm:text-4xl">Selected client work and outcomes</h2>
+            <p className="mt-3 text-sm text-slate-500">Short case studies showing challenges, approach and outcomes.</p>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <article className="rounded-xl border p-4">
+              <h3 className="font-medium">Brand launch — Studio X</h3>
+              <p className="mt-2 text-sm text-slate-500">Photography, campaign content and launch support that increased engagement by 42%.</p>
+            </article>
+
+            <article className="rounded-xl border p-4">
+              <h3 className="font-medium">Product film — Alpha Co.</h3>
+              <p className="mt-2 text-sm text-slate-500">End-to-end production and post that helped the product reach 1M views.</p>
+            </article>
+
+            <article className="rounded-xl border p-4">
+              <h3 className="font-medium">Event coverage — Summit 2025</h3>
+              <p className="mt-2 text-sm text-slate-500">Full production and rapid delivery to press partners.</p>
+            </article>
+          </div>
+        </div>
+      </section>
       <section className="px-5 pb-16 lg:px-8 lg:pb-20">
         <div className="mx-auto max-w-7xl">
           <div className="grid border-t border-slate-200 md:grid-cols-2 lg:grid-cols-4">
@@ -847,8 +917,14 @@ export default function HomePage() {
             <Link href="/sign-in" className="hover:text-slate-700">
               Sign in
             </Link>
+            <Link href="/privacy" className="hover:text-slate-700">
+              Privacy
+            </Link>
+            <a href="https://www.google.com/maps/dir/?api=1&destination=Nairobi" target="_blank" rel="noopener noreferrer" className="hover:text-slate-700">
+              Maps & directions
+            </a>
           </div>
-
+ 
           <span>© 2026 KIPSMTHN</span>
         </div>
       </footer>

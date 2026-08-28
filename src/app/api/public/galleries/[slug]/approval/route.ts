@@ -18,11 +18,21 @@ async function getGallery(slug: string) {
       access_pin,
       expires_at
     FROM galleries
-    WHERE (slug = ${slug} OR id::text = ${slug})
+    WHERE (
+      slug = ${slug}
+      OR id::text = ${slug}
+    )
     LIMIT 1
   `);
 
   return result.rows[0] || null;
+}
+
+function hasAccessPin(value: unknown) {
+  return (
+    typeof value === "string" &&
+    value.trim().length > 0
+  );
 }
 
 export async function GET(
@@ -30,14 +40,17 @@ export async function GET(
   context: Context,
 ) {
   try {
-    const { slug } = await context.params;
+    const { slug } =
+      await context.params;
 
-    const gallery = await getGallery(slug);
+    const gallery =
+      await getGallery(slug);
 
     if (!gallery) {
       return NextResponse.json(
         {
-          error: "Gallery not found.",
+          error:
+            "Gallery not found.",
         },
         {
           status: 404,
@@ -47,11 +60,17 @@ export async function GET(
 
     if (
       gallery.expires_at &&
-      new Date(String(gallery.expires_at)).getTime() <= Date.now()
+      new Date(
+        String(
+          gallery.expires_at,
+        ),
+      ).getTime() <=
+        Date.now()
     ) {
       return NextResponse.json(
         {
-          error: "Gallery expired.",
+          error:
+            "Gallery expired.",
         },
         {
           status: 410,
@@ -59,21 +78,25 @@ export async function GET(
       );
     }
 
-    const session = await requireGallerySession(
-      String(gallery.id),
-      gallery.client_id
-        ? String(gallery.client_id)
-        : null,
-    );
+    const session =
+      await requireGallerySession(
+        String(gallery.id),
+        gallery.client_id
+          ? String(
+              gallery.client_id,
+            )
+          : null,
+      );
 
     if (!session) {
       return NextResponse.json(
         {
-          error: "Gallery access required.",
-          requiresPin: Boolean(
-            typeof gallery.access_pin === "string" &&
-            gallery.access_pin.trim(),
-          ),
+          error:
+            "Gallery access required.",
+          requiresPin:
+            hasAccessPin(
+              gallery.access_pin,
+            ),
         },
         {
           status: 401,
@@ -81,15 +104,18 @@ export async function GET(
       );
     }
 
-    const approval = await db.execute(sql`
-      SELECT *
-      FROM gallery_approvals
-      WHERE gallery_id = ${gallery.id}
-      LIMIT 1
-    `);
+    const approval =
+      await db.execute(sql`
+        SELECT *
+        FROM gallery_approvals
+        WHERE gallery_id = ${gallery.id}
+        LIMIT 1
+      `);
 
     return NextResponse.json({
-      approval: approval.rows[0] || null,
+      approval:
+        approval.rows[0] ||
+        null,
     });
   } catch (error) {
     console.error(
@@ -99,7 +125,8 @@ export async function GET(
 
     return NextResponse.json(
       {
-        error: "Unable to load approval state.",
+        error:
+          "Unable to load approval state.",
       },
       {
         status: 500,
@@ -113,14 +140,17 @@ export async function POST(
   context: Context,
 ) {
   try {
-    const { slug } = await context.params;
+    const { slug } =
+      await context.params;
 
-    const gallery = await getGallery(slug);
+    const gallery =
+      await getGallery(slug);
 
     if (!gallery) {
       return NextResponse.json(
         {
-          error: "Gallery not found.",
+          error:
+            "Gallery not found.",
         },
         {
           status: 404,
@@ -130,11 +160,17 @@ export async function POST(
 
     if (
       gallery.expires_at &&
-      new Date(String(gallery.expires_at)).getTime() <= Date.now()
+      new Date(
+        String(
+          gallery.expires_at,
+        ),
+      ).getTime() <=
+        Date.now()
     ) {
       return NextResponse.json(
         {
-          error: "Gallery expired.",
+          error:
+            "Gallery expired.",
         },
         {
           status: 410,
@@ -142,21 +178,25 @@ export async function POST(
       );
     }
 
-    const session = await requireGallerySession(
-      String(gallery.id),
-      gallery.client_id
-        ? String(gallery.client_id)
-        : null,
-    );
+    const session =
+      await requireGallerySession(
+        String(gallery.id),
+        gallery.client_id
+          ? String(
+              gallery.client_id,
+            )
+          : null,
+      );
 
     if (!session) {
       return NextResponse.json(
         {
-          error: "Gallery access required.",
-          requiresPin: Boolean(
-            typeof gallery.access_pin === "string" &&
-            gallery.access_pin.trim(),
-          ),
+          error:
+            "Gallery access required.",
+          requiresPin:
+            hasAccessPin(
+              gallery.access_pin,
+            ),
         },
         {
           status: 401,
@@ -164,46 +204,60 @@ export async function POST(
       );
     }
 
-    const body = await request.json();
+    const body =
+      await request.json();
 
     const status =
-      body.status === "approved" ||
-      body.status === "changes_requested"
+      body.status ===
+        "approved" ||
+      body.status ===
+        "changes_requested"
         ? body.status
         : "approved";
 
     const note =
-      typeof body.note === "string"
-        ? body.note.trim().slice(0, 2000)
+      typeof body.note ===
+      "string"
+        ? body.note
+            .trim()
+            .slice(0, 2000)
         : null;
 
-    const result = await db.execute(sql`
-      INSERT INTO gallery_approvals (
-        gallery_id,
-        client_id,
-        status,
-        requested_at,
-        responded_at,
-        response_note,
-        updated_at
-      )
-      VALUES (
-        ${gallery.id},
-        ${gallery.client_id || null},
-        ${status},
-        now(),
-        now(),
-        ${note},
-        now()
-      )
-      ON CONFLICT (gallery_id)
-      DO UPDATE SET
-        status = EXCLUDED.status,
-        responded_at = now(),
-        response_note = EXCLUDED.response_note,
-        updated_at = now()
-      RETURNING *
-    `);
+    const result =
+      await db.execute(sql`
+        INSERT INTO gallery_approvals (
+          gallery_id,
+          client_id,
+          status,
+          requested_at,
+          responded_at,
+          response_note,
+          updated_at
+        )
+        VALUES (
+          ${gallery.id},
+          ${
+            gallery.client_id ||
+            null
+          },
+          ${status},
+          now(),
+          now(),
+          ${note},
+          now()
+        )
+        ON CONFLICT (gallery_id)
+        DO UPDATE SET
+          status =
+            EXCLUDED.status,
+          responded_at =
+            now(),
+          response_note =
+            EXCLUDED.response_note,
+          updated_at =
+            now()
+        RETURNING *
+      `);
 
     await db.execute(sql`
       UPDATE gallery_access_sessions
@@ -212,7 +266,8 @@ export async function POST(
     `);
 
     return NextResponse.json({
-      approval: result.rows[0],
+      approval:
+        result.rows[0],
     });
   } catch (error) {
     console.error(
@@ -222,7 +277,8 @@ export async function POST(
 
     return NextResponse.json(
       {
-        error: "Unable to save approval.",
+        error:
+          "Unable to save approval.",
       },
       {
         status: 500,

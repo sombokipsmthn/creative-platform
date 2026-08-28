@@ -309,16 +309,6 @@ export async function PATCH(
     if (
       Object.prototype.hasOwnProperty.call(
         body,
-        "kraPin"
-      )
-    ) {
-      updateData.kraPin =
-        cleanString(body.kraPin);
-    }
-
-    if (
-      Object.prototype.hasOwnProperty.call(
-        body,
         "phone"
       )
     ) {

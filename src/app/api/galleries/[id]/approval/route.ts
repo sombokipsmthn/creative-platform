@@ -5,50 +5,150 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 
-type Context = { params: Promise<{ id: string }> };
+type Context = {
+  params: Promise<{
+    id: string;
+  }>;
+};
 
 async function getCreator() {
   const { userId } = await auth();
-  if (!userId) return null;
+
+  if (!userId) {
+    return null;
+  }
+
   return getOrCreateLocalUser(userId);
 }
 
-async function ownsGallery(id: string, creatorId: string) {
+async function ownsGallery(
+  id: string,
+  creatorId: string,
+) {
   const result = await db.execute(sql`
-    SELECT id FROM galleries WHERE id = ${id} AND creator_id = ${creatorId} LIMIT 1
+    SELECT id
+    FROM galleries
+    WHERE id = ${id}
+      AND creator_id = ${creatorId}
+    LIMIT 1
   `);
+
   return Boolean(result.rows[0]);
 }
 
-export async function GET(_request: Request, context: Context) {
+export async function GET(
+  _request: Request,
+  context: Context,
+) {
   try {
     const creator = await getCreator();
-    if (!creator) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!creator) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
     const { id } = await context.params;
-    if (!(await ownsGallery(id, creator.id))) return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
+
+    if (
+      !(await ownsGallery(
+        id,
+        creator.id,
+      ))
+    ) {
+      return NextResponse.json(
+        {
+          error: "Gallery not found.",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
 
     const result = await db.execute(sql`
-      SELECT * FROM gallery_approvals WHERE gallery_id = ${id} LIMIT 1
+      SELECT *
+      FROM gallery_approvals
+      WHERE gallery_id = ${id}
+      LIMIT 1
     `);
-    return NextResponse.json({ approval: result.rows[0] || null });
+
+    return NextResponse.json({
+      approval: result.rows[0] || null,
+    });
   } catch (error) {
-    console.error("GET gallery approval", error);
-    return NextResponse.json({ error: "Unable to load approval." }, { status: 500 });
+    console.error(
+      "GET gallery approval",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        error: "Unable to load approval.",
+      },
+      {
+        status: 500,
+      },
+    );
   }
 }
 
-export async function PATCH(request: Request, context: Context) {
+export async function PATCH(
+  request: Request,
+  context: Context,
+) {
   try {
     const creator = await getCreator();
-    if (!creator) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    if (!creator) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized",
+        },
+        {
+          status: 401,
+        },
+      );
+    }
+
     const { id } = await context.params;
-    if (!(await ownsGallery(id, creator.id))) return NextResponse.json({ error: "Gallery not found." }, { status: 404 });
+
+    if (
+      !(await ownsGallery(
+        id,
+        creator.id,
+      ))
+    ) {
+      return NextResponse.json(
+        {
+          error: "Gallery not found.",
+        },
+        {
+          status: 404,
+        },
+      );
+    }
 
     const body = await request.json();
-    const status = ["pending", "approved", "changes_requested"].includes(body.status)
+
+    const status = [
+      "pending",
+      "approved",
+      "changes_requested",
+    ].includes(body.status)
       ? body.status
       : "pending";
-    const note = typeof body.note === "string" ? body.note.trim().slice(0, 2000) : null;
+
+    const note =
+      typeof body.note === "string"
+        ? body.note.trim().slice(0, 2000)
+        : null;
 
     const result = await db.execute(sql`
       INSERT INTO gallery_approvals (
@@ -64,8 +164,16 @@ export async function PATCH(request: Request, context: Context) {
         g.id,
         g.client_id,
         ${status},
-        CASE WHEN ${status} = 'pending' THEN now() ELSE NULL END,
-        CASE WHEN ${status} = 'pending' THEN NULL ELSE now() END,
+        CASE
+          WHEN ${status} = 'pending'
+          THEN now()
+          ELSE NULL
+        END,
+        CASE
+          WHEN ${status} = 'pending'
+          THEN NULL
+          ELSE now()
+        END,
         ${note},
         now()
       FROM galleries g
@@ -74,21 +182,36 @@ export async function PATCH(request: Request, context: Context) {
       DO UPDATE SET
         status = EXCLUDED.status,
         requested_at = CASE
-          WHEN EXCLUDED.status = 'pending' THEN now()
+          WHEN EXCLUDED.status = 'pending'
+          THEN now()
           ELSE gallery_approvals.requested_at
         END,
         responded_at = CASE
-          WHEN EXCLUDED.status = 'pending' THEN NULL
+          WHEN EXCLUDED.status = 'pending'
+          THEN NULL
           ELSE now()
         END,
         response_note = EXCLUDED.response_note,
         updated_at = now()
       RETURNING *
-    `;
+    `);
 
-    return NextResponse.json({ approval: result.rows[0] });
+    return NextResponse.json({
+      approval: result.rows[0],
+    });
   } catch (error) {
-    console.error("PATCH gallery approval", error);
-    return NextResponse.json({ error: "Unable to update approval." }, { status: 500 });
+    console.error(
+      "PATCH gallery approval",
+      error,
+    );
+
+    return NextResponse.json(
+      {
+        error: "Unable to update approval.",
+      },
+      {
+        status: 500,
+      },
+    );
   }
 }

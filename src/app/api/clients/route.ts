@@ -67,6 +67,7 @@ async function getCurrentUser() {
      * In local development without Clerk configured,
      * use the existing development user.
      */
+
     if (clerkKey) {
       const authResult = await auth();
 
@@ -79,31 +80,39 @@ async function getCurrentUser() {
       return null;
     }
 
-    let user = await db.query.users.findFirst({
-      where: eq(users.authUserId, userId),
-    });
+    let user =
+      await db.query.users.findFirst({
+        where: eq(
+          users.authUserId,
+          userId
+        ),
+      });
 
     /*
      * Development fallback:
      * create the local creator record if it does not exist.
      */
+
     if (!user) {
       try {
-        const [created] = await db
-          .insert(users)
-          .values({
-            authUserId: userId,
-            email:
-              process.env.ADMIN_EMAIL ||
-              "creator@kipsmthn.com",
-            name: "Somboriot Kipchilat",
-            onboardingStatus: "incomplete",
-            onboardingStep: 1,
-          })
-          .onConflictDoNothing()
-          .returning();
+        const [created] =
+          await db
+            .insert(users)
+            .values({
+              authUserId: userId,
+              email:
+                process.env.ADMIN_EMAIL ||
+                "creator@kipsmthn.com",
+              name: "Somboriot Kipchilat",
+              onboardingStatus:
+                "incomplete",
+              onboardingStep: 1,
+            })
+            .onConflictDoNothing()
+            .returning();
 
-        user = created ?? undefined;
+        user =
+          created ?? undefined;
       } catch (error) {
         console.error(
           "Failed to create development user:",
@@ -131,7 +140,8 @@ async function getCurrentUser() {
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
+    const user =
+      await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
@@ -144,13 +154,24 @@ export async function GET() {
       );
     }
 
-    const results = await db.query.clients.findMany({
-      where: eq(clients.creatorId, user.id),
-      orderBy: (clients, { desc }) =>
-        desc(clients.createdAt),
-    });
+    const results =
+      await db.query.clients.findMany({
+        where: eq(
+          clients.creatorId,
+          user.id
+        ),
+        orderBy: (
+          clients,
+          { desc }
+        ) =>
+          desc(
+            clients.createdAt
+          ),
+      });
 
-    return NextResponse.json(results);
+    return NextResponse.json(
+      results
+    );
   } catch (error) {
     console.error(
       "GET /api/clients error:",
@@ -181,7 +202,8 @@ export async function POST(
   request: Request
 ) {
   try {
-    const user = await getCurrentUser();
+    const user =
+      await getCurrentUser();
 
     if (!user) {
       return NextResponse.json(
@@ -194,14 +216,17 @@ export async function POST(
       );
     }
 
-    const body = await request.json();
+    const body =
+      await request.json();
 
-    const name = cleanString(body?.name);
+    const name =
+      cleanString(body?.name);
 
     if (!name) {
       return NextResponse.json(
         {
-          error: "Client name is required",
+          error:
+            "Client name is required",
         },
         {
           status: 400,
@@ -240,6 +265,7 @@ export async function POST(
      * call from incorrectly inferring the inline
      * object as the array overload.
      */
+
     const clientInsert: InferInsertModel<
       typeof clients
     > = {
@@ -250,25 +276,34 @@ export async function POST(
       name,
 
       company:
-        cleanString(body?.company),
+        cleanString(
+          body?.company
+        ),
 
       email:
-        cleanString(body?.email),
+        cleanString(
+          body?.email
+        ),
 
       phone:
-        cleanString(body?.phone),
-
-      kraPin:
-        cleanString(body?.kraPin),
+        cleanString(
+          body?.phone
+        ),
 
       website:
-        cleanString(body?.website),
+        cleanString(
+          body?.website
+        ),
 
       location:
-        cleanString(body?.location),
+        cleanString(
+          body?.location
+        ),
 
       notes:
-        cleanString(body?.notes),
+        cleanString(
+          body?.notes
+        ),
 
       status,
 
@@ -281,10 +316,11 @@ export async function POST(
       taxCertificateStatus,
     };
 
-    const [client] = await db
-      .insert(clients)
-      .values(clientInsert)
-      .returning();
+    const [client] =
+      await db
+        .insert(clients)
+        .values(clientInsert)
+        .returning();
 
     if (!client) {
       return NextResponse.json(

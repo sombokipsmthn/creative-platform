@@ -72,8 +72,12 @@ async function getCurrentUser() {
       const authResult = await auth();
 
       userId = authResult.userId;
-    } else {
+    } else if (process.env.NODE_ENV === 'development') {
+      // Only use a local development fallback when running in development.
       userId = "dev_admin_user";
+    } else {
+      // In production without Clerk configured, fail closed.
+      return null;
     }
 
     if (!userId) {
@@ -93,7 +97,7 @@ async function getCurrentUser() {
      * create the local creator record if it does not exist.
      */
 
-    if (!user) {
+    if (!user && process.env.NODE_ENV === 'development') {
       try {
         const [created] =
           await db

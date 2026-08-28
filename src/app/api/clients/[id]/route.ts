@@ -22,8 +22,10 @@ async function getCurrentUser() {
     if (clerkKey) {
       const authResult = await auth();
       userId = authResult.userId;
-    } else {
+    } else if (process.env.NODE_ENV === 'development') {
       userId = "dev_admin_user";
+    } else {
+      return null;
     }
 
     if (!userId) {
@@ -34,7 +36,7 @@ async function getCurrentUser() {
       where: eq(users.authUserId, userId),
     });
 
-    if (!user) {
+    if (!user && process.env.NODE_ENV === 'development') {
       try {
         const [created] = await db
           .insert(users)
@@ -56,6 +58,7 @@ async function getCurrentUser() {
             where: eq(users.authUserId, userId),
           }));
       } catch {
+        // In development only, return a safe fallback object so the admin UI still works.
         user = {
           id: "creator_01",
           authUserId: userId,

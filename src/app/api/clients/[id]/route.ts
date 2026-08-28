@@ -11,7 +11,7 @@ type RouteContext = {
   }>;
 };
 
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 function cleanString(value: unknown) {
   if (typeof value !== "string") {

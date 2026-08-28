@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq, gte, lte, or } from "drizzle-orm";
 import { db } from "@/db";
 import { projects } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 export async function GET(req: Request) {
   try {

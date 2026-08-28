@@ -15,7 +15,7 @@ type RouteContext = {
   }>;
 };
 
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 const STATUS_TRANSITIONS: Record<
   string,
   string[]

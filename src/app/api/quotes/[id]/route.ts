@@ -10,7 +10,7 @@ import {
   users,
 } from "@/db/schema";
 
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 type RouteContext = {
   params: Promise<{

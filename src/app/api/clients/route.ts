@@ -54,7 +54,7 @@ function getTaxCertificateStatus(value: unknown): string {
    CURRENT USER
    ========================================================= */
 
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 /* =========================================================
    GET

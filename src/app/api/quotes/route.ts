@@ -9,7 +9,7 @@ import {
   users,
 } from "@/db/schema";
 
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 export function normalizeStatus(status: unknown) {
   const value = String(status ?? "draft")

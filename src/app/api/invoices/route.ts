@@ -130,18 +130,40 @@ export async function GET(req: Request) {
     const { searchParams } =
       new URL(req.url);
 
-    const status =
-      searchParams.get("status");
+    const status = searchParams.get("status");
+    const clientId = searchParams.get("clientId");
+    const currency = searchParams.get("currency");
+
+    const page = Math.max(
+      Number(searchParams.get("page") || 1),
+      1
+    );
+
+    const limit = Math.min(
+      Math.max(
+        Number(searchParams.get("limit") || 20),
+        1
+      ),
+      100
+    );
 
     const conditions = [
       eq(invoices.creatorId, user.id),
     ];
 
     if (status) {
-      conditions.push(
-        eq(invoices.status, status)
-      );
+      conditions.push(eq(invoices.status, status));
     }
+
+    if (clientId) {
+      conditions.push(eq(invoices.clientId, clientId));
+    }
+
+    if (currency) {
+      conditions.push(eq(invoices.currency, currency.toUpperCase()));
+    }
+
+    const offset = (page - 1) * limit;
 
     const results = await db
       .select({
@@ -156,16 +178,31 @@ export async function GET(req: Request) {
       .where(and(...conditions))
       .orderBy(
         sql`${invoices.createdAt} DESC`
-      );
+      )
+      .limit(limit)
+      .offset(offset);
 
-    return NextResponse.json(
-      results.map(
+    const [{ count }] = await db
+      .select({
+        count: sql<number>`count(*)`,
+      })
+      .from(invoices)
+      .where(and(...conditions));
+
+    return NextResponse.json({
+      data: results.map(
         ({ invoice, client }) => ({
           ...invoice,
           client,
         })
-      )
-    );
+      ),
+      pagination: {
+        page,
+        limit,
+        total: Number(count),
+        totalPages: Math.ceil(Number(count) / limit),
+      },
+    });
   } catch (error) {
     console.error(
       "GET /api/invoices error:",
@@ -179,6 +216,67 @@ export async function GET(req: Request) {
       {
         status: 500,
       }
+    );
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
+| PATCH /api/invoices
+|--------------------------------------------------------------------------
+|
+| Updates invoice status.
+|
+*/
+
+export async function PATCH(req: Request) {
+  try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+
+    if (!body.id || !body.status) {
+      return NextResponse.json(
+        { error: "Invoice id and status are required" },
+        { status: 400 }
+      );
+    }
+
+    const [invoice] = await db
+      .update(invoices)
+      .set({
+        status: String(body.status).trim().toLowerCase(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(invoices.id, body.id),
+          eq(invoices.creatorId, user.id)
+        )
+      )
+      .returning();
+
+    if (!invoice) {
+      return NextResponse.json(
+        { error: "Invoice not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(invoice);
+  } catch (error) {
+    console.error("PATCH /api/invoices error:", error);
+
+    return NextResponse.json(
+      { error: "Failed to update invoice" },
+      { status: 500 }
     );
   }
 }

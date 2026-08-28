@@ -123,11 +123,21 @@ export default function EquipmentServicesSelector({
   currency = 'KES',
 }: EquipmentServicesSelectorProps) {
   const [equipment, setEquipment] = useState<EquipmentRecord[]>([]);
-  const [loadingEquipment, setLoadingEquipment] = useState(true);
+  const [services, setServices] = useState<ServiceCatalogItem[]>([]);
+  const [loadingEquipment, setLoadingEquipment] = useState(false);
   const [equipmentError, setEquipmentError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showCustomForm, setShowCustomForm] = useState(false);
+
+  // Debounced search term
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const [customName, setCustomName] = useState('');
   const [customCategory, setCustomCategory] = useState('extra');
@@ -144,37 +154,43 @@ export default function EquipmentServicesSelector({
   useEffect(() => {
     let cancelled = false;
 
-    async function loadEquipment() {
+    async function loadCatalog() {
       try {
         setLoadingEquipment(true);
         setEquipmentError('');
 
-        const response = await fetch('/api/equipment', {
-          cache: 'no-store',
-        });
+        const [equipmentRes, servicesRes] = await Promise.all([
+          fetch(`/api/equipment/search?q=${encodeURIComponent(debouncedSearch)}`),
+          fetch(`/api/services/search?q=${encodeURIComponent(debouncedSearch)}`)
+        ]);
 
-        if (!response.ok) {
-          throw new Error('Failed to load equipment');
+        if (!equipmentRes.ok || !servicesRes.ok) {
+          throw new Error('Failed to load catalog');
         }
 
-        const data = await response.json();
-        const rows: EquipmentRecord[] = Array.isArray(data)
-          ? data
-          : Array.isArray(data.equipment)
-            ? data.equipment
-            : [];
+        const equipmentData = await equipmentRes.json();
+        const servicesData = await servicesRes.json();
+
+        const eqRows: EquipmentRecord[] = equipmentData.equipment || [];
+        // Map creatorServices to ServiceCatalogItem format
+        const svRows: ServiceCatalogItem[] = (servicesData.services || []).map((s: any) => ({
+          id: `service-${s.id}`,
+          name: s.name,
+          category: s.category || 'professional',
+          sectionName: s.category === 'professional' ? 'Professional Fees' : 'Services',
+          defaultRate: s.defaultRate,
+          defaultUnit: 'day',
+          defaultNotes: s.description || undefined
+        }));
 
         if (!cancelled) {
-          setEquipment(rows);
+          setEquipment(eqRows);
+          setServices(svRows);
         }
       } catch (error) {
-        console.error('Failed to load equipment catalog:', error);
-
+        console.error('Failed to load catalog:', error);
         if (!cancelled) {
-          setEquipment([]);
-          setEquipmentError(
-            'Equipment could not be loaded. Services and custom items remain available.'
-          );
+          setEquipmentError('Catalog could not be loaded. Custom items remain available.');
         }
       } finally {
         if (!cancelled) {
@@ -183,24 +199,25 @@ export default function EquipmentServicesSelector({
       }
     }
 
-    loadEquipment();
+    loadCatalog();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [debouncedSearch]);
 
   const catalog = useMemo<CatalogItem[]>(
     () => [
       ...equipment.map(toCatalogItem),
-      ...SERVICE_CATALOG.map(toServiceCatalogItem),
+      ...services.map(toServiceCatalogItem),
+      ...SERVICE_CATALOG.map(toServiceCatalogItem) // Append hardcoded ones as fallback
     ],
-    [equipment]
+    [equipment, services]
   );
 
   const filteredCatalog = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-
+    
     return catalog.filter((item) => {
       const matchesSearch =
         !query ||

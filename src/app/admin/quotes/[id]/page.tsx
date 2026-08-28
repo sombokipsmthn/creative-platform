@@ -388,6 +388,11 @@ export default function QuoteDetailPage() {
   const [openEquipmentId, setOpenEquipmentId] =
     useState<string | null>(null);
 
+  const [invoiceConflict, setInvoiceConflict] = useState<{
+    existingInvoiceId: string;
+    existingInvoiceNumber: string | null;
+  } | null>(null);
+
   /* =======================================================
      LOAD QUOTE
   ======================================================= */
@@ -863,30 +868,37 @@ export default function QuoteDetailPage() {
       return;
     }
 
+    await doGenerateInvoice();
+  }
+
+  async function doGenerateInvoice(action?: 'update' | 'new') {
+    if (!quote) return;
     try {
       setActionLoading('invoice');
       setError('');
       setSuccess('');
+      setInvoiceConflict(null);
 
-      const response = await fetch(
-        '/api/invoices',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type':
-              'application/json',
-          },
-          body: JSON.stringify({
-            quoteId: quote.id,
-          }),
-        }
-      );
+      const url = action
+        ? `/api/quotes/${quote.id}/invoice?action=${action}`
+        : `/api/quotes/${quote.id}/invoice`;
+
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
 
       const data = await response
         .json()
         .catch(() => null);
 
       if (!response.ok) {
+        // 409 = invoice already exists — prompt user to choose
+        if (response.status === 409 && data?.conflict) {
+          setInvoiceConflict({
+            existingInvoiceId: data.existingInvoiceId,
+            existingInvoiceNumber: data.existingInvoiceNumber,
+          });
+          return;
+        }
+
         throw new Error(
           data?.error ||
             'Failed to generate invoice'
@@ -1170,6 +1182,53 @@ export default function QuoteDetailPage() {
           </div>
         )}
       </div>
+
+      {/* INVOICE CONFLICT MODAL */}
+      {invoiceConflict && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl">
+            <div className="mb-1 text-[10px] font-mono uppercase tracking-widest text-amber-500">
+              Invoice Conflict
+            </div>
+            <h2 className="text-xl font-semibold text-slate-900">Invoice already exists</h2>
+            <p className="mt-2 text-sm text-slate-500">
+              Invoice{' '}
+              <span className="font-mono font-medium text-slate-700">
+                {invoiceConflict.existingInvoiceNumber || invoiceConflict.existingInvoiceId.slice(0, 8)}
+              </span>{' '}
+              was previously generated from this quote.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                disabled={Boolean(actionLoading)}
+                onClick={() => doGenerateInvoice('update')}
+                className="w-full rounded-xl bg-purple-600 px-4 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-purple-700 disabled:opacity-50"
+              >
+                {actionLoading === 'invoice' ? 'Updating…' : '↻ Update Existing Invoice'}
+              </button>
+
+              <button
+                type="button"
+                disabled={Boolean(actionLoading)}
+                onClick={() => doGenerateInvoice('new')}
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+              >
+                {actionLoading === 'invoice' ? 'Creating…' : '+ Save as New Invoice'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setInvoiceConflict(null)}
+                className="w-full rounded-xl px-4 py-2 text-xs font-mono text-slate-400 transition hover:text-slate-600"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ===================================================
           QUOTE DOCUMENT

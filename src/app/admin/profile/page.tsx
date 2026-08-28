@@ -1,7 +1,7 @@
 // src/app/admin/profile/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -22,9 +22,62 @@ export default function AdminProfilePage() {
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
   });
 
-  const handleSave = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  // Load existing profile from the API and merge into demo defaults
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadProfile() {
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/profile', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (ignore) return;
+        if (data?.profile) {
+          setProfile((prev) => ({ ...prev, ...data.profile }));
+        }
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadProfile();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Demo Creator Profile updated successfully!');
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ profile }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result?.error || 'Failed to save profile');
+      }
+
+      setMessage('Profile saved successfully');
+    } catch (err) {
+      console.error('Save profile error:', err);
+      setMessage(err instanceof Error ? err.message : 'Failed to save profile');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -192,10 +245,15 @@ export default function AdminProfilePage() {
 
             <button
               type="submit"
-              className="w-full py-4 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer"
+              disabled={isSaving}
+              className="w-full py-4 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-60"
             >
-              Save Profile Changes
+              {isSaving ? 'Saving...' : 'Save Profile Changes'}
             </button>
+
+            {message && (
+              <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">{message}</p>
+            )}
           </div>
         </form>
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { projects, clients } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
@@ -95,11 +95,3 @@ export async function POST(request: Request) {
   }
 }
 
-// Helper to match the patterns in other routes
-function and(...args: any[]) {
-  return args; // Simplified for this purpose, Drizzle's 'and' is usually imported
-}
-
-function desc(column: any) {
-  return column; // Simplified
-}

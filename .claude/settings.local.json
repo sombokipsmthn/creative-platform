@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm 'src/app/admin/quotes/new/page.tsx`')"
+    ]
+  }
+}

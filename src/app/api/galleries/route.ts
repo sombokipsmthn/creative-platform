@@ -13,8 +13,10 @@ async function getCreator() {
     if (clerkKey) {
       const { userId: clerkUserId } = await auth();
       userId = clerkUserId;
-    } else {
+    } else if (process.env.NODE_ENV === 'development') {
       userId = "dev_admin_user";
+    } else {
+      return null;
     }
 
     if (!userId) return null;

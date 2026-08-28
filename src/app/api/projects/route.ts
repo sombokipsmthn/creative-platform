@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { projects, clients } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 /* =========================================================
    GET /api/projects

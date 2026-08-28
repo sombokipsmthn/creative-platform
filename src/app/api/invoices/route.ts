@@ -11,7 +11,7 @@ import {
   users,
 } from "@/db/schema";
 
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 function normalizeNumber(value: unknown, fallback = 0) {
   const number = Number(value);

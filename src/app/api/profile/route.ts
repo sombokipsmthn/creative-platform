@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { creatorProfiles, creatorBusinessProfiles } from "@/db/schema";
-import { getCurrentUser } from "@/lib/auth/get-current-user";
+import getCurrentUser from "@/lib/auth/get-current-user";
 
 /* =========================================================
    GET /api/profile

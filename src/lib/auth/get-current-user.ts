@@ -11,7 +11,7 @@ import { getOrCreateLocalUser } from "./get-or-create-local-user";
  *
  * This is the canonical way to identify the creator for admin API requests.
  */
-export async function getCurrentUser() {
+export default async function getCurrentUser() {
   try {
     const { userId } = await auth();
 

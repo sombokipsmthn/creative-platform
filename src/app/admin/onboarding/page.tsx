@@ -38,6 +38,11 @@ type ServiceForm = {
   category: string;
   defaultRate: string;
   currency: string;
+  rates?: {
+    fullDay?: string;
+    halfDay?: string;
+    hourly?: string;
+  };
 };
 
 type BusinessForm = {
@@ -120,6 +125,7 @@ const emptyService: ServiceForm = {
   category: "",
   defaultRate: "",
   currency: "KES",
+  rates: {},
 };
 
 /**
@@ -219,6 +225,9 @@ export default function CreatorOnboardingPage() {
     useState<ServiceForm[]>([
       { ...emptyService },
     ]);
+
+  const [addedPresets, setAddedPresets] =
+    useState<string[]>([]);
 
   const [business, setBusiness] =
     useState<BusinessForm>({
@@ -468,6 +477,45 @@ export default function CreatorOnboardingPage() {
     );
   }
 
+  function updateServiceRate(
+    index: number,
+    rateKey: "fullDay" | "halfDay" | "hourly",
+    value: string
+  ) {
+    setServices((current) =>
+      current.map((service, serviceIndex) =>
+        serviceIndex === index
+          ? {
+              ...service,
+              rates: {
+                ...(service.rates || {}),
+                [rateKey]: value,
+              },
+            }
+          : service
+      )
+    );
+  }
+
+  function toggleServiceRate(
+    index: number,
+    rateKey: "fullDay" | "halfDay" | "hourly"
+  ) {
+    setServices((current) =>
+      current.map((service, serviceIndex) =>
+        serviceIndex === index
+          ? {
+              ...service,
+              rates: {
+                ...(service.rates || {}),
+                [rateKey]: service.rates && service.rates[rateKey] !== undefined ? undefined : "",
+              },
+            }
+          : service
+      )
+    );
+  }
+
   function addService() {
     setServices((current) => [
       ...current,
@@ -488,6 +536,11 @@ export default function CreatorOnboardingPage() {
         current.length === 1 &&
         !current[0].name.trim()
       ) {
+        // mark preset as added
+        setAddedPresets((prev) =>
+          Array.from(new Set([...prev, preset.name]))
+        );
+
         return [
           {
             ...current[0],
@@ -498,6 +551,10 @@ export default function CreatorOnboardingPage() {
           },
         ];
       }
+
+      setAddedPresets((prev) =>
+        Array.from(new Set([...prev, preset.name]))
+      );
 
       return [
         ...current,
@@ -643,6 +700,7 @@ export default function CreatorOnboardingPage() {
           service.defaultRate.trim(),
         currency:
           service.currency || "KES",
+        rates: service.rates || {},
       }));
 
     const response = await fetch(
@@ -1389,13 +1447,13 @@ export default function CreatorOnboardingPage() {
                             <button
                               key={preset.name}
                               type="button"
-                              onClick={() =>
-                                quickAddService(
-                                  preset
-                                )
-                              }
+                              onClick={() => quickAddService(preset)}
                               disabled={saving}
-                              className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3.5 py-2 text-xs font-medium text-gray-700 transition hover:border-[#6D28D9] hover:bg-purple-50 hover:text-[#6D28D9] disabled:cursor-not-allowed disabled:opacity-50"
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+                                addedPresets.includes(preset.name)
+                                  ? "bg-[#6D28D9] border-[#6D28D9] text-white"
+                                  : "border-gray-200 bg-white text-gray-700 hover:border-[#6D28D9] hover:bg-purple-50 hover:text-[#6D28D9]"
+                              }`}
                             >
                               <Plus className="h-3.5 w-3.5" />
                               {preset.name}
@@ -1584,6 +1642,92 @@ export default function CreatorOnboardingPage() {
                                     placeholder="25000"
                                     className="h-12 min-w-0 flex-1 rounded-xl border border-gray-200 px-4 text-sm outline-none transition placeholder:text-gray-400 focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100"
                                   />
+                                </div>
+
+                                {/* Rate options: Full Day / Half Day / Hourly */}
+                                <div className="mt-3">
+                                  <p className="text-sm font-medium text-gray-800">Rate options</p>
+                                  <p className="mt-1 text-xs text-gray-400">Enable and set amounts for different booking lengths.</p>
+
+                                  <div className="mt-2 flex flex-wrap gap-3 items-center">
+                                    {/* Full Day */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleServiceRate(index, "fullDay")}
+                                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium transition ${
+                                          service.rates && service.rates.fullDay !== undefined
+                                            ? "bg-[#6D28D9] text-white border-[#6D28D9]"
+                                            : "bg-white text-gray-700 border border-gray-200"
+                                        }`}
+                                      >
+                                        Full Day
+                                      </button>
+
+                                      {service.rates && service.rates.fullDay !== undefined && (
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          value={service.rates.fullDay || ""}
+                                          onChange={(e) => updateServiceRate(index, "fullDay", e.target.value)}
+                                          placeholder="Amount"
+                                          className="h-10 w-28 rounded-xl border border-gray-200 px-3 text-sm outline-none"
+                                        />
+                                      )}
+                                    </div>
+
+                                    {/* Half Day */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleServiceRate(index, "halfDay")}
+                                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium transition ${
+                                          service.rates && service.rates.halfDay !== undefined
+                                            ? "bg-[#6D28D9] text-white border-[#6D28D9]"
+                                            : "bg-white text-gray-700 border border-gray-200"
+                                        }`}
+                                      >
+                                        Half Day
+                                      </button>
+
+                                      {service.rates && service.rates.halfDay !== undefined && (
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          value={service.rates.halfDay || ""}
+                                          onChange={(e) => updateServiceRate(index, "halfDay", e.target.value)}
+                                          placeholder="Amount"
+                                          className="h-10 w-28 rounded-xl border border-gray-200 px-3 text-sm outline-none"
+                                        />
+                                      )}
+                                    </div>
+
+                                    {/* Hourly */}
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => toggleServiceRate(index, "hourly")}
+                                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium transition ${
+                                          service.rates && service.rates.hourly !== undefined
+                                            ? "bg-[#6D28D9] text-white border-[#6D28D9]"
+                                            : "bg-white text-gray-700 border border-gray-200"
+                                        }`}
+                                      >
+                                        Hourly
+                                      </button>
+
+                                      {service.rates && service.rates.hourly !== undefined && (
+                                        <input
+                                          type="number"
+                                          min="0"
+                                          value={service.rates.hourly || ""}
+                                          onChange={(e) => updateServiceRate(index, "hourly", e.target.value)}
+                                          placeholder="Amount"
+                                          className="h-10 w-28 rounded-xl border border-gray-200 px-3 text-sm outline-none"
+                                        />
+                                      )}
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
                             </div>

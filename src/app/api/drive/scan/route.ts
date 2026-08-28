@@ -1,5 +1,6 @@
 // src/app/api/drive/scan/route.ts
 import { NextResponse } from 'next/server';
+import { getCurrentUser } from "@/lib/auth/get-current-user";
 
 // List of Google Drive Folder IDs you want to scan
 // (Copy the Folder ID from the URL of each Google Drive folder)
@@ -11,6 +12,15 @@ const DRIVE_FOLDER_IDS = [
 
 export async function GET() {
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     const googleApiKey = process.env.GOOGLE_DRIVE_API_KEY;
     const allImages: Array<{ id: string; name: string; url: string }> = [];
 

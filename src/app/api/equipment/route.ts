@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { and, asc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
 
-async function requireAuth() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return null;
-  }
-
-  return userId;
-}
 
 function normalizeEquipment(body: Record<string, unknown>) {
   const name = String(body.name ?? "").trim();
@@ -38,9 +29,9 @@ function normalizeEquipment(body: Record<string, unknown>) {
 
 export async function GET(req: Request) {
   try {
-    const userId = await requireAuth();
+    const user = await getCurrentUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -103,9 +94,9 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const userId = await requireAuth();
+    const user = await getCurrentUser();
 
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

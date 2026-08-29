@@ -44,6 +44,7 @@ type Gallery = {
   allow_downloads: boolean;
   allow_favorites: boolean;
   allow_selections: boolean;
+  theme?: string | null;
 };
 
 export default function ClientGalleryPage({
@@ -312,7 +313,7 @@ export default function ClientGalleryPage({
   }
 
   return (
-    <main className="min-h-screen bg-[#080808] text-white">
+    <main className="min-h-screen bg-[#080808] text-white" data-gallery-theme={gallery.theme || 'reference-pending'}>
       <header className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-5">
           <div className="flex items-center justify-between gap-4">
@@ -405,7 +406,7 @@ export default function ClientGalleryPage({
                     }
                     width={1800}
                     height={1200}
-                    className="w-full h-auto rounded-sm transition-transform duration-500 group-hover:scale-[1.01]"
+                    className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.01]"
                   />
                 </button>
 

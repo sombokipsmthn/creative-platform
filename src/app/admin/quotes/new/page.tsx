@@ -1207,20 +1207,17 @@ export default function NewQuotePage() {
                             type="number"
                             min="0"
                             value={
-                              item.rate
+                              item.rate === 0
+                                ? ''
+                                : item.rate
                             }
-                            onChange={(
-                              event
-                            ) =>
+                            onChange={(event) => {
+                              const value = event.target.value;
                               updateRate(
                                 item.id,
-                                Number(
-                                  event
-                                    .target
-                                    .value
-                                )
-                              )
-                            }
+                                value === '' ? 0 : Number(value) || 0
+                              );
+                            }}
                             className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                           />
                         </label>
@@ -1317,8 +1314,8 @@ export default function NewQuotePage() {
 
           {/* PRICING */}
 
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="border-t border-slate-200 dark:border-zinc-800 pt-6">
               <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                 Terms
               </h2>
@@ -1342,7 +1339,7 @@ export default function NewQuotePage() {
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
                       <select 
-                        className="bg-slate-100 dark:bg-zinc-800 text-xs text-slate-600 dark:text-zinc-300 rounded px-2 py-1 outline-none"
+                        className="bg-transparent text-xs text-slate-500 dark:text-zinc-400 px-1 py-1 outline-none"
                         onChange={(e) => {
                           if (e.target.value) setPaymentTerms(e.target.value);
                           e.target.value = '';

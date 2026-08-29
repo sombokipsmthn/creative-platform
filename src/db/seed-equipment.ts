@@ -1,4 +1,5 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
 import path from "node:path";
 import { sql } from "drizzle-orm";
 import * as XLSX from "xlsx";
@@ -35,7 +36,11 @@ async function seed() {
   if (!sheet) {
     throw new Error('The workbook does not contain an "Equipment" sheet.');
   }
+const databaseUrl = process.env.DATABASE_URL;
 
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is required to seed equipment.");
+}
   const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
     defval: null,
   });

@@ -251,14 +251,14 @@ export default function InvoiceDetailPage() {
       </div>
 
       {/* INVOICE DOCUMENT */}
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm print:shadow-none print:border-0">
+      <div className="mx-auto max-w-5xl print:max-w-none">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
 
           {/* HEADER */}
-          <div className="border-b border-slate-100 px-8 py-8 sm:px-10">
+          <div className="border-b border-slate-100 px-8 py-8 sm:px-10 print:px-0 print:py-0 print:pb-7">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-3 h-1 w-10 rounded" style={{ backgroundColor: PURPLE }} />
+                <div className="mb-3 h-1 w-10 print:hidden" style={{ backgroundColor: PURPLE }} />
                 <h1 className="text-3xl font-light tracking-tight text-slate-900">{invoice.title}</h1>
                 <p className="mt-1 font-mono text-xs uppercase tracking-widest text-slate-400">
                   {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 8).toUpperCase()}`}
@@ -276,7 +276,7 @@ export default function InvoiceDetailPage() {
                   </p>
                 )}
                 <div className="pt-1">
-                  <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-widest ${statusBadgeClass(status)}`}>
+                  <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-mono uppercase tracking-widest print:border-0 print:px-0 ${statusBadgeClass(status)}`}>
                     {status}
                   </span>
                 </div>
@@ -285,7 +285,7 @@ export default function InvoiceDetailPage() {
           </div>
 
           {/* CLIENT */}
-          <div className="border-b border-slate-100 px-8 py-6 sm:px-10">
+          <div className="border-b border-slate-100 px-8 py-6 sm:px-10 print:px-0">
             <p className="mb-3 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Billed To</p>
             {invoice.client ? (
               <div className="space-y-0.5">
@@ -307,7 +307,7 @@ export default function InvoiceDetailPage() {
           </div>
 
           {/* LINE ITEMS */}
-          <div className="px-8 py-6 sm:px-10">
+          <div className="px-8 py-6 sm:px-10 print:px-0">
             <p className="mb-4 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Line Items</p>
             {items.length === 0 ? (
               <p className="py-8 text-center italic text-sm text-slate-400">No line items on this invoice.</p>
@@ -340,7 +340,7 @@ export default function InvoiceDetailPage() {
           </div>
 
           {/* TOTALS */}
-          <div className="border-t border-slate-100 px-8 py-6 sm:px-10">
+          <div className="border-t border-slate-100 px-8 py-6 sm:px-10 print:px-0">
             <div className="ml-auto max-w-xs space-y-2">
               <div className="flex justify-between text-sm text-slate-600">
                 <span>Subtotal</span>
@@ -359,7 +359,7 @@ export default function InvoiceDetailPage() {
 
           {/* NOTES */}
           {invoice.notes && (
-            <div className="border-t border-slate-100 px-8 py-6 sm:px-10">
+            <div className="border-t border-slate-100 px-8 py-6 sm:px-10 print:px-0">
               <p className="mb-2 text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Notes</p>
               <p className="whitespace-pre-wrap text-sm text-slate-600">{invoice.notes}</p>
             </div>
@@ -377,6 +377,36 @@ export default function InvoiceDetailPage() {
 
         </div>
       </div>
+
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: A4;
+            margin: 12mm 14mm;
+          }
+
+          html,
+          body {
+            background: white !important;
+          }
+
+          body {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+
+          input,
+          textarea,
+          select,
+          button {
+            box-shadow: none !important;
+          }
+
+          .print\:hidden {
+            display: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

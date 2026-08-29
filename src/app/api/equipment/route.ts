@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
-import { and, asc, eq, ilike, or } from "drizzle-orm";
+import { and, asc, eq, ilike, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
-
 
 function normalizeEquipment(body: Record<string, unknown>) {
   const name = String(body.name ?? "").trim();
@@ -62,7 +61,16 @@ export async function GET(req: Request) {
     }
 
     const results = await db
-      .select()
+      .select({
+        id: equipment.id,
+        name: equipment.name,
+        dailyRate: equipment.dailyRate,
+        category: equipment.category,
+        subcategory: equipment.subcategory,
+        brand: equipment.brand,
+        specs: equipment.specs,
+        imageUrl: sql<string | null>`equipment.image_url`,
+      })
       .from(equipment)
       .where(
         conditions.length > 0

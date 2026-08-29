@@ -3,6 +3,20 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronDown,
+  FileText,
+  Loader2,
+  Plus,
+  Printer,
+  RefreshCw,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-react';
 
 /* =========================================================
    TYPES
@@ -10,7 +24,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 type Client = {
   id: string;
-  name: string;
+  name?: string | null;
   company?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -18,18 +32,18 @@ type Client = {
 
 type QuoteItem = {
   id: string;
-  category: string;
-  description: string;
-  quantity: number;
-  unit: string;
-  rate: number;
-  amount: number;
+  category?: string | null;
+  description?: string | null;
+  quantity?: number | string | null;
+  unit?: string | null;
+  rate?: number | string | null;
+  amount?: number | string | null;
   notes?: string | null;
 };
 
 type Quote = {
   id: string;
-  creatorId?: string;
+  creatorId?: string | null;
   clientId?: string | null;
 
   quoteNumber?: string | null;
@@ -38,27 +52,27 @@ type Quote = {
 
   status: string;
 
-  subtotal: number;
+  subtotal: number | string;
   discountType?: string | null;
-  discountValue?: number | null;
-  discountAmount?: number | null;
-  tax: number;
-  total: number;
+  discountValue?: number | string | null;
+  discountAmount?: number | string | null;
+  tax: number | string;
+  total: number | string;
 
   currency: string;
 
   paymentTerms?: string | null;
   validUntil?: string | null;
-  productionDays?: number | null;
+  productionDays?: number | string | null;
   location?: string | null;
   clientContact?: string | null;
-  depositPercentage?: number | null;
+  depositPercentage?: number | string | null;
   notes?: string | null;
 
   invoiceId?: string | null;
 
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 
   client?: Client | null;
   items?: QuoteItem[];
@@ -71,6 +85,13 @@ type EquipmentOption = {
   unit: string;
   rate: number;
 };
+
+type InvoiceConflict = {
+  existingInvoiceId: string;
+  existingInvoiceNumber?: string | null;
+};
+
+type ApiObject = Record<string, unknown>;
 
 /* =========================================================
    CONSTANTS
@@ -127,16 +148,6 @@ const categoryOptions = [
   'Other',
 ];
 
-/*
- * Local equipment catalogue used by the searchable selector.
- *
- * The quote itself remains fully editable, so adding an item
- * that isn't in this catalogue is still possible.
- *
- * If your project already has an equipment API, this list can
- * later be replaced by that endpoint without changing the
- * editor structure.
- */
 const equipmentCatalogue: EquipmentOption[] = [
   {
     id: 'sony-fx3',
@@ -291,8 +302,63 @@ const equipmentCatalogue: EquipmentOption[] = [
    HELPERS
 ========================================================= */
 
+function isObject(value: unknown): value is ApiObject {
+  return typeof value === 'object' && value !== null;
+}
+
+function getApiError(value: unknown): string | null {
+  if (!isObject(value)) {
+    return null;
+  }
+
+  return typeof value.error === 'string'
+    ? value.error
+    : null;
+}
+
+function getStringProperty(
+  value: unknown,
+  key: string
+): string | null {
+  if (!isObject(value)) {
+    return null;
+  }
+
+  return typeof value[key] === 'string'
+    ? value[key]
+    : null;
+}
+
+function getInvoiceId(value: unknown): string | null {
+  if (!isObject(value)) {
+    return null;
+  }
+
+  if (typeof value.id === 'string') {
+    return value.id;
+  }
+
+  if (isObject(value.invoice)) {
+    if (typeof value.invoice.id === 'string') {
+      return value.invoice.id;
+    }
+  }
+
+  return null;
+}
+
+function hasConflict(value: unknown): boolean {
+  return (
+    isObject(value) &&
+    value.conflict === true &&
+    typeof value.existingInvoiceId === 'string'
+  );
+}
+
 function formatDate(date?: string | null) {
-  if (!date) return '—';
+  if (!date) {
+    return '—';
+  }
 
   const parsed = new Date(date);
 
@@ -308,7 +374,9 @@ function formatDate(date?: string | null) {
 }
 
 function toDateInputValue(date?: string | null) {
-  if (!date) return '';
+  if (!date) {
+    return '';
+  }
 
   const parsed = new Date(date);
 
@@ -320,7 +388,7 @@ function toDateInputValue(date?: string | null) {
 }
 
 function formatAmount(
-  amount: number | null | undefined,
+  amount: number | string | null | undefined,
   currency: string
 ) {
   const value = Number(amount || 0);
@@ -338,36 +406,43 @@ function toNumber(value: unknown) {
 }
 
 function calculateItemAmount(
-  quantity: number,
-  rate: number
+  quantity: number | string | null | undefined,
+  rate: number | string | null | undefined
 ) {
   return toNumber(quantity) * toNumber(rate);
 }
 
-function formatStatus(status: string) {
+function formatStatus(status?: string | null) {
+  if (!status) {
+    return 'Draft';
+  }
+
   return status
     .replace(/_/g, ' ')
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+    .replace(/\b\w/g, (letter) =>
+      letter.toUpperCase()
+    );
+}
+
+function getStatusClass(status?: string | null) {
+  switch ((status || '').toLowerCase()) {
+    case 'accepted':
+      return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+
+    case 'sent':
+      return 'border-blue-200 bg-blue-50 text-blue-700';
+
+    case 'invoiced':
+      return 'border-violet-200 bg-violet-50 text-violet-700';
+
+    case 'draft':
+    default:
+      return 'border-amber-200 bg-amber-50 text-amber-700';
+  }
 }
 
 /* =========================================================
-   REUSABLE FIELD CLASSES
-========================================================= */
-
-const inputClass =
-  'w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder hover focus focus focus focus/10';
-
-const compactInputClass =
-  'w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none transition placeholder hover focus focus focus focus/10';
-
-const labelClass =
-  'mb-2 block text-[10px] font-mono font-medium uppercase tracking-[0.2em] text-slate-400';
-
-const sectionLabelClass =
-  'text-[10px] font-mono font-medium uppercase tracking-[0.25em] text-purple-500';
-
-/* =========================================================
-   COMPONENT
+   PAGE
 ========================================================= */
 
 export default function QuoteDetailPage() {
@@ -380,18 +455,20 @@ export default function QuoteDetailPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [actionLoading, setActionLoading] = useState('');
+  const [actionLoading, setActionLoading] =
+    useState('');
+
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const [equipmentSearch, setEquipmentSearch] = useState('');
+  const [equipmentSearch, setEquipmentSearch] =
+    useState('');
+
   const [openEquipmentId, setOpenEquipmentId] =
     useState<string | null>(null);
 
-  const [invoiceConflict, setInvoiceConflict] = useState<{
-    existingInvoiceId: string;
-    existingInvoiceNumber: string | null;
-  } | null>(null);
+  const [invoiceConflict, setInvoiceConflict] =
+    useState<InvoiceConflict | null>(null);
 
   /* =======================================================
      LOAD QUOTE
@@ -404,12 +481,10 @@ export default function QuoteDetailPage() {
 
     let cancelled = false;
 
-    async function fetchQuote() {
+    async function loadQuote() {
       try {
-        if (!cancelled) {
-          setLoading(true);
-          setError('');
-        }
+        setLoading(true);
+        setError('');
 
         const response = await fetch(
           `/api/quotes/${quoteId}`,
@@ -418,18 +493,25 @@ export default function QuoteDetailPage() {
           }
         );
 
-        const data = await response
+        const data: unknown = await response
           .json()
           .catch(() => null);
 
         if (!response.ok) {
           throw new Error(
-            data?.error || 'Failed to load quote'
+            getApiError(data) ||
+              'Failed to load quote.'
+          );
+        }
+
+        if (!isObject(data)) {
+          throw new Error(
+            'Invalid quote response.'
           );
         }
 
         if (!cancelled) {
-          setQuote(data);
+          setQuote(data as unknown as Quote);
         }
       } catch (err) {
         console.error(
@@ -451,7 +533,7 @@ export default function QuoteDetailPage() {
       }
     }
 
-    void fetchQuote();
+    void loadQuote();
 
     return () => {
       cancelled = true;
@@ -467,34 +549,13 @@ export default function QuoteDetailPage() {
     value: unknown
   ) {
     setQuote((current) => {
-      if (!current) return current;
+      if (!current) {
+        return current;
+      }
 
       return {
         ...current,
         [field]: value,
-      };
-    });
-  }
-
-  function updateClientField(
-    field: keyof Client,
-    value: string
-  ) {
-    setQuote((current) => {
-      if (!current) return current;
-
-      return {
-        ...current,
-        client: current.client
-          ? {
-              ...current.client,
-              [field]: value,
-            }
-          : {
-              id: '',
-              name: '',
-              [field]: value,
-            },
       };
     });
   }
@@ -509,33 +570,35 @@ export default function QuoteDetailPage() {
     value: unknown
   ) {
     setQuote((current) => {
-      if (!current) return current;
+      if (!current) {
+        return current;
+      }
 
-      const items = (current.items || []).map(
-        (item) => {
-          if (item.id !== itemId) {
-            return item;
-          }
-
-          const updated = {
-            ...item,
-            [field]: value,
-          };
-
-          if (
-            field === 'quantity' ||
-            field === 'rate'
-          ) {
-            updated.amount =
-              calculateItemAmount(
-                toNumber(updated.quantity),
-                toNumber(updated.rate)
-              );
-          }
-
-          return updated;
+      const items = (
+        current.items || []
+      ).map((item) => {
+        if (item.id !== itemId) {
+          return item;
         }
-      );
+
+        const updated: QuoteItem = {
+          ...item,
+          [field]: value,
+        };
+
+        if (
+          field === 'quantity' ||
+          field === 'rate'
+        ) {
+          updated.amount =
+            calculateItemAmount(
+              updated.quantity,
+              updated.rate
+            );
+        }
+
+        return updated;
+      });
 
       return {
         ...current,
@@ -546,7 +609,9 @@ export default function QuoteDetailPage() {
 
   function addItem() {
     setQuote((current) => {
-      if (!current) return current;
+      if (!current) {
+        return current;
+      }
 
       const newItem: QuoteItem = {
         id: `new-${Date.now()}`,
@@ -571,11 +636,15 @@ export default function QuoteDetailPage() {
 
   function removeItem(itemId: string) {
     setQuote((current) => {
-      if (!current) return current;
+      if (!current) {
+        return current;
+      }
 
       return {
         ...current,
-        items: (current.items || []).filter(
+        items: (
+          current.items || []
+        ).filter(
           (item) => item.id !== itemId
         ),
       };
@@ -587,28 +656,32 @@ export default function QuoteDetailPage() {
     equipment: EquipmentOption
   ) {
     setQuote((current) => {
-      if (!current) return current;
+      if (!current) {
+        return current;
+      }
 
       return {
         ...current,
-        items: (current.items || []).map(
-          (item) => {
-            if (item.id !== itemId) {
-              return item;
-            }
-
-            return {
-              ...item,
-              category: equipment.category,
-              description: equipment.name,
-              unit: equipment.unit,
-              rate: equipment.rate,
-              amount:
-                equipment.rate *
-                toNumber(item.quantity || 1),
-            };
+        items: (
+          current.items || []
+        ).map((item) => {
+          if (item.id !== itemId) {
+            return item;
           }
-        ),
+
+          const quantity =
+            toNumber(item.quantity) || 1;
+
+          return {
+            ...item,
+            category: equipment.category,
+            description: equipment.name,
+            unit: equipment.unit,
+            rate: equipment.rate,
+            amount:
+              equipment.rate * quantity,
+          };
+        }),
       };
     });
 
@@ -630,7 +703,9 @@ export default function QuoteDetailPage() {
       };
     }
 
-    const subtotal = (quote.items || []).reduce(
+    const subtotal = (
+      quote.items || []
+    ).reduce(
       (sum, item) =>
         sum +
         calculateItemAmount(
@@ -640,25 +715,26 @@ export default function QuoteDetailPage() {
       0
     );
 
+    const discountType =
+      quote.discountType || 'none';
+
+    const discountValue =
+      toNumber(quote.discountValue);
+
     let discountAmount = 0;
 
     if (
-      quote.discountType ===
-      'percentage'
+      discountType === 'percentage'
     ) {
       discountAmount =
         subtotal *
-        (toNumber(quote.discountValue) /
-          100);
+        (discountValue / 100);
     }
 
     if (
-      quote.discountType ===
-      'fixed'
+      discountType === 'fixed'
     ) {
-      discountAmount = toNumber(
-        quote.discountValue
-      );
+      discountAmount = discountValue;
     }
 
     discountAmount = Math.min(
@@ -666,16 +742,15 @@ export default function QuoteDetailPage() {
       Math.max(0, discountAmount)
     );
 
-    const taxableAmount =
-      subtotal - discountAmount;
-
     const tax = Math.max(
       0,
       toNumber(quote.tax)
     );
 
     const total =
-      taxableAmount + tax;
+      subtotal -
+      discountAmount +
+      tax;
 
     return {
       subtotal,
@@ -690,12 +765,83 @@ export default function QuoteDetailPage() {
   ======================================================= */
 
   async function saveQuote() {
-    if (!quote) return;
+    if (!quote) {
+      return;
+    }
 
     try {
       setSaving(true);
       setError('');
       setSuccess('');
+
+      const payload = {
+        title: quote.title,
+        projectName:
+          quote.projectName || null,
+        quoteNumber:
+          quote.quoteNumber || null,
+        currency:
+          quote.currency || 'KES',
+        paymentTerms:
+          quote.paymentTerms || null,
+        validUntil:
+          quote.validUntil || null,
+        productionDays:
+          toNumber(
+            quote.productionDays
+          ) || 1,
+        location:
+          quote.location || null,
+        clientContact:
+          quote.clientContact || null,
+        depositPercentage:
+          toNumber(
+            quote.depositPercentage
+          ),
+        notes:
+          quote.notes || null,
+        discountType:
+          quote.discountType || 'none',
+        discountValue:
+          toNumber(
+            quote.discountValue
+          ),
+        tax:
+          toNumber(quote.tax),
+        clientId:
+          quote.clientId || null,
+
+        items: (
+          quote.items || []
+        ).map((item) => ({
+          id: item.id.startsWith('new-')
+            ? undefined
+            : item.id,
+          category:
+            item.category || 'Other',
+          description:
+            item.description || '',
+          quantity:
+            Math.max(
+              1,
+              toNumber(item.quantity)
+            ),
+          unit:
+            item.unit || 'unit',
+          rate:
+            Math.max(
+              0,
+              toNumber(item.rate)
+            ),
+          amount:
+            calculateItemAmount(
+              item.quantity,
+              item.rate
+            ),
+          notes:
+            item.notes || null,
+        })),
+      };
 
       const response = await fetch(
         `/api/quotes/${quote.id}`,
@@ -705,58 +851,31 @@ export default function QuoteDetailPage() {
             'Content-Type':
               'application/json',
           },
-          body: JSON.stringify({
-            title: quote.title,
-            projectName:
-              quote.projectName,
-            quoteNumber:
-              quote.quoteNumber,
-            clientId:
-              quote.clientId,
-            currency:
-              quote.currency,
-            paymentTerms:
-              quote.paymentTerms,
-            validUntil:
-              quote.validUntil,
-            productionDays:
-              quote.productionDays,
-            location:
-              quote.location,
-            clientContact:
-              quote.clientContact,
-            depositPercentage:
-              quote.depositPercentage,
-            notes: quote.notes,
-            discountType:
-              quote.discountType,
-            discountValue:
-              quote.discountValue,
-            tax: calculatedTotals.tax,
-            subtotal:
-              calculatedTotals.subtotal,
-            discountAmount:
-              calculatedTotals.discountAmount,
-            total:
-              calculatedTotals.total,
-            items:
-              quote.items || [],
-          }),
+          body: JSON.stringify(
+            payload
+          ),
         }
       );
 
-      const data = await response
-        .json()
-        .catch(() => null);
+      const data: unknown =
+        await response
+          .json()
+          .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
-          data?.error ||
-            'Failed to save quote'
+          getApiError(data) ||
+            'Failed to save quote.'
         );
       }
 
-      setQuote(data);
+      if (
+        isObject(data)
+      ) {
+        setQuote(
+          data as unknown as Quote
+        );
+      }
 
       setSuccess(
         'Quote saved successfully.'
@@ -784,13 +903,14 @@ export default function QuoteDetailPage() {
   async function updateQuoteStatus(
     nextStatus: string
   ) {
-    if (!quote) return;
+    if (!quote) {
+      return;
+    }
 
     try {
       setActionLoading(
-        nextStatus
+        `status-${nextStatus}`
       );
-
       setError('');
       setSuccess('');
 
@@ -808,18 +928,23 @@ export default function QuoteDetailPage() {
         }
       );
 
-      const data = await response
-        .json()
-        .catch(() => null);
+      const data: unknown =
+        await response
+          .json()
+          .catch(() => null);
 
       if (!response.ok) {
         throw new Error(
-          data?.error ||
-            'Failed to update quote status'
+          getApiError(data) ||
+            'Failed to update quote status.'
         );
       }
 
-      setQuote(data);
+      if (isObject(data)) {
+        setQuote(
+          data as unknown as Quote
+        );
+      }
 
       setSuccess(
         `Quote marked as ${formatStatus(
@@ -835,7 +960,7 @@ export default function QuoteDetailPage() {
       setError(
         err instanceof Error
           ? err.message
-          : 'Unable to update quote.'
+          : 'Unable to update quote status.'
       );
     } finally {
       setActionLoading('');
@@ -847,7 +972,9 @@ export default function QuoteDetailPage() {
   ======================================================= */
 
   async function generateInvoice() {
-    if (!quote) return;
+    if (!quote) {
+      return;
+    }
 
     if (
       quote.status?.toLowerCase() !==
@@ -868,11 +995,16 @@ export default function QuoteDetailPage() {
       return;
     }
 
-    await doGenerateInvoice();
+    await createInvoice();
   }
 
-  async function doGenerateInvoice(action?: 'update' | 'new') {
-    if (!quote) return;
+  async function createInvoice(
+    action?: 'update' | 'new'
+  ) {
+    if (!quote) {
+      return;
+    }
+
     try {
       setActionLoading('invoice');
       setError('');
@@ -883,31 +1015,70 @@ export default function QuoteDetailPage() {
         ? `/api/quotes/${quote.id}/invoice?action=${action}`
         : `/api/quotes/${quote.id}/invoice`;
 
-      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      const response = await fetch(
+        url,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json',
+          },
+        }
+      );
 
-      const data = await response
-        .json()
-        .catch(() => null);
+      /*
+       * IMPORTANT:
+       *
+       * Do not type this as:
+       *
+       * InvoiceConversionResponse | { error?: string }
+       *
+       * because that makes TypeScript reject
+       * data.error and data.invoice.
+       *
+       * We intentionally treat the API response
+       * as unknown and narrow it safely.
+       */
+      const data: unknown =
+        await response
+          .json()
+          .catch(() => null);
 
       if (!response.ok) {
-        // 409 = invoice already exists — prompt user to choose
-        if (response.status === 409 && data?.conflict) {
-          setInvoiceConflict({
-            existingInvoiceId: data.existingInvoiceId,
-            existingInvoiceNumber: data.existingInvoiceNumber,
-          });
-          return;
+        if (
+          response.status === 409 &&
+          hasConflict(data)
+        ) {
+          const existingInvoiceId =
+            getStringProperty(
+              data,
+              'existingInvoiceId'
+            );
+
+          if (
+            existingInvoiceId
+          ) {
+            setInvoiceConflict({
+              existingInvoiceId,
+              existingInvoiceNumber:
+                getStringProperty(
+                  data,
+                  'existingInvoiceNumber'
+                ),
+            });
+
+            return;
+          }
         }
 
         throw new Error(
-          data?.error ||
-            'Failed to generate invoice'
+          getApiError(data) ||
+            'Failed to generate invoice.'
         );
       }
 
       const invoiceId =
-        data?.id ||
-        data?.invoice?.id;
+        getInvoiceId(data);
 
       if (!invoiceId) {
         throw new Error(
@@ -944,34 +1115,39 @@ export default function QuoteDetailPage() {
     }
   }
 
-  function printQuote() {
-    window.print();
-  }
-
   /* =======================================================
      EQUIPMENT SEARCH
   ======================================================= */
 
-  const filteredEquipment = useMemo(() => {
-    const query =
-      equipmentSearch
-        .trim()
-        .toLowerCase();
+  const filteredEquipment =
+    useMemo(() => {
+      const query =
+        equipmentSearch
+          .trim()
+          .toLowerCase();
 
-    if (!query) {
-      return equipmentCatalogue;
-    }
+      if (!query) {
+        return equipmentCatalogue;
+      }
 
-    return equipmentCatalogue.filter(
-      (equipment) =>
-        equipment.name
-          .toLowerCase()
-          .includes(query) ||
-        equipment.category
-          .toLowerCase()
-          .includes(query)
-    );
-  }, [equipmentSearch]);
+      return equipmentCatalogue.filter(
+        (equipment) =>
+          equipment.name
+            .toLowerCase()
+            .includes(query) ||
+          equipment.category
+            .toLowerCase()
+            .includes(query)
+      );
+    }, [equipmentSearch]);
+
+  /* =======================================================
+     PRINT
+  ======================================================= */
+
+  function printQuote() {
+    window.print();
+  }
 
   /* =======================================================
      LOADING
@@ -979,22 +1155,22 @@ export default function QuoteDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 px-6 py-10">
+      <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-20 text-center shadow-sm">
-            <div
-              className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200"
+          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-24 text-center shadow-sm">
+            <Loader2
+              className="mx-auto h-7 w-7 animate-spin"
               style={{
-                borderTopColor: PURPLE,
+                color: PURPLE,
               }}
             />
 
-            <p className="text-xs font-mono uppercase tracking-[0.2em] text-slate-400">
+            <p className="mt-4 text-[10px] font-mono uppercase tracking-[0.22em] text-slate-400">
               Loading quote
             </p>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -1004,828 +1180,531 @@ export default function QuoteDetailPage() {
 
   if (!quote) {
     return (
-      <div className="min-h-screen bg-slate-50 px-6 py-10">
+      <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <Link
-            href="/admin/quotes"
-            className="text-xs font-mono uppercase tracking-widest text-purple-600"
-          >
-            ← Back to Quotes
-          </Link>
+          <div className="rounded-2xl border border-slate-200 bg-white px-6 py-24 text-center shadow-sm">
+            <FileText className="mx-auto h-8 w-8 text-slate-300" />
 
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-            <h1 className="text-xl font-semibold text-red-700">
+            <h1 className="mt-5 text-lg font-medium text-slate-900">
               Quote not found
             </h1>
 
-            <p className="mt-2 text-sm text-red-600">
+            <p className="mt-2 text-sm text-slate-400">
               {error ||
-                'The requested quote could not be loaded.'}
+                'This quote could not be loaded.'}
             </p>
+
+            <Link
+              href="/admin/quotes"
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-white"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to quotes
+            </Link>
           </div>
         </div>
-      </div>
+      </main>
     );
   }
-
-  const status =
-    quote.status?.toLowerCase() ||
-    'draft';
-
-  const canSend =
-    status === 'draft';
-
-  const canAccept =
-    status === 'sent';
-
-  const canGenerateInvoice =
-    status === 'accepted' &&
-    !quote.invoiceId;
-
-  const hasInvoice =
-    Boolean(quote.invoiceId);
 
   /* =======================================================
      PAGE
   ======================================================= */
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8 print:bg-white print:p-0">
-      {/* ===================================================
-          TOP TOOLBAR
-      =================================================== */}
+    <>
+      <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8 print:bg-white print:p-0">
+        <div className="mx-auto max-w-7xl space-y-6 print:max-w-none print:space-y-0">
 
-      <div className="mx-auto mb-6 max-w-7xl print:hidden">
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/admin/quotes"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600"
-              aria-label="Back to quotes"
-            >
-              ←
-            </Link>
+          {/* HEADER */}
 
+          <header className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between print:hidden">
             <div>
-              <p className={sectionLabelClass}>
-                Quote Editor
-              </p>
-
-              <p className="mt-1 text-sm font-medium text-slate-900">
-                {quote.quoteNumber ||
-                  'New quotation'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={printQuote}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
-            >
-              Print / PDF
-            </button>
-
-            <button
-              type="button"
-              onClick={saveQuote}
-              disabled={saving}
-              className="rounded-xl px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-widest text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-              style={{
-                backgroundColor: PURPLE,
-              }}
-            >
-              {saving
-                ? 'Saving...'
-                : 'Save Quote'}
-            </button>
-
-            {canSend && (
-              <button
-                type="button"
-                disabled={
-                  Boolean(actionLoading)
-                }
-                onClick={() =>
-                  updateQuoteStatus(
-                    'sent'
-                  )
-                }
-                className="rounded-xl bg-slate-900 px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-slate-800 disabled:opacity-50"
-              >
-                {actionLoading ===
-                'sent'
-                  ? 'Sending...'
-                  : 'Send Quote'}
-              </button>
-            )}
-
-            {canAccept && (
-              <button
-                type="button"
-                disabled={
-                  Boolean(actionLoading)
-                }
-                onClick={() =>
-                  updateQuoteStatus(
-                    'accepted'
-                  )
-                }
-                className="rounded-xl bg-emerald-600 px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {actionLoading ===
-                'accepted'
-                  ? 'Updating...'
-                  : 'Mark Accepted'}
-              </button>
-            )}
-
-            {canGenerateInvoice && (
-              <button
-                type="button"
-                disabled={
-                  Boolean(actionLoading)
-                }
-                onClick={
-                  generateInvoice
-                }
-                className="rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-amber-600 disabled:opacity-50"
-              >
-                {actionLoading ===
-                'invoice'
-                  ? 'Generating...'
-                  : 'Generate Invoice'}
-              </button>
-            )}
-
-            {hasInvoice && (
               <Link
-                href={`/admin/invoices/${quote.invoiceId}`}
-                className="rounded-xl bg-amber-500 px-5 py-2.5 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-amber-600"
+                href="/admin/quotes"
+                className="mb-4 inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-slate-400 transition hover:text-slate-900"
               >
-                View Invoice →
+                <ArrowLeft className="h-3 w-3" />
+                Quotes
               </Link>
-            )}
-          </div>
-        </div>
 
-        {error && (
-          <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-600">
-            {success}
-          </div>
-        )}
-      </div>
-
-      {/* INVOICE CONFLICT MODAL */}
-      {invoiceConflict && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
-          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl">
-            <div className="mb-1 text-[10px] font-mono uppercase tracking-widest text-amber-500">
-              Invoice Conflict
-            </div>
-            <h2 className="text-xl font-semibold text-slate-900">Invoice already exists</h2>
-            <p className="mt-2 text-sm text-slate-500">
-              Invoice{' '}
-              <span className="font-mono font-medium text-slate-700">
-                {invoiceConflict.existingInvoiceNumber || invoiceConflict.existingInvoiceId.slice(0, 8)}
-              </span>{' '}
-              was previously generated from this quote.
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <button
-                type="button"
-                disabled={Boolean(actionLoading)}
-                onClick={() => doGenerateInvoice('update')}
-                className="w-full rounded-xl bg-purple-600 px-4 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-purple-700 disabled:opacity-50"
-              >
-                {actionLoading === 'invoice' ? 'Updating…' : '↻ Update Existing Invoice'}
-              </button>
-
-              <button
-                type="button"
-                disabled={Boolean(actionLoading)}
-                onClick={() => doGenerateInvoice('new')}
-                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
-              >
-                {actionLoading === 'invoice' ? 'Creating…' : '+ Save as New Invoice'}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setInvoiceConflict(null)}
-                className="w-full rounded-xl px-4 py-2 text-xs font-mono text-slate-400 transition hover:text-slate-600"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ===================================================
-          QUOTE DOCUMENT
-      =================================================== */}
-
-      <main
-        id="quote-preview"
-        className="mx-auto max-w-6xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm print:max-w-none print:rounded-none print:border-0 print:shadow-none"
-      >
-        {/* =================================================
-            DOCUMENT HEADER
-        ================================================= */}
-
-        <section className="px-6 pb-8 pt-7 sm:px-10 sm:pb-10 sm:pt-9 lg:px-14">
-          <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div
-                className="flex h-12 w-12 items-center justify-center rounded-2xl text-lg font-bold text-white"
-                style={{
-                  backgroundColor: PURPLE,
-                }}
-              >
-                K
-              </div>
-
-              <div>
-                <p className="text-sm font-bold tracking-[0.28em] text-slate-900">
-                  KIPSMTHN
+              <div className="flex flex-wrap items-center gap-3">
+                <p
+                  className="text-[10px] font-mono uppercase tracking-[0.25em]"
+                  style={{
+                    color: PURPLE,
+                  }}
+                >
+                  Quote
                 </p>
 
-                <p className="mt-1 text-[9px] font-mono uppercase tracking-[0.25em] text-slate-400">
-                  Creative Production
-                </p>
+                <span
+                  className={`inline-flex rounded-full border px-3 py-1 text-[9px] font-mono uppercase tracking-widest ${getStatusClass(
+                    quote.status
+                  )}`}
+                >
+                  {formatStatus(
+                    quote.status
+                  )}
+                </span>
               </div>
-            </div>
 
-            <div className="sm:text-right">
-              <p className={sectionLabelClass}>
-                Quotation
+              <h1 className="mt-2 text-3xl font-light tracking-tight text-slate-950 sm:text-4xl">
+                {quote.title ||
+                  'Untitled quote'}
+              </h1>
+
+              <p className="mt-2 text-sm text-slate-500">
+                {quote.quoteNumber ||
+                  `Quote ${quote.id
+                    .slice(0, 8)
+                    .toUpperCase()}`}
               </p>
+            </div>
 
-              <input
-                value={
-                  quote.quoteNumber ||
-                  ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'quoteNumber',
-                    event.target.value
-                  )
-                }
-                placeholder="Q-2026-000001"
-                className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-right text-sm font-mono font-medium text-slate-900 outline-none focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-500/10 sm:w-52"
-              />
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={printQuote}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+              >
+                <Printer className="h-3.5 w-3.5" />
+                Print
+              </button>
 
-              <p className="mt-2 text-[11px] text-slate-400">
-                Issued{' '}
-                {formatDate(
-                  quote.createdAt
+              <button
+                type="button"
+                onClick={saveQuote}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Save className="h-3.5 w-3.5" />
                 )}
-              </p>
+                Save
+              </button>
+
+              {quote.status ===
+                'accepted' && (
+                <button
+                  type="button"
+                  onClick={
+                    generateInvoice
+                  }
+                  disabled={
+                    actionLoading ===
+                    'invoice'
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                  style={{
+                    backgroundColor:
+                      PURPLE,
+                  }}
+                >
+                  {actionLoading ===
+                  'invoice' ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <FileText className="h-3.5 w-3.5" />
+                  )}
+                  Generate Invoice
+                </button>
+              )}
             </div>
-          </div>
-        </section>
+          </header>
 
-        {/* =================================================
-            PROJECT + CLIENT
-        ================================================= */}
+          {/* MESSAGES */}
 
-        <section className="border-y border-slate-100 bg-white px-6 py-8 sm:px-10 lg:px-14">
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.25fr_0.75fr]">
-            {/* PROJECT */}
+          {(error || success) && (
+            <div className="print:hidden">
+              {error && (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
 
-            <div>
-              <p className={sectionLabelClass}>
-                Project Quotation
-              </p>
-
-              <input
-                value={quote.title || ''}
-                onChange={(event) =>
-                  updateQuoteField(
-                    'title',
-                    event.target.value
-                  )
-                }
-                placeholder="Project quotation"
-                className="mt-3 w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-2xl font-semibold tracking-tight text-slate-900 outline-none transition placeholder:text-slate-300 hover:border-slate-300 focus:border-purple-400 focus:bg-white focus:ring-4 focus:ring-purple-500/10 sm:text-3xl"
-              />
-
-              <input
-                value={
-                  quote.projectName ||
-                  ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'projectName',
-                    event.target.value
-                  )
-                }
-                placeholder="Project name"
-                className={`mt-3 ${inputClass}`}
-              />
+              {success && !error && (
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4" />
+                    {success}
+                  </div>
+                </div>
+              )}
             </div>
+          )}
 
-            {/* CLIENT */}
+          {/* INVOICE CONFLICT */}
 
-            <div>
-              <p className={sectionLabelClass}>
-                Prepared For
-              </p>
+          {invoiceConflict && (
+            <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 print:hidden">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-amber-900">
+                    An invoice already exists
+                  </p>
 
-              <div className="mt-3 space-y-2">
-                <input
-                  value={
-                    quote.client?.name ||
-                    ''
-                  }
-                  onChange={(event) =>
-                    updateClientField(
-                      'name',
-                      event.target.value
-                    )
-                  }
-                  placeholder="Client name"
-                  className={inputClass}
-                />
+                  <p className="mt-1 text-xs leading-5 text-amber-700">
+                    {invoiceConflict
+                      .existingInvoiceNumber ||
+                      'An invoice has already been generated for this quote.'}
+                  </p>
+                </div>
 
-                <input
-                  value={
-                    quote.client?.company ||
-                    ''
-                  }
-                  onChange={(event) =>
-                    updateClientField(
-                      'company',
-                      event.target.value
-                    )
-                  }
-                  placeholder="Company"
-                  className={inputClass}
-                />
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={`/admin/invoices/${invoiceConflict.existingInvoiceId}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-white"
+                  >
+                    View Invoice
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
 
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <input
-                    value={
-                      quote.client
-                        ?.email || ''
-                    }
-                    onChange={(event) =>
-                      updateClientField(
-                        'email',
-                        event.target.value
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void createInvoice(
+                        'update'
                       )
                     }
-                    placeholder="Email"
-                    type="email"
-                    className={inputClass}
-                  />
-
-                  <input
-                    value={
-                      quote.client
-                        ?.phone || ''
+                    disabled={
+                      actionLoading ===
+                      'invoice'
                     }
-                    onChange={(event) =>
-                      updateClientField(
-                        'phone',
-                        event.target.value
+                    className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-amber-800"
+                  >
+                    Update Existing
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      void createInvoice(
+                        'new'
                       )
                     }
-                    placeholder="Phone"
-                    className={inputClass}
-                  />
+                    disabled={
+                      actionLoading ===
+                      'invoice'
+                    }
+                    className="inline-flex items-center gap-2 rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-amber-800"
+                  >
+                    Create New
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setInvoiceConflict(
+                        null
+                      )
+                    }
+                    className="inline-flex items-center justify-center rounded-xl border border-transparent px-3 py-2 text-slate-500 hover:text-slate-900"
+                    aria-label="Close"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* PRINT DOCUMENT */}
+
+          <section className="rounded-2xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
+
+            {/* DOCUMENT HEADER */}
+
+            <div className="border-b border-slate-200 p-6 sm:p-8 print:border-b print:px-12 print:py-10">
+              <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+
+                <div>
+                  <p
+                    className="text-[10px] font-mono uppercase tracking-[0.25em]"
+                    style={{
+                      color: PURPLE,
+                    }}
+                  >
+                    QUOTE
+                  </p>
+
+                  <h2 className="mt-2 text-3xl font-light tracking-tight text-slate-950">
+                    {quote.title ||
+                      'Untitled quote'}
+                  </h2>
+
+                  {quote.projectName && (
+                    <p className="mt-2 text-sm text-slate-500">
+                      {quote.projectName}
+                    </p>
+                  )}
+                </div>
+
+                <div className="text-left sm:text-right">
+                  <p className="font-mono text-sm font-medium text-slate-900">
+                    {quote.quoteNumber ||
+                      `Q-${quote.id
+                        .slice(0, 8)
+                        .toUpperCase()}`}
+                  </p>
+
+                  <p className="mt-2 text-xs text-slate-400">
+                    Issued{' '}
+                    {formatDate(
+                      quote.createdAt
+                    )}
+                  </p>
+
+                  {quote.validUntil && (
+                    <p className="mt-1 text-xs text-slate-400">
+                      Valid until{' '}
+                      {formatDate(
+                        quote.validUntil
+                      )}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
-        </section>
 
-        {/* =================================================
-            META ROW
-        ================================================= */}
+            {/* DETAILS */}
 
-        <section className="bg-slate-50 px-6 py-6 sm:px-10 lg:px-14">
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-            <div>
-              <label className={labelClass}>
-                Issue Date
-              </label>
+            <div className="grid gap-6 border-b border-slate-200 p-6 sm:grid-cols-2 lg:grid-cols-4 sm:p-8 print:px-12 print:py-8">
 
-              <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-600">
-                {formatDate(
-                  quote.createdAt
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                  Client
+                </p>
+
+                <p className="mt-2 text-sm font-medium text-slate-900">
+                  {quote.client
+                    ?.company ||
+                    quote.client
+                      ?.name ||
+                    'No client'}
+                </p>
+
+                {quote.client
+                  ?.company &&
+                  quote.client
+                    ?.name && (
+                    <p className="mt-1 text-xs text-slate-500">
+                      {quote.client.name}
+                    </p>
+                  )}
+              </div>
+
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                  Contact
+                </p>
+
+                <p className="mt-2 text-sm text-slate-700">
+                  {quote.clientContact ||
+                    quote.client
+                      ?.email ||
+                    '—'}
+                </p>
+
+                {quote.client
+                  ?.phone && (
+                  <p className="mt-1 text-xs text-slate-400">
+                    {quote.client.phone}
+                  </p>
                 )}
               </div>
-            </div>
 
-            <div>
-              <label className={labelClass}>
-                Valid Until
-              </label>
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                  Location
+                </p>
 
-              <input
-                type="date"
-                value={toDateInputValue(
-                  quote.validUntil
-                )}
-                onChange={(event) =>
-                  updateQuoteField(
-                    'validUntil',
-                    event.target.value
-                  )
-                }
-                className={compactInputClass}
-              />
-            </div>
+                <p className="mt-2 text-sm text-slate-700">
+                  {quote.location ||
+                    '—'}
+                </p>
+              </div>
 
-            <div>
-              <label className={labelClass}>
-                Currency
-              </label>
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                  Production
+                </p>
 
-              <select
-                value={
-                  quote.currency ||
-                  'KES'
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'currency',
-                    event.target.value
-                  )
-                }
-                className={compactInputClass}
-              >
-                {currencyOptions.map(
-                  (option) => (
-                    <option
-                      key={option.value}
-                      value={
-                        option.value
-                      }
-                    >
-                      {option.label}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Production
-              </label>
-
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="1"
-                  value={
-                    quote.productionDays ??
-                    1
-                  }
-                  onChange={(event) =>
-                    updateQuoteField(
-                      'productionDays',
-                      Math.max(
-                        1,
+                <p className="mt-2 text-sm text-slate-700">
+                  {quote.productionDays
+                    ? `${quote.productionDays} day${
                         Number(
-                          event.target
-                            .value
-                        ) || 1
-                      )
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/10"
-                />
-
-                <span className="text-xs text-slate-400">
-                  days
-                </span>
+                          quote.productionDays
+                        ) === 1
+                          ? ''
+                          : 's'
+                      }`
+                    : '—'}
+                </p>
               </div>
             </div>
 
-            <div>
-              <label className={labelClass}>
-                Deposit
-              </label>
+            {/* ITEMS */}
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  min="0"
-                  max="100"
-                  value={
-                    quote.depositPercentage ??
-                    50
-                  }
-                  onChange={(event) =>
-                    updateQuoteField(
-                      'depositPercentage',
-                      Math.min(
-                        100,
-                        Math.max(
-                          0,
-                          Number(
-                            event.target
-                              .value
-                          ) || 0
-                        )
-                      )
-                    )
-                  }
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm outline-none focus:border-purple-400 focus:ring-4 focus:ring-purple-500/10"
-                />
+            <div className="p-6 sm:p-8 print:px-12 print:py-8">
 
-                <span className="text-xs text-slate-400">
-                  %
-                </span>
-              </div>
-            </div>
+              <div className="mb-5 flex items-center justify-between print:mb-4">
+                <div>
+                  <p
+                    className="text-[10px] font-mono uppercase tracking-[0.25em]"
+                    style={{
+                      color: PURPLE,
+                    }}
+                  >
+                    Line Items
+                  </p>
 
-            <div>
-              <label className={labelClass}>
-                Status
-              </label>
+                  <p className="mt-1 text-xs text-slate-400">
+                    Equipment, crew and
+                    production expenses
+                  </p>
+                </div>
 
-              <select
-                value={status}
-                onChange={(event) =>
-                  updateQuoteStatus(
-                    event.target.value
-                  )
-                }
-                disabled={
-                  Boolean(
-                    actionLoading
-                  )
-                }
-                className={compactInputClass}
-              >
-                {statusOptions.map(
-                  (option) => (
-                    <option
-                      key={option.value}
-                      value={
-                        option.value
-                      }
-                    >
-                      {option.label}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-          </div>
-        </section>
-
-        {/* =================================================
-            PROJECT INFORMATION
-        ================================================= */}
-
-        <section className="px-6 py-8 sm:px-10 lg:px-14">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            <div>
-              <label className={labelClass}>
-                Project
-              </label>
-
-              <input
-                value={
-                  quote.projectName ||
-                  ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'projectName',
-                    event.target.value
-                  )
-                }
-                placeholder="Project name"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Location
-              </label>
-
-              <input
-                value={
-                  quote.location || ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'location',
-                    event.target.value
-                  )
-                }
-                placeholder="Nairobi"
-                className={inputClass}
-              />
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Client Contact
-              </label>
-
-              <input
-                value={
-                  quote.clientContact ||
-                  ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'clientContact',
-                    event.target.value
-                  )
-                }
-                placeholder="Primary contact"
-                className={inputClass}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* =================================================
-            SCOPE
-        ================================================= */}
-
-        <section className="px-6 pb-8 sm:px-10 lg:px-14">
-          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className={sectionLabelClass}>
-                Project Scope
-              </p>
-
-              <h2 className="mt-1 text-xl font-semibold tracking-tight text-slate-900">
-                Equipment &amp; Services
-              </h2>
-
-              <p className="mt-1 text-xs text-slate-400">
-                Add equipment, crew,
-                production services or
-                post-production work.
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={addItem}
-              className="rounded-xl border border-purple-200 bg-purple-50 px-4 py-2.5 text-xs font-mono font-semibold uppercase tracking-widest text-purple-600 transition hover:border-purple-300 hover:bg-purple-100 print:hidden"
-            >
-              + Add Item
-            </button>
-          </div>
-
-          {/* TABLE */}
-
-          <div className="overflow-hidden rounded-2xl border border-slate-200">
-            <div className="hidden grid-cols-[42px_minmax(240px,1.8fr)_150px_90px_130px_140px_42px] bg-slate-50 px-4 py-3 text-[9px] font-mono uppercase tracking-[0.18em] text-slate-400 md:grid">
-              <div>#</div>
-
-              <div>
-                Item / Equipment
+                <button
+                  type="button"
+                  onClick={addItem}
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-600 transition hover:border-slate-300 print:hidden"
+                >
+                  <Plus className="h-3 w-3" />
+                  Add Item
+                </button>
               </div>
 
-              <div>
-                Category
-              </div>
+              {/* DESKTOP TABLE */}
 
-              <div className="text-right">
-                Qty
-              </div>
+              <div className="hidden overflow-visible md:block">
+                <div className="grid grid-cols-[1.2fr_2.5fr_0.7fr_0.9fr_1.2fr_32px] gap-3 border-b border-slate-200 px-3 pb-3">
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Category
+                  </p>
 
-              <div className="text-right">
-                Rate
-              </div>
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Description
+                  </p>
 
-              <div className="text-right">
-                Total
-              </div>
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Qty
+                  </p>
 
-              <div />
-            </div>
+                  <p className="text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Unit
+                  </p>
 
-            <div className="divide-y divide-slate-100">
-              {(quote.items || []).map(
-                (item, index) => {
-                  const isOpen =
-                    openEquipmentId ===
-                    item.id;
+                  <p className="text-right text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Amount
+                  </p>
 
-                  return (
-                    <div
-                      key={item.id}
-                      className="relative p-4"
-                    >
-                      <div className="grid grid-cols-1 gap-4 md:grid-cols-[42px_minmax(240px,1.8fr)_150px_90px_130px_140px_42px] md:items-start">
-                        {/* NUMBER */}
+                  <span />
+                </div>
 
-                        <div className="hidden pt-3 text-xs font-mono text-slate-400 md:block">
-                          {String(
-                            index + 1
-                          ).padStart(
-                            2,
-                            '0'
+                <div className="divide-y divide-slate-100">
+                  {(quote.items || []).map(
+                    (item) => (
+                      <div
+                        key={item.id}
+                        className="grid grid-cols-[1.2fr_2.5fr_0.7fr_0.9fr_1.2fr_32px] items-center gap-3 py-4"
+                      >
+
+                        {/* CATEGORY */}
+
+                        <select
+                          value={
+                            item.category ||
+                            'Other'
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            updateItem(
+                              item.id,
+                              'category',
+                              event.target
+                                .value
+                            )
+                          }
+                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-700 outline-none focus:border-purple-400 print:border-0 print:bg-transparent"
+                        >
+                          {categoryOptions.map(
+                            (
+                              category
+                            ) => (
+                              <option
+                                key={
+                                  category
+                                }
+                                value={
+                                  category
+                                }
+                              >
+                                {
+                                  category
+                                }
+                              </option>
+                            )
                           )}
-                        </div>
+                        </select>
 
-                        {/* EQUIPMENT */}
+                        {/* DESCRIPTION / EQUIPMENT */}
 
                         <div className="relative">
-                          <label className="mb-1.5 block text-[9px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
-                            Item /
-                            Equipment
-                          </label>
-
-                          <div className="relative">
-                            <input
-                              value={
-                                isOpen
-                                  ? equipmentSearch
-                                  : item.description
-                              }
-                              onFocus={() => {
-                                setOpenEquipmentId(
-                                  item.id
-                                );
-
-                                setEquipmentSearch(
-                                  item.description
-                                );
-                              }}
-                              onChange={(
+                          <input
+                            value={
+                              item.description ||
+                              ''
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateItem(
+                                item.id,
+                                'description',
                                 event
-                              ) => {
-                                setOpenEquipmentId(
-                                  item.id
-                                );
+                                  .target
+                                  .value
+                              )
+                            }
+                            onFocus={() =>
+                              setOpenEquipmentId(
+                                item.id
+                              )
+                            }
+                            placeholder="Search or enter equipment, crew or expense..."
+                            className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-purple-400 print:border-0 print:bg-transparent"
+                          />
 
-                                setEquipmentSearch(
+                          {openEquipmentId ===
+                            item.id && (
+                            <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[320px] rounded-xl border border-slate-200 bg-white p-2 shadow-xl print:hidden">
+                              <input
+                                autoFocus
+                                value={
+                                  equipmentSearch
+                                }
+                                onChange={(
                                   event
-                                    .target
-                                    .value
-                                );
-
-                                updateItem(
-                                  item.id,
-                                  'description',
-                                  event
-                                    .target
-                                    .value
-                                );
-                              }}
-                              placeholder="Search equipment or type custom item..."
-                              className={inputClass}
-                            />
-
-                            <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                              ⌄
-                            </span>
-                          </div>
-
-                          {isOpen && (
-                            <>
-                              <button
-                                type="button"
-                                aria-label="Close equipment menu"
-                                className="fixed inset-0 z-10 cursor-default"
-                                onClick={() =>
-                                  setOpenEquipmentId(
-                                    null
+                                ) =>
+                                  setEquipmentSearch(
+                                    event
+                                      .target
+                                      .value
                                   )
                                 }
+                                placeholder="Search equipment..."
+                                className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-purple-400"
                               />
 
-                              <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-20 max-h-72 overflow-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                              <div className="max-h-56 overflow-y-auto">
                                 {filteredEquipment.length ===
                                 0 ? (
-                                  <div className="px-3 py-6 text-center">
-                                    <p className="text-sm font-medium text-slate-700">
-                                      No equipment
-                                      found
-                                    </p>
-
-                                    <p className="mt-1 text-xs text-slate-400">
-                                      Keep typing
-                                      to use a
-                                      custom
-                                      item.
-                                    </p>
+                                  <div className="px-3 py-5 text-center text-xs text-slate-400">
+                                    No equipment found
                                   </div>
                                 ) : (
                                   filteredEquipment.map(
@@ -1837,22 +1716,27 @@ export default function QuoteDetailPage() {
                                           equipment.id
                                         }
                                         type="button"
+                                        onMouseDown={(
+                                          event
+                                        ) =>
+                                          event.preventDefault()
+                                        }
                                         onClick={() =>
                                           selectEquipment(
                                             item.id,
                                             equipment
                                           )
                                         }
-                                        className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition hover:bg-purple-50"
+                                        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition hover:bg-slate-50"
                                       >
                                         <div>
-                                          <p className="text-sm font-medium text-slate-800">
+                                          <p className="text-xs font-medium text-slate-800">
                                             {
                                               equipment.name
                                             }
                                           </p>
 
-                                          <p className="mt-0.5 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                                          <p className="mt-0.5 text-[10px] text-slate-400">
                                             {
                                               equipment.category
                                             }{' '}
@@ -1863,58 +1747,201 @@ export default function QuoteDetailPage() {
                                           </p>
                                         </div>
 
-                                        <span className="text-xs font-medium text-slate-600">
+                                        <p className="font-mono text-xs text-slate-600">
                                           {formatAmount(
                                             equipment.rate,
                                             quote.currency
                                           )}
-                                        </span>
+                                        </p>
                                       </button>
                                     )
                                   )
                                 )}
                               </div>
-                            </>
+                            </div>
                           )}
+                        </div>
+
+                        {/* QUANTITY */}
+
+                        <input
+                          type="number"
+                          min="1"
+                          value={
+                            item.quantity ??
+                            1
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            updateItem(
+                              item.id,
+                              'quantity',
+                              Math.max(
+                                1,
+                                Number(
+                                  event
+                                    .target
+                                    .value
+                                ) || 1
+                              )
+                            )
+                          }
+                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-purple-400 print:border-0 print:bg-transparent"
+                        />
+
+                        {/* UNIT */}
+
+                        <input
+                          value={
+                            item.unit ||
+                            'unit'
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            updateItem(
+                              item.id,
+                              'unit',
+                              event.target
+                                .value
+                            )
+                          }
+                          className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-purple-400 print:border-0 print:bg-transparent"
+                        />
+
+                        {/* AMOUNT */}
+
+                        <div className="text-right">
+                          <p className="font-mono text-sm font-medium text-slate-900">
+                            {formatAmount(
+                              calculateItemAmount(
+                                item.quantity,
+                                item.rate
+                              ),
+                              quote.currency
+                            )}
+                          </p>
 
                           <input
+                            type="number"
+                            min="0"
                             value={
-                              item.notes ||
-                              ''
+                              item.rate ??
+                              0
                             }
-                            onChange={(event) =>
+                            onChange={(
+                              event
+                            ) =>
                               updateItem(
                                 item.id,
-                                'notes',
-                                event.target
-                                  .value
+                                'rate',
+                                Math.max(
+                                  0,
+                                  Number(
+                                    event
+                                      .target
+                                      .value
+                                  ) || 0
+                                )
                               )
                             }
-                            placeholder="Optional item note"
-                            className="mt-2 w-full border-0 bg-transparent px-1 text-xs text-slate-400 outline-none placeholder:text-slate-300 focus:text-slate-600"
+                            className="mt-1 w-full border-0 bg-transparent p-0 text-right text-[10px] text-slate-400 outline-none print:hidden"
                           />
                         </div>
 
-                        {/* CATEGORY */}
+                        {/* REMOVE */}
 
-                        <div>
-                          <label className="mb-1.5 block text-[9px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
-                            Category
-                          </label>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeItem(
+                              item.id
+                            )
+                          }
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-red-50 hover:text-red-500 print:hidden"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    )
+                  )}
+                </div>
+              </div>
 
-                          <select
+              {/* MOBILE ITEMS */}
+
+              <div className="space-y-4 md:hidden print:hidden">
+                {(quote.items || []).map(
+                  (item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="mb-2 text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                            Description
+                          </p>
+
+                          <input
                             value={
-                              item.category
+                              item.description ||
+                              ''
                             }
-                            onChange={(event) =>
+                            onChange={(
+                              event
+                            ) =>
                               updateItem(
                                 item.id,
-                                'category',
-                                event.target
+                                'description',
+                                event
+                                  .target
                                   .value
                               )
                             }
-                            className={compactInputClass}
+                            placeholder="Equipment, crew or expense"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-purple-400"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeItem(
+                              item.id
+                            )
+                          }
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      <div className="mt-4 grid grid-cols-2 gap-3">
+                        <div>
+                          <p className="mb-2 text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                            Category
+                          </p>
+
+                          <select
+                            value={
+                              item.category ||
+                              'Other'
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateItem(
+                                item.id,
+                                'category',
+                                event
+                                  .target
+                                  .value
+                              )
+                            }
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none"
                           >
                             {categoryOptions.map(
                               (
@@ -1937,18 +1964,41 @@ export default function QuoteDetailPage() {
                           </select>
                         </div>
 
-                        {/* QTY */}
+                        <div>
+                          <p className="mb-2 text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                            Unit
+                          </p>
+
+                          <input
+                            value={
+                              item.unit ||
+                              'day'
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateItem(
+                                item.id,
+                                'unit',
+                                event.target
+                                  .value
+                              )
+                            }
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
+                          />
+                        </div>
 
                         <div>
-                          <label className="mb-1.5 block text-[9px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
+                          <p className="mb-2 text-[9px] font-mono uppercase tracking-widest text-slate-400">
                             Quantity
-                          </label>
+                          </p>
 
                           <input
                             type="number"
                             min="1"
                             value={
-                              item.quantity
+                              item.quantity ??
+                              1
                             }
                             onChange={(
                               event
@@ -1962,46 +2012,25 @@ export default function QuoteDetailPage() {
                                     event
                                       .target
                                       .value
-                                  ) ||
-                                    1
+                                  ) || 1
                                 )
                               )
                             }
-                            className={`${compactInputClass} text-right`}
-                          />
-
-                          <input
-                            value={
-                              item.unit
-                            }
-                            onChange={(
-                              event
-                            ) =>
-                              updateItem(
-                                item.id,
-                                'unit',
-                                event
-                                  .target
-                                  .value
-                              )
-                            }
-                            className="mt-1.5 w-full rounded-lg border border-transparent bg-transparent px-2 py-1 text-right text-[10px] text-slate-400 outline-none focus:border-slate-200"
-                            placeholder="unit"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
                           />
                         </div>
 
-                        {/* RATE */}
-
                         <div>
-                          <label className="mb-1.5 block text-[9px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
+                          <p className="mb-2 text-[9px] font-mono uppercase tracking-widest text-slate-400">
                             Rate
-                          </label>
+                          </p>
 
                           <input
                             type="number"
                             min="0"
                             value={
-                              item.rate
+                              item.rate ??
+                              0
                             }
                             onChange={(
                               event
@@ -2015,143 +2044,438 @@ export default function QuoteDetailPage() {
                                     event
                                       .target
                                       .value
-                                  ) ||
-                                    0
+                                  ) || 0
                                 )
                               )
                             }
-                            className={`${compactInputClass} text-right`}
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none"
                           />
                         </div>
+                      </div>
 
-                        {/* TOTAL */}
+                      <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-3">
+                        <span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                          Amount
+                        </span>
 
-                        <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-3 md:block md:bg-transparent md:px-0 md:py-2 md:text-right">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 md:hidden">
-                            Total
-                          </span>
-
-                          <span className="text-sm font-semibold text-slate-900">
-                            {formatAmount(
-                              calculateItemAmount(
-                                item.quantity,
-                                item.rate
-                              ),
-                              quote.currency
-                            )}
-                          </span>
-                        </div>
-
-                        {/* DELETE */}
-
-                        <div className="flex items-center justify-end">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              removeItem(
-                                item.id
-                              )
-                            }
-                            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-300 transition hover:bg-red-50 hover:text-red-500 print:hidden"
-                            aria-label="Remove item"
-                          >
-                            ×
-                          </button>
-                        </div>
+                        <span className="font-mono text-sm font-medium text-slate-900">
+                          {formatAmount(
+                            calculateItemAmount(
+                              item.quantity,
+                              item.rate
+                            ),
+                            quote.currency
+                          )}
+                        </span>
                       </div>
                     </div>
-                  );
-                }
-              )}
-
-              {(quote.items || [])
-                .length === 0 && (
-                <div className="px-6 py-14 text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-50 text-purple-500">
-                    +
-                  </div>
-
-                  <p className="mt-4 text-sm font-medium text-slate-700">
-                    No items added yet
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    Add equipment or a
-                    production service
-                    to start the quote.
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={addItem}
-                    className="mt-5 rounded-xl px-4 py-2.5 text-xs font-mono uppercase tracking-widest text-white"
-                    style={{
-                      backgroundColor:
-                        PURPLE,
-                    }}
-                  >
-                    Add First Item
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* =================================================
-            TOTALS
-        ================================================= */}
-
-        <section className="border-t border-slate-100 px-6 py-8 sm:px-10 lg:px-14">
-          <div className="flex justify-end">
-            <div className="w-full max-w-md">
-              <div className="flex items-center justify-between py-2.5 text-sm">
-                <span className="text-slate-500">
-                  Subtotal
-                </span>
-
-                <span className="font-medium text-slate-800">
-                  {formatAmount(
-                    calculatedTotals.subtotal,
-                    quote.currency
-                  )}
-                </span>
+                  )
+                )}
               </div>
+            </div>
 
-              <div className="flex items-center justify-between gap-4 py-2.5 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-500">
-                    Discount
+            {/* TOTALS */}
+
+            <div className="border-t border-slate-200 p-6 sm:p-8 print:px-12 print:py-8">
+              <div className="ml-auto w-full max-w-md space-y-3">
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-slate-500">
+                    Subtotal
                   </span>
 
-                  <select
+                  <span className="font-mono text-sm text-slate-700">
+                    {formatAmount(
+                      calculatedTotals.subtotal,
+                      quote.currency
+                    )}
+                  </span>
+                </div>
+
+                {quote.discountType &&
+                  quote.discountType !==
+                    'none' && (
+                    <div className="flex items-center justify-between gap-4">
+                      <span className="text-xs text-slate-500">
+                        Discount
+                      </span>
+
+                      <span className="font-mono text-sm text-red-500">
+                        -
+                        {formatAmount(
+                          calculatedTotals.discountAmount,
+                          quote.currency
+                        )}
+                      </span>
+                    </div>
+                  )}
+
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-xs text-slate-500">
+                    Tax
+                  </span>
+
+                  <span className="font-mono text-sm text-slate-700">
+                    {formatAmount(
+                      calculatedTotals.tax,
+                      quote.currency
+                    )}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between gap-4 border-t border-slate-200 pt-4">
+                  <span className="text-sm font-medium text-slate-900">
+                    Total
+                  </span>
+
+                  <span className="font-mono text-xl font-medium text-slate-950">
+                    {formatAmount(
+                      calculatedTotals.total,
+                      quote.currency
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* TERMS / NOTES */}
+
+            <div className="grid gap-6 border-t border-slate-200 p-6 sm:grid-cols-2 sm:p-8 print:px-12 print:py-8">
+
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                  Payment Terms
+                </p>
+
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                  {quote.paymentTerms ||
+                    '—'}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
+                  Notes
+                </p>
+
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                  {quote.notes ||
+                    '—'}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* EDITING PANEL */}
+
+          <section className="grid gap-6 lg:grid-cols-2 print:hidden">
+
+            {/* GENERAL */}
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-6">
+                <p
+                  className="text-[10px] font-mono uppercase tracking-[0.25em]"
+                  style={{
+                    color: PURPLE,
+                  }}
+                >
+                  Quote Details
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  Edit the quote information
+                </p>
+              </div>
+
+              <div className="space-y-5">
+
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Title
+                  </label>
+
+                  <input
                     value={
-                      quote.discountType ||
-                      'none'
+                      quote.title || ''
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       updateQuoteField(
-                        'discountType',
+                        'title',
                         event.target.value
                       )
                     }
-                    className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-mono uppercase outline-none focus:border-purple-400 print:hidden"
-                  >
-                    <option value="none">
-                      None
-                    </option>
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                  />
+                </div>
 
-                    <option value="percentage">
-                      Percentage
-                    </option>
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Project Name
+                  </label>
 
-                    <option value="fixed">
-                      Fixed
-                    </option>
-                  </select>
+                  <input
+                    value={
+                      quote.projectName ||
+                      ''
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateQuoteField(
+                        'projectName',
+                        event.target.value
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                  />
+                </div>
 
-                  {quote.discountType !==
-                    'none' && (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                      Quote Number
+                    </label>
+
+                    <input
+                      value={
+                        quote.quoteNumber ||
+                        ''
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateQuoteField(
+                          'quoteNumber',
+                          event.target
+                            .value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 font-mono text-sm outline-none focus:border-purple-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                      Currency
+                    </label>
+
+                    <select
+                      value={
+                        quote.currency ||
+                        'KES'
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateQuoteField(
+                          'currency',
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                    >
+                      {currencyOptions.map(
+                        (currency) => (
+                          <option
+                            key={
+                              currency.value
+                            }
+                            value={
+                              currency.value
+                            }
+                          >
+                            {
+                              currency.label
+                            }
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                      Valid Until
+                    </label>
+
+                    <input
+                      type="date"
+                      value={toDateInputValue(
+                        quote.validUntil
+                      )}
+                      onChange={(
+                        event
+                      ) =>
+                        updateQuoteField(
+                          'validUntil',
+                          event.target.value
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                      Production Days
+                    </label>
+
+                    <input
+                      type="number"
+                      min="1"
+                      value={
+                        quote.productionDays ??
+                        1
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateQuoteField(
+                          'productionDays',
+                          Math.max(
+                            1,
+                            Number(
+                              event.target
+                                .value
+                            ) || 1
+                          )
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Location
+                  </label>
+
+                  <input
+                    value={
+                      quote.location ||
+                      ''
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateQuoteField(
+                        'location',
+                        event.target.value
+                      )
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Client Contact
+                  </label>
+
+                  <input
+                    value={
+                      quote.clientContact ||
+                      ''
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateQuoteField(
+                        'clientContact',
+                        event.target.value
+                      )
+                    }
+                    placeholder="Name, email or phone"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* BILLING */}
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="mb-6">
+                <p
+                  className="text-[10px] font-mono uppercase tracking-[0.25em]"
+                  style={{
+                    color: PURPLE,
+                  }}
+                >
+                  Billing
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  Payment and quote settings
+                </p>
+              </div>
+
+              <div className="space-y-5">
+
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Payment Terms
+                  </label>
+
+                  <textarea
+                    rows={4}
+                    value={
+                      quote.paymentTerms ||
+                      ''
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateQuoteField(
+                        'paymentTerms',
+                        event.target.value
+                      )
+                    }
+                    placeholder="e.g. 50% deposit, balance on completion"
+                    className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-purple-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Discount
+                  </label>
+
+                  <div className="grid grid-cols-[1fr_1fr] gap-3">
+                    <select
+                      value={
+                        quote.discountType ||
+                        'none'
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateQuoteField(
+                          'discountType',
+                          event.target.value
+                        )
+                      }
+                      className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
+                    >
+                      <option value="none">
+                        No discount
+                      </option>
+
+                      <option value="percentage">
+                        Percentage
+                      </option>
+
+                      <option value="fixed">
+                        Fixed amount
+                      </option>
+                    </select>
+
                     <input
                       type="number"
                       min="0"
@@ -2159,256 +2483,252 @@ export default function QuoteDetailPage() {
                         quote.discountValue ??
                         0
                       }
-                      onChange={(event) =>
+                      onChange={(
+                        event
+                      ) =>
                         updateQuoteField(
                           'discountValue',
-                          Number(
-                            event.target
-                              .value
-                          ) || 0
+                          Math.max(
+                            0,
+                            Number(
+                              event.target
+                                .value
+                            ) || 0
+                          )
                         )
                       }
-                      className="w-20 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-right text-xs outline-none focus:border-purple-400 print:hidden"
+                      disabled={
+                        !quote.discountType ||
+                        quote.discountType ===
+                          'none'
+                      }
+                      className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400 disabled:opacity-40"
                     />
-                  )}
+                  </div>
                 </div>
 
-                <span className="font-medium text-red-500">
-                  {calculatedTotals.discountAmount >
-                  0
-                    ? `-${formatAmount(
-                        calculatedTotals.discountAmount,
-                        quote.currency
-                      )}`
-                    : formatAmount(
-                        0,
-                        quote.currency
-                      )}
-                </span>
-              </div>
-
-              <div className="flex items-center justify-between py-2.5 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-500">
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
                     Tax
-                  </span>
+                  </label>
 
                   <input
                     type="number"
                     min="0"
                     value={
-                      quote.tax || 0
+                      quote.tax ?? 0
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       updateQuoteField(
                         'tax',
-                        Number(
-                          event.target
-                            .value
-                        ) || 0
+                        Math.max(
+                          0,
+                          Number(
+                            event.target
+                              .value
+                          ) || 0
+                        )
                       )
                     }
-                    className="w-24 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-right text-xs outline-none focus:border-purple-400 print:hidden"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"
                   />
                 </div>
 
-                <span className="font-medium text-slate-800">
-                  {formatAmount(
-                    calculatedTotals.tax,
-                    quote.currency
-                  )}
-                </span>
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Deposit Percentage
+                  </label>
+
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={
+                        quote.depositPercentage ??
+                        0
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        updateQuoteField(
+                          'depositPercentage',
+                          Math.min(
+                            100,
+                            Math.max(
+                              0,
+                              Number(
+                                event.target
+                                  .value
+                              ) || 0
+                            )
+                          )
+                        )
+                      }
+                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 pr-10 text-sm outline-none focus:border-purple-400"
+                    />
+
+                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+                      %
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                    Notes
+                  </label>
+
+                  <textarea
+                    rows={5}
+                    value={
+                      quote.notes || ''
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      updateQuoteField(
+                        'notes',
+                        event.target.value
+                      )
+                    }
+                    placeholder="Additional notes for the client..."
+                    className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-purple-400"
+                  />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* STATUS CONTROLS */}
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:hidden">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
+              <div>
+                <p
+                  className="text-[10px] font-mono uppercase tracking-[0.25em]"
+                  style={{
+                    color: PURPLE,
+                  }}
+                >
+                  Quote Status
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                  Move the quote through the
+                  approval workflow.
+                </p>
               </div>
 
-              <div
-                className="my-3 h-px"
+              <div className="flex flex-wrap gap-2">
+                {statusOptions.map(
+                  (option) => {
+                    const active =
+                      quote.status ===
+                      option.value;
+
+                    const loadingStatus =
+                      actionLoading ===
+                      `status-${option.value}`;
+
+                    return (
+                      <button
+                        key={
+                          option.value
+                        }
+                        type="button"
+                        onClick={() =>
+                          void updateQuoteStatus(
+                            option.value
+                          )
+                        }
+                        disabled={
+                          active ||
+                          actionLoading !== ''
+                        }
+                        className={`inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest transition disabled:cursor-not-allowed ${
+                          active
+                            ? 'border-slate-900 bg-slate-900 text-white'
+                            : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                        }`}
+                      >
+                        {loadingStatus && (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        )}
+
+                        {!loadingStatus &&
+                          active && (
+                            <Check className="h-3 w-3" />
+                          )}
+
+                        {
+                          option.label
+                        }
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* BOTTOM ACTIONS */}
+
+          <div className="flex flex-col gap-3 pb-10 sm:flex-row sm:items-center sm:justify-between print:hidden">
+            <Link
+              href="/admin/quotes"
+              className="inline-flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-slate-400 hover:text-slate-900"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              Back to quotes
+            </Link>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  window.location.reload()
+                }
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest text-slate-500"
+              >
+                <RefreshCw className="h-3 w-3" />
+                Reload
+              </button>
+
+              <button
+                type="button"
+                onClick={saveQuote}
+                disabled={saving}
+                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-mono uppercase tracking-widest text-white disabled:opacity-50"
                 style={{
                   backgroundColor:
                     PURPLE,
                 }}
-              />
-
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">
-                    Grand Total
-                  </p>
-
-                  <p className="mt-1 text-xs text-slate-400">
-                    {quote.depositPercentage ||
-                      0}
-                    % deposit required
-                  </p>
-                </div>
-
-                <p className="text-3xl font-semibold tracking-tight text-slate-900">
-                  {formatAmount(
-                    calculatedTotals.total,
-                    quote.currency
-                  )}
-                </p>
-              </div>
-
-              {quote.depositPercentage &&
-                quote.depositPercentage >
-                  0 && (
-                  <div className="mt-4 rounded-xl bg-purple-50 px-4 py-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-purple-700">
-                        Deposit (
-                        {
-                          quote.depositPercentage
-                        }
-                        %)
-                      </span>
-
-                      <span className="text-sm font-semibold text-purple-700">
-                        {formatAmount(
-                          calculatedTotals.total *
-                            (Number(
-                              quote.depositPercentage
-                            ) /
-                              100),
-                          quote.currency
-                        )}
-                      </span>
-                    </div>
-                  </div>
+              >
+                {saving ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Save className="h-3 w-3" />
                 )}
+                Save Quote
+              </button>
             </div>
           </div>
-        </section>
-
-        {/* =================================================
-            TERMS
-        ================================================= */}
-
-        <section className="border-t border-slate-100 bg-slate-50 px-6 py-8 sm:px-10 lg:px-14">
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <label className={labelClass}>
-                Payment Terms
-              </label>
-
-              <textarea
-                value={
-                  quote.paymentTerms ||
-                  ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'paymentTerms',
-                    event.target.value
-                  )
-                }
-                placeholder="e.g. 50% deposit to confirm booking. Balance due on delivery."
-                rows={5}
-                className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-600 outline-none placeholder:text-slate-300"
-              />
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5">
-              <label className={labelClass}>
-                Client Contact
-              </label>
-
-              <textarea
-                value={
-                  quote.clientContact ||
-                  ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'clientContact',
-                    event.target.value
-                  )
-                }
-                placeholder="Primary contact details..."
-                rows={5}
-                className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-600 outline-none placeholder:text-slate-300"
-              />
-            </div>
-
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 md:col-span-2">
-              <label className={labelClass}>
-                Notes
-              </label>
-
-              <textarea
-                value={
-                  quote.notes || ''
-                }
-                onChange={(event) =>
-                  updateQuoteField(
-                    'notes',
-                    event.target.value
-                  )
-                }
-                placeholder="Additional notes, deliverables, exclusions or special requirements..."
-                rows={4}
-                className="w-full resize-none border-0 bg-transparent text-sm leading-6 text-slate-600 outline-none placeholder:text-slate-300"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* =================================================
-            FOOTER
-        ================================================= */}
-
-        <footer className="border-t border-slate-100 px-6 py-8 sm:px-10 lg:px-14">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold text-white"
-                  style={{
-                    backgroundColor:
-                      PURPLE,
-                  }}
-                >
-                  K
-                </div>
-
-                <p className="text-xs font-bold tracking-[0.2em] text-slate-800">
-                  KIPSMTHN
-                </p>
-              </div>
-
-              <p className="mt-2 text-xs text-slate-400">
-                Creative Production
-              </p>
-
-              <p className="mt-1 text-xs text-slate-400">
-                Thank you for the
-                opportunity to work
-                together.
-              </p>
-            </div>
-
-            <div className="sm:text-right">
-              <p className="text-[9px] font-mono uppercase tracking-[0.2em] text-slate-400">
-                Quotation
-              </p>
-
-              <p className="mt-1 text-xs font-mono font-medium text-slate-600">
-                {quote.quoteNumber ||
-                  quote.id}
-              </p>
-            </div>
-          </div>
-        </footer>
+        </div>
       </main>
 
-      {/* ===================================================
+      {/* =====================================================
           PRINT STYLES
-      =================================================== */}
+      ====================================================== */}
 
       <style jsx global>{`
         @media print {
           @page {
             size: A4;
-            margin: 10mm;
+            margin: 12mm;
           }
 
           html,
@@ -2417,37 +2737,40 @@ export default function QuoteDetailPage() {
           }
 
           body {
+            color: #0f172a !important;
+          }
+
+          button,
+          input,
+          select,
+          textarea {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
 
-          #quote-preview {
-            width: 100%;
-            max-width: none;
-            border: 0 !important;
-            border-radius: 0 !important;
-            box-shadow: none !important;
-          }
-
           input,
-          textarea,
-          select {
-            border-color: transparent !important;
-            background: transparent !important;
+          select,
+          textarea {
             box-shadow: none !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
           }
 
-          button {
-            display: none !important;
+          * {
+            border-radius: 0 !important;
           }
 
           .print\\:hidden {
             display: none !important;
           }
+
+          .print\\:border-0 {
+            border: 0 !important;
+          }
+
+          .print\\:shadow-none {
+            box-shadow: none !important;
+          }
         }
       `}</style>
-    </div>
+    </>
   );
 }

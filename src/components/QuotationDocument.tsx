@@ -84,6 +84,11 @@ function formatStatus(status?: string) {
     .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
+function getShortQuoteNumber(quote: Quote) {
+  const source = (quote.quoteNumber || quote.id || '').replace(/[^a-zA-Z0-9]/g, '');
+  return `Q-${source.slice(-8).toUpperCase()}`;
+}
+
 export default function QuotationDocument({
   quote,
 }: QuotationDocumentProps) {
@@ -123,7 +128,7 @@ export default function QuotationDocument({
             </p>
 
             <p className="mt-1 text-lg font-medium">
-              {quote.quoteNumber || quote.id}
+              {getShortQuoteNumber(quote)}
             </p>
 
             <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-600">
@@ -414,7 +419,7 @@ export default function QuotationDocument({
         )}
 
         {/* FOOTER */}
-        <div className="mt-12 border-t border-slate-200 pt-6 text-center">
+        <div className="mt-12 border-t border-slate-200 pt-6 text-center print:hidden">
           <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">
             Thank you for the opportunity
           </p>

@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import EquipmentSearch from "@/components/quotes/EquipmentSearch";
+
+/* =========================================================
+   TYPES
+========================================================= */
 
 type Equipment = {
   id: string;
@@ -13,6 +16,18 @@ type Equipment = {
   subcategory?: string | null;
   brand?: string | null;
   specs?: string | null;
+};
+
+type DescriptionOption = {
+  id: string;
+  label: string;
+  type: "equipment" | "service";
+  equipmentId?: string;
+  category: string;
+  subcategory?: string | null;
+  brand?: string | null;
+  rate: number;
+  unit: string;
 };
 
 type QuoteItem = {
@@ -37,6 +52,124 @@ type Client = {
   kraPin?: string | null;
 };
 
+/* =========================================================
+   QUOTE CATEGORIES
+
+   These are quote-builder categories.
+
+   IMPORTANT:
+   These do NOT have to match the raw equipment DB categories.
+   getDescriptionOptions() maps them to the correct catalogue
+   records.
+========================================================= */
+
+const QUOTE_CATEGORIES = [
+  "Equipment",
+  "Camera",
+  "Audio",
+  "Lighting",
+  "Grip",
+  "Crew",
+  "Production",
+  "Post Production",
+  "Transport",
+  "Other",
+] as const;
+
+/* =========================================================
+   CREW CATALOGUE
+
+   Crew is not stored in the equipment table, so it lives
+   here as selectable quote-builder services.
+========================================================= */
+
+const CREW_OPTIONS: Array<
+  [string, string, number]
+> = [
+    ["Camera Operator", "day", 12000],
+    ["Director", "day", 20000],
+    ["Producer", "day", 18000],
+    ["Director of Photography", "day", 18000],
+    ["1st Assistant Camera", "day", 10000],
+    ["2nd Assistant Camera", "day", 7000],
+    ["Gaffer", "day", 12000],
+    ["Sound Recordist", "day", 12000],
+    ["Boom Operator", "day", 8000],
+    ["Production Assistant", "day", 5000],
+    ["Editor", "day", 15000],
+    ["Photographer", "day", 12000],
+  ];
+
+/* =========================================================
+   PRODUCTION SERVICES
+========================================================= */
+
+const PRODUCTION_OPTIONS: Array<
+  [string, string, number]
+> = [
+    ["Production Management", "project", 15000],
+    ["Pre-production", "project", 12000],
+    ["Location Scouting", "project", 8000],
+    ["Production Coordination", "project", 10000],
+    ["Production Day", "day", 15000],
+    ["Set Catering", "day", 8000],
+    ["Production Insurance", "project", 0],
+  ];
+
+/* =========================================================
+   POST PRODUCTION SERVICES
+========================================================= */
+
+const POST_PRODUCTION_OPTIONS: Array<
+  [string, string, number]
+> = [
+    ["Video Editing", "project", 25000],
+    ["Color Grading", "project", 15000],
+    ["Sound Mix", "project", 15000],
+    ["Motion Graphics", "project", 20000],
+    ["Subtitles / Captions", "project", 8000],
+    ["Photo Retouching", "project", 12000],
+    ["Photo Editing", "project", 10000],
+    ["SFX / VFX", "project", 25000],
+    ["Rendering / Encoding", "project", 5000],
+  ];
+
+/* =========================================================
+   TRANSPORT SERVICES
+========================================================= */
+
+const TRANSPORT_OPTIONS: Array<
+  [string, string, number]
+> = [
+    ["Production Transport", "day", 8000],
+    ["Crew Transport", "day", 6000],
+    ["Equipment Transport", "day", 6000],
+    ["Fuel / Mileage", "trip", 0],
+  ];
+
+/* =========================================================
+   OTHER SERVICES
+========================================================= */
+
+const OTHER_OPTIONS: Array<
+  [string, string, number]
+> = [
+    ["Miscellaneous Expense", "unit", 0],
+    ["Location Fee", "day", 0],
+    ["Permit", "project", 0],
+    ["Other Service", "unit", 0],
+  ];
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function normalize(value: unknown) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
 function createItem(
   type: "equipment" | "custom" = "custom"
 ): QuoteItem {
@@ -44,10 +177,10 @@ function createItem(
     id: crypto.randomUUID(),
     type,
     equipmentId: "",
-    category: "Production",
+    category: "Equipment",
     description: "",
     quantity: 1,
-    unit: "unit",
+    unit: type === "equipment" ? "day" : "unit",
     rate: 0,
     amount: 0,
     notes: "",
@@ -63,16 +196,22 @@ function formatAmount(
   ).toLocaleString("en-KE")}`;
 }
 
+/* =========================================================
+   PAGE
+========================================================= */
+
 export default function NewQuotePage() {
   const router = useRouter();
 
-  const [equipment, setEquipment] = useState<
-    Equipment[]
-  >([]);
+  /* =======================================================
+     DATA
+  ======================================================= */
 
-  const [clients, setClients] = useState<
-    Client[]
-  >([]);
+  const [equipment, setEquipment] =
+    useState<Equipment[]>([]);
+
+  const [clients, setClients] =
+    useState<Client[]>([]);
 
   const [loadingEquipment, setLoadingEquipment] =
     useState(true);
@@ -80,11 +219,12 @@ export default function NewQuotePage() {
   const [loadingClients, setLoadingClients] =
     useState(true);
 
-  const [saving, setSaving] = useState(false);
+  /* =======================================================
+     QUOTE DETAILS
+  ======================================================= */
 
-  const [error, setError] = useState("");
-
-  const [title, setTitle] = useState("");
+  const [title, setTitle] =
+    useState("");
 
   const [projectName, setProjectName] =
     useState("");
@@ -116,25 +256,56 @@ export default function NewQuotePage() {
   const [notes, setNotes] =
     useState("");
 
+  /* =======================================================
+     PRICING
+  ======================================================= */
+
   const [discountType, setDiscountType] =
-    useState<"none" | "percentage" | "fixed">(
-      "none"
-    );
+    useState<
+      "none" | "percentage" | "fixed"
+    >("none");
 
   const [discountValue, setDiscountValue] =
     useState(0);
 
-  const [tax, setTax] = useState(0);
+  const [tax, setTax] =
+    useState(0);
 
-  const [items, setItems] = useState<
-    QuoteItem[]
-  >([createItem()]);
+  /* =======================================================
+     LINE ITEMS
+  ======================================================= */
+
+  const [items, setItems] =
+    useState<QuoteItem[]>([
+      createItem(),
+    ]);
 
   /*
-  |--------------------------------------------------------------------------
-  | Load equipment
-  |--------------------------------------------------------------------------
-  */
+   * Search text is kept independently for every
+   * description field.
+   */
+  const [descriptionSearch, setDescriptionSearch] =
+    useState<Record<string, string>>({});
+
+  /*
+   * Only one description dropdown is open at a time.
+   */
+  const [openDescriptionSearch, setOpenDescriptionSearch] =
+    useState<string | null>(null);
+
+  /* =======================================================
+     UI
+  ======================================================= */
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  /* =======================================================
+     LOAD EQUIPMENT
+  ======================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -159,10 +330,12 @@ export default function NewQuotePage() {
         const data =
           await response.json();
 
-        const equipmentData =
+        const equipmentData: Equipment[] =
           Array.isArray(data)
             ? data
-            : Array.isArray(data.equipment)
+            : Array.isArray(
+              data.equipment
+            )
               ? data.equipment
               : [];
 
@@ -196,11 +369,9 @@ export default function NewQuotePage() {
     };
   }, []);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Load clients
-  |--------------------------------------------------------------------------
-  */
+  /* =======================================================
+     LOAD CLIENTS
+  ======================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -209,12 +380,13 @@ export default function NewQuotePage() {
       try {
         setLoadingClients(true);
 
-        const response = await fetch(
-          "/api/clients",
-          {
-            cache: "no-store",
-          }
-        );
+        const response =
+          await fetch(
+            "/api/clients",
+            {
+              cache: "no-store",
+            }
+          );
 
         if (!response.ok) {
           throw new Error(
@@ -225,10 +397,12 @@ export default function NewQuotePage() {
         const data =
           await response.json();
 
-        const clientData =
+        const clientData: Client[] =
           Array.isArray(data)
             ? data
-            : Array.isArray(data.clients)
+            : Array.isArray(
+              data.clients
+            )
               ? data.clients
               : [];
 
@@ -262,11 +436,443 @@ export default function NewQuotePage() {
     };
   }, []);
 
-  /*
-  |--------------------------------------------------------------------------
-  | Totals
-  |--------------------------------------------------------------------------
-  */
+  /* =======================================================
+     CATEGORY-AWARE EQUIPMENT MATCHING
+
+     THIS IS THE IMPORTANT PART.
+
+     The selected quote category controls the catalogue.
+
+     Description selection NEVER changes category.
+  ======================================================= */
+
+  function equipmentMatchesQuoteCategory(
+    item: Equipment,
+    category: string
+  ) {
+    const selected =
+      normalize(category);
+
+    const dbCategory =
+      normalize(item.category);
+
+    const subcategory =
+      normalize(item.subcategory);
+
+    const searchable = normalize(
+      [
+        item.name,
+        item.brand,
+        item.category,
+        item.subcategory,
+        item.specs,
+      ]
+        .filter(Boolean)
+        .join(" ")
+    );
+
+    if (!selected) {
+      return false;
+    }
+
+    /*
+     * Equipment and Camera intentionally both point
+     * to camera equipment.
+     */
+    if (
+      selected === "equipment" ||
+      selected === "camera"
+    ) {
+      return (
+        dbCategory === "cameras" ||
+        dbCategory === "camera" ||
+        subcategory.includes("camera") ||
+        searchable.includes("camera")
+      );
+    }
+
+    /*
+     * Audio -> Sound catalogue.
+     */
+    if (selected === "audio") {
+      return (
+        dbCategory === "sound" ||
+        dbCategory.includes("audio") ||
+        subcategory.includes("audio") ||
+        subcategory.includes("sound") ||
+        searchable.includes("microphone") ||
+        searchable.includes("recorder") ||
+        searchable.includes("boom mic") ||
+        searchable.includes("lapel") ||
+        searchable.includes("wireless audio")
+      );
+    }
+
+    /*
+     * Lighting -> Lights + Modifiers.
+     */
+    if (selected === "lighting") {
+      return (
+        dbCategory === "lights" ||
+        dbCategory === "light" ||
+        dbCategory === "lighting" ||
+        dbCategory === "modifiers" ||
+        subcategory.includes("light") ||
+        subcategory.includes("lighting") ||
+        subcategory.includes("modifier") ||
+        searchable.includes("led") ||
+        searchable.includes("light")
+      );
+    }
+
+    /*
+     * Grip -> physical grip/motion/support gear.
+     */
+    if (selected === "grip") {
+      return (
+        dbCategory === "stands" ||
+        dbCategory === "stabilizers" ||
+        dbCategory === "motion" ||
+        dbCategory === "grip" ||
+        dbCategory === "modifiers" ||
+        subcategory.includes("stand") ||
+        subcategory.includes("support") ||
+        subcategory.includes("stabilizer") ||
+        subcategory.includes("gimbal") ||
+        subcategory.includes("dolly") ||
+        subcategory.includes("slider") ||
+        searchable.includes("tripod") ||
+        searchable.includes("gimbal") ||
+        searchable.includes("dolly") ||
+        searchable.includes("slider")
+      );
+    }
+
+    return false;
+  }
+
+  /* =======================================================
+     DESCRIPTION OPTIONS
+
+     Returns ONLY options belonging to item.category.
+  ======================================================= */
+
+  function getDescriptionOptions(
+    item: QuoteItem
+  ): DescriptionOption[] {
+    const category =
+      item.category;
+
+    const selectedCategory =
+      normalize(category);
+
+    const search =
+      normalize(
+        descriptionSearch[item.id]
+      );
+
+    const options: DescriptionOption[] =
+      [];
+
+    /*
+     * -------------------------------------------------------
+     * EQUIPMENT CATEGORIES
+     * -------------------------------------------------------
+     */
+
+    const equipmentCategories =
+      new Set([
+        "equipment",
+        "camera",
+        "audio",
+        "lighting",
+        "grip",
+      ]);
+
+    if (
+      equipmentCategories.has(
+        selectedCategory
+      )
+    ) {
+      equipment.forEach(
+        (equipmentItem) => {
+          if (
+            !equipmentMatchesQuoteCategory(
+              equipmentItem,
+              category
+            )
+          ) {
+            return;
+          }
+
+          const searchable =
+            normalize(
+              [
+                equipmentItem.name,
+                equipmentItem.brand,
+                equipmentItem.category,
+                equipmentItem.subcategory,
+                equipmentItem.specs,
+              ]
+                .filter(Boolean)
+                .join(" ")
+            );
+
+          if (
+            search &&
+            !searchable.includes(
+              search
+            )
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `equipment-${equipmentItem.id}`,
+            label:
+              equipmentItem.name,
+            type: "equipment",
+            equipmentId:
+              equipmentItem.id,
+            category:
+              equipmentItem.category,
+            subcategory:
+              equipmentItem.subcategory,
+            brand:
+              equipmentItem.brand,
+            rate:
+              Number(
+                equipmentItem.dailyRate
+              ) || 0,
+            unit: "day",
+          });
+        }
+      );
+
+      return options
+        .sort((a, b) =>
+          a.label.localeCompare(
+            b.label
+          )
+        )
+        .slice(0, 50);
+    }
+
+    /*
+     * -------------------------------------------------------
+     * CREW
+     * -------------------------------------------------------
+     */
+
+    if (
+      selectedCategory ===
+      "crew"
+    ) {
+      CREW_OPTIONS.forEach(
+        (
+          [label, unit, rate],
+          index
+        ) => {
+          if (
+            search &&
+            !normalize(
+              label
+            ).includes(search)
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `crew-${index}`,
+            label,
+            type: "service",
+            category: "Crew",
+            subcategory:
+              "Crew",
+            rate,
+            unit,
+          });
+        }
+      );
+
+      return options;
+    }
+
+    /*
+     * -------------------------------------------------------
+     * PRODUCTION
+     * -------------------------------------------------------
+     */
+
+    if (
+      selectedCategory ===
+      "production"
+    ) {
+      PRODUCTION_OPTIONS.forEach(
+        (
+          [label, unit, rate],
+          index
+        ) => {
+          if (
+            search &&
+            !normalize(
+              label
+            ).includes(search)
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `production-${index}`,
+            label,
+            type: "service",
+            category:
+              "Production",
+            subcategory:
+              "Production",
+            rate,
+            unit,
+          });
+        }
+      );
+
+      return options;
+    }
+
+    /*
+     * -------------------------------------------------------
+     * POST PRODUCTION
+     * -------------------------------------------------------
+     */
+
+    if (
+      selectedCategory ===
+      "post production"
+    ) {
+      POST_PRODUCTION_OPTIONS.forEach(
+        (
+          [label, unit, rate],
+          index
+        ) => {
+          if (
+            search &&
+            !normalize(
+              label
+            ).includes(search)
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `post-production-${index}`,
+            label,
+            type: "service",
+            category:
+              "Post Production",
+            subcategory:
+              "Post Production",
+            rate,
+            unit,
+          });
+        }
+      );
+
+      return options;
+    }
+
+    /*
+     * -------------------------------------------------------
+     * TRANSPORT
+     * -------------------------------------------------------
+     */
+
+    if (
+      selectedCategory ===
+      "transport"
+    ) {
+      TRANSPORT_OPTIONS.forEach(
+        (
+          [label, unit, rate],
+          index
+        ) => {
+          if (
+            search &&
+            !normalize(
+              label
+            ).includes(search)
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `transport-${index}`,
+            label,
+            type: "service",
+            category:
+              "Transport",
+            subcategory:
+              "Transport",
+            rate,
+            unit,
+          });
+        }
+      );
+
+      return options;
+    }
+
+    /*
+     * -------------------------------------------------------
+     * OTHER
+     * -------------------------------------------------------
+     */
+
+    if (
+      selectedCategory ===
+      "other"
+    ) {
+      OTHER_OPTIONS.forEach(
+        (
+          [label, unit, rate],
+          index
+        ) => {
+          if (
+            search &&
+            !normalize(
+              label
+            ).includes(search)
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `other-${index}`,
+            label,
+            type: "service",
+            category: "Other",
+            subcategory:
+              "Other",
+            rate,
+            unit,
+          });
+        }
+      );
+
+      return options;
+    }
+
+    return options;
+  }
+
+  /* =======================================================
+     TOTALS
+
+     IMPORTANT:
+     Amount is the authoritative line-item value.
+
+     We do NOT calculate subtotal from rate anymore.
+     This allows Amount to be manually edited.
+  ======================================================= */
 
   const subtotal = useMemo(
     () =>
@@ -275,51 +881,58 @@ export default function NewQuotePage() {
           sum +
           Math.max(
             0,
-            Number(item.quantity) || 0
-          ) *
-            Math.max(
-              0,
-              Number(item.rate) || 0
-            ),
+            Number(item.amount) ||
+            0
+          ),
         0
       ),
     [items]
   );
 
-  const discountAmount = useMemo(() => {
-    const value = Math.max(
-      0,
-      Number(discountValue) || 0
-    );
+  const discountAmount =
+    useMemo(() => {
+      const value =
+        Math.max(
+          0,
+          Number(
+            discountValue
+          ) || 0
+        );
 
-    if (
-      discountType === "percentage"
-    ) {
-      return Math.round(
-        subtotal *
-          Math.min(value, 100) /
-          100
-      );
-    }
+      if (
+        discountType ===
+        "percentage"
+      ) {
+        return Math.round(
+          subtotal *
+          (Math.min(
+            value,
+            100
+          ) /
+            100)
+        );
+      }
 
-    if (
-      discountType === "fixed"
-    ) {
-      return Math.min(
-        value,
-        subtotal
-      );
-    }
+      if (
+        discountType ===
+        "fixed"
+      ) {
+        return Math.min(
+          value,
+          subtotal
+        );
+      }
 
-    return 0;
-  }, [
-    subtotal,
-    discountType,
-    discountValue,
-  ]);
+      return 0;
+    }, [
+      subtotal,
+      discountType,
+      discountValue,
+    ]);
 
   const taxableSubtotal =
-    subtotal - discountAmount;
+    subtotal -
+    discountAmount;
 
   const total =
     taxableSubtotal +
@@ -328,212 +941,418 @@ export default function NewQuotePage() {
       Number(tax) || 0
     );
 
-  /*
-  |--------------------------------------------------------------------------
-  | Equipment selection
-  |--------------------------------------------------------------------------
-  */
+  /* =======================================================
+     CATEGORY CHANGE
 
-  function handleEquipmentChange(
+     Category is authoritative.
+
+     Changing it clears the previous description because
+     the old description may not belong to the new category.
+  ======================================================= */
+
+  function handleCategoryChange(
     itemId: string,
-    equipmentId: string
+    category: string
   ) {
-    const selectedEquipment =
-      equipment.find(
-        (item) =>
-          item.id === equipmentId
-      );
+    const normalized =
+      normalize(category);
 
-    setItems((current) =>
-      current.map((item) => {
-        if (item.id !== itemId) {
-          return item;
-        }
+    let defaultUnit =
+      "unit";
 
-        /*
-         * Switching back to custom keeps the line
-         * item editable instead of deleting it.
-         */
+    if (
+      normalized ===
+      "crew" ||
+      normalized ===
+      "camera" ||
+      normalized ===
+      "equipment" ||
+      normalized ===
+      "audio" ||
+      normalized ===
+      "lighting" ||
+      normalized ===
+      "grip"
+    ) {
+      defaultUnit = "day";
+    }
 
-        if (!selectedEquipment) {
-          return {
-            ...item,
-            type: "custom",
-            equipmentId: "",
-          };
-        }
+    if (
+      normalized ===
+      "post production"
+    ) {
+      defaultUnit =
+        "project";
+    }
 
-        return {
-          ...item,
+    if (
+      normalized ===
+      "production"
+    ) {
+      defaultUnit =
+        "project";
+    }
 
-          type: "equipment",
+    if (
+      normalized ===
+      "transport"
+    ) {
+      defaultUnit =
+        "day";
+    }
 
-          equipmentId:
-            selectedEquipment.id,
+    setItems(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id === itemId
+              ? {
+                ...item,
 
-          category:
-            selectedEquipment.category ||
-            "Equipment",
+                /*
+                 * Category is ONLY changed here.
+                 */
+                category,
 
-          description:
-            selectedEquipment.name,
+                type: "custom",
 
-          unit: "day",
+                equipmentId:
+                  "",
 
-          rate:
-            Number(
-              selectedEquipment.dailyRate
-            ) || 0,
+                description:
+                  "",
 
-          amount:
-            Math.max(
-              1,
-              Number(item.quantity) || 1
-            ) *
-            Math.max(
-              0,
-              Number(
-                selectedEquipment.dailyRate
-              ) || 0
-            ),
+                quantity:
+                  Math.max(
+                    1,
+                    Number(
+                      item.quantity
+                    ) || 1
+                  ),
 
-          /*
-           * Keep existing notes instead of
-           * overwriting user-entered notes.
-           */
-          notes: item.notes,
-        };
+                unit:
+                  defaultUnit,
+
+                rate: 0,
+
+                amount: 0,
+              }
+              : item
+        )
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [itemId]: "",
       })
+    );
+
+    setOpenDescriptionSearch(
+      itemId
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Quantity
-  |--------------------------------------------------------------------------
-  */
+  /* =======================================================
+     DESCRIPTION SELECTION
+
+     IMPORTANT:
+     item.category is NEVER changed here.
+  ======================================================= */
+
+  function handleDescriptionChange(
+    itemId: string,
+    option: DescriptionOption
+  ) {
+    setItems(
+      (current) =>
+        current.map(
+          (item) => {
+            if (
+              item.id !==
+              itemId
+            ) {
+              return item;
+            }
+
+            const quantity =
+              Math.max(
+                1,
+                Number(
+                  item.quantity
+                ) || 1
+              );
+
+            const rate =
+              Math.max(
+                0,
+                Number(
+                  option.rate
+                ) || 0
+              );
+
+            return {
+              ...item,
+
+              /*
+               * DO NOT CHANGE category.
+               */
+              category:
+                item.category,
+
+              type:
+                option.type ===
+                  "equipment"
+                  ? "equipment"
+                  : "custom",
+
+              equipmentId:
+                option.type ===
+                  "equipment"
+                  ? option.equipmentId ||
+                  ""
+                  : "",
+
+              description:
+                option.label,
+
+              unit:
+                option.unit,
+
+              rate,
+
+              /*
+               * Populate the single editable
+               * Amount field.
+               */
+              amount:
+                quantity * rate,
+            };
+          }
+        )
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [itemId]:
+          option.label,
+      })
+    );
+
+    setOpenDescriptionSearch(
+      null
+    );
+  }
+
+  /* =======================================================
+     AMOUNT
+
+     This is the only amount editor displayed to the user.
+  ======================================================= */
+
+  function updateAmount(
+    itemId: string,
+    value: number
+  ) {
+    const amount =
+      Math.max(
+        0,
+        Number(value) || 0
+      );
+
+    setItems(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id === itemId
+              ? {
+                ...item,
+                amount,
+              }
+              : item
+        )
+    );
+  }
+
+  /* =======================================================
+     QUANTITY
+  ======================================================= */
 
   function updateQuantity(
     itemId: string,
     value: number
   ) {
-    const quantity = Math.max(
-      1,
-      Number(value) || 1
-    );
+    const quantity =
+      Math.max(
+        1,
+        Number(value) || 1
+      );
 
-    setItems((current) =>
-      current.map((item) => ({
-        ...item,
-        ...(item.id === itemId
-          ? {
+    setItems(
+      (current) =>
+        current.map(
+          (item) => {
+            if (
+              item.id !==
+              itemId
+            ) {
+              return item;
+            }
+
+            /*
+             * When quantity changes, use the catalogue rate
+             * to rebuild the amount.
+             *
+             * The user can then manually override Amount.
+             */
+            const rate =
+              Math.max(
+                0,
+                Number(
+                  item.rate
+                ) || 0
+              );
+
+            return {
+              ...item,
               quantity,
               amount:
                 quantity *
-                Math.max(
-                  0,
-                  Number(item.rate) || 0
-                ),
-            }
-          : {}),
-      }))
+                rate,
+            };
+          }
+        )
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Rate
-  |--------------------------------------------------------------------------
-  |
-  | Equipment rates are populated automatically,
-  | but remain editable so you can override the
-  | standard daily rate for a specific quote.
-  |
-  */
+  /* =======================================================
+     GENERIC ITEM UPDATE
 
-  function updateRate(
-    itemId: string,
-    value: number
-  ) {
-    const rate = Math.max(
-      0,
-      Number(value) || 0
-    );
-
-    setItems((current) =>
-      current.map((item) => ({
-        ...item,
-        ...(item.id === itemId
-          ? {
-              rate,
-              amount:
-                Math.max(
-                  1,
-                  Number(
-                    item.quantity
-                  ) || 1
-                ) * rate,
-            }
-          : {}),
-      }))
-    );
-  }
-
-  /*
-  |--------------------------------------------------------------------------
-  | Custom field updates
-  |--------------------------------------------------------------------------
-  */
+     Used for Unit and Notes and manual description text.
+  ======================================================= */
 
   function updateItem(
     itemId: string,
     field: keyof QuoteItem,
     value: string
   ) {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              [field]: value,
-            }
-          : item
-      )
+    setItems(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id === itemId
+              ? {
+                ...item,
+                [field]:
+                  value,
+              }
+              : item
+        )
     );
   }
 
+  /* =======================================================
+     ADD ITEM
+  ======================================================= */
+
   function addEquipmentItem() {
-    setItems((current) => [
-      ...current,
-      createItem("equipment"),
-    ]);
+    const item =
+      createItem(
+        "equipment"
+      );
+
+    setItems(
+      (current) => [
+        ...current,
+        item,
+      ]
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [item.id]: "",
+      })
+    );
+
+    setOpenDescriptionSearch(
+      item.id
+    );
   }
 
   function addCustomItem() {
-    setItems((current) => [
-      ...current,
-      createItem("custom"),
-    ]);
-  }
-
-  function removeItem(itemId: string) {
-    setItems((current) => {
-      if (current.length === 1) {
-        return [createItem()];
-      }
-
-      return current.filter(
-        (item) =>
-          item.id !== itemId
+    const item =
+      createItem(
+        "custom"
       );
-    });
+
+    setItems(
+      (current) => [
+        ...current,
+        item,
+      ]
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [item.id]: "",
+      })
+    );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | Save
-  |--------------------------------------------------------------------------
-  */
+  /* =======================================================
+     REMOVE ITEM
+  ======================================================= */
+
+  function removeItem(
+    itemId: string
+  ) {
+    setItems(
+      (current) => {
+        if (
+          current.length ===
+          1
+        ) {
+          return [
+            createItem(),
+          ];
+        }
+
+        return current.filter(
+          (item) =>
+            item.id !==
+            itemId
+        );
+      }
+    );
+
+    setDescriptionSearch(
+      (current) => {
+        const next = {
+          ...current,
+        };
+
+        delete next[itemId];
+
+        return next;
+      }
+    );
+
+    if (
+      openDescriptionSearch ===
+      itemId
+    ) {
+      setOpenDescriptionSearch(
+        null
+      );
+    }
+  }
+
+  /* =======================================================
+     SAVE
+  ======================================================= */
 
   async function handleSubmit(
     event: React.FormEvent
@@ -542,17 +1361,24 @@ export default function NewQuotePage() {
 
     setError("");
 
-    if (!title.trim()) {
+    if (
+      !title.trim()
+    ) {
       setError(
         "Quote title is required."
       );
+
       return;
     }
 
-    if (items.length === 0) {
+    if (
+      items.length ===
+      0
+    ) {
       setError(
         "Add at least one line item."
       );
+
       return;
     }
 
@@ -566,6 +1392,7 @@ export default function NewQuotePage() {
       setError(
         "Every line item needs a description."
       );
+
       return;
     }
 
@@ -583,94 +1410,99 @@ export default function NewQuotePage() {
                 "application/json",
             },
 
-            body: JSON.stringify({
-              clientId:
-                clientId || null,
+            body: JSON.stringify(
+              {
+                clientId:
+                  clientId ||
+                  null,
 
-              title:
-                title.trim(),
+                title:
+                  title.trim(),
 
-              projectName:
-                projectName.trim() ||
-                null,
+                projectName:
+                  projectName.trim() ||
+                  null,
 
-              currency,
+                currency,
 
-              paymentTerms:
-                paymentTerms.trim() ||
-                null,
+                paymentTerms:
+                  paymentTerms.trim() ||
+                  null,
 
-              validUntil:
-                validUntil ||
-                null,
+                validUntil:
+                  validUntil ||
+                  null,
 
-              productionDays,
+                productionDays,
 
-              location:
-                location.trim() ||
-                null,
+                location:
+                  location.trim() ||
+                  null,
 
-              clientContact:
-                clientContact.trim() ||
-                null,
+                clientContact:
+                  clientContact.trim() ||
+                  null,
 
-              depositPercentage,
+                depositPercentage,
 
-              notes:
-                notes.trim() ||
-                null,
+                notes:
+                  notes.trim() ||
+                  null,
 
-              status: "draft",
+                status:
+                  "draft",
 
-              discountType,
+                discountType,
 
-              discountValue,
+                discountValue,
 
-              tax,
+                tax,
 
-              items: items.map(
-                (item) => ({
-                  category:
-                    item.category,
+                items:
+                  items.map(
+                    (item) => ({
+                      category:
+                        item.category,
 
-                  description:
-                    item.description.trim(),
+                      description:
+                        item.description.trim(),
 
-                  quantity:
-                    item.quantity,
+                      quantity:
+                        item.quantity,
 
-                  unit:
-                    item.unit,
+                      unit:
+                        item.unit,
 
-                  rate:
-                    item.rate,
+                      rate:
+                        item.rate,
 
-                  amount:
-                    item.quantity *
-                    item.rate,
+                      /*
+                       * IMPORTANT:
+                       * Save the editable Amount,
+                       * not quantity * rate.
+                       */
+                      amount:
+                        Math.max(
+                          0,
+                          Number(
+                            item.amount
+                          ) || 0
+                        ),
 
-                  notes:
-                    item.notes.trim() ||
-                    null,
+                      notes:
+                        item.notes.trim() ||
+                        null,
 
-                  /*
-                   * Preserve equipment relationship
-                   * for consumers that want to know the
-                   * source of the line item.
-                   *
-                   * The current quoteItems schema does
-                   * not require this field, so it is only
-                   * sent when an equipment item exists.
-                   */
-                  ...(item.equipmentId
-                    ? {
-                        equipmentId:
-                          item.equipmentId,
-                      }
-                    : {}),
-                })
-              ),
-            }),
+                      ...(item.equipmentId
+                        ? {
+                          equipmentId:
+                            item.equipmentId,
+                        }
+                        : {}),
+                    })
+                  ),
+              }
+            ),
           }
         );
 
@@ -680,7 +1512,7 @@ export default function NewQuotePage() {
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            "Failed to create quote"
+          "Failed to create quote"
         );
       }
 
@@ -703,14 +1535,32 @@ export default function NewQuotePage() {
     }
   }
 
+  /* =======================================================
+     INPUT CLASSES
+  ======================================================= */
+
+  const inputClass =
+    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500";
+
+  const labelClass =
+    "text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600";
+
+  /* =======================================================
+     PAGE
+  ======================================================= */
+
   return (
     <div className="min-h-screen px-6 py-10">
       <div className="max-w-6xl mx-auto">
         <form
-          onSubmit={handleSubmit}
+          onSubmit={
+            handleSubmit
+          }
           className="space-y-8"
         >
-          {/* HEADER */}
+          {/* =================================================
+              HEADER
+          ================================================= */}
 
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
@@ -730,8 +1580,10 @@ export default function NewQuotePage() {
               </h1>
 
               <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
-                Build a production estimate
-                from equipment and custom
+                Build a production
+                estimate from
+                equipment, crew
+                and production
                 services.
               </p>
             </div>
@@ -756,7 +1608,9 @@ export default function NewQuotePage() {
             </div>
           </div>
 
-          {/* ERROR */}
+          {/* =================================================
+              ERROR
+          ================================================= */}
 
           {error && (
             <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-5 py-4">
@@ -766,7 +1620,9 @@ export default function NewQuotePage() {
             </div>
           )}
 
-          {/* BASIC DETAILS */}
+          {/* =================================================
+              QUOTE DETAILS
+          ================================================= */}
 
           <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
             <div className="mb-6">
@@ -775,54 +1631,112 @@ export default function NewQuotePage() {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
-                Client and project information.
+                Client and project
+                information.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* TITLE */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Quote Title *
                 </span>
 
                 <input
                   value={title}
-                  onChange={(event) =>
+                  onChange={(
+                    event
+                  ) =>
                     setTitle(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                   placeholder="Production Quote"
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  className={
+                    inputClass
+                  }
                 />
               </label>
 
+              {/* CLIENT */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Client
                 </span>
 
                 <select
-                  value={clientId}
-                  onChange={(event) => {
-                    const id = event.target.value;
-                    setClientId(id);
-                    
+                  value={
+                    clientId
+                  }
+                  onChange={(
+                    event
+                  ) => {
+                    const id =
+                      event.target
+                        .value;
+
+                    setClientId(
+                      id
+                    );
+
                     if (id) {
-                      const client = clients.find(c => c.id === id);
+                      const client =
+                        clients.find(
+                          (
+                            item
+                          ) =>
+                            item.id ===
+                            id
+                        );
+
                       if (client) {
-                        const contactParts = [client.name, client.phone, client.email].filter(Boolean);
-                        setClientContact(contactParts.join(' • '));
-                        if (!paymentTerms) {
-                          setPaymentTerms('50% deposit, balance on completion');
+                        const contactParts =
+                          [
+                            client.name,
+                            client.phone,
+                            client.email,
+                          ].filter(
+                            Boolean
+                          );
+
+                        setClientContact(
+                          contactParts.join(
+                            " • "
+                          )
+                        );
+
+                        if (
+                          !paymentTerms
+                        ) {
+                          setPaymentTerms(
+                            "50% deposit, balance on completion"
+                          );
                         }
                       }
                     } else {
-                      setClientContact('');
+                      setClientContact(
+                        ""
+                      );
                     }
                   }}
-                  disabled={loadingClients}
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  disabled={
+                    loadingClients
+                  }
+                  className={
+                    inputClass
+                  }
                 >
                   <option value="">
                     {loadingClients
@@ -831,7 +1745,9 @@ export default function NewQuotePage() {
                   </option>
 
                   {clients.map(
-                    (client) => (
+                    (
+                      client
+                    ) => (
                       <option
                         key={
                           client.id
@@ -849,131 +1765,217 @@ export default function NewQuotePage() {
                 </select>
               </label>
 
+              {/* PROJECT */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Project
                 </span>
 
                 <input
-                  value={projectName}
-                  onChange={(event) =>
+                  value={
+                    projectName
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setProjectName(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
                   placeholder="Project name"
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  className={
+                    inputClass
+                  }
                 />
               </label>
 
+              {/* CURRENCY */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Currency
                 </span>
 
                 <select
-                  value={currency}
-                  onChange={(event) =>
+                  value={
+                    currency
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setCurrency(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  className={
+                    inputClass
+                  }
                 >
                   <option value="KES">
                     KES
                   </option>
+
                   <option value="USD">
                     USD
                   </option>
+
                   <option value="EUR">
                     EUR
                   </option>
+
                   <option value="GBP">
                     GBP
                   </option>
                 </select>
               </label>
 
+              {/* VALID UNTIL */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Valid Until
                 </span>
 
                 <input
                   type="date"
-                  value={validUntil}
-                  onChange={(event) =>
+                  value={
+                    validUntil
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setValidUntil(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  className={
+                    inputClass
+                  }
                 />
               </label>
 
+              {/* PRODUCTION DAYS */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Production Days
                 </span>
 
                 <input
                   type="number"
                   min="1"
-                  value={productionDays}
-                  onChange={(event) =>
+                  value={
+                    productionDays
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setProductionDays(
                       Math.max(
                         1,
                         Number(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         ) || 1
                       )
                     )
                   }
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  className={
+                    inputClass
+                  }
                 />
               </label>
 
+              {/* LOCATION */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Location
                 </span>
 
                 <input
-                  value={location}
-                  onChange={(event) =>
+                  value={
+                    location
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setLocation(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
-                  placeholder="Production location"
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  placeholder="Nairobi, Kenya"
+                  className={
+                    inputClass
+                  }
                 />
               </label>
 
+              {/* CLIENT CONTACT */}
+
               <label className="block">
-                <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
                   Client Contact
                 </span>
 
                 <input
-                  value={clientContact}
-                  onChange={(event) =>
+                  value={
+                    clientContact
+                  }
+                  onChange={(
+                    event
+                  ) =>
                     setClientContact(
-                      event.target.value
+                      event.target
+                        .value
                     )
                   }
-                  placeholder="Contact person"
-                  className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                  placeholder="Primary client contact"
+                  className={
+                    inputClass
+                  }
                 />
               </label>
             </div>
           </section>
 
-          {/* LINE ITEMS */}
+          {/* =================================================
+              LINE ITEMS
+          ================================================= */}
 
-          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-visible">
+            {/* HEADER */}
+
             <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -982,9 +1984,12 @@ export default function NewQuotePage() {
                   </h2>
 
                   <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
-                    Select equipment from your
-                    equipment database or add
-                    custom services.
+                    Select a category
+                    first. The
+                    description
+                    search will only
+                    show items from
+                    that category.
                   </p>
                 </div>
 
@@ -1012,282 +2017,469 @@ export default function NewQuotePage() {
               </div>
             </div>
 
+            {/* LINE ITEM ROWS */}
+
             <div className="divide-y divide-slate-100 dark:divide-zinc-900">
               {items.map(
-                (item, index) => (
-                  <div
-                    key={item.id}
-                    className="p-6"
-                  >
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-mono">
-                          {index + 1}
-                        </span>
+                (
+                  item,
+                  index
+                ) => {
+                  const options =
+                    getDescriptionOptions(
+                      item
+                    );
 
-                        <span className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                          {item.type ===
-                          "equipment"
-                            ? "Equipment"
-                            : "Custom"}
-                        </span>
-                      </div>
+                  const isOpen =
+                    openDescriptionSearch ===
+                    item.id;
 
-                      <button
-                        type="button"
-                        onClick={() =>
-                          removeItem(
-                            item.id
-                          )
-                        }
-                        className="text-xs text-red-500 hover:text-red-700"
-                      >
-                        Remove
-                      </button>
-                    </div>
+                  const searchValue =
+                    descriptionSearch[
+                    item.id
+                    ] ??
+                    "";
 
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                      {/* EQUIPMENT */}
+                  return (
+                    <div
+                      key={
+                        item.id
+                      }
+                      className="p-6"
+                    >
+                      {/* ITEM HEADER */}
 
-                      <div className="lg:col-span-4">
-                        <label className="block">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                            Equipment
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-3">
+                          <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-mono">
+                            {index +
+                              1}
                           </span>
 
-                          <select
-                            value={
-                              item.equipmentId ||
-                              ""
-                            }
-                            onChange={(
-                              event
-                            ) =>
-                              handleEquipmentChange(
-                                item.id,
+                          <span className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                            {item.category ||
+                              "Line Item"}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeItem(
+                              item.id
+                            )
+                          }
+                          className="text-xs text-red-500 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      {/* GRID */}
+
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                        {/* =================================================
+                            CATEGORY
+                        ================================================= */}
+
+                        <div className="lg:col-span-3">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Category
+                            </span>
+
+                            <select
+                              value={
+                                item.category ||
+                                ""
+                              }
+                              onChange={(
                                 event
-                                  .target
-                                  .value
-                              )
-                            }
-                            disabled={
-                              loadingEquipment
-                            }
-                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                          >
-                            <option value="">
-                              {loadingEquipment
-                                ? "Loading equipment..."
-                                : "Custom item / no equipment"}
-                            </option>
-
-                            {equipment.map(
-                              (
-                                equipmentItem
-                              ) => (
-                                <option
-                                  key={
-                                    equipmentItem.id
-                                  }
-                                  value={
-                                    equipmentItem.id
-                                  }
-                                >
-                                  {equipmentItem.name}
-                                  {" — "}
-                                  {formatAmount(
-                                    equipmentItem.dailyRate,
-                                    currency
-                                  )}
-                                  /day
-                                </option>
-                              )
-                            )}
-                          </select>
-                        </label>
-                      </div>
-
-                      {/* DESCRIPTION */}
-
-                      <div className="lg:col-span-4">
-                        <label className="block">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                            Description
-                          </span>
-
-                          <input
-                            value={
-                              item.description
-                            }
-                            onChange={(
-                              event
-                            ) =>
-                              updateItem(
-                                item.id,
-                                "description",
-                                event
-                                  .target
-                                  .value
-                              )
-                            }
-                            placeholder="Description"
-                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                          />
-                        </label>
-                      </div>
-
-                      {/* QUANTITY */}
-
-                      <div className="lg:col-span-1">
-                        <label className="block">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                            Qty
-                          </span>
-
-                          <input
-                            type="number"
-                            min="1"
-                            value={
-                              item.quantity
-                            }
-                            onChange={(
-                              event
-                            ) =>
-                              updateQuantity(
-                                item.id,
-                                Number(
+                              ) =>
+                                handleCategoryChange(
+                                  item.id,
                                   event
                                     .target
                                     .value
                                 )
-                              )
-                            }
-                            className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                          />
-                        </label>
+                              }
+                              disabled={
+                                loadingEquipment
+                              }
+                              className={
+                                inputClass
+                              }
+                            >
+                              <option value="">
+                                {loadingEquipment
+                                  ? "Loading..."
+                                  : "Select category"}
+                              </option>
+
+                              {QUOTE_CATEGORIES.map(
+                                (
+                                  category
+                                ) => (
+                                  <option
+                                    key={
+                                      category
+                                    }
+                                    value={
+                                      category
+                                    }
+                                  >
+                                    {
+                                      category
+                                    }
+                                  </option>
+                                )
+                              )}
+                            </select>
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            DESCRIPTION
+
+                            Category controls this list.
+                        ================================================= */}
+
+                        <div className="lg:col-span-5">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Description
+                            </span>
+
+                            <div className="relative mt-2">
+                              <input
+                                type="text"
+                                value={
+                                  isOpen
+                                    ? searchValue
+                                    : item.description
+                                }
+                                onFocus={() => {
+                                  if (
+                                    item.category
+                                  ) {
+                                    setDescriptionSearch(
+                                      (
+                                        current
+                                      ) => ({
+                                        ...current,
+                                        [item.id]:
+                                          "",
+                                      })
+                                    );
+
+                                    setOpenDescriptionSearch(
+                                      item.id
+                                    );
+                                  }
+                                }}
+                                onChange={(
+                                  event
+                                ) => {
+                                  setDescriptionSearch(
+                                    (
+                                      current
+                                    ) => ({
+                                      ...current,
+                                      [item.id]:
+                                        event
+                                          .target
+                                          .value,
+                                    })
+                                  );
+
+                                  setOpenDescriptionSearch(
+                                    item.id
+                                  );
+                                }}
+                                disabled={
+                                  !item.category
+                                }
+                                placeholder={
+                                  !item.category
+                                    ? "Select a category first"
+                                    : `Search ${item.category.toLowerCase()}...`
+                                }
+                                className={`w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none ${!item.category
+                                    ? "opacity-60 cursor-not-allowed"
+                                    : "focus:border-purple-500"
+                                  }`}
+                              />
+
+                              {/* DROPDOWN */}
+
+                              {isOpen &&
+                                item.category && (
+                                  <div className="absolute z-[100] mt-2 left-0 right-0 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
+                                      <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                                        {
+                                          item.category
+                                        }{" "}
+                                        options
+                                      </p>
+
+                                      <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-600">
+                                        {
+                                          options.length
+                                        }{" "}
+                                        found
+                                      </span>
+                                    </div>
+
+                                    <div className="max-h-80 overflow-y-auto">
+                                      {options.length ===
+                                        0 ? (
+                                        <div className="px-4 py-8 text-center">
+                                          <p className="text-xs text-slate-500 dark:text-zinc-500">
+                                            No matching{" "}
+                                            {item.category.toLowerCase()}{" "}
+                                            items found.
+                                          </p>
+
+                                          <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-600">
+                                            Try another search term.
+                                          </p>
+                                        </div>
+                                      ) : (
+                                        options.map(
+                                          (
+                                            option
+                                          ) => (
+                                            <button
+                                              key={
+                                                option.id
+                                              }
+                                              type="button"
+                                              onClick={() =>
+                                                handleDescriptionChange(
+                                                  item.id,
+                                                  option
+                                                )
+                                              }
+                                              className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900 border-b border-slate-100 dark:border-zinc-900 last:border-b-0 transition"
+                                            >
+                                              <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                                                    {
+                                                      option.label
+                                                    }
+                                                  </p>
+
+                                                  <p className="mt-1 text-[10px] uppercase tracking-wider text-slate-400 dark:text-zinc-600">
+                                                    {option.type ===
+                                                      "equipment"
+                                                      ? `${option.category}${option.subcategory
+                                                        ? ` · ${option.subcategory}`
+                                                        : ""
+                                                      }${option.brand
+                                                        ? ` · ${option.brand}`
+                                                        : ""
+                                                      }`
+                                                      : option.category}
+                                                  </p>
+                                                </div>
+
+                                                {option.rate >
+                                                  0 && (
+                                                    <span className="shrink-0 text-xs font-mono text-slate-600 dark:text-zinc-400">
+                                                      {formatAmount(
+                                                        option.rate,
+                                                        currency
+                                                      )}
+                                                      /
+                                                      {
+                                                        option.unit
+                                                      }
+                                                    </span>
+                                                  )}
+                                              </div>
+                                            </button>
+                                          )
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            QUANTITY
+                        ================================================= */}
+
+                        <div className="lg:col-span-1">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Qty
+                            </span>
+
+                            <input
+                              type="number"
+                              min="1"
+                              value={
+                                item.quantity
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateQuantity(
+                                  item.id,
+                                  Number(
+                                    event
+                                      .target
+                                      .value
+                                  )
+                                )
+                              }
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                            />
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            UNIT
+                        ================================================= */}
+
+                        <div className="lg:col-span-1">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Unit
+                            </span>
+
+                            <input
+                              value={
+                                item.unit
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateItem(
+                                  item.id,
+                                  "unit",
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                            />
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            AMOUNT
+
+                            THIS IS THE ONLY AMOUNT FIELD.
+                        ================================================= */}
+
+                        <div className="lg:col-span-2">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Amount
+                            </span>
+
+                            <div className="relative mt-2">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 dark:text-zinc-600">
+                                {
+                                  currency
+                                }
+                              </span>
+
+                              <input
+                                type="number"
+                                min="0"
+                                value={
+                                  item.amount ===
+                                    0
+                                    ? ""
+                                    : item.amount
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateAmount(
+                                    item.id,
+                                    Number(
+                                      event
+                                        .target
+                                        .value
+                                    ) || 0
+                                  )
+                                }
+                                placeholder="0"
+                                className="w-full px-4 py-3 pl-14 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                              />
+                            </div>
+                          </label>
+                        </div>
                       </div>
 
-                      {/* UNIT */}
+                      {/* NOTES */}
 
-                      <div className="lg:col-span-1">
+                      <div className="mt-4">
                         <label className="block">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                            Unit
+                          <span
+                            className={
+                              labelClass
+                            }
+                          >
+                            Notes
                           </span>
 
                           <input
                             value={
-                              item.unit
+                              item.notes
                             }
                             onChange={(
                               event
                             ) =>
                               updateItem(
                                 item.id,
-                                "unit",
+                                "notes",
                                 event
                                   .target
                                   .value
                               )
                             }
-                            className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                          />
-                        </label>
-                      </div>
-
-                      {/* RATE */}
-
-                      <div className="lg:col-span-2">
-                        <label className="block">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                            Rate
-                          </span>
-
-                          <input
-                            type="number"
-                            min="0"
-                            value={
-                              item.rate === 0
-                                ? ''
-                                : item.rate
-                            }
-                            onChange={(event) => {
-                              const value = event.target.value;
-                              updateRate(
-                                item.id,
-                                value === '' ? 0 : Number(value) || 0
-                              );
-                            }}
-                            className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                            placeholder="Optional notes"
+                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                           />
                         </label>
                       </div>
                     </div>
-
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <label className="block">
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                          Category
-                        </span>
-
-                        <input
-                          value={
-                            item.category
-                          }
-                          onChange={(
-                            event
-                          ) =>
-                            updateItem(
-                              item.id,
-                              "category",
-                              event
-                                .target
-                                .value
-                            )
-                          }
-                          className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                        />
-                      </label>
-
-                      <label className="block">
-                        <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                          Notes
-                        </span>
-
-                        <input
-                          value={
-                            item.notes
-                          }
-                          onChange={(
-                            event
-                          ) =>
-                            updateItem(
-                              item.id,
-                              "notes",
-                              event
-                                .target
-                                .value
-                            )
-                          }
-                          placeholder="Optional notes"
-                          className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
-                        />
-                      </label>
-                    </div>
-
-                    <div className="mt-4 flex justify-end">
-                      <p className="text-sm font-medium text-slate-900 dark:text-white">
-                        {formatAmount(
-                          item.quantity *
-                            item.rate,
-                          currency
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                )
+                  );
+                }
               )}
             </div>
+
+            {/* ADD BUTTONS */}
 
             <div className="p-6 border-t border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row gap-3">
               <button
@@ -1312,50 +2504,100 @@ export default function NewQuotePage() {
             </div>
           </section>
 
-          {/* PRICING */}
+          {/* =================================================
+              TERMS + PRICING
+          ================================================= */}
 
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* TERMS */}
+
             <div className="border-t border-slate-200 dark:border-zinc-800 pt-6">
               <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                 Terms
               </h2>
 
               <div className="mt-5 space-y-5">
+                {/* PAYMENT TERMS */}
+
                 <label className="block">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
                     Payment Terms
                   </span>
 
                   <div className="relative">
                     <input
-                      value={paymentTerms}
-                      onChange={(event) =>
+                      value={
+                        paymentTerms
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         setPaymentTerms(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         )
                       }
                       placeholder="e.g. 50% deposit, balance on completion"
-                      className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                      className="mt-2 w-full px-4 py-3 pr-32 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                     />
+
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
-                      <select 
+                      <select
                         className="bg-transparent text-xs text-slate-500 dark:text-zinc-400 px-1 py-1 outline-none"
-                        onChange={(e) => {
-                          if (e.target.value) setPaymentTerms(e.target.value);
-                          e.target.value = '';
+                        onChange={(
+                          event
+                        ) => {
+                          if (
+                            event
+                              .target
+                              .value
+                          ) {
+                            setPaymentTerms(
+                              event
+                                .target
+                                .value
+                            );
+                          }
+
+                          event.target.value =
+                            "";
                         }}
                       >
-                        <option value="">Templates...</option>
-                        <option value="50% upfront, 50% on completion">50% upfront, 50% on completion</option>
-                        <option value="100% upfront">100% upfront</option>
-                        <option value="Net 30">Net 30</option>
+                        <option value="">
+                          Templates...
+                        </option>
+
+                        <option value="50% upfront, 50% on completion">
+                          50% upfront,
+                          50% on
+                          completion
+                        </option>
+
+                        <option value="100% upfront">
+                          100% upfront
+                        </option>
+
+                        <option value="Net 30">
+                          Net 30
+                        </option>
                       </select>
                     </div>
                   </div>
                 </label>
 
+                {/* DEPOSIT */}
+
                 <label className="block">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
                     Deposit %
                   </span>
 
@@ -1366,7 +2608,9 @@ export default function NewQuotePage() {
                     value={
                       depositPercentage
                     }
-                    onChange={(event) =>
+                    onChange={(
+                      event
+                    ) =>
                       setDepositPercentage(
                         Math.min(
                           100,
@@ -1381,20 +2625,33 @@ export default function NewQuotePage() {
                         )
                       )
                     }
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                    className={
+                      inputClass
+                    }
                   />
                 </label>
 
+                {/* NOTES */}
+
                 <label className="block">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
                     Notes
                   </span>
 
                   <textarea
-                    value={notes}
-                    onChange={(event) =>
+                    value={
+                      notes
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       setNotes(
-                        event.target.value
+                        event.target
+                          .value
                       )
                     }
                     rows={5}
@@ -1405,12 +2662,16 @@ export default function NewQuotePage() {
               </div>
             </div>
 
+            {/* PRICING */}
+
             <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
               <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                 Pricing
               </h2>
 
               <div className="mt-5 space-y-5">
+                {/* SUBTOTAL */}
+
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-slate-500 dark:text-zinc-500">
                     Subtotal
@@ -1424,8 +2685,14 @@ export default function NewQuotePage() {
                   </span>
                 </div>
 
+                {/* DISCOUNT */}
+
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
                     Discount
                   </span>
 
@@ -1441,9 +2708,9 @@ export default function NewQuotePage() {
                           event
                             .target
                             .value as
-                            | "none"
-                            | "percentage"
-                            | "fixed"
+                          | "none"
+                          | "percentage"
+                          | "fixed"
                         )
                       }
                       className="px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
@@ -1490,6 +2757,8 @@ export default function NewQuotePage() {
                   </div>
                 </div>
 
+                {/* DISCOUNT AMOUNT */}
+
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500 dark:text-zinc-500">
                     Discount amount
@@ -1504,29 +2773,44 @@ export default function NewQuotePage() {
                   </span>
                 </div>
 
+                {/* TAX */}
+
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
                     Tax
                   </span>
 
                   <input
                     type="number"
                     min="0"
-                    value={tax}
-                    onChange={(event) =>
+                    value={
+                      tax
+                    }
+                    onChange={(
+                      event
+                    ) =>
                       setTax(
                         Math.max(
                           0,
                           Number(
-                            event.target
+                            event
+                              .target
                               .value
                           ) || 0
                         )
                       )
                     }
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
+                    className={
+                      inputClass
+                    }
                   />
                 </div>
+
+                {/* TOTAL */}
 
                 <div className="pt-5 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
                   <span className="text-sm font-medium text-slate-900 dark:text-white">
@@ -1544,12 +2828,16 @@ export default function NewQuotePage() {
             </div>
           </section>
 
-          {/* MOBILE SAVE */}
+          {/* =================================================
+              BOTTOM SAVE
+          ================================================= */}
 
           <div className="flex justify-end pb-10">
             <button
               type="submit"
-              disabled={saving}
+              disabled={
+                saving
+              }
               className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-mono uppercase tracking-widest font-semibold"
             >
               {saving
@@ -1559,6 +2847,23 @@ export default function NewQuotePage() {
           </div>
         </form>
       </div>
+
+      {/* =====================================================
+          CLOSE DESCRIPTION DROPDOWN WHEN CLICKING OUTSIDE
+      ===================================================== */}
+
+      {openDescriptionSearch && (
+        <button
+          type="button"
+          aria-label="Close description search"
+          onClick={() =>
+            setOpenDescriptionSearch(
+              null
+            )
+          }
+          className="fixed inset-0 z-[90] cursor-default bg-transparent"
+        />
+      )}
     </div>
   );
 }

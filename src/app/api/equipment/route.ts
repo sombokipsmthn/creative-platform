@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
-import { and, asc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, asc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
 
@@ -69,7 +69,6 @@ export async function GET(req: Request) {
         subcategory: equipment.subcategory,
         brand: equipment.brand,
         specs: equipment.specs,
-        imageUrl: sql<string | null>`equipment.image_url`,
       })
       .from(equipment)
       .where(
@@ -137,7 +136,9 @@ export async function POST(req: Request) {
       throw new Error("Equipment was not created");
     }
 
-    return NextResponse.json(createdEquipment, { status: 201 });
+    return NextResponse.json(createdEquipment, {
+      status: 201,
+    });
   } catch (error) {
     console.error(
       "POST /api/equipment error:",

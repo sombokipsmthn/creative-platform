@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { hashPin } from "@/lib/gallery/pin";
 
 async function getCreator() {
   try {
@@ -94,6 +95,7 @@ export async function POST(request: Request) {
     const description = typeof body?.description === "string" && body.description.trim() ? body.description.trim() : null;
     const category = typeof body?.category === "string" && body.category.trim() ? body.category.trim() : null;
     const accessPin = typeof body?.accessPin === "string" && body.accessPin.trim() ? body.accessPin.trim() : null;
+    const hashedPin = accessPin ? await hashPin(accessPin) : null;
     const allowDownloads = body?.allowDownloads !== false;
     const allowFavorites = body?.allowFavorites !== false;
     const allowSelections = body?.allowSelections !== false;

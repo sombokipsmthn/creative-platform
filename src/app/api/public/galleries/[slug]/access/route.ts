@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, and, eq, or } from "drizzle-orm";
 
 import { db } from "@/db";
 import { createGallerySession } from "@/lib/gallery/session";
+import { comparePin } from "@/lib/gallery/pin";
+import { galleryAccessAttempts } from "@/db/schema";
 
 type Context = {
   params: Promise<{
@@ -78,7 +80,9 @@ export async function POST(
       });
     }
 
-    if (!pin || pin !== configuredPin) {
+    const isPinValid = await comparePin(pin, configuredPin);
+
+    if (!pin || !isPinValid) {
       return NextResponse.json(
         {
           error: "Incorrect PIN.",

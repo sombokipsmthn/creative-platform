@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { hashPin } from "@/lib/gallery/pin";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -287,7 +288,9 @@ export async function PATCH(
 
     const accessPin =
       body.accessPin !== undefined
-        ? body.accessPin
+        ? (typeof body.accessPin === "string" && body.accessPin.trim()
+            ? await hashPin(body.accessPin.trim())
+            : (body.accessPin === "" ? null : body.accessPin))
         : undefined;
 
     const status =

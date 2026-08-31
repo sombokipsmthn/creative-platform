@@ -125,7 +125,7 @@ export const invoices = pgTable("invoices", {
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   clientId: text("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
   quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "set null" }),
-  invoiceNumber: text("invoice_number").notNull(),
+  invoiceNumber: text("invoice_number").notNull().unique(),
   title: text("title").default("Invoice").notNull(),
   status: text("status").default("draft").notNull(),
   issueDate: timestamp("issue_date").defaultNow().notNull(),
@@ -236,6 +236,17 @@ export const galleryAccessSessions = pgTable("gallery_access_sessions", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
 });
+
+export const galleryAccessAttempts = pgTable("gallery_access_attempts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  galleryId: uuid("gallery_id").notNull().references(() => galleries.id, { onDelete: "cascade" }),
+  ipAddress: text("ip_address").notNull(),
+  attemptCount: integer("attempt_count").default(0).notNull(),
+  lastAttemptAt: timestamp("last_attempt_at").defaultNow().notNull(),
+  lockoutUntil: timestamp("lockout_until"),
+}, (table) => ({
+  galleryIpIdx: unique().on(table.galleryId, table.ipAddress),
+}));
 
 export const galleryPhotoActions = pgTable("gallery_photo_actions", {
   id: uuid("id").defaultRandom().primaryKey(),

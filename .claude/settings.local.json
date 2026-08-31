@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm 'src/app/admin/quotes/new/page.tsx`')"
+      "Bash(rm 'src/app/admin/quotes/new/page.tsx`')",
+      "Bash(npm install *)",
+      "Bash(gh pr *)"
     ]
   }
 }

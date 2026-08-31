@@ -1,0 +1,165 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: creative-platform
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: creative-platform-config
+  namespace: creative-platform
+data:
+  NODE_ENV: "production"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: creative-platform-secrets
+  namespace: creative-platform
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql://user:password@postgres-service:5432/creative_platform"
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_xxx"
+  CLERK_SECRET_KEY: "sk_live_xxx"
+  CLERK_WEBHOOK_SECRET: "whsec_xxx"
+  BLOB_READ_WRITE_TOKEN: "vercel_blob_token"
+  SVIX_AUTH_TOKEN: "svix_token"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: creative-platform
+  namespace: creative-platform
+  labels:
+    app: creative-platform
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: creative-platform
+  template:
+    metadata:
+      labels:
+        app: creative-platform
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/kipsmthn/creative-platform:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        envFrom:
+        - configMapRef:
+            name: creative-platform-config
+        - secretRef:
+            name: creative-platform-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 2
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: app-cache
+          mountPath: /app/.next
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: app-cache
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - creative-platform
+              topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: creative-platform-service
+  namespace: creative-platform
+  labels:
+    app: creative-platform
+spec:
+  type: LoadBalancer
+  selector:
+    app: creative-platform
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 3000
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: creative-platform-hpa
+  namespace: creative-platform
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: creative-platform
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

@@ -18,3 +18,4 @@ build
 .playwright-cli
 public/videos
 public/uploads
+.env

@@ -46,17 +46,22 @@ const sections = [
   },
 ];
 
-function SignOutButton() {
+function SignOutButton({ compact = false }: { compact?: boolean }) {
   const { signOut } = useClerk();
 
   return (
     <button
       type="button"
       onClick={() => void signOut({ redirectUrl: '/' })}
-      className="mt-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[11px] font-medium text-red-500 transition hover:bg-red-500/10 hover:text-red-400"
+      aria-label="Log out"
+      className={
+        compact
+          ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-500/20 text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+          : 'mt-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[11px] font-medium text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+      }
     >
       <LogOut className="h-3.5 w-3.5 shrink-0" />
-      <span>Log out</span>
+      {!compact && <span>Log out</span>}
     </button>
   );
 }
@@ -172,7 +177,7 @@ export default function AdminLayout({
         </Link>
         <div className="flex items-center gap-2">
           <ProfileMenu />
-          <SignOutButton />
+          <SignOutButton compact />
         </div>
       </header>
 

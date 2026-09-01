@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { getLocalUser } from "@/lib/auth/get-local-user";
 import { getGalleryStorage } from "@/lib/gallery/storage";
 import { processImage } from "@/lib/gallery/image-processing";
 
@@ -26,9 +26,12 @@ async function getCreator() {
     return null;
   }
 
-  return getOrCreateLocalUser(
-    userId,
-  );
+  try {
+    return await getLocalUser(userId);
+  } catch (e) {
+    console.error("Creator not found for photos route:", e);
+    return null;
+  }
 }
 
 async function ownsGallery(

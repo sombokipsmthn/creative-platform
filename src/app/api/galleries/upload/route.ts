@@ -21,8 +21,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const creator =
-      await getOrCreateLocalUser(userId);
+    let creator;
+    try {
+      creator = await getLocalUser(userId);
+    } catch (e) {
+      console.error("Creator not found for upload route:", e);
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const body = await request.json();
 

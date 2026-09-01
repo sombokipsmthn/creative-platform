@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { getLocalUser } from "@/lib/auth/get-local-user";
 
 type Context = {
   params: Promise<{
@@ -18,7 +18,13 @@ async function getCreator() {
     return null;
   }
 
-  return getOrCreateLocalUser(userId);
+  try {
+    return await getLocalUser(userId);
+  } catch (e) {
+    // If the local user does not exist yet, treat as unauthenticated for this route.
+    console.error("Creator not found for approval route:", e);
+    return null;
+  }
 }
 
 async function ownsGallery(

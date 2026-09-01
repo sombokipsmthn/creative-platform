@@ -1,5 +1,5 @@
 import { auth } from "@clerk/nextjs/server";
-import { getOrCreateLocalUser } from "./get-or-create-local-user";
+import { getLocalUser } from "./get-local-user";
 
 /**
  * Retrieves the currently authenticated creator user from the database.
@@ -19,7 +19,14 @@ export async function getCurrentUser() {
       return null;
     }
 
-    return await getOrCreateLocalUser(userId);
+    try {
+      return await getLocalUser(userId);
+    } catch (e) {
+      throw new Error(
+        `Local creator account not found for Clerk ID ${userId}. ` +
+        "Ensure the user has been created via /auth before calling this function."
+      );
+    }
   } catch (error) {
     console.error("getCurrentUser error:", error);
     return null;

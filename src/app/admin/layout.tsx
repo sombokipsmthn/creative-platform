@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -9,6 +9,7 @@ import {
   FileText,
   FolderKanban,
   LayoutDashboard,
+  LogOut,
   Receipt,
   Settings2,
   SlidersHorizontal,
@@ -44,6 +45,26 @@ const sections = [
     ],
   },
 ];
+
+function SignOutButton({ compact = false }: { compact?: boolean }) {
+  const { signOut } = useClerk();
+
+  return (
+    <button
+      type="button"
+      onClick={() => void signOut({ redirectUrl: '/' })}
+      aria-label="Log out"
+      className={
+        compact
+          ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-500/20 text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+          : 'mt-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[11px] font-medium text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+      }
+    >
+      <LogOut className="h-3.5 w-3.5 shrink-0" />
+      {!compact && <span>Log out</span>}
+    </button>
+  );
+}
 
 export default function AdminLayout({
   children,
@@ -143,6 +164,7 @@ export default function AdminLayout({
             <ThemeToggle />
           </div>
           <ProfileMenu />
+          <SignOutButton />
         </div>
       </aside>
 
@@ -153,7 +175,10 @@ export default function AdminLayout({
           </span>
           KIPSMTHN<span className="text-[var(--accent)]">.</span>
         </Link>
-        <ProfileMenu />
+        <div className="flex items-center gap-2">
+          <ProfileMenu />
+          <SignOutButton compact />
+        </div>
       </header>
 
       <main className="lg:pl-[248px]">{children}</main>

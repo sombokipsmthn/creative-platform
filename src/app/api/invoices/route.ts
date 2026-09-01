@@ -27,12 +27,53 @@ function normalizeQuantity(value: unknown) {
   return Math.max(1, normalizeNumber(value, 1));
 }
 
-function normalizeCurrency(value: unknown, fallback = "USD") {
+function normalizeCurrency(value: unknown, fallback = "KES") {
   const currency = String(value ?? "")
     .trim()
     .toUpperCase();
 
   return currency || fallback;
+}
+
+function cleanString(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+  return value.trim();
+}
+
+function validateString(
+  val: unknown,
+  maxLength = 500
+): string {
+  const str = cleanString(val);
+
+  if (!str) {
+    throw new Error("Invalid input: value is required");
+  }
+
+  if (str.length > maxLength) {
+    throw new Error(
+      `Invalid input: value exceeds maximum length of ${maxLength}`
+    );
+  }
+
+  return str;
+}
+
+function validateOptionalString(
+  val: unknown,
+  maxLength = 500
+): string {
+  const str = cleanString(val);
+
+  if (str.length > maxLength) {
+    throw new Error(
+      `Invalid input: value exceeds maximum length of ${maxLength}`
+    );
+  }
+
+  return str;
 }
 
 async function generateInvoiceNumber(

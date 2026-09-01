@@ -44,12 +44,18 @@ const customMiddleware = clerkMiddleware(
      */
 
     if (isOnboardingRoute(req)) {
-      const {
-        userId,
-        redirectToSignIn,
-      } = await auth();
+      try {
+        const {
+          userId,
+          redirectToSignIn,
+        } = await auth();
 
-      if (!userId) {
+        if (!userId) {
+          return redirectToSignIn();
+        }
+      } catch (error) {
+        console.error('[Middleware] Auth error in onboarding route:', error);
+        const { redirectToSignIn } = await auth();
         return redirectToSignIn();
       }
 
@@ -86,12 +92,18 @@ const customMiddleware = clerkMiddleware(
      */
 
     if (isAdminRoute(req)) {
-      const {
-        userId,
-        redirectToSignIn,
-      } = await auth();
+      try {
+        const {
+          userId,
+          redirectToSignIn,
+        } = await auth();
 
-      if (!userId) {
+        if (!userId) {
+          return redirectToSignIn();
+        }
+      } catch (error) {
+        console.error('[Middleware] Auth error in admin route:', error);
+        const { redirectToSignIn } = await auth();
         return redirectToSignIn();
       }
 

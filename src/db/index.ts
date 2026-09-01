@@ -15,55 +15,18 @@ if (dbUrl && dbUrl.startsWith("postgres")) {
     db = drizzle(pool, {
       schema,
     });
+    console.log("✅ Database connected successfully");
   } catch (err) {
-    console.warn("[AI Studio] Database connection error:", err);
-    db = createFallbackDb();
+    console.error("❌ [Database] Connection failed:", err);
+    throw new Error(
+      `Database connection error: ${err instanceof Error ? err.message : String(err)}. Please check DATABASE_URL.`
+    );
   }
 } else {
-  db = createFallbackDb();
-}
-
-function createFallbackDb(): NodePgDatabase<typeof schema> {
-  const noOp = {
-    findMany: async () => [],
-    findFirst: async () => null,
-    findUnique: async () => null,
-    create: async (d: { data?: unknown }) => d?.data ?? {},
-    update: async (d: { data?: unknown }) => d?.data ?? {},
-    delete: async () => ({}),
-  };
-
-  const chainable = () => ({
-    from: () => ({
-      where: () => ({
-        orderBy: () => Promise.resolve([]),
-      }),
-      orderBy: () => Promise.resolve([]),
-    }),
-    where: () => ({
-      orderBy: () => Promise.resolve([]),
-    }),
-    values: () => ({
-      returning: () => Promise.resolve([]),
-      onConflictDoNothing: () => ({
-        returning: () => Promise.resolve([]),
-      }),
-    }),
-    orderBy: () => Promise.resolve([]),
-    then: (resolve: (val: unknown[]) => void) => resolve([]),
-  });
-
-  return new Proxy({} as NodePgDatabase<typeof schema>, {
-    get: (_, prop) => {
-      if (prop === "query") {
-        return new Proxy({}, { get: () => noOp });
-      }
-      if (prop === "select" || prop === "insert" || prop === "update" || prop === "delete") {
-        return chainable;
-      }
-      return chainable;
-    },
-  });
+  console.error("❌ [Database] DATABASE_URL not set. This is required for production.");
+  throw new Error(
+    "DATABASE_URL environment variable is not set. Cannot initialize database."
+  );
 }
 
 export { db };

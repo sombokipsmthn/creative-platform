@@ -210,6 +210,9 @@ export default function NewQuotePage() {
   const [equipment, setEquipment] =
     useState<Equipment[]>([]);
 
+  const [services, setServices] =
+    useState<Array<{ id: string; label: string; category: string; unit: string; rate: number }>>([]);
+
   const [clients, setClients] =
     useState<Client[]>([]);
 
@@ -362,7 +365,38 @@ export default function NewQuotePage() {
       }
     }
 
+    async function loadServices() {
+      try {
+        // Load all service categories
+        const categories = ["crew", "production", "post production", "transport", "other"];
+        const allServices: typeof services = [];
+
+        for (const category of categories) {
+          const response = await fetch(
+            `/api/services?category=${encodeURIComponent(category)}`,
+            { cache: "no-store" }
+          );
+
+          if (response.ok) {
+            const categoryServices = await response.json();
+            allServices.push(...categoryServices);
+          }
+        }
+
+        if (!cancelled) {
+          setServices(allServices);
+        }
+      } catch (err) {
+        console.error("Failed to load services:", err);
+        // Services are optional, fall back to empty
+        if (!cancelled) {
+          setServices([]);
+        }
+      }
+    }
+
     loadEquipment();
+    loadServices();
 
     return () => {
       cancelled = true;
@@ -450,26 +484,18 @@ export default function NewQuotePage() {
     item: Equipment,
     category: string
   ) {
-    const selected =
-      normalize(category);
+    const dbCategory = normalize(item.category ?? "");
+    const subcategory = normalize(item.subcategory ?? "");
+    const searchable = [
+      item.name,
+      item.category,
+      item.subcategory,
+      item.specs,
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-    const dbCategory =
-      normalize(item.category);
-
-    const subcategory =
-      normalize(item.subcategory);
-
-    const searchable = normalize(
-      [
-        item.name,
-        item.brand,
-        item.category,
-        item.subcategory,
-        item.specs,
-      ]
-        .filter(Boolean)
-        .join(" ")
-    );
+    const selected = normalize(category);
 
     if (!selected) {
       return false;
@@ -660,205 +686,59 @@ export default function NewQuotePage() {
 
     /*
      * -------------------------------------------------------
-     * CREW
+     * SERVICES (Crew, Production, Post-Production, etc)
      * -------------------------------------------------------
      */
 
-    if (
-      selectedCategory ===
-      "crew"
-    ) {
-      CREW_OPTIONS.forEach(
-        (
-          [label, unit, rate],
-          index
-        ) => {
-          if (
-            search &&
-            !normalize(
-              label
-            ).includes(search)
-          ) {
-            return;
-          }
+    const serviceCategories = new Set([
+      "crew",
+      "production",
+      "post production",
+      "transport",
+      "other",
+    ]);
 
-          options.push({
-            id: `crew-${index}`,
-            label,
-            type: "service",
-            category: "Crew",
-            subcategory:
-              "Crew",
-            rate,
-            unit,
-          });
+    if (serviceCategories.has(selectedCategory)) {
+      services.forEach((service) => {
+        if (
+          normalize(service.category) !==
+          selectedCategory
+        ) {
+          return;
         }
-      );
 
-      return options;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * PRODUCTION
-     * -------------------------------------------------------
-     */
-
-    if (
-      selectedCategory ===
-      "production"
-    ) {
-      PRODUCTION_OPTIONS.forEach(
-        (
-          [label, unit, rate],
-          index
-        ) => {
-          if (
-            search &&
-            !normalize(
-              label
+        if (
+          search &&
+          !(
+            normalize(service.label).includes(
+              search
+            ) ||
+            normalize(
+              service.category
             ).includes(search)
-          ) {
-            return;
-          }
-
-          options.push({
-            id: `production-${index}`,
-            label,
-            type: "service",
-            category:
-              "Production",
-            subcategory:
-              "Production",
-            rate,
-            unit,
-          });
+          )
+        ) {
+          return;
         }
-      );
 
-      return options;
-    }
+        options.push({
+          id: service.id,
+          label: service.label,
+          type: "service",
+          category: service.category,
+          subcategory:
+            service.category,
+          rate: service.rate,
+          unit: service.unit,
+        });
+      });
 
-    /*
-     * -------------------------------------------------------
-     * POST PRODUCTION
-     * -------------------------------------------------------
-     */
-
-    if (
-      selectedCategory ===
-      "post production"
-    ) {
-      POST_PRODUCTION_OPTIONS.forEach(
-        (
-          [label, unit, rate],
-          index
-        ) => {
-          if (
-            search &&
-            !normalize(
-              label
-            ).includes(search)
-          ) {
-            return;
-          }
-
-          options.push({
-            id: `post-production-${index}`,
-            label,
-            type: "service",
-            category:
-              "Post Production",
-            subcategory:
-              "Post Production",
-            rate,
-            unit,
-          });
-        }
-      );
-
-      return options;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * TRANSPORT
-     * -------------------------------------------------------
-     */
-
-    if (
-      selectedCategory ===
-      "transport"
-    ) {
-      TRANSPORT_OPTIONS.forEach(
-        (
-          [label, unit, rate],
-          index
-        ) => {
-          if (
-            search &&
-            !normalize(
-              label
-            ).includes(search)
-          ) {
-            return;
-          }
-
-          options.push({
-            id: `transport-${index}`,
-            label,
-            type: "service",
-            category:
-              "Transport",
-            subcategory:
-              "Transport",
-            rate,
-            unit,
-          });
-        }
-      );
-
-      return options;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * OTHER
-     * -------------------------------------------------------
-     */
-
-    if (
-      selectedCategory ===
-      "other"
-    ) {
-      OTHER_OPTIONS.forEach(
-        (
-          [label, unit, rate],
-          index
-        ) => {
-          if (
-            search &&
-            !normalize(
-              label
-            ).includes(search)
-          ) {
-            return;
-          }
-
-          options.push({
-            id: `other-${index}`,
-            label,
-            type: "service",
-            category: "Other",
-            subcategory:
-              "Other",
-            rate,
-            unit,
-          });
-        }
-      );
-
-      return options;
+      return options
+        .sort((a, b) =>
+          a.label.localeCompare(
+            b.label
+          )
+        );
     }
 
     return options;
@@ -2213,8 +2093,8 @@ export default function NewQuotePage() {
                                     : `Search ${item.category.toLowerCase()}...`
                                 }
                                 className={`w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none ${!item.category
-                                    ? "opacity-60 cursor-not-allowed"
-                                    : "focus:border-purple-500"
+                                  ? "opacity-60 cursor-not-allowed"
+                                  : "focus:border-purple-500"
                                   }`}
                               />
 

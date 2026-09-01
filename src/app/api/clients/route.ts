@@ -20,6 +20,25 @@ function cleanString(value: unknown): string | null {
   return trimmed.length > 0 ? trimmed : null;
 }
 
+function validateString(
+  val: unknown,
+  maxLength = 500
+): string {
+  const str = cleanString(val);
+
+  if (!str) {
+    throw new Error("Invalid input: value is required");
+  }
+
+  if (str.length > maxLength) {
+    throw new Error(
+      `Invalid input: value exceeds maximum length of ${maxLength}`
+    );
+  }
+
+  return str;
+}
+
 function getStatus(value: unknown): string {
   const status = cleanString(value);
 

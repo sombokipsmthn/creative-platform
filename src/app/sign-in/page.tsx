@@ -1,11 +1,10 @@
 'use client';
 
-import { isClerkAPIResponseError } from '@clerk/nextjs/errors';
 import { useSignIn } from '@clerk/nextjs/legacy';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function SignInPage() {
   const { isSignedIn, isLoaded: isUserLoaded } = useUser();
@@ -25,13 +24,12 @@ export default function SignInPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLoaded || !signIn) return;
-
+    if (!isLoaded || !signIn || !setActive) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      // Use Clerk's signIn method
+      // Use Clerk's signIn.create method
       const result = await signIn.create({
         identifier: email,
         password,
@@ -46,13 +44,8 @@ export default function SignInPage() {
         setError('Authentication requires additional steps. Please check your email.');
       }
     } catch (err) {
-      if (isClerkAPIResponseError(err)) {
-        setError(err.errors[0]?.longMessage || err.errors[0]?.message || 'Invalid email or password');
-      } else if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Invalid email or password');
-      }
+      const clerkError = err as { errors?: { longMessage?: string; message?: string }[] };
+      setError(clerkError.errors?.[0]?.longMessage || clerkError.errors?.[0]?.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -133,7 +126,7 @@ export default function SignInPage() {
         <div className="mt-6 text-center">
           <p className="text-xs text-slate-500 dark:text-zinc-400">
             Don't have an account?{' '}
-            <Link href="/sign-up" className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
+            <Link href="/admin/onboarding" className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
               Get started
             </Link>
           </p>

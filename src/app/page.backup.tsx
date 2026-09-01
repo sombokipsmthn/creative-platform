@@ -102,4 +102,4 @@ export default function HomePage() {
           <div className="text-center">
             <div className="mx-auto h-10 w-10 rounded-full border-2 border-purple-200 border-t-purple-600 animate-spin" />
 
-            <p className="mt-5 text-sm text-slate-500 dark:text-zinc-400">
+            <p className="mt-5 text-sm text-slate-500 dark:text-zinc-400">Loading creator profile...</p>

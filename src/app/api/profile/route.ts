@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { creatorProfiles, creatorBusinessProfiles, users } from "@/db/schema";
 import getCurrentUser from "@/lib/auth/get-current-user";

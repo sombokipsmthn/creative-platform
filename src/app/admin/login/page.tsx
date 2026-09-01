@@ -8,7 +8,10 @@ export default function AdminLoginPage() {
       <SignIn
         path="/admin/login"
         routing="path"
-        signUpUrl="/admin/onboarding"
+        // Redirect users who need to sign up to the actual Clerk sign‑up page.
+        // The onboarding flow lives at /admin/onboarding and is entered after
+        // the user has a valid Clerk account and passes through /auth.
+        signUpUrl="/sign-up"
         fallbackRedirectUrl="/admin"
       />
     </main>

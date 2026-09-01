@@ -41,6 +41,7 @@ export default function AdminProfilePage() {
   useEffect(() => {
     if (!isLoaded || !user) return;
 
+    const currentUser = user;
     let ignore = false;
 
     async function loadProfile() {
@@ -58,16 +59,16 @@ export default function AdminProfilePage() {
         if (ignore) return;
 
         setProfile({
-          name: data?.user?.name || user.fullName || user.firstName || '',
-          handle: data?.user?.handle || user.username || '',
-          email: data?.user?.email || user.primaryEmailAddress?.emailAddress || '',
+          name: data?.user?.name || currentUser.fullName || currentUser.firstName || '',
+          handle: data?.user?.handle || currentUser.username || '',
+          email: data?.user?.email || currentUser.primaryEmailAddress?.emailAddress || '',
           phone: data?.businessProfile?.phone || '',
           kraPin: data?.businessProfile?.kraPin || '',
           location: data?.profile?.location || '',
           bio: data?.profile?.bio || '',
           website: data?.profile?.website || '',
           businessName: data?.businessProfile?.businessName || '',
-          avatarUrl: data?.profile?.avatarUrl || user.imageUrl || '',
+          avatarUrl: data?.profile?.avatarUrl || currentUser.imageUrl || '',
         });
       } catch (error) {
         console.error('Failed to load creator profile:', error);
@@ -91,6 +92,7 @@ export default function AdminProfilePage() {
 
     if (!user) return;
 
+    const currentUser = user;
     setIsSaving(true);
     setMessage(null);
 
@@ -100,7 +102,7 @@ export default function AdminProfilePage() {
       const lastName = nameParts.join(' ');
 
       // Keep Clerk identity and the local creator record aligned.
-      await user.update({
+      await currentUser.update({
         firstName,
         lastName,
       });

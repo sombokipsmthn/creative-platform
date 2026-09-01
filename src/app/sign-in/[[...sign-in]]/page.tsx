@@ -1,11 +1,15 @@
-import { useClerk, useUser } from '@clerk/nextjs';
+'use client';
+
+import { isClerkAPIResponseError } from '@clerk/nextjs/errors';
+import { useSignIn } from '@clerk/nextjs/legacy';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
-import { redirect, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function SignInPage() {
-  const { isSignedIn } = useUser();
-  const { signIn } = useClerk();
+  const { isSignedIn, isLoaded: isUserLoaded } = useUser();
+  const { isLoaded, signIn, setActive } = useSignIn();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -13,12 +17,16 @@ export default function SignInPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   // If already authenticated, redirect to admin
-  if (isSignedIn) {
-    redirect('/admin');
-  }
+  useEffect(() => {
+    if (isUserLoaded && isSignedIn) {
+      router.replace('/admin');
+    }
+  }, [isUserLoaded, isSignedIn, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isLoaded || !signIn) return;
+
     setIsLoading(true);
     setError(null);
 
@@ -31,13 +39,20 @@ export default function SignInPage() {
 
       // Handle successful sign-in
       if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
         router.push('/admin');
       } else {
         // Handle cases where additional steps are needed (2FA, email verification, etc.)
         setError('Authentication requires additional steps. Please check your email.');
       }
     } catch (err) {
-      setError(err.errors?.[0]?.message || 'Invalid email or password');
+      if (isClerkAPIResponseError(err)) {
+        setError(err.errors[0]?.longMessage || err.errors[0]?.message || 'Invalid email or password');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Invalid email or password');
+      }
     } finally {
       setIsLoading(false);
     }

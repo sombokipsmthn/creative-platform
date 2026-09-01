@@ -184,126 +184,11 @@ export default function CreativeOSDashboardPage() {
     setTourStep(tourStep + 1);
   }
 
-<<<<<<< HEAD
-  return (
-    <main className="os-page min-h-screen">
-      <div className="os-shell py-6 sm:py-8 lg:py-10">
-        <header className="os-reveal mb-8 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
-          <div className="flex items-start gap-4">
-            {avatar ? (
-              <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-soft)] shadow-sm">
-                <img src={avatar} alt={name} className="h-full w-full object-cover" />
-              </div>
-            ) : (
-              <span className="os-icon-box h-12 w-12 rounded-2xl"><BriefcaseBusiness className="h-5 w-5" /></span>
-            )}
-            <div>
-              <p className="os-eyebrow">Creative · Command Center</p>
-              <h1 className="mt-2 text-3xl font-medium tracking-[-0.05em] sm:text-4xl">Good to see you, {firstName}.</h1>
-              <p className="mt-2 max-w-2xl text-xs leading-6 text-[var(--text-muted)] sm:text-sm">
-                Your studio, client work and commercial operations in one view. Start with what needs attention, then move the work forward.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-card)] p-1 shadow-sm">
-            {ranges.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setRange(option.value)}
-                className={`rounded-lg px-3 py-2 font-mono text-[9px] uppercase tracking-[0.12em] transition ${
-                  range === option.value
-                    ? 'bg-[var(--accent)] text-white shadow-sm'
-                    : 'text-[var(--text-muted)] hover:bg-[var(--bg-soft)] hover:text-[var(--text-primary)]'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </header>
-
-        {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3 text-xs text-red-500">
-            <Clock3 className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <section className="os-reveal mb-9" style={{ animationDelay: '60ms' }}>
-          <SectionHeading
-            eyebrow="01 · Run"
-            title="Your studio at a glance"
-            description="The north-star numbers for the selected period."
-          />
-
-          {loading && !stats ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-36 animate-pulse rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-card)]" />
-              ))}
-            </div>
-          ) : stats ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <MetricCard
-                label="Quoted value"
-                value={formatCurrency(stats.finance.periodQuotedValue)}
-                detail={`${stats.overview.newQuotes} new quotes · ${rangeLabels[range]}`}
-                href="/admin/quotes"
-                icon={<Wallet className="h-4 w-4" />}
-              />
-              <MetricCard
-                label="Paid invoices"
-                value={formatCurrency(stats.finance.periodPaidValue)}
-                detail={`${invoicePaidRate}% of invoices paid`}
-                href="/admin/invoices"
-                icon={<CheckCircle2 className="h-4 w-4" />}
-                accent="green"
-              />
-              <MetricCard
-                label="Active projects"
-                value={formatNumber(stats.overview.activeProjects)}
-                detail={`${stats.overview.completedProjects} completed · ${stats.overview.projects} total`}
-                href="/admin/projects"
-                icon={<FolderKanban className="h-4 w-4" />}
-                accent="cyan"
-              />
-              <MetricCard
-                label="Clients"
-                value={formatNumber(stats.overview.clients)}
-                detail={`${stats.overview.activeClients} active · ${stats.overview.newClients} new`}
-                href="/admin/clients"
-                icon={<Users className="h-4 w-4" />}
-                accent="amber"
-              />
-            </div>
-          ) : null}
-        </section>
-=======
   if (!isLoaded) return <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 dark:bg-[#09090b]"><p className="text-xs font-mono uppercase tracking-widest text-slate-500">Loading Creative OS...</p></main>;
->>>>>>> c9d8fc8c2d9c7f5075031d5febecb2a82da31770
 
   return <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
     <header className="border-b border-slate-200 dark:border-zinc-800"><div className="mx-auto max-w-7xl px-6 py-8 lg:py-10"><div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative OS Command Center</p><div className="flex items-center gap-4">{avatar && <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30"><img src={avatar} alt={name} className="h-full w-full object-cover" /></div>}<div><h1 className="text-3xl font-light tracking-tight md:text-4xl">Welcome back, {name.split(' ')[0]}.</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Run your creative business from one place.{email ? ` · ${email}` : ''}</p></div></div></div><div className="flex flex-wrap items-center gap-2">{ranges.map((option) => <button key={option.value} type="button" onClick={() => setRange(option.value)} className={`rounded-full px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest transition ${range === option.value ? 'bg-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400'}`}>{option.label}</button>)}</div></div></div></header>
 
-<<<<<<< HEAD
-            <section className="os-reveal mb-9" style={{ animationDelay: '180ms' }}>
-              <SectionHeading
-                eyebrow="03 · Signal"
-                title="See where the business is moving"
-                description="This platform's strongest idea is not the chart itself — it is putting context around the number. This layer applies that principle to your studio."
-              />
-              <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr]">
-                <Panel eyebrow="Money" title="Commercial flow" action={<Link href="/admin/invoices" className="font-mono text-[8px] uppercase tracking-[0.15em] text-[var(--text-muted)] hover:text-[var(--accent)]">Open ledger →</Link>}>
-                  <MoneyFlow stats={stats} />
-                </Panel>
-                <Panel eyebrow="Quotes" title="Pipeline health" action={<span className="os-pill"><span className="os-pill-dot text-[var(--accent)]" /> live</span>}>
-                  <QuotePipeline stats={stats} />
-                </Panel>
-              </div>
-            </section>
-=======
     <div className="mx-auto max-w-7xl px-6 py-8">
       {error && <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300"><AlertCircle className="h-4 w-4" />{error}</div>}
       <section data-tour="tour-overview" className="mb-8"><div className="mb-4"><p className="text-[9px] font-mono uppercase tracking-[0.22em] text-purple-600 dark:text-purple-400">Overview</p><h2 className="mt-1 text-xl font-semibold">Your business at a glance</h2></div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -312,7 +197,6 @@ export default function CreativeOSDashboardPage() {
         <Metric label="Quotes" value={number(stats?.overview.quotes || 0)} detail={`${number(stats?.quotes.conversionRate || 0)}% conversion`} href="/admin/quotes/new" icon={<FileText className="h-4 w-4" />} target="tour-quotes" />
         <Metric label="Invoices" value={number(stats?.overview.invoices || 0)} detail={`${paidRate}% paid`} href="/admin/invoices" icon={<Receipt className="h-4 w-4" />} target="tour-invoices" />
       </div></section>
->>>>>>> c9d8fc8c2d9c7f5075031d5febecb2a82da31770
 
       <section className="mb-8"><div className="mb-4"><p className="text-[9px] font-mono uppercase tracking-[0.22em] text-purple-600 dark:text-purple-400">Start here</p><h2 className="mt-1 text-xl font-semibold">Quick actions</h2></div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickAction href="/admin/clients" label="Add / Manage Client" detail="Build your CRM" icon={<Users className="h-4 w-4" />} target="tour-clients" /><QuickAction href="/admin/quotes/new" label="Create Quote" detail="Price a new production" icon={<FileText className="h-4 w-4" />} target="tour-quotes" /><QuickAction href="/admin/invoices" label="Manage Invoices" detail="Track billing and payments" icon={<Receipt className="h-4 w-4" />} target="tour-invoices" /><QuickAction href="/admin/projects" label="Open Projects" detail="Manage production work" icon={<FolderKanban className="h-4 w-4" />} target="tour-projects" /></div></section>
 
@@ -330,19 +214,7 @@ export default function CreativeOSDashboardPage() {
         ].map(([label, value, href, icon]) => <Link key={label as string} href={href as string} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-zinc-900/50"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300">{icon}</span><span><span className="block text-sm font-medium">{label}</span><span className="block text-xs text-slate-500">Review in workspace</span></span></div><span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">{number(value as number)}</span></Link>)}</div></Panel></div>
     </div>
 
-<<<<<<< HEAD
-        <footer className="mt-10 border-t border-[var(--border-subtle)] pt-5">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--text-faint)]">Creative · KIPSMTHN</p>
-            <p className="text-[10px] text-[var(--text-faint)]">Built around the way a creative studio actually works.</p>
-          </div>
-        </footer>
-      </div>
-    </main>
-  );
-=======
     {tourStep !== null && <Tour step={tourStep} onNext={nextTour} onSkip={skipTour} />}
     {showFirstClient && <FirstClientModal onClose={() => { localStorage.setItem('creative-os-first-client-prompted', '1'); setShowFirstClient(false); }} onCreated={() => { setShowFirstClient(false); setRange((current) => current); }} />}
   </main>;
->>>>>>> c9d8fc8c2d9c7f5075031d5febecb2a82da31770
 }

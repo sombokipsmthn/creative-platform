@@ -13,9 +13,7 @@ import {
   creatorBusinessProfiles,
 } from "@/db/schema";
 
-import {
-  getOrCreateLocalUser,
-} from "@/lib/auth/get-or-create-local-user";
+import { getLocalUser } from "@/lib/auth/get-local-user";
 
 type ServiceInput = {
   id?: string;
@@ -110,27 +108,20 @@ async function getAuthenticatedContext() {
   }
 
   let localUser;
-
   try {
-    localUser =
-      await getOrCreateLocalUser(userId);
+    localUser = await getLocalUser(userId);
   } catch (error) {
-    console.error(
-      "ONBOARDING LOCAL USER ERROR:",
-      error
-    );
-
+    // No local creator record – onboarding cannot proceed without one.
+    console.error("ONBOARDING: local user missing", error);
     return {
       error: NextResponse.json(
         {
           error:
             error instanceof Error
               ? error.message
-              : "Unable to create creator account.",
+              : "Local creator account not found.",
         },
-        {
-          status: 500,
-        }
+        { status: 404 }
       ),
     };
   }
@@ -145,11 +136,7 @@ async function getAuthenticatedContext() {
     }
   );
 
-  return {
-    userId,
-    clerkUser,
-    localUser,
-  };
+  return { userId, clerkUser, localUser };
 }
 
 export async function GET() {

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { getLocalUser } from "@/lib/auth/get-local-user";
 
 type Context = {
   params: Promise<{

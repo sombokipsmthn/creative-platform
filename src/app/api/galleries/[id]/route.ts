@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { getLocalUser } from "@/lib/auth/get-local-user";
 import { hashPin } from "@/lib/gallery/pin";
 
 type Context = {
@@ -17,7 +17,12 @@ async function getCreator() {
     return null;
   }
 
-  return getOrCreateLocalUser(userId);
+  try {
+    return await getLocalUser(userId);
+  } catch (e) {
+    console.error("Creator not found for this route:", e);
+    return null;
+  }
 }
 
 export async function GET(_request: Request, context: Context) {

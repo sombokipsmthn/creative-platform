@@ -1,1 +1,1 @@
-export { default } from "./page.backup.tsx";
+export { default } from "./page.backup";

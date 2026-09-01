@@ -1,8 +1,8 @@
-// src/app/admin/clients/page.tsx
 'use client';
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/Button';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -255,14 +255,13 @@ export default function AdminClientsPage() {
             </p>
           </div>
 
-          <button
+          <Button
             onClick={openCreateModal}
-            className="px-5 py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm"
+            variant="primary"
+            className="text-xs font-mono uppercase tracking-widest"
           >
-            <span>
-              + Register New Client
-            </span>
-          </button>
+            + Register New Client
+          </Button>
         </div>
 
         {error && !isAddClientOpen && !selectedClient && (
@@ -278,21 +277,20 @@ export default function AdminClientsPage() {
             ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
             ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl shadow-sm dark:shadow-none">
+            <div key={String(label)} className="ui-card">
               <p className={`text-xs ${color} font-mono uppercase`}>{label}</p>
               <p className="text-3xl font-light text-slate-900 dark:text-white mt-1">{count}</p>
             </div>
           ))}
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 dark:bg-zinc-900/40 p-4 border border-slate-200 dark:border-zinc-800/80 rounded-2xl">
-
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 dark:bg-zinc-900/40 p-4 border border-slate-200 dark:border-zinc-800/80 rounded-xl">
           <input
             type="text"
             placeholder="Search clients by name, company, email, phone..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full md:w-96 px-4 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-xl focus:border-purple-600 focus:outline-none"
+            className="ui-input w-full md:w-96"
           />
 
           <div className="flex flex-wrap gap-2 text-xs font-mono">
@@ -304,47 +302,48 @@ export default function AdminClientsPage() {
                 ['archived', archivedCount],
               ] as const
             ).map(([status, count]) => (
-              <button
+              <Button
                 key={status}
+                variant={filterStatus === status ? 'primary' : 'secondary'}
                 onClick={() => setFilterStatus(status)}
-                className={`px-3 py-1.5 rounded-lg border transition-all ${
-                  filterStatus === status
-                    ? 'bg-purple-600 border-purple-500 text-white'
-                    : 'btn-secondary'
-                }`}
+                className="text-xs font-mono uppercase tracking-widest"
               >
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
+          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
             <p className="text-xs font-mono text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading clients…</p>
           </div>
         ) : filteredClients.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-2xl">
+          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
             <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
-            <button onClick={openCreateModal} className="mt-4 px-4 py-2 btn-primary text-xs font-mono rounded-lg">
+            <Button
+              onClick={openCreateModal}
+              variant="primary"
+              className="text-xs font-mono rounded-lg"
+            >
               Register your first client
-            </button>
+            </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-6">
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/20 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
+                className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
               >
                 <div className="space-y-3 max-w-3xl">
                   <div className="flex flex-wrap items-center gap-2">
                     {client.company && (
-                      <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">
+                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
                         {client.company}
                       </span>
                     )}
-                    <span className={`px-2.5 py-0.5 border text-[10px] font-mono rounded-full uppercase ${statusClass(client.status)}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono rounded-full uppercase ${statusClass(client.status)}`}>
                       {statusLabel(client.status)}
                     </span>
                   </div>
@@ -368,15 +367,16 @@ export default function AdminClientsPage() {
                   </p>
                 </div>
 
-                <button
+                <Button
                   onClick={() => {
                     setError('');
                     setSelectedClient(client);
                   }}
-                  className="px-4 py-2.5 btn-secondary text-xs font-mono rounded-xl cursor-pointer"
+                  variant="secondary"
+                  className="text-xs font-mono rounded-xl"
                 >
                   View / Edit
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -384,53 +384,56 @@ export default function AdminClientsPage() {
 
         {isAddClientOpen && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-              <button onClick={closeCreateModal} disabled={saving} className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50">✕</button>
+            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+              <Button
+                onClick={closeCreateModal}
+                variant="ghost"
+                size="icon"
+                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
+              >
+                ✕
+              </Button>
 
               <div className="space-y-1">
-                <p className="text-xs font-mono uppercase text-purple-600 dark:text-purple-400 tracking-widest">CRM</p>
-                <h2 className="text-2xl font-light">Register New Client</h2>
+                <p className="ui-eyebrow">CRM</p>
+                <h2 className="ui-section-title">Register New Client</h2>
               </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateClient} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Contact Name *</label>
-                  <input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                  <label className="ui-label">Contact Name *</label>
+                  <input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Email</label>
-                    <input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                    <label className="ui-label">Email</label>
+                    <input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="ui-input" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone</label>
+                    <label className="ui-label">Phone</label>
                     <div className="flex items-center gap-2">
-                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="px-3 py-2 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg">
+                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="ui-select">
                         <option value="+254">🇰🇪 +254 (Kenya)</option>
                         <option value="+1">🇺🇸 +1 (USA)</option>
                         <option value="+44">🇬🇧 +44 (UK)</option>
                         <option value="+27">🇿🇦 +27 (South Africa)</option>
                         <option value="+254">Other</option>
                       </select>
-                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
                     </div>
                   </div>
-
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Company / Organization</label>
-                    <input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                    <label className="ui-label">Company / Organization</label>
+                    <input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} className="ui-input" />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Website</label>
+                    <label className="ui-label">Website</label>
                     <input 
                       type="url" 
                       placeholder="https://company.com" 
@@ -448,35 +451,34 @@ export default function AdminClientsPage() {
                           setForm({ ...form, website: val });
                         }
                       }}
-                      className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" 
+                      className="ui-input"
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="ui-label">KRA PIN</label>
+                    <input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} className="ui-input" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Status</label>
+                    <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="ui-select">
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="archived">Archived</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">KRA PIN</label>
-                  <input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
+                  <label className="ui-label">Internal Notes</label>
+                  <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="ui-textarea" />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Status</label>
-                  <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="archived">Archived</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Internal Notes</label>
-                  <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="w-full px-4 py-2 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono rounded-lg focus:border-purple-600 focus:outline-none" />
-                </div>
-
-                <button type="submit" disabled={saving} className="w-full py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-md disabled:opacity-50">
+                <Button type="submit" disabled={saving} variant="primary" className="w-full">
                   {saving ? 'Saving Client…' : '+ Add Client to CRM'}
-                </button>
-
+                </Button>
               </form>
             </div>
           </div>
@@ -484,11 +486,18 @@ export default function AdminClientsPage() {
 
         {selectedClient && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-              <button onClick={() => setSelectedClient(null)} className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white">✕</button>
+            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+              <Button
+                onClick={() => setSelectedClient(null)}
+                variant="ghost"
+                size="icon"
+                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white"
+              >
+                ✕
+              </Button>
 
               <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
-                {selectedClient.company && <span className="inline-flex px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase">{selectedClient.company}</span>}
+                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">{selectedClient.company}</span>}
                 <h2 className="text-2xl font-light">{selectedClient.name}</h2>
                 <p className="text-xs font-mono text-slate-600 dark:text-zinc-400 break-words">
                   {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}
@@ -505,30 +514,27 @@ export default function AdminClientsPage() {
 
               <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
                 <div>
-                  <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Client Status</p>
-                  <p className="text-xs text-slate-500 dark:text-zinc-500 mt-1">Changes are saved directly to the database.</p>
+                  <p className="ui-label">Client Status</p>
+                  <p className="ui-meta">Changes are saved directly to the database.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {(['active', 'inactive', 'archived'] as ClientStatus[]).map((status) => (
-                    <button
+                    <Button
                       key={status}
+                      variant={selectedClient.status === status ? 'primary' : 'secondary'}
                       disabled={updating || selectedClient.status === status}
                       onClick={() => updateClientStatus(status)}
-                      className={`px-3 py-2.5 border rounded-lg text-[10px] font-mono uppercase transition-all disabled:opacity-50 ${
-                        selectedClient.status === status
-                          ? statusClass(status)
-                          : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-600 dark:text-zinc-400 hover:border-purple-500'
-                      }`}
+                      className="text-[10px] font-mono uppercase transition-all disabled:opacity-50"
                     >
                       {statusLabel(status)}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <p className="text-[10px] font-mono text-slate-500 dark:text-zinc-500 uppercase">Internal Notes</p>
+                <p className="ui-label">Internal Notes</p>
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
               </div>
 
@@ -536,7 +542,6 @@ export default function AdminClientsPage() {
                 <div>Created {formatDate(selectedClient.createdAt)}</div>
                 <div className="text-right">Updated {formatDate(selectedClient.updatedAt)}</div>
               </div>
-
             </div>
           </div>
         )}

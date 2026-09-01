@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Download, Heart, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 
@@ -34,9 +35,9 @@ export function GalleryViewerStory({
 
   if (photos.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white p-6">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#09090b] p-6">
         <div className="text-center">
-          <p className="text-lg font-light text-gray-400">No photos in gallery</p>
+          <p className="text-lg font-light text-slate-400 dark:text-zinc-500">No photos in gallery</p>
         </div>
       </div>
     );
@@ -68,14 +69,14 @@ export function GalleryViewerStory({
       }}
     >
       {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-base text-gray-600">{description}</p>}
+      <div className="border-b border-slate-200 dark:border-zinc-800 px-6 py-8 sm:px-10 lg:px-16">
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-base text-slate-600 dark:text-zinc-400">{description}</p>}
 
         {/* Progress Bar */}
-        <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-gray-200">
+        <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-zinc-800">
           <div
-            className="h-full bg-black transition-all duration-300"
+            className="h-full bg-black dark:bg-white transition-all duration-300"
             style={{ width: `${scrollProgress}%` }}
           />
         </div>
@@ -91,15 +92,15 @@ export function GalleryViewerStory({
               <div key={photo.id} className="flex-shrink-0 w-96 scroll-snap-align-start">
                 {/* Chapter Number/Divider */}
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="h-0.5 flex-1 bg-gray-200" />
-                  <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                  <div className="h-0.5 flex-1 bg-slate-200 dark:bg-zinc-800" />
+                  <span className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-zinc-400">
                     {idx + 1} of {photos.length}
                   </span>
-                  <div className="h-0.5 flex-1 bg-gray-200" />
+                  <div className="h-0.5 flex-1 bg-slate-200 dark:bg-zinc-800" />
                 </div>
 
                 {/* Image Container */}
-                <div className="mb-4 overflow-hidden rounded-lg bg-gray-100">
+                <div className="mb-4 overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-900">
                   <div className="relative aspect-video">
                     <Image
                       src={photo.displayUrl}
@@ -113,9 +114,9 @@ export function GalleryViewerStory({
 
                 {/* Caption */}
                 <div className="mb-4">
-                  <p className="text-sm font-medium">{photo.filename}</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-white">{photo.filename}</p>
                   {photo.captureDate && (
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
                       {new Date(photo.captureDate).toLocaleDateString('en-KE', {
                         year: 'numeric',
                         month: 'long',
@@ -126,31 +127,35 @@ export function GalleryViewerStory({
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 border-t border-gray-200 pt-4">
+                <div className="flex gap-2 border-t border-slate-200 dark:border-zinc-800 pt-4">
                   {allowFavorites && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleFavorite(photo.id)}
-                      className="flex items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-gray-100"
+                      className="flex items-center gap-1.5"
                     >
                       <Heart
                         className={`h-4 w-4 ${
-                          isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                          isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-400 dark:text-zinc-500'
                         }`}
                       />
                       <span className="text-xs">
                         {isFavorite ? 'Favorited' : 'Favorite'}
                       </span>
-                    </button>
+                    </Button>
                   )}
 
                   {allowDownloads && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => onPhotoDownload?.(photo.id)}
-                      className="flex items-center gap-1.5 rounded-lg px-3 py-2 transition hover:bg-gray-100"
+                      className="flex items-center gap-1.5"
                     >
-                      <Download className="h-4 w-4 text-gray-400" />
+                      <Download className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
                       <span className="text-xs">Download</span>
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -160,9 +165,9 @@ export function GalleryViewerStory({
       </div>
 
       {/* Scroll Hint */}
-      <div className="border-t border-gray-200 bg-gray-50 px-6 py-6 sm:px-10 lg:px-16">
+      <div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 px-6 py-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-7xl">
-          <p className="flex items-center gap-2 text-xs text-gray-500">
+          <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
             <ChevronDown className="h-4 w-4 rotate-90" />
             Scroll to explore the story
           </p>

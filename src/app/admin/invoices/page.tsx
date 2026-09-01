@@ -11,6 +11,8 @@ import {
   Search,
 } from 'lucide-react';
 
+import { Button } from '@/components/ui/Button';
+
 type Client = {
   id: string;
   name?: string | null;
@@ -284,25 +286,20 @@ export default function InvoicesPage() {
         {/* HEADER */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
-              Billing & Payments
-            </p>
+            <p className="ui-eyebrow">Billing & Payments</p>
+            <h1 className="ui-page-title">Invoices</h1>
 
-            <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white">
-              Invoices
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
+            <p className="ui-meta">
               Manage invoices, monitor payments and keep track of client billing.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              type="button"
+            <Button
               onClick={() => void loadInvoices(true)}
               disabled={loading || refreshing}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-mono uppercase tracking-widest text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              variant="secondary"
+              className="text-xs font-mono uppercase tracking-widest"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${
@@ -310,11 +307,11 @@ export default function InvoicesPage() {
                 }`}
               />
               Refresh
-            </button>
+            </Button>
 
             <Link
               href="/admin/quotes/new"
-              className="inline-flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-purple-700 shadow-sm"
+              className="Button Button--primary"
             >
               New Quote
               <ArrowRight className="h-3.5 w-3.5" />
@@ -324,41 +321,29 @@ export default function InvoicesPage() {
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Total Invoices
-            </p>
-
-            <p className="mt-2 text-3xl font-light text-slate-900 dark:text-white">
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Total Invoices</p>
+            <p className="text-3xl font-light text-slate-900 dark:text-white">
               {summary.total}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Draft
-            </p>
-
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Draft</p>
             <p className="mt-2 text-3xl font-light text-amber-600 dark:text-amber-400">
               {summary.draft}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Paid
-            </p>
-
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Paid</p>
             <p className="mt-2 text-3xl font-light text-emerald-600 dark:text-emerald-400">
               {summary.paid}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Outstanding
-            </p>
-
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Outstanding</p>
             <p className="mt-2 text-2xl font-light text-slate-900 dark:text-white">
               {formatMoney(summary.outstanding, 'KES')}
             </p>
@@ -374,7 +359,7 @@ export default function InvoicesPage() {
               placeholder="Search invoices, clients or projects..."
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+              className="ui-input w-full"
             />
           </div>
 
@@ -384,7 +369,7 @@ export default function InvoicesPage() {
               setPage(1);
               setStatus(event.target.value);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+            className="ui-select"
           >
             {STATUSES.map((item) => (
               <option key={item} value={item}>
@@ -399,7 +384,7 @@ export default function InvoicesPage() {
               setPage(1);
               setCurrency(event.target.value);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+            className="ui-select"
           >
             <option value="all">All currencies</option>
             <option value="KES">KES</option>
@@ -413,7 +398,7 @@ export default function InvoicesPage() {
               setPage(1);
               setClientId(event.target.value);
             }}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+            className="ui-select"
           >
             <option value="all">All clients</option>
             {clients.map((client) => (
@@ -426,48 +411,36 @@ export default function InvoicesPage() {
 
         {hasFilters && (
           <div className="flex items-center justify-between px-2">
-            <p className="text-xs text-slate-500 dark:text-zinc-400">
-              Showing filtered results
-            </p>
-            <button
-              type="button"
+            <p className="ui-meta">Showing filtered results</p>
+            <Button
               onClick={resetFilters}
-              className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline"
+              variant="ghost"
+              className="text-xs font-mono uppercase tracking-widest"
             >
               Clear filters
-            </button>
+            </Button>
           </div>
         )}
 
         {/* ERROR */}
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 dark:border-red-900/50 dark:bg-red-950/20">
+          <div className="ui-card p-4">
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* TABLE */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="ui-card">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
+            <table className="ui-table w-full min-w-[700px]">
               <thead>
                 <tr className="border-b border-slate-200 text-left dark:border-zinc-800">
-                  <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                    Invoice
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                    Client
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                    Issued
-                  </th>
-                  <th className="px-6 py-4 text-right text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                    Total
-                  </th>
-                  <th className="px-6 py-4" />
+                  <th className="ui-table-header">Invoice</th>
+                  <th className="ui-table-header">Client</th>
+                  <th className="ui-table-header">Status</th>
+                  <th className="ui-table-header">Issued</th>
+                  <th className="ui-table-header">Total</th>
+                  <th className="ui-table-header" />
                 </tr>
               </thead>
 
@@ -547,7 +520,7 @@ export default function InvoicesPage() {
                       <td className="px-6 py-5 text-right">
                         <Link
                           href={`/admin/invoices/${invoice.id}`}
-                          className="inline-flex items-center gap-1 text-xs font-mono uppercase tracking-widest text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
+                          className="Button Button--secondary"
                         >
                           View
                           <ArrowRight className="h-3 w-3" />
@@ -564,40 +537,40 @@ export default function InvoicesPage() {
         {/* PAGINATION */}
         {pagination && pagination.totalPages > 0 && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
-            <p className="text-xs text-slate-400">
+            <p className="ui-meta">
               {pagination.total === 0
                 ? 'No invoices'
                 : `Showing page ${pagination.page} of ${pagination.totalPages}`}
             </p>
 
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={pagination.page <= 1}
+              <Button
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                disabled={pagination.page <= 1}
+                variant="secondary"
+                className="text-xs font-mono uppercase tracking-widest"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
                 Previous
-              </button>
+              </Button>
 
               <div className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-slate-900 px-2 text-[10px] font-mono text-white dark:bg-zinc-800">
                 {pagination.page}
               </div>
 
-              <button
-                type="button"
-                disabled={pagination.page >= pagination.totalPages}
+              <Button
                 onClick={() =>
                   setPage((current) =>
                     Math.min(pagination.totalPages, current + 1)
                   )
                 }
-                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-mono uppercase tracking-widest text-slate-500 shadow-sm transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-40 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+                disabled={pagination.page >= pagination.totalPages}
+                variant="secondary"
+                className="text-xs font-mono uppercase tracking-widest"
               >
                 Next
                 <ChevronRight className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
         )}

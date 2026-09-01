@@ -66,7 +66,14 @@ export default function ProjectPage() {
         if (!response.ok) throw new Error('Failed to load gallery')
         const rawData = await response.json()
         const transformed = transformGalleryResponse(rawData)
-        setGallery(transformed.gallery as any)
+        setGallery({
+          ...(transformed.gallery || {}),
+          photos: Array.isArray(transformed.photos) ? transformed.photos : [],
+          collections: Array.isArray(transformed.collections) ? transformed.collections : [],
+          approval: transformed.approval || null,
+          presets: Array.isArray(transformed.presets) ? transformed.presets : [],
+          watermark: transformed.watermark || null,
+        } as unknown as GalleryData)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load gallery')
       } finally {
@@ -154,7 +161,7 @@ export default function ProjectPage() {
                 <span className="os-pill-dot text-[var(--success)]" />
                 {gallery.status || 'draft'}
               </span>
-              <span className="os-pill">{gallery.photos.length} photos</span>
+              <span className="os-pill">{gallery.photos?.length || 0} photos</span>
             </div>
           </header>
 
@@ -167,12 +174,12 @@ export default function ProjectPage() {
                     <h2 className="os-title text-[1.35rem] md:text-[1.5rem]">Photos & Collections</h2>
                     <p className="os-subtitle">Organize the images that clients will see in their gallery.</p>
                   </div>
-                  <span className="os-pill">{gallery.collections.length} collections</span>
+                  <span className="os-pill">{gallery.collections?.length || 0} collections</span>
                 </div>
 
-                {gallery.photos.length > 0 ? (
+                {(gallery.photos?.length || 0) > 0 ? (
                   <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                    {gallery.photos.map((photo) => (
+                    {gallery.photos?.map((photo) => (
                       <div
                         key={photo.id}
                         className="group relative aspect-square overflow-hidden rounded-[0.8rem] border border-[var(--border-subtle)] bg-[var(--bg-soft)] shadow-[var(--shadow-card)]"
@@ -266,11 +273,11 @@ export default function ProjectPage() {
                 <h2 className="os-title">Gallery Cover</h2>
                 <p className="os-subtitle">Choose the image that introduces this gallery to clients.</p>
 
-                {gallery.photos.length > 0 ? (
+                {(gallery.photos?.length || 0) > 0 ? (
                   <div className="mt-6 overflow-hidden rounded-[0.9rem] border border-[var(--border-subtle)] bg-[var(--bg-soft)] shadow-[var(--shadow-card)]">
                     <div className="relative aspect-[16/9]">
                       <img
-                        src={gallery.photos[0].displayUrl || gallery.photos[0].originalUrl}
+                        src={gallery.photos?.[0]?.displayUrl || gallery.photos?.[0]?.originalUrl}
                         alt="Gallery Cover"
                         className="h-full w-full object-cover"
                         onError={(e) => {
@@ -337,19 +344,19 @@ export default function ProjectPage() {
                     </span>
                     <p className="os-metric-label">Client Favorites</p>
                   </div>
-                  <p className="os-metric-value">{gallery.photos.filter((p) => p.isFavorite).length}</p>
+                  <p className="os-metric-value">{(gallery.photos || []).filter((p) => p.isFavorite).length}</p>
                   <p className="os-metric-detail">Images currently marked as favorites by the client.</p>
                 </div>
 
                 <div className="os-card os-card-interactive p-5">
                   <p className="os-metric-label">Photos</p>
-                  <p className="os-metric-value">{gallery.photos.length}</p>
+                  <p className="os-metric-value">{gallery.photos?.length || 0}</p>
                   <p className="os-metric-detail">Total images currently associated with this gallery.</p>
                 </div>
 
                 <div className="os-card os-card-interactive p-5">
                   <p className="os-metric-label">Collections</p>
-                  <p className="os-metric-value">{gallery.collections.length}</p>
+                  <p className="os-metric-value">{gallery.collections?.length || 0}</p>
                   <p className="os-metric-detail">Sets available for organizing the client delivery.</p>
                 </div>
               </div>

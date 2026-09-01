@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Download, Heart } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 
@@ -34,9 +35,9 @@ export function GalleryViewerMosaic({
 
   if (photos.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white p-6">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#09090b] p-6">
         <div className="text-center">
-          <p className="text-lg font-light text-gray-400">No photos in gallery</p>
+          <p className="text-lg font-light text-slate-400 dark:text-zinc-500">No photos in gallery</p>
         </div>
       </div>
     );
@@ -69,9 +70,9 @@ export function GalleryViewerMosaic({
       }}
     >
       {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
-        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-base text-gray-600">{description}</p>}
+      <div className="border-b border-slate-200 dark:border-zinc-800 px-6 py-8 sm:px-10 lg:px-16">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-base text-slate-600 dark:text-zinc-400">{description}</p>}
       </div>
 
       {/* Mosaic Grid */}
@@ -91,7 +92,7 @@ export function GalleryViewerMosaic({
               return (
                 <div
                   key={photo.id}
-                  className="mb-4 break-inside-avoid overflow-hidden rounded-lg bg-gray-100 transition-transform hover:scale-105"
+                  className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-105"
                 >
                   <div className={`${heightClass} relative group`}>
                     <Image
@@ -109,7 +110,9 @@ export function GalleryViewerMosaic({
                       </p>
                       <div className="ml-2 flex gap-2 shrink-0">
                         {allowFavorites && (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => handleFavorite(photo.id)}
                             className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
@@ -118,15 +121,17 @@ export function GalleryViewerMosaic({
                                 isFavorite ? 'fill-red-500 text-red-500' : 'text-white'
                               }`}
                             />
-                          </button>
+                          </Button>
                         )}
                         {allowDownloads && (
-                          <button
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => onPhotoDownload?.(photo.id)}
                             className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
                             <Download className="h-4 w-4 text-white" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -139,13 +144,13 @@ export function GalleryViewerMosaic({
       </div>
 
       {/* Footer Stats */}
-      <div className="border-t border-gray-200 bg-gray-50 px-6 py-6 sm:px-10 lg:px-16">
+      <div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 px-6 py-6 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-slate-600 dark:text-zinc-400">
             <span className="font-semibold">{photos.length}</span> photos
           </p>
           {favorites.size > 0 && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-slate-600 dark:text-zinc-400">
               <span className="font-semibold">{favorites.size}</span> favorited
             </p>
           )}

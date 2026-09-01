@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@/components/ui/Button';
 
 type QuoteClient = {
   id: string;
@@ -178,22 +179,17 @@ export default function QuotesPage() {
         {/* HEADER */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
-              Sales & Production
-            </p>
+            <p className="ui-eyebrow">Sales & Production</p>
+            <h1 className="ui-page-title">Quotes</h1>
 
-            <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white">
-              Quotes
-            </h1>
-
-            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
+            <p className="ui-meta">
               Production estimates and client proposals.
             </p>
           </div>
 
           <Link
             href="/admin/quotes/new"
-            className="inline-flex items-center justify-center rounded-xl bg-purple-600 px-5 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white transition hover:bg-purple-700"
+            className="Button Button--primary"
           >
             + New Quote
           </Link>
@@ -201,41 +197,29 @@ export default function QuotesPage() {
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Total Quotes
-            </p>
-
-            <p className="mt-2 text-3xl font-light text-slate-900 dark:text-white">
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Total Quotes</p>
+            <p className="text-3xl font-light text-slate-900 dark:text-white">
               {quotes.length}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Accepted
-            </p>
-
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Accepted</p>
             <p className="mt-2 text-3xl font-light text-emerald-600 dark:text-emerald-400">
               {acceptedQuotes}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Invoiced
-            </p>
-
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Invoiced</p>
             <p className="mt-2 text-3xl font-light text-cyan-600 dark:text-cyan-400">
               {invoicedQuotes}
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-              Pipeline Value
-            </p>
-
+          <div className="ui-card p-4">
+            <p className="ui-meta uppercase">Pipeline Value</p>
             <p className="mt-2 text-2xl font-light text-slate-900 dark:text-white">
               {formatAmount(totalValue, 'KES')}
             </p>
@@ -249,13 +233,13 @@ export default function QuotesPage() {
             placeholder="Search quotes, clients, projects..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/10 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600"
+            className="ui-input flex-1"
           />
 
           <select
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white"
+            className="ui-select"
           >
             <option value="all">All statuses</option>
             <option value="draft">Draft</option>
@@ -270,15 +254,13 @@ export default function QuotesPage() {
 
         {/* ERROR */}
         {error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-5 py-4 dark:border-red-900/50 dark:bg-red-950/20">
-            <p className="text-sm text-red-600 dark:text-red-400">
-              {error}
-            </p>
+          <div className="ui-card p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* TABLE */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div className="ui-card">
           {loading ? (
             <div className="px-6 py-16 text-center">
               <p className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
@@ -306,7 +288,7 @@ export default function QuotesPage() {
               {quotes.length === 0 && (
                 <Link
                   href="/admin/quotes/new"
-                  className="mt-6 inline-flex rounded-xl bg-purple-600 px-5 py-3 text-xs font-mono font-semibold uppercase tracking-widest text-white hover:bg-purple-700"
+                  className="Button Button--primary mt-6"
                 >
                   Create First Quote
                 </Link>
@@ -314,34 +296,16 @@ export default function QuotesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-225">
+              <table className="ui-table w-full min-w-225">
                 <thead>
                   <tr className="border-b border-slate-200 text-left dark:border-zinc-800">
-                    <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                      Quote
-                    </th>
-
-                    <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                      Client
-                    </th>
-
-                    <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                      Project
-                    </th>
-
-                    <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                      Status
-                    </th>
-
-                    <th className="px-6 py-4 text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                      Created
-                    </th>
-
-                    <th className="px-6 py-4 text-right text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                      Total
-                    </th>
-
-                    <th className="px-6 py-4" />
+                    <th className="ui-table-header">Quote</th>
+                    <th className="ui-table-header">Client</th>
+                    <th className="ui-table-header">Project</th>
+                    <th className="ui-table-header">Status</th>
+                    <th className="ui-table-header">Created</th>
+                    <th className="ui-table-header">Total</th>
+                    <th className="ui-table-header" />
                   </tr>
                 </thead>
 
@@ -411,7 +375,7 @@ export default function QuotesPage() {
                             {hasInvoice && (
                               <Link
                                 href={`/admin/invoices/${quote.invoiceId}`}
-                                className="text-[10px] font-mono uppercase tracking-widest text-cyan-600 hover:text-cyan-800 dark:text-cyan-400 dark:hover:text-cyan-300"
+                                className="Button Button--secondary"
                               >
                                 View Invoice →
                               </Link>
@@ -436,7 +400,7 @@ export default function QuotesPage() {
                         <td className="px-6 py-5 text-right">
                           <Link
                             href={`/admin/quotes/${quote.id}`}
-                            className="text-xs font-mono uppercase tracking-widest text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
+                            className="Button Button--secondary"
                           >
                             View →
                           </Link>

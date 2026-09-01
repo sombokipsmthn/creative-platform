@@ -4,7 +4,7 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'icon';
   asChild?: boolean;
 }
 
@@ -34,6 +34,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       sm: 'h-9 px-3',
       md: 'h-10 px-4',
       lg: 'h-11 px-5',
+      icon: 'h-9 w-9 p-0',
     };
 
     return (

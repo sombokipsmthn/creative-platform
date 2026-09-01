@@ -1,9 +1,9 @@
-// src/app/admin/expenses/page.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
 
 interface ExpenseReceipt {
   id: string;
@@ -130,19 +130,19 @@ export default function AdminExpensesPage() {
 
         {/* Metrics Summary Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
+          <div className="ui-card p-4">
             <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono uppercase">Total Claimable Expenses</p>
             <p className="text-3xl font-light text-slate-900 dark:text-white">KES {totalClaimable.toLocaleString()}</p>
             <p className="text-[11px] text-purple-600 dark:text-purple-400 font-mono">eTIMS & ETR Verified Receipts</p>
           </div>
 
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
+          <div className="ui-card p-4">
             <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono uppercase">Est. KRA Tax Savings</p>
             <p className="text-3xl font-light text-emerald-600 dark:text-emerald-400">KES {estimatedTaxShield.toLocaleString()}</p>
             <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-mono">Tax Deductible at 30% Corporate Rate</p>
           </div>
 
-          <div className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950/60 rounded-2xl space-y-1 shadow-sm dark:shadow-none">
+          <div className="ui-card p-4">
             <p className="text-xs text-amber-600 dark:text-amber-400 font-mono uppercase">Pending Verification</p>
             <p className="text-3xl font-light text-slate-900 dark:text-white">
               {expenses.filter((e) => e.status === 'PENDING_VERIFICATION').length} Receipts
@@ -152,59 +152,59 @@ export default function AdminExpensesPage() {
         </div>
 
         {/* SCANNER FORM */}
-        <div className="p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-xl max-w-4xl mx-auto">
+        <div className="ui-card p-6 shadow-xl max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
             <div>
-              <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">OCR Receipt Processing</p>
-              <h2 className="text-2xl font-light text-slate-900 dark:text-white">Scan & Capture KRA Expense Receipt</h2>
+              <p className="ui-eyebrow">OCR Receipt Processing</p>
+              <h2 className="ui-section-title">Scan & Capture KRA Expense Receipt</h2>
             </div>
 
-            <button
-              type="button"
+            <Button
               onClick={handleSimulateScan}
               disabled={isScanning}
-              className="px-5 py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
+              variant="primary"
+              className="px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
             >
               <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
               <span>{isScanning ? 'Scanning Receipt...' : 'Scan Receipt Photo (OCR)'}</span>
-            </button>
+            </Button>
           </div>
 
           <form onSubmit={handleAddExpense} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Merchant Name *</label>
+                <label className="ui-label">Merchant Name *</label>
                 <input
                   type="text"
                   placeholder="e.g. Sony Kenya / Text Book Centre"
                   value={merchant}
                   onChange={(e) => setMerchant(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  className="ui-input w-full"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Merchant KRA PIN *</label>
+                <label className="ui-label">Merchant KRA PIN *</label>
                 <input
                   type="text"
                   placeholder="e.g. P051123456Z"
                   value={merchantKraPin}
                   onChange={(e) => setMerchantKraPin(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  className="ui-input w-full"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Category</label>
+                <label className="ui-label">Category</label>
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value as typeof category)}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  className="ui-select w-full"
                 >
                   <option value="GEAR">Camera & Production Gear</option>
                   <option value="TRAVEL">Production Travel & Transport</option>
@@ -215,46 +215,47 @@ export default function AdminExpensesPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Total Amount (KES) *</label>
+                <label className="ui-label">Total Amount (KES) *</label>
                 <input
                   type="number"
                   placeholder="e.g. 180000"
                   value={amountKes || ''}
                   onChange={(e) => setAmountKes(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  className="ui-input w-full"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">VAT Portion (KES 16%)</label>
+                <label className="ui-label">VAT Portion (KES 16%)</label>
                 <input
                   type="number"
                   placeholder="e.g. 24800"
                   value={vatAmountKes || ''}
                   onChange={(e) => setVatAmountKes(parseFloat(e.target.value) || 0)}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  className="ui-input w-full"
                 />
               </div>
             </div>
 
-            <button
+            <Button
               type="submit"
-              className="w-full py-3.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-lg transition-colors shadow-md cursor-pointer"
+              className="w-full py-3.5"
+              variant="primary"
             >
               + Record Expense for KRA Tax Return
-            </button>
+            </Button>
           </form>
         </div>
 
         {/* EXPENSES LIST */}
         <div className="space-y-4">
-          <h2 className="text-xl font-light text-slate-900 dark:text-white">Logged Receipts & Expenses ({expenses.length})</h2>
+          <h2 className="ui-section-title">Logged Receipts & Expenses ({expenses.length})</h2>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-6">
             {expenses.map((exp) => (
               <div
                 key={exp.id}
-                className="p-6 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/20 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm dark:shadow-none"
+                className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
               >
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shrink-0 bg-slate-100 dark:bg-zinc-900">
@@ -263,10 +264,10 @@ export default function AdminExpensesPage() {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase font-semibold">
+                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
                         {exp.category}
                       </span>
-                      <span className={`px-2.5 py-0.5 text-[10px] font-mono rounded-full ${
+                      <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-mono rounded-full ${
                         exp.status === 'CLAIMABLE' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
                       }`}>
                         {exp.status === 'CLAIMABLE' ? 'Claimable ✓' : 'Pending Verification ⚠️'}
@@ -274,7 +275,7 @@ export default function AdminExpensesPage() {
                     </div>
 
                     <h3 className="text-base font-medium text-slate-900 dark:text-white">{exp.merchant}</h3>
-                    <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">
+                    <p className="ui-meta">
                       Merchant KRA PIN: <span className="font-bold text-slate-900 dark:text-white">{exp.merchantKraPin}</span> • Date: {exp.date}
                     </p>
                   </div>
@@ -282,7 +283,7 @@ export default function AdminExpensesPage() {
 
                 <div className="text-right font-mono">
                   <p className="text-xl font-bold text-slate-900 dark:text-white">KES {exp.amountKes.toLocaleString()}</p>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">Est. Tax Shield: KES {(exp.amountKes * 0.3).toLocaleString()}</p>
+                  <p className="ui-meta">Est. Tax Shield: KES {(exp.amountKes * 0.3).toLocaleString()}</p>
                 </div>
               </div>
             ))}

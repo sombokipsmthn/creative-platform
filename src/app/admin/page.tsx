@@ -378,7 +378,7 @@ export default function CreativeOSDashboardPage() {
               <span className="os-icon-box h-12 w-12 rounded-2xl"><BriefcaseBusiness className="h-5 w-5" /></span>
             )}
             <div>
-              <p className="os-eyebrow">Creative OS · Command Center</p>
+              <p className="os-eyebrow">Creative · Command Center</p>
               <h1 className="mt-2 text-3xl font-medium tracking-[-0.05em] sm:text-4xl">Good to see you, {firstName}.</h1>
               <p className="mt-2 max-w-2xl text-xs leading-6 text-[var(--text-muted)] sm:text-sm">
                 Your studio, client work and commercial operations in one view. Start with what needs attention, then move the work forward.
@@ -481,7 +481,7 @@ export default function CreativeOSDashboardPage() {
               <SectionHeading
                 eyebrow="03 · Signal"
                 title="See where the business is moving"
-                description="Cometly's strongest idea is not the chart itself — it is putting context around the number. This layer applies that principle to your studio."
+                description="This platform's strongest idea is not the chart itself — it is putting context around the number. This layer applies that principle to your studio."
               />
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-[1.15fr_0.85fr]">
                 <Panel eyebrow="Money" title="Commercial flow" action={<Link href="/admin/invoices" className="font-mono text-[8px] uppercase tracking-[0.15em] text-[var(--text-muted)] hover:text-[var(--accent)]">Open ledger →</Link>}>
@@ -568,7 +568,7 @@ export default function CreativeOSDashboardPage() {
 
         <footer className="mt-10 border-t border-[var(--border-subtle)] pt-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--text-faint)]">Creative OS · KIPSMTHN</p>
+            <p className="font-mono text-[8px] uppercase tracking-[0.18em] text-[var(--text-faint)]">Creative · KIPSMTHN</p>
             <p className="text-[10px] text-[var(--text-faint)]">Built around the way a creative studio actually works.</p>
           </div>
         </footer>

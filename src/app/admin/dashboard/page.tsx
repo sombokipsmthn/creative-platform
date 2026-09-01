@@ -247,7 +247,7 @@ export default function CreativeOSDashboardPage() {
           <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
-                Creative OS Command Center
+                Command Center
               </p>
               <div className="flex items-center gap-4">
                 {avatar && (

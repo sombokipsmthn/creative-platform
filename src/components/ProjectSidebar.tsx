@@ -12,54 +12,86 @@ const tabs: SidebarTab[] = [
   {
     type: 'photos',
     label: 'Photos & Collections',
-    icon: <Layers className="w-4 h-4" />,
+    icon: <Layers className="h-4 w-4" />,
   },
   {
     type: 'details',
     label: 'Gallery Details',
-    icon: <Sliders className="w-4 h-4" />,
+    icon: <Sliders className="h-4 w-4" />,
   },
   {
     type: 'themes',
     label: 'Theme & Design',
-    icon: <Palette className="w-4 h-4" />,
+    icon: <Palette className="h-4 w-4" />,
   },
   {
     type: 'cover',
     label: 'Cover Image',
-    icon: <Star className="w-4 h-4" />,
+    icon: <Star className="h-4 w-4" />,
   },
   {
     type: 'settings',
     label: 'Settings & Access',
-    icon: <Settings className="w-4 h-4" />,
+    icon: <Settings className="h-4 w-4" />,
   },
   {
     type: 'activity',
     label: 'Client Activity',
-    icon: <Heart className="w-4 h-4" />,
+    icon: <Heart className="h-4 w-4" />,
   },
 ]
 
-export default function ProjectSidebar({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) {
+export default function ProjectSidebar({
+  activeTab,
+  onTabChange,
+}: {
+  activeTab: string
+  onTabChange: (tab: string) => void
+}) {
   return (
-    <div className="w-64 h-full bg-white dark:bg-zinc-950 border-r border-slate-200 dark:border-zinc-800 p-4 flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Project Tools</h2>
+    <aside className="w-full shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-card)] md:w-60 md:border-b-0 md:border-r">
+      <div className="flex h-full flex-col px-3 py-4 md:px-4 md:py-5">
+        <div className="mb-5 px-2">
+          <p className="os-eyebrow">Project</p>
+          <h2 className="mt-2 text-base font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
+            Project Tools
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-[var(--text-muted)]">
+            Manage this client gallery
+          </p>
+        </div>
+
+        <nav className="grid grid-cols-2 gap-1 md:block md:space-y-1" aria-label="Project tools">
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.type
+
+            return (
+              <button
+                key={tab.type}
+                type="button"
+                onClick={() => onTabChange(tab.type)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`group flex min-h-10 w-full items-center gap-2.5 rounded-[0.7rem] px-3 py-2.5 text-left text-xs font-medium transition-all duration-150 md:text-sm ${
+                  isActive
+                    ? 'bg-[var(--accent-soft)] text-[var(--accent)] shadow-sm ring-1 ring-inset ring-[color-mix(in_srgb,var(--accent)_18%,transparent)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--bg-soft)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[0.55rem] border transition-colors ${
+                    isActive
+                      ? 'border-[color-mix(in_srgb,var(--accent)_20%,transparent)] bg-[var(--bg-card)] text-[var(--accent)]'
+                      : 'border-transparent text-[var(--text-muted)] group-hover:border-[var(--border-subtle)] group-hover:bg-[var(--bg-card)] group-hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  {tab.icon}
+                </span>
+                <span className="min-w-0 truncate">{tab.label}</span>
+              </button>
+            )
+          })}
+        </nav>
       </div>
-      
-      <nav className="flex-1 space-y-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.type}
-            onClick={() => onTabChange(tab.type)}
-            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.type ? 'bg-purple-600 text-white' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-900'}`}
-          >
-            {tab.icon}
-            {tab.label}
-          </button>
-        ))}
-      </nav>
-    </div>
+    </aside>
   )
 }

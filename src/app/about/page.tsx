@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -6,6 +5,7 @@ import Image from "next/image";
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCreator } from "@/context/CreatorContext";
+import { Button } from "@/components/ui/Button";
 
 const resolveImage = (
   source?: string | null,
@@ -54,7 +54,7 @@ export default function AboutPage() {
             : "ABOUT KIPSMTHN PLATFORM"}
         </p>
 
-        <h1 className="heading-editorial text-slate-900 dark:text-white max-w-4xl mx-auto">
+        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
           {activeUser
             ? activeUser.name
             : "Multi-Creator Portfolio & Client Delivery Engine"}
@@ -67,20 +67,20 @@ export default function AboutPage() {
 
       {/* CREATOR PROFILE */}
       {!activeUser ? (
-        <section className="py-16 px-6 max-w-4xl mx-auto text-center">
-          <div className="p-12 border-2 border-dashed border-slate-300 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-3xl space-y-4">
-            <h2 className="text-xl font-medium text-slate-900 dark:text-white">
+        <section className="py-12 px-6 max-w-4xl mx-auto">
+          <div className="border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/40 rounded-xl p-6 space-y-4">
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
               No Creator Logged In
             </h2>
 
-            <p className="text-xs text-slate-500 font-mono">
+            <p className="text-sm text-slate-500 dark:text-zinc-500">
               Log in to your creator account to view your
               profile and portfolio information.
             </p>
 
             <Link
               href="/admin/login"
-              className="inline-block px-6 py-3 btn-primary text-xs font-mono uppercase tracking-widest rounded-full"
+              className="Button Button--primary mt-4 w-full"
             >
               Creator Login →
             </Link>
@@ -88,35 +88,37 @@ export default function AboutPage() {
         </section>
       ) : (
         <section className="py-12 px-6 max-w-7xl mx-auto">
-          <div className="relative border border-slate-200 dark:border-zinc-800 bg-linear-to-r from-purple-100/80 via-slate-50 to-white dark:from-purple-950/40 dark:via-zinc-900/60 dark:to-zinc-950 rounded-3xl p-8 md:p-16 overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <span className="inline-flex px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
-                {activeUser.name} — {location}
-              </span>
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+                  {activeUser.name} — {location}
+                </span>
+              </div>
 
-              <h2 className="text-3xl md:text-5xl font-light text-slate-900 dark:text-white leading-tight">
+              <h2 className="text-3xl font-light text-slate-900 dark:text-white">
                 About {activeUser.name}
               </h2>
 
-              <p className="text-sm text-slate-700 dark:text-zinc-300 font-light leading-relaxed">
+              <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
                 {bio}
               </p>
 
               {profile?.website && (
-                <div className="pt-2">
-                  <a
+                <div className="mt-4">
+                  <Link
                     href={profile.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex px-6 py-3 btn-primary text-xs uppercase font-medium tracking-widest rounded-full"
+                    className="Button Button--primary"
                   >
                     Visit Website ↗
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
 
-            <div className="relative aspect-square w-full max-w-md mx-auto rounded-2xl overflow-hidden border border-purple-500/30 shadow-2xl">
+            <div className="relative aspect-square w-full max-w-md mx-auto rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
               <Image
                 src={resolveImage(profile?.avatarUrl)}
                 alt={activeUser.name}
@@ -130,7 +132,7 @@ export default function AboutPage() {
       )}
 
       {/* FOOTER */}
-      <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6 mt-16">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6 mt-16">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
           <p>
             © {new Date().getFullYear()}{" "}

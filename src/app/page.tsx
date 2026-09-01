@@ -3,6 +3,7 @@ import { ArrowRight, Check, FileText, FolderKanban, Images, LayoutDashboard, Use
 
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/Button";
 
 const platformFeatures = [
   {
@@ -131,7 +132,7 @@ export default function HomePage() {
               <div className="mt-10 flex flex-wrap gap-3">
                 <Link
                   href="/sign-up"
-                  className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700"
+                  className="Button Button--primary"
                 >
                   Get started
                   <ArrowRight className="h-4 w-4" />
@@ -139,7 +140,7 @@ export default function HomePage() {
 
                 <Link
                   href="#platform"
-                  className="inline-flex items-center rounded-full border border-slate-200 px-7 py-4 text-sm font-medium transition hover:border-purple-400 hover:text-purple-600 dark:border-zinc-800 dark:hover:border-purple-800 dark:hover:text-purple-400"
+                  className="Button Button--secondary"
                 >
                   Explore the platform
                 </Link>
@@ -154,7 +155,7 @@ export default function HomePage() {
               ].map(([number, title, text]) => (
                 <div
                   key={number}
-                  className="rounded-[1.5rem] border border-slate-200 bg-white/70 p-6 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/70"
+                  className="rounded-xl border border-slate-200 bg-white/70 p-6 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/70"
                 >
                   <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">
                     {number}
@@ -193,7 +194,7 @@ export default function HomePage() {
                 {platformFeatures.map((feature) => (
                   <article
                     key={feature.number}
-                    className="group rounded-[1.5rem] border border-slate-200 p-7 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-600/5 dark:border-zinc-800 dark:hover:border-purple-900"
+                    className="group rounded-xl border border-slate-200 p-7 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-600/5 dark:border-zinc-800 dark:hover:border-purple-900"
                   >
                     <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">
                       {feature.number}
@@ -227,7 +228,7 @@ export default function HomePage() {
               {workflow.map((item) => (
                 <article
                   key={item.step}
-                  className="relative rounded-[1.5rem] border border-slate-200 p-7 dark:border-zinc-800"
+                  className="relative rounded-xl border border-slate-200 p-7 dark:border-zinc-800"
                 >
                   <span className="font-mono text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">
                     {item.step}
@@ -263,7 +264,7 @@ export default function HomePage() {
                   return (
                     <div
                       key={module.title}
-                      className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-zinc-800 dark:bg-zinc-950"
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-5 dark:border-zinc-800 dark:bg-zinc-950"
                     >
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-purple-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-purple-400">
                         <Icon className="h-4 w-4" />
@@ -285,7 +286,7 @@ export default function HomePage() {
         {/* PRIVATE CREATOR WORKSPACE */}
         <section className="px-6 py-24 md:py-32">
           <div className="mx-auto max-w-7xl">
-            <div className="rounded-[2rem] bg-purple-600 p-8 text-white md:p-14">
+            <div className="rounded-2xl bg-purple-600 p-8 text-white md:p-14">
               <div className="grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-200">
@@ -322,14 +323,14 @@ export default function HomePage() {
               <div className="mt-10 flex flex-wrap gap-3">
                 <Link
                   href="/sign-up"
-                  className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-purple-700 transition hover:bg-purple-50"
+                  className="Button Button--primary"
                 >
                   Create your workspace
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <Link
                   href="/sign-in"
-                  className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-sm font-medium text-white transition hover:bg-white/10"
+                  className="Button Button--secondary"
                 >
                   Sign in
                 </Link>
@@ -354,7 +355,7 @@ export default function HomePage() {
             <div className="mt-9 flex justify-center gap-3">
               <Link
                 href="/sign-up"
-                className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700"
+                className="Button Button--primary"
               >
                 Get started
                 <ArrowRight className="h-4 w-4" />
@@ -378,13 +379,13 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <Link
               href="/sign-in"
-              className="rounded-full border border-slate-200 px-5 py-2.5 text-xs font-medium transition hover:border-purple-400 hover:text-purple-600 dark:border-zinc-800 dark:hover:border-purple-800 dark:hover:text-purple-400"
+              className="Button Button--secondary"
             >
               Sign in
             </Link>
             <Link
               href="/sign-up"
-              className="rounded-full bg-purple-600 px-5 py-2.5 text-xs font-medium text-white transition hover:bg-purple-700"
+              className="Button Button--primary"
             >
               Get started
             </Link>

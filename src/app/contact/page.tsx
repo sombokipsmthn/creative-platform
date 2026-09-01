@@ -1,6 +1,6 @@
-// src/app/contact/page.tsx
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
+import Link from 'next/link';
 
 export default function ContactPage() {
   return (
@@ -14,7 +14,7 @@ export default function ContactPage() {
           INITIATE COLLABORATION
         </p>
 
-        <h1 className="heading-editorial text-slate-900 dark:text-white max-w-4xl mx-auto">
+        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
           Start a Project with <span className="font-normal text-purple-600 dark:text-purple-400">Kip-Smthn</span>
         </h1>
 
@@ -24,44 +24,70 @@ export default function ContactPage() {
       </section>
 
       {/* Direct Contact Cards */}
-      <main className="py-12 px-6 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="p-8 bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-3xl space-y-4 shadow-sm dark:shadow-none">
-          <span className="px-3 py-1 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold uppercase">
+      <main className="py-12 px-6 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Direct Inquiries Card */}
+        <div className="border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/40 rounded-xl p-6 space-y-4">
+          <span className="inline-flex items-center px-3 py-1 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
             Direct Inquiries
           </span>
-          <h2 className="text-2xl font-light text-slate-900 dark:text-white">Somboriot Kipchilat</h2>
+          <h2 className="text-2xl font-light text-slate-900 dark:text-white">
+            Somboriot Kipchilat
+          </h2>
           <div className="space-y-2 text-xs font-mono text-slate-600 dark:text-zinc-300">
-            <p>📧 Email: <a href="mailto:somboriot@gmail.com" className="text-purple-600 dark:text-purple-400 font-bold hover:underline">somboriot@gmail.com</a></p>
-            <p>📱 Phone: <a href="tel:+254722145776" className="text-purple-600 dark:text-purple-400 font-bold hover:underline">+254 722 145 776</a></p>
+            <p>
+              📧 Email: <a href="mailto:somboriot@gmail.com" className="text-purple-600 dark:text-purple-400 font-medium hover:underline">
+                somboriot@gmail.com
+              </a>
+            </p>
+            <p>
+              📱 Phone: <a href="tel:+254722145776" className="text-purple-600 dark:text-purple-400 font-medium hover:underline">
+                +254 722 145 776
+              </a>
+            </p>
             <p>📍 Location: Nairobi, Kenya</p>
             <p>🧾 KRA eTIMS & WHT Compliant</p>
           </div>
         </div>
 
-        <div className="p-8 bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-3xl space-y-4 shadow-sm dark:shadow-none">
-          <span className="px-3 py-1 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold uppercase">
+        {/* Social & Digital Media Card */}
+        <div className="border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/40 rounded-xl p-6 space-y-4">
+          <span className="inline-flex items-center px-3 py-1 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
             Social & Digital Media
           </span>
-          <h2 className="text-2xl font-light text-slate-900 dark:text-white">Channels & Archives</h2>
+          <h2 className="text-2xl font-light text-slate-900 dark:text-white">
+            Channels & Archives
+          </h2>
           <div className="flex flex-col gap-2 text-xs font-mono pt-2">
-            <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-4 py-2.5 btn-secondary rounded-xl flex justify-between items-center">
-              <span>LinkedIn Profile</span>
-              <span>↗</span>
-            </a>
-            <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2.5 btn-secondary rounded-xl flex justify-between items-center">
-              <span>YouTube / Kraft Digital</span>
-              <span>↗</span>
-            </a>
-            <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2.5 btn-secondary rounded-xl flex justify-between items-center">
-              <span>Linktree Directory</span>
-              <span>↗</span>
-            </a>
+            <Link
+              href="https://www.linkedin.com/in/sombo09/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="Button Button--secondary h-9 w-full justify-start"
+            >
+              LinkedIn Profile
+            </Link>
+            <Link
+              href="https://www.youtube.com/@kraftdigital7749"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="Button Button--secondary h-9 w-full justify-start"
+            >
+              YouTube / Kraft Digital
+            </Link>
+            <Link
+              href="https://linktr.ee/kipsmthn"
+              target="_blank"
+              rel="noopener noreffer"
+              className="Button Button--secondary h-9 w-full justify-start"
+            >
+              Linktree Directory
+            </Link>
           </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6 mt-20">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6 mt-20">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
           <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
           <div className="flex items-center gap-6">

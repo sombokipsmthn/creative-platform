@@ -1,8 +1,8 @@
-// src/app/services/page.tsx
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/Button';
 
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80';
@@ -89,8 +89,7 @@ export default function ServicesPage() {
           KIPSMTHN CAPABILITIES
         </p>
 
-        {/* Small Caps Title */}
-        <h1 className="heading-editorial text-slate-900 dark:text-white max-w-4xl mx-auto">
+        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
           Production & Creative <span className="font-normal text-purple-600 dark:text-purple-400">Storytelling Services</span>
         </h1>
 
@@ -105,7 +104,7 @@ export default function ServicesPage() {
           {serviceModules.map((s) => (
             <div
               key={s.num}
-              className="p-8 md:p-12 bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800/80 rounded-3xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center shadow-md dark:shadow-none hover:border-purple-600/50 transition-all"
+              className="p-8 md:p-12 bg-white dark:bg-zinc-900/30 border border-slate-200 dark:border-zinc-800/80 rounded-xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center shadow-md dark:shadow-none hover:border-purple-600/50 transition-all"
             >
               <div className="space-y-6">
                 <div className="space-y-2">
@@ -143,7 +142,7 @@ export default function ServicesPage() {
                 <div className="pt-2">
                   <Link
                     href="/contact"
-                    className="inline-block px-6 py-3 btn-primary text-xs uppercase font-medium tracking-widest rounded-full shadow-sm"
+                    className="Button Button--primary"
                   >
                     Request Proposal →
                   </Link>
@@ -151,7 +150,7 @@ export default function ServicesPage() {
               </div>
 
               {/* Service Cover Image */}
-              <div className="relative aspect-4/3 w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-xl">
+              <div className="relative aspect-4/3 w-full rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-xl">
                 <Image
                   src={resolveImage(s.image)}
                   alt={s.title}
@@ -174,7 +173,7 @@ export default function ServicesPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {workflowSteps.map((w) => (
-            <div key={w.step} className="p-6 bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-2xl space-y-3 shadow-sm dark:shadow-none">
+            <div key={w.step} className="p-6 bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-xl space-y-3 shadow-sm dark:shadow-none">
               <span className="text-xs font-mono text-purple-600 dark:text-purple-400 font-bold">{w.step}</span>
               <h3 className="text-lg font-medium text-slate-900 dark:text-white">{w.title}</h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">{w.desc}</p>
@@ -183,7 +182,7 @@ export default function ServicesPage() {
         </div>
 
         {/* KRA eTIMS Notice */}
-        <div className="p-8 border border-purple-500/30 bg-purple-100/50 dark:bg-purple-950/20 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="p-8 border border-purple-500/30 bg-purple-100/50 dark:bg-purple-950/20 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2 max-w-xl">
             <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase font-semibold">
               Kenyan Business & Tax Compliant
@@ -194,14 +193,14 @@ export default function ServicesPage() {
             </p>
           </div>
 
-          <Link href="/contact" className="px-6 py-3 btn-primary text-xs uppercase font-medium tracking-widest rounded-full shrink-0">
+          <Link href="/contact" className="Button Button--primary shrink-0">
             Get Invoice Quote
           </Link>
         </div>
       </section>
 
       {/* 4. FOOTER */}
-      <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
@@ -212,19 +211,19 @@ export default function ServicesPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-purple-600 text-white">
+              <Link href="https://www.linkedin.com/in/sombo09/" target="_blank" className="Button Button--primary">
                 LinkedIn
-              </a>
-              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="Button Button--secondary">
                 Instagram
-              </a>
-              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="Button Button--secondary">
                 YouTube
-              </a>
-              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link href="https://linktr.ee/kipsmthn" target="_blank" className="Button Button--secondary">
                 Linktree
-              </a>
-              <Link href="/portal" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link href="/portal" className="Button Button--secondary">
                 Client Delivery Portal
               </Link>
             </div>
@@ -232,7 +231,7 @@ export default function ServicesPage() {
 
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
-            
+
             <div className="flex items-center gap-6">
               <ThemeToggle />
               <span className="text-slate-500 dark:text-zinc-500">Nairobi, Kenya</span>

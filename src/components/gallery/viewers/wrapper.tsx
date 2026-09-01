@@ -2,11 +2,11 @@
 
 import React from 'react';
 import { getGalleryTheme, type GalleryThemeId } from '@/lib/gallery/themes';
-import { GalleryViewerMinimal } from './viewers/minimal';
-import { GalleryViewerEditorial } from './viewers/editorial';
-import { GalleryViewerCinematic } from './viewers/cinematic';
-import { GalleryViewerMosaic } from './viewers/mosaic';
-import { GalleryViewerStory } from './viewers/story';
+import { GalleryViewerMinimal } from './minimal';
+import { GalleryViewerEditorial } from './editorial';
+import { GalleryViewerCinematic } from './cinematic';
+import { GalleryViewerMosaic } from './mosaic';
+import { GalleryViewerStory } from './story';
 
 export interface GalleryPhoto {
   id: string;

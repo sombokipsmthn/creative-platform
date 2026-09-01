@@ -1,16 +1,14 @@
 'use client'
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { Image as ImageIcon, Layers, Sliders, Star, Settings, Heart } from 'lucide-react'
+import { Layers, Sliders, Star, Settings, Heart, Palette } from 'lucide-react'
 
-interface TabType {
-  type: 'photos' | 'details' | 'cover' | 'settings' | 'activity'
+interface SidebarTab {
+  type: string
   label: string
   icon: React.ReactNode
 }
 
-const tabs: TabType[] = [
+const tabs: SidebarTab[] = [
   {
     type: 'photos',
     label: 'Photos & Collections',
@@ -20,6 +18,11 @@ const tabs: TabType[] = [
     type: 'details',
     label: 'Gallery Details',
     icon: <Sliders className="w-4 h-4" />,
+  },
+  {
+    type: 'themes',
+    label: 'Theme & Design',
+    icon: <Palette className="w-4 h-4" />,
   },
   {
     type: 'cover',
@@ -50,7 +53,7 @@ export default function ProjectSidebar({ activeTab, onTabChange }: { activeTab: 
           <button
             key={tab.type}
             onClick={() => onTabChange(tab.type)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.type ? 'bg-purple-600 text-white' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-900'}`}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.type ? 'bg-purple-600 text-white' : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-900'}`}
           >
             {tab.icon}
             {tab.label}

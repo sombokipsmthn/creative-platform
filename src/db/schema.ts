@@ -6,6 +6,8 @@ import {
   integer,
   boolean,
   bigint,
+  unique,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -18,7 +20,11 @@ export const users = pgTable("users", {
   onboardingStep: integer("onboarding_step").default(1).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const creatorProfiles = pgTable("creator_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -29,7 +35,11 @@ export const creatorProfiles = pgTable("creator_profiles", {
   location: text("location"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const creatorServices = pgTable("creator_services", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -41,7 +51,11 @@ export const creatorServices = pgTable("creator_services", {
   currency: text("currency").default("KES").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("creator_services_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const creatorBusinessProfiles = pgTable("creator_business_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -56,7 +70,11 @@ export const creatorBusinessProfiles = pgTable("creator_business_profiles", {
   whtRate: integer("wht_rate").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const clients = pgTable("clients", {
   id: text("id").primaryKey(),
@@ -75,7 +93,10 @@ export const clients = pgTable("clients", {
   taxCertificateStatus: text("tax_certificate_status").default("NOT_RECEIVED").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("clients_creator_id_idx").on(table.creatorId),
+  statusIdx: index("clients_status_idx").on(table.status),
+}));
 
 export const projects = pgTable("projects", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -89,7 +110,11 @@ export const projects = pgTable("projects", {
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("projects_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("projects_client_id_idx").on(table.clientId),
+  statusIdx: index("projects_status_idx").on(table.status),
+}));
 
 export const quotes = pgTable("quotes", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -113,18 +138,22 @@ export const quotes = pgTable("quotes", {
   clientContact: text("client_contact"),
   depositPercentage: integer("deposit_percentage").default(50),
   notes: text("notes"),
-  invoiceId: uuid("invoice_id"),
+  invoiceId: uuid("invoice_id").references(() => invoices.id, { onDelete: "cascade" }),
   version: integer("version").default(1).notNull(),
   archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("quotes_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("quotes_client_id_idx").on(table.clientId),
+  statusIdx: index("quotes_status_idx").on(table.status),
+}));
 
 export const invoices = pgTable("invoices", {
   id: uuid("id").defaultRandom().primaryKey(),
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   clientId: text("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
-  quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "set null" }),
+  quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "cascade" }),
   invoiceNumber: text("invoice_number").notNull().unique(),
   title: text("title").default("Invoice").notNull(),
   status: text("status").default("draft").notNull(),
@@ -134,10 +163,14 @@ export const invoices = pgTable("invoices", {
   subtotal: integer("subtotal").default(0).notNull(),
   tax: integer("tax").default(0).notNull(),
   total: integer("total").default(0).notNull(),
-  currency: text("currency").default("USD").notNull(),
+  currency: text("currency").default("KES").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const invoiceItems = pgTable("invoice_items", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -192,7 +225,11 @@ export const galleries = pgTable("galleries", {
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("galleries_creator_id_idx").on(table.creatorId),
+  statusIdx: index("galleries_status_idx").on(table.status),
+  slugIdx: index("galleries_slug_idx").on(table.slug),
+}));
 
 export const galleryCollections = pgTable("gallery_collections", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -202,7 +239,11 @@ export const galleryCollections = pgTable("gallery_collections", {
   sortOrder: integer("sort_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const galleryPhotos = pgTable("gallery_photos", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -213,6 +254,11 @@ export const galleryPhotos = pgTable("gallery_photos", {
   displayUrl: text("display_url").notNull(),
   thumbnailUrl: text("thumbnail_url").notNull(),
   storagePath: text("storage_path"),
+  originalPath: text("original_path"),
+  displayPath: text("display_path"),
+  thumbnailPath: text("thumbnail_path"),
+  watermarkPath: text("watermark_path"),
+  processingStatus: text("processing_status").default("pending").notNull(),
   mimeType: text("mime_type"),
   fileSize: bigint("file_size", { mode: "number" }),
   width: integer("width"),
@@ -225,7 +271,10 @@ export const galleryPhotos = pgTable("gallery_photos", {
   downloadCount: integer("download_count").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  galleryIdIdx: index("gallery_photos_gallery_id_idx").on(table.galleryId),
+  collectionIdIdx: index("gallery_photos_collection_id_idx").on(table.collectionId),
+}));
 
 export const galleryAccessSessions = pgTable("gallery_access_sessions", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -256,7 +305,11 @@ export const galleryPhotoActions = pgTable("gallery_photo_actions", {
   isFavorite: boolean("is_favorite").default(false).notNull(),
   isSelected: boolean("is_selected").default(false).notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const galleryComments = pgTable("gallery_comments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -269,7 +322,11 @@ export const galleryComments = pgTable("gallery_comments", {
   resolvedAt: timestamp("resolved_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const galleryApprovals = pgTable("gallery_approvals", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -281,7 +338,11 @@ export const galleryApprovals = pgTable("gallery_approvals", {
   responseNote: text("response_note"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const galleryWatermarks = pgTable("gallery_watermarks", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -293,7 +354,11 @@ export const galleryWatermarks = pgTable("gallery_watermarks", {
   fontSize: integer("font_size").default(42).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const galleryDownloadPresets = pgTable("gallery_download_presets", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -306,7 +371,11 @@ export const galleryDownloadPresets = pgTable("gallery_download_presets", {
   includeWatermark: boolean("include_watermark").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));
 
 export const galleryDownloads = pgTable("gallery_downloads", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -321,3 +390,27 @@ export const galleryDownloads = pgTable("gallery_downloads", {
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const galleryThemes = pgTable("gallery_themes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  galleryId: uuid("gallery_id").notNull().unique().references(() => galleries.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  type: text("type").default("custom").notNull(), // 'preset' or 'custom'
+  layout: text("layout").default("masonry").notNull(), // 'masonry', 'grid', 'slideshow', 'list'
+  accentColor: text("accent_color").default("#000000").notNull(),
+  backgroundColor: text("background_color").default("#ffffff").notNull(),
+  textColor: text("text_color").default("#000000").notNull(),
+  borderRadius: integer("border_radius").default(0).notNull(),
+  showTitle: boolean("show_title").default(true).notNull(),
+  showDescription: boolean("show_description").default(true).notNull(),
+  showCollections: boolean("show_collections").default(true).notNull(),
+  masonryColumns: integer("masonry_columns").default(4).notNull(),
+  aspectRatio: text("aspect_ratio").default("auto").notNull(), // 'auto', '1:1', '16:9', '4:3', '3:2'
+  customCSS: text("custom_css"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdIdx: index("invoices_creator_id_idx").on(table.creatorId),
+  clientIdIdx: index("invoices_client_id_idx").on(table.clientId),
+  statusIdx: index("invoices_status_idx").on(table.status),
+}));

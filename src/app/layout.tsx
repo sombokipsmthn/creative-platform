@@ -6,6 +6,10 @@ import './globals.css';
 
 import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
+import { validateEnv } from '@/lib/env';
+
+// Validate environment variables on app startup
+validateEnv();
 
 export const viewport: Viewport = {
   width: 'device-width',

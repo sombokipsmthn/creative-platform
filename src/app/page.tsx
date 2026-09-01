@@ -261,6 +261,7 @@ export default function HomePage() {
               alt="Kips and the team at the studio"
               fill
               priority
+              unoptimized
               className="object-cover"
             />
  
@@ -302,7 +303,7 @@ export default function HomePage() {
               "addressLocality": "Nairobi",
               "addressCountry": "KE"
             },
-            "telephone": "+254700000000",
+            "telephone": process.env.NEXT_PUBLIC_PHONE ?? "+254722145776",
             "url": "https://kipsmthn.com/",
             "openingHours": "Mo-Fr 09:00-17:00"
           }

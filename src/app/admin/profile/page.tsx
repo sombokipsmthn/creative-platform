@@ -1,263 +1,378 @@
-// src/app/admin/profile/page.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Image from 'next/image';
 
-export default function AdminProfilePage() {
-  // 💡 DEMO CREATOR PROFILE DEFAULT STATE
-  const [profile, setProfile] = useState({
-    name: 'Alex Mercer',
-    title: 'Lead Visual Director & Media Producer',
-    email: 'alex@creativestudio.com',
-    phone: '+254 700 000 000',
-    kraPin: 'P000000000X',
-    location: 'Nairobi, Kenya',
-    bio: 'Lead visual director and media producer specializing in commercial campaigns, brand films, motion graphics, and digital platform delivery.',
-    linkedin: 'https://linkedin.com/in/democreator',
-    instagram: 'https://instagram.com/democreator',
-    youtube: 'https://youtube.com/@democreator',
-    linktree: 'https://linktr.ee/democreator',
-    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
-  });
+interface ProfileForm {
+  name: string;
+  handle: string;
+  email: string;
+  phone: string;
+  kraPin: string;
+  location: string;
+  bio: string;
+  website: string;
+  businessName: string;
+  avatarUrl: string;
+}
 
+const emptyProfile: ProfileForm = {
+  name: '',
+  handle: '',
+  email: '',
+  phone: '',
+  kraPin: '',
+  location: '',
+  bio: '',
+  website: '',
+  businessName: '',
+  avatarUrl: '',
+};
+
+export default function AdminProfilePage() {
+  const { isLoaded, user } = useUser();
+  const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Load existing profile from the API and merge into demo defaults
   useEffect(() => {
+    if (!isLoaded || !user) return;
+
     let ignore = false;
 
     async function loadProfile() {
+      setIsLoading(true);
+      setMessage(null);
+
       try {
-        setIsLoading(true);
-        const res = await fetch('/api/profile', { cache: 'no-store' });
-        if (!res.ok) return;
-        const data = await res.json();
-        if (ignore) return;
-        if (data?.profile) {
-          setProfile((prev) => ({ ...prev, ...data.profile }));
+        const response = await fetch('/api/profile', { cache: 'no-store' });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error || 'Failed to load profile');
         }
-      } catch (err) {
-        console.error('Failed to load profile:', err);
+
+        if (ignore) return;
+
+        setProfile({
+          name: data?.user?.name || user.fullName || user.firstName || '',
+          handle: data?.user?.handle || user.username || '',
+          email: data?.user?.email || user.primaryEmailAddress?.emailAddress || '',
+          phone: data?.businessProfile?.phone || '',
+          kraPin: data?.businessProfile?.kraPin || '',
+          location: data?.profile?.location || '',
+          bio: data?.profile?.bio || '',
+          website: data?.profile?.website || '',
+          businessName: data?.businessProfile?.businessName || '',
+          avatarUrl: data?.profile?.avatarUrl || user.imageUrl || '',
+        });
+      } catch (error) {
+        console.error('Failed to load creator profile:', error);
+        if (!ignore) {
+          setMessage(error instanceof Error ? error.message : 'Failed to load profile');
+        }
       } finally {
         if (!ignore) setIsLoading(false);
       }
     }
 
     void loadProfile();
+
     return () => {
       ignore = true;
     };
-  }, []);
+  }, [isLoaded, user]);
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!user) return;
+
     setIsSaving(true);
     setMessage(null);
 
     try {
-      const res = await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ profile }),
+      const nameParts = profile.name.trim().split(/\s+/).filter(Boolean);
+      const firstName = nameParts.shift() || '';
+      const lastName = nameParts.join(' ');
+
+      // Keep Clerk identity and the local creator record aligned.
+      await user.update({
+        firstName,
+        lastName,
       });
 
-      const result = await res.json();
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: {
+            name: profile.name.trim(),
+            handle: profile.handle.trim(),
+          },
+          profile: {
+            bio: profile.bio,
+            avatarUrl: profile.avatarUrl,
+            website: profile.website,
+            location: profile.location,
+          },
+          businessProfile: {
+            businessName: profile.businessName,
+            phone: profile.phone,
+            kraPin: profile.kraPin,
+          },
+        }),
+      });
 
-      if (!res.ok) {
+      const result = await response.json();
+
+      if (!response.ok) {
         throw new Error(result?.error || 'Failed to save profile');
       }
 
-      setMessage('Profile saved successfully');
-    } catch (err) {
-      console.error('Save profile error:', err);
-      setMessage(err instanceof Error ? err.message : 'Failed to save profile');
+      setMessage('Profile saved successfully.');
+    } catch (error) {
+      console.error('Save profile error:', error);
+      setMessage(error instanceof Error ? error.message : 'Failed to save profile');
     } finally {
       setIsSaving(false);
     }
   };
 
+  if (!isLoaded || isLoading) {
+    return (
+      <main className="os-page flex min-h-[70vh] items-center justify-center">
+        <div className="os-pulse flex items-center gap-3">
+          <span className="os-icon-box h-9 w-9" />
+          <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--text-muted)]">
+            Loading creator profile
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  const displayName = profile.name || user.fullName || user.firstName || 'Creator';
+  const avatar = profile.avatarUrl || user.imageUrl;
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase() || 'C';
+
+  const update = (key: keyof ProfileForm, value: string) => {
+    setProfile((current) => ({ ...current, [key]: value }));
+  };
+
   return (
-    <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
-      <div className="max-w-4xl mx-auto space-y-10">
-        
-        {/* Header Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
+    <main className="os-page min-h-screen">
+      <div className="os-shell py-8 sm:py-10">
+        <div className="mb-8 flex flex-col gap-4 border-b border-[var(--border-subtle)] pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <Link href="/admin" className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline">
+            <Link
+              href="/admin"
+              className="font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--accent)] hover:underline"
+            >
               ← Back to Dashboard
             </Link>
-            <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">Creator Profile & Identity</h1>
+            <p className="os-eyebrow mt-3">Account</p>
+            <h1 className="os-title text-2xl sm:text-3xl">Creator Profile</h1>
+            <p className="os-subtitle">
+              Your profile is connected to the signed-in Clerk account and your creator records.
+            </p>
           </div>
 
-          <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
-            Demo Creator Profile #1
+          <span className="os-pill">
+            <span className="os-pill-dot text-[var(--success)]" />
+            Authenticated creator
           </span>
         </div>
 
-        {/* Profile Card & Edit Form */}
-        <form onSubmit={handleSave} className="space-y-8">
-          
-          {/* Avatar Preview Header Card */}
-          <div className="p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl flex flex-col sm:flex-row items-center gap-6 shadow-xl">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden shrink-0 border-2 border-purple-500 shadow-lg">
-              <Image
-                src={profile.avatarUrl}
-                alt={profile.name}
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-
-            <div className="space-y-2 text-center sm:text-left flex-1">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full font-semibold uppercase">
-                  Verified Demo Creator
-                </span>
-                <span className="text-xs font-mono text-slate-500 dark:text-zinc-400">KRA PIN: {profile.kraPin}</span>
+        <form onSubmit={handleSave} className="space-y-6">
+          <section className="os-card p-5 sm:p-7">
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[var(--border-strong)] bg-[var(--bg-soft)]">
+                {avatar ? (
+                  <Image
+                    src={avatar}
+                    alt={displayName}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-[var(--text-muted)]">
+                    {initials}
+                  </div>
+                )}
               </div>
 
-              <h2 className="text-2xl font-medium text-slate-900 dark:text-white">{profile.name}</h2>
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">{profile.title}</p>
-              <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">{profile.email} • {profile.phone} • {profile.location}</p>
+              <div className="min-w-0 flex-1">
+                <p className="os-eyebrow">Current account</p>
+                <h2 className="mt-1 truncate text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+                  {displayName}
+                </h2>
+                <p className="mt-1 truncate text-[11px] text-[var(--text-muted)]">
+                  {profile.email || user.primaryEmailAddress?.emailAddress || 'No email available'}
+                </p>
+                {profile.handle && (
+                  <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--accent)]">
+                    @{profile.handle}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          </section>
 
-          {/* Edit Form Controls */}
-          <div className="p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-xl">
-            <div className="border-b border-slate-200 dark:border-zinc-800 pb-3">
-              <span className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">Personal & Professional Info</span>
-              <h3 className="text-lg font-light text-slate-900 dark:text-white">Edit Creator Profile</h3>
+          <section className="os-card">
+            <div className="border-b border-[var(--border-subtle)] px-5 py-4 sm:px-7">
+              <p className="os-eyebrow">Identity</p>
+              <h2 className="mt-1 text-sm font-semibold text-[var(--text-primary)]">Creator details</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Creator Full Name</label>
+            <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7">
+              <label className="space-y-1.5">
+                <span className="os-field-label">Full name</span>
                 <input
                   type="text"
                   value={profile.name}
-                  onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  onChange={(event) => update('name', event.target.value)}
+                  required
+                  className="os-input"
                 />
-              </div>
+              </label>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Professional Title</label>
+              <label className="space-y-1.5">
+                <span className="os-field-label">Creator handle</span>
                 <input
                   type="text"
-                  value={profile.title}
-                  onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  value={profile.handle}
+                  onChange={(event) => update('handle', event.target.value)}
+                  placeholder="yourhandle"
+                  className="os-input"
                 />
-              </div>
-            </div>
+              </label>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Email Address</label>
+              <label className="space-y-1.5">
+                <span className="os-field-label">Email address</span>
                 <input
                   type="email"
                   value={profile.email}
-                  onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  readOnly
+                  className="os-input cursor-not-allowed opacity-70"
                 />
-              </div>
+                <span className="block text-[9px] text-[var(--text-faint)]">
+                  Managed by Clerk authentication.
+                </span>
+              </label>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Phone Number</label>
+              <label className="space-y-1.5">
+                <span className="os-field-label">Phone number</span>
                 <input
                   type="text"
                   value={profile.phone}
-                  onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  onChange={(event) => update('phone', event.target.value)}
+                  placeholder="+254 ..."
+                  className="os-input"
                 />
-              </div>
-            </div>
+              </label>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Creator KRA PIN</label>
+              <label className="space-y-1.5">
+                <span className="os-field-label">Business name</span>
+                <input
+                  type="text"
+                  value={profile.businessName}
+                  onChange={(event) => update('businessName', event.target.value)}
+                  placeholder="Studio or business name"
+                  className="os-input"
+                />
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="os-field-label">KRA PIN</span>
                 <input
                   type="text"
                   value={profile.kraPin}
-                  onChange={(e) => setProfile({ ...profile, kraPin: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  onChange={(event) => update('kraPin', event.target.value)}
+                  placeholder="P000000000X"
+                  className="os-input"
                 />
-              </div>
+              </label>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Location</label>
+              <label className="space-y-1.5 sm:col-span-2">
+                <span className="os-field-label">Location</span>
                 <input
                   type="text"
                   value={profile.location}
-                  onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  onChange={(event) => update('location', event.target.value)}
+                  placeholder="Nairobi, Kenya"
+                  className="os-input"
                 />
-              </div>
-            </div>
+              </label>
 
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Profile Avatar URL</label>
-              <input
-                type="text"
-                value={profile.avatarUrl}
-                onChange={(e) => setProfile({ ...profile, avatarUrl: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-mono text-slate-600 dark:text-zinc-400 uppercase">Public Bio / Mission</label>
-              <textarea
-                rows={3}
-                value={profile.bio}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-              />
-            </div>
-
-            {/* Social Links */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">LinkedIn URL</label>
+              <label className="space-y-1.5 sm:col-span-2">
+                <span className="os-field-label">Profile avatar URL</span>
                 <input
-                  type="text"
-                  value={profile.linkedin}
-                  onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  type="url"
+                  value={profile.avatarUrl}
+                  onChange={(event) => update('avatarUrl', event.target.value)}
+                  placeholder="https://..."
+                  className="os-input"
                 />
-              </div>
+              </label>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase">Instagram URL</label>
+              <label className="space-y-1.5 sm:col-span-2">
+                <span className="os-field-label">Website</span>
                 <input
-                  type="text"
-                  value={profile.instagram}
-                  onChange={(e) => setProfile({ ...profile, instagram: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                  type="url"
+                  value={profile.website}
+                  onChange={(event) => update('website', event.target.value)}
+                  placeholder="https://..."
+                  className="os-input"
                 />
-              </div>
+              </label>
+
+              <label className="space-y-1.5 sm:col-span-2">
+                <span className="os-field-label">Public bio</span>
+                <textarea
+                  rows={5}
+                  value={profile.bio}
+                  onChange={(event) => update('bio', event.target.value)}
+                  placeholder="Tell clients about your creative work..."
+                  className="os-input min-h-32 resize-y"
+                />
+              </label>
             </div>
+          </section>
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {message ? (
+              <p className="text-xs text-[var(--text-muted)]">{message}</p>
+            ) : (
+              <p className="text-[10px] text-[var(--text-faint)]">
+                Changes are saved to your authenticated creator account.
+              </p>
+            )}
 
             <button
               type="submit"
               disabled={isSaving}
-              className="w-full py-4 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer disabled:opacity-60"
+              className="btn-primary rounded-xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.18em] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSaving ? 'Saving...' : 'Save Profile Changes'}
             </button>
-
-            {message && (
-              <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">{message}</p>
-            )}
           </div>
         </form>
-
       </div>
-    </div>
+    </main>
   );
 }

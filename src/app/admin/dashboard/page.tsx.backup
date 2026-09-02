@@ -247,7 +247,7 @@ export default function CreativeOSDashboardPage() {
           <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
-                Command Center
+                Dashboard
               </p>
               <div className="flex items-center gap-4">
                 {avatar && (
@@ -256,9 +256,9 @@ export default function CreativeOSDashboardPage() {
                   </div>
                 )}
                 <div>
-                  <h1 className="ui-page-title">Welcome back, {name.split(' ')[0]}.</h1>
+                  <h1 className="ui-page-title">Dashboard</h1>
                   <p className="ui-meta">
-                    Run your creative business from one place.{email ? ` · ${email}` : ''}
+                    Welcome back, {name.split(' ')[0]}.{email ? ` · ${email}` : ''}
                   </p>
                 </div>
               </div>
@@ -379,7 +379,7 @@ export default function CreativeOSDashboardPage() {
                 label="Galleries"
                 value={formatNumber(stats.overview.galleries)}
                 detail={`${stats.attention.activeGalleries} active`}
-                href="/admin/projects"
+                href="/admin/galleries"
                 icon={<GalleryHorizontalEnd className="h-4 w-4" />}
               />
             </section>
@@ -414,7 +414,7 @@ export default function CreativeOSDashboardPage() {
                     title="Active galleries"
                     detail="Client-facing galleries in progress."
                     count={stats.attention.activeGalleries}
-                    href="/admin/projects"
+                    href="/admin/galleries"
                   />
                 </div>
               </Panel>

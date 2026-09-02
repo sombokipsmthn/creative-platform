@@ -8,9 +8,15 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   asChild?: boolean;
 }
 
+/**
+ * Button component — maps to the global design system.
+ * Uses CSS variable-based styling from globals.css so it works in both
+ * light and dark mode without relying on Tailwind's non-existent tokens
+ * (bg-primary, bg-secondary, bg-destructive, bg-accent).
+ */
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({
-    className,
+    className = '',
     variant = 'primary',
     size = 'md',
     asChild = false,
@@ -18,28 +24,23 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   }, ref) => {
     const Comp = asChild ? 'span' : 'button';
 
-    // Base styles
-    const baseClasses = 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
+    const variantClass = {
+      primary:     'ui-button ui-button-primary',
+      secondary:   'ui-button ui-button-secondary',
+      ghost:       'ui-button ui-button-ghost',
+      destructive: 'ui-button ui-button-destructive',
+    }[variant];
 
-    // Variants
-    const variantClasses = {
-      primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-      secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-      ghost: 'hover:bg-accent hover:text-accent-foreground',
-      destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-    };
-
-    // Sizes
-    const sizeClasses = {
-      sm: 'h-9 px-3',
-      md: 'h-10 px-4',
-      lg: 'h-11 px-5',
-      icon: 'h-9 w-9 p-0',
-    };
+    const sizeClass = {
+      sm:   'ui-button-sm',
+      md:   '',
+      lg:   'ui-button-lg',
+      icon: 'ui-button-icon',
+    }[size];
 
     return (
       <Comp
-        className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+        className={[variantClass, sizeClass, className].filter(Boolean).join(' ')}
         ref={ref}
         {...props}
       />

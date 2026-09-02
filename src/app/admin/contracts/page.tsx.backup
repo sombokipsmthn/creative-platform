@@ -1,51 +1,122 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   FilePlus,
-  FileSearch,
-  List,
+  FileSignature,
   Loader2,
   Plus,
   Trash2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
-import { formatCurrency } from '@/lib/utils';
+import TableFilterBar from '@/components/admin/TableFilterBar';
+
+type Contract = {
+  id: string;
+  contractNumber: string;
+  title: string;
+  status: string;
+  clientName: string;
+  projectName?: string | null;
+  createdAt: string;
+  sentAt?: string | null;
+  signedAt?: string | null;
+};
+
+type Client = {
+  id: string;
+  name: string;
+  company?: string | null;
+};
+
+type Stats = {
+  total: number;
+  draft: number;
+  sent: number;
+  viewed: number;
+  awaiting_signature: number;
+  signed: number;
+  declined: number;
+  expired: number;
+  cancelled: number;
+};
 
 export default function ContractsPage() {
-  const router = useRouter();
-  const [contracts, setContracts] = useState<Array<any>>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    draft: 0,
+    sent: 0,
+    viewed: 0,
+    awaiting_signature: 0,
+    signed: 0,
+    declined: 0,
+    expired: 0,
+    cancelled: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<any>(null);
 
+  // Filter states
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [clientId, setClientId] = useState<string>('all');
+
+  // Fetch clients for the filter
   useEffect(() => {
-    const loadData = async () => {
+    const fetchClients = async () => {
+      try {
+        const res = await fetch('/api/clients', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch clients');
+        const data = await res.json();
+        setClients(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch clients:', err);
+      }
+    };
+    fetchClients();
+  }, []);
+
+  // Fetch contracts, stats, and templates (we only need contracts and stats here)
+  useEffect(() => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const [contractsRes, statsRes] = await Promise.all([
-          fetch('/api/contracts', { cache: 'no-store' }),
-          fetch('/api/contracts/stats', { cache: 'no-store' }),
-        ]);
-        if (!contractsRes.ok) throw new Error('Failed to fetch contracts');
-        if (!statsRes.ok) throw new Error('Failed to fetch stats');
-        const contractsData = await contractsRes.json();
-        const statsData = await statsRes.json();
-        setContracts(contractsData.contracts || []);
-        setStats(statsData);
+        const params = new URLSearchParams();
+        params.set('search', search);
+        params.set('status', status);
+        if (clientId !== 'all') params.set('clientId', clientId);
+
+        const res = await fetch(`/api/contracts?${params.toString()}`, {
+          cache: 'no-store',
+        });
+        if (!res.ok) throw new Error('Failed to fetch contracts data');
+        const data = await res.json();
+        setContracts(data.contracts || []);
+        setStats(data.stats || {
+          total: 0,
+          draft: 0,
+          sent: 0,
+          viewed: 0,
+          awaiting_signature: 0,
+          signed: 0,
+          declined: 0,
+          expired: 0,
+          cancelled: 0,
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
     };
-    void loadData();
-  }, []);
+    fetchData();
+  }, [search, status, clientId]);
 
   if (loading) {
     return (
@@ -95,53 +166,93 @@ export default function ContractsPage() {
         </div>
       </header>
 
-      {stats && (
-        <div className="grid gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900">{stats.total}</h2>
-            <p className="text-sm text-gray-500">Total Contracts</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-green-500">{stats.draft}</h2>
-            <p className="text-sm text-gray-500">Drafts</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-blue-500">{stats.sent}</h2>
-            <p className="text-sm text-gray-500">Sent</p>
-          </div>
-          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-            <h2 className="text-2xl font-bold text-purple-500">{stats.signed}</h2>
-            <p className="text-sm text-gray-500">Signed</p>
-          </div>
+      {/* Statistics */}
+      <div className="grid gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900">{stats.total}</h2>
+          <p className="text-sm text-gray-500">Total Contracts</p>
         </div>
-      )}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-green-500">{stats.draft}</h2>
+          <p className="text-sm text-gray-500">Drafts</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-blue-500">{stats.sent}</h2>
+          <p className="text-sm text-gray-500">Sent</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-yellow-500">{stats.viewed}</h2>
+          <p className="text-sm text-gray-500">Viewed</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-purple-500">{stats.awaiting_signature}</h2>
+          <p className="text-sm text-gray-500">Awaiting Signature</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-emerald-500">{stats.signed}</h2>
+          <p className="text-sm text-gray-500">Signed</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-red-500">{stats.declined}</h2>
+          <p className="text-sm text-gray-500">Declined</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-amber-500">{stats.expired}</h2>
+          <p className="text-sm text-gray-500">Expired</p>
+        </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
+          <h2 className="text-2xl font-bold text-red-500">{stats.cancelled}</h2>
+          <p className="text-sm text-gray-500">Cancelled</p>
+        </div>
+      </div>
+
+      {/* Table Filter Bar */}
+      <TableFilterBar
+        search={search}
+        onSearchChange={setSearch}
+        filters={{ status, clientId }}
+        onFiltersChange={(filters) => {
+          setSearch(filters.search ?? '');
+          setStatus(filters.status ?? 'all');
+          setClientId(filters.clientId ?? 'all');
+        }}
+        onAddItem={() => {
+          // We'll handle the "New Contract" button in the header, so we can leave this as a noop or we can use it to switch to the create tab.
+          // Since we don't have a create tab in the contracts page, we'll just use the header button.
+          // We'll leave it empty.
+        }}
+        filterOptions={ [
+          {
+            label: 'Status',
+            value: 'status',
+            options: [
+              { label: 'All Statuses', value: 'all' },
+              { label: 'Draft', value: 'draft' },
+              { label: 'Sent', value: 'sent' },
+              { label: 'Viewed', value: 'viewed' },
+              { label: 'Awaiting Signature', value: 'awaiting_signature' },
+              { label: 'Signed', value: 'signed' },
+              { label: 'Declined', value: 'declined' },
+              { label: 'Expired', value: 'expired' },
+              { label: 'Cancelled', value: 'cancelled' },
+            ]
+          },
+          {
+            label: 'Client',
+            value: 'clientId',
+            options: [
+              { label: 'All Clients', value: 'all' },
+              ...clients.map(client => ({
+                label: client.name + (client.company ? ` (${client.company})` : ''),
+                value: client.id,
+              })),
+            ]
+          }
+        ]
+        itemLabel="Contract"
+      />
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center space-x-4">
-            <FileSearch className="h-4 w-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search contracts..."
-              className="border border-gray-300 rounded px-3 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
-            <select
-              className="border border-gray-300 rounded px-3 py-2 w-48 focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="">All Statuses</option>
-              <option value="draft">Draft</option>
-              <option value="sent">Sent</option>
-              <option value="viewed">Viewed</option>
-              <option value="awaiting_signature">Awaiting Signature</option>
-              <option value="signed">Signed</option>
-              <option value="declined">Declined</option>
-              <option value="expired">Expired</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -194,15 +305,10 @@ export default function ContractsPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <p className="text-sm font-medium text-gray-900">{contract.client?.name || 'Unknown'}</p>
-                      {contract.client?.company && (
-                        <p className="text-xs text-gray-500">{contract.client.company}</p>
-                      )}
+                      <p className="text-sm font-medium text-gray-900">{contract.clientName}</p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {contract.project ? (
-                        <p className="text-sm font-medium text-gray-900">{contract.project.name}</p>
-                      ) : (
+                      {contract.projectName ?? (
                         <p className="text-xs text-gray-500 italic">None</p>
                       )}
                     </td>
@@ -251,7 +357,7 @@ export default function ContractsPage() {
                             className="text-gray-600 hover:text-gray-800"
                             title="Duplicate"
                           >
-                            <List className="h-4 w-4" />
+                            <Trash2 className="h-4 w-4" />
                           </Link>
                         </>
                       )}
@@ -289,7 +395,7 @@ function getStatusColor(status: string) {
     case 'declined':
       return 'bg-red-100 text-red-800';
     case 'expired':
-      return 'bg-gray-300 text-gray-600';
+      return 'bg-amber-100 text-amber-800';
     case 'cancelled':
       return 'bg-red-100 text-red-800';
     default:

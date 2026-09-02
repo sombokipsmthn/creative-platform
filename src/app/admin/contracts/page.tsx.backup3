@@ -248,7 +248,7 @@ export default function ContractsPage() {
               })),
             ]
           }
-        ]
+1
         itemLabel="Contract"
       />
 

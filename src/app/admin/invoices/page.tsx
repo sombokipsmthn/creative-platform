@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
+import TableFilterBar from '@/components/admin/TableFilterBar';
+import { formatCurrency } from '@/lib/utils';
 
 type Client = {
   id: string;
@@ -51,6 +53,13 @@ const STATUSES = [
   'paid',
   'overdue',
   'cancelled',
+] as const;
+
+const CURRENCIES = [
+  { label: 'All currencies', value: 'all' },
+  { label: 'KES', value: 'KES' },
+  { label: 'USD', value: 'USD' },
+  { label: 'EUR', value: 'EUR' },
 ] as const;
 
 function formatMoney(value: number, currency: string) {
@@ -350,64 +359,49 @@ export default function InvoicesPage() {
           </div>
         </div>
 
-        {/* FILTERS */}
-        <div className="flex flex-col gap-3 md:flex-row">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="search"
-              placeholder="Search invoices, clients or projects..."
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              className="ui-input w-full"
-            />
-          </div>
-
-          <select
-            value={status}
-            onChange={(event) => {
-              setPage(1);
-              setStatus(event.target.value);
-            }}
-            className="ui-select"
-          >
-            {STATUSES.map((item) => (
-              <option key={item} value={item}>
-                {item === 'all' ? 'All statuses' : getStatusLabel(item)}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={currency}
-            onChange={(event) => {
-              setPage(1);
-              setCurrency(event.target.value);
-            }}
-            className="ui-select"
-          >
-            <option value="all">All currencies</option>
-            <option value="KES">KES</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-          </select>
-
-          <select
-            value={clientId}
-            onChange={(event) => {
-              setPage(1);
-              setClientId(event.target.value);
-            }}
-            className="ui-select"
-          >
-            <option value="all">All clients</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.id}>
-                {getClientName(client)}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* FILTER BAR */}
+        <TableFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          filters={{ status, currency, clientId }}
+          onFiltersChange={(filters) => {
+            setPage(1);
+            setStatus(filters.status ?? 'all');
+            setCurrency(filters.currency ?? 'all');
+            setClientId(filters.clientId ?? 'all');
+          }}
+          onAddItem={() => {
+            // Navigate to new invoice page
+            // We'll need to create this route
+          }}
+          filterOptions={ [
+            {
+              label: 'Status',
+              value: 'status',
+              options: STATUSES.map(s => ({
+                label: s === 'all' ? 'All statuses' : getStatusLabel(s),
+                value: s
+              }))
+            },
+            {
+              label: 'Currency',
+              value: 'currency',
+              options: CURRENCIES
+            },
+            {
+              label: 'Client',
+              value: 'clientId',
+              options: [
+                { label: 'All clients', value: 'all' },
+                ...clients.map(c => ({
+                  label: getClientName(c),
+                  value: c.id
+                }))
+              ],
+              type: 'pills'
+            }
+          ] } itemLabel="Invoice"
+        />
 
         {hasFilters && (
           <div className="flex items-center justify-between px-2">
@@ -468,7 +462,7 @@ export default function InvoicesPage() {
                           : 'Invoices will appear here once they are created.'}
                       </p>
                     </td>
-                  </tr>
+                  )
                 ) : (
                   filteredInvoices.map((invoice) => (
                     <tr

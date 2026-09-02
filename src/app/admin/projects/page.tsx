@@ -16,6 +16,8 @@ import {
   Trash2,
 } from 'lucide-react';
 
+import TableFilterBar from '@/components/admin/TableFilterBar';
+
 interface GalleryItem {
   id: string;
   title: string;
@@ -59,14 +61,10 @@ export default function AdminGalleryManagerPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Form State for creating a new gallery
-  const [title, setTitle] = useState('');
-  const [clientId, setClientId] = useState('');
-  const [category, setCategory] = useState('Ecosystem Storytelling');
-  const [pin, setPin] = useState('4821');
-  const [allowDownloads, setAllowDownloads] = useState(true);
-  const [allowFavorites, setAllowFavorites] = useState(true);
-  const [allowSelections, setAllowSelections] = useState(true);
+  // Filter states for the gallery grid
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'published'>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -206,6 +204,25 @@ export default function AdminGalleryManagerPage() {
     showToast('✓ Client share link copied to clipboard!');
   };
 
+  // Filtered galleries based on search and filters
+  const filteredGalleries = galleries.filter((gal) => {
+    // Search in title and client name
+    const matchesSearch =
+      gal.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      gal.client_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      false;
+
+    // Status filter
+    const matchesStatus =
+      filterStatus === 'all' || gal.status === filterStatus;
+
+    // Category filter
+    const matchesCategory =
+      filterCategory === 'all' || gal.category === filterCategory;
+
+    return matchesSearch && matchesStatus && matchesCategory;
+  });
+
   return (
     <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
       {/* Toast Notification */}
@@ -290,7 +307,7 @@ export default function AdminGalleryManagerPage() {
                   </div>
                 ))}
               </div>
-            ) : galleries.length === 0 ? (
+            ) : filteredGalleries.length === 0 ? (
               <div className="border border-dashed border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-950 rounded-2xl p-12 text-center">
                 <div className="w-14 h-14 mx-auto mb-5 rounded-full bg-slate-100 dark:bg-zinc-900 flex items-center justify-center text-purple-600">
                   <ImageIcon className="w-6 h-6" />
@@ -312,115 +329,154 @@ export default function AdminGalleryManagerPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {galleries.map((gal) => {
-                  const fallbackCover =
-                    'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1000&q=80';
-                  const coverSrc = gal.cover_url || fallbackCover;
+              <>
+                {/* Table Filter Bar for the gallery grid */}
+                <TableFilterBar
+                  search={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  filters={{ status: filterStatus, category: filterCategory }}
+                  onFiltersChange={(filters) => {
+                    setFilterStatus(filters.status ?? 'all');
+                    setFilterCategory(filters.category ?? 'all');
+                  }}
+                  onAddItem={() => {
+                    setActiveTab('create');
+                  }}
+                  filterOptions={ [
+                    {
+                      label: 'Status',
+                      value: 'status',
+                      options: [
+                        { label: 'All Statuses', value: 'all' },
+                        { label: 'Draft', value: 'draft' },
+                        { label: 'Published', value: 'published' },
+                      ]
+                    },
+                    {
+                      label: 'Category',
+                      value: 'category',
+                      options: [
+                        { label: 'All Categories', value: 'all' },
+                        ...CATEGORY_OPTIONS.map((cat) => ({
+                          label: cat,
+                          value: cat,
+                        }))
+                      ]
+                    }
+                  ]
+                  itemLabel="Gallery"
+                />
 
-                  return (
-                    <div
-                      key={gal.id}
-                      className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all group flex flex-col justify-between shadow-sm"
-                    >
-                      <div className="space-y-3">
-                        {/* Cover Photo */}
-                        <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-zinc-950">
-                          <Image
-                            src={coverSrc}
-                            alt={gal.title}
-                            fill
-                            className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            unoptimized
-                          />
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredGalleries.map((gal) => {
+                    const fallbackCover =
+                      'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1000&q=80';
+                    const coverSrc = gal.cover_url || fallbackCover;
 
-                          <div className="absolute top-3 left-3 flex gap-2">
-                            <span
-                              className={`px-2.5 py-1 backdrop-blur-md text-[10px] font-mono uppercase rounded-full border ${
-                                gal.status === 'published'
-                                  ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/30'
-                                  : 'bg-amber-950/80 text-amber-300 border-amber-500/30'
-                              }`}
-                            >
-                              {gal.status}
-                            </span>
+                    return (
+                      <div
+                        key={gal.id}
+                        className="bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all group flex flex-col justify-between shadow-sm"
+                      >
+                        <div className="space-y-3">
+                          {/* Cover Photo */}
+                          <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                            <Image
+                              src={coverSrc}
+                              alt={gal.title}
+                              fill
+                              className="object-cover group-hover:scale-105 transition-transform duration-500"
+                              unoptimized
+                            />
 
-                            {gal.access_pin && (
-                              <span className="px-2.5 py-1 bg-black/70 backdrop-blur-md border border-white/20 text-zinc-200 text-[10px] font-mono rounded-full">
-                                PIN: {gal.access_pin}
+                            <div className="absolute top-3 left-3 flex gap-2">
+                              <span
+                                className={`px-2.5 py-1 backdrop-blur-md text-[10px] font-mono uppercase rounded-full border ${
+                                  gal.status === 'published'
+                                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/30'
+                                    : 'bg-amber-950/80 text-amber-300 border-amber-500/30'
+                                }`}
+                              >
+                                {gal.status}
                               </span>
-                            )}
+
+                              {gal.access_pin && (
+                                <span className="px-2.5 py-1 bg-black/70 backdrop-blur-md border border-white/20 text-zinc-200 text-[10px] font-mono rounded-full">
+                                  PIN: {gal.access_pin}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md text-white text-[10px] font-mono rounded-full flex items-center gap-1.5">
+                              <ImageIcon className="w-3 h-3" />
+                              <span>{gal.photo_count} photos</span>
+                            </div>
                           </div>
 
-                          <div className="absolute bottom-3 right-3 px-2.5 py-1 bg-black/70 backdrop-blur-md text-white text-[10px] font-mono rounded-full flex items-center gap-1.5">
-                            <ImageIcon className="w-3 h-3" />
-                            <span>{gal.photo_count} photos</span>
-                          </div>
-                        </div>
+                          {/* Meta Details */}
+                          <div className="p-5 space-y-2">
+                            <div className="space-y-0.5">
+                              <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase">
+                                {gal.client_name || gal.category || 'Portfolio Gallery'}
+                              </p>
 
-                        {/* Meta Details */}
-                        <div className="p-5 space-y-2">
-                          <div className="space-y-0.5">
-                            <p className="text-xs font-mono text-purple-600 dark:text-purple-400 uppercase">
-                              {gal.client_name || gal.category || 'Portfolio Gallery'}
+                              <h3 className="text-xl font-medium text-slate-900 dark:text-white truncate">
+                                {gal.title}
+                              </h3>
+                            </div>
+
+                            <p className="text-[11px] text-slate-500 font-mono">
+                              Created {new Date(gal.created_at).toLocaleDateString()} •{' '}
+                              {gal.collections_count || 1} set(s)
                             </p>
-
-                            <h3 className="text-xl font-medium text-slate-900 dark:text-white truncate">
-                              {gal.title}
-                            </h3>
                           </div>
-
-                          <p className="text-[11px] text-slate-500 font-mono">
-                            Created {new Date(gal.created_at).toLocaleDateString()} •{' '}
-                            {gal.collections_count || 1} set(s)
-                          </p>
                         </div>
-                      </div>
 
-                      {/* Actions Bar */}
-                      <div className="p-5 pt-0 space-y-2">
-                        {/* Primary: Edit Gallery Manager */}
-                        <Link
-                          href={`/admin/projects/${gal.id}`}
-                          className="w-full py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 shadow-sm"
-                        >
-                          <Sliders className="w-3.5 h-3.5" />
-                          <span>Edit / Manage Gallery</span>
-                        </Link>
-
-                        {/* Secondary Actions Row */}
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => copyShareLink(gal.slug || gal.id)}
-                            className="flex-1 py-2 btn-secondary text-xs font-mono uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5"
-                            title="Copy Client Link"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>Copy Link</span>
-                          </button>
-
+                        {/* Actions Bar */}
+                        <div className="p-5 pt-0 space-y-2">
+                          {/* Primary: Edit Gallery Manager */}
                           <Link
-                            href={`/portal/g/${gal.slug || gal.id}`}
-                            target="_blank"
-                            className="p-2 btn-secondary rounded-lg text-slate-600 dark:text-zinc-300 hover:text-purple-600"
-                            title="Open Client Portal"
+                            href={`/admin/projects/${gal.id}`}
+                            className="w-full py-2.5 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 shadow-sm"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
+                            <Sliders className="w-3.5 h-3.5" />
+                            <span>Edit / Manage Gallery</span>
                           </Link>
 
-                          <button
-                            onClick={() => handleDeleteGallery(gal.id, gal.title)}
-                            className="p-2 btn-secondary rounded-lg text-slate-400 hover:text-red-500"
-                            title="Delete Gallery"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {/* Secondary Actions Row */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => copyShareLink(gal.slug || gal.id)}
+                              className="flex-1 py-2 btn-secondary text-xs font-mono uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5"
+                              title="Copy Client Link"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>Copy Link</span>
+                            </button>
+
+                            <Link
+                              href={`/portal/g/${gal.slug || gal.id}`}
+                              target="_blank"
+                              className="p-2 btn-secondary rounded-lg text-slate-600 dark:text-zinc-300 hover:text-purple-600"
+                              title="Open Client Portal"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Link>
+
+                            <button
+                              onClick={() => handleDeleteGallery(gal.id, gal.title)}
+                              className="p-2 btn-secondary rounded-lg text-slate-400 hover:text-red-500"
+                              title="Delete Gallery"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </>
             )}
           </>
         )}
@@ -598,7 +654,7 @@ export default function AdminGalleryManagerPage() {
 
                         <h3 className="text-lg font-medium text-slate-900 dark:text-white">
                           {g.title}
-                        </h3>
+                        </p>
                       </div>
 
                       <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/40 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full">
@@ -635,7 +691,7 @@ export default function AdminGalleryManagerPage() {
                       </Link>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

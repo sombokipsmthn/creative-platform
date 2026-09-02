@@ -39,7 +39,7 @@ export default function TableFilterBar({
   };
 
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="ui-fade-in flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       {/* Search */}
       <div className="relative flex-1 min-w-0">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
@@ -85,7 +85,7 @@ export default function TableFilterBar({
                 {option.options?.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {opt.label}
-                  </>
+                  </option>
                 ))}
               </select>
             )}

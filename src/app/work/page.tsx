@@ -1,4 +1,3 @@
-// src/app/work/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/Button';
 
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1200&q=80';
@@ -184,8 +184,7 @@ export default function WorkIndexPage() {
           KIPSMTHN PORTFOLIO ARCHIVE
         </p>
 
-        {/* 💡 REFINED SMALL CAPS HEADLINE */}
-        <h1 className="text-3xl md:text-5xl font-light tracking-tight text-slate-900 dark:text-white leading-tight max-w-4xl mx-auto lowercase [font-variant:small-caps]">
+        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
           Selected Works Across <span className="font-normal text-purple-600 dark:text-purple-400">Four Creative Pillars</span>
         </h1>
 
@@ -203,7 +202,7 @@ export default function WorkIndexPage() {
               <div
                 key={p.num}
                 onClick={() => setSelectedPillar(p.id)}
-                className={`p-6 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
+                className={`p-6 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
                   isActive
                     ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40 shadow-lg'
                     : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-purple-500/50'
@@ -234,50 +233,45 @@ export default function WorkIndexPage() {
       {/* 3. INTERACTIVE PILLAR SWITCHER BAR */}
       <section className="py-6 px-6 max-w-7xl mx-auto border-y border-slate-200 dark:border-zinc-900">
         <div className="flex gap-3 overflow-x-auto justify-start md:justify-center py-2">
-          <button
+          <Button
+            variant={selectedPillar === 'All' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('All')}
-            className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-full transition-all whitespace-nowrap cursor-pointer ${
-              selectedPillar === 'All' ? 'btn-primary shadow-sm' : 'btn-secondary'
-            }`}
+            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
           >
             All Works ({allProjects.length})
-          </button>
-          
-          <button
+          </Button>
+
+          <Button
+            variant={selectedPillar === 'Photography' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Photography')}
-            className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-full transition-all whitespace-nowrap cursor-pointer ${
-              selectedPillar === 'Photography' ? 'btn-primary shadow-sm' : 'btn-secondary'
-            }`}
+            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
           >
             01. Photography ({allProjects.filter((p) => p.category === 'Photography').length})
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={selectedPillar === 'Videography' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Videography')}
-            className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-full transition-all whitespace-nowrap cursor-pointer ${
-              selectedPillar === 'Videography' ? 'btn-primary shadow-sm' : 'btn-secondary'
-            }`}
+            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
           >
             02. Videography ({allProjects.filter((p) => p.category === 'Videography').length})
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={selectedPillar === 'Branding' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Branding')}
-            className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-full transition-all whitespace-nowrap cursor-pointer ${
-              selectedPillar === 'Branding' ? 'btn-primary shadow-sm' : 'btn-secondary'
-            }`}
+            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
           >
             03. Branding ({allProjects.filter((p) => p.category === 'Branding').length})
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={selectedPillar === 'UI/UX' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('UI/UX')}
-            className={`px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-full transition-all whitespace-nowrap cursor-pointer ${
-              selectedPillar === 'UI/UX' ? 'btn-primary shadow-sm' : 'btn-secondary'
-            }`}
+            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
           >
             04. UI / UX ({allProjects.filter((p) => p.category === 'UI/UX').length})
-          </button>
+          </Button>
         </div>
       </section>
 
@@ -287,9 +281,7 @@ export default function WorkIndexPage() {
           {filteredProjects.map((project) => (
             <div
               key={project.id}
-              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-2xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 shadow-md dark:shadow-none ${
-                project.featured ? 'md:col-span-2' : ''
-              }`}
+              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 shadow-md dark:shadow-none ${project.featured ? 'md:col-span-2' : ''}`}
             >
               <div className={`relative w-full ${project.featured ? 'aspect-21/9' : 'aspect-4/3'} overflow-hidden`}>
                 <Image
@@ -328,7 +320,7 @@ export default function WorkIndexPage() {
       </main>
 
       {/* 5. FOOTER */}
-      <footer className="bg-slate-100 dark:bg-zinc-950 border-t border-slate-200 dark:border-zinc-900 rounded-t-3xl pt-16 pb-12 px-6">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
@@ -339,19 +331,42 @@ export default function WorkIndexPage() {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <a href="https://www.linkedin.com/in/sombo09/" target="_blank" className="px-4 py-2 text-xs font-mono rounded-full bg-purple-600 text-white">
+              <Link
+                href="https://www.linkedin.com/in/sombo09/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="Button Button--primary"
+              >
                 LinkedIn
-              </a>
-              <a href="https://www.instagram.com/sombo_kipsmthn/" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link
+                href="https://www.instagram.com/sombo_kipsmthn/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="Button Button--secondary"
+              >
                 Instagram
-              </a>
-              <a href="https://www.youtube.com/@kraftdigital7749" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link
+                href="https://www.youtube.com/@kraftdigital7749"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="Button Button--secondary"
+              >
                 YouTube
-              </a>
-              <a href="https://linktr.ee/kipsmthn" target="_blank" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link
+                href="https://linktr.ee/kipsmthn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="Button Button--secondary"
+              >
                 Linktree
-              </a>
-              <Link href="/portal" className="px-4 py-2 text-xs font-mono btn-secondary rounded-full">
+              </Link>
+              <Link
+                href="/portal"
+                className="Button Button--secondary"
+              >
                 Client Delivery Portal
               </Link>
             </div>
@@ -359,7 +374,7 @@ export default function WorkIndexPage() {
 
           <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
-            
+
             <div className="flex items-center gap-6">
               <ThemeToggle />
               <span className="text-slate-500 dark:text-zinc-500">Nairobi, Kenya</span>

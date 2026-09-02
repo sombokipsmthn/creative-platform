@@ -8,6 +8,7 @@ import {
   bigint,
   unique,
   index,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -81,7 +82,6 @@ export const projects = pgTable("projects", {
   name: text("name").notNull(),
   description: text("description"),
   status: text("status").default("active").notNull(),
-  // Optional scheduling fields for calendar views
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -300,3 +300,50 @@ export const galleryDownloads = pgTable("gallery_downloads", {
   ipHash: text("ip_hash"),
   userAgent: text("user_agent"),
   createdAt: timestamp("created_at").defaultNow().notNull()});
+
+export const contractTemplates = pgTable("contract_templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  documentType: text("document_type").notNull(),
+  content: text("content").notNull(),
+  variables: jsonb("variables").default([]).notNull(),
+  isSystemTemplate: boolean("is_system_template").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+export const contracts = pgTable("contracts", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: text("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "set null" }),
+  templateId: uuid("template_id").references(() => contractTemplates.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  contractNumber: text("contract_number").notNull().unique(),
+  status: text("status").default("draft").notNull(),
+  content: text("content").notNull(),
+  currency: text("currency").default("KES"),
+  totalAmount: integer("total_amount"),
+  token: text("token").notNull().unique(),
+  expiresAt: timestamp("expires_at"),
+  sentAt: timestamp("sent_at"),
+  viewedAt: timestamp("viewed_at"),
+  signedAt: timestamp("signed_at"),
+  declinedAt: timestamp("declined_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+});
+
+export const contractEvents = pgTable("contract_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  contractId: uuid("contract_id").notNull().references(() => contracts.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(),
+  metadata: jsonb("metadata").default({}).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});

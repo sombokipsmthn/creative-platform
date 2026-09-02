@@ -1,17 +1,9 @@
 import { NextResponse } from "next/server";
-import {
-  auth,
-} from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import {
-  creatorProfiles,
-} from "@/db/schema";
-
-import {
-  getOrCreateLocalUser,
-} from "@/lib/auth/get-or-create-local-user";
+import { creatorProfiles, users } from "@/db/schema";
 
 export async function POST() {
   try {
@@ -55,73 +47,62 @@ export async function POST() {
      * 2. Brand-new Clerk users
      */
 
-    const user =
-      await getOrCreateLocalUser(
+    // Fetch the local user by the Clerk authUserId. Do **not** create a new
+    // record here – creation should happen only in /auth or the onboarding flow.
+    const [localUser] = await db
+      .select()
+      .from(users)
+      .where(eq(users.authUserId, userId))
+      .limit(1);
+
+    // If there is no local user yet, we can immediately respond that
+    // onboarding is required. No profile lookup is necessary and we avoid
+    // accessing `localUser.id` when undefined.
+    if (!localUser) {
+      console.log(
+        "Creator sync: no local user found for Clerk ID",
         userId
       );
+      return NextResponse.json({
+        needsOnboarding: true,
+        user: null,
+        profile: null,
+      });
+    }
 
     console.log(
       "Creator sync: local user confirmed",
       {
-        id: user.id,
-
-        authUserId:
-          user.authUserId,
-
-        onboardingStatus:
-          user.onboardingStatus,
-
-        onboardingStep:
-          user.onboardingStep,
+        id: localUser.id,
+        authUserId: localUser.authUserId,
+        onboardingStatus: localUser.onboardingStatus,
+        onboardingStep: localUser.onboardingStep,
       }
     );
 
-    /*
-     * -------------------------------------------------------
-     * FIND CREATOR PROFILE
-     * -------------------------------------------------------
-     */
+    // -------------------------------------------------------
+    // FIND CREATOR PROFILE
+    // -------------------------------------------------------
+    const existingProfiles = await db
+      .select()
+      .from(creatorProfiles)
+      .where(eq(creatorProfiles.userId, localUser.id))
+      .limit(1);
 
-    const existingProfiles =
-      await db
-        .select()
-        .from(
-          creatorProfiles
-        )
-        .where(
-          eq(
-            creatorProfiles.userId,
-            user.id
-          )
-        )
-        .limit(1);
+    const profile = existingProfiles[0] ?? null;
 
-    const profile =
-      existingProfiles[0] ??
-      null;
-
-    /*
-     * -------------------------------------------------------
-     * DETERMINE ONBOARDING STATE
-     * -------------------------------------------------------
-     */
-
+    // -------------------------------------------------------
+    // DETERMINE ONBOARDING STATE
+    // -------------------------------------------------------
     const needsOnboarding =
-      !profile ||
-      user.onboardingStatus !==
-        "complete";
+      !profile || localUser.onboardingStatus !== "complete";
 
-    /*
-     * -------------------------------------------------------
-     * RESPONSE
-     * -------------------------------------------------------
-     */
-
+    // -------------------------------------------------------
+    // RESPONSE
+    // -------------------------------------------------------
     return NextResponse.json({
       needsOnboarding,
-
-      user,
-
+      user: localUser,
       profile,
     });
   } catch (error) {

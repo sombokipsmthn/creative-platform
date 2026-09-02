@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { getLocalUser } from "@/lib/auth/get-local-user";
 
 type Context = {
   params: Promise<{
@@ -25,8 +25,13 @@ export async function POST(
       );
     }
 
-    const creator =
-      await getOrCreateLocalUser(userId);
+    let creator;
+    try {
+      creator = await getLocalUser(userId);
+    } catch (e) {
+      console.error("Creator not found for reorder route:", e);
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
     const { id: galleryId } =
       await context.params;

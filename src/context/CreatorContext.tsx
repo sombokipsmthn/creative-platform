@@ -67,24 +67,9 @@ export function CreatorProvider({
   const [loading, setLoading] = useState(true);
 
   const syncCreator = useCallback(async function syncCreator() {
-    /*
-     * -------------------------------------------------------
-     * DO NOT SYNC WHILE ONBOARDING
-     * -------------------------------------------------------
-     *
-     * CreatorProvider wraps the entire application.
-     * A brand-new Clerk user must be allowed to reach
-     * /admin/onboarding without being redirected repeatedly.
-     */
-    if (
-      typeof window !== "undefined" &&
-      window.location.pathname === "/admin/onboarding"
-    ) {
-      setActiveUser(null);
-      setUsersDb({});
-      setLoading(false);
-      return;
-    }
+    // The context no longer blocks synchronization on the onboarding route.
+    // Routing decisions are handled by /auth, so we always attempt to fetch the
+    // creator state when Clerk reports the user as signed in.
 
     /*
      * Clerk has not finished loading yet.

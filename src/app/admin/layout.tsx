@@ -54,9 +54,13 @@ function SignOutButton({ compact = false }: { compact?: boolean }) {
       type="button"
       onClick={() => void signOut({ redirectUrl: '/' })}
       aria-label="Log out"
-      className={compact ? 'admin-signout admin-signout-compact' : 'admin-signout'}
+      className={
+        compact
+          ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-500/20 text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+          : 'mt-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[11px] font-medium text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+      }
     >
-      <LogOut className="admin-icon-sm" />
+      <LogOut className="h-3.5 w-3.5 shrink-0" />
       {!compact && <span>Log out</span>}
     </button>
   );
@@ -77,12 +81,14 @@ export default function AdminLayout({
 
   if (!isLoaded) {
     return (
-      <div className="os-page admin-ui admin-loading">
-        <div className="admin-loading-content os-pulse">
-          <span className="os-icon-box admin-loading-icon">
-            <SlidersHorizontal className="admin-icon-sm" />
+      <div className="ui-page flex min-h-screen items-center justify-center">
+        <div className="flex items-center gap-3 os-pulse">
+          <span className="ui-icon-box h-8 w-8">
+            <SlidersHorizontal className="h-3.5 w-3.5" />
           </span>
-          <p className="admin-eyebrow-text">Loading Creative OS</p>
+          <p className="ui-meta uppercase">
+            Loading Creative OS
+          </p>
         </div>
       </div>
     );
@@ -93,33 +99,37 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="os-page admin-ui">
-      <aside className="admin-sidebar">
-        <div className="admin-brandbar">
-          <Link href="/admin" className="admin-brand">
-            <span className="admin-brand-mark">
-              <BarChart3 className="admin-icon-sm" />
+    <div className="ui-page min-h-screen text-[var(--color-text-primary)]">
+      <aside className="fixed inset-y-0 left-0 z-50 hidden w-[248px] border-r border-[var(--color-border-subtle)] bg-[color-mix(in_srgb,var(--color-bg-page)_92%,transparent)] backdrop-blur-xl lg:flex lg:flex-col">
+        <div className="flex h-16 items-center border-b border-[var(--color-border-subtle)] px-5">
+          <Link href="/admin" className="group flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white shadow-lg shadow-purple-500/10">
+              <BarChart3 className="h-3.5 w-3.5" />
             </span>
-            <span className="admin-brand-name">
-              KIPSMTHN<span>.</span>
+            <span className="text-[12px] font-bold uppercase tracking-[0.18em]">
+              KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
             </span>
           </Link>
         </div>
 
-        <div className="admin-sidebar-scroll">
-          <div className="admin-workspace-card">
-            <div className="admin-workspace-status">
-              <span className="admin-status-dot os-pulse" />
-              <span>Creative OS</span>
+        <div className="flex-1 overflow-y-auto px-3 py-5">
+          <div className="mb-5 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] px-3 py-3 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="os-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+              <span className="ui-meta uppercase">
+                Creative OS
+              </span>
             </div>
-            <p>Command center</p>
+            <p className="mt-1 text-xs font-medium text-[var(--color-text-primary)]">Command center</p>
           </div>
 
-          <nav className="admin-nav" aria-label="Creator platform navigation">
+          <nav className="space-y-6" aria-label="Creator platform navigation">
             {sections.map((section) => (
-              <div key={section.label} className="admin-nav-section">
-                <p className="admin-nav-label">{section.label}</p>
-                <div className="admin-nav-items">
+              <div key={section.label}>
+                <p className="mb-2 px-3 ui-meta uppercase">
+                  {section.label}
+                </p>
+                <div className="space-y-1">
                   {section.items.map((item) => {
                     const isActive =
                       pathname === item.href ||
@@ -130,10 +140,14 @@ export default function AdminLayout({
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`admin-nav-link${isActive ? ' is-active' : ''}`}
+                        className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[12px] font-medium transition ${
+                          isActive
+                            ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                            : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]'
+                        }`}
                       >
-                        {isActive && <span className="admin-nav-active-bar" />}
-                        <Icon className="admin-icon" />
+                        {isActive && <span className="absolute left-0 h-5 w-0.5 rounded-full bg-[var(--color-accent)]" />}
+                        <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`} />
                         <span>{item.name}</span>
                       </Link>
                     );
@@ -144,9 +158,9 @@ export default function AdminLayout({
           </nav>
         </div>
 
-        <div className="admin-sidebar-footer">
-          <div className="admin-appearance">
-            <span>Appearance</span>
+        <div className="border-t border-[var(--color-border-subtle)] p-3">
+          <div className="mb-2 flex items-center justify-between rounded-lg bg-[var(--color-bg-soft)] px-3 py-2">
+            <span className="ui-meta uppercase">Appearance</span>
             <ThemeToggle />
           </div>
           <ProfileMenu />
@@ -154,22 +168,20 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <header className="admin-mobile-header">
-        <Link href="/admin" className="admin-brand admin-brand-mobile">
-          <span className="admin-brand-mark">
-            <BarChart3 className="admin-icon-sm" />
+      <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
+        <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
+            <BarChart3 className="h-3.5 w-3.5" />
           </span>
-          <span className="admin-brand-name">
-            KIPSMTHN<span>.</span>
-          </span>
+          KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
         </Link>
-        <div className="admin-mobile-actions">
+        <div className="flex items-center gap-2">
           <ProfileMenu />
           <SignOutButton compact />
         </div>
       </header>
 
-      <main className="admin-main">{children}</main>
+      <main className="lg:pl-[248px]">{children}</main>
     </div>
   );
 }

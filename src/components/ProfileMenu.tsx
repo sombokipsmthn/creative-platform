@@ -101,6 +101,7 @@ export default function ProfileMenu() {
             alt={fullName}
             width={36}
             height={36}
+            unoptimized
             className="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-zinc-700"
           />
         ) : (
@@ -144,6 +145,7 @@ export default function ProfileMenu() {
                   alt={fullName}
                   width={44}
                   height={44}
+                  unoptimized
                   className="h-11 w-11 rounded-full object-cover border border-slate-200 dark:border-zinc-700"
                 />
               ) : (

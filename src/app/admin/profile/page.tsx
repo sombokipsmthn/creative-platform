@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Button } from '@/components/ui/Button';
 
 interface ProfileForm {
   name: string;
@@ -146,10 +147,10 @@ export default function AdminProfilePage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <main className="os-page flex min-h-[70vh] items-center justify-center">
+      <main className="ui-page flex min-h-[70vh] items-center justify-center">
         <div className="os-pulse flex items-center gap-3">
           <span className="os-icon-box h-9 w-9" />
-          <p className="font-mono text-[9px] uppercase tracking-[0.22em] text-[var(--text-muted)]">
+          <p className="ui-meta uppercase">
             Loading creator profile
           </p>
         </div>
@@ -176,33 +177,33 @@ export default function AdminProfilePage() {
   };
 
   return (
-    <main className="os-page min-h-screen">
-      <div className="os-shell py-8 sm:py-10">
-        <div className="mb-8 flex flex-col gap-4 border-b border-[var(--border-subtle)] pb-6 sm:flex-row sm:items-end sm:justify-between">
+    <main className="ui-page min-h-screen">
+      <div className="ui-shell py-8 sm:py-10">
+        <div className="mb-8 flex flex-col gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
               href="/admin"
-              className="font-mono text-[9px] uppercase tracking-[0.18em] text-[var(--accent)] hover:underline"
+              className="ui-eyebrow hover:underline"
             >
               ← Back to Dashboard
             </Link>
-            <p className="os-eyebrow mt-3">Account</p>
-            <h1 className="os-title text-2xl sm:text-3xl">Creator Profile</h1>
-            <p className="os-subtitle">
+            <p className="ui-eyebrow mt-3">Account</p>
+            <h1 className="ui-page-title">Creator Profile</h1>
+            <p className="ui-meta">
               Your profile is connected to the signed-in Clerk account and your creator records.
             </p>
           </div>
 
-          <span className="os-pill">
-            <span className="os-pill-dot text-[var(--success)]" />
+          <span className="ui-badge">
+            <span className="ui-badge-dot bg-emerald-500" />
             Authenticated creator
           </span>
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
-          <section className="os-card p-5 sm:p-7">
+          <section className="ui-card p-5 sm:p-7">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-[var(--border-strong)] bg-[var(--bg-soft)]">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-900">
                 {avatar ? (
                   <Image
                     src={avatar}
@@ -212,22 +213,22 @@ export default function AdminProfilePage() {
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-[var(--text-muted)]">
+                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-slate-400 dark:text-zinc-500">
                     {initials}
                   </div>
                 )}
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="os-eyebrow">Current account</p>
-                <h2 className="mt-1 truncate text-xl font-semibold tracking-tight text-[var(--text-primary)]">
+                <p className="ui-eyebrow">Current account</p>
+                <h2 className="mt-1 truncate ui-section-title">
                   {displayName}
                 </h2>
-                <p className="mt-1 truncate text-[11px] text-[var(--text-muted)]">
+                <p className="ui-meta">
                   {profile.email || user.primaryEmailAddress?.emailAddress || 'No email available'}
                 </p>
                 {profile.handle && (
-                  <p className="mt-1 font-mono text-[9px] uppercase tracking-[0.14em] text-[var(--accent)]">
+                  <p className="ui-eyebrow mt-1">
                     @{profile.handle}
                   </p>
                 )}
@@ -235,122 +236,122 @@ export default function AdminProfilePage() {
             </div>
           </section>
 
-          <section className="os-card">
-            <div className="border-b border-[var(--border-subtle)] px-5 py-4 sm:px-7">
-              <p className="os-eyebrow">Identity</p>
-              <h2 className="mt-1 text-sm font-semibold text-[var(--text-primary)]">Creator details</h2>
+          <section className="ui-card">
+            <div className="border-b border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
+              <p className="ui-eyebrow">Identity</p>
+              <h2 className="ui-section-title">Creator details</h2>
             </div>
 
             <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7">
               <label className="space-y-1.5">
-                <span className="os-field-label">Full name</span>
+                <span className="ui-label">Full name</span>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(event) => update('name', event.target.value)}
                   required
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5">
-                <span className="os-field-label">Creator handle</span>
+                <span className="ui-label">Creator handle</span>
                 <input
                   type="text"
                   value={profile.handle}
                   onChange={(event) => update('handle', event.target.value)}
                   placeholder="yourhandle"
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5">
-                <span className="os-field-label">Email address</span>
+                <span className="ui-label">Email address</span>
                 <input
                   type="email"
                   value={profile.email}
                   readOnly
-                  className="os-input cursor-not-allowed opacity-70"
+                  className="ui-input cursor-not-allowed opacity-70"
                 />
-                <span className="block text-[9px] text-[var(--text-faint)]">
+                <span className="ui-meta">
                   Managed by Clerk authentication.
                 </span>
               </label>
 
               <label className="space-y-1.5">
-                <span className="os-field-label">Phone number</span>
+                <span className="ui-label">Phone number</span>
                 <input
                   type="text"
                   value={profile.phone}
                   onChange={(event) => update('phone', event.target.value)}
                   placeholder="+254 ..."
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5">
-                <span className="os-field-label">Business name</span>
+                <span className="ui-label">Business name</span>
                 <input
                   type="text"
                   value={profile.businessName}
                   onChange={(event) => update('businessName', event.target.value)}
                   placeholder="Studio or business name"
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5">
-                <span className="os-field-label">KRA PIN</span>
+                <span className="ui-label">KRA PIN</span>
                 <input
                   type="text"
                   value={profile.kraPin}
                   onChange={(event) => update('kraPin', event.target.value)}
                   placeholder="P000000000X"
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="os-field-label">Location</span>
+                <span className="ui-label">Location</span>
                 <input
                   type="text"
                   value={profile.location}
                   onChange={(event) => update('location', event.target.value)}
                   placeholder="Nairobi, Kenya"
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="os-field-label">Profile avatar URL</span>
+                <span className="ui-label">Profile avatar URL</span>
                 <input
                   type="url"
                   value={profile.avatarUrl}
                   onChange={(event) => update('avatarUrl', event.target.value)}
                   placeholder="https://..."
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="os-field-label">Website</span>
+                <span className="ui-label">Website</span>
                 <input
                   type="url"
                   value={profile.website}
                   onChange={(event) => update('website', event.target.value)}
                   placeholder="https://..."
-                  className="os-input"
+                  className="ui-input"
                 />
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="os-field-label">Public bio</span>
+                <span className="ui-label">Public bio</span>
                 <textarea
                   rows={5}
                   value={profile.bio}
                   onChange={(event) => update('bio', event.target.value)}
                   placeholder="Tell clients about your creative work..."
-                  className="os-input min-h-32 resize-y"
+                  className="ui-textarea min-h-32 resize-y"
                 />
               </label>
             </div>
@@ -358,20 +359,21 @@ export default function AdminProfilePage() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {message ? (
-              <p className="text-xs text-[var(--text-muted)]">{message}</p>
+              <p className="ui-meta">{message}</p>
             ) : (
-              <p className="text-[10px] text-[var(--text-faint)]">
+              <p className="ui-meta">
                 Changes are saved to your authenticated creator account.
               </p>
             )}
 
-            <button
+            <Button
               type="submit"
               disabled={isSaving}
-              className="btn-primary rounded-xl px-6 py-3 font-mono text-[9px] uppercase tracking-[0.18em] disabled:cursor-not-allowed disabled:opacity-60"
+              variant="primary"
+              className="px-6 py-3 text-xs font-mono uppercase tracking-widest"
             >
               {isSaving ? 'Saving...' : 'Save Profile Changes'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

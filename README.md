@@ -173,3 +173,32 @@ The gallery system is also being expanded toward a complete professional client 
 Creative Platform is being built to become the digital backbone of a modern creative studio — connecting **business management, production, and client delivery** in one platform.
 
 **From first inquiry to final delivery.**
+
+---
+
+## Design System
+
+The platform uses a centralized design system defined in `src/app/globals.css`. This system provides:
+
+- **Design tokens**: Colors, spacing, radius, typography scales
+- **Semantic CSS classes**: `.ui-card`, `.ui-button`, `.ui-input`, etc.
+- **Dark mode support**: Automatic theme switching
+- **Responsive utilities**: Mobile-first grid system
+
+### Key Classes
+
+| Class | Usage |
+|-------|-------|
+| `.ui-card` | Base card container |
+| `.ui-stat-card` | Metric/KPI cards |
+| `.ui-table-container` | Table wrapper |
+| `.ui-badge` | Status badges |
+| `.ui-button` | Button variants |
+| `.ui-input` | Form inputs |
+| `.ui-page-title` | H1 headings |
+| `.ui-section-title` | H2 headings |
+| `.ui-eyebrow` | Uppercase labels |
+| `.ui-meta` | Secondary text |
+
+See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for complete documentation.
+

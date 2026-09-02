@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { contractTemplates } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 const templates = [
   {
@@ -715,16 +716,21 @@ Either Party may terminate this Agreement with {{notice_period}} written notice.
 async function seed() {
   console.log('Seeding contract templates...');
   // Clear existing system templates
-  await db.delete(contractTemplates).where({ isSystemTemplate: true });
+  await db.delete(contractTemplates).where(eq(contractTemplates.isSystemTemplate, true));
   
   // Insert system templates
   for (const template of templates) {
     await db.insert(contractTemplates).values({
-      ...template,
-      variables: JSON.stringify(template.variables),
-      creatorId: null, // System templates have no owner
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      name: template.name,
+      description: template.description,
+      category: template.category,
+      documentType: template.documentType,
+      content: template.content,
+      variables: template.variables,
+      isSystemTemplate: template.isSystemTemplate,
+      creatorId: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
   }
   

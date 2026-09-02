@@ -48,11 +48,12 @@ export default function NewContractPage() {
       const resolvedContent = finalContent.replace(/\{\{(\w+)\}\}/g, (match: string, varName: string) => 
         mappedVariables[varName] || match
       );
+      if (!selectedClient?.id) return;
       createContractMutation({
         ...contractData,
         content: resolvedContent,
         templateId: selectedTemplate?.id,
-        clientId: selectedClient?.id,
+        clientId: selectedClient.id,
         projectId: selectedProject?.id,
       });
     }

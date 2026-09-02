@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchContract, updateContract, deleteContract } from '@/lib/api/contracts';
+import { fetchContract, updateContract, deleteContract } from '@/lib/contracts/server';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -13,6 +13,7 @@ export async function GET(
     }
     return NextResponse.json(contract);
   } catch (error) {
+    console.error('GET /api/contracts/[id] error:', error);
     return NextResponse.json({ error: 'Failed to fetch contract' }, { status: 500 });
   }
 }
@@ -27,12 +28,13 @@ export async function PATCH(
     const contract = await updateContract(id, data);
     return NextResponse.json(contract);
   } catch (error) {
+    console.error('PATCH /api/contracts/[id] error:', error);
     return NextResponse.json({ error: 'Failed to update contract' }, { status: 500 });
   }
 }
 
 export async function DELETE(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -40,6 +42,7 @@ export async function DELETE(
     await deleteContract(id);
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('DELETE /api/contracts/[id] error:', error);
     return NextResponse.json({ error: 'Failed to delete contract' }, { status: 500 });
   }
 }

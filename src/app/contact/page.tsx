@@ -1,6 +1,7 @@
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
+import Footer from '@/components/Footer';
 
 export default function ContactPage() {
   return (
@@ -77,7 +78,7 @@ export default function ContactPage() {
             <Link
               href="https://linktr.ee/kipsmthn"
               target="_blank"
-              rel="noopener noreffer"
+              rel="noopener noreferrer"
               className="Button Button--secondary h-9 w-full justify-start"
             >
               Linktree Directory
@@ -86,16 +87,7 @@ export default function ContactPage() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6 mt-20">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
-          <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <ThemeToggle />
-            <span>Nairobi, Kenya</span>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

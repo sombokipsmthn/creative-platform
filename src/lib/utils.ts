@@ -15,3 +15,6 @@ export function formatCurrency(value: number, currency: string = 'KES') {
     maximumFractionDigits: 0,
   }).format(value);
 }
+
+export const generateContractNumber = () =>
+  `CNT-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;

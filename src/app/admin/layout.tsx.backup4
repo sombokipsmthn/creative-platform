@@ -19,23 +19,74 @@ import {
   Activity,
   Search,
   Sliders,
-  FileSignature,
 } from 'lucide-react';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
 
-// Try to fetch real badge counts, fallback to mock
+// Mock badge counts API - in a real app, this would be an actual endpoint
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
-  try {
-    const res = await fetch('/api/badge-counts', { cache: 'no-store' });
-    if (!res.ok) return {};
-    return await res.json();
-  } catch {
-    return {};
-  }
+  // Simulate API call
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        '/admin/quotes': 3,
+        '/admin/invoices': 5,
+        '/admin/projects': 2,
+        '/admin/clients': 0,
+        '/admin/settings': 0,
+      });
+    }, 500);
+  });
 }
+
+const sections = [
+  {
+    label: 'Workspace',
+    items: [
+      { name: 'Overview', href: '/admin', icon: LayoutDashboard },
+      { name: 'Clients', href: '/admin/clients', icon: Users },
+      { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
+    ],
+  },
+  {
+    label: 'Business',
+    items: [
+      { name: 'Quotes', href: '/admin/quotes', icon: FileText },
+      { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
+      { name: 'Expenses', href: '/admin/expenses', icon: WalletCards },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { name: 'Profile', href: '/admin/profile', icon: BriefcaseBusiness },
+      { name: 'Settings', href: '/admin/settings', icon: Settings2 },
+    ],
+  },
+];
+
+function SignOutButton({ compact = false }: { compact?: boolean }) {
+  const { signOut } = useClerk();
+
+  return (
+    <button
+      type="button"
+      onClick={() => void signOut({ redirectUrl: '/' })}
+      aria-label="Log out"
+      className={
+        compact
+          ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-500/20 text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+          : 'mt-2 flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-[11px] font-medium text-red-500 transition hover:bg-red-500/10 hover:text-red-400'
+      }
+    >
+      <LogOut className="h-3.5 w-3.5 shrink-0" />
+      {!compact && <span>Log out</span>}
+    </button>
+  );
+}
+
 function NavItemWithBadge({
   item,
   isActive,
@@ -192,9 +243,9 @@ export default function AdminLayout({
               </nav>
             </div>
 
-            {/* Promotion Banner (sticky bottom) with animation */}
+            {/* Promotion Banner (sticky bottom) */}
             <div className="border-t border-[var(--color-border-subtle)] p-4">
-              <div className="ui-card bg-[var(--color-accent)] text-white ui-fade-in">
+              <div className="ui-card bg-[var(--color-accent)] text-white">
                 <div className="ui-card-content">
                   <h3 className="font-semibold mb-2">Unlock All Features</h3>
                   <p className="ui-meta mb-3">
@@ -239,8 +290,8 @@ export default function AdminLayout({
             {/* Main Content */}
             <div className="lg:w-[65%] lg:pr-6">{children}</div>
             
-            {/* Split-View Drawer (Persistent Right Panel) with animation */}
-            <div className="lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] lg:hidden ui-fade-in">
+            {/* Split-View Drawer (Persistent Right Panel) */}
+            <div className="lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] lg:hidden">
               {/* This will be populated by individual pages that need the detail view */}
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
                 {useSplitView().content}

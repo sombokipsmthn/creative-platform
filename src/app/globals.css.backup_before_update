@@ -3,6 +3,9 @@
  * Single source of truth for the platform's visual language.
  */
 
+/* ─── 0. Font Imports ──────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
 /* ─── 1. Tailwind + Custom Variant ─────────────────── */
 @import "tailwindcss";
 
@@ -10,7 +13,7 @@
 
 /* ─── 2. Theme: Typography ─────────────────────────── */
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", Consolas, monospace;
 }
 

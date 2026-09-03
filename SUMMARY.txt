@@ -1,6 +1,0 @@
-Implementation summary
-Database schema added for contracts, templates, events.
-Admin navigation added.
-Core admin pages: dashboard, template library, new contract wizard, contract viewer.
-API routes created for contracts and templates.
-Remaining: rich-text editor, client-facing PDF/signing, email integration, quote integration, template seeding.

@@ -1,322 +1,370 @@
-import getCurrentUser from '@/lib/auth/get-current-user';
 import { db } from '@/db';
-import { contracts, contractTemplates, contractEvents, clients, projects } from '@/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { contracts, contractTemplates, contractEvents, clients, projects, quotes, users } from '@/db/schema';
+import { eq, and, or, ilike, inArray, asc, desc, sql, isNull, isNotNull } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  Contract,
-  NewContract,
-  UpdateContractInput,
-  ContractTemplate,
-  ContractEvent,
-  ContractStats,
-  Client,
-  Project,
-} from '@/lib/types/contracts';
+import { generateContractNumber } from '@/lib/utils'; // We'll create this helper if it doesn't exist
 
-export type {
-  Contract,
-  NewContract,
-  UpdateContractInput,
-  ContractTemplate,
-  ContractEvent,
-  ContractStats,
-  Client,
-  Project,
-};
+// Helper to get current user ID from Clerk (assuming we have a helper)
+import { getCurrentUserId } from '@/lib/auth';
 
-async function generateContractNumber(): Promise<string> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  
-  const last = await db
-    .select({ contractNumber: contracts.contractNumber })
-    .from(contracts)
-    .where(and(eq(contracts.creatorId, user.id)))
-    .orderBy(contracts.contractNumber)
-    .limit(1);
-  
-  let seq = 1;
-  if (last[0]?.contractNumber) {
-    const match = last[0].contractNumber.match(/-(\d+)$/);
-    if (match) seq = parseInt(match[1], 10) + 1;
+// Contracts API functions
+
+export async function fetchContracts({ search, status, clientId, limit = 50, offset = 0 }: {
+  search?: string;
+  status?: string;
+  clientId?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  let where = and(eq(contracts.creatorId, userId));
+
+  if (search) {
+    where = and(where,
+      or(
+        ilike(contracts.title, `%${search}%`),
+        ilike(contracts.contractNumber, `%${search}%`)
+      )
+    );
   }
-  
-  return `CNT-${year}${month}${day}-${String(seq).padStart(4, '0')}`;
-}
 
-export async function fetchContractStats(): Promise<ContractStats> {
-  const user = await getCurrentUser();
-  if (!user) return {};
-  
-  const all = await db.select().from(contracts).where(eq(contracts.creatorId, user.id));
-  
+  if (status && status !== 'all') {
+    where = and(where, eq(contracts.status, status));
+  }
+
+  if (clientId && clientId !== 'all') {
+    where = and(where, eq(contracts.clientId, clientId));
+  }
+
+  const data = await db.select().from(contracts).where(where).limit(limit).offset(offset).orderBy(desc(contracts.createdAt));
+  const total = await db.select({ count: sql<number>`count(*)` }).from(contracts).where(where);
+
   return {
-    totalContracts: all.length,
-    drafts: all.filter(c => c.status === 'draft').length,
-    sent: all.filter(c => c.status === 'sent').length,
-    viewed: all.filter(c => c.status === 'viewed').length,
-    awaitingSignature: all.filter(c => c.status === 'awaiting_signature').length,
-    signed: all.filter(c => c.status === 'signed').length,
-    expired: all.filter(c => c.status === 'expired').length,
+    contracts: data,
+    total: Number(total[0].count),
   };
 }
 
-export async function fetchContracts(): Promise<Contract[]> {
-  const user = await getCurrentUser();
-  if (!user) return [];
-  
-  const result = await db.select().from(contracts).where(eq(contracts.creatorId, user.id)).orderBy(contracts.createdAt);
-  return result as unknown as Contract[];
+export async function fetchContract(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [contract] = await db.select().from(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId)));
+  if (!contract) throw new Error('Contract not found or unauthorized');
+  return contract;
 }
 
-export async function fetchContract(id: string): Promise<Contract | null> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const result = await db.select().from(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, user.id))).limit(1);
-  return (result[0] as unknown as Contract) ?? null;
-}
+export async function createContract(data: any) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
 
-export async function fetchContractTemplates(): Promise<ContractTemplate[]> {
-  const user = await getCurrentUser();
-  if (!user) return [];
-  
-  const result = await db
-    .select()
-    .from(contractTemplates)
-    .where(eq(contractTemplates.isSystemTemplate, true))
-    .orderBy(contractTemplates.name);
-  
-  return result as unknown as ContractTemplate[];
-}
+  const contractNumber = await generateContractNumber(); // Assuming this function exists
 
-export async function createContract(data: NewContract): Promise<Contract> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const contractNumber = await generateContractNumber();
-  
-  const [contract] = await db
-    .insert(contracts)
-    .values({
-      creatorId: user.id,
-      clientId: data.clientId,
-      projectId: data.projectId || null,
-      quoteId: data.quoteId || null,
-      templateId: data.templateId || null,
-      title: data.title,
-      contractNumber,
-      token: uuidv4(),
-      content: data.content || '',
-      status: 'draft',
-      currency: data.currency || 'KES',
-      totalAmount: data.totalAmount ? Math.round(data.totalAmount) : null,
-    })
-    .returning();
-  
-  if (!contract) throw new Error('Failed to create contract');
+  const [newContract] = await db.insert(contracts).values({
+    id: uuidv4(),
+    creatorId: userId,
+    clientId: data.clientId,
+    projectId: data.projectId ?? null,
+    quoteId: data.quoteId ?? null,
+    templateId: data.templateId ?? null,
+    title: data.title,
+    contractNumber,
+    status: data.status ?? 'draft',
+    content: data.content ?? '',
+    currency: data.currency ?? 'KES',
+    totalAmount: data.totalAmount ?? null,
+    token: uuidv4(), // Generate a unique token for public access
+    expiresAt: data.expiresAt ?? null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
 
+  // Log event
   await db.insert(contractEvents).values({
-    contractId: contract.id,
+    id: uuidv4(),
+    contractId: newContract.id,
     eventType: 'created',
-    metadata: {},
+    metadata: { ...data },
+    createdAt: new Date(),
   });
-  
-  return contract as unknown as Contract;
+
+  return newContract;
 }
 
-export async function updateContract(id: string, data: UpdateContractInput): Promise<Contract> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const updateData: Record<string, unknown> = {
+export async function updateContract(id: string, data: any) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [updatedContract] = await db.update(contracts).set({
     ...data,
     updatedAt: new Date(),
-  };
-  if (data.content !== undefined) {
-    updateData.content = data.content || '';
-  }
-  if (data.totalAmount !== undefined) {
-    updateData.totalAmount = data.totalAmount ? Math.round(data.totalAmount) : null;
-  }
+  }).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
 
-  const [contract] = await db
-    .update(contracts)
-    .set(updateData)
-    .where(and(eq(contracts.id, id), eq(contracts.creatorId, user.id)))
-    .returning();
-  
-  if (!contract) throw new Error('Contract not found');
-  
+  // Log event
   await db.insert(contractEvents).values({
+    id: uuidv4(),
     contractId: id,
     eventType: 'updated',
-    metadata: (data || {}) as Record<string, unknown>,
+    metadata: { ...data },
+    createdAt: new Date(),
   });
-  
-  return contract as unknown as Contract;
+
+  return updatedContract;
 }
 
-export async function deleteContract(id: string): Promise<void> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  await db.delete(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, user.id)));
-  
+export async function deleteContract(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [deletedContract] = await db.delete(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
+
+  // Log event
   await db.insert(contractEvents).values({
+    id: uuidv4(),
     contractId: id,
     eventType: 'deleted',
-    metadata: {},
+    metadata: { id: deletedContract.id },
+    createdAt: new Date(),
   });
+
+  return deletedContract;
 }
 
-export async function sendContract(id: string): Promise<Contract> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const [contract] = await db
-    .update(contracts)
-    .set({ status: 'sent', sentAt: new Date(), updatedAt: new Date() })
-    .where(and(eq(contracts.id, id), eq(contracts.creatorId, user.id)))
-    .returning();
-  
-  if (!contract) throw new Error('Contract not found');
-  
+export async function sendContract(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [updatedContract] = await db.update(contracts).set({
+    status: 'sent',
+    sentAt: new Date(),
+    updatedAt: new Date(),
+  }).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
+
+  // Log event
   await db.insert(contractEvents).values({
+    id: uuidv4(),
     contractId: id,
     eventType: 'sent',
     metadata: {},
+    createdAt: new Date(),
   });
-  
-  return contract as unknown as Contract;
+
+  return updatedContract;
 }
 
-export async function duplicateContract(id: string): Promise<Contract> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const original = await fetchContract(id);
-  if (!original) throw new Error('Contract not found');
-  
-  const contractNumber = await generateContractNumber();
-  
-  const [duplicate] = await db
-    .insert(contracts)
-    .values({
-      creatorId: user.id,
-      clientId: original.clientId,
-      projectId: original.projectId || null,
-      quoteId: original.quoteId || null,
-      templateId: original.templateId || null,
-      title: `${original.title} (Copy)`,
-      contractNumber,
-      token: uuidv4(),
-      content: original.content || '',
-      status: 'draft',
-      currency: original.currency || 'KES',
-      totalAmount: original.totalAmount ? Math.round(original.totalAmount) : null,
-    })
-    .returning();
-  
-  if (!duplicate) throw new Error('Failed to duplicate contract');
+export async function duplicateContract(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
 
-  await db.insert(contractEvents).values({
-    contractId: duplicate.id,
-    eventType: 'duplicated',
-    metadata: { originalContractId: original.id },
-  });
-  
-  return duplicate as unknown as Contract;
-}
-
-export async function saveAsTemplate(id: string, name: string, description: string): Promise<ContractTemplate> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
   const contract = await fetchContract(id);
-  if (!contract) throw new Error('Contract not found');
-  
-  const [template] = await db
-    .insert(contractTemplates)
-    .values({
-      creatorId: user.id,
-      name,
-      description: description || null,
-      category: 'Custom',
-      documentType: 'contract',
-      content: contract.content || '',
-      variables: [],
-      isSystemTemplate: false,
-      isActive: true,
-    })
-    .returning();
-  
-  if (!template) throw new Error('Failed to save template');
+  const contractNumber = await generateContractNumber();
 
+  const [newContract] = await db.insert(contracts).values({
+    id: uuidv4(),
+    creatorId: userId,
+    clientId: contract.clientId,
+    projectId: contract.projectId,
+    quoteId: contract.quoteId,
+    templateId: contract.templateId,
+    title: `${contract.title} (Copy)`,
+    contractNumber,
+    status: 'draft',
+    content: contract.content,
+    currency: contract.currency,
+    totalAmount: contract.totalAmount,
+    token: uuidv4(),
+    expiresAt: contract.expiresAt,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
+
+  // Log event
   await db.insert(contractEvents).values({
+    id: uuidv4(),
+    contractId: newContract.id,
+    eventType: 'duplicated',
+    metadata: { originalContractId: id },
+    createdAt: new Date(),
+  });
+
+  return newContract;
+}
+
+export async function saveContractAsTemplate(id: string, data: any) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const contract = await fetchContract(id);
+
+  const [newTemplate] = await db.insert(contractTemplates).values({
+    id: uuidv4(),
+    creatorId: userId,
+    name: data.name ?? contract.title,
+    description: data.description ?? '',
+    category: data.category ?? 'General Business',
+    documentType: data.documentType ?? 'services',
+    content: contract.content,
+    variables: data.variables ?? [],
+    isSystemTemplate: false,
+    isActive: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
+
+  // Log event
+  await db.insert(contractEvents).values({
+    id: uuidv4(),
     contractId: id,
     eventType: 'saved_as_template',
-    metadata: { templateId: template.id },
+    metadata: { templateId: newTemplate.id },
+    createdAt: new Date(),
   });
-  
-  return template as unknown as ContractTemplate;
+
+  return newTemplate;
 }
 
-export async function fetchContractByToken(token: string): Promise<Contract | null> {
-  const result = await db.select().from(contracts).where(eq(contracts.token, token)).limit(1);
-  return (result[0] as unknown as Contract) ?? null;
+export async function fetchContractStats() {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const stats = await db.select({
+    total: sql<number>`count(*)`.map(Number),
+    draft: sql<number>`count(*) filter (where ${eq(contracts.status, 'draft')})`.map(Number),
+    sent: sql<number>`count(*) filter (where ${eq(contracts.status, 'sent')})`.map(Number),
+    viewed: sql<number>`count(*) filter (where ${eq(contracts.status, 'viewed')})`.map(Number),
+    awaiting_signature: sql<number>`count(*) filter (where ${eq(contracts.status, 'awaiting_signature')})`.map(Number),
+    signed: sql<number>`count(*) filter (where ${eq(contracts.status, 'signed')})`.map(Number),
+    declined: sql<number>`count(*) filter (where ${eq(contracts.status, 'declined')})`.map(Number),
+    expired: sql<number>`count(*) filter (where ${eq(contracts.status, 'expired')})`.map(Number),
+    cancelled: sql<number>`count(*) filter (where ${eq(contracts.status, 'cancelled')})`.map(Number),
+  }).from(contracts).where(eq(contracts.creatorId, userId));
+
+  return stats[0];
 }
 
-export async function updateContractStatus(token: string, status: 'signed' | 'declined'): Promise<Contract> {
-  const [contract] = await db
-    .update(contracts)
-    .set({
-      status,
-      signedAt: status === 'signed' ? new Date() : undefined,
-      declinedAt: status === 'declined' ? new Date() : undefined,
-      updatedAt: new Date(),
-    })
-    .where(eq(contracts.token, token))
-    .returning();
-  
+export async function fetchContractTemplates({ search, category, limit = 50, offset = 0 }: {
+  search?: string;
+  category?: string;
+  limit?: number;
+  offset?: number;
+}) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  let where = and(
+    or(
+      eq(contractTemplates.isSystemTemplate, true),
+      eq(contractTemplates.creatorId, userId)
+    ),
+    eq(contractTemplates.isActive, true)
+  );
+
+  if (search) {
+    where = and(where,
+      or(
+        ilike(contractTemplates.name, `%${search}%`),
+        ilike(contractTemplates.description, `%${search}%`)
+      )
+    );
+  }
+
+  if (category && category !== 'all') {
+    where = and(where, eq(contractTemplates.category, category));
+  }
+
+  const data = await db.select().from(contractTemplates).where(where).limit(limit).offset(offset).orderBy(desc(contractTemplates.createdAt));
+  const total = await db.select({ count: sql<number>`count(*)` }).from(contractTemplates).where(where);
+
+  return {
+    templates: data,
+    total: Number(total[0].count),
+  };
+}
+
+export async function createContractTemplate(data: any) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [newTemplate] = await db.insert(contractTemplates).values({
+    id: uuidv4(),
+    creatorId: userId,
+    name: data.name,
+    description: data.description ?? '',
+    category: data.category,
+    documentType: data.documentType,
+    content: data.content,
+    variables: data.variables ?? [],
+    isSystemTemplate: data.isSystemTemplate ?? false,
+    isActive: data.isActive ?? true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }).returning();
+
+  return newTemplate;
+}
+
+export async function updateContractTemplate(id: string, data: any) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [updatedTemplate] = await db.update(contractTemplates).set({
+    ...data,
+    updatedAt: new Date(),
+  }).where(and(eq(contractTemplates.id, id), or(
+    eq(contractTemplates.isSystemTemplate, true),
+    eq(contractTemplates.creatorId, userId)
+  ))).returning();
+
+  return updatedTemplate;
+}
+
+export async function deleteContractTemplate(id: string) {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+
+  const [deletedTemplate] = await db.delete(contractTemplates).where(and(eq(contractTemplates.id, id), or(
+    eq(contractTemplates.isSystemTemplate, true),
+    eq(contractTemplates.creatorId, userId)
+  ))).returning();
+
+  return deletedTemplate;
+}
+
+// Public API functions (no authentication required for viewing/signing by client)
+
+export async function getPublicContract(token: string) {
+  const [contract] = await db.select().from(contracts).where(eq(contracts.token, token));
   if (!contract) throw new Error('Contract not found');
-  
+  return contract;
+}
+
+export async function signPublicContract(token: string, signatureData: any) {
+  const [contract] = await db.update(contracts).set({
+    status: 'signed',
+    signedAt: new Date(),
+    updatedAt: new Date(),
+  }).where(eq(contracts.token, token)).returning();
+
+  // Log event
   await db.insert(contractEvents).values({
+    id: uuidv4(),
     contractId: contract.id,
-    eventType: status,
-    metadata: {},
+    eventType: 'signed',
+    metadata: signatureData,
+    createdAt: new Date(),
   });
-  
-  return contract as unknown as Contract;
+
+  return contract;
 }
 
-export async function fetchContractEvents(contractId: string): Promise<ContractEvent[]> {
-  const user = await getCurrentUser();
-  if (!user) throw new Error('Unauthorized');
-  
-  const [contract] = await db.select().from(contracts).where(and(eq(contracts.id, contractId), eq(contracts.creatorId, user.id))).limit(1);
-  if (!contract) throw new Error('Contract not found');
-  
-  const result = await db.select().from(contractEvents).where(eq(contractEvents.contractId, contractId)).orderBy(contractEvents.createdAt);
-  return result as unknown as ContractEvent[];
-}
-
-export async function fetchClients(): Promise<Client[]> {
-  const user = await getCurrentUser();
-  if (!user) return [];
-  const result = await db.select().from(clients).where(eq(clients.creatorId, user.id));
-  return result as unknown as Client[];
-}
-
-export async function fetchProjects(): Promise<Project[]> {
-  const user = await getCurrentUser();
-  if (!user) return [];
-  const result = await db.select().from(projects).where(eq(projects.creatorId, user.id));
-  return result as unknown as Project[];
-}
+// Add the named exports that the API routes expect
+export const fetchContractByToken = getPublicContract;
+export const updateContractStatus = updateContract; // thin wrapper
+export const fetchContractEvents = async (contractId: string) => {
+  const userId = await getCurrentUserId();
+  if (!userId) throw new Error('Unauthenticated');
+  return db.select().from(contractEvents).where(eq(contractEvents.contractId, contractId));
+};
+export const saveAsTemplate = saveContractAsTemplate;

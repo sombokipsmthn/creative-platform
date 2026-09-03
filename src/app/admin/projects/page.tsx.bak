@@ -342,7 +342,7 @@ export default function AdminGalleryManagerPage() {
                   onAddItem={() => {
                     setActiveTab('create');
                   }}
-                  filterOptions={ [
+                  filterOptions=[
                     {
                       label: 'Status',
                       value: 'status',

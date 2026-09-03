@@ -577,13 +577,13 @@ html.dark {
   .ui-loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; padding: 4rem 1.5rem; text-align: center; }
 
   /* Icon containers */
-  .ui-icon-box { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-lg); background-color: var(--color-accent-soft); color: var(--color-accent); flex-shrink: 0; }
+  .ui-icon-box { display: inline-flex; align-items: center; justify-content: center;; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-lg); background-color: var(--color-accent-soft); color: var(--color-accent); flex-shrink: 0; }
   .ui-icon-box-sm { width: 1.75rem; height: 1.75rem; border-radius: var(--radius-md); }
   .ui-icon-box-lg { width: 2.75rem; height: 2.75rem; border-radius: var(--radius-xl); }
-  .os-icon-box { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-lg); background-color: var(--color-accent-soft); color: var(--color-accent); flex-shrink: 0; }
+  .os-icon-box { display: inline-flex; align-items: center; justify-content: center;; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-lg); background-color: var(--color-accent-soft); color: var(--color-accent); flex-shrink: 0; }
 
   /* Avatars */
-  .ui-avatar { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; overflow: hidden; flex-shrink: 0; background-color: var(--color-bg-soft); border: 1px solid var(--color-border-subtle); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-muted); }
+  .ui-avatar { display: inline-flex; align-items: center; justify-content: center;; border-radius: 50%; overflow: hidden; flex-shrink: 0; background-color: var(--color-bg-soft); border: 1px solid var(--color-border-subtle); font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-muted); }
   .ui-avatar-sm  { width: 2rem;   height: 2rem;   }
   .ui-avatar-md  { width: 2.5rem; height: 2.5rem; }
   .ui-avatar-lg  { width: 3.5rem; height: 3.5rem; }

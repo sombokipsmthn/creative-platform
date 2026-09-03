@@ -21,6 +21,10 @@ interface DashboardStats {
     completedProjects: number;
     quotes: number;
     newQuotes: number;
+    activeProjects: number;
+    completedProjects: number;
+    quotes: number;
+    newQuotes: number;
     invoices: number;
     newInvoices: number;
     galleries: number;
@@ -112,15 +116,17 @@ function MetricCard({ label, value, detail, href, icon }: { label: string; value
       href={href}
       className="ui-card ui-card-interactive group"
     >
-      <div className="flex items-start justify-between gap-4">
-        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">{icon}</span>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-purple-500">
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
+      <div className="ui-card-content">
+        <div className="flex items-start justify-between gap-4">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">{icon}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-purple-500">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </div>
+        <p className="ui-meta">{label}</p>
+        <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{value}</p>
+        <p className="ui-meta">{detail}</p>
       </div>
-      <p className="ui-meta">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{value}</p>
-      <p className="ui-meta">{detail}</p>
     </Link>
   );
 }
@@ -213,23 +219,23 @@ export default function CreativeOSDashboardPage() {
   const avatar = activeCreator?.profile?.avatarUrl || user?.imageUrl || '';
 
   const invoicePaidRate = useMemo(() => {
-    if (!stats) return 0;
-    const total = Object.values(stats.invoices.statuses).reduce((sum, v) => sum + (v || 0), 0);
-    const paid = stats.invoices.statuses.paid || 0;
+    if (!Stats) return 0;
+    const total = Object.values(Stats.invoices.statuses).reduce((sum, v) => sum + (v || 0), 0);
+    const paid = Stats.invoices.statuses.paid || 0;
     return total > 0 ? Math.round((paid / total) * 100) : 0;
-  }, [stats]);
+  }, [Stats]);
 
   const quotePipeline = useMemo(() => {
-    if (!stats) return [];
+    if (!Stats) return [];
     const items: Array<[string, number]> = [
-      ['Draft', stats.quotes.statuses.draft || 0],
-      ['Sent', stats.quotes.statuses.sent || 0],
-      ['Accepted', stats.quotes.statuses.accepted || 0],
-      ['Rejected', stats.quotes.statuses.rejected || 0],
-      ['Invoiced', stats.quotes.statuses.invoiced || 0],
+      ['Draft', Stats.quotes.statuses.draft || 0],
+      ['Sent', Stats.quotes.statuses.sent || 0],
+      ['Accepted', Stats.quotes.statuses.accepted || 0],
+      ['Rejected', Stats.quotes.statuses.rejected || 0],
+      ['Invoiced', Stats.quotes.statuses.invoiced || 0],
     ];
     return items.filter(([_, v]) => v > 0);
-  }, [stats]);
+  }, [Stats]);
 
   if (!isLoaded) {
     return (
@@ -247,7 +253,7 @@ export default function CreativeOSDashboardPage() {
           <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
-                Command Center
+                Dashboard
               </p>
               <div className="flex items-center gap-4">
                 {avatar && (
@@ -256,9 +262,9 @@ export default function CreativeOSDashboardPage() {
                   </div>
                 )}
                 <div>
-                  <h1 className="ui-page-title">Welcome back, {name.split(' ')[0]}.</h1>
+                  <h1 className="ui-page-title">Dashboard</h1>
                   <p className="ui-meta">
-                    Run your creative business from one place.{email ? ` · ${email}` : ''}
+                    Welcome back, {name.split(' ')[0]}.{email ? ` · ${email}` : ''}
                   </p>
                 </div>
               </div>
@@ -303,7 +309,7 @@ export default function CreativeOSDashboardPage() {
         </section>
 
         {/* Loading Skeleton */}
-        {loading && !stats && (
+        {loading && !Stats && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="h-36 animate-pulse rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950" />
@@ -311,8 +317,8 @@ export default function CreativeOSDashboardPage() {
           </div>
         )}
 
-        {/* Stats Grid */}
-        {stats && (
+        {/* Stats Grid - 4 Column KPI Card Grid */}
+        {Stats && (
           <>
             {/* Business Pulse */}
             <section>
@@ -323,28 +329,28 @@ export default function CreativeOSDashboardPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <MetricCard
                   label="Quoted value"
-                  value={formatCurrency(stats.finance.periodQuotedValue)}
-                  detail={`${stats.overview.newQuotes} new quotes`}
+                  value={formatCurrency(Stats.finance.periodQuotedValue)}
+                  detail={`${Stats.overview.newQuotes} new quotes`}
                   href="/admin/quotes"
                   icon={<Wallet className="h-4 w-4" />}
                 />
                 <MetricCard
                   label="Paid invoices"
-                  value={formatCurrency(stats.finance.periodPaidValue)}
+                  value={formatCurrency(Stats.finance.periodPaidValue)}
                   detail={`${invoicePaidRate}% of invoices paid`}
                   href="/admin/invoices"
                   icon={<CheckCircle2 className="h-4 w-4" />}
                 />
                 <MetricCard
                   label="Accepted quotes"
-                  value={formatCurrency(stats.finance.acceptedQuoteValue)}
-                  detail={`${stats.quotes.conversionRate}% conversion rate`}
+                  value={formatCurrency(Stats.finance.acceptedQuoteValue)}
+                  detail={`${Stats.quotes.conversionRate}% conversion rate`}
                   href="/admin/quotes"
                   icon={<CheckCircle2 className="h-4 w-4" />}
                 />
                 <MetricCard
                   label="Overdue invoices"
-                  value={formatNumber(stats.finance.overdueInvoices)}
+                  value={formatNumber(Stats.finance.overdueInvoices)}
                   detail="Requires follow-up"
                   href="/admin/invoices"
                   icon={<Clock3 className="h-4 w-4" />}
@@ -356,30 +362,30 @@ export default function CreativeOSDashboardPage() {
             <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard
                 label="Clients"
-                value={formatNumber(stats.overview.clients)}
-                detail={`${stats.overview.activeClients} active · ${stats.overview.newClients} new`}
+                value={formatNumber(Stats.overview.clients)}
+                detail={`${Stats.overview.activeClients} active · ${Stats.overview.newClients} new`}
                 href="/admin/clients"
                 icon={<Users className="h-4 w-4" />}
               />
               <MetricCard
                 label="Projects"
-                value={formatNumber(stats.overview.projects)}
-                detail={`${stats.overview.activeProjects} active · ${stats.overview.completedProjects} completed`}
+                value={formatNumber(Stats.overview.projects)}
+                detail={`${Stats.overview.activeProjects} active · ${Stats.overview.completedProjects} completed`}
                 href="/admin/projects"
                 icon={<LayoutDashboard className="h-4 w-4" />}
               />
               <MetricCard
                 label="Quotes"
-                value={formatNumber(stats.overview.quotes)}
-                detail={`${stats.overview.newQuotes} created in period`}
+                value={formatNumber(Stats.overview.quotes)}
+                detail={`${Stats.overview.newQuotes} created in period`}
                 href="/admin/quotes"
                 icon={<FileText className="h-4 w-4" />}
               />
               <MetricCard
                 label="Galleries"
-                value={formatNumber(stats.overview.galleries)}
-                detail={`${stats.attention.activeGalleries} active`}
-                href="/admin/projects"
+                value={formatNumber(Stats.overview.galleries)}
+                detail={`${Stats.attention.activeGalleries} active`}
+                href="/admin/galleries"
                 icon={<GalleryHorizontalEnd className="h-4 w-4" />}
               />
             </section>
@@ -392,29 +398,29 @@ export default function CreativeOSDashboardPage() {
                     icon={<Receipt className="h-4 w-4" />}
                     title="Overdue invoices"
                     detail="Follow up on outstanding payments."
-                    count={stats.attention.overdueInvoices}
+                    count={Stats.attention.overdueInvoices}
                     href="/admin/invoices"
                   />
                   <AttentionItem
                     icon={<FileText className="h-4 w-4" />}
                     title="Quotes awaiting action"
                     detail="Draft or sent quotes to review."
-                    count={stats.attention.pendingQuotes}
+                    count={Stats.attention.pendingQuotes}
                     href="/admin/quotes"
                   />
                   <AttentionItem
                     icon={<LayoutDashboard className="h-4 w-4" />}
                     title="Active projects"
                     detail="Current production workload."
-                    count={stats.attention.activeProjects}
+                    count={Stats.attention.activeProjects}
                     href="/admin/projects"
                   />
                   <AttentionItem
                     icon={<GalleryHorizontalEnd className="h-4 w-4" />}
                     title="Active galleries"
                     detail="Client-facing galleries in progress."
-                    count={stats.attention.activeGalleries}
-                    href="/admin/projects"
+                    count={Stats.attention.activeGalleries}
+                    href="/admin/galleries"
                   />
                 </div>
               </Panel>
@@ -422,11 +428,11 @@ export default function CreativeOSDashboardPage() {
               <Panel eyebrow="Commercial health" title="Quote pipeline">
                 <div className="space-y-5 px-5 py-5">
                   {quotePipeline.map(([label, value]) => (
-                    <StatusBar key={label} label={label} value={value} total={stats.overview.quotes} />
+                    <StatusBar key={label} label={label} value={value} total={Stats.overview.quotes} />
                   ))}
                   <div className="border-t border-slate-100 pt-4 dark:border-zinc-900">
                     <p className="ui-eyebrow">Conversion</p>
-                    <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{stats.quotes.conversionRate}%</p>
+                    <p className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{Stats.quotes.conversionRate}%</p>
                     <p className="ui-meta">Accepted vs. decided quotes.</p>
                   </div>
                 </div>
@@ -437,13 +443,13 @@ export default function CreativeOSDashboardPage() {
             <section className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_0.65fr]">
               <Panel eyebrow="Workspace" title="Recent activity" action={<span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Live from your account</span>}>
                 <div className="divide-y divide-slate-100 dark:divide-zinc-900">
-                  {stats.activity.length === 0 ? (
+                  {Stats.activity.length === 0 ? (
                     <div className="px-5 py-10 text-center">
                       <p className="text-sm font-medium text-slate-700 dark:text-zinc-200">No activity yet</p>
                       <p className="ui-meta">Create a client, project or quote to get started.</p>
                     </div>
                   ) : (
-                    stats.activity.map((item) => <ActivityRow key={item.id} {...item} />)
+                    Stats.activity.map((item) => <ActivityRow key={item.id} {...item} />)
                   )}
                 </div>
               </Panel>
@@ -452,12 +458,12 @@ export default function CreativeOSDashboardPage() {
                 <div className="space-y-4 px-5 py-5">
                   <div className="rounded-xl bg-slate-50 p-4 dark:bg-zinc-900/70">
                     <p className="ui-eyebrow">Invoiced</p>
-                    <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{formatCurrency(stats.finance.periodInvoicedValue)}</p>
+                    <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{formatCurrency(Stats.finance.periodInvoicedValue)}</p>
                     <p className="ui-meta">Within {rangeLabels[range]}.</p>
                   </div>
                   <div className="rounded-xl bg-slate-50 p-4 dark:bg-zinc-900/70">
                     <p className="ui-eyebrow">Paid</p>
-                    <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{formatCurrency(stats.finance.periodPaidValue)}</p>
+                    <p className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">{formatCurrency(Stats.finance.periodPaidValue)}</p>
                     <p className="ui-meta">Cash collected in the period.</p>
                   </div>
                   <Link

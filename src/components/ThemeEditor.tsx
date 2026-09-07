@@ -139,7 +139,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
   const updateThemeProperty = async (
     key: keyof Theme,
-    value: any
+    value: Theme[keyof Theme]
   ) => {
     if (!theme) return
 

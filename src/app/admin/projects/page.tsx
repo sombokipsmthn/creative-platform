@@ -163,14 +163,19 @@ export default function AdminGalleryManagerPage() {
      ========================================================= */
 
   useEffect(() => {
-    fetchData();
+    const initialLoad = window.setTimeout(() => {
+      void fetchData();
+    }, 0);
 
     // Poll for new activity every 30 seconds
     const pollInterval = setInterval(() => {
       fetchData(true);
     }, 30000);
 
-    return () => clearInterval(pollInterval);
+    return () => {
+      window.clearTimeout(initialLoad);
+      clearInterval(pollInterval);
+    };
   }, [fetchData]);
 
   /* =========================================================
@@ -370,7 +375,10 @@ export default function AdminGalleryManagerPage() {
                 onSearchChange={setSearchQuery}
                 filters={{ status: filterStatus, category: filterCategory }}
                 onFiltersChange={(filters) => {
-                  setFilterStatus(filters.status ?? 'all');
+                  const nextStatus = filters.status;
+                  if (nextStatus === 'all' || nextStatus === 'draft' || nextStatus === 'published') {
+                    setFilterStatus(nextStatus);
+                  }
                   setFilterCategory(filters.category ?? 'all');
                 }}
                 onAddItem={() => {

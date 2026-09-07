@@ -2,8 +2,9 @@
 
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useMemo, useState, useEffect } from 'react';
-import { AlertCircle, CalendarDays, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd, LayoutDashboard, Plus, Receipt, Users, Wallet } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd, LayoutDashboard, Receipt, Users, Wallet } from 'lucide-react';
 
 import { useCreator } from '@/context/CreatorContext';
 import { formatCurrency } from '@/lib/utils';
@@ -45,7 +46,9 @@ interface DashboardStats {
   activity: Array<{ id: string; type: 'client' | 'project' | 'quote' | 'invoice' | 'gallery'; title: string; description: string; date: string }>;
 }
 
-const ranges = [
+type Range = '7d' | '30d' | '90d' | '12m' | 'all';
+
+const ranges: Array<{ value: Range; label: string }> = [
   { value: '7d', label: '7 days' },
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
@@ -230,7 +233,7 @@ export default function CreativeOSDashboardPage() {
       ['Rejected', stats.quotes.statuses.rejected || 0],
       ['Invoiced', stats.quotes.statuses.invoiced || 0],
     ];
-    return items.filter(([_, v]) => v > 0);
+    return items.filter(([, v]) => v > 0);
   }, [stats]);
 
   if (!isLoaded) {
@@ -254,7 +257,7 @@ export default function CreativeOSDashboardPage() {
               <div className="flex items-center gap-4">
                 {avatar && (
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30">
-                    <img src={avatar} alt={name} className="h-full w-full object-cover" />
+                    <Image src={avatar} alt={name} fill unoptimized className="object-cover" />
                   </div>
                 )}
                 <div>
@@ -270,7 +273,7 @@ export default function CreativeOSDashboardPage() {
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setRange(opt.value as any)}
+                  onClick={() => setRange(opt.value)}
                   className={`ui-button ${range === opt.value ? 'ui-button-primary' : 'ui-button-secondary'}`}
                 >
                   {opt.label}

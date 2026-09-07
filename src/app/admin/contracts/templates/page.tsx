@@ -4,19 +4,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  CheckCircle2,
   FilePlus,
   Loader2,
-  Plus,
   Search,
-  Trash2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
+import type { ContractTemplate } from '@/lib/types/contracts';
 
 export default function ContractTemplatesPage() {
   const router = useRouter();
-  const [templates, setTemplates] = useState<Array<any>>([]);
+  const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -122,8 +120,8 @@ export default function ContractTemplatesPage() {
             <p className="text-gray-500">No templates found.</p>
           </div>
         ) : (
-          templates.map((template, idx) => (
-            <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+          templates.map((template) => (
+            <div key={template.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">

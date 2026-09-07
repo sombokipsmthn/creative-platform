@@ -19,14 +19,12 @@ interface StoryViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
  * Timeline-like narrative experience.
  */
 export function GalleryViewerStory({
-  id,
   title,
   description,
   theme,
   photos,
   allowDownloads,
   allowFavorites,
-  isClient,
   onPhotoDownload,
   onPhotoFavorite,
 }: StoryViewerProps) {

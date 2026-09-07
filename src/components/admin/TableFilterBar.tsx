@@ -1,16 +1,17 @@
-import { useState } from 'react';
 import { Search, Sliders, Plus } from 'lucide-react';
+
+type FilterValue = string | undefined;
 
 interface TableFilterBarProps {
   search: string;
   onSearchChange: (value: string) => void;
-  filters: Record<string, any>;
-  onFiltersChange: (filters: Record<string, any>) => void;
+  filters: Record<string, FilterValue>;
+  onFiltersChange: (filters: Record<string, FilterValue>) => void;
   onAddItem: () => void;
   filterOptions: {
     label: string;
     value: string;
-    options?: Array<{ label: string; value: string | number }>;
+    options?: Array<{ label: string; value: string }>;
     type?: 'select' | 'pills';
   }[];
   itemLabel: string;
@@ -32,10 +33,10 @@ export default function TableFilterBar({
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    onFiltersChange((prev: any) => ({
-      ...prev,
+    onFiltersChange({
+      ...filters,
       [name]: value === 'all' ? undefined : value
-    }));
+    });
   };
 
   return (
@@ -65,10 +66,10 @@ export default function TableFilterBar({
                     type="button"
                     className={`ui-tab-pill ${filters[option.value] === opt.value ? 'ui-tab-pill-active' : ''}`}
                     onClick={() => {
-                      onFiltersChange((prev: any) => ({
-                        ...prev,
+                      onFiltersChange({
+                        ...filters,
                         [option.value]: opt.value === 'all' ? undefined : opt.value
-                      }));
+                      });
                     }}
                   >
                     {opt.label}

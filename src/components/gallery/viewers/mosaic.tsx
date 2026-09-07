@@ -19,19 +19,16 @@ interface MosaicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
  * Organic masonry-style layout.
  */
 export function GalleryViewerMosaic({
-  id,
   title,
   description,
   theme,
   photos,
   allowDownloads,
   allowFavorites,
-  isClient,
   onPhotoDownload,
   onPhotoFavorite,
 }: MosaicViewerProps) {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   if (photos.length === 0) {
     return (

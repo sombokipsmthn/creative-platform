@@ -1,19 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
   FileText,
   RefreshCw,
-  Search,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
-import { formatCurrency } from '@/lib/utils';
 
 type Client = {
   id: string;
@@ -152,7 +150,7 @@ export default function InvoicesPage() {
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  async function loadInvoices(showRefreshState = false) {
+  const loadInvoices = useCallback(async (showRefreshState = false) => {
     try {
       if (showRefreshState) {
         setRefreshing(true);
@@ -203,11 +201,14 @@ export default function InvoicesPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }
+  }, [page, status, currency, clientId]);
 
   useEffect(() => {
-    void loadInvoices();
-  }, [page, status, currency, clientId]);
+    const load = window.setTimeout(() => {
+      void loadInvoices();
+    }, 0);
+    return () => window.clearTimeout(load);
+  }, [loadInvoices]);
 
   const clients = useMemo(() => {
     const map = new Map<string, Client>();

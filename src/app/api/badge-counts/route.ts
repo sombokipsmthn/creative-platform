@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Mock badge counts - in a real app, this would come from a database or service
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     // In a real app, we would get the user ID from the request (via Clerk) and then compute the counts
     // For now, we return mock data

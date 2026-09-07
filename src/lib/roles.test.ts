@@ -17,13 +17,15 @@ describe("roles", () => {
       sessionClaims: {
         metadata: { role: "admin" },
       },
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof auth>>);
 
     await expect(getCurrentRole()).resolves.toBe("admin");
   });
 
   it("returns null when the session has no role metadata", async () => {
-    vi.mocked(auth).mockResolvedValue({ sessionClaims: {} } as any);
+    vi.mocked(auth).mockResolvedValue(
+      { sessionClaims: {} } as unknown as Awaited<ReturnType<typeof auth>>,
+    );
 
     await expect(getCurrentRole()).resolves.toBeNull();
   });
@@ -33,7 +35,7 @@ describe("roles", () => {
       sessionClaims: {
         metadata: { role: "client" },
       },
-    } as any);
+    } as unknown as Awaited<ReturnType<typeof auth>>);
 
     await expect(requireRole("client")).resolves.toBeUndefined();
     await expect(requireRole("admin")).rejects.toThrow(

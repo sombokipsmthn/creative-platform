@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
-import { sql } from "drizzle-orm";
-import { db } from "@/db";
 
 /**
  * Get available services for quote builder

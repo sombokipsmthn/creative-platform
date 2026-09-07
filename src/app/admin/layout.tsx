@@ -7,7 +7,6 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   BarChart3,
-  BriefcaseBusiness,
   FileText,
   FolderKanban,
   GalleryHorizontalEnd,
@@ -18,12 +17,9 @@ import {
   SlidersHorizontal,
   Users,
   WalletCards,
-  Bell,
-  Activity,
-  Search,
-  Sliders,
   FileSignature,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -44,7 +40,7 @@ function NavItemWithBadge({
   isActive,
   badgeCount = 0,
 }: {
-  item: { name: string; href: string; icon: React.ComponentType<any> };
+  item: { name: string; href: string; icon: LucideIcon };
   isActive: boolean;
   badgeCount?: number;
 }) {
@@ -158,8 +154,7 @@ export default function AdminLayout({
         if (isMounted) {
           setBadgeCounts(counts);
         }
-      } catch (err) {
-        console.error('Failed to fetch badge counts:', err);
+      } catch {
         if (isMounted) {
           // Keep empty counts on error
           setBadgeCounts({});

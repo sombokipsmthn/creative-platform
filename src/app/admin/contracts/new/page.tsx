@@ -6,6 +6,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { Loader2Icon } from 'lucide-react';
 import { fetchClients, fetchProjects, fetchContractTemplates, createContract } from '@/lib/api/contracts';
 import type { Client, Project, ContractTemplate } from '@/lib/api/contracts';
+import type { Contract } from '@/lib/types/contracts';
 import VariableMapper from '@/components/VariableMapper';
 
 type Step = 'template' | 'client' | 'project' | 'details';
@@ -27,15 +28,21 @@ export default function NewContractPage() {
 
   const { mutate: createContractMutation, isPending } = useMutation({
     mutationFn: createContract,
-    onSuccess: (contract: any) => {
+    onSuccess: (contract: Contract) => {
       router.push(`/admin/contracts/${contract.id}`);
     },
   });
 
   useEffect(() => {
     if (templateId && templates) {
-      const template = templates.find((t: any) => t.id === templateId);
-      if (template) setSelectedTemplate(template);
+      const template = templates.find((t) => t.id === templateId);
+      if (template) {
+        const updateTemplate = window.setTimeout(
+          () => setSelectedTemplate(template),
+          0,
+        );
+        return () => window.clearTimeout(updateTemplate);
+      }
     }
   }, [templateId, templates]);
 
@@ -81,7 +88,7 @@ export default function NewContractPage() {
               <button onClick={() => setStep('client')} className="ui-template-card">
                 <h3>Start from Blank</h3>
               </button>
-              {templates?.map((template: any) => (
+              {templates?.map((template) => (
                 <button key={template.id} onClick={() => setSelectedTemplate(template)} className={`ui-template-card ${selectedTemplate?.id === template.id ? 'selected' : ''}`}>
                   <h3>{template.name}</h3>
                   <p>{template.description}</p>
@@ -94,7 +101,7 @@ export default function NewContractPage() {
           <div>
             <h2 className="ui-card-title">Select Client</h2>
             <div className="ui-client-list">
-              {clients?.map((client: any) => (
+              {clients?.map((client) => (
                 <button key={client.id} onClick={() => setSelectedClient(client)} className={`ui-client-card ${selectedClient?.id === client.id ? 'selected' : ''}`}>
                   <h3>{client.name}</h3>
                   <p>{client.email}</p>
@@ -110,7 +117,7 @@ export default function NewContractPage() {
               <button onClick={() => setStep('details')} className="ui-project-card">
                 No Project
               </button>
-              {projects?.map((project: any) => (
+              {projects?.map((project) => (
                 <button key={project.id} onClick={() => setSelectedProject(project)} className={`ui-project-card ${selectedProject?.id === project.id ? 'selected' : ''}`}>
                   <h3>{project.name}</h3>
                 </button>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { SERVICE_CATALOG, ServiceCatalogItem } from '@/lib/serviceCatalog';
+import { SERVICE_CATALOG, ServiceCatalogItem, type ServiceCategory } from '@/lib/serviceCatalog';
 import { toCatalogItem, toServiceCatalogItem } from '@/lib/catalog';
 
 export type QuoteLineItem = {
@@ -33,6 +33,14 @@ interface CatalogItem {
   defaultRate: number;
   defaultUnit: 'day' | 'item' | 'output' | 'set';
   defaultNotes?: string;
+}
+
+interface ServiceResponse {
+  id: string;
+  name: string;
+  category?: string | null;
+  defaultRate: number;
+  description?: string | null;
 }
 
 interface EquipmentServicesSelectorProps {
@@ -105,14 +113,16 @@ export default function EquipmentServicesSelector({
         }
 
         const equipmentData = await equipmentRes.json();
-        const servicesData = await servicesRes.json();
+        const servicesData = await servicesRes.json() as { services?: ServiceResponse[] };
 
         const eqRows: EquipmentRecord[] = equipmentData.equipment || [];
         // Map creatorServices to ServiceCatalogItem format
-        const svRows: ServiceCatalogItem[] = (servicesData.services || []).map((s: any) => ({
+        const svRows: ServiceCatalogItem[] = (servicesData.services || []).map((s) => ({
           id: `service-${s.id}`,
           name: s.name,
-          category: s.category || 'professional',
+          category: (['professional', 'data', 'logistics', 'postproduction', 'extra'] as ServiceCategory[]).includes(s.category as ServiceCategory)
+            ? s.category as ServiceCategory
+            : 'professional',
           sectionName: s.category === 'professional' ? 'Professional Fees' : 'Services',
           defaultRate: s.defaultRate,
           defaultUnit: 'day',

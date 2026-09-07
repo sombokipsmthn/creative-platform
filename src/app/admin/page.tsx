@@ -2,18 +2,17 @@
 
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCreator } from '@/context/CreatorContext';
 import { formatCurrency } from '@/lib/utils';
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertCircle,
   ArrowUpRight,
-  CheckCircle2,
   Clock3,
   FileText,
   FolderKanban,
   GalleryHorizontalEnd,
-  Plus,
   Receipt,
   Sparkles,
   Users,
@@ -137,13 +136,19 @@ export default function CreativeOSDashboardPage() {
   useEffect(() => {
     if (!isLoaded || !user) return;
     const tourSeen = localStorage.getItem('creative-os-tour-seen') === '1';
-    if (!tourSeen) setTourStep(0);
+    if (!tourSeen) {
+      const showTour = window.setTimeout(() => setTourStep(0), 0);
+      return () => window.clearTimeout(showTour);
+    }
   }, [isLoaded, user]);
 
   useEffect(() => {
     if (!stats || tourStep !== null) return;
     const prompted = localStorage.getItem('creative-os-first-client-prompted') === '1';
-    if (stats.overview.clients === 0 && !prompted) setShowFirstClient(true);
+    if (stats.overview.clients === 0 && !prompted) {
+      const showPrompt = window.setTimeout(() => setShowFirstClient(true), 0);
+      return () => window.clearTimeout(showPrompt);
+    }
   }, [stats, tourStep]);
 
   useEffect(() => {
@@ -187,7 +192,7 @@ export default function CreativeOSDashboardPage() {
   if (!isLoaded) return <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 dark:bg-[#09090b]"><p className="text-xs font-mono uppercase tracking-widest text-slate-500">Loading Creative OS...</p></main>;
 
   return <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
-    <header className="border-b border-slate-200 dark:border-zinc-800"><div className="mx-auto max-w-7xl px-6 py-8 lg:py-10"><div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative OS Command Center</p><div className="flex items-center gap-4">{avatar && <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30"><img src={avatar} alt={name} className="h-full w-full object-cover" /></div>}<div><h1 className="text-3xl font-light tracking-tight md:text-4xl">Welcome back, {name.split(' ')[0]}.</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Run your creative business from one place.{email ? ` · ${email}` : ''}</p></div></div></div><div className="flex flex-wrap items-center gap-2">{ranges.map((option) => <button key={option.value} type="button" onClick={() => setRange(option.value)} className={`rounded-full px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest transition ${range === option.value ? 'bg-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400'}`}>{option.label}</button>)}</div></div></div></header>
+    <header className="border-b border-slate-200 dark:border-zinc-800"><div className="mx-auto max-w-7xl px-6 py-8 lg:py-10"><div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative OS Command Center</p><div className="flex items-center gap-4">{avatar && <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30"><Image src={avatar} alt={name} fill unoptimized className="object-cover" /></div>}<div><h1 className="text-3xl font-light tracking-tight md:text-4xl">Welcome back, {name.split(' ')[0]}.</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Run your creative business from one place.{email ? ` · ${email}` : ''}</p></div></div></div><div className="flex flex-wrap items-center gap-2">{ranges.map((option) => <button key={option.value} type="button" onClick={() => setRange(option.value)} className={`rounded-full px-3.5 py-2 text-[10px] font-mono uppercase tracking-widest transition ${range === option.value ? 'bg-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400'}`}>{option.label}</button>)}</div></div></div></header>
 
     <div className="mx-auto max-w-7xl px-6 py-8">
       {error && <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300"><AlertCircle className="h-4 w-4" />{error}</div>}
@@ -207,10 +212,10 @@ export default function CreativeOSDashboardPage() {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]"><Panel eyebrow="Latest" title="Recent activity" action={<Link href="/admin" className="text-[10px] font-medium text-purple-600">Refresh</Link>}><div className="divide-y divide-slate-100 dark:divide-zinc-900">{loading ? <div className="px-5 py-10 text-center text-xs text-slate-400"><Clock3 className="mx-auto mb-2 h-4 w-4 animate-pulse" />Loading activity...</div> : stats?.activity.length ? stats.activity.slice(0, 8).map((item) => <ActivityRow key={item.id} item={item} />) : <div className="px-5 py-10 text-center text-sm text-slate-400">No activity yet.</div>}</div></Panel>
         <Panel eyebrow="Attention" title="Things to review"><div className="divide-y divide-slate-100 dark:divide-zinc-900">{[
-          ['Overdue invoices', stats?.attention.overdueInvoices || 0, '/admin/invoices', <Wallet className="h-4 w-4" />],
-          ['Pending quotes', stats?.attention.pendingQuotes || 0, '/admin/quotes/new', <FileText className="h-4 w-4" />],
-          ['Active projects', stats?.attention.activeProjects || 0, '/admin/projects', <FolderKanban className="h-4 w-4" />],
-          ['Active galleries', stats?.attention.activeGalleries || 0, '/admin/projects', <GalleryHorizontalEnd className="h-4 w-4" />],
+          ['Overdue invoices', stats?.attention.overdueInvoices || 0, '/admin/invoices', <Wallet key="overdue" className="h-4 w-4" />],
+          ['Pending quotes', stats?.attention.pendingQuotes || 0, '/admin/quotes/new', <FileText key="quotes" className="h-4 w-4" />],
+          ['Active projects', stats?.attention.activeProjects || 0, '/admin/projects', <FolderKanban key="projects" className="h-4 w-4" />],
+          ['Active galleries', stats?.attention.activeGalleries || 0, '/admin/projects', <GalleryHorizontalEnd key="galleries" className="h-4 w-4" />],
         ].map(([label, value, href, icon]) => <Link key={label as string} href={href as string} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-zinc-900/50"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300">{icon}</span><span><span className="block text-sm font-medium">{label}</span><span className="block text-xs text-slate-500">Review in workspace</span></span></div><span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">{number(value as number)}</span></Link>)}</div></Panel></div>
     </div>
 

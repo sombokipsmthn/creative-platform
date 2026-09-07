@@ -1,6 +1,6 @@
 import { db } from '@/db';
-import { contracts, contractTemplates, contractEvents, clients, projects, quotes, users } from '@/db/schema';
-import { eq, and, or, ilike, inArray, asc, desc, sql, isNull, isNotNull } from 'drizzle-orm';
+import { contracts, contractTemplates, contractEvents } from '@/db/schema';
+import { eq, and, or, ilike, desc, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { generateContractNumber } from '@/lib/utils'; // We'll create this helper if it doesn't exist
 
@@ -8,6 +8,35 @@ import { generateContractNumber } from '@/lib/utils'; // We'll create this helpe
 import { getCurrentUserId } from '@/lib/auth';
 
 // Contracts API functions
+
+type ContractInput = {
+  clientId?: string;
+  projectId?: string | null;
+  quoteId?: string | null;
+  templateId?: string | null;
+  title?: string;
+  status?: string;
+  content?: string;
+  currency?: string;
+  totalAmount?: number | null;
+  expiresAt?: Date | null;
+};
+
+type NewContractInput = ContractInput & {
+  clientId: string;
+  title: string;
+};
+
+type ContractTemplateInput = {
+  name?: string;
+  description?: string;
+  category?: string;
+  documentType?: string;
+  content?: string;
+  variables?: string[];
+  isSystemTemplate?: boolean;
+  isActive?: boolean;
+};
 
 export async function fetchContracts({ search, status, clientId, limit = 50, offset = 0 }: {
   search?: string;
@@ -56,7 +85,7 @@ export async function fetchContract(id: string) {
   return contract;
 }
 
-export async function createContract(data: any) {
+export async function createContract(data: NewContractInput) {
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Unauthenticated');
 
@@ -93,7 +122,7 @@ export async function createContract(data: any) {
   return newContract;
 }
 
-export async function updateContract(id: string, data: any) {
+export async function updateContract(id: string, data: ContractInput) {
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Unauthenticated');
 
@@ -192,7 +221,7 @@ export async function duplicateContract(id: string) {
   return newContract;
 }
 
-export async function saveContractAsTemplate(id: string, data: any) {
+export async function saveContractAsTemplate(id: string, data: ContractTemplateInput) {
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Unauthenticated');
 
@@ -283,7 +312,14 @@ export async function fetchContractTemplates({ search, category, limit = 50, off
   };
 }
 
-export async function createContractTemplate(data: any) {
+export async function createContractTemplate(
+  data: ContractTemplateInput & {
+    name: string;
+    category: string;
+    documentType: string;
+    content: string;
+  },
+) {
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Unauthenticated');
 
@@ -305,7 +341,7 @@ export async function createContractTemplate(data: any) {
   return newTemplate;
 }
 
-export async function updateContractTemplate(id: string, data: any) {
+export async function updateContractTemplate(id: string, data: ContractTemplateInput) {
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Unauthenticated');
 
@@ -340,7 +376,7 @@ export async function getPublicContract(token: string) {
   return contract;
 }
 
-export async function signPublicContract(token: string, signatureData: any) {
+export async function signPublicContract(token: string, signatureData: unknown) {
   const [contract] = await db.update(contracts).set({
     status: 'signed',
     signedAt: new Date(),

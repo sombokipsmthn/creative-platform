@@ -11,7 +11,6 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
 type Contract = {

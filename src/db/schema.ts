@@ -7,7 +7,6 @@ import {
   boolean,
   bigint,
   unique,
-  index,
   jsonb,
 } from "drizzle-orm/pg-core";
 

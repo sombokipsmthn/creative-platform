@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -7,7 +6,6 @@ import {
   clients,
   quoteItems,
   quotes,
-  users,
 } from "@/db/schema";
 
 import getCurrentUser from "@/lib/auth/get-current-user";

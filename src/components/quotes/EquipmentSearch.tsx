@@ -13,6 +13,8 @@ type Equipment = {
   specs?: string | null;
 };
 
+type EquipmentResponse = Equipment[] | { equipment?: Equipment[] };
+
 interface EquipmentSearchProps {
   value: string;
   onChange: (id: string) => void;
@@ -44,10 +46,10 @@ export default function EquipmentSearch({
       try {
         const res = await fetch(`/api/equipment?search=${encodeURIComponent(value)}`);
         if (res.ok) {
-          const data = await res.json();
+          const data = await res.json() as EquipmentResponse;
           const item = Array.isArray(data)
-            ? data.find((i: any) => i.id === value)
-            : data.equipment?.find((i: any) => i.id === value);
+            ? data.find((i) => i.id === value)
+            : data.equipment?.find((i) => i.id === value);
           if (item) setSelectedName(item.name);
         }
       } catch (e) {
@@ -123,7 +125,7 @@ export default function EquipmentSearch({
         <div className="absolute z-50 mt-2 w-full rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-lg max-h-60 overflow-y-auto">
           {results.length === 0 && !isLoading && (
             <div className="px-4 py-3 text-xs text-slate-500 text-center">
-              No equipment found matching "{query}"
+              No equipment found matching &quot;{query}&quot;
             </div>
           )}
           {results.map((item) => (

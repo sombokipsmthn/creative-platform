@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import type { InferInsertModel } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, users } from "@/db/schema";
+import { clients } from "@/db/schema";
 
 /* =========================================================
    HELPERS
@@ -18,25 +17,6 @@ function cleanString(value: unknown): string | null {
   const trimmed = value.trim();
 
   return trimmed.length > 0 ? trimmed : null;
-}
-
-function validateString(
-  val: unknown,
-  maxLength = 500
-): string {
-  const str = cleanString(val);
-
-  if (!str) {
-    throw new Error("Invalid input: value is required");
-  }
-
-  if (str.length > maxLength) {
-    throw new Error(
-      `Invalid input: value exceeds maximum length of ${maxLength}`
-    );
-  }
-
-  return str;
 }
 
 function getStatus(value: unknown): string {

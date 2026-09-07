@@ -5,7 +5,6 @@ import Image from "next/image";
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCreator } from "@/context/CreatorContext";
-import { Button } from "@/components/ui/Button";
 
 const resolveImage = (
   source?: string | null,

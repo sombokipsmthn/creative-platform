@@ -1,10 +1,9 @@
 import { NextResponse } from "next/server";
-import { sql, and, eq, or } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { createGallerySession } from "@/lib/gallery/session";
 import { comparePin } from "@/lib/gallery/pin";
-import { galleryAccessAttempts } from "@/db/schema";
 
 type Context = {
   params: Promise<{

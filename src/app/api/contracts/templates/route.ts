@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { fetchContractTemplates } from '@/lib/contracts/server';
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const templates = await fetchContractTemplates({});
     return NextResponse.json(templates);

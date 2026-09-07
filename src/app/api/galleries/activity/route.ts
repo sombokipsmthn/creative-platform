@@ -21,7 +21,7 @@ async function getCreator() {
 
     if (!userId) return null;
     return getLocalUser(userId);
-  } catch (error) {
+  } catch {
     return null;
   }
 }

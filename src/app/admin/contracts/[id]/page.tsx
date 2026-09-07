@@ -2,20 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
-  CheckCircle2,
-  Copy,
   FilePlus,
-  FileSignature,
   Loader2,
-  Plus,
-  Trash2,
-  User,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
+import type { Contract, ContractEvent } from '@/lib/types/contracts';
 
 export default function ContractDetailPage({
   params,
@@ -23,11 +16,10 @@ export default function ContractDetailPage({
   params: { id: string };
 }) {
   const { id } = params;
-  const router = useRouter();
-  const [contract, setContract] = useState<any>(null);
+  const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [events, setEvents] = useState<Array<any>>([]);
+  const [events, setEvents] = useState<ContractEvent[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -96,32 +88,6 @@ export default function ContractDetailPage({
       window.location.reload();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error sending contract');
-    }
-  };
-
-  const handleDuplicate = async () => {
-    try {
-      const res = await fetch(`/api/contracts/${id}/duplicate`, {
-        method: 'POST',
-      });
-      if (!res.ok) throw new Error('Failed to duplicate contract');
-      const data = await res.json();
-      router.push(`/admin/contracts/${data.id}`);
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error duplicating contract');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this contract?')) return;
-    try {
-      const res = await fetch(`/api/contracts/${id}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Failed to delete contract');
-      router.push('/admin/contracts');
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error deleting contract');
     }
   };
 
@@ -234,7 +200,7 @@ export default function ContractDetailPage({
               Currency: {contract.currency}
             </p>
             <p className="text-sm text-gray-500">
-              Total Amount: {contract.totalAmount !== null ? formatCurrency(contract.totalAmount) : '-'}
+              Total Amount: {contract.totalAmount != null ? formatCurrency(contract.totalAmount) : '-'}
             </p>
           </div>
         </div>

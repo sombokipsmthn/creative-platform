@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Heart, ImageIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import ProjectSidebar from '@/components/ProjectSidebar'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
 import ThemeEditor from '@/components/ThemeEditor'
@@ -45,7 +46,7 @@ interface GalleryData {
   allowSelections?: boolean
   photos: GalleryPhoto[]
   collections: GalleryCollection[]
-  [key: string]: any
+  [key: string]: unknown
 }
 
 const panelClass = 'os-card p-5 md:p-6'
@@ -64,7 +65,7 @@ export default function ProjectPage() {
         setLoading(true)
         const response = await fetch(`/api/galleries/${id}`)
         if (!response.ok) throw new Error('Failed to load gallery')
-        const rawData = await response.json()
+        const rawData = await response.json() as Record<string, unknown>
         const transformed = transformGalleryResponse(rawData)
         setGallery({
           ...(transformed.gallery || {}),
@@ -184,10 +185,12 @@ export default function ProjectPage() {
                         key={photo.id}
                         className="group relative aspect-square overflow-hidden rounded-[0.8rem] border border-[var(--border-subtle)] bg-[var(--bg-soft)] shadow-[var(--shadow-card)]"
                       >
-                        <img
-                          src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl}
+                        <Image
+                          src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl || '/placeholder.jpg'}
                           alt={photo.filename}
-                          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                          fill
+                          unoptimized
+                          className="object-cover transition duration-300 group-hover:scale-[1.03]"
                           onError={(e) => {
                             const target = e.target as HTMLImageElement
                             target.src = '/placeholder.jpg'
@@ -276,10 +279,12 @@ export default function ProjectPage() {
                 {(gallery.photos?.length || 0) > 0 ? (
                   <div className="mt-6 overflow-hidden rounded-[0.9rem] border border-[var(--border-subtle)] bg-[var(--bg-soft)] shadow-[var(--shadow-card)]">
                     <div className="relative aspect-[16/9]">
-                      <img
-                        src={gallery.photos?.[0]?.displayUrl || gallery.photos?.[0]?.originalUrl}
+                      <Image
+                        src={gallery.photos?.[0]?.displayUrl || gallery.photos?.[0]?.originalUrl || '/placeholder.jpg'}
                         alt="Gallery Cover"
-                        className="h-full w-full object-cover"
+                        fill
+                        unoptimized
+                        className="object-cover"
                         onError={(e) => {
                           const target = e.target as HTMLImageElement
                           target.src = '/placeholder.jpg'

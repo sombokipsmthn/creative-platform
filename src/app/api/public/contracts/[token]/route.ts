@@ -11,7 +11,9 @@ export async function GET(
     if (!contract) {
       return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
     }
-    const { token: _, ...safeContract } = contract;
+    const safeContract = Object.fromEntries(
+      Object.entries(contract).filter(([key]) => key !== 'token'),
+    );
     return NextResponse.json(safeContract);
   } catch (error) {
     console.error('GET /api/public/contracts/[token] error:', error);

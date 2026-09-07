@@ -3,7 +3,6 @@ import { ArrowRight, Check, FileText, FolderKanban, Images, LayoutDashboard, Use
 
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/Button";
 
 const platformFeatures = [
   { number: "01", title: "Build your creative presence", description: "Create a polished portfolio that gives your work a professional home and makes it easier for the right clients to discover you." },

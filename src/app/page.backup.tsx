@@ -4,25 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 import Header from "@/components/header";
-import ThemeToggle from "@/components/ThemeToggle";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1600&q=80";
-
-function resolveImage(source?: string | null) {
-  if (!source) {
-    return FALLBACK_IMAGE;
-  }
-
-  if (
-    source.startsWith("http://") ||
-    source.startsWith("https://")
-  ) {
-    return source;
-  }
-
-  return `https://lh3.googleusercontent.com/d/${source}`;
-}
 
 const platformFeatures = [
   {

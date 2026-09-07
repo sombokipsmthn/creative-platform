@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowRight,
@@ -187,8 +188,8 @@ export default function CreatorOnboardingPage() {
   useEffect(() => {
     const handle = normaliseHandle(profile.handle);
     if (!handle) {
-      setHandleStatus("idle");
-      return;
+      const reset = window.setTimeout(() => setHandleStatus("idle"), 0);
+      return () => window.clearTimeout(reset);
     }
 
     let cancelled = false;
@@ -404,7 +405,7 @@ export default function CreatorOnboardingPage() {
                 {currentStep === 1 && <>
                   <div className="flex items-center gap-4">
                     <button type="button" onClick={() => fileInputRef.current?.click()} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-purple-50" aria-label="Upload profile photo">
-                      {avatarUrl ? <img src={avatarUrl} alt="Your profile" className="h-full w-full object-cover" /> : <ImagePlus className="mx-auto h-6 w-6 text-[#6D28D9]" />}
+                      {avatarUrl ? <Image src={avatarUrl} alt="Your profile" fill unoptimized className="object-cover" /> : <ImagePlus className="mx-auto h-6 w-6 text-[#6D28D9]" />}
                       <span className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-[9px] font-medium text-white opacity-0 transition group-hover:opacity-100">Change photo</span>
                     </button>
                     <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void chooseAvatar(file); event.target.value = ""; }} />

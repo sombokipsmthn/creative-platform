@@ -80,7 +80,11 @@ export default function AdminDashboardPage() {
     } finally { setLoading(false); }
   }, []);
 
-  useEffect(() => { if (isLoaded && user) void loadStats(range); }, [isLoaded, user, range, loadStats]);
+  useEffect(() => {
+    if (!isLoaded || !user) return;
+    const load = window.setTimeout(() => void loadStats(range), 0);
+    return () => window.clearTimeout(load);
+  }, [isLoaded, user, range, loadStats]);
 
   const name = activeCreator?.name || user?.fullName || user?.firstName || 'Creator';
   const email = activeCreator?.email || user?.primaryEmailAddress?.emailAddress || '';

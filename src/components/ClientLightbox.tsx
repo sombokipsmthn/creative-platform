@@ -10,6 +10,13 @@ interface CommentItem {
   time: string;
 }
 
+interface CommentResponse {
+  id: string;
+  author_name?: string | null;
+  body: string;
+  created_at: string;
+}
+
 interface LightboxProps {
   isOpen: boolean;
   item: {
@@ -63,10 +70,10 @@ export default function ClientLightbox({
           { cache: 'no-store' },
         );
         if (!response.ok) return;
-        const data = await response.json();
+        const data = await response.json() as { comments?: CommentResponse[] };
         if (cancelled) return;
         setComments(
-          (data.comments || []).map((comment: any) => ({
+          (data.comments || []).map((comment) => ({
             id: comment.id,
             name: comment.author_name || 'Client',
             text: comment.body,

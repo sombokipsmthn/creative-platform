@@ -24,17 +24,20 @@ export default function AdminSettingsPage() {
 
   // Apply preset when changed
   useEffect(() => {
-    if (watermarkPreset === 'proof') {
-      setWatermarkText('KIPSMTHN PROOF');
-      setWatermarkOpacity(30);
-      setWatermarkPosition('bottom-right');
-      setWatermarkSize(42);
-    } else {
-      setWatermarkText('KIPSMTHN');
-      setWatermarkOpacity(55);
-      setWatermarkPosition('bottom-right');
-      setWatermarkSize(36);
-    }
+    const applyPreset = window.setTimeout(() => {
+      if (watermarkPreset === 'proof') {
+        setWatermarkText('KIPSMTHN PROOF');
+        setWatermarkOpacity(30);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(42);
+      } else {
+        setWatermarkText('KIPSMTHN');
+        setWatermarkOpacity(55);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(36);
+      }
+    }, 0);
+    return () => window.clearTimeout(applyPreset);
   }, [watermarkPreset]);
 
   // Handle watermark changes from preview

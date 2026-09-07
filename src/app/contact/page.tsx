@@ -1,5 +1,4 @@
 import Header from '@/components/header';
-import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
 

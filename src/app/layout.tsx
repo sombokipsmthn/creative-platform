@@ -20,6 +20,9 @@ export const viewport: Viewport = {
 
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  ),
   title: 'Kipsmthn | Creative Platform',
   description:
     'Commercial Photography, Brand Films, Motion Graphics & Startup Ecosystem Storytelling.',
@@ -76,7 +79,6 @@ export default function RootLayout({
             <>
               <script async src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`} />
               <script
-                // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{
                   __html: `
                     window.dataLayer = window.dataLayer || [];

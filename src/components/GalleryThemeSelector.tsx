@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import Image from 'next/image'
+
 
 interface ThemeOption {
   id: string
@@ -62,10 +63,12 @@ export default function GalleryThemeSelector({ selectedTheme, onThemeChange }: {
             className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 transition-all ${selectedTheme === theme.id ? 'border-purple-600 bg-purple-50 dark:bg-zinc-900/50' : 'border-transparent hover:border-slate-200 dark:hover:border-zinc-800'}`}
           >
             <div className="w-full aspect-square rounded-lg overflow-hidden bg-slate-100 dark:bg-zinc-800">
-              <img
+              <Image
                 src={theme.previewImage}
                 alt={`${theme.name} theme preview`}
-                className="w-full h-full object-cover"
+                fill
+                unoptimized
+                className="object-cover"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement
                   target.src = '/themes/placeholder.jpg'

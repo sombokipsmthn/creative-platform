@@ -20,7 +20,7 @@ export interface Contract {
   cancelledAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  client?: { name?: string | null; email?: string | null; company?: string | null } | null;
+  client?: { name?: string | null; email?: string | null; company?: string | null; phone?: string | null } | null;
   project?: { name?: string | null } | null;
 }
 
@@ -35,7 +35,7 @@ export interface NewContract {
   totalAmount?: number;
 }
 
-export interface UpdateContractInput extends Partial<NewContract> {}
+export type UpdateContractInput = Partial<NewContract>;
 
 export interface ContractTemplate {
   id: string;
@@ -45,7 +45,7 @@ export interface ContractTemplate {
   category: string;
   documentType: string;
   content: string;
-  variables?: string | null;
+  variables?: string[] | null;
   isSystemTemplate: boolean;
   isActive: boolean;
   createdAt: Date;

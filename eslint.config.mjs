@@ -7,12 +7,12 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-empty-object-type": "warn",
-      "@typescript-eslint/no-require-imports": "warn",
-      "react-hooks/set-state-in-effect": "warn",
-      "react/jsx-key": "warn",
-      "react/no-unescaped-entities": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-empty-object-type": "error",
+      "@typescript-eslint/no-require-imports": "error",
+      "react-hooks/set-state-in-effect": "error",
+      "react/jsx-key": "error",
+      "react/no-unescaped-entities": "error",
     },
   },
   // Override default ignores of eslint-config-next.

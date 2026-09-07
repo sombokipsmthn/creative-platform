@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import {
   BarChart3,
   FileText,
-  FolderKanban,
   GalleryHorizontalEnd,
   LayoutDashboard,
   LogOut,
@@ -78,7 +77,6 @@ const sections = [
     label: 'Content',
     items: [
       { name: 'Clients', href: '/admin/clients', icon: Users },
-      { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
     ],
   },
@@ -221,16 +219,6 @@ export default function AdminLayout({
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-5">
-              <div className="mb-5 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] px-3 py-3 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <span className="os-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-                  <span className="ui-meta uppercase">
-                    Creative OS
-                  </span>
-                </div>
-                <p className="mt-1 text-xs font-medium text-[var(--color-text-primary)]">Command center</p>
-              </div>
-
               <nav className="space-y-6 flex-1" aria-label="Creator platform navigation">
                 {sections.map((section) => (
                   <div key={section.label}>
@@ -260,20 +248,6 @@ export default function AdminLayout({
               </nav>
             </div>
 
-            {/* Promotion Banner (sticky bottom) with animation */}
-            <div className="border-t border-[var(--color-border-subtle)] p-4">
-              <div className="ui-card bg-[var(--color-accent)] text-white ui-fade-in">
-                <div className="ui-card-content">
-                  <h3 className="font-semibold mb-2">Unlock All Features</h3>
-                  <p className="ui-meta mb-3">
-                    Access advanced analytics, custom branding, and priority support
-                  </p>
-                  <Link href="/admin/settings" className="ui-button ui-button-primary w-full">
-                    Go Pro Today
-                  </Link>
-                </div>
-              </div>
-            </div>
           </div>
 
         </aside>

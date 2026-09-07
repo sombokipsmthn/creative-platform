@@ -8,7 +8,7 @@ export async function GET() {
     const counts = {
       '/admin/quotes': 3,
       '/admin/invoices': 5,
-      '/admin/projects': 2,
+      '/admin/galleries': 2,
       '/admin/contracts': 0, // We'll set this to 0 for now, but it could be the number of draft contracts or something else
       '/admin/clients': 0,
       '/admin/settings': 0,

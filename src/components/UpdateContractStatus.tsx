@@ -47,7 +47,7 @@ export function UpdateContractStatus({ token }: UpdateContractStatusProps) {
             <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />
             <span>I agree that typing my name records my electronic signature for this agreement.</span>
           </label>
-          <div className="flex flex-wrap gap-4">
+          <div className="ui-action-row ui-action-row-start">
             <button onClick={() => void handleAction('signed')} className="ui-button ui-button-primary">Accept & Sign</button>
             <button onClick={() => void handleAction('declined')} className="ui-button ui-button-danger">Decline</button>
           </div>

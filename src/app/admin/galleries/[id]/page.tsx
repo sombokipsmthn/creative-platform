@@ -1,2 +1,5 @@
-// src/app/admin/galleries/[id]/page.tsx
-export { default } from '@/app/admin/projects/[id]/page';
+import GalleryWorkspace from '@/components/admin/GalleryWorkspace'
+
+export default function GalleryPage() {
+  return <GalleryWorkspace />
+}

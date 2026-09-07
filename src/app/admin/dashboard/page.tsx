@@ -303,7 +303,7 @@ export default function CreativeOSDashboardPage() {
             <QuickAction href="/admin/clients" label="Add / Manage Client" icon={<Users className="h-4 w-4" />} />
             <QuickAction href="/admin/quotes/new" label="Create Quote" icon={<FileText className="h-4 w-4" />} />
             <QuickAction href="/admin/invoices" label="Manage Invoices" icon={<Receipt className="h-4 w-4" />} />
-            <QuickAction href="/admin/projects" label="Open Projects" icon={<LayoutDashboard className="h-4 w-4" />} />
+            <QuickAction href="/admin/galleries" label="Open Galleries" icon={<GalleryHorizontalEnd className="h-4 w-4" />} />
           </div>
         </section>
 
@@ -370,7 +370,7 @@ export default function CreativeOSDashboardPage() {
                 label="Projects"
                 value={formatNumber(stats.overview.projects)}
                 detail={`${stats.overview.activeProjects} active · ${stats.overview.completedProjects} completed`}
-                href="/admin/projects"
+                href="/admin/galleries"
                 icon={<LayoutDashboard className="h-4 w-4" />}
               />
               <MetricCard
@@ -412,7 +412,7 @@ export default function CreativeOSDashboardPage() {
                     title="Active projects"
                     detail="Current production workload."
                     count={stats.attention.activeProjects}
-                    href="/admin/projects"
+                    href="/admin/galleries"
                   />
                   <AttentionItem
                     icon={<GalleryHorizontalEnd className="h-4 w-4" />}

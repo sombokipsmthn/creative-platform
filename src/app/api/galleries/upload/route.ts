@@ -30,8 +30,11 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-
-    const galleryId = body.galleryId;
+    const clientPayload =
+      typeof body.clientPayload === "string"
+        ? JSON.parse(body.clientPayload)
+        : null;
+    const galleryId = body.galleryId || clientPayload?.galleryId;
 
     if (!galleryId) {
       return NextResponse.json(

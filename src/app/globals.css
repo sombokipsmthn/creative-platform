@@ -256,6 +256,7 @@ html.dark {
     padding-inline: 1rem;
     outline: none;
     border: none;
+    vertical-align: middle;
   }
 
   .ui-button:disabled {
@@ -309,6 +310,16 @@ html.dark {
   .ui-button-destructive:hover {
     background-color: rgba(239, 68, 68, 0.08);
     color: #dc2626;
+  }
+
+  .ui-button-danger {
+    background-color: transparent;
+    color: var(--color-danger);
+    border: 1px solid color-mix(in srgb, var(--color-danger) 28%, transparent);
+  }
+
+  .ui-button-danger:hover {
+    background-color: color-mix(in srgb, var(--color-danger) 9%, transparent);
   }
 
   /* Button sizes */
@@ -475,6 +486,36 @@ html.dark {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+  }
+
+  .ui-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .ui-action-row-start {
+    justify-content: flex-start;
+  }
+
+  .ui-action-row-between {
+    justify-content: space-between;
+  }
+
+  .ui-panel-content {
+    padding: 1.25rem;
+  }
+
+  .ui-panel-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--color-border-subtle);
   }
 
   .ui-template-grid {

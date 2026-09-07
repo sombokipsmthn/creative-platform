@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
@@ -12,6 +13,7 @@ type Client = {
   company?: string | null;
   email?: string | null;
   phone?: string | null;
+  location?: string | null;
   kraPin?: string | null;
   website?: string | null;
   notes?: string | null;
@@ -47,6 +49,17 @@ function formatDate(value?: string | null) {
 
 function statusLabel(status: string) {
   return status.replace(/_/g, ' ');
+}
+
+function getInitials(client: Pick<Client, 'name' | 'company'>) {
+  const value = client.company || client.name;
+  const parts = value.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
 function statusClass(status: string) {
@@ -243,8 +256,8 @@ export default function AdminClientsPage() {
   */
 
   return (
-    <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
           <div>
             <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">
@@ -271,21 +284,21 @@ export default function AdminClientsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[
             ['Total Clients', clients.length, 'text-slate-500 dark:text-zinc-400'],
             ['Active', activeCount, 'text-emerald-600 dark:text-emerald-400'],
             ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
             ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="ui-card">
-              <p className={`text-xs ${color} font-sans uppercase`}>{label}</p>
-              <p className="text-3xl font-light text-slate-900 dark:text-white mt-1">{count}</p>
+            <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
+              <p className={`ui-stat-label ${color}`}>{label}</p>
+              <p className="ui-stat-value">{count}</p>
             </div>
           ))}
         </div>
 
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 dark:bg-zinc-900/40 p-4 border border-slate-200 dark:border-zinc-800/80 rounded-xl">
+        <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
           <input
             type="text"
             placeholder="Search clients by name, company, email, phone..."
@@ -331,41 +344,41 @@ export default function AdminClientsPage() {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
+                className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
-                <div className="space-y-3 max-w-3xl">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {client.company && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
-                        {client.company}
+                <div className="flex min-w-0 items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+                    {getInitials(client)}
+                  </div>
+
+                  <div className="min-w-0 space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
+                        {client.name}
+                      </h3>
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(client.status)}`}>
+                        {statusLabel(client.status)}
                       </span>
-                    )}
-                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-sans rounded-full uppercase ${statusClass(client.status)}`}>
-                      {statusLabel(client.status)}
-                    </span>
+                    </div>
+
+                    <p className="text-sm text-slate-500 dark:text-zinc-400">
+                      {client.company || 'Independent client'}
+                    </p>
+
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-zinc-400">
+                      {client.email && <span className="inline-flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" />{client.email}</span>}
+                      {client.phone && <span className="inline-flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" />{client.phone}</span>}
+                      {client.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-400" />{client.location}</span>}
+                    </div>
+
+                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-600">
+                      Added {formatDate(client.createdAt)}
+                    </p>
                   </div>
-
-                  <h3 className="text-xl font-medium text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                    {client.name}
-                  </h3>
-
-                  <div className="text-xs text-slate-600 dark:text-zinc-400 font-sans flex flex-wrap gap-x-2 gap-y-1">
-                    {client.email && <span>{client.email}</span>}
-                    {client.phone && <span>• {client.phone}</span>}
-                    {client.website && <span>• {client.website}</span>}
-                  </div>
-
-                  {client.notes && (
-                    <p className="text-xs text-slate-500 dark:text-zinc-500 font-light italic">“{client.notes}”</p>
-                  )}
-
-                  <p className="text-[10px] text-slate-400 dark:text-zinc-600 font-sans uppercase">
-                    Added {formatDate(client.createdAt)}
-                  </p>
                 </div>
 
                 <Button
@@ -374,9 +387,10 @@ export default function AdminClientsPage() {
                     setSelectedClient(client);
                   }}
                   variant="secondary"
-                  className="text-xs font-sans rounded-xl"
+                  className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
                 >
-                  View / Edit
+                  View client
+                  <ArrowUpRight className="h-3.5 w-3.5" />
                 </Button>
               </div>
             ))}

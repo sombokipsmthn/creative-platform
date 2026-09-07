@@ -95,7 +95,7 @@ export default function TableFilterBar({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex items-center gap-3">
+      <div className="ui-action-row">
         <button
           onClick={onAddItem}
           className="ui-button ui-button-primary"

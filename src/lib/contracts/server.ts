@@ -230,15 +230,15 @@ export async function fetchContractStats() {
   if (!userId) throw new Error('Unauthenticated');
 
   const stats = await db.select({
-    total: sql<number>`count(*)`.map(Number),
-    draft: sql<number>`count(*) filter (where ${eq(contracts.status, 'draft')})`.map(Number),
-    sent: sql<number>`count(*) filter (where ${eq(contracts.status, 'sent')})`.map(Number),
-    viewed: sql<number>`count(*) filter (where ${eq(contracts.status, 'viewed')})`.map(Number),
-    awaiting_signature: sql<number>`count(*) filter (where ${eq(contracts.status, 'awaiting_signature')})`.map(Number),
-    signed: sql<number>`count(*) filter (where ${eq(contracts.status, 'signed')})`.map(Number),
-    declined: sql<number>`count(*) filter (where ${eq(contracts.status, 'declined')})`.map(Number),
-    expired: sql<number>`count(*) filter (where ${eq(contracts.status, 'expired')})`.map(Number),
-    cancelled: sql<number>`count(*) filter (where ${eq(contracts.status, 'cancelled')})`.map(Number),
+    total: sql<number>`count(*)`,
+    draft: sql<number>`count(*) filter (where ${eq(contracts.status, 'draft')})`,
+    sent: sql<number>`count(*) filter (where ${eq(contracts.status, 'sent')})`,
+    viewed: sql<number>`count(*) filter (where ${eq(contracts.status, 'viewed')})`,
+    awaiting_signature: sql<number>`count(*) filter (where ${eq(contracts.status, 'awaiting_signature')})`,
+    signed: sql<number>`count(*) filter (where ${eq(contracts.status, 'signed')})`,
+    declined: sql<number>`count(*) filter (where ${eq(contracts.status, 'declined')})`,
+    expired: sql<number>`count(*) filter (where ${eq(contracts.status, 'expired')})`,
+    cancelled: sql<number>`count(*) filter (where ${eq(contracts.status, 'cancelled')})`,
   }).from(contracts).where(eq(contracts.creatorId, userId));
 
   return stats[0];
@@ -367,4 +367,4 @@ export const fetchContractEvents = async (contractId: string) => {
   if (!userId) throw new Error('Unauthenticated');
   return db.select().from(contractEvents).where(eq(contractEvents.contractId, contractId));
 };
-export const saveAsTemplate = saveContractAsTemplate;
+export const saveAsTemplate = (id: string, name: string, description: string) => saveContractAsTemplate(id, { name, description });

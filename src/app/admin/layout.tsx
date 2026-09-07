@@ -1,13 +1,16 @@
 'use client';
 
 import { useClerk, useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { usePathname, useEffect, useState } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import {
   BarChart3,
   BriefcaseBusiness,
   FileText,
   FolderKanban,
+  GalleryHorizontalEnd,
   LayoutDashboard,
   LogOut,
   Receipt,
@@ -65,6 +68,73 @@ function NavItemWithBadge({
   );
 }
 
+
+// Navigation sections
+const sections = [
+  {
+    label: 'Dashboard',
+    items: [
+      { name: 'Overview', href: '/admin', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { name: 'Clients', href: '/admin/clients', icon: Users },
+      { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
+      { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
+    ],
+  },
+  {
+    label: 'Sales & Billing',
+    items: [
+      { name: 'Quotes', href: '/admin/quotes', icon: FileText },
+      { name: 'Contracts', href: '/admin/contracts', icon: FileSignature },
+      { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
+      { name: 'Payments', href: '/admin/payments', icon: WalletCards },
+    ],
+  },
+  {
+    label: 'Settings',
+    items: [
+      { name: 'Settings', href: '/admin/settings', icon: Settings2 },
+    ],
+  },
+];
+
+// SignOutButton component
+function SignOutButton({ compact }: { compact?: boolean }) {
+  const { signOut } = useClerk();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    await signOut({ redirectUrl: '/admin/login' });
+    router.push('/admin/login');
+  };
+
+  if (compact) {
+    return (
+      <button
+        onClick={handleSignOut}
+        className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+        title="Sign out"
+      >
+        <LogOut className="h-4 w-4" />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={handleSignOut}
+      className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-[12px] font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+    >
+      <LogOut className="h-4 w-4" />
+      <span>Sign out</span>
+    </button>
+  );
+}
+
 export default function AdminLayout({
   children,
 }: {
@@ -75,6 +145,7 @@ export default function AdminLayout({
   const isLoginPage = pathname === '/admin/login';
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
+  const splitView = useSplitView();
 
   // Fetch badge counts on mount and when pathname changes (to refresh if needed)
   useEffect(() => {
@@ -243,7 +314,7 @@ export default function AdminLayout({
             <div className="lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] lg:hidden ui-fade-in">
               {/* This will be populated by individual pages that need the detail view */}
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
-                {useSplitView().content}
+                {splitView.content}
               </div>
             </div>
           </div>

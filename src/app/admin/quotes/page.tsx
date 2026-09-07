@@ -260,7 +260,7 @@ export default function QuotesPage() {
                 { label: 'Expired', value: 'expired' },
               ]
             }
-          ]
+          ]}
           itemLabel="Quote"
         />
 

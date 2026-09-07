@@ -180,6 +180,7 @@ export const galleries = pgTable("galleries", {
   allowDownloads: boolean("allow_downloads").default(true).notNull(),
   allowFavorites: boolean("allow_favorites").default(true).notNull(),
   allowSelections: boolean("allow_selections").default(true).notNull(),
+  focal_point: jsonb("focal_point").default("{}"),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});

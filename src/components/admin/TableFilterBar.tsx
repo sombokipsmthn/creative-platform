@@ -32,7 +32,7 @@ export default function TableFilterBar({
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    onFiltersChange(prev => ({
+    onFiltersChange((prev: any) => ({
       ...prev,
       [name]: value === 'all' ? undefined : value
     }));
@@ -65,7 +65,7 @@ export default function TableFilterBar({
                     type="button"
                     className={`ui-tab-pill ${filters[option.value] === opt.value ? 'ui-tab-pill-active' : ''}`}
                     onClick={() => {
-                      onFiltersChange(prev => ({
+                      onFiltersChange((prev: any) => ({
                         ...prev,
                         [option.value]: opt.value === 'all' ? undefined : opt.value
                       }));

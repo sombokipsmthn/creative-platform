@@ -119,11 +119,11 @@ export default function AdminExpensesPage() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
           <div>
-            <Link href="/admin" className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
+            <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
             <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-mono rounded-full font-semibold">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-sans rounded-full font-semibold">
             <span>30% KRA Income Tax Shield Active</span>
           </div>
         </div>
@@ -131,23 +131,23 @@ export default function AdminExpensesPage() {
         {/* Metrics Summary Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div className="ui-card p-4">
-            <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono uppercase">Total Claimable Expenses</p>
+            <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans uppercase">Total Claimable Expenses</p>
             <p className="text-3xl font-light text-slate-900 dark:text-white">KES {totalClaimable.toLocaleString()}</p>
-            <p className="text-[11px] text-purple-600 dark:text-purple-400 font-mono">eTIMS & ETR Verified Receipts</p>
+            <p className="text-[11px] text-purple-600 dark:text-purple-400 font-sans">eTIMS & ETR Verified Receipts</p>
           </div>
 
           <div className="ui-card p-4">
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono uppercase">Est. KRA Tax Savings</p>
+            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-sans uppercase">Est. KRA Tax Savings</p>
             <p className="text-3xl font-light text-emerald-600 dark:text-emerald-400">KES {estimatedTaxShield.toLocaleString()}</p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-mono">Tax Deductible at 30% Corporate Rate</p>
+            <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-sans">Tax Deductible at 30% Corporate Rate</p>
           </div>
 
           <div className="ui-card p-4">
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-mono uppercase">Pending Verification</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 font-sans uppercase">Pending Verification</p>
             <p className="text-3xl font-light text-slate-900 dark:text-white">
               {expenses.filter((e) => e.status === 'PENDING_VERIFICATION').length} Receipts
             </p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-mono">Requires eTIMS PIN confirmation</p>
+            <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-sans">Requires eTIMS PIN confirmation</p>
           </div>
         </div>
 
@@ -163,7 +163,7 @@ export default function AdminExpensesPage() {
               onClick={handleSimulateScan}
               disabled={isScanning}
               variant="primary"
-              className="px-5 py-2.5 text-xs font-mono uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
+              className="px-5 py-2.5 text-xs font-sans uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
             >
               <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
@@ -264,10 +264,10 @@ export default function AdminExpensesPage() {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
+                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
                         {exp.category}
                       </span>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-mono rounded-full ${
+                      <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${
                         exp.status === 'CLAIMABLE' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
                       }`}>
                         {exp.status === 'CLAIMABLE' ? 'Claimable ✓' : 'Pending Verification ⚠️'}
@@ -281,7 +281,7 @@ export default function AdminExpensesPage() {
                   </div>
                 </div>
 
-                <div className="text-right font-mono">
+                <div className="text-right font-sans">
                   <p className="text-xl font-bold text-slate-900 dark:text-white">KES {exp.amountKes.toLocaleString()}</p>
                   <p className="ui-meta">Est. Tax Shield: KES {(exp.amountKes * 0.3).toLocaleString()}</p>
                 </div>

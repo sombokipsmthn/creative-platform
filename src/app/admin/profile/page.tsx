@@ -188,9 +188,9 @@ export default function AdminProfilePage() {
               ← Back to Dashboard
             </Link>
             <p className="ui-eyebrow mt-3">Account</p>
-            <h1 className="ui-page-title">Creator Profile</h1>
+            <h1 className="ui-page-title">Creator Settings</h1>
             <p className="ui-meta">
-              Your profile is connected to the signed-in Clerk account and your creator records.
+              Manage your identity, public profile, and business details.
             </p>
           </div>
 
@@ -370,7 +370,7 @@ export default function AdminProfilePage() {
               type="submit"
               disabled={isSaving}
               variant="primary"
-              className="px-6 py-3 text-xs font-mono uppercase tracking-widest"
+              className="px-6 py-3 text-xs font-sans uppercase tracking-widest"
             >
               {isSaving ? 'Saving...' : 'Save Profile Changes'}
             </Button>

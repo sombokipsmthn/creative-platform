@@ -293,7 +293,7 @@ export default function AdminGalleryManagerPage() {
     <div className="ui-page p-4 md:p-8 lg:p-12 transition-colors duration-300">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-xl shadow-2xl text-[11px] font-mono flex items-center gap-3 animate-fade-in border border-white/10 dark:border-zinc-200">
+        <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-xl shadow-2xl text-[11px] font-sans flex items-center gap-3 animate-fade-in border border-white/10 dark:border-zinc-200">
           <Sparkles className="w-4 h-4 text-purple-500" />
           <span className="font-medium">{toastMessage}</span>
         </div>
@@ -320,7 +320,7 @@ export default function AdminGalleryManagerPage() {
               )}
             </div>
 
-            <p className="ui-body font-mono text-xs">
+            <p className="ui-body font-sans text-xs">
               Manage client delivery, proofing & digital delivery portals.
             </p>
           </div>
@@ -436,7 +436,7 @@ export default function AdminGalleryManagerPage() {
                     <h2 className="ui-section-title">
                       No galleries found
                     </h2>
-                    <p className="ui-body font-mono">
+                    <p className="ui-body font-sans">
                       Adjust your filters or create your first delivery gallery.
                     </p>
                   </div>
@@ -624,7 +624,7 @@ export default function AdminGalleryManagerPage() {
                   Refresh
                 </button>
               </div>
-              <p className="ui-body font-mono">
+              <p className="ui-body font-sans">
                 Recent engagement events from all published portals. (Auto-polls every 30s)
               </p>
             </div>
@@ -636,7 +636,7 @@ export default function AdminGalleryManagerPage() {
                   ))}
                </div>
             ) : activities.length === 0 ? (
-              <div className="ui-empty-state border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl p-20 font-mono text-xs text-slate-500">
+              <div className="ui-empty-state border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl p-20 font-sans text-xs text-slate-500">
                 No client activity recorded yet.
               </div>
             ) : (
@@ -716,7 +716,7 @@ export default function AdminGalleryManagerPage() {
                 <h2 className="ui-page-title text-3xl">
                   New Client Gallery
                 </h2>
-                <p className="ui-body font-mono max-w-sm mx-auto">
+                <p className="ui-body font-sans max-w-sm mx-auto">
                   Set up a private proofing studio for your client.
                 </p>
               </div>
@@ -793,7 +793,7 @@ export default function AdminGalleryManagerPage() {
                   <div className="flex items-center justify-between group cursor-pointer" onClick={() => setAllowDownloads(!allowDownloads)}>
                     <div className="space-y-0.5">
                       <p className="ui-card-title">Downloads</p>
-                      <p className="ui-caption font-mono">Allow full-resolution & ZIP delivery</p>
+                      <p className="ui-caption font-sans">Allow full-resolution & ZIP delivery</p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowDownloads ? 'left-5' : 'left-1'}`} />
@@ -803,7 +803,7 @@ export default function AdminGalleryManagerPage() {
                   <div className="flex items-center justify-between group cursor-pointer" onClick={() => setAllowFavorites(!allowFavorites)}>
                     <div className="space-y-0.5">
                       <p className="ui-card-title">Favorites</p>
-                      <p className="ui-caption font-mono">Allow hearting / liking photos</p>
+                      <p className="ui-caption font-sans">Allow hearting / liking photos</p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowFavorites ? 'left-5' : 'left-1'}`} />
@@ -813,7 +813,7 @@ export default function AdminGalleryManagerPage() {
                   <div className="flex items-center justify-between group cursor-pointer" onClick={() => setAllowSelections(!allowSelections)}>
                     <div className="space-y-0.5">
                       <p className="ui-card-title">Proofing</p>
-                      <p className="ui-caption font-mono">Enable client selection for delivery</p>
+                      <p className="ui-caption font-sans">Enable client selection for delivery</p>
                     </div>
                     <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowSelections ? 'left-5' : 'left-1'}`} />

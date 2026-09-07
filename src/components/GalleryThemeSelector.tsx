@@ -47,7 +47,7 @@ export default function GalleryThemeSelector({ selectedTheme, onThemeChange }: {
   return (
     <div className="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 shadow-sm">
       <div className="border-b border-slate-100 dark:border-zinc-900 pb-4 mb-6">
-        <p className="text-[10px] font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-semibold">
+        <p className="text-[10px] font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-semibold">
           Gallery Theme
         </p>
         <h2 className="text-xl font-light text-slate-900 dark:text-white mt-1">

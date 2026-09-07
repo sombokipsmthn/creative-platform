@@ -103,7 +103,7 @@ export default function ClientGalleryPortal({
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-6">
         <div className="max-w-md w-full bg-white dark:bg-zinc-900 rounded-xl p-6 text-center space-y-4 border border-slate-200 dark:border-zinc-800">
-          <p className="text-xs font-mono uppercase text-purple-600 dark:text-purple-400">
+          <p className="text-xs font-sans uppercase text-purple-600 dark:text-purple-400">
             Private Client Gallery
           </p>
 

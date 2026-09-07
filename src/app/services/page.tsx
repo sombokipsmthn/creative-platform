@@ -84,7 +84,7 @@ export default function ServicesPage() {
       <section className="relative pt-36 pb-16 px-6 max-w-7xl mx-auto text-center space-y-6">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           KIPSMTHN CAPABILITIES
         </p>
 
@@ -107,7 +107,7 @@ export default function ServicesPage() {
             >
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <div className="flex items-center gap-3 font-mono text-xs">
+                  <div className="flex items-center gap-3 font-sans text-xs">
                     <span className="text-purple-600 dark:text-purple-400 font-bold">{s.num}</span>
                     <span className="px-3 py-1 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 rounded-full font-semibold">
                       {s.subtitle}
@@ -122,10 +122,10 @@ export default function ServicesPage() {
 
                 {/* Deliverables Checklist */}
                 <div className="space-y-2 border-t border-slate-200 dark:border-zinc-800 pt-4">
-                  <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+                  <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
                     Key Deliverables:
                   </p>
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-slate-700 dark:text-zinc-300">
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans text-slate-700 dark:text-zinc-300">
                     {s.deliverables.map((item, i) => (
                       <li key={i} className="flex items-center gap-2">
                         <span className="text-purple-600 dark:text-purple-400">✓</span> {item}
@@ -134,7 +134,7 @@ export default function ServicesPage() {
                   </ul>
                 </div>
 
-                <p className="text-[11px] font-mono text-slate-500 dark:text-zinc-400">
+                <p className="text-[11px] font-sans text-slate-500 dark:text-zinc-400">
                   <strong className="text-slate-700 dark:text-zinc-300">Track Record:</strong> {s.partners}
                 </p>
 
@@ -166,14 +166,14 @@ export default function ServicesPage() {
       {/* 3. WORKFLOW & COMPLIANCE SECTION */}
       <section className="py-20 px-6 max-w-7xl mx-auto space-y-12 border-t border-slate-200 dark:border-zinc-800">
         <div className="text-center space-y-2">
-          <span className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Methodology</span>
+          <span className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">Methodology</span>
           <h2 className="text-3xl md:text-4xl font-light text-slate-900 dark:text-white">Production & Delivery Workflow</h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {workflowSteps.map((w) => (
             <div key={w.step} className="p-6 bg-white dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800/80 rounded-xl space-y-3 shadow-sm dark:shadow-none">
-              <span className="text-xs font-mono text-purple-600 dark:text-purple-400 font-bold">{w.step}</span>
+              <span className="text-xs font-sans text-purple-600 dark:text-purple-400 font-bold">{w.step}</span>
               <h3 className="text-lg font-medium text-slate-900 dark:text-white">{w.title}</h3>
               <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">{w.desc}</p>
             </div>
@@ -183,7 +183,7 @@ export default function ServicesPage() {
         {/* KRA eTIMS Notice */}
         <div className="p-8 border border-purple-500/30 bg-purple-100/50 dark:bg-purple-950/20 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2 max-w-xl">
-            <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-mono rounded-full uppercase font-semibold">
+            <span className="px-2.5 py-0.5 bg-purple-600/20 text-purple-700 dark:text-purple-300 text-[10px] font-sans rounded-full uppercase font-semibold">
               Kenyan Business & Tax Compliant
             </span>
             <h3 className="text-xl font-medium text-slate-900 dark:text-white">KRA eTIMS Invoicing & Multi-Currency Billing</h3>
@@ -206,7 +206,7 @@ export default function ServicesPage() {
               <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
                 KIPSMTHN<span className="text-purple-500">.</span>
               </h2>
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-sans">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -228,7 +228,7 @@ export default function ServicesPage() {
             </div>
           </div>
 
-          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
+          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
 
             <div className="flex items-center gap-6">

@@ -81,7 +81,7 @@ export function ProductionCalendar() {
         ) : (
           <div className="grid grid-cols-7 gap-px bg-slate-100 dark:bg-zinc-900">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day: string) => (
-              <div key={day} className="bg-white py-2 text-center text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:bg-zinc-950 dark:text-zinc-500">
+              <div key={day} className="bg-white py-2 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:bg-zinc-950 dark:text-zinc-500">
                 {day}
               </div>
             ))}
@@ -99,7 +99,7 @@ export function ProductionCalendar() {
 
               return (
                 <div key={i} className="group relative h-24 bg-white p-2 transition hover:bg-slate-50 dark:bg-zinc-950 dark:hover:bg-zinc-900">
-                  <span className={`text-[10px] font-mono ${isSameDay(day, new Date()) ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
                     {format(day, 'd')}
                   </span>
                   <div className="mt-1 space-y-1">

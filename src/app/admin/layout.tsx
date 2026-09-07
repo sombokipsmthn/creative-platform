@@ -18,6 +18,7 @@ import {
   Users,
   WalletCards,
   FileSignature,
+  UserRound,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -93,7 +94,8 @@ const sections = [
   {
     label: 'Settings',
     items: [
-      { name: 'Settings', href: '/admin/settings', icon: Settings2 },
+      { name: 'Creator settings', href: '/admin/profile', icon: UserRound },
+      { name: 'Platform settings', href: '/admin/settings', icon: Settings2 },
     ],
   },
 ];
@@ -274,15 +276,6 @@ export default function AdminLayout({
             </div>
           </div>
 
-          {/* Appearance section at bottom */}
-          <div className="border-t border-[var(--color-border-subtle)] p-3">
-            <div className="mb-2 flex items-center justify-between rounded-lg bg-[var(--color-bg-soft)] px-3 py-2">
-              <span className="ui-meta uppercase">Appearance</span>
-              <ThemeToggle />
-            </div>
-            <ProfileMenu />
-            <SignOutButton />
-          </div>
         </aside>
 
         {/* Mobile Header */}
@@ -294,6 +287,16 @@ export default function AdminLayout({
             KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
           </Link>
           <div className="flex items-center gap-2">
+            <ThemeToggle compact />
+            <Link
+              href="/admin/settings"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+              aria-label="Open settings"
+              title="Platform settings"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Link>
+            <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
             <ProfileMenu />
             <SignOutButton compact />
           </div>
@@ -301,12 +304,34 @@ export default function AdminLayout({
 
         {/* Main Content with Split-View Container */}
         <main className="lg:pl-[248px] lg:min-h-[calc(100vh-56px)] relative">
+          <header className="hidden h-16 items-center justify-end gap-2 border-b border-[var(--color-border-subtle)] px-8 lg:flex">
+            <ThemeToggle compact />
+            <Link
+              href="/admin/settings"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+              aria-label="Open settings"
+              title="Platform settings"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Link>
+            <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
+            <ProfileMenu showLabel />
+            <SignOutButton compact />
+          </header>
           <div className="lg:flex lg:h-full">
             {/* Main Content */}
-            <div className="lg:w-[65%] lg:pr-6">{children}</div>
+            <div className={splitView.content ? 'lg:w-[65%] lg:pr-6' : 'lg:w-full'}>
+              {children}
+            </div>
             
             {/* Split-View Drawer (Persistent Right Panel) with animation */}
-            <div className="lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] lg:hidden ui-fade-in">
+            <div
+              className={
+                splitView.content
+                  ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
+                  : 'hidden'
+              }
+            >
               {/* This will be populated by individual pages that need the detail view */}
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
                 {splitView.content}

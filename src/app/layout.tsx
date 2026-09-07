@@ -6,6 +6,7 @@ import './globals.css';
 
 import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
+import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
 
 // Validate environment variables on app startup
@@ -99,9 +100,11 @@ export default function RootLayout({
           className="font-sans antialiased selection:bg-purple-600 selection:text-white"
         >
 
-          <CreatorProvider>
-            {children}
-          </CreatorProvider>
+          <QueryProvider>
+            <CreatorProvider>
+              {children}
+            </CreatorProvider>
+          </QueryProvider>
 
         </body>
 

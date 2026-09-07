@@ -154,7 +154,7 @@ export default function HomePage() {
                 key={f.number}
                 className="p-8 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800/80 space-y-4 shadow-sm"
               >
-                <span className="text-xs font-mono text-purple-600 dark:text-purple-400 font-semibold">
+                <span className="text-xs font-sans text-purple-600 dark:text-purple-400 font-semibold">
                   {f.number}
                 </span>
                 <h3 className="text-xl font-medium text-slate-950 dark:text-white">

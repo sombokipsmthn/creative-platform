@@ -300,7 +300,7 @@ export async function fetchContractTemplates({ search, category, limit = 50, off
   }
 
   if (category && category !== 'all') {
-    where = and(where, eq(contractTemplates.category, category));
+    where = and(where, ilike(contractTemplates.category, category));
   }
 
   const data = await db.select().from(contractTemplates).where(where).limit(limit).offset(offset).orderBy(desc(contractTemplates.createdAt));
@@ -373,15 +373,50 @@ export async function deleteContractTemplate(id: string) {
 export async function getPublicContract(token: string) {
   const [contract] = await db.select().from(contracts).where(eq(contracts.token, token));
   if (!contract) throw new Error('Contract not found');
+
+  if (contract.status === 'sent') {
+    const viewedAt = new Date();
+    const [viewedContract] = await db.update(contracts).set({
+      status: 'viewed',
+      viewedAt,
+      updatedAt: viewedAt,
+    }).where(and(eq(contracts.id, contract.id), eq(contracts.status, 'sent'))).returning();
+
+    if (viewedContract) {
+      await db.insert(contractEvents).values({
+        id: uuidv4(),
+        contractId: contract.id,
+        eventType: 'viewed',
+        metadata: {},
+        createdAt: viewedAt,
+      });
+      return viewedContract;
+    }
+  }
+
   return contract;
 }
 
 export async function signPublicContract(token: string, signatureData: unknown) {
+  const [existingContract] = await db.select().from(contracts).where(eq(contracts.token, token));
+  if (!existingContract) throw new Error('Contract not found');
+  if (!['sent', 'viewed', 'awaiting_signature'].includes(existingContract.status)) {
+    throw new Error(`Contract cannot be signed while ${existingContract.status}`);
+  }
+
+  const signedAt = new Date();
+  const signature = typeof signatureData === 'object' && signatureData !== null
+    ? signatureData as { signerName?: string; signerEmail?: string; ipAddress?: string; userAgent?: string }
+    : {};
   const [contract] = await db.update(contracts).set({
     status: 'signed',
-    signedAt: new Date(),
-    updatedAt: new Date(),
-  }).where(eq(contracts.token, token)).returning();
+    signedAt,
+    signerName: signature.signerName,
+    signerEmail: signature.signerEmail,
+    signedIp: signature.ipAddress,
+    signedUserAgent: signature.userAgent,
+    updatedAt: signedAt,
+  }).where(and(eq(contracts.token, token), eq(contracts.status, existingContract.status))).returning();
 
   // Log event
   await db.insert(contractEvents).values({
@@ -395,9 +430,40 @@ export async function signPublicContract(token: string, signatureData: unknown) 
   return contract;
 }
 
+export async function declinePublicContract(token: string, signatureData: unknown) {
+  const [existingContract] = await db.select().from(contracts).where(eq(contracts.token, token));
+  if (!existingContract) throw new Error('Contract not found');
+  if (!['sent', 'viewed', 'awaiting_signature'].includes(existingContract.status)) {
+    throw new Error(`Contract cannot be declined while ${existingContract.status}`);
+  }
+
+  const declinedAt = new Date();
+  const signature = typeof signatureData === 'object' && signatureData !== null
+    ? signatureData as { signerName?: string; signerEmail?: string; ipAddress?: string; userAgent?: string }
+    : {};
+  const [contract] = await db.update(contracts).set({
+    status: 'declined',
+    signerName: signature.signerName,
+    signerEmail: signature.signerEmail,
+    signedIp: signature.ipAddress,
+    signedUserAgent: signature.userAgent,
+    declinedAt,
+    updatedAt: declinedAt,
+  }).where(and(eq(contracts.token, token), eq(contracts.status, existingContract.status))).returning();
+
+  await db.insert(contractEvents).values({
+    id: uuidv4(),
+    contractId: contract.id,
+    eventType: 'declined',
+    metadata: signatureData,
+    createdAt: declinedAt,
+  });
+
+  return contract;
+}
+
 // Add the named exports that the API routes expect
 export const fetchContractByToken = getPublicContract;
-export const updateContractStatus = updateContract; // thin wrapper
 export const fetchContractEvents = async (contractId: string) => {
   const userId = await getCurrentUserId();
   if (!userId) throw new Error('Unauthenticated');

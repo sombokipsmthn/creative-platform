@@ -59,7 +59,7 @@ export default function ContractDetailPage({
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 mb-6">
           <p>{error}</p>
         </div>
       </div>
@@ -108,6 +108,15 @@ export default function ContractDetailPage({
     }
   };
 
+  const publicLink = typeof window !== 'undefined'
+    ? `${window.location.origin}/contract/${contract.token}`
+    : `/contract/${contract.token}`;
+
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(publicLink);
+    alert('Signing link copied.');
+  };
+
   return (
     <div className="min-h-screen p-6">
       <header className="mb-8">
@@ -129,6 +138,9 @@ export default function ContractDetailPage({
               disabled={contract.status !== 'draft'}
             >
               Send Contract
+            </button>
+            <button onClick={handleCopyLink} className="Button Button--outline">
+              Copy Signing Link
             </button>
             <button
               onClick={handleSaveAsTemplate}
@@ -164,6 +176,11 @@ export default function ContractDetailPage({
           {contract.signedAt && (
             <p className="mt-1 text-sm text-gray-500">
               Signed: {new Date(contract.signedAt).toLocaleDateString()}
+            </p>
+          )}
+          {contract.signerName && (
+            <p className="mt-1 text-sm text-gray-500">
+              Signer: {contract.signerName} ({contract.signerEmail})
             </p>
           )}
         </div>
@@ -209,6 +226,17 @@ export default function ContractDetailPage({
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900">Contract Content</h2>
+        </div>
+
+        <div className="mt-8 rounded-xl border border-purple-200 bg-purple-50 p-6 dark:border-purple-900 dark:bg-purple-950/30">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Client signing link</h2>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+            Share this secure link with the client. Opening it records a view; signing or declining records the signer details and activity.
+          </p>
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <input readOnly value={publicLink} className="ui-input flex-1" aria-label="Client signing link" />
+            <button onClick={handleCopyLink} className="ui-button ui-button-primary">Copy link</button>
+          </div>
         </div>
         <div className="p-6 space-y-4">
           <div className="whitespace-pre-wrap text-sm text-gray-900">

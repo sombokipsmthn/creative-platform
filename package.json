@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed:equipment": "tsx src/db/seed-equipment.ts"
+    "db:seed:equipment": "tsx src/db/seed-equipment.ts",
+    "db:seed:templates": "tsx src/db/seed-templates.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.1",

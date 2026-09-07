@@ -277,7 +277,7 @@ export default function EquipmentServicesSelector({
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-purple-600" />
             Equipment & Services Catalog
           </h3>
-          <p className="font-mono text-xs text-slate-500 dark:text-zinc-400">
+          <p className="font-sans text-xs text-slate-500 dark:text-zinc-400">
             Equipment rates come from the database. Crew, logistics, data, and post services use the service catalog.
           </p>
         </div>
@@ -285,7 +285,7 @@ export default function EquipmentServicesSelector({
         <button
           type="button"
           onClick={() => setShowCustomForm((previous) => !previous)}
-          className="rounded-full border border-purple-500/50 bg-purple-50 px-3 py-1.5 font-mono text-xs font-semibold uppercase text-purple-700 transition hover:bg-purple-600 hover:text-white dark:bg-purple-950/40 dark:text-purple-300"
+          className="rounded-full border border-purple-500/50 bg-purple-50 px-3 py-1.5 font-sans text-xs font-semibold uppercase text-purple-700 transition hover:bg-purple-600 hover:text-white dark:bg-purple-950/40 dark:text-purple-300"
         >
           {showCustomForm ? '✕ Close Custom' : '+ Add Custom Gear/Service'}
         </button>
@@ -302,13 +302,13 @@ export default function EquipmentServicesSelector({
           onSubmit={handleAddCustomItem}
           className="space-y-4 rounded-xl border border-purple-200 bg-slate-50 p-4 dark:border-purple-900/50 dark:bg-zinc-950"
         >
-          <div className="font-mono text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
+          <div className="font-sans text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
             Create Custom Line Item
           </div>
 
           <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 lg:grid-cols-4">
             <div className="sm:col-span-2">
-              <label className="mb-1 block font-mono text-[10px] uppercase text-slate-600 dark:text-zinc-400">
+              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
                 Item Name / Description *
               </label>
               <input
@@ -322,7 +322,7 @@ export default function EquipmentServicesSelector({
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[10px] uppercase text-slate-600 dark:text-zinc-400">
+              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
                 Target Section *
               </label>
               <select
@@ -344,7 +344,7 @@ export default function EquipmentServicesSelector({
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[10px] uppercase text-slate-600 dark:text-zinc-400">
+              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
                 Rate ({currency}) *
               </label>
               <input
@@ -352,35 +352,35 @@ export default function EquipmentServicesSelector({
                 min="0"
                 value={customRate}
                 onChange={(event) => setCustomRate(event.target.value === '' ? '' : Number(event.target.value))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 required
               />
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[10px] uppercase text-slate-600 dark:text-zinc-400">Quantity</label>
+              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">Quantity</label>
               <input
                 type="number"
                 min="1"
                 value={customQty}
                 onChange={(event) => setCustomQty(Math.max(1, Number(event.target.value) || 1))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
               />
             </div>
 
             <div>
-              <label className="mb-1 block font-mono text-[10px] uppercase text-slate-600 dark:text-zinc-400">Days / Units</label>
+              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">Days / Units</label>
               <input
                 type="number"
                 min="1"
                 value={customDays}
                 onChange={(event) => setCustomDays(Math.max(1, Number(event.target.value) || 1))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-mono text-xs text-slate-900 dark:border-zinc-700 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 dark:border-zinc-700 dark:text-zinc-100"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="mb-1 block font-mono text-[10px] uppercase text-slate-600 dark:text-zinc-400">Notes / Specs</label>
+              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">Notes / Specs</label>
               <input
                 type="text"
                 value={customNotes}
@@ -392,10 +392,10 @@ export default function EquipmentServicesSelector({
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={() => setShowCustomForm(false)} className="px-3 py-1 text-xs font-mono text-slate-500 hover:text-slate-700 dark:text-zinc-400">
+            <button type="button" onClick={() => setShowCustomForm(false)} className="px-3 py-1 text-xs font-sans text-slate-500 hover:text-slate-700 dark:text-zinc-400">
               Cancel
             </button>
-            <button type="submit" className="rounded-full bg-purple-600 px-4 py-1.5 font-mono text-xs font-semibold uppercase text-white transition hover:bg-purple-700">
+            <button type="submit" className="rounded-full bg-purple-600 px-4 py-1.5 font-sans text-xs font-semibold uppercase text-white transition hover:bg-purple-700">
               Insert Line Item →
             </button>
           </div>
@@ -413,7 +413,7 @@ export default function EquipmentServicesSelector({
           />
           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
           {searchTerm && (
-            <button type="button" onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-xs text-slate-400 hover:text-slate-600">
+            <button type="button" onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 font-sans text-xs text-slate-400 hover:text-slate-600">
               Clear
             </button>
           )}
@@ -425,7 +425,7 @@ export default function EquipmentServicesSelector({
               key={category.key}
               type="button"
               onClick={() => setSelectedCategory(category.key)}
-              className={`whitespace-nowrap rounded-full px-3 py-1 font-mono text-[11px] transition ${
+              className={`whitespace-nowrap rounded-full px-3 py-1 font-sans text-[11px] transition ${
                 selectedCategory === category.key
                   ? 'bg-purple-600 font-bold text-white'
                   : 'bg-slate-100 text-slate-600 hover:text-purple-600 dark:bg-zinc-800 dark:text-zinc-400'
@@ -457,17 +457,17 @@ export default function EquipmentServicesSelector({
                   <span className="line-clamp-2 text-xs font-semibold text-slate-900 dark:text-zinc-200">{item.name}</span>
                 </div>
                 <div className="mt-0.5 flex items-center gap-2">
-                  <span className="font-mono text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                  <span className="font-sans text-[10px] font-bold text-purple-600 dark:text-purple-400">
                     {currency} {Number(item.defaultRate).toLocaleString()}
                   </span>
-                  <span className="font-mono text-[10px] text-slate-400">/{item.defaultUnit}</span>
+                  <span className="font-sans text-[10px] text-slate-400">/{item.defaultUnit}</span>
                 </div>
                 {item.defaultNotes && (
                   <p className="mt-1 line-clamp-2 text-[11px] text-slate-500 dark:text-zinc-500">{item.defaultNotes}</p>
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-2 border-t border-slate-200/60 pt-2 text-xs font-mono dark:border-zinc-800">
+              <div className="flex items-center justify-between gap-2 border-t border-slate-200/60 pt-2 text-xs font-sans dark:border-zinc-800">
                 <div className="flex items-center gap-1">
                   <label className="text-[10px] uppercase text-slate-400">Qty:</label>
                   <input
@@ -490,7 +490,7 @@ export default function EquipmentServicesSelector({
                 <button
                   type="button"
                   onClick={() => handleAddCatalogItem(item)}
-                  className="rounded-lg bg-purple-600 px-3 py-1 font-mono text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition hover:bg-purple-700"
+                  className="rounded-lg bg-purple-600 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition hover:bg-purple-700"
                 >
                   + Add
                 </button>

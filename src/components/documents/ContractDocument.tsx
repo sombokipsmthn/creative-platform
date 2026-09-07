@@ -25,7 +25,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
         {/* HEADER */}
         <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[10px] font-mono font-semibold uppercase tracking-[0.35em] text-purple-600">
+            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
               Contract
             </p>
             <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
@@ -33,11 +33,11 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
             </h1>
           </div>
           <div className="text-left sm:text-right">
-            <p className="text-xs font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-xs font-sans uppercase tracking-widest text-slate-400">
               Contract
             </p>
             <p className="mt-1 text-lg font-medium">{contract.contractNumber}</p>
-            <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-600">
+            <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-sans uppercase tracking-wider text-slate-600">
               {contract.status}
             </div>
           </div>
@@ -46,7 +46,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
         {/* META */}
         <div className="grid grid-cols-1 gap-8 border-b border-slate-200 py-8 sm:grid-cols-2">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Client
             </p>
             <div className="mt-2 space-y-1 text-sm">
@@ -57,7 +57,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
             </div>
           </div>
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Created
             </p>
             <p className="mt-2 text-sm">
@@ -77,13 +77,13 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
         <div className="mt-12">
           <div className="grid grid-cols-1 gap-6 pt-8 border-t border-slate-200 sm:grid-cols-2">
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
                 Creator Signature
               </p>
               <div className="mt-4 h-20 border border-slate-300 rounded" />
             </div>
             <div>
-              <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+              <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
                 Client Signature
               </p>
               <div className="mt-4 h-20 border border-slate-300 rounded" />
@@ -93,7 +93,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
 
         {/* FOOTER */}
         <div className="mt-12 border-t border-slate-200 pt-6 text-center">
-          <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">
+          <p className="text-[10px] font-sans uppercase tracking-[0.25em] text-slate-400">
             This is a legally binding agreement.
           </p>
         </div>

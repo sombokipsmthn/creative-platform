@@ -36,10 +36,10 @@ export default function PartnerLogos({ partnersList }: PartnerLogosProps) {
   return (
     <div className="py-12 border-y border-slate-200 dark:border-zinc-900 bg-slate-100/60 dark:bg-zinc-950/60 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 space-y-4">
-        <p className="text-[10px] font-mono text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
+        <p className="text-[10px] font-sans text-purple-600 dark:text-purple-400 uppercase tracking-widest font-bold">
           Creator Program & Brand Partners
         </p>
-        <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-mono text-slate-700 dark:text-zinc-300">
+        <div className="flex flex-wrap justify-between items-center gap-6 text-sm font-sans text-slate-700 dark:text-zinc-300">
           {partnersList.map((partnerName) => {
             const domain = partnerDomainMap[partnerName] || 'google.com';
             const hasFailed = failedLogos[partnerName];

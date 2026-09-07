@@ -309,7 +309,7 @@ export default function InvoicesPage() {
               onClick={() => void loadInvoices(true)}
               disabled={loading || refreshing}
               variant="secondary"
-              className="text-xs font-mono uppercase tracking-widest"
+              className="text-xs font-sans uppercase tracking-widest"
             >
               <RefreshCw
                 className={`h-3.5 w-3.5 ${
@@ -411,7 +411,7 @@ export default function InvoicesPage() {
             <Button
               onClick={resetFilters}
               variant="ghost"
-              className="text-xs font-mono uppercase tracking-widest"
+              className="text-xs font-sans uppercase tracking-widest"
             >
               Clear filters
             </Button>
@@ -444,7 +444,7 @@ export default function InvoicesPage() {
                 {loading ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-16 text-center">
-                      <p className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                      <p className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                         Loading invoices...
                       </p>
                     </td>
@@ -476,7 +476,7 @@ export default function InvoicesPage() {
                           <p className="font-medium text-slate-900 dark:text-white">
                             {invoice.title || 'Untitled Invoice'}
                           </p>
-                          <p className="text-[11px] font-mono text-slate-400 dark:text-zinc-600">
+                          <p className="text-[11px] font-sans text-slate-400 dark:text-zinc-600">
                             {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
                           </p>
                         </div>
@@ -484,7 +484,7 @@ export default function InvoicesPage() {
 
                       <td className="px-6 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-600/10 text-[9px] font-mono font-semibold text-purple-600 dark:text-purple-400">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-600/10 text-[9px] font-sans font-semibold text-purple-600 dark:text-purple-400">
                             {getInitials(invoice.client)}
                           </div>
                           <div className="min-w-0">
@@ -497,7 +497,7 @@ export default function InvoicesPage() {
 
                       <td className="px-6 py-5">
                         <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider ${getStatusClass(
+                          className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-sans uppercase tracking-wider ${getStatusClass(
                             invoice.status
                           )}`}
                         >
@@ -544,13 +544,13 @@ export default function InvoicesPage() {
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={pagination.page <= 1}
                 variant="secondary"
-                className="text-xs font-mono uppercase tracking-widest"
+                className="text-xs font-sans uppercase tracking-widest"
               >
                 <ChevronLeft className="h-3.5 w-3.5" />
                 Previous
               </Button>
 
-              <div className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-slate-900 px-2 text-[10px] font-mono text-white dark:bg-zinc-800">
+              <div className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-slate-900 px-2 text-[10px] font-sans text-white dark:bg-zinc-800">
                 {pagination.page}
               </div>
 
@@ -562,7 +562,7 @@ export default function InvoicesPage() {
                 }
                 disabled={pagination.page >= pagination.totalPages}
                 variant="secondary"
-                className="text-xs font-mono uppercase tracking-widest"
+                className="text-xs font-sans uppercase tracking-widest"
               >
                 Next
                 <ChevronRight className="h-3.5 w-3.5" />

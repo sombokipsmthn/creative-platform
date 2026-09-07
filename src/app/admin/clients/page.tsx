@@ -28,6 +28,7 @@ const emptyForm = {
   company: '',
   kraPin: '',
   website: '',
+  location: '',
   notes: '',
   status: 'active' as ClientStatus,
 };
@@ -246,11 +247,11 @@ export default function AdminClientsPage() {
       <div className="max-w-7xl mx-auto space-y-10">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
           <div>
-            <Link href="/admin" className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline">
+            <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">
               ← Back to Dashboard
             </Link>
             <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">Client CRM</h1>
-            <p className="text-xs text-slate-500 dark:text-zinc-500 font-mono mt-2">
+            <p className="text-xs text-slate-500 dark:text-zinc-500 font-sans mt-2">
               Database-backed client records and workflow status.
             </p>
           </div>
@@ -258,7 +259,7 @@ export default function AdminClientsPage() {
           <Button
             onClick={openCreateModal}
             variant="primary"
-            className="text-xs font-mono uppercase tracking-widest"
+            className="text-xs font-sans uppercase tracking-widest"
           >
             + Register New Client
           </Button>
@@ -278,7 +279,7 @@ export default function AdminClientsPage() {
             ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
             <div key={String(label)} className="ui-card">
-              <p className={`text-xs ${color} font-mono uppercase`}>{label}</p>
+              <p className={`text-xs ${color} font-sans uppercase`}>{label}</p>
               <p className="text-3xl font-light text-slate-900 dark:text-white mt-1">{count}</p>
             </div>
           ))}
@@ -293,7 +294,7 @@ export default function AdminClientsPage() {
             className="ui-input w-full md:w-96"
           />
 
-          <div className="flex flex-wrap gap-2 text-xs font-mono">
+          <div className="flex flex-wrap gap-2 text-xs font-sans">
             {(
               [
                 ['ALL', clients.length],
@@ -306,7 +307,7 @@ export default function AdminClientsPage() {
                 key={status}
                 variant={filterStatus === status ? 'primary' : 'secondary'}
                 onClick={() => setFilterStatus(status)}
-                className="text-xs font-mono uppercase tracking-widest"
+                className="text-xs font-sans uppercase tracking-widest"
               >
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
               </Button>
@@ -316,7 +317,7 @@ export default function AdminClientsPage() {
 
         {loading ? (
           <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-mono text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading clients…</p>
+            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading clients…</p>
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
@@ -324,7 +325,7 @@ export default function AdminClientsPage() {
             <Button
               onClick={openCreateModal}
               variant="primary"
-              className="text-xs font-mono rounded-lg"
+              className="text-xs font-sans rounded-lg"
             >
               Register your first client
             </Button>
@@ -339,11 +340,11 @@ export default function AdminClientsPage() {
                 <div className="space-y-3 max-w-3xl">
                   <div className="flex flex-wrap items-center gap-2">
                     {client.company && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
                         {client.company}
                       </span>
                     )}
-                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-mono rounded-full uppercase ${statusClass(client.status)}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-sans rounded-full uppercase ${statusClass(client.status)}`}>
                       {statusLabel(client.status)}
                     </span>
                   </div>
@@ -352,7 +353,7 @@ export default function AdminClientsPage() {
                     {client.name}
                   </h3>
 
-                  <div className="text-xs text-slate-600 dark:text-zinc-400 font-mono flex flex-wrap gap-x-2 gap-y-1">
+                  <div className="text-xs text-slate-600 dark:text-zinc-400 font-sans flex flex-wrap gap-x-2 gap-y-1">
                     {client.email && <span>{client.email}</span>}
                     {client.phone && <span>• {client.phone}</span>}
                     {client.website && <span>• {client.website}</span>}
@@ -362,7 +363,7 @@ export default function AdminClientsPage() {
                     <p className="text-xs text-slate-500 dark:text-zinc-500 font-light italic">“{client.notes}”</p>
                   )}
 
-                  <p className="text-[10px] text-slate-400 dark:text-zinc-600 font-mono uppercase">
+                  <p className="text-[10px] text-slate-400 dark:text-zinc-600 font-sans uppercase">
                     Added {formatDate(client.createdAt)}
                   </p>
                 </div>
@@ -373,7 +374,7 @@ export default function AdminClientsPage() {
                     setSelectedClient(client);
                   }}
                   variant="secondary"
-                  className="text-xs font-mono rounded-xl"
+                  className="text-xs font-sans rounded-xl"
                 >
                   View / Edit
                 </Button>
@@ -423,6 +424,10 @@ export default function AdminClientsPage() {
                         <option value="+254">Other</option>
                       </select>
                       <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="ui-label">Location</label>
+                      <input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="ui-input" />
                     </div>
                   </div>
                 </div>
@@ -497,13 +502,13 @@ export default function AdminClientsPage() {
               </Button>
 
               <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
-                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">{selectedClient.company}</span>}
+                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">{selectedClient.company}</span>}
                 <h2 className="text-2xl font-light">{selectedClient.name}</h2>
-                <p className="text-xs font-mono text-slate-600 dark:text-zinc-400 break-words">
+                <p className="text-xs font-sans text-slate-600 dark:text-zinc-400 break-words">
                   {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}
                 </p>
                 {selectedClient.kraPin && (
-                  <p className="text-xs font-mono text-slate-500 dark:text-zinc-500 mt-1">
+                  <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 mt-1">
                     KRA PIN: {selectedClient.kraPin}
                   </p>
                 )}
@@ -525,7 +530,7 @@ export default function AdminClientsPage() {
                       variant={selectedClient.status === status ? 'primary' : 'secondary'}
                       disabled={updating || selectedClient.status === status}
                       onClick={() => updateClientStatus(status)}
-                      className="text-[10px] font-mono uppercase transition-all disabled:opacity-50"
+                      className="text-[10px] font-sans uppercase transition-all disabled:opacity-50"
                     >
                       {statusLabel(status)}
                     </Button>
@@ -538,7 +543,7 @@ export default function AdminClientsPage() {
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-600">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
                 <div>Created {formatDate(selectedClient.createdAt)}</div>
                 <div className="text-right">Updated {formatDate(selectedClient.updatedAt)}</div>
               </div>

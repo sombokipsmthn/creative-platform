@@ -141,7 +141,7 @@ export default function EquipmentSearch({
             >
               <div className="flex justify-between items-center">
                 <span className="font-medium text-slate-900 dark:text-white">{item.name}</span>
-                <span className="text-xs font-mono text-slate-500">{item.dailyRate} KES/day</span>
+                <span className="text-xs font-sans text-slate-500">{item.dailyRate} KES/day</span>
               </div>
               <div className="text-[10px] text-slate-400 uppercase tracking-wider">
                 {item.category} {item.subcategory ? `· ${item.subcategory}` : ''}

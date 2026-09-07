@@ -37,7 +37,7 @@ export default async function EquipmentPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-100">
       <a
         href="#equipment-catalog"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-purple-600 focus:px-4 focus:py-2 focus:text-xs focus:font-mono focus:uppercase focus:tracking-widest focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-purple-600 focus:px-4 focus:py-2 focus:text-xs focus:font-sans focus:uppercase focus:tracking-widest focus:text-white"
       >
         Skip to equipment catalog
       </a>
@@ -47,7 +47,7 @@ export default async function EquipmentPage() {
       <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-36 text-center">
         <div className="pointer-events-none absolute top-1/4 left-1/2 h-100 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600/15 blur-3xl" />
 
-        <p className="text-xs font-mono font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">
+        <p className="text-xs font-sans font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">
           Production kit
         </p>
 
@@ -73,7 +73,7 @@ export default async function EquipmentPage() {
       </main>
 
       <footer className="mt-8 rounded-t-3xl border-t border-slate-200 bg-slate-100 px-6 pt-16 pb-12 dark:border-zinc-900 dark:bg-zinc-950">
-        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-[11px] font-mono text-slate-500 sm:flex-row dark:text-zinc-600">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 text-[11px] font-sans text-slate-500 sm:flex-row dark:text-zinc-600">
           <p>
             © {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.
           </p>

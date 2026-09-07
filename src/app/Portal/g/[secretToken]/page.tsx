@@ -228,7 +228,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
-        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
+        <p className="text-xs font-sans uppercase tracking-widest text-slate-500">
           Loading Gallery...
         </p>
       </div>
@@ -251,12 +251,12 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
               {galleryTitle}
             </h1>
 
-            <p className="text-xs font-mono uppercase tracking-widest text-purple-500 mt-2">
+            <p className="text-xs font-sans uppercase tracking-widest text-purple-500 mt-2">
               Private Client Studio
             </p>
           </div>
 
-          <p className="text-xs text-slate-500 font-mono">
+          <p className="text-xs text-slate-500 font-sans">
             Enter the 4-digit PIN provided by your photographer to access the private gallery.
           </p>
 
@@ -270,18 +270,18 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             placeholder="PIN"
             type="password"
             autoFocus
-            className="w-full text-center text-3xl tracking-[0.5em] rounded-2xl bg-slate-100 dark:bg-zinc-900 p-4 font-mono outline-none border border-slate-200 dark:border-zinc-800 focus:border-purple-600"
+            className="w-full text-center text-3xl tracking-[0.5em] rounded-2xl bg-slate-100 dark:bg-zinc-900 p-4 font-sans outline-none border border-slate-200 dark:border-zinc-800 focus:border-purple-600"
           />
 
           {pinError && (
-            <p className="text-xs font-mono text-red-500">
+            <p className="text-xs font-sans text-red-500">
               Incorrect PIN. Please check and try again.
             </p>
           )}
 
           <button
             type="submit"
-            className="w-full py-4 rounded-xl bg-purple-600 text-white text-xs font-mono uppercase tracking-widest hover:bg-purple-700 transition font-bold"
+            className="w-full py-4 rounded-xl bg-purple-600 text-white text-xs font-sans uppercase tracking-widest hover:bg-purple-700 transition font-bold"
           >
             Unlock Gallery →
           </button>
@@ -303,7 +303,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             {allowDownloads && (
               <button
                 onClick={() => setDownloadOpen(true)}
-                className="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-mono flex items-center gap-1.5 shadow-sm"
+                className="px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-sans flex items-center gap-1.5 shadow-sm"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Download ({favorites.length || items.length})</span>
@@ -332,13 +332,13 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         )}
 
         <div className="relative max-w-7xl mx-auto px-6 py-16 md:py-24 space-y-3 text-white">
-          <span className="px-3 py-1 bg-purple-600/80 text-white text-[10px] font-mono uppercase tracking-widest rounded-full">
+          <span className="px-3 py-1 bg-purple-600/80 text-white text-[10px] font-sans uppercase tracking-widest rounded-full">
             Client Portal
           </span>
 
           <h1 className="text-3xl md:text-5xl font-light mt-2">{galleryTitle}</h1>
 
-          <p className="text-sm font-mono text-zinc-300">
+          <p className="text-sm font-sans text-zinc-300">
             {clientName} • {items.length} Photos
           </p>
         </div>
@@ -349,7 +349,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         <div className="max-w-7xl mx-auto px-6 pt-6 flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           <button
             onClick={() => setActiveCollection('all')}
-            className={`px-4 py-2 text-xs font-mono rounded-full transition ${
+            className={`px-4 py-2 text-xs font-sans rounded-full transition ${
               activeCollection === 'all'
                 ? 'bg-purple-600 text-white font-bold'
                 : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-800'
@@ -367,7 +367,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
               <button
                 key={col.id}
                 onClick={() => setActiveCollection(col.id)}
-                className={`px-4 py-2 text-xs font-mono rounded-full transition whitespace-nowrap ${
+                className={`px-4 py-2 text-xs font-sans rounded-full transition whitespace-nowrap ${
                   activeCollection === col.id
                     ? 'bg-purple-600 text-white font-bold'
                     : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 border border-slate-200 dark:border-zinc-800'
@@ -429,7 +429,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
                           e.stopPropagation();
                           toggleSelection(item.id);
                         }}
-                        className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition text-xs font-mono font-bold shadow-md ${
+                        className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center transition text-xs font-sans font-bold shadow-md ${
                           isSelected
                             ? 'bg-purple-600 text-white'
                             : 'bg-black/40 text-white hover:bg-purple-600'
@@ -442,7 +442,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
                   </div>
                 </div>
 
-                <div className="p-3 flex justify-between items-center text-xs font-mono">
+                <div className="p-3 flex justify-between items-center text-xs font-sans">
                   <span className="text-slate-700 dark:text-zinc-300 truncate max-w-[180px]">
                     {item.title}
                   </span>

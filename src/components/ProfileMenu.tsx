@@ -8,10 +8,12 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
+import { useCreator } from '@/context/CreatorContext';
 
-export default function ProfileMenu() {
+export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
+  const { activeCreator } = useCreator();
 
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -75,12 +77,13 @@ export default function ProfileMenu() {
     user.username?.charAt(0) ||
     email.charAt(0) ||
     'C';
+  const avatarUrl = activeCreator?.profile?.avatarUrl || user.imageUrl;
 
   async function handleSignOut() {
-  await signOut({
-    redirectUrl: "/",
-  });
-}
+    await signOut({
+      redirectUrl: "/",
+    });
+  }
 
   return (
     <div
@@ -93,11 +96,11 @@ export default function ProfileMenu() {
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label="Open profile menu"
-        className="flex items-center gap-2 rounded-full outline-none transition focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
+        className="flex items-center gap-2 rounded-lg px-1.5 py-1 outline-none transition hover:bg-[var(--color-bg-soft)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
       >
-        {user.imageUrl ? (
+        {avatarUrl ? (
           <Image
-            src={user.imageUrl}
+            src={avatarUrl}
             alt={fullName}
             width={36}
             height={36}
@@ -110,8 +113,18 @@ export default function ProfileMenu() {
           </span>
         )}
 
+        {showLabel && (
+          <span className="hidden text-left lg:block">
+            <span className="block max-w-32 truncate text-xs font-semibold text-[var(--color-text-primary)]">
+              {activeCreator?.name || fullName}
+            </span>
+            <span className="block text-[10px] text-[var(--color-text-muted)]">
+              Creator settings
+            </span>
+          </span>
+        )}
         <span
-          className={`hidden xl:block transition-transform duration-200 ${
+          className={`transition-transform duration-200 ${
             open ? 'rotate-180' : ''
           }`}
           aria-hidden="true"
@@ -139,9 +152,9 @@ export default function ProfileMenu() {
         >
           <div className="border-b border-slate-100 px-4 py-4 dark:border-zinc-800">
             <div className="flex items-center gap-3">
-              {user.imageUrl ? (
+              {avatarUrl ? (
                 <Image
-                  src={user.imageUrl}
+                  src={avatarUrl}
                   alt={fullName}
                   width={44}
                   height={44}
@@ -194,7 +207,7 @@ export default function ProfileMenu() {
                 />
               </svg>
 
-              <span>Profile</span>
+              <span>Creator settings</span>
             </Link>
 
             <Link
@@ -222,7 +235,7 @@ export default function ProfileMenu() {
                 <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.55V20h-2.4v-.09a1.7 1.7 0 0 0-1.03-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.46 15a1.7 1.7 0 0 0-1.55-1.03H6.8v-2.4h.11a1.7 1.7 0 0 0 1.55-1.03 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.55V5.6h2.4v.11a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.03h.11v2.4h-.11A1.7 1.7 0 0 0 19.4 15Z" />
               </svg>
 
-              <span>Settings</span>
+              <span>Platform settings</span>
             </Link>
 
             <Link

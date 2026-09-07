@@ -107,7 +107,7 @@ export default function QuotationDocument({
         {/* HEADER */}
         <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[10px] font-mono font-semibold uppercase tracking-[0.35em] text-purple-600">
+            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
               Quotation
             </p>
 
@@ -123,7 +123,7 @@ export default function QuotationDocument({
           </div>
 
           <div className="text-left sm:text-right">
-            <p className="text-xs font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-xs font-sans uppercase tracking-widest text-slate-400">
               Quote
             </p>
 
@@ -131,7 +131,7 @@ export default function QuotationDocument({
               {getShortQuoteNumber(quote)}
             </p>
 
-            <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-600">
+            <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-sans uppercase tracking-wider text-slate-600">
               {formatStatus(quote.status)}
             </div>
           </div>
@@ -140,7 +140,7 @@ export default function QuotationDocument({
         {/* META */}
         <div className="grid grid-cols-1 gap-8 border-b border-slate-200 py-8 sm:grid-cols-2 lg:grid-cols-3">
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Prepared For
             </p>
 
@@ -170,7 +170,7 @@ export default function QuotationDocument({
           </div>
 
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Quote Details
             </p>
 
@@ -200,7 +200,7 @@ export default function QuotationDocument({
           </div>
 
           <div>
-            <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Production
             </p>
 
@@ -247,19 +247,19 @@ export default function QuotationDocument({
             <table className="w-full border-collapse">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  <th className="px-4 py-3 text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                  <th className="px-4 py-3 text-[10px] font-sans uppercase tracking-widest text-slate-500">
                     Description
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                  <th className="px-4 py-3 text-right text-[10px] font-sans uppercase tracking-widest text-slate-500">
                     Qty
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                  <th className="px-4 py-3 text-right text-[10px] font-sans uppercase tracking-widest text-slate-500">
                     Rate
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-mono uppercase tracking-widest text-slate-500">
+                  <th className="px-4 py-3 text-right text-[10px] font-sans uppercase tracking-widest text-slate-500">
                     Amount
                   </th>
                 </tr>
@@ -288,7 +288,7 @@ export default function QuotationDocument({
                           </p>
 
                           {item.category && (
-                            <p className="mt-1 text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                            <p className="mt-1 text-[10px] font-sans uppercase tracking-wider text-slate-400">
                               {item.category}
                             </p>
                           )}
@@ -394,7 +394,7 @@ export default function QuotationDocument({
           <div className="mt-10 grid grid-cols-1 gap-8 border-t border-slate-200 pt-8 sm:grid-cols-2">
             {quote.paymentTerms && (
               <div>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
                   Payment Terms
                 </p>
 
@@ -406,7 +406,7 @@ export default function QuotationDocument({
 
             {quote.notes && (
               <div>
-                <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
                   Notes
                 </p>
 
@@ -420,7 +420,7 @@ export default function QuotationDocument({
 
         {/* FOOTER */}
         <div className="mt-12 border-t border-slate-200 pt-6 text-center print:hidden">
-          <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-slate-400">
+          <p className="text-[10px] font-sans uppercase tracking-[0.25em] text-slate-400">
             Thank you for the opportunity
           </p>
         </div>

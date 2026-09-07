@@ -16,6 +16,10 @@ export interface Contract {
   sentAt?: Date | null;
   viewedAt?: Date | null;
   signedAt?: Date | null;
+  signerName?: string | null;
+  signerEmail?: string | null;
+  signedIp?: string | null;
+  signedUserAgent?: string | null;
   declinedAt?: Date | null;
   cancelledAt?: Date | null;
   createdAt: Date;
@@ -76,10 +80,21 @@ export interface Client {
   email?: string | null;
   company?: string | null;
   phone?: string | null;
+  location?: string | null;
 }
 
 export interface Project {
   id: string;
   name?: string | null;
   description?: string | null;
+  scopeOfWork?: string | null;
+  deliverables?: string | null;
+  totalAmount?: number | null;
+  currency?: string | null;
+  paymentTerms?: string | null;
+  revisionsPolicy?: string | null;
+  licensingTerms?: string | null;
+  noticePeriod?: string | null;
+  startDate?: Date | string | null;
+  endDate?: Date | string | null;
 }

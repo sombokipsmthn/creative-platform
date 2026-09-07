@@ -274,7 +274,7 @@ export default function QuotesPage() {
         <div className="ui-card">
           {loading ? (
             <div className="px-6 py-16 text-center">
-              <p className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+              <p className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                 Loading quotes...
               </p>
             </div>
@@ -339,7 +339,7 @@ export default function QuotesPage() {
                               {quote.title || 'Untitled Quote'}
                             </p>
 
-                            <p className="text-[11px] font-mono text-slate-400 dark:text-zinc-600">
+                            <p className="text-[11px] font-sans text-slate-400 dark:text-zinc-600">
                               {quote.quoteNumber || quote.id}
                             </p>
                           </div>
@@ -375,7 +375,7 @@ export default function QuotesPage() {
                         <td className="px-6 py-5">
                           <div className="flex flex-col items-start gap-2">
                             <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider ${
+                              className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-sans uppercase tracking-wider ${
                                 statusStyles[status] ||
                                 statusStyles.draft
                               }`}

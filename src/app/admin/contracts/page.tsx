@@ -248,7 +248,7 @@ export default function ContractsPage() {
               })),
             ]
           }
-        ]
+        ] }
         itemLabel="Contract"
       />
 
@@ -286,7 +286,7 @@ export default function ContractsPage() {
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {contracts.length === 0 ? (
                 <tr>
-                  <td className="px-6 py-4 text-center text-gray-500" colSpan="8">
+                  <td className="px-6 py-4 text-center text-gray-500" colSpan={8}>
                     No contracts yet. Create your first contract or browse templates.
                   </td>
                 </tr>

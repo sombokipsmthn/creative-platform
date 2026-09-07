@@ -65,7 +65,38 @@ export async function GET() {
         (
           SELECT COUNT(*) FROM gallery_collections col
           WHERE col.gallery_id = g.id
-        )::int AS collections_count
+        )::int AS collections_count,
+        (
+          SELECT COUNT(*) FROM gallery_photo_actions a
+          WHERE a.gallery_id = g.id AND a.is_favorite = true
+        )::int AS favorites_count,
+        (
+          SELECT COUNT(*) FROM gallery_photo_actions a
+          WHERE a.gallery_id = g.id AND a.is_selected = true
+        )::int AS selections_count,
+        (
+          SELECT COUNT(*) FROM gallery_comments comm
+          WHERE comm.gallery_id = g.id
+        )::int AS comments_count,
+        (
+          SELECT COUNT(*) FROM gallery_downloads d
+          WHERE d.gallery_id = g.id
+        )::int AS downloads_count,
+        (
+          SELECT COUNT(*) FROM gallery_access_sessions s
+          WHERE s.gallery_id = g.id
+        )::int AS views_count,
+        (
+          SELECT MAX(created_at) FROM (
+            SELECT created_at FROM gallery_photo_actions WHERE gallery_id = g.id
+            UNION ALL
+            SELECT created_at FROM gallery_comments WHERE gallery_id = g.id
+            UNION ALL
+            SELECT created_at FROM gallery_downloads WHERE gallery_id = g.id
+            UNION ALL
+            SELECT created_at FROM gallery_access_sessions WHERE gallery_id = g.id
+          ) AS recent_activity
+        ) AS last_activity_at
       FROM galleries g
       LEFT JOIN clients c ON c.id = g.client_id
       LEFT JOIN gallery_photos cp ON cp.id = g.cover_photo_id

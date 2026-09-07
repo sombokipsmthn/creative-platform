@@ -9,11 +9,9 @@ import { eq } from "drizzle-orm";
  * guaranteed local user should call this after verifying the Clerk session.
  */
 export async function getLocalUser(authUserId: string) {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(eq(users.authUserId, authUserId))
-    .limit(1);
+  const user = await db.query.users.findFirst({
+    where: eq(users.authUserId, authUserId),
+  });
 
   if (!user) {
     throw new Error(

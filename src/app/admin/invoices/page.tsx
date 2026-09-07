@@ -45,7 +45,7 @@ type InvoiceResponse = {
   pagination: Pagination;
 };
 
-const STATUSES = [
+const STATUSES: string[] = [
   'all',
   'draft',
   'sent',
@@ -53,14 +53,14 @@ const STATUSES = [
   'paid',
   'overdue',
   'cancelled',
-] as const;
+];
 
-const CURRENCIES = [
+const CURRENCIES: { label: string; value: string }[] = [
   { label: 'All currencies', value: 'all' },
   { label: 'KES', value: 'KES' },
   { label: 'USD', value: 'USD' },
   { label: 'EUR', value: 'EUR' },
-] as const;
+];
 
 function formatMoney(value: number, currency: string) {
   return `${currency} ${Number(value || 0).toLocaleString('en-KE')}`;
@@ -400,7 +400,8 @@ export default function InvoicesPage() {
               ],
               type: 'pills'
             }
-          ] } itemLabel="Invoice"
+          ]}
+          itemLabel="Invoice"
         />
 
         {hasFilters && (
@@ -462,7 +463,7 @@ export default function InvoicesPage() {
                           : 'Invoices will appear here once they are created.'}
                       </p>
                     </td>
-                  )
+                  </tr>
                 ) : (
                   filteredInvoices.map((invoice) => (
                     <tr

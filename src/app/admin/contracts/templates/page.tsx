@@ -120,7 +120,7 @@ export default function ContractTemplatesPage() {
         {templates.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <p className="text-gray-500">No templates found.</p>
-          )
+          </div>
         ) : (
           templates.map((template, idx) => (
             <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
@@ -136,7 +136,7 @@ export default function ContractTemplatesPage() {
                     </div>
                   </div>
                   <Button
-                    variant="outline"
+                    variant="secondary"
                     onClick={() => {
                       router.push(`/admin/contracts/new?template=${template.id}`);
                     }}
@@ -148,22 +148,23 @@ export default function ContractTemplatesPage() {
                 <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-3 text-xs text-gray-500">
                     <p>Variables:</p>
-                    <p className="ml-2">
+                    <div className="ml-2 flex flex-wrap gap-1">
                       {template.variables && template.variables.length > 0 ? (
-                        template.variables.map((v, vIdx) => (
-                          <span key={vIdx} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full mr-1">
+                        template.variables.map((v: string, vIdx: number) => (
+                          <span key={vIdx} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
                             {v}
                           </span>
                         ))
                       ) : (
                         <span>None</span>
                       )}
-                    </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

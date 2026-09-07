@@ -94,6 +94,9 @@ export default function ContractsPage() {
         const res = await fetch(`/api/contracts?${params.toString()}`, {
           cache: 'no-store',
         });
+        if (res.status === 401) {
+          throw new Error('Please sign in to view your contracts.');
+        }
         if (!res.ok) throw new Error('Failed to fetch contracts data');
         const data = await res.json();
         setContracts(data.contracts || []);

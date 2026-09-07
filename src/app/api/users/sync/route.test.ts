@@ -4,12 +4,7 @@ const { mockAuth, mockCurrentUser, mockDb } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockCurrentUser: vi.fn(),
   mockDb: {
-    query: {
-      users: {
-        findFirst: vi.fn(),
-      },
-    },
-    insert: vi.fn(),
+    select: vi.fn(),
   },
 }));
 
@@ -36,29 +31,22 @@ describe("POST /api/users/sync", () => {
       firstName: "Creator",
       lastName: null,
     });
-    mockDb.query.users.findFirst.mockResolvedValue(null);
-    mockDb.insert.mockReturnValue({
-      values: vi.fn(() => ({
-        returning: vi.fn().mockResolvedValue([
-          {
-            id: "db_user_1",
-            authUserId: "user_123",
-            email: "creator@example.com",
-            name: "Creator",
-          },
-        ]),
+    mockDb.select.mockReturnValue({
+      from: vi.fn(() => ({
+        where: vi.fn(() => ({
+          limit: vi.fn().mockResolvedValue([]),
+        })),
       })),
     });
 
     const response = await POST();
 
-    expect(response.status).toBe(201);
-    expect(await response.json()).toMatchObject({
-      authUserId: "user_123",
-      email: "creator@example.com",
-      name: "Creator",
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      needsOnboarding: true,
+      user: null,
+      profile: null,
     });
-    expect(mockDb.insert).toHaveBeenCalled();
   });
 
   it("returns the existing user and does not create a duplicate record", async () => {
@@ -74,13 +62,30 @@ describe("POST /api/users/sync", () => {
       firstName: "Creator",
       lastName: "",
     });
-    mockDb.query.users.findFirst.mockResolvedValue(existingUser);
+    mockDb.select
+      .mockReturnValueOnce({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn().mockResolvedValue([existingUser]),
+          })),
+        })),
+      })
+      .mockReturnValueOnce({
+        from: vi.fn(() => ({
+          where: vi.fn(() => ({
+            limit: vi.fn().mockResolvedValue([]),
+          })),
+        })),
+      });
 
     const response = await POST();
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual(existingUser);
-    expect(mockDb.insert).not.toHaveBeenCalled();
+    expect(await response.json()).toEqual({
+      needsOnboarding: true,
+      user: existingUser,
+      profile: null,
+    });
   });
 
   it("rejects a request that lacks a Clerk session user id", async () => {

@@ -40,6 +40,7 @@ function normalizeTheme(row: ThemeRow | undefined) {
     showTitle: Boolean(row.show_title),
     showDescription: Boolean(row.show_description),
     showCollections: Boolean(row.show_collections),
+    showLogo: Boolean(row.show_logo ?? true),
     masonryColumns: Number(row.masonry_columns ?? 4),
     aspectRatio: String(row.aspect_ratio || "auto"),
     customCSS: row.custom_css ? String(row.custom_css) : null,
@@ -52,7 +53,6 @@ function normalizeTheme(row: ThemeRow | undefined) {
     thumbnailSize: String(row.thumbnail_size || "regular"),
     gridSpacing: String(row.grid_spacing || "regular"),
     navigationStyle: String(row.navigation_style || "icons-and-text"),
-    showLogo: Boolean(row.show_logo ?? true),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -94,6 +94,7 @@ async function ensureTheme(galleryId: string) {
       show_title,
       show_description,
       show_collections,
+      show_logo,
       masonry_columns,
       aspect_ratio,
       font_family,
@@ -104,12 +105,11 @@ async function ensureTheme(galleryId: string) {
       grid_style,
       thumbnail_size,
       grid_spacing,
-      navigation_style,
-      show_logo
+      navigation_style
     ) VALUES (
       ${galleryId},
-      ${"Minimal"},
-      ${"preset"},
+      ${'Minimal'},
+      ${'preset'},
       ${preset.layout},
       ${preset.accentColor},
       ${preset.backgroundColor},
@@ -118,6 +118,7 @@ async function ensureTheme(galleryId: string) {
       ${preset.showTitle},
       ${preset.showDescription},
       ${preset.showCollections},
+      ${preset.showLogo},
       ${preset.masonryColumns},
       ${preset.aspectRatio},
       ${preset.fontFamily},
@@ -128,8 +129,7 @@ async function ensureTheme(galleryId: string) {
       ${preset.gridStyle},
       ${preset.thumbnailSize},
       ${preset.gridSpacing},
-      ${preset.navigationStyle},
-      ${preset.showLogo}
+      ${preset.navigationStyle}
     )
     RETURNING *
   `);
@@ -204,7 +204,7 @@ export async function PATCH(request: Request, context: Context) {
     };
 
     const next = {
-      name: value("name", preset ? getGalleryTheme(requestedPresetId).label : String(current.name || "Custom")),
+      name: value("name", preset ? getGalleryTheme(requestedPresetId!).label : String(current.name || "Custom")),
       type: preset ? "preset" : value("type", "custom"),
       layout: value("layout", preset?.layout ?? String(current.layout || "masonry")),
       accentColor: value("accentColor", preset?.accentColor ?? String(current.accent_color || "#111111")),
@@ -214,6 +214,7 @@ export async function PATCH(request: Request, context: Context) {
       showTitle: value("showTitle", preset?.showTitle ?? Boolean(current.show_title)),
       showDescription: value("showDescription", preset?.showDescription ?? Boolean(current.show_description)),
       showCollections: value("showCollections", preset?.showCollections ?? Boolean(current.show_collections)),
+      showLogo: value("showLogo", preset?.showLogo ?? Boolean(current.show_logo ?? true)),
       masonryColumns: value("masonryColumns", preset?.masonryColumns ?? Number(current.masonry_columns ?? 4)),
       aspectRatio: value("aspectRatio", preset?.aspectRatio ?? String(current.aspect_ratio || "auto")),
       customCSS: value("customCSS", current.custom_css ? String(current.custom_css) : null),
@@ -226,7 +227,6 @@ export async function PATCH(request: Request, context: Context) {
       thumbnailSize: value("thumbnailSize", preset?.thumbnailSize ?? String(current.thumbnail_size || "regular")),
       gridSpacing: value("gridSpacing", preset?.gridSpacing ?? String(current.grid_spacing || "regular")),
       navigationStyle: value("navigationStyle", preset?.navigationStyle ?? String(current.navigation_style || "icons-and-text")),
-      showLogo: value("showLogo", preset?.showLogo ?? Boolean(current.show_logo ?? true)),
     };
 
     const result = await db.execute(sql`

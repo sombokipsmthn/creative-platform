@@ -175,6 +175,14 @@ export async function GET(
         LIMIT 1
       `);
 
+    const theme =
+      await db.execute(sql`
+        SELECT *
+        FROM gallery_themes
+        WHERE gallery_id = ${galleryId}
+        LIMIT 1
+      `);
+
     return NextResponse.json({
       gallery,
       collections:
@@ -183,6 +191,9 @@ export async function GET(
         photos.rows,
       approval:
         approval.rows[0] ||
+        null,
+      theme:
+        theme.rows[0] ||
         null,
       sessionId:
         session?.id ||

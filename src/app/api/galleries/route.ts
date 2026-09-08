@@ -40,73 +40,53 @@ function createSlug(title: string) {
 export async function GET() {
   try {
     const creator = await getCreator();
-    if (!creator) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!creator) {
+      console.warn('GET /api/galleries: No creator found');
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log('GET /api/galleries: Fetching galleries for creator:', creator.id);
 
     const result = await db.execute(sql`
       SELECT
-        g.*,
+        g.id,
+        g.creator_id,
+        g.client_id,
+        g.project_id,
+        g.title,
+        g.description,
+        g.category,
+        g.slug,
+        g.access_pin,
+        g.status,
+        g.cover_photo_id,
+        g.allow_downloads,
+        g.allow_favorites,
+        g.allow_selections,
+        g.published_at,
+        g.created_at,
+        g.updated_at,
         c.name AS client_name,
-        COALESCE(
-          cp.display_url,
-          (
-            SELECT p.display_url
-            FROM gallery_photos p
-            WHERE p.gallery_id = g.id
-              AND p.is_hidden = false
-            ORDER BY p.sort_order ASC, p.created_at ASC
-            LIMIT 1
-          )
-        ) AS cover_url,
-        (
-          SELECT COUNT(*) FROM gallery_photos p
-          WHERE p.gallery_id = g.id AND p.is_hidden = false
-        )::int AS photo_count,
-        (
-          SELECT COUNT(*) FROM gallery_collections col
-          WHERE col.gallery_id = g.id
-        )::int AS collections_count,
-        (
-          SELECT COUNT(*) FROM gallery_photo_actions a
-          WHERE a.gallery_id = g.id AND a.is_favorite = true
-        )::int AS favorites_count,
-        (
-          SELECT COUNT(*) FROM gallery_photo_actions a
-          WHERE a.gallery_id = g.id AND a.is_selected = true
-        )::int AS selections_count,
-        (
-          SELECT COUNT(*) FROM gallery_comments comm
-          WHERE comm.gallery_id = g.id
-        )::int AS comments_count,
-        (
-          SELECT COUNT(*) FROM gallery_downloads d
-          WHERE d.gallery_id = g.id
-        )::int AS downloads_count,
-        (
-          SELECT COUNT(*) FROM gallery_access_sessions s
-          WHERE s.gallery_id = g.id
-        )::int AS views_count,
-        (
-          SELECT MAX(created_at) FROM (
-            SELECT created_at FROM gallery_photo_actions WHERE gallery_id = g.id
-            UNION ALL
-            SELECT created_at FROM gallery_comments WHERE gallery_id = g.id
-            UNION ALL
-            SELECT created_at FROM gallery_downloads WHERE gallery_id = g.id
-            UNION ALL
-            SELECT created_at FROM gallery_access_sessions WHERE gallery_id = g.id
-          ) AS recent_activity
-        ) AS last_activity_at
+        c.company AS client_company,
+        (SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = g.id AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1) AS cover_url,
+        (SELECT COUNT(*) FROM gallery_photos p WHERE p.gallery_id = g.id AND p.is_hidden = false)::int AS photo_count,
+        (SELECT COUNT(*) FROM gallery_collections col WHERE col.gallery_id = g.id)::int AS collections_count,
+        (SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = g.id AND a.is_favorite = true)::int AS favorites_count,
+        (SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = g.id AND a.is_selected = true)::int AS selections_count,
+        (SELECT COUNT(*) FROM gallery_comments comm WHERE comm.gallery_id = g.id)::int AS comments_count,
+        (SELECT COUNT(*) FROM gallery_downloads d WHERE d.gallery_id = g.id)::int AS downloads_count,
+        (SELECT COUNT(*) FROM gallery_access_sessions s WHERE s.gallery_id = g.id)::int AS views_count
       FROM galleries g
       LEFT JOIN clients c ON c.id = g.client_id
-      LEFT JOIN gallery_photos cp ON cp.id = g.cover_photo_id
       WHERE g.creator_id = ${creator.id}
       ORDER BY g.created_at DESC
     `);
 
+    console.log('GET /api/galleries: Query returned', result.rows.length, 'galleries');
     return NextResponse.json({ galleries: result.rows });
   } catch (error) {
     console.error("GET /api/galleries error:", error);
-    return NextResponse.json({ error: "Unable to load galleries." }, { status: 500 });
+    return NextResponse.json({ error: "Unable to load galleries.", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
   }
 }
 

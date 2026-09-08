@@ -61,6 +61,7 @@ export async function POST(request: Request) {
     const response = await handleUpload({
       body,
       request,
+      token: process.env.BLOB_READ_WRITE_TOKEN,
 
       onBeforeGenerateToken: async (
         pathname
@@ -198,15 +199,10 @@ export async function POST(request: Request) {
               display_url,
               thumbnail_url,
               storage_path,
-              original_path,
-              display_path,
-              thumbnail_path,
-              watermark_path,
               mime_type,
               file_size,
               width,
               height,
-              processing_status,
               sort_order
             )
             VALUES (
@@ -217,15 +213,10 @@ export async function POST(request: Request) {
               ${display.url},
               ${thumbnail.url},
               ${blob.pathname},
-              ${original.path},
-              ${display.path},
-              ${thumbnail.path},
-              ${watermarked.path},
               ${processed.mimeType},
               ${processed.original.byteLength},
               ${processed.width || null},
               ${processed.height || null},
-              'ready',
               ${sortOrder}
             )
           `);

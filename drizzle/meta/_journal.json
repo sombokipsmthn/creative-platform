@@ -141,6 +141,13 @@
       "when": 1788349899023,
       "tag": "0019_loving_blizzard",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1788900821749,
+      "tag": "0020_gallery_themes_activity",
+      "breakpoints": true
     }
   ]
 }

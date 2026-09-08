@@ -128,6 +128,10 @@ export default function AdminGalleryManagerPage() {
       if (galRes.ok) {
         const data = await galRes.json();
         setGalleries(data.galleries || []);
+      } else {
+        console.error('Failed to fetch galleries:', galRes.status, galRes.statusText);
+        const errorData = await galRes.json().catch(() => ({}));
+        console.error('Gallery error response:', errorData);
       }
       if (clientRes.ok) {
         const clientData = await clientRes.json();
@@ -439,12 +443,6 @@ export default function AdminGalleryManagerPage() {
                       Adjust your filters or create your first delivery gallery.
                     </p>
                   </div>
-                  <button
-                    onClick={() => setActiveTab('create')}
-                    className="ui-button ui-button-primary ui-button-lg shadow-lg shadow-purple-500/20"
-                  >
-                    + Create New Gallery
-                  </button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">

@@ -210,6 +210,11 @@ export const galleryPhotos = pgTable("gallery_photos", {
   displayUrl: text("display_url").notNull(),
   thumbnailUrl: text("thumbnail_url").notNull(),
   storagePath: text("storage_path"),
+  originalPath: text("original_path"),
+  displayPath: text("display_path"),
+  thumbnailPath: text("thumbnail_path"),
+  watermarkPath: text("watermark_path"),
+  processingStatus: text("processing_status").default("ready").notNull(),
   mimeType: text("mime_type"),
   fileSize: bigint("file_size", { mode: "number" }),
   width: integer("width"),
@@ -220,6 +225,25 @@ export const galleryPhotos = pgTable("gallery_photos", {
   isFavorite: boolean("is_favorite").default(false).notNull(),
   isSelected: boolean("is_selected").default(false).notNull(),
   downloadCount: integer("download_count").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+
+export const galleryThemes = pgTable("gallery_themes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  galleryId: uuid("gallery_id").notNull().unique().references(() => galleries.id, { onDelete: "cascade" }),
+  name: text("name").default("Default").notNull(),
+  type: text("type").default("preset").notNull(),
+  layout: text("layout").default("masonry").notNull(),
+  accentColor: text("accent_color").default("#000000").notNull(),
+  backgroundColor: text("background_color").default("#ffffff").notNull(),
+  textColor: text("text_color").default("#000000").notNull(),
+  borderRadius: integer("border_radius").default(0).notNull(),
+  showTitle: boolean("show_title").default(true).notNull(),
+  showDescription: boolean("show_description").default(true).notNull(),
+  showCollections: boolean("show_collections").default(true).notNull(),
+  masonryColumns: integer("masonry_columns").default(4).notNull(),
+  aspectRatio: text("aspect_ratio").default("auto").notNull(),
+  customCSS: text("custom_css"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
@@ -261,6 +285,17 @@ export const galleryComments = pgTable("gallery_comments", {
   resolvedAt: timestamp("resolved_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
+
+export const galleryActivity = pgTable("gallery_activity", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  galleryId: uuid("gallery_id").notNull().references(() => galleries.id, { onDelete: "cascade" }),
+  sessionId: uuid("session_id").references(() => galleryAccessSessions.id, { onDelete: "set null" }),
+  photoId: uuid("photo_id").references(() => galleryPhotos.id, { onDelete: "set null" }),
+  collectionId: uuid("collection_id").references(() => galleryCollections.id, { onDelete: "set null" }),
+  eventType: text("event_type").notNull(),
+  clientName: text("client_name"),
+  metadata: jsonb("metadata").default({}),
+  createdAt: timestamp("created_at").defaultNow().notNull()});
 
 export const galleryApprovals = pgTable("gallery_approvals", {
   id: uuid("id").defaultRandom().primaryKey(),

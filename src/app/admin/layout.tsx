@@ -24,8 +24,8 @@ import type { LucideIcon } from 'lucide-react';
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
+import './admin.css';
 
-// Try to fetch real badge counts, fallback to mock
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
     const res = await fetch('/api/badge-counts', { cache: 'no-store' });
@@ -35,6 +35,7 @@ async function fetchBadgeCounts(): Promise<Record<string, number>> {
     return {};
   }
 }
+
 function NavItemWithBadge({
   item,
   isActive,
@@ -64,8 +65,6 @@ function NavItemWithBadge({
   );
 }
 
-
-// Navigation sections
 const sections = [
   {
     label: 'Dashboard',
@@ -98,7 +97,6 @@ const sections = [
   },
 ];
 
-// SignOutButton component
 function SignOutButton({ compact }: { compact?: boolean }) {
   const { signOut } = useClerk();
   const router = useRouter();
@@ -143,10 +141,10 @@ export default function AdminLayout({
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const splitView = useSplitView();
 
-  // Fetch badge counts on mount and when pathname changes (to refresh if needed)
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return;
     let isMounted = true;
+
     async function loadBadgeCounts() {
       try {
         setLoadingBadgeCounts(true);
@@ -156,7 +154,6 @@ export default function AdminLayout({
         }
       } catch {
         if (isMounted) {
-          // Keep empty counts on error
           setBadgeCounts({});
         }
       } finally {
@@ -165,7 +162,9 @@ export default function AdminLayout({
         }
       }
     }
+
     loadBadgeCounts();
+
     return () => {
       isMounted = false;
     };
@@ -203,9 +202,7 @@ export default function AdminLayout({
   return (
     <SplitViewProvider>
       <div className="ui-page min-h-screen text-[var(--color-text-primary)] relative">
-        {/* Sidebar */}
         <aside className="fixed inset-y-0 left-0 z-50 hidden w-[248px] border-r border-[var(--color-border-subtle)] bg-[color-mix(in_srgb,var(--color-bg-page)_92%,transparent)] backdrop-blur-xl lg:flex lg:flex-col">
-          {/* Sidebar Content */}
           <div className="flex h-[calc(100%-3rem)] flex-col">
             <div className="flex h-16 items-center border-b border-[var(--color-border-subtle)] px-5">
               <Link href="/admin" className="group flex items-center gap-2.5">
@@ -230,7 +227,7 @@ export default function AdminLayout({
                         const isActive =
                           pathname === item.href ||
                           (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
-                        
+
                         const badgeCount = loadingBadgeCounts ? 0 : (badgeCounts[item.href] ?? 0);
 
                         return (
@@ -247,12 +244,9 @@ export default function AdminLayout({
                 ))}
               </nav>
             </div>
-
           </div>
-
         </aside>
 
-        {/* Mobile Header */}
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
           <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
@@ -276,7 +270,6 @@ export default function AdminLayout({
           </div>
         </header>
 
-        {/* Main Content with Split-View Container */}
         <main className="lg:pl-[248px] lg:min-h-[calc(100vh-56px)] relative">
           <header className="hidden h-16 items-center justify-end gap-2 border-b border-[var(--color-border-subtle)] px-8 lg:flex">
             <ThemeToggle compact />
@@ -293,12 +286,13 @@ export default function AdminLayout({
             <SignOutButton compact />
           </header>
           <div className="lg:flex lg:h-full">
-            {/* Main Content */}
-            <div className={splitView.content ? 'lg:w-[65%] lg:pr-6' : 'lg:w-full'}>
+            <div
+              data-admin-content
+              className={splitView.content ? 'lg:w-[65%] lg:pr-6' : 'lg:w-full'}
+            >
               {children}
             </div>
-            
-            {/* Split-View Drawer (Persistent Right Panel) with animation */}
+
             <div
               className={
                 splitView.content
@@ -306,7 +300,6 @@ export default function AdminLayout({
                   : 'hidden'
               }
             >
-              {/* This will be populated by individual pages that need the detail view */}
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
                 {splitView.content}
               </div>

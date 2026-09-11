@@ -38,7 +38,6 @@ interface CreatorContextType {
   usersDb: Record<string, CreatorData>;
   loading: boolean;
   registerUser: (creator: CreatorData) => void;
-  registerNewCreator: (creator: CreatorData) => void;
   updateActiveProfile: (
     updated: Partial<CreatorProfile>
   ) => void;
@@ -121,6 +120,14 @@ export function CreatorProvider({
           response.status,
           text
         );
+
+        // 401 is expected when user is not signed in
+        if (response.status === 401) {
+          setActiveUser(null);
+          setUsersDb({});
+          setLoading(false);
+          return;
+        }
 
         throw new Error(
           `Creator sync failed with HTTP ${response.status}`
@@ -279,7 +286,6 @@ export function CreatorProvider({
         usersDb,
         loading,
         registerUser,
-        registerNewCreator: registerUser,
         updateActiveProfile,
         refreshCreator: syncCreator,
       }}

@@ -16,11 +16,15 @@ export interface Contract {
   sentAt?: Date | null;
   viewedAt?: Date | null;
   signedAt?: Date | null;
+  signerName?: string | null;
+  signerEmail?: string | null;
+  signedIp?: string | null;
+  signedUserAgent?: string | null;
   declinedAt?: Date | null;
   cancelledAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  client?: { name?: string | null; email?: string | null; company?: string | null } | null;
+  client?: { name?: string | null; email?: string | null; company?: string | null; phone?: string | null } | null;
   project?: { name?: string | null } | null;
 }
 
@@ -35,7 +39,7 @@ export interface NewContract {
   totalAmount?: number;
 }
 
-export interface UpdateContractInput extends Partial<NewContract> {}
+export type UpdateContractInput = Partial<NewContract>;
 
 export interface ContractTemplate {
   id: string;
@@ -45,7 +49,7 @@ export interface ContractTemplate {
   category: string;
   documentType: string;
   content: string;
-  variables?: string | null;
+  variables?: string[] | null;
   isSystemTemplate: boolean;
   isActive: boolean;
   createdAt: Date;
@@ -76,10 +80,21 @@ export interface Client {
   email?: string | null;
   company?: string | null;
   phone?: string | null;
+  location?: string | null;
 }
 
 export interface Project {
   id: string;
   name?: string | null;
   description?: string | null;
+  scopeOfWork?: string | null;
+  deliverables?: string | null;
+  totalAmount?: number | null;
+  currency?: string | null;
+  paymentTerms?: string | null;
+  revisionsPolicy?: string | null;
+  licensingTerms?: string | null;
+  noticePeriod?: string | null;
+  startDate?: Date | string | null;
+  endDate?: Date | string | null;
 }

@@ -18,15 +18,12 @@ interface EditorialViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
  * Editorial typography and story-driven presentation.
  */
 export function GalleryViewerEditorial({
-  id,
   title,
   description,
   theme,
   photos,
-  collections,
   allowDownloads,
   allowFavorites,
-  isClient,
   onPhotoDownload,
   onPhotoFavorite,
 }: EditorialViewerProps) {
@@ -127,7 +124,7 @@ export function GalleryViewerEditorial({
             </p>
 
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {remaining.map((photo, idx) => {
+              {remaining.map((photo) => {
                 const isFavorite = favorites.has(photo.id) || photo.isFavorite;
 
                 return (

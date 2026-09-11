@@ -21,7 +21,7 @@ export async function getCurrentUser() {
 
     try {
       return await getLocalUser(userId);
-    } catch (e) {
+    } catch {
       throw new Error(
         `Local creator account not found for Clerk ID ${userId}. ` +
         "Ensure the user has been created via /auth before calling this function."

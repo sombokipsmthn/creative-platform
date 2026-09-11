@@ -125,7 +125,7 @@ export default function SignInPage() {
 
         <div className="mt-6 text-center">
           <p className="text-xs text-slate-500 dark:text-zinc-400">
-            Don't have an account?{' '}
+            Don&apos;t have an account?{' '}
             <Link href="/admin/onboarding" className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
               Get started
             </Link>

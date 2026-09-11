@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  CheckCircle2,
-  Copy,
   FilePlus,
-  FileSignature,
   Loader2,
-  Plus,
-  Trash2,
-  User,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
 import { formatCurrency } from '@/lib/utils';
+import type { Contract, ContractEvent } from '@/lib/types/contracts';
 
 interface ContractDetailContentProps {
   contractId: string;
@@ -21,10 +15,10 @@ interface ContractDetailContentProps {
 export default function ContractDetailContent({
   contractId,
 }: ContractDetailContentProps) {
-  const [contract, setContract] = useState<any>(null);
+  const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [events, setEvents] = useState<Array<any>>([]);
+  const [events, setEvents] = useState<ContractEvent[]>([]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -93,37 +87,6 @@ export default function ContractDetailContent({
       window.location.reload();
     } catch (err) {
       alert(err instanceof Error ? err.message : 'Error sending contract');
-    }
-  };
-
-  const handleDuplicate = async () => {
-    try {
-      const res = await fetch(`/api/contracts/${contractId}/duplicate`, {
-        method: 'POST',
-      });
-      if (!res.ok) throw new Error('Failed to duplicate contract');
-      const data = await res.json();
-      // Note: In a real app, we would update the list and maybe navigate to the new contract
-      // For now, we just alert and reload the list (if in list view) or we can try to update the drawer content via state (but we don't have that here)
-      alert('Contract duplicated');
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error duplicating contract');
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this contract?')) return;
-    try {
-      const res = await fetch(`/api/contracts/${contractId}`, {
-        method: 'DELETE',
-      });
-      if (!res.ok) throw new Error('Failed to delete contract');
-      // In a real app, we would remove from the list and go back to the list
-      alert('Contract deleted');
-      // We try to go back to the list by updating the split-view content to null and then maybe the list page would need to know?
-      // For simplicity, we just alert and the user can manually go back or we rely on the list being refetched elsewhere.
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Error deleting contract');
     }
   };
 
@@ -236,7 +199,7 @@ export default function ContractDetailContent({
               Currency: {contract.currency}
             </p>
             <p className="text-sm text-gray-500">
-              Total Amount: {contract.totalAmount !== null ? formatCurrency(contract.totalAmount) : '-'}
+              Total Amount: {contract.totalAmount != null ? formatCurrency(contract.totalAmount) : '-'}
             </p>
           </div>
         </div>

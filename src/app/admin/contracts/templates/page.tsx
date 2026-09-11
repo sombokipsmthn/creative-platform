@@ -4,19 +4,17 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
-  CheckCircle2,
   FilePlus,
   Loader2,
-  Plus,
   Search,
-  Trash2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
+import type { ContractTemplate } from '@/lib/types/contracts';
 
 export default function ContractTemplatesPage() {
   const router = useRouter();
-  const [templates, setTemplates] = useState<Array<any>>([]);
+  const [templates, setTemplates] = useState<ContractTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -56,7 +54,7 @@ export default function ContractTemplatesPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 mb-6">
           <p>{error}</p>
         </div>
       </div>
@@ -103,14 +101,14 @@ export default function ContractTemplatesPage() {
               className="border border-gray-300 rounded px-3 py-2 w-48 focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="all">All Categories</option>
-              <option value="photography">Photography</option>
-              <option value="video">Video</option>
-              <option value="design">Design</option>
-              <option value="creative-services">Creative Services</option>
-              <option value="consulting">Consulting</option>
-              <option value="events">Events</option>
-              <option value="general-business">General Business</option>
-              <option value="legal-protection">Legal & Protection</option>
+              <option value="Photography">Photography</option>
+              <option value="Video">Video</option>
+              <option value="Design">Design</option>
+              <option value="Creative Services">Creative Services</option>
+              <option value="Consulting">Consulting</option>
+              <option value="Events">Events</option>
+              <option value="General Business">General Business</option>
+              <option value="Legal & Protection">Legal & Protection</option>
             </select>
           </div>
         </div>
@@ -122,8 +120,8 @@ export default function ContractTemplatesPage() {
             <p className="text-gray-500">No templates found.</p>
           </div>
         ) : (
-          templates.map((template, idx) => (
-            <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+          templates.map((template) => (
+            <div key={template.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center space-x-3">
@@ -138,28 +136,15 @@ export default function ContractTemplatesPage() {
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      router.push(`/admin/contracts/new?template=${template.id}`);
+                      router.push(`/admin/contracts/new?templateId=${template.id}`);
                     }}
                   >
                     Use Template
                   </Button>
                 </div>
                 <p className="text-sm text-gray-600">{template.description || 'No description'}</p>
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center space-x-3 text-xs text-gray-500">
-                    <p>Variables:</p>
-                    <div className="ml-2 flex flex-wrap gap-1">
-                      {template.variables && template.variables.length > 0 ? (
-                        template.variables.map((v: string, vIdx: number) => (
-                          <span key={vIdx} className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                            {v}
-                          </span>
-                        ))
-                      ) : (
-                        <span>None</span>
-                      )}
-                    </div>
-                  </div>
+                <div className="mt-4 border-t border-gray-200 pt-4 text-sm text-gray-500 dark:border-gray-700">
+                  Choose this template and we&apos;ll guide you through the information needed for this agreement.
                 </div>
               </div>
             </div>

@@ -1,23 +1,45 @@
-export type GalleryThemeId = 
-  | 'minimal' 
-  | 'editorial' 
-  | 'cinematic' 
-  | 'mosaic' 
+export type GalleryThemeId =
+  | 'minimal'
+  | 'editorial'
+  | 'cinematic'
+  | 'mosaic'
   | 'story';
 
-export type GalleryThemeCategory = 'modern' | 'editorial' | 'cinematic' | 'playful' | 'narrative';
+export type GalleryThemeCategory =
+  | 'modern'
+  | 'editorial'
+  | 'cinematic'
+  | 'playful'
+  | 'narrative';
+
+export type GalleryFontFamily = 'sans' | 'serif' | 'modern' | 'editorial';
+export type GalleryCoverStyle = 'image' | 'split' | 'centered' | 'minimal' | 'immersive' | 'none';
+export type GalleryGridStyle = 'masonry' | 'vertical' | 'horizontal' | 'uniform';
+export type GalleryThumbnailSize = 'small' | 'regular' | 'large';
+export type GalleryGridSpacing = 'tight' | 'regular' | 'wide';
+export type GalleryNavigationStyle = 'icons-only' | 'icons-and-text';
 
 export interface GalleryThemePreset {
   layout: 'single' | 'magazine' | 'fullscreen' | 'masonry' | 'vertical';
   aspectRatio: 'auto' | '1:1' | '16:9' | '4:3' | '3:2';
-  masonryColumns?: number;
+  masonryColumns: number;
   showTitle: boolean;
   showDescription: boolean;
   showCollections: boolean;
+  showLogo: boolean;
   accentColor: string;
   backgroundColor: string;
   textColor: string;
   borderRadius: number;
+  fontFamily: GalleryFontFamily;
+  coverStyle: GalleryCoverStyle;
+  coverFocalX: number;
+  coverFocalY: number;
+  coverOverlayOpacity: number;
+  gridStyle: GalleryGridStyle;
+  thumbnailSize: GalleryThumbnailSize;
+  gridSpacing: GalleryGridSpacing;
+  navigationStyle: GalleryNavigationStyle;
 }
 
 export interface GalleryThemeDefinition {
@@ -25,104 +47,113 @@ export interface GalleryThemeDefinition {
   label: string;
   description: string;
   category: GalleryThemeCategory;
-  icon: string; // CSS icon name or emoji
+  icon: string;
   preset: GalleryThemePreset;
   customizable: {
     colors: boolean;
-    layout: boolean;
+    cover: boolean;
+    grid: boolean;
     typography: boolean;
   };
 }
 
-/**
- * Theme registry with all 5 gallery themes.
- * 
- * Each theme represents a distinct visual and experiential approach:
- * - Minimal: Clean, spacious, focus on image quality
- * - Editorial: Magazine-style layout with stories
- * - Cinematic: Fullscreen hero images with minimal UI
- * - Mosaic: Dynamic grid with varied aspect ratios
- * - Story: Sequential storytelling with annotations
- */
 export const GALLERY_THEMES: GalleryThemeDefinition[] = [
   {
     id: 'minimal',
     label: 'Minimal',
-    description: 'Clean, spacious layout with focus on image quality and breathing room.',
+    description: 'Quiet, spacious presentation that keeps the photography first.',
     category: 'modern',
-    icon: '⊟',
+    icon: 'minimal',
     preset: {
       layout: 'single',
       aspectRatio: 'auto',
+      masonryColumns: 3,
       showTitle: true,
       showDescription: true,
       showCollections: true,
-      accentColor: '#000000',
+      showLogo: true,
+      accentColor: '#111111',
       backgroundColor: '#FFFFFF',
-      textColor: '#000000',
+      textColor: '#111111',
       borderRadius: 0,
+      fontFamily: 'sans',
+      coverStyle: 'minimal',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverOverlayOpacity: 15,
+      gridStyle: 'vertical',
+      thumbnailSize: 'large',
+      gridSpacing: 'wide',
+      navigationStyle: 'icons-and-text',
     },
-    customizable: {
-      colors: true,
-      layout: false,
-      typography: true,
-    },
+    customizable: { colors: true, cover: true, grid: true, typography: true },
   },
-
   {
     id: 'editorial',
     label: 'Editorial',
-    description: 'Magazine-style layout with featured images and editorial typography.',
+    description: 'Magazine-inspired typography and image rhythm for story-led work.',
     category: 'editorial',
-    icon: '⊞',
+    icon: 'editorial',
     preset: {
       layout: 'magazine',
       aspectRatio: 'auto',
+      masonryColumns: 3,
       showTitle: true,
       showDescription: true,
       showCollections: true,
-      accentColor: '#000000',
-      backgroundColor: '#FAFAFA',
-      textColor: '#1A1A1A',
+      showLogo: true,
+      accentColor: '#181818',
+      backgroundColor: '#F7F5F1',
+      textColor: '#181818',
       borderRadius: 0,
+      fontFamily: 'serif',
+      coverStyle: 'split',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverOverlayOpacity: 10,
+      gridStyle: 'horizontal',
+      thumbnailSize: 'regular',
+      gridSpacing: 'regular',
+      navigationStyle: 'icons-and-text',
     },
-    customizable: {
-      colors: true,
-      layout: true,
-      typography: true,
-    },
+    customizable: { colors: true, cover: true, grid: true, typography: true },
   },
-
   {
     id: 'cinematic',
     label: 'Cinematic',
-    description: 'Fullscreen hero images with minimal UI for dramatic, immersive experience.',
+    description: 'Immersive, full-bleed presentation with restrained interface chrome.',
     category: 'cinematic',
-    icon: '⊟',
+    icon: 'cinematic',
     preset: {
       layout: 'fullscreen',
       aspectRatio: '16:9',
-      showTitle: false,
+      masonryColumns: 1,
+      showTitle: true,
       showDescription: false,
       showCollections: false,
+      showLogo: true,
       accentColor: '#FFFFFF',
-      backgroundColor: '#000000',
+      backgroundColor: '#080808',
       textColor: '#FFFFFF',
       borderRadius: 0,
+      fontFamily: 'modern',
+      coverStyle: 'immersive',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverOverlayOpacity: 40,
+      gridStyle: 'uniform',
+      thumbnailSize: 'large',
+      gridSpacing: 'tight',
+      navigationStyle: 'icons-only',
     },
-    customizable: {
-      colors: true,
-      layout: false,
-      typography: false,
-    },
+    customizable: { colors: true, cover: true, grid: false, typography: true },
   },
-
   {
     id: 'mosaic',
     label: 'Mosaic',
-    description: 'Dynamic grid with varied image sizes for playful, energetic portfolios.',
+    description: 'Flexible image grid designed for fast browsing across larger galleries.',
     category: 'playful',
-    icon: '⊞',
+    icon: 'mosaic',
     preset: {
       layout: 'masonry',
       aspectRatio: 'auto',
@@ -130,65 +161,64 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       showTitle: true,
       showDescription: true,
       showCollections: true,
+      showLogo: true,
       accentColor: '#6D28D9',
       backgroundColor: '#FFFFFF',
-      textColor: '#1A1A1A',
-      borderRadius: 8,
+      textColor: '#171717',
+      borderRadius: 6,
+      fontFamily: 'sans',
+      coverStyle: 'image',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverOverlayOpacity: 25,
+      gridStyle: 'masonry',
+      thumbnailSize: 'regular',
+      gridSpacing: 'regular',
+      navigationStyle: 'icons-and-text',
     },
-    customizable: {
-      colors: true,
-      layout: true,
-      typography: true,
-    },
+    customizable: { colors: true, cover: true, grid: true, typography: true },
   },
-
   {
     id: 'story',
     label: 'Story',
-    description: 'Vertical storytelling layout with captions for narrative-driven content.',
+    description: 'Tall, sequential presentation for documentary and narrative galleries.',
     category: 'narrative',
-    icon: '⊞',
+    icon: 'story',
     preset: {
       layout: 'vertical',
       aspectRatio: 'auto',
+      masonryColumns: 1,
       showTitle: true,
       showDescription: true,
       showCollections: true,
-      accentColor: '#6D28D9',
-      backgroundColor: '#FFFFFF',
-      textColor: '#1A1A1A',
+      showLogo: true,
+      accentColor: '#111111',
+      backgroundColor: '#FAFAFA',
+      textColor: '#171717',
       borderRadius: 4,
+      fontFamily: 'editorial',
+      coverStyle: 'centered',
+      coverFocalX: 50,
+      coverFocalY: 50,
+      coverOverlayOpacity: 20,
+      gridStyle: 'vertical',
+      thumbnailSize: 'large',
+      gridSpacing: 'wide',
+      navigationStyle: 'icons-and-text',
     },
-    customizable: {
-      colors: true,
-      layout: false,
-      typography: true,
-    },
+    customizable: { colors: true, cover: true, grid: true, typography: true },
   },
 ];
 
-/**
- * Get theme by ID, with fallback to first theme if not found.
- */
 export function getGalleryTheme(id?: string | null): GalleryThemeDefinition {
-  if (!id) {
-    return GALLERY_THEMES[0];
-  }
-
-  const theme = GALLERY_THEMES.find((t) => t.id === id);
-  return theme || GALLERY_THEMES[0];
+  if (!id) return GALLERY_THEMES[0];
+  return GALLERY_THEMES.find((theme) => theme.id === id) || GALLERY_THEMES[0];
 }
 
-/**
- * Get all theme IDs for type safety.
- */
 export function getAllThemeIds(): GalleryThemeId[] {
-  return GALLERY_THEMES.map((t) => t.id);
+  return GALLERY_THEMES.map((theme) => theme.id);
 }
 
-/**
- * Check if a theme ID is valid.
- */
 export function isValidThemeId(id: string | null | undefined): id is GalleryThemeId {
-  return Boolean(id && GALLERY_THEMES.some((t) => t.id === id));
+  return Boolean(id && GALLERY_THEMES.some((theme) => theme.id === id));
 }

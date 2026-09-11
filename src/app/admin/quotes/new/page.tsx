@@ -77,90 +77,6 @@ const QUOTE_CATEGORIES = [
 ] as const;
 
 /* =========================================================
-   CREW CATALOGUE
-
-   Crew is not stored in the equipment table, so it lives
-   here as selectable quote-builder services.
-========================================================= */
-
-const CREW_OPTIONS: Array<
-  [string, string, number]
-> = [
-    ["Camera Operator", "day", 12000],
-    ["Director", "day", 20000],
-    ["Producer", "day", 18000],
-    ["Director of Photography", "day", 18000],
-    ["1st Assistant Camera", "day", 10000],
-    ["2nd Assistant Camera", "day", 7000],
-    ["Gaffer", "day", 12000],
-    ["Sound Recordist", "day", 12000],
-    ["Boom Operator", "day", 8000],
-    ["Production Assistant", "day", 5000],
-    ["Editor", "day", 15000],
-    ["Photographer", "day", 12000],
-  ];
-
-/* =========================================================
-   PRODUCTION SERVICES
-========================================================= */
-
-const PRODUCTION_OPTIONS: Array<
-  [string, string, number]
-> = [
-    ["Production Management", "project", 15000],
-    ["Pre-production", "project", 12000],
-    ["Location Scouting", "project", 8000],
-    ["Production Coordination", "project", 10000],
-    ["Production Day", "day", 15000],
-    ["Set Catering", "day", 8000],
-    ["Production Insurance", "project", 0],
-  ];
-
-/* =========================================================
-   POST PRODUCTION SERVICES
-========================================================= */
-
-const POST_PRODUCTION_OPTIONS: Array<
-  [string, string, number]
-> = [
-    ["Video Editing", "project", 25000],
-    ["Color Grading", "project", 15000],
-    ["Sound Mix", "project", 15000],
-    ["Motion Graphics", "project", 20000],
-    ["Subtitles / Captions", "project", 8000],
-    ["Photo Retouching", "project", 12000],
-    ["Photo Editing", "project", 10000],
-    ["SFX / VFX", "project", 25000],
-    ["Rendering / Encoding", "project", 5000],
-  ];
-
-/* =========================================================
-   TRANSPORT SERVICES
-========================================================= */
-
-const TRANSPORT_OPTIONS: Array<
-  [string, string, number]
-> = [
-    ["Production Transport", "day", 8000],
-    ["Crew Transport", "day", 6000],
-    ["Equipment Transport", "day", 6000],
-    ["Fuel / Mileage", "trip", 0],
-  ];
-
-/* =========================================================
-   OTHER SERVICES
-========================================================= */
-
-const OTHER_OPTIONS: Array<
-  [string, string, number]
-> = [
-    ["Miscellaneous Expense", "unit", 0],
-    ["Location Fee", "day", 0],
-    ["Permit", "project", 0],
-    ["Other Service", "unit", 0],
-  ];
-
-/* =========================================================
    HELPERS
 ========================================================= */
 
@@ -1423,7 +1339,7 @@ export default function NewQuotePage() {
     "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500";
 
   const labelClass =
-    "text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600";
+    "text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600";
 
   /* =======================================================
      PAGE
@@ -1446,12 +1362,12 @@ export default function NewQuotePage() {
             <div>
               <Link
                 href="/admin/quotes"
-                className="text-[10px] font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400"
+                className="text-[10px] font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400"
               >
                 ← Quotes
               </Link>
 
-              <p className="mt-5 text-[10px] font-mono uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400 font-semibold">
+              <p className="mt-5 text-[10px] font-sans uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400 font-semibold">
                 Sales & Production
               </p>
 
@@ -1471,7 +1387,7 @@ export default function NewQuotePage() {
             <div className="flex gap-3">
               <Link
                 href="/admin/quotes"
-                className="px-5 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-mono uppercase tracking-widest text-slate-600 dark:text-zinc-400"
+                className="px-5 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-sans uppercase tracking-widest text-slate-600 dark:text-zinc-400"
               >
                 Cancel
               </Link>
@@ -1479,7 +1395,7 @@ export default function NewQuotePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-mono uppercase tracking-widest font-semibold"
+                className="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
               >
                 {saving
                   ? "Saving..."
@@ -1879,7 +1795,7 @@ export default function NewQuotePage() {
                     onClick={
                       addEquipmentItem
                     }
-                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-mono uppercase tracking-widest font-semibold"
+                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-sans uppercase tracking-widest font-semibold"
                   >
                     + Equipment
                   </button>
@@ -1889,7 +1805,7 @@ export default function NewQuotePage() {
                     onClick={
                       addCustomItem
                     }
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-mono uppercase tracking-widest"
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-sans uppercase tracking-widest"
                   >
                     + Custom Item
                   </button>
@@ -1931,12 +1847,12 @@ export default function NewQuotePage() {
 
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-mono">
+                          <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-sans">
                             {index +
                               1}
                           </span>
 
-                          <span className="text-xs font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                          <span className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                             {item.category ||
                               "Line Item"}
                           </span>
@@ -2104,14 +2020,14 @@ export default function NewQuotePage() {
                                 item.category && (
                                   <div className="absolute z-[100] mt-2 left-0 right-0 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden">
                                     <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
-                                      <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                                      <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                                         {
                                           item.category
                                         }{" "}
                                         options
                                       </p>
 
-                                      <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-600">
+                                      <span className="text-[10px] font-sans text-slate-400 dark:text-zinc-600">
                                         {
                                           options.length
                                         }{" "}
@@ -2175,7 +2091,7 @@ export default function NewQuotePage() {
 
                                                 {option.rate >
                                                   0 && (
-                                                    <span className="shrink-0 text-xs font-mono text-slate-600 dark:text-zinc-400">
+                                                    <span className="shrink-0 text-xs font-sans text-slate-600 dark:text-zinc-400">
                                                       {formatAmount(
                                                         option.rate,
                                                         currency
@@ -2286,7 +2202,7 @@ export default function NewQuotePage() {
                             </span>
 
                             <div className="relative mt-2">
-                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-400 dark:text-zinc-600">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-sans text-slate-400 dark:text-zinc-600">
                                 {
                                   currency
                                 }
@@ -2367,7 +2283,7 @@ export default function NewQuotePage() {
                 onClick={
                   addEquipmentItem
                 }
-                className="px-4 py-3 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-mono uppercase tracking-widest"
+                className="px-4 py-3 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-sans uppercase tracking-widest"
               >
                 + Add Equipment
               </button>
@@ -2377,7 +2293,7 @@ export default function NewQuotePage() {
                 onClick={
                   addCustomItem
                 }
-                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-xs font-mono uppercase tracking-widest"
+                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-xs font-sans uppercase tracking-widest"
               >
                 + Add Custom Line
               </button>
@@ -2718,7 +2634,7 @@ export default function NewQuotePage() {
               disabled={
                 saving
               }
-              className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-mono uppercase tracking-widest font-semibold"
+              className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
             >
               {saving
                 ? "Saving..."

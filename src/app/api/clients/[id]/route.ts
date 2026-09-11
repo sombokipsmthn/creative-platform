@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, users } from "@/db/schema";
+import { clients } from "@/db/schema";
 
 type RouteContext = {
   params: Promise<{

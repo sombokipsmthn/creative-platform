@@ -7,36 +7,42 @@ export function toCamelCase(str: string): string {
   return str.replace(/_([a-z])/g, (_, char) => char.toUpperCase());
 }
 
-export function transformKeys<T extends Record<string, any>>(
-  obj: T
-): Record<string, any> {
-  if (Array.isArray(obj)) {
-    return obj.map(transformKeys) as any;
-  }
+type JsonObject = Record<string, unknown>;
 
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
+function transformValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(transformValue);
   }
+  if (value !== null && typeof value === 'object') {
+    return transformKeys(value as JsonObject);
+  }
+  return value;
+}
 
-  return Object.entries(obj).reduce((acc, [key, value]) => {
+export function transformKeys(obj: JsonObject): JsonObject {
+  return Object.entries(obj).reduce<JsonObject>((acc, [key, value]) => {
     const camelKey = toCamelCase(key);
-    acc[camelKey] = Array.isArray(value) ? value.map(transformKeys) : 
-                     (value !== null && typeof value === 'object') ? transformKeys(value) :
-                     value;
+    acc[camelKey] = transformValue(value);
     return acc;
-  }, {} as Record<string, any>);
+  }, {});
 }
 
 /**
  * Transform API gallery response to component format
  */
-export function transformGalleryResponse(data: any) {
+export function transformGalleryResponse(data: JsonObject) {
   return {
-    gallery: transformKeys(data.gallery),
-    collections: Array.isArray(data.collections) ? data.collections.map(transformKeys) : [],
-    photos: Array.isArray(data.photos) ? data.photos.map(transformKeys) : [],
-    approval: data.approval ? transformKeys(data.approval) : null,
-    presets: Array.isArray(data.presets) ? data.presets.map(transformKeys) : [],
-    watermark: data.watermark ? transformKeys(data.watermark) : null,
+    gallery: transformKeys((data.gallery ?? {}) as JsonObject),
+    collections: Array.isArray(data.collections)
+      ? data.collections.map((item) => transformKeys(item as JsonObject))
+      : [],
+    photos: Array.isArray(data.photos)
+      ? data.photos.map((item) => transformKeys(item as JsonObject))
+      : [],
+    approval: data.approval ? transformKeys(data.approval as JsonObject) : null,
+    presets: Array.isArray(data.presets)
+      ? data.presets.map((item) => transformKeys(item as JsonObject))
+      : [],
+    watermark: data.watermark ? transformKeys(data.watermark as JsonObject) : null,
   };
 }

@@ -5,7 +5,6 @@ import Image from "next/image";
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useCreator } from "@/context/CreatorContext";
-import { Button } from "@/components/ui/Button";
 
 const resolveImage = (
   source?: string | null,
@@ -48,7 +47,7 @@ export default function AboutPage() {
       <section className="relative pt-36 pb-16 px-6 max-w-7xl mx-auto text-center space-y-6">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           {activeUser
             ? `ABOUT ${activeUser.name}`
             : "ABOUT KIPSMTHN PLATFORM"}
@@ -91,7 +90,7 @@ export default function AboutPage() {
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+                <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
                   {activeUser.name} — {location}
                 </span>
               </div>
@@ -133,7 +132,7 @@ export default function AboutPage() {
 
       {/* FOOTER */}
       <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6 mt-16">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
           <p>
             © {new Date().getFullYear()}{" "}
             {activeUser?.handle || "KIPSMTHN"}. All rights reserved.

@@ -24,17 +24,20 @@ export default function AdminSettingsPage() {
 
   // Apply preset when changed
   useEffect(() => {
-    if (watermarkPreset === 'proof') {
-      setWatermarkText('KIPSMTHN PROOF');
-      setWatermarkOpacity(30);
-      setWatermarkPosition('bottom-right');
-      setWatermarkSize(42);
-    } else {
-      setWatermarkText('KIPSMTHN');
-      setWatermarkOpacity(55);
-      setWatermarkPosition('bottom-right');
-      setWatermarkSize(36);
-    }
+    const applyPreset = window.setTimeout(() => {
+      if (watermarkPreset === 'proof') {
+        setWatermarkText('KIPSMTHN PROOF');
+        setWatermarkOpacity(30);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(42);
+      } else {
+        setWatermarkText('KIPSMTHN');
+        setWatermarkOpacity(55);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(36);
+      }
+    }, 0);
+    return () => window.clearTimeout(applyPreset);
   }, [watermarkPreset]);
 
   // Handle watermark changes from preview
@@ -84,12 +87,15 @@ export default function AdminSettingsPage() {
         
         {/* Title Bar */}
         <div className="border-b border-slate-200 dark:border-zinc-800/80 pb-6">
-          <Link href="/admin" className="text-xs font-mono text-purple-600 dark:text-purple-400 hover:underline">
+          <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">
             ← Back to Dashboard
           </Link>
           <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">
             Platform Settings
           </h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-zinc-400">
+            Configure how the platform behaves for your workspace, galleries, and client communications.
+          </p>
         </div>
 
         {/* 💡 SUB-NAVIGATION TABS */}
@@ -100,7 +106,7 @@ export default function AdminSettingsPage() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`pb-3 text-xs font-mono uppercase tracking-widest cursor-pointer transition-all border-b-2 whitespace-nowrap ${
+                className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all border-b-2 whitespace-nowrap ${
                   activeTab === tab.id
                     ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
                     : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -121,29 +127,29 @@ export default function AdminSettingsPage() {
               <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
                 <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                   <h2 className="text-lg font-medium text-slate-900 dark:text-white">Domain & Custom URLs</h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Your client galleries are always available on your default site address.</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Your client galleries are always available on your default site address.</p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Default Site Address</label>
+                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Site Address</label>
                     <input
                       type="text"
                       value={domainSlug}
                       onChange={(e) => setDomainSlug(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Custom Domain</label>
+                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Custom Domain</label>
                     <input
                       type="text"
                       value={customDomain}
                       onChange={(e) => setCustomDomain(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     />
-                    <p className="text-[11px] text-slate-500 font-mono">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
+                    <p className="text-[11px] text-slate-500 font-sans">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
                   </div>
                 </div>
               </div>
@@ -152,25 +158,25 @@ export default function AdminSettingsPage() {
               <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
                 <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                   <h2 className="text-lg font-medium text-slate-900 dark:text-white">Logos & Favicon</h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Upload custom brand logos for your client portal header and browser tab icon.</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Upload custom brand logos for your client portal header and browser tab icon.</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600 dark:text-purple-400 font-mono text-xl">+</div>
-                    <p className="text-xs font-mono font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
-                    <p className="text-[10px] text-slate-500 font-mono">PNG or SVG with transparent background</p>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600 dark:text-purple-400 font-sans text-xl">+</div>
+                    <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
+                    <p className="text-[10px] text-slate-500 font-sans">PNG or SVG with transparent background</p>
                   </div>
 
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600 dark:text-purple-400 font-mono text-xl">+</div>
-                    <p className="text-xs font-mono font-bold text-slate-900 dark:text-white">Upload Favicon Icon</p>
-                    <p className="text-[10px] text-slate-500 font-mono">32x32 PNG, ICO or SVG file</p>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600 dark:text-purple-400 font-sans text-xl">+</div>
+                    <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Favicon Icon</p>
+                    <p className="text-[10px] text-slate-500 font-sans">32x32 PNG, ICO or SVG file</p>
                   </div>
                 </div>
 
                 <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
-                  <label className="flex items-center gap-3 text-xs font-mono text-slate-700 dark:text-zinc-300 cursor-pointer">
+                  <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={hidePlatformBranding}
@@ -192,7 +198,7 @@ export default function AdminSettingsPage() {
                 <button
                   type="button"
                   onClick={() => setWatermarkPreset('proof')}
-                  className={`px-3 py-1.5 text-xs font-mono rounded-lg transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
                     watermarkPreset === 'proof'
                       ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -203,7 +209,7 @@ export default function AdminSettingsPage() {
                 <button
                   type="button"
                   onClick={() => setWatermarkPreset('brand')}
-                  className={`px-3 py-1.5 text-xs font-mono rounded-lg transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
                     watermarkPreset === 'brand'
                       ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm'
                       : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -226,22 +232,22 @@ export default function AdminSettingsPage() {
               <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
                 <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                   <h2 className="text-lg font-medium text-slate-900 dark:text-white">Watermark Details</h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Adjust the watermark text and appearance.</p>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Adjust the watermark text and appearance.</p>
                 </div>
 
                 <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Watermark Text</label>
+                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Watermark Text</label>
                     <input
                       type="text"
                       value={watermarkText}
                       onChange={(e) => setWatermarkText(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-mono">
+                    <div className="flex justify-between text-xs font-sans">
                       <span className="text-slate-700 dark:text-zinc-300">Opacity</span>
                       <span className="text-purple-600 font-bold">{watermarkOpacity}%</span>
                     </div>
@@ -256,7 +262,7 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-mono">
+                    <div className="flex justify-between text-xs font-sans">
                       <span className="text-slate-700 dark:text-zinc-300">Size</span>
                       <span className="text-purple-600 font-bold">{watermarkSize}px</span>
                     </div>
@@ -271,7 +277,7 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
-                    <label className="flex items-center gap-3 text-xs font-mono text-slate-700 dark:text-zinc-300 cursor-pointer">
+                    <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
                       <input
                         type="checkbox"
                         checked={applyWatermarkToProofs}
@@ -291,37 +297,37 @@ export default function AdminSettingsPage() {
             <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
               <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                 <h2 className="text-lg font-medium text-slate-900 dark:text-white">Default Gallery Presets</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Pre-fill settings when creating new private client galleries.</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Pre-fill settings when creating new private client galleries.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Default Photo Selection Limit</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Photo Selection Limit</label>
                   <input
                     type="number"
                     value={defaultSelectionLimit}
                     onChange={(e) => setDefaultSelectionLimit(parseInt(e.target.value, 10))}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Default Expiration (Days)</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Expiration (Days)</label>
                   <input
                     type="number"
                     value={defaultExpiryDays}
                     onChange={(e) => setDefaultExpiryDays(parseInt(e.target.value, 10))}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Default Master PIN</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Master PIN</label>
                   <input
                     type="text"
                     value={defaultPin}
                     onChange={(e) => setDefaultPin(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -333,27 +339,27 @@ export default function AdminSettingsPage() {
             <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
               <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                 <h2 className="text-lg font-medium text-slate-900 dark:text-white">Email Invitation Templates</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Customize automated client notification emails.</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Customize automated client notification emails.</p>
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Email Subject</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Email Subject</label>
                   <input
                     type="text"
                     value={invitationSubject}
                     onChange={(e) => setInvitationSubject(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Email Message Body</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Email Message Body</label>
                   <textarea
                     rows={6}
                     value={invitationBody}
                     onChange={(e) => setInvitationBody(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -365,26 +371,26 @@ export default function AdminSettingsPage() {
             <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
               <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                 <h2 className="text-lg font-medium text-slate-900 dark:text-white">Kenyan Tax & Business Preferences</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Configure KRA PIN, base currency, and WHT rules.</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Configure KRA PIN, base currency, and WHT rules.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Creator KRA PIN Number</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Creator KRA PIN Number</label>
                   <input
                     type="text"
                     value={kraPin}
                     onChange={(e) => setKraPin(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Default Currency</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Currency</label>
                   <select
                     value={defaultCurrency}
                     onChange={(e) => setDefaultCurrency(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   >
                     <option value="KES">KES — Kenyan Shilling (KSh)</option>
                     <option value="USD">USD — US Dollar ($)</option>
@@ -393,11 +399,11 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-mono font-medium">Withholding Tax (WHT) Rate</label>
+                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Withholding Tax (WHT) Rate</label>
                   <select
                     value={defaultWhtRate}
                     onChange={(e) => setDefaultWhtRate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-mono text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
                   >
                     <option value="5%">5% — Resident Professional Services</option>
                     <option value="20%">20% — Non-Resident Fee</option>
@@ -413,11 +419,11 @@ export default function AdminSettingsPage() {
             <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
               <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
                 <h2 className="text-lg font-medium text-slate-900 dark:text-white">API Integrations & Storage</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-mono">Manage external services connected to KIPSMTHN.</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Manage external services connected to KIPSMTHN.</p>
               </div>
 
               <div className="space-y-4">
-                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-mono">
+                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">KRA eTIMS Taxpayer Portal Bridge</p>
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400">Connected to etims.kra.go.ke</p>
@@ -425,7 +431,7 @@ export default function AdminSettingsPage() {
                   <span className="px-3 py-1 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-full font-bold">Active ✓</span>
                 </div>
 
-                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-mono">
+                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">Cloudflare R2 Object Storage</p>
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400">142.8 GB Used • $0 Egress Fees</p>
@@ -433,7 +439,7 @@ export default function AdminSettingsPage() {
                   <span className="px-3 py-1 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-full font-bold">Active ✓</span>
                 </div>
 
-                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-mono">
+                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">Google Drive Importer API</p>
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400">OAuth 2.0 Read-Only Connector</p>
@@ -446,7 +452,7 @@ export default function AdminSettingsPage() {
 
           <button
             type="submit"
-            className="w-full py-4 btn-primary text-xs font-mono uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer"
+            className="w-full py-4 btn-primary text-xs font-sans uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer"
           >
             Save Settings Changes
           </button>

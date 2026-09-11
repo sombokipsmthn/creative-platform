@@ -13,7 +13,10 @@ export default function ContractEditor({ contract, onUpdate }: ContractEditorPro
   const [content, setContent] = useState(contract.content || '');
 
   useEffect(() => {
-    setContent(contract.content || '');
+    const updateContent = window.setTimeout(() => {
+      setContent(contract.content || '');
+    }, 0);
+    return () => window.clearTimeout(updateContent);
   }, [contract.content]);
 
   const handleChange = (html: string) => {

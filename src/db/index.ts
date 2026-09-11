@@ -16,12 +16,18 @@ if (!dbUrl || !dbUrl.startsWith("postgres")) {
   );
 }
 
+const parsedDbUrl = new URL(dbUrl);
+const usesTls =
+  parsedDbUrl.hostname.endsWith(".neon.tech") ||
+  parsedDbUrl.searchParams.get("sslmode") === "require";
+
+if (usesTls && parsedDbUrl.searchParams.get("sslmode") === "require") {
+  parsedDbUrl.searchParams.set("sslmode", "verify-full");
+}
+
 const pool = new Pool({
-  connectionString: dbUrl,
-  ssl:
-    dbUrl.includes("neon.tech") || dbUrl.includes("sslmode=require")
-      ? { rejectUnauthorized: false }
-      : undefined,
+  connectionString: parsedDbUrl.toString(),
+  ssl: usesTls ? { rejectUnauthorized: true } : undefined,
 });
 
 export const db: NodePgDatabase<typeof schema> = drizzle(pool, {

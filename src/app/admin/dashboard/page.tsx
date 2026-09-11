@@ -2,8 +2,9 @@
 
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useMemo, useState, useEffect } from 'react';
-import { AlertCircle, CalendarDays, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd, LayoutDashboard, Plus, Receipt, Users, Wallet } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd, LayoutDashboard, Receipt, Users, Wallet } from 'lucide-react';
 
 import { useCreator } from '@/context/CreatorContext';
 import { formatCurrency } from '@/lib/utils';
@@ -45,7 +46,9 @@ interface DashboardStats {
   activity: Array<{ id: string; type: 'client' | 'project' | 'quote' | 'invoice' | 'gallery'; title: string; description: string; date: string }>;
 }
 
-const ranges = [
+type Range = '7d' | '30d' | '90d' | '12m' | 'all';
+
+const ranges: Array<{ value: Range; label: string }> = [
   { value: '7d', label: '7 days' },
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
@@ -161,7 +164,7 @@ function ActivityRow({ type, title, description, date }: { type: string; title: 
         <p className="text-sm font-medium text-slate-800 dark:text-zinc-100">{title}</p>
         <p className="truncate ui-meta">{description}</p>
       </div>
-      <time className="shrink-0 text-[10px] font-mono text-slate-400">{formatDate(date)}</time>
+      <time className="shrink-0 text-[10px] font-sans text-slate-400">{formatDate(date)}</time>
     </div>
   );
 }
@@ -230,13 +233,13 @@ export default function CreativeOSDashboardPage() {
       ['Rejected', stats.quotes.statuses.rejected || 0],
       ['Invoiced', stats.quotes.statuses.invoiced || 0],
     ];
-    return items.filter(([_, v]) => v > 0);
+    return items.filter(([, v]) => v > 0);
   }, [stats]);
 
   if (!isLoaded) {
     return (
       <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 dark:bg-[#09090b]">
-        <p className="text-xs font-mono uppercase tracking-widest text-slate-500">Loading Creative OS...</p>
+        <p className="text-xs font-sans uppercase tracking-widest text-slate-500">Loading Creative OS...</p>
       </main>
     );
   }
@@ -248,13 +251,13 @@ export default function CreativeOSDashboardPage() {
         <div className="mx-auto max-w-7xl px-6 py-8 lg:py-10">
           <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="mb-3 text-[10px] font-mono font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
+              <p className="mb-3 text-[10px] font-sans font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
                 Dashboard
               </p>
               <div className="flex items-center gap-4">
                 {avatar && (
                   <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30">
-                    <img src={avatar} alt={name} className="h-full w-full object-cover" />
+                    <Image src={avatar} alt={name} fill unoptimized className="object-cover" />
                   </div>
                 )}
                 <div>
@@ -270,7 +273,7 @@ export default function CreativeOSDashboardPage() {
                 <button
                   key={opt.value}
                   type="button"
-                  onClick={() => setRange(opt.value as any)}
+                  onClick={() => setRange(opt.value)}
                   className={`ui-button ${range === opt.value ? 'ui-button-primary' : 'ui-button-secondary'}`}
                 >
                   {opt.label}
@@ -300,7 +303,7 @@ export default function CreativeOSDashboardPage() {
             <QuickAction href="/admin/clients" label="Add / Manage Client" icon={<Users className="h-4 w-4" />} />
             <QuickAction href="/admin/quotes/new" label="Create Quote" icon={<FileText className="h-4 w-4" />} />
             <QuickAction href="/admin/invoices" label="Manage Invoices" icon={<Receipt className="h-4 w-4" />} />
-            <QuickAction href="/admin/projects" label="Open Projects" icon={<LayoutDashboard className="h-4 w-4" />} />
+            <QuickAction href="/admin/galleries" label="Open Galleries" icon={<GalleryHorizontalEnd className="h-4 w-4" />} />
           </div>
         </section>
 
@@ -367,7 +370,7 @@ export default function CreativeOSDashboardPage() {
                 label="Projects"
                 value={formatNumber(stats.overview.projects)}
                 detail={`${stats.overview.activeProjects} active · ${stats.overview.completedProjects} completed`}
-                href="/admin/projects"
+                href="/admin/galleries"
                 icon={<LayoutDashboard className="h-4 w-4" />}
               />
               <MetricCard
@@ -409,7 +412,7 @@ export default function CreativeOSDashboardPage() {
                     title="Active projects"
                     detail="Current production workload."
                     count={stats.attention.activeProjects}
-                    href="/admin/projects"
+                    href="/admin/galleries"
                   />
                   <AttentionItem
                     icon={<GalleryHorizontalEnd className="h-4 w-4" />}
@@ -437,7 +440,7 @@ export default function CreativeOSDashboardPage() {
 
             {/* Recent Activity */}
             <section className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-              <Panel eyebrow="Workspace" title="Recent activity" action={<span className="text-[9px] font-mono uppercase tracking-widest text-slate-400">Live from your account</span>}>
+              <Panel eyebrow="Workspace" title="Recent activity" action={<span className="text-[9px] font-sans uppercase tracking-widest text-slate-400">Live from your account</span>}>
                 <div className="divide-y divide-slate-100 dark:divide-zinc-900">
                   {stats.activity.length === 0 ? (
                     <div className="px-5 py-10 text-center">

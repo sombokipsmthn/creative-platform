@@ -80,6 +80,16 @@ export async function POST(request: Request) {
         clientId: body?.clientId || null,
         name,
         description: body?.description || null,
+        scopeOfWork: body?.scopeOfWork || null,
+        deliverables: body?.deliverables || null,
+        totalAmount: body?.totalAmount ? Number(body.totalAmount) : null,
+        currency: body?.currency || "KES",
+        paymentTerms: body?.paymentTerms || null,
+        revisionsPolicy: body?.revisionsPolicy || null,
+        licensingTerms: body?.licensingTerms || null,
+        noticePeriod: body?.noticePeriod || null,
+        startDate: body?.startDate ? new Date(body.startDate) : null,
+        endDate: body?.endDate ? new Date(body.endDate) : null,
         status: body?.status || "active",
       })
       .returning();
@@ -94,4 +104,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
   }
 }
-

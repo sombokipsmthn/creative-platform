@@ -52,12 +52,12 @@ export default function ProjectSidebar({
     <aside className="w-full shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-card)] md:w-60 md:border-b-0 md:border-r">
       <div className="flex h-full flex-col px-3 py-4 md:px-4 md:py-5">
         <div className="mb-5 px-2">
-          <p className="os-eyebrow">Project</p>
+          <p className="os-eyebrow">Gallery</p>
           <h2 className="mt-2 text-base font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
-            Project Tools
+            Gallery tools
           </h2>
           <p className="mt-1 text-xs leading-5 text-[var(--text-muted)]">
-            Manage this client gallery
+            Build and deliver this client gallery
           </p>
         </div>
 

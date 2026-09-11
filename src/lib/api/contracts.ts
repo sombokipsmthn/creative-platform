@@ -105,11 +105,15 @@ export async function fetchContractByToken(token: string): Promise<Contract | nu
   return res.json();
 }
 
-export async function updateContractStatus(token: string, status: 'signed' | 'declined'): Promise<Contract> {
+export async function updateContractStatus(
+  token: string,
+  status: 'signed' | 'declined',
+  signer?: { signerName: string; signerEmail: string },
+): Promise<Contract> {
   const res = await fetch(`/api/public/contracts/${token}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, ...signer }),
   });
   if (!res.ok) throw new Error('Failed to update contract status');
   return res.json();

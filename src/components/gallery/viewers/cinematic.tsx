@@ -19,14 +19,10 @@ interface CinematicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
  * Slideshow-like experience.
  */
 export function GalleryViewerCinematic({
-  id,
   title,
-  description,
-  theme,
   photos,
   allowDownloads,
   allowFavorites,
-  isClient,
   onPhotoDownload,
   onPhotoFavorite,
 }: CinematicViewerProps) {

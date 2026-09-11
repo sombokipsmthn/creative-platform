@@ -247,7 +247,7 @@ export default function ClientGalleryPage({
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-xs font-mono uppercase tracking-[0.3em] text-zinc-500">
+        <div className="text-xs font-sans uppercase tracking-[0.3em] text-zinc-500">
           Loading gallery
         </div>
       </div>

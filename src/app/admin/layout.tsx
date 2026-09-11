@@ -7,9 +7,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import {
   BarChart3,
-  BriefcaseBusiness,
   FileText,
-  FolderKanban,
   GalleryHorizontalEnd,
   LayoutDashboard,
   LogOut,
@@ -18,18 +16,16 @@ import {
   SlidersHorizontal,
   Users,
   WalletCards,
-  Bell,
-  Activity,
-  Search,
-  Sliders,
   FileSignature,
+  UserRound,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
+import './admin.css';
 
-// Try to fetch real badge counts, fallback to mock
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
     const res = await fetch('/api/badge-counts', { cache: 'no-store' });
@@ -39,12 +35,13 @@ async function fetchBadgeCounts(): Promise<Record<string, number>> {
     return {};
   }
 }
+
 function NavItemWithBadge({
   item,
   isActive,
   badgeCount = 0,
 }: {
-  item: { name: string; href: string; icon: React.ComponentType<any> };
+  item: { name: string; href: string; icon: LucideIcon };
   isActive: boolean;
   badgeCount?: number;
 }) {
@@ -68,8 +65,6 @@ function NavItemWithBadge({
   );
 }
 
-
-// Navigation sections
 const sections = [
   {
     label: 'Dashboard',
@@ -81,7 +76,6 @@ const sections = [
     label: 'Content',
     items: [
       { name: 'Clients', href: '/admin/clients', icon: Users },
-      { name: 'Projects', href: '/admin/projects', icon: FolderKanban },
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
     ],
   },
@@ -97,12 +91,12 @@ const sections = [
   {
     label: 'Settings',
     items: [
-      { name: 'Settings', href: '/admin/settings', icon: Settings2 },
+      { name: 'Creator settings', href: '/admin/profile', icon: UserRound },
+      { name: 'Platform settings', href: '/admin/settings', icon: Settings2 },
     ],
   },
 ];
 
-// SignOutButton component
 function SignOutButton({ compact }: { compact?: boolean }) {
   const { signOut } = useClerk();
   const router = useRouter();
@@ -147,10 +141,10 @@ export default function AdminLayout({
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const splitView = useSplitView();
 
-  // Fetch badge counts on mount and when pathname changes (to refresh if needed)
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return;
     let isMounted = true;
+
     async function loadBadgeCounts() {
       try {
         setLoadingBadgeCounts(true);
@@ -158,10 +152,8 @@ export default function AdminLayout({
         if (isMounted) {
           setBadgeCounts(counts);
         }
-      } catch (err) {
-        console.error('Failed to fetch badge counts:', err);
+      } catch {
         if (isMounted) {
-          // Keep empty counts on error
           setBadgeCounts({});
         }
       } finally {
@@ -170,7 +162,9 @@ export default function AdminLayout({
         }
       }
     }
+
     loadBadgeCounts();
+
     return () => {
       isMounted = false;
     };
@@ -208,9 +202,7 @@ export default function AdminLayout({
   return (
     <SplitViewProvider>
       <div className="ui-page min-h-screen text-[var(--color-text-primary)] relative">
-        {/* Sidebar */}
         <aside className="fixed inset-y-0 left-0 z-50 hidden w-[248px] border-r border-[var(--color-border-subtle)] bg-[color-mix(in_srgb,var(--color-bg-page)_92%,transparent)] backdrop-blur-xl lg:flex lg:flex-col">
-          {/* Sidebar Content */}
           <div className="flex h-[calc(100%-3rem)] flex-col">
             <div className="flex h-16 items-center border-b border-[var(--color-border-subtle)] px-5">
               <Link href="/admin" className="group flex items-center gap-2.5">
@@ -224,16 +216,6 @@ export default function AdminLayout({
             </div>
 
             <div className="flex-1 overflow-y-auto px-3 py-5">
-              <div className="mb-5 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] px-3 py-3 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <span className="os-pulse h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-                  <span className="ui-meta uppercase">
-                    Creative OS
-                  </span>
-                </div>
-                <p className="mt-1 text-xs font-medium text-[var(--color-text-primary)]">Command center</p>
-              </div>
-
               <nav className="space-y-6 flex-1" aria-label="Creator platform navigation">
                 {sections.map((section) => (
                   <div key={section.label}>
@@ -245,7 +227,7 @@ export default function AdminLayout({
                         const isActive =
                           pathname === item.href ||
                           (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
-                        
+
                         const badgeCount = loadingBadgeCounts ? 0 : (badgeCounts[item.href] ?? 0);
 
                         return (
@@ -262,35 +244,9 @@ export default function AdminLayout({
                 ))}
               </nav>
             </div>
-
-            {/* Promotion Banner (sticky bottom) with animation */}
-            <div className="border-t border-[var(--color-border-subtle)] p-4">
-              <div className="ui-card bg-[var(--color-accent)] text-white ui-fade-in">
-                <div className="ui-card-content">
-                  <h3 className="font-semibold mb-2">Unlock All Features</h3>
-                  <p className="ui-meta mb-3">
-                    Access advanced analytics, custom branding, and priority support
-                  </p>
-                  <Link href="/admin/settings" className="ui-button ui-button-primary w-full">
-                    Go Pro Today
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Appearance section at bottom */}
-          <div className="border-t border-[var(--color-border-subtle)] p-3">
-            <div className="mb-2 flex items-center justify-between rounded-lg bg-[var(--color-bg-soft)] px-3 py-2">
-              <span className="ui-meta uppercase">Appearance</span>
-              <ThemeToggle />
-            </div>
-            <ProfileMenu />
-            <SignOutButton />
           </div>
         </aside>
 
-        {/* Mobile Header */}
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
           <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
@@ -299,20 +255,51 @@ export default function AdminLayout({
             KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
           </Link>
           <div className="flex items-center gap-2">
+            <ThemeToggle compact />
+            <Link
+              href="/admin/settings"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+              aria-label="Open settings"
+              title="Platform settings"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Link>
+            <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
             <ProfileMenu />
             <SignOutButton compact />
           </div>
         </header>
 
-        {/* Main Content with Split-View Container */}
         <main className="lg:pl-[248px] lg:min-h-[calc(100vh-56px)] relative">
+          <header className="hidden h-16 items-center justify-end gap-2 border-b border-[var(--color-border-subtle)] px-8 lg:flex">
+            <ThemeToggle compact />
+            <Link
+              href="/admin/settings"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+              aria-label="Open settings"
+              title="Platform settings"
+            >
+              <Settings2 className="h-4 w-4" />
+            </Link>
+            <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
+            <ProfileMenu showLabel />
+            <SignOutButton compact />
+          </header>
           <div className="lg:flex lg:h-full">
-            {/* Main Content */}
-            <div className="lg:w-[65%] lg:pr-6">{children}</div>
-            
-            {/* Split-View Drawer (Persistent Right Panel) with animation */}
-            <div className="lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] lg:hidden ui-fade-in">
-              {/* This will be populated by individual pages that need the detail view */}
+            <div
+              data-admin-content
+              className={splitView.content ? 'lg:w-[65%] lg:pr-6' : 'lg:w-full'}
+            >
+              {children}
+            </div>
+
+            <div
+              className={
+                splitView.content
+                  ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
+                  : 'hidden'
+              }
+            >
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
                 {splitView.content}
               </div>

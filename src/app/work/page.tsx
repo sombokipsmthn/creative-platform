@@ -180,7 +180,7 @@ export default function WorkIndexPage() {
       <section className="relative pt-36 pb-12 px-6 max-w-7xl mx-auto text-center space-y-6">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           KIPSMTHN PORTFOLIO ARCHIVE
         </p>
 
@@ -209,7 +209,7 @@ export default function WorkIndexPage() {
                 }`}
               >
                 <div className="space-y-2">
-                  <div className="flex justify-between items-center font-mono text-xs">
+                  <div className="flex justify-between items-center font-sans text-xs">
                     <span className="text-purple-600 dark:text-purple-400 font-bold">{p.num}</span>
                     <span className="text-slate-500 dark:text-zinc-500">{p.count}</span>
                   </div>
@@ -219,7 +219,7 @@ export default function WorkIndexPage() {
 
                 <div className="flex flex-wrap gap-1 pt-2">
                   {p.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] text-slate-700 dark:text-zinc-400 font-mono rounded-sm">
+                    <span key={tag} className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] text-slate-700 dark:text-zinc-400 font-sans rounded-sm">
                       {tag}
                     </span>
                   ))}
@@ -236,7 +236,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'All' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('All')}
-            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             All Works ({allProjects.length})
           </Button>
@@ -244,7 +244,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'Photography' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Photography')}
-            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             01. Photography ({allProjects.filter((p) => p.category === 'Photography').length})
           </Button>
@@ -252,7 +252,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'Videography' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Videography')}
-            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             02. Videography ({allProjects.filter((p) => p.category === 'Videography').length})
           </Button>
@@ -260,7 +260,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'Branding' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Branding')}
-            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             03. Branding ({allProjects.filter((p) => p.category === 'Branding').length})
           </Button>
@@ -268,7 +268,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'UI/UX' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('UI/UX')}
-            className="text-xs font-mono uppercase tracking-widest whitespace-nowrap"
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             04. UI / UX ({allProjects.filter((p) => p.category === 'UI/UX').length})
           </Button>
@@ -298,16 +298,16 @@ export default function WorkIndexPage() {
               <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end bg-linear-to-t from-black/95 via-black/70 to-transparent pt-12">
                 <div className="space-y-2 max-w-xl">
                   <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-1 bg-purple-600/30 border border-purple-400/50 text-purple-200 text-[10px] font-mono uppercase tracking-widest rounded-sm font-semibold">
+                    <span className="px-2.5 py-1 bg-purple-600/30 border border-purple-400/50 text-purple-200 text-[10px] font-sans uppercase tracking-widest rounded-sm font-semibold">
                       {project.category}
                     </span>
-                    <span className="text-xs text-zinc-300 font-mono">{project.year}</span>
+                    <span className="text-xs text-zinc-300 font-sans">{project.year}</span>
                   </div>
                   <h2 className="text-xl md:text-2xl font-medium text-white group-hover:text-purple-300 transition-colors">
                     {project.title}
                   </h2>
                   <p className="text-xs text-zinc-200 font-light leading-relaxed">{project.desc}</p>
-                  <p className="text-[11px] text-purple-300 font-mono font-semibold">Client: {project.client}</p>
+                  <p className="text-[11px] text-purple-300 font-sans font-semibold">Client: {project.client}</p>
                 </div>
 
                 <div className="w-10 h-10 rounded-full border border-white/30 bg-black/70 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all shrink-0">
@@ -327,7 +327,7 @@ export default function WorkIndexPage() {
               <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
                 KIPSMTHN<span className="text-purple-500">.</span>
               </h2>
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-mono">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-sans">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -372,7 +372,7 @@ export default function WorkIndexPage() {
             </div>
           </div>
 
-          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-mono gap-4">
+          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
 
             <div className="flex items-center gap-6">

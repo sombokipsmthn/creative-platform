@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchContractByToken, updateContractStatus } from '@/lib/contracts/server';
+import {
+  declinePublicContract,
+  fetchContractByToken,
+  signPublicContract,
+} from '@/lib/contracts/server';
 
 export async function GET(
   _request: NextRequest,
@@ -11,7 +15,9 @@ export async function GET(
     if (!contract) {
       return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
     }
-    const { token: _, ...safeContract } = contract;
+    const safeContract = Object.fromEntries(
+      Object.entries(contract).filter(([key]) => key !== 'token'),
+    );
     return NextResponse.json(safeContract);
   } catch (error) {
     console.error('GET /api/public/contracts/[token] error:', error);
@@ -27,13 +33,29 @@ export async function POST(
     const { token } = await params;
     const data = await request.json();
     const status = typeof data === 'string' ? data : data?.status;
-    if (status !== 'signed' && status !== 'declined') {
-      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    const signerName = typeof data === 'object' && data ? data.signerName : undefined;
+    const signerEmail = typeof data === 'object' && data ? data.signerEmail : undefined;
+    if ((status !== 'signed' && status !== 'declined') ||
+        typeof signerName !== 'string' || signerName.trim().length < 2 ||
+        typeof signerEmail !== 'string' || !signerEmail.includes('@')) {
+      return NextResponse.json({ error: 'Signer name and valid email are required' }, { status: 400 });
     }
-    const updatedContract = await updateContractStatus(token, status);
+    const signatureData = {
+      signerName: signerName.trim(),
+      signerEmail: signerEmail.trim().toLowerCase(),
+      ipAddress: request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined,
+      userAgent: request.headers.get('user-agent') || undefined,
+      signedAt: new Date().toISOString(),
+    };
+    const updatedContract = status === 'signed'
+      ? await signPublicContract(token, signatureData)
+      : await declinePublicContract(token, signatureData);
     return NextResponse.json(updatedContract);
   } catch (error) {
     console.error('POST /api/public/contracts/[token] error:', error);
+    if (error instanceof Error && error.message.startsWith('Contract cannot be')) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to update contract status' }, { status: 500 });
   }
 }

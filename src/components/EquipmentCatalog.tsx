@@ -175,7 +175,7 @@ export default function EquipmentCatalog({
         <p
           id="equipment-results-count"
           aria-live="polite"
-          className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-zinc-500"
+          className="text-xs font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-500"
         >
           {filtered.length} {filtered.length === 1 ? "item" : "items"}
           {activeCategory !== "All"
@@ -198,7 +198,7 @@ export default function EquipmentCatalog({
               role="tab"
               aria-selected={selected}
               onClick={() => setActiveCategory(category)}
-              className={`shrink-0 rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 ${
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 ${
                 selected
                   ? "bg-purple-600 text-white"
                   : "btn-secondary"
@@ -227,7 +227,7 @@ export default function EquipmentCatalog({
               setQuery("");
               setActiveCategory("All");
             }}
-            className="mt-6 inline-flex rounded-full px-5 py-2.5 text-xs font-mono uppercase tracking-widest btn-primary"
+            className="mt-6 inline-flex rounded-full px-5 py-2.5 text-xs font-sans uppercase tracking-widest btn-primary"
           >
             Reset filters
           </button>
@@ -253,11 +253,11 @@ export default function EquipmentCatalog({
                         <Icon aria-hidden="true" className="h-5 w-5" />
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
-                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-slate-600 dark:bg-zinc-900 dark:text-zinc-400">
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-sans uppercase tracking-widest text-slate-600 dark:bg-zinc-900 dark:text-zinc-400">
                           {displayCategory(item.category)}
                         </span>
                         {item.isPopular && (
-                          <span className="rounded-full bg-purple-600/15 px-2.5 py-1 text-[10px] font-mono uppercase tracking-widest text-purple-700 dark:text-purple-300">
+                          <span className="rounded-full bg-purple-600/15 px-2.5 py-1 text-[10px] font-sans uppercase tracking-widest text-purple-700 dark:text-purple-300">
                             Popular
                           </span>
                         )}
@@ -268,7 +268,7 @@ export default function EquipmentCatalog({
                       <h2 className="text-lg font-medium leading-snug text-slate-900 dark:text-white">
                         {item.name}
                       </h2>
-                      <p className="mt-1 text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">
+                      <p className="mt-1 text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">
                         {item.brand}
                       </p>
                     </div>
@@ -280,7 +280,7 @@ export default function EquipmentCatalog({
 
                   <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4 dark:border-zinc-800">
                     <div>
-                      <p className="text-[10px] font-mono uppercase tracking-widest text-slate-400">
+                      <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
                         Daily rate
                       </p>
                       <p className="mt-1 text-xl font-medium text-slate-900 dark:text-white">
@@ -291,7 +291,7 @@ export default function EquipmentCatalog({
                     <button
                       type="button"
                       onClick={() => toggleSelected(item.id)}
-                      className={`rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest transition ${
+                      className={`rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition ${
                         selected ? "btn-primary" : "btn-secondary"
                       }`}
                       aria-pressed={selected}
@@ -310,7 +310,7 @@ export default function EquipmentCatalog({
         <aside className="sticky bottom-4 z-20 rounded-3xl border border-purple-200 bg-white/95 p-5 shadow-xl backdrop-blur dark:border-purple-900/50 dark:bg-zinc-950/95">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400">
+              <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">
                 Selected kit
               </p>
               <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
@@ -325,13 +325,13 @@ export default function EquipmentCatalog({
               <button
                 type="button"
                 onClick={() => setSelectedIds([])}
-                className="rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest btn-secondary"
+                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest btn-secondary"
               >
                 Clear kit
               </button>
               <Link
                 href={inquiryMailto(selectedItems)}
-                className="rounded-full px-4 py-2 text-xs font-mono uppercase tracking-widest btn-primary"
+                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest btn-primary"
               >
                 Request quote
               </Link>

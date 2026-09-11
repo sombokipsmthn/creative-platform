@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 import type { InferInsertModel } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, users } from "@/db/schema";
+import { clients } from "@/db/schema";
+import { withCreatorApi, ApiError } from "@/lib/api/route-boundaries";
 
 /* =========================================================
    HELPERS
@@ -18,25 +18,6 @@ function cleanString(value: unknown): string | null {
   const trimmed = value.trim();
 
   return trimmed.length > 0 ? trimmed : null;
-}
-
-function validateString(
-  val: unknown,
-  maxLength = 500
-): string {
-  const str = cleanString(val);
-
-  if (!str) {
-    throw new Error("Invalid input: value is required");
-  }
-
-  if (str.length > maxLength) {
-    throw new Error(
-      `Invalid input: value exceeds maximum length of ${maxLength}`
-    );
-  }
-
-  return str;
 }
 
 function getStatus(value: unknown): string {
@@ -69,11 +50,7 @@ function getTaxCertificateStatus(value: unknown): string {
   return status ?? "NOT_RECEIVED";
 }
 
-/* =========================================================
-   CURRENT USER
-   ========================================================= */
 
-import getCurrentUser from "@/lib/auth/get-current-user";
 
 /* =========================================================
    GET
@@ -81,58 +58,15 @@ import getCurrentUser from "@/lib/auth/get-current-user";
    Returns all clients belonging to the current creator.
    ========================================================= */
 
-export async function GET() {
-  try {
-    const user =
-      await getCurrentUser();
+export async function GET(req: Request) {
+  return withCreatorApi(req, async (_request, user) => {
+    const results = await db.query.clients.findMany({
+      where: eq(clients.creatorId, user.id),
+      orderBy: (clients, { desc }) => desc(clients.createdAt),
+    });
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
-
-    const results =
-      await db.query.clients.findMany({
-        where: eq(
-          clients.creatorId,
-          user.id
-        ),
-        orderBy: (
-          clients,
-          { desc }
-        ) =>
-          desc(
-            clients.createdAt
-          ),
-      });
-
-    return NextResponse.json(
-      results
-    );
-  } catch (error) {
-    console.error(
-      "GET /api/clients error:",
-      error
-    );
-
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to fetch clients",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+    return results;
+  });
 }
 
 /* =========================================================
@@ -141,164 +75,46 @@ export async function GET() {
    Creates a new client.
    ========================================================= */
 
-export async function POST(
-  request: Request
-) {
-  try {
-    const user =
-      await getCurrentUser();
+export async function POST(request: Request) {
+  return withCreatorApi(
+    request,
+    async (req, user) => {
+      const body = await req.json();
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
+      const name = cleanString(body?.name);
 
-    const body =
-      await request.json();
+      if (!name) {
+        throw new ApiError("Client name is required", 400);
+      }
 
-    const name =
-      cleanString(body?.name);
+      const clientInsert: InferInsertModel<typeof clients> = {
+        id: crypto.randomUUID(),
+        creatorId: user.id,
+        name,
+        company: cleanString(body?.company),
+        email: cleanString(body?.email),
+        phone: cleanString(body?.phone),
+        website: cleanString(body?.website),
+        location: cleanString(body?.location),
+        notes: cleanString(body?.notes),
+        status: getStatus(body?.status),
+        feedbackStatus: getFeedbackStatus(body?.feedbackStatus),
+        contractStatus: getContractStatus(body?.contractStatus),
+        etimsInvoiceStatus: getEtimsInvoiceStatus(body?.etimsInvoiceStatus),
+        taxCertificateStatus: getTaxCertificateStatus(body?.taxCertificateStatus),
+      };
 
-    if (!name) {
-      return NextResponse.json(
-        {
-          error:
-            "Client name is required",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    const status =
-      getStatus(body?.status);
-
-    const feedbackStatus =
-      getFeedbackStatus(
-        body?.feedbackStatus
-      );
-
-    const contractStatus =
-      getContractStatus(
-        body?.contractStatus
-      );
-
-    const etimsInvoiceStatus =
-      getEtimsInvoiceStatus(
-        body?.etimsInvoiceStatus
-      );
-
-    const taxCertificateStatus =
-      getTaxCertificateStatus(
-        body?.taxCertificateStatus
-      );
-
-    /*
-     * Explicitly type the object against the
-     * Drizzle insert model.
-     *
-     * This prevents the overloaded `.values()`
-     * call from incorrectly inferring the inline
-     * object as the array overload.
-     */
-
-    const clientInsert: InferInsertModel<
-      typeof clients
-    > = {
-      id: crypto.randomUUID(),
-
-      creatorId: user.id,
-
-      name,
-
-      company:
-        cleanString(
-          body?.company
-        ),
-
-      email:
-        cleanString(
-          body?.email
-        ),
-
-      phone:
-        cleanString(
-          body?.phone
-        ),
-
-      website:
-        cleanString(
-          body?.website
-        ),
-
-      location:
-        cleanString(
-          body?.location
-        ),
-
-      notes:
-        cleanString(
-          body?.notes
-        ),
-
-      status,
-
-      feedbackStatus,
-
-      contractStatus,
-
-      etimsInvoiceStatus,
-
-      taxCertificateStatus,
-    };
-
-    const [client] =
-      await db
+      const [client] = await db
         .insert(clients)
         .values(clientInsert)
         .returning();
 
-    if (!client) {
-      return NextResponse.json(
-        {
-          error:
-            "Client could not be created",
-        },
-        {
-          status: 500,
-        }
-      );
-    }
-
-    return NextResponse.json(
-      client,
-      {
-        status: 201,
+      if (!client) {
+        throw new ApiError("Client could not be created", 500);
       }
-    );
-  } catch (error) {
-    console.error(
-      "POST /api/clients error:",
-      error
-    );
 
-    return NextResponse.json(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Failed to create client",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+      return client;
+    },
+    { status: 201 }
+  );
 }

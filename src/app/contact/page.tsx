@@ -1,5 +1,4 @@
 import Header from '@/components/header';
-import ThemeToggle from '@/components/ThemeToggle';
 import Link from 'next/link';
 import Footer from '@/components/Footer';
 
@@ -11,7 +10,7 @@ export default function ContactPage() {
       <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto text-center space-y-8">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="text-xs font-mono uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           INITIATE COLLABORATION
         </p>
 
@@ -28,13 +27,13 @@ export default function ContactPage() {
       <main className="py-12 px-6 max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Direct Inquiries Card */}
         <div className="border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/40 rounded-xl p-6 space-y-4">
-          <span className="inline-flex items-center px-3 py-1 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+          <span className="inline-flex items-center px-3 py-1 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
             Direct Inquiries
           </span>
           <h2 className="text-2xl font-light text-slate-900 dark:text-white">
             Somboriot Kipchilat
           </h2>
-          <div className="space-y-2 text-xs font-mono text-slate-600 dark:text-zinc-300">
+          <div className="space-y-2 text-xs font-sans text-slate-600 dark:text-zinc-300">
             <p>
               📧 Email: <a href="mailto:somboriot@gmail.com" className="text-purple-600 dark:text-purple-400 font-medium hover:underline">
                 somboriot@gmail.com
@@ -52,13 +51,13 @@ export default function ContactPage() {
 
         {/* Social & Digital Media Card */}
         <div className="border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/40 rounded-xl p-6 space-y-4">
-          <span className="inline-flex items-center px-3 py-1 text-xs font-mono bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+          <span className="inline-flex items-center px-3 py-1 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
             Social & Digital Media
           </span>
           <h2 className="text-2xl font-light text-slate-900 dark:text-white">
             Channels & Archives
           </h2>
-          <div className="flex flex-col gap-2 text-xs font-mono pt-2">
+          <div className="flex flex-col gap-2 text-xs font-sans pt-2">
             <Link
               href="https://www.linkedin.com/in/sombo09/"
               target="_blank"

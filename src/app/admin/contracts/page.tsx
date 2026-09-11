@@ -11,7 +11,6 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
 type Contract = {
@@ -95,6 +94,9 @@ export default function ContractsPage() {
         const res = await fetch(`/api/contracts?${params.toString()}`, {
           cache: 'no-store',
         });
+        if (res.status === 401) {
+          throw new Error('Please sign in to view your contracts.');
+        }
         if (!res.ok) throw new Error('Failed to fetch contracts data');
         const data = await res.json();
         setContracts(data.contracts || []);
@@ -132,7 +134,7 @@ export default function ContractsPage() {
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 mb-6">
           <p>{error}</p>
         </div>
       </div>

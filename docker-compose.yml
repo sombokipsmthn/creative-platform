@@ -26,6 +26,14 @@ services:
     volumes:
       - ./src:/app/src
       - ./public:/app/public
+    develop:
+      watch:
+        - path: ./src
+          action: sync
+        - path: ./public
+          action: sync
+        - path: ./package.json
+          action: rebuild
     networks:
       - staging
     healthcheck:

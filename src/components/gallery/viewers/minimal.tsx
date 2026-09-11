@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Download, Heart, Tag } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, Heart } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 
@@ -18,14 +18,12 @@ interface MinimalViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
  * Minimal UI chrome.
  */
 export function GalleryViewerMinimal({
-  id,
   title,
   description,
   theme,
   photos,
   allowDownloads,
   allowFavorites,
-  isClient,
   onPhotoDownload,
   onPhotoFavorite,
 }: MinimalViewerProps) {

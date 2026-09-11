@@ -1,15 +1,13 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Layers, Loader2, Palette, Plus, Settings, Sliders, Star, Upload, X, Copy, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash2, Eye, EyeOff } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { upload } from '@vercel/blob/client'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
-import ThemeEditor from '@/components/ThemeEditor'
 import GalleryTopNav from '@/components/ui/GalleryTopNav'
-import GalleryDetailsTab from '@/components/gallery/GalleryDetailsTab'
-import GalleryCoverTab from '@/components/gallery/GalleryCoverTab'
+import GalleryDesignTab from '@/components/gallery/GalleryDesignTab'
 import GallerySettingsTab from '@/components/gallery/GallerySettingsTab'
 import GalleryActivityTab from '@/components/gallery/GalleryActivityTab'
 
@@ -57,9 +55,7 @@ interface GalleryData {
 
 const tabs = [
   { id: 'photos', label: 'Photos', icon: <Layers className="h-4 w-4" /> },
-  { id: 'details', label: 'Details', icon: <Sliders className="h-4 w-4" /> },
-  { id: 'theme', label: 'Theme', icon: <Palette className="h-4 w-4" /> },
-  { id: 'cover', label: 'Cover', icon: <Star className="h-4 w-4" /> },
+  { id: 'design', label: 'Design', icon: <Palette className="h-4 w-4" /> },
   { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
   { id: 'activity', label: 'Activity', icon: <Heart className="h-4 w-4" /> },
 ]
@@ -78,6 +74,7 @@ export default function GalleryWorkspacePage() {
   const [sortBy, setSortBy] = useState<'custom' | 'filename_asc' | 'filename_desc' | 'date_taken_new' | 'date_taken_old' | 'date_uploaded_new' | 'date_uploaded_old' | 'random'>('custom')
   const [activeCollection, setActiveCollection] = useState<string | null>(null)
   const [showCollectionPicker, setShowCollectionPicker] = useState(false)
+  const [moveDestination, setMoveDestination] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const refreshGallery = useCallback(async () => {
@@ -201,6 +198,7 @@ export default function GalleryWorkspacePage() {
       }
       setSelectedPhotos(new Set())
       setShowCollectionPicker(false)
+      setMoveDestination(null)
       await refreshGallery()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to move photos')
@@ -401,7 +399,10 @@ export default function GalleryWorkspacePage() {
                     </span>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => setShowCollectionPicker(!showCollectionPicker)}
+                        onClick={() => {
+                          setShowCollectionPicker(true)
+                          setMoveDestination(null)
+                        }}
                         className="gallery-btn gallery-btn-secondary gap-2"
                       >
                         <Copy className="w-4 h-4" />
@@ -424,28 +425,68 @@ export default function GalleryWorkspacePage() {
                   </div>
                 )}
 
-                {/* COLLECTION PICKER */}
+                {/* MOVE DIALOG */}
                 {showCollectionPicker && selectedPhotos.size > 0 && (
-                  <div className="bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)] rounded-lg p-4 space-y-2">
-                    <p className="text-sm font-medium mb-3">Move to collection:</p>
-                    <button
-                      onClick={() => void handleMoveToCollection(null)}
-                      className="w-full text-left p-3 rounded-lg hover:bg-[var(--color-bg)] border border-transparent hover:border-[var(--color-border-subtle)] transition text-sm"
-                    >
-                      All Photos (no collection)
-                    </button>
-                    {gallery.collections?.map((coll) => (
-                      <button
-                        key={coll.id}
-                        onClick={() => void handleMoveToCollection(coll.id)}
-                        className="w-full text-left p-3 rounded-lg hover:bg-[var(--color-bg)] border border-transparent hover:border-[var(--color-border-subtle)] transition text-sm"
-                      >
-                        {coll.title}
-                        <span className="text-xs text-[var(--color-text-muted)] ml-2">
-                          {coll.photo_count || 0} photos
-                        </span>
-                      </button>
-                    ))}
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 w-full max-w-md">
+                      <div className="mb-4">
+                        <p className="font-medium">
+                          Move {selectedPhotos.size} selected photo{selectedPhotos.size !== 1 ? 's' : ''} to:
+                        </p>
+                      </div>
+                      <div className="space-y-3">
+                        <label className="flex items-center space-x-3">
+                          <input
+                            type="radio"
+                            name="move-destination"
+                            value="null"
+                            checked={moveDestination === null}
+                            onChange={() => setMoveDestination(null)}
+                            className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border-subtle)]"
+                          />
+                          <span>All Photos (no collection)</span>
+                        </label>
+                        {gallery.collections?.map((coll) => (
+                          <label key={coll.id} className="flex items-center space-x-3">
+                            <input
+                              type="radio"
+                              name="move-destination"
+                              value={coll.id}
+                              checked={moveDestination === coll.id}
+                              onChange={() => setMoveDestination(coll.id)}
+                              className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border-subtle)]"
+                            />
+                            <span className="flex-1">
+                              {coll.title}
+                            </span>
+                            <span className="text-xs text-[var(--color-text-muted)]">
+                              {coll.photo_count || 0} photos
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                      <div className="mt-4 flex justify-end space-x-3">
+                        <button
+                          onClick={() => {
+                            setShowCollectionPicker(false)
+                            setMoveDestination(null)
+                          }}
+                          className="px-4 py-2 bg-white dark:bg-zinc-700 border border-[var(--color-border-subtle)] rounded-md hover:bg-[var(--color-bg-soft)] dark:hover:bg-zinc-600"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleMoveToCollection(moveDestination)
+                            setShowCollectionPicker(false)
+                            setMoveDestination(null)
+                          }}
+                          className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-md hover:bg-[var(--color-accent)/80]"
+                        >
+                          Move photos
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
 
@@ -465,12 +506,20 @@ export default function GalleryWorkspacePage() {
                         <option value="date_uploaded_new">Uploaded (newest)</option>
                         <option value="date_uploaded_old">Uploaded (oldest)</option>
                       </select>
-                      <button
-                        onClick={() => handleSelectAll()}
-                        className="text-sm px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] transition"
-                      >
-                        {selectedPhotos.size === (gallery?.photos?.length || 0) ? 'Clear' : 'Select All'}
-                      </button>
+                      <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
+                        <input
+                          type="checkbox"
+                          checked={selectedPhotos.size === (gallery?.photos?.length || 0) && (gallery?.photos?.length || 0) > 0}
+                          ref={(el) => {
+                            if (el) {
+                              el.indeterminate = selectedPhotos.size > 0 && selectedPhotos.size < (gallery?.photos?.length || 0)
+                            }
+                          }}
+                          onChange={() => handleSelectAll()}
+                          className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] cursor-pointer"
+                        />
+                        <span>Select All</span>
+                      </label>
                     </div>
                   </div>
 
@@ -631,33 +680,14 @@ export default function GalleryWorkspacePage() {
               </section>
             )}
 
-            {/* DETAILS TAB */}
-            {activeTab === 'details' && (
-              <GalleryDetailsTab galleryId={id} onRefresh={refreshGallery} />
-            )}
-
-            {/* THEME TAB */}
-            {activeTab === 'theme' && (
-              <section className="os-reveal mx-auto max-w-4xl space-y-5">
-                <div className="ui-card p-6">
-                  <p className="ui-eyebrow">Client Experience</p>
-                  <h2 className="ui-page-title">Theme & Design</h2>
-                  <p className="ui-body text-[var(--color-text-muted)]">
-                    Customize how your gallery looks to clients.
-                  </p>
-                </div>
-                <ThemeEditor galleryId={id} />
-              </section>
-            )}
-
-            {/* COVER TAB */}
-            {activeTab === 'cover' && (
-              <GalleryCoverTab galleryId={id} gallery={gallery} onRefresh={refreshGallery} />
+            {/* DESIGN TAB */}
+            {activeTab === 'design' && (
+              <GalleryDesignTab galleryId={id} gallery={gallery} onRefresh={refreshGallery} />
             )}
 
             {/* SETTINGS TAB */}
             {activeTab === 'settings' && (
-              <GallerySettingsTab galleryId={id} onRefresh={refreshGallery} />
+              <GallerySettingsTab galleryId={id} gallery={gallery} onRefresh={refreshGallery} />
             )}
 
             {/* ACTIVITY TAB */}

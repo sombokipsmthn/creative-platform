@@ -1361,6 +1361,5 @@ html.dark {
     letter-spacing: 0.08em;
     margin-left: 0.75rem;
     flex-shrink: 0;
-    font-family: var(--font-sans);
   }
 }

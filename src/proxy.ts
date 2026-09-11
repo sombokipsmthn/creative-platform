@@ -55,8 +55,9 @@ const customMiddleware = clerkMiddleware(
         }
       } catch (error) {
         console.error('[Middleware] Auth error in onboarding route:', error);
-        const { redirectToSignIn } = await auth();
-        return redirectToSignIn();
+        // Do not attempt to call auth() again in catch block
+        // Let the error propagate to Next.js error handler
+        throw error;
       }
 
       return;
@@ -103,8 +104,9 @@ const customMiddleware = clerkMiddleware(
         }
       } catch (error) {
         console.error('[Middleware] Auth error in admin route:', error);
-        const { redirectToSignIn } = await auth();
-        return redirectToSignIn();
+        // Do not attempt to call auth() again in catch block
+        // Let the error propagate to Next.js error handler
+        throw error;
       }
 
       return;

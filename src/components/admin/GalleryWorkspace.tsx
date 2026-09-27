@@ -136,7 +136,31 @@ export default function GalleryWorkspacePage() {
       }
       await refreshGallery()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to upload photos')
+      let message = err instanceof Error ? err.message : 'Unable to upload photos'
+      if (message.includes('Failed to retrieve the client token')) {
+        try {
+          const testRes = await fetch('/api/galleries/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              type: 'blob.generate-client-token',
+              payload: {
+                pathname: `galleries/${id}/test.jpg`,
+                clientPayload: JSON.stringify({ galleryId: id }),
+              },
+            }),
+          })
+          if (!testRes.ok) {
+            const data = await testRes.json().catch(() => null)
+            if (data?.error) {
+              message = data.error
+            }
+          }
+        } catch {
+          // fallback to message
+        }
+      }
+      setError(message)
     } finally {
       setUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -343,7 +367,7 @@ export default function GalleryWorkspacePage() {
               <div className="flex flex-wrap items-center gap-2">
                 {gallery.slug && (
                   <a
-                    href={`/portal/g/${gallery.id}/${gallery.slug}`}
+                    href={`/portal/g/${gallery.id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="gallery-btn gallery-btn-secondary"

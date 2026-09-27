@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash2, Eye, EyeOff } from 'lucide-react'
+import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash2, Eye, EyeOff, Video } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { upload } from '@vercel/blob/client'
@@ -29,6 +29,10 @@ interface GalleryPhoto {
   originalUrl: string
   displayUrl: string
   thumbnailUrl: string
+  mimeType: string
+  duration: number | null
+  videoCodec: string | null
+  audioCodec: string | null
   sortOrder: number
   isHidden: boolean
   isFavorite: boolean
@@ -54,7 +58,7 @@ interface GalleryData {
 }
 
 const tabs = [
-  { id: 'photos', label: 'Photos', icon: <Layers className="h-4 w-4" /> },
+  { id: 'photos', label: 'Photos & Videos', icon: <Layers className="h-4 w-4" /> },
   { id: 'design', label: 'Design', icon: <Palette className="h-4 w-4" /> },
   { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
   { id: 'activity', label: 'Activity', icon: <Heart className="h-4 w-4" /> },
@@ -258,6 +262,24 @@ export default function GalleryWorkspacePage() {
     }
   }
 
+  // Helper to determine media type
+  const getMediaType = (photo: GalleryPhoto): 'image' | 'video' => {
+    if (photo.mimeType?.startsWith('video/')) return 'video'
+    if (photo.duration !== null) return 'video'
+    return 'image'
+  }
+
+  // Format duration in seconds to readable format
+  const formatDuration = (duration: number | null): string => {
+    if (!duration) return ''
+    const minutes = Math.floor(duration / 60)
+    const seconds = duration % 60
+    if (minutes > 0) {
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`
+    }
+    return `${seconds}s`
+  }
+
   const filteredPhotos = activeCollection
     ? gallery?.photos?.filter(p => p.collectionId === activeCollection) || []
     : gallery?.photos || []
@@ -349,7 +371,7 @@ export default function GalleryWorkspacePage() {
                   {gallery.status === 'published' ? 'Unpublish' : 'Publish'}
                 </button>
                 <span className="text-xs text-[var(--color-text-muted)]">
-                  {gallery.status} · {gallery.photos?.length || 0} photos
+                  {gallery.status} · {gallery.photos?.length || 0} items
                 </span>
               </div>
             </div>
@@ -385,7 +407,7 @@ export default function GalleryWorkspacePage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
                   multiple
                   className="hidden"
                   onChange={(event) => void handleUpload(event.target.files)}
@@ -395,7 +417,7 @@ export default function GalleryWorkspacePage() {
                 {selectedPhotos.size > 0 && (
                   <div className="sticky top-0 z-10 bg-[var(--color-bg)] border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center justify-between gap-4">
                     <span className="text-sm font-medium">
-                      {selectedPhotos.size} photo{selectedPhotos.size !== 1 ? 's' : ''} selected
+                      {selectedPhotos.size} item{selectedPhotos.size !== 1 ? 's' : ''} selected
                     </span>
                     <div className="flex items-center gap-2">
                       <button
@@ -431,7 +453,7 @@ export default function GalleryWorkspacePage() {
                     <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 w-full max-w-md">
                       <div className="mb-4">
                         <p className="font-medium">
-                          Move {selectedPhotos.size} selected photo{selectedPhotos.size !== 1 ? 's' : ''} to:
+                          Move {selectedPhotos.size} selected item{selectedPhotos.size !== 1 ? 's' : ''} to:
                         </p>
                       </div>
                       <div className="space-y-3">
@@ -460,7 +482,7 @@ export default function GalleryWorkspacePage() {
                               {coll.title}
                             </span>
                             <span className="text-xs text-[var(--color-text-muted)]">
-                              {coll.photo_count || 0} photos
+                              {coll.photo_count || 0} items
                             </span>
                           </label>
                         ))}
@@ -483,7 +505,7 @@ export default function GalleryWorkspacePage() {
                           }}
                           className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-md hover:bg-[var(--color-accent)/80]"
                         >
-                          Move photos
+                          Move items
                         </button>
                       </div>
                     </div>
@@ -493,7 +515,7 @@ export default function GalleryWorkspacePage() {
                 {/* PHOTOS GRID */}
                 <div className="ui-card p-6 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Photos</h2>
+                    <h2 className="text-lg font-semibold">Photos & Videos</h2>
                     <div className="flex items-center gap-2">
                       <select
                         value={sortBy}
@@ -525,66 +547,90 @@ export default function GalleryWorkspacePage() {
 
                   {filteredPhotos.length > 0 ? (
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                      {filteredPhotos.map((photo) => (
-                        <div
-                          key={photo.id}
-                          className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] cursor-pointer"
-                          onClick={() => handlePhotoToggle(photo.id)}
-                        >
-                          {/* CHECKBOX */}
-                          <div className="absolute top-2 left-2 z-10 w-5 h-5 rounded border-2 border-white bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                            {selectedPhotos.has(photo.id) && (
-                              <div className="w-3 h-3 rounded-sm bg-white" />
-                            )}
-                          </div>
-
-                          {/* HIDDEN INDICATOR */}
-                          {photo.isHidden && (
-                            <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/70 flex items-center justify-center">
-                              <EyeOff className="w-3 h-3 text-white" />
-                            </div>
-                          )}
-
-                          {/* IMAGE */}
-                          <Image
-                            src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl || '/placeholder.jpg'}
-                            alt={photo.filename}
-                            fill
-                            unoptimized
-                            className={`object-cover transition duration-300 ${selectedPhotos.has(photo.id) ? 'brightness-75' : 'group-hover:brightness-90'}`}
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement
-                              target.src = '/placeholder.jpg'
-                            }}
-                          />
-
-                          {/* FILENAME OVERLAY */}
-                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 opacity-0 group-hover:opacity-100 transition">
-                            <p className="truncate text-[10px] font-medium text-white">
-                              {photo.filename.split('.').slice(0, -1).join('.')}
-                            </p>
-                          </div>
-
-                          {/* HOVER ACTIONS */}
-                          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                void handleToggleHidden(photo.id, photo.isHidden)
-                              }}
-                              className="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
-                              title={photo.isHidden ? 'Show' : 'Hide'}
-                            >
-                              {photo.isHidden ? (
-                                <EyeOff className="w-4 h-4 text-black" />
-                              ) : (
-                                <Eye className="w-4 h-4 text-black" />
+                      {filteredPhotos.map((photo) => {
+                        const mediaType = getMediaType(photo)
+                        
+                        return (
+                          <div
+                            key={photo.id}
+                            className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] cursor-pointer"
+                            onClick={() => handlePhotoToggle(photo.id)}
+                          >
+                            {/* CHECKBOX */}
+                            <div className="absolute top-2 left-2 z-10 w-5 h-5 rounded border-2 border-white bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                              {selectedPhotos.has(photo.id) && (
+                                <div className="w-3 h-3 rounded-sm bg-white" />
                               )}
-                            </button>
+                            </div>
+
+                            {/* HIDDEN INDICATOR */}
+                            {photo.isHidden && (
+                              <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/70 flex items-center justify-center">
+                                <EyeOff className="w-3 h-3 text-white" />
+                              </div>
+                            )}
+
+                            {/* MEDIA DISPLAY */}
+                            {mediaType === 'video' ? (
+                              <div className="relative w-full h-full">
+                                <video
+                                  src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl}
+                                  className="object-cover w-full h-full"
+                                  preload="metadata"
+                                />
+                                {/* Video Icon Overlay */}
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                  <Video className="w-8 h-8 text-white" />
+                                </div>
+                                {/* Duration Badge */}
+                                {photo.duration && (
+                                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                                    {formatDuration(photo.duration)}
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <Image
+                                src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl || '/placeholder.jpg'}
+                                alt={photo.filename}
+                                fill
+                                unoptimized
+                                className={`object-cover transition duration-300 ${selectedPhotos.has(photo.id) ? 'brightness-75' : 'group-hover:brightness-90'}`}
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement
+                                  target.src = '/placeholder.jpg'
+                                }}
+                              />
+                            )}
+
+                            {/* FILENAME OVERLAY */}
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 opacity-0 group-hover:opacity-100 transition">
+                              <p className="truncate text-[10px] font-medium text-white">
+                                {photo.filename.split('.').slice(0, -1).join('.')}
+                              </p>
+                            </div>
+
+                            {/* HOVER ACTIONS */}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  void handleToggleHidden(photo.id, photo.isHidden)
+                                }}
+                                className="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
+                                title={photo.isHidden ? 'Show' : 'Hide'}
+                              >
+                                {photo.isHidden ? (
+                                  <EyeOff className="w-4 h-4 text-black" />
+                                ) : (
+                                  <Eye className="w-4 h-4 text-black" />
+                                )}
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   ) : (
                     <button
@@ -595,12 +641,12 @@ export default function GalleryWorkspacePage() {
                       <div className="gallery-dropzone-icon">
                         <Upload className="w-5 h-5" />
                       </div>
-                      <h3 className="gallery-dropzone-title">Drop in your first photos</h3>
+                      <h3 className="gallery-dropzone-title">Drop in your first photos or videos</h3>
                       <p className="gallery-dropzone-text">
-                        Choose multiple images at once. We will prepare web-ready versions and keep the originals safe.
+                        Choose multiple images and videos at once. We will prepare web-ready versions and keep the originals safe.
                       </p>
                       <span className="inline-flex items-center justify-center gap-2 gallery-btn gallery-btn-secondary mt-5">
-                        CHOOSE PHOTOS
+                        CHOOSE MEDIA
                       </span>
                     </button>
                   )}
@@ -651,9 +697,9 @@ export default function GalleryWorkspacePage() {
                             : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
                         }`}
                       >
-                        <span className="font-medium">All Photos</span>
+                        <span className="font-medium">All Photos & Videos</span>
                         <span className="text-xs ml-2 opacity-70">
-                          {gallery.photos?.length || 0} photos
+                          {gallery.photos?.length || 0} items
                         </span>
                       </button>
                       {gallery.collections.map((collection) => (
@@ -668,13 +714,13 @@ export default function GalleryWorkspacePage() {
                         >
                           <span className="font-medium">{collection.title}</span>
                           <span className="text-xs ml-2 opacity-70">
-                            {collection.photo_count || 0} photos
+                            {collection.photo_count || 0} items
                           </span>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[var(--color-text-muted)]">No collections yet. Create one to organize your photos.</p>
+                    <p className="text-sm text-[var(--color-text-muted)]">No collections yet. Create one to organize your photos and videos.</p>
                   )}
                 </div>
               </section>

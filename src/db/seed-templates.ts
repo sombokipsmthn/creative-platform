@@ -61,7 +61,6 @@ Either Party may terminate this Agreement with {{notice_period}} written notice.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'creator_name', 'creator_business_name', 'creator_email', 'creator_phone', 'client_name', 'client_company', 'client_email', 'scope_of_work', 'total_fee', 'currency', 'payment_terms', 'project_end_date', 'revisions_policy', 'licensing_terms', 'notice_period'],
     isSystemTemplate: true,
@@ -123,7 +122,6 @@ Photographer is not liable for lost or damaged files beyond the fee paid.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'photographer_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'client_phone', 'event_date', 'location', 'duration', 'num_images', 'delivery_timeframe', 'total_fee', 'currency', 'deposit_percentage', 'deposit_amount', 'balance', 'payment_due_date', 'usage_rights', 'reschedule_notice'],
     isSystemTemplate: true,
@@ -181,7 +179,6 @@ If Client cancels, the deposit is non-refundable. Rescheduling requires {{resche
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'videographer_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'event_date', 'location', 'duration', 'num_videos', 'video_length', 'delivery_timeframe', 'total_fee', 'currency', 'deposit_percentage', 'deposit_amount', 'balance', 'payment_due_date', 'usage_rights', 'reschedule_notice'],
     isSystemTemplate: true,
@@ -243,7 +240,6 @@ If Client cancels, the deposit is non-refundable. Rescheduling requires {{resche
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'producer_name', 'production_company', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'project_title', 'video_type', 'video_length', 'format', 'delivery_method', 'pre_production_dates', 'production_dates', 'post_production_dates', 'total_fee', 'currency', 'deposit_percentage', 'deposit_amount', 'milestone_1_amount', 'milestone_1_date', 'milestone_2_amount', 'milestone_2_date', 'revisions_policy', 'usage_rights', 'reschedule_notice'],
     isSystemTemplate: true,
@@ -304,7 +300,6 @@ If Client cancels, the deposit is non-refundable.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'editor_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'project_title', 'num_videos', 'video_length', 'format', 'delivery_timeframe', 'total_fee', 'currency', 'deposit_percentage', 'deposit_amount', 'balance', 'payment_due_date', 'revisions_policy', 'usage_rights'],
     isSystemTemplate: true,
@@ -369,7 +364,6 @@ Either Party may terminate this Agreement with {{notice_period}} written notice.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'creator_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'services_description', 'deliverables', 'total_fee', 'currency', 'payment_schedule', 'start_date', 'delivery_date', 'revisions_policy', 'ip_clause', 'notice_period'],
     isSystemTemplate: true,
@@ -419,7 +413,6 @@ Either Party may terminate this Agreement with {{notice_period}} written notice.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'provider_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'start_date', 'term_duration', 'monthly_fee', 'currency', 'due_date', 'payment_method', 'scope_of_work', 'notice_period'],
     isSystemTemplate: true,
@@ -477,7 +470,6 @@ Upon full payment, the Designer grants the Client {{licensing_terms}}.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'designer_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'services_description', 'deliverables', 'file_formats', 'total_fee', 'currency', 'payment_schedule', 'revisions_policy', 'licensing_terms', 'start_date', 'delivery_date'],
     isSystemTemplate: true,
@@ -535,7 +527,6 @@ Client receives {{usage_rights}} for all content created.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'creator_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'services_description', 'deliverables', 'delivery_schedule', 'total_fee', 'currency', 'payment_schedule', 'usage_rights', 'revisions_policy', 'start_date', 'completion_date'],
     isSystemTemplate: true,
@@ -587,7 +578,6 @@ The Receiving Party acknowledges that monetary damages may be insufficient remed
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'disclosing_party_name', 'disclosing_party_business', 'disclosing_party_email', 'receiving_party_name', 'receiving_party_business', 'receiving_party_email', 'term_duration'],
     isSystemTemplate: true,
@@ -649,7 +639,6 @@ Client shall review and accept deliverables within {{acceptance_period}} of deli
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'provider_name', 'business_name', 'email', 'phone', 'client_name', 'client_company', 'client_email', 'project_title', 'project_description', 'deliverables', 'total_fee', 'currency', 'payment_schedule', 'start_date', 'end_date', 'revisions_policy', 'acceptance_period', 'ip_clause'],
     isSystemTemplate: true,
@@ -706,7 +695,6 @@ Either Party may terminate this Agreement with {{notice_period}} written notice.
 
 ---
 
-*Template for general business use. Review and adapt this agreement for your specific circumstances and obtain professional legal advice where appropriate.*
 `,
     variables: ['effective_date', 'company_name', 'company_address', 'company_email', 'contractor_name', 'contractor_address', 'contractor_email', 'contractor_phone', 'services_description', 'fee', 'currency', 'payment_terms', 'start_date', 'end_date', 'notice_period'],
     isSystemTemplate: true,

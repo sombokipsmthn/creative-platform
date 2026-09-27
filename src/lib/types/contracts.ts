@@ -84,6 +84,7 @@ export interface Client {
 }
 
 export interface Project {
+  clientId: string;
   id: string;
   name?: string | null;
   description?: string | null;
@@ -97,4 +98,6 @@ export interface Project {
   noticePeriod?: string | null;
   startDate?: Date | string | null;
   endDate?: Date | string | null;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

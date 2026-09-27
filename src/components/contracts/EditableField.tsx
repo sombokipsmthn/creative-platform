@@ -78,7 +78,7 @@ export function EditableField({
         className={`inline-block cursor-pointer px-1 py-0.5 rounded transition-colors ${
           isEmpty
             ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 font-medium'
-            : 'hover:bg-purple-100 dark:hover:bg-purple-900/30 text-inherit'
+            : 'hover:bg-purple-100 dark:hover:bg-purple-900/30 font-semibold text-inherit'
         } ${isInvalid ? 'ring-2 ring-red-500 dark:ring-red-400' : ''}`}
         title={`Click to edit ${field.label.toLowerCase()}`}
       >

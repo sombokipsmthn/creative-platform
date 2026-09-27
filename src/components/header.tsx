@@ -5,6 +5,7 @@ import { useAuth } from "@clerk/nextjs";
 import { LogIn, LogOut } from "lucide-react";
 
 import ThemeToggle from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/Button";
 
 export default function Header() {
   const { isLoaded, isSignedIn, signOut } = useAuth();
@@ -14,29 +15,41 @@ export default function Header() {
   };
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50">
-      <div className="mx-auto max-w-7xl px-6 pt-5">
+    <header className="ui-header">
+      <div className="ui-shell">
         <nav className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/80 px-6 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
           {/* LOGO */}
           <Link
             href="/"
-            className="text-lg font-semibold tracking-[0.35em] text-slate-900 dark:text-white"
+            className="ui-logo text-lg font-semibold tracking-[0.35em] text-slate-900 dark:text-white"
           >
             KIPSMTHN
           </Link>
 
           {/* PUBLIC NAVIGATION */}
           <div className="hidden items-center gap-8 text-sm font-medium text-slate-500 dark:text-zinc-400 md:flex">
-            <Link href="/#platform" className="transition hover:text-purple-600">
+            <Link
+              href="/#platform"
+              className="ui-nav-link transition hover:text-purple-600"
+            >
               Platform
             </Link>
-            <Link href="/#workflow" className="transition hover:text-purple-600">
+            <Link
+              href="/#workflow"
+              className="ui-nav-link transition hover:text-purple-600"
+            >
               Workflow
             </Link>
-            <Link href="/#work" className="transition hover:text-purple-600">
+            <Link
+              href="/#work"
+              className="ui-nav-link transition hover:text-purple-600"
+            >
               Work
             </Link>
-            <Link href="/#pricing" className="transition hover:text-purple-600">
+            <Link
+              href="/#pricing"
+              className="ui-nav-link transition hover:text-purple-600"
+            >
               Pricing
             </Link>
           </div>
@@ -72,12 +85,12 @@ export default function Header() {
                   <span>Sign in</span>
                 </Link>
 
-                <Link
-                  href="/sign-up"
-                  className="rounded-full bg-purple-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700"
+                <Button
+                  variant="primary"
+                  size="sm"
                 >
                   Get started
-                </Link>
+                </Button>
               </>
             ) : (
               <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-zinc-800" />

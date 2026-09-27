@@ -8,6 +8,8 @@ import ClientLightbox from '@/components/ClientLightbox';
 import DownloadModal from '@/components/DownloadModal';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/Button';
+import Header from '@/components/header';
+import Footer from '@/components/Footer';
 
 interface GalleryItem {
   id: string;
@@ -138,71 +140,58 @@ export default function ClientGalleryPortal({
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-black text-slate-900 dark:text-white">
-      <header className="sticky top-0 z-40 backdrop-blur-md border-b p-4 bg-white/80 dark:bg-black/80 flex justify-between items-center">
-        <Link href="/" className="text-lg font-medium text-slate-900 dark:text-white">
-          KIPSMTHN<span className="text-purple-600">.</span>
-        </Link>
-
-        <Button
-          onClick={() => setDownload(true)}
-          className="px-4 py-2 text-xs"
-        >
-          Download
-        </Button>
-      </header>
-
-      <section className="max-w-7xl mx-auto p-6 space-y-3">
-        <h1 className="text-4xl font-light text-slate-900 dark:text-white">
-          {gallery.title}
-        </h1>
-
-        <p className="text-sm text-slate-500 dark:text-zinc-400">
-          {gallery.client} • {gallery.date}
-        </p>
-      </section>
-
-      <main className="max-w-7xl mx-auto p-6 grid md:grid-cols-3 gap-6">
-        {gallery.items.map((item, index) => (
-          <div
-            key={item.id}
-            className="rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900"
-          >
-            <div
-              className="relative aspect-square cursor-pointer"
-              onClick={() => setLightbox(index)}
-            >
-              <Image
-                src={item.url}
-                alt={item.title}
-                fill
-                className="object-cover"
-              />
-            </div>
-
-            <div className="p-4 flex justify-between items-center">
-              <span className="text-xs text-slate-900 dark:text-white">
-                {item.title}
-              </span>
-
-              <Button
-                onClick={() => toggleFavorite(item.id)}
-                className="text-xl"
-              >
-                {favorites.includes(item.id) ? '♥' : '♡'}
-              </Button>
-            </div>
+    <div className="ui-page">
+      <Header />
+      <div className="ui-page-padded">
+        <section className="ui-shell flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="ui-page-title-lg">{gallery.title}</h1>
+            <p className="ui-meta">{gallery.client} • {gallery.date}</p>
           </div>
-        ))}
-      </main>
+          <Button
+            onClick={() => setDownload(true)}
+            variant="secondary"
+            size="sm"
+          >
+            Download
+          </Button>
+        </section>
+        <main className="ui-shell grid md:grid-cols-3 gap-6 mt-6">
+          {gallery.items.map((item, index) => (
+            <div key={item.id} className="ui-card">
+              <div className="relative aspect-square cursor-pointer" onClick={() => setLightbox(index)}>
+                <Image
+                  src={item.url}
+                  alt={item.title}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              <div className="p-4 flex justify-between items-center">
+                <span className="text-xs text-slate-900 dark:text-white">
+                  {item.title}
+                </span>
+
+                <Button
+                  onClick={() => toggleFavorite(item.id)}
+                  size="lg"
+                >
+                  {favorites.includes(item.id) ? '♥' : '♡'}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </main>
+      </div>
 
       {lightbox !== null && (
         <ClientLightbox
           isOpen={true}
           item={gallery.items[lightbox]}
           onClose={() => setLightbox(null)}
-          onNext={() => {}}
-          onPrev={() => {}}
+          onNext={() => setLightbox((lightbox + 1) % gallery.items.length)}
+          onPrev={() => setLightbox((lightbox - 1 + gallery.items.length) % gallery.items.length)}
           isFavorite={favorites.includes(gallery.items[lightbox].id)}
           onToggleFavorite={toggleFavorite}
         />
@@ -217,13 +206,7 @@ export default function ClientGalleryPortal({
         favoritesCount={favorites.length}
       />
 
-      <footer className="border-t p-6 flex justify-between items-center text-xs text-slate-500 dark:text-zinc-400">
-        <span>
-          © {new Date().getFullYear()} KIPSMTHN
-        </span>
-
-        <ThemeToggle />
-      </footer>
+      <Footer />
     </div>
   );
 }

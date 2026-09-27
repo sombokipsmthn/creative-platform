@@ -5,6 +5,7 @@ import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 interface ProfileForm {
   name: string;

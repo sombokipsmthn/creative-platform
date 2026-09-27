@@ -1,9 +1,9 @@
 import React from 'react';
 
-interface CardProps {
-  children: React.ReactNode;
+interface CardProps extends React.HTMLAttributes<HTMLElement> {
+  children?: React.ReactNode;
   className?: string;
-  as?: keyof JSX.IntrinsicElements | React.ComponentType<any>;
+  as?: React.ElementType;
 }
 
 /**

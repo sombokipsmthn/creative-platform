@@ -1363,3 +1363,108 @@ html.dark {
     flex-shrink: 0;
   }
 }
+
+/* Image Card Variants */
+.ui-card-image {
+  overflow: hidden;
+}
+
+.ui-card-image-top .ui-card-image-content {
+  padding-top: 0;
+}
+
+.ui-card-image-bottom .ui-card-image-content {
+  padding-bottom: 0;
+}
+
+.ui-card-image-cover {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-2xl);
+}
+
+.ui-card-image-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.ui-card-image-content {
+  position: relative;
+  z-index: 1;
+  padding: 1.5rem;
+  background-color: var(--color-bg-card);
+  border-radius: inherit;
+}
+
+/* Multi-step form container */
+.ui-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ui-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ui-step-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ui-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  background-color: var(--color-bg-soft);
+  border: 1px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.ui-step-active .ui-step-number {
+  background-color: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.ui-step-completed .ui-step-number {
+  background-color: var(--color-success);
+  border-color: var(--color-success);
+  color: white;
+}
+
+.ui-step-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.ui-step-description {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.ui-step-content {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 1.5rem;
+}
+
+.ui-step-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

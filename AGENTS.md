@@ -111,7 +111,8 @@ import { useUser } from '@clerk/nextjs';
 
 ## Future Work
 
-- [ ] Convert remaining hardcoded styles to semantic classes
-- [ ] Add more component variants (with images, multi-step)
-- [ ] Implement animation tokens
-- [ ] Add component library (Button, Input, Card components)
+- [ ] Add animation tokens for transitions
+- [ ] Add more advanced component variants (forms with validation, data tables)
+- [ ] Create comprehensive component library documentation
+- [ ] Implement theme customization capabilities
+- [ ] Add accessibility auditing and fixes

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getLocalUser } from "@/lib/auth/get-local-user";
+import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 
 async function getCreator() {
   try {
@@ -20,7 +20,7 @@ async function getCreator() {
     }
 
     if (!userId) return null;
-    return getLocalUser(userId);
+    return getOrCreateLocalUser(userId);
   } catch (error) {
     console.error("getCreator error:", error);
     return null;

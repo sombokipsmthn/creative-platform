@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Plus, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
 type QuoteClient = {
@@ -24,23 +26,6 @@ type Quote = {
   validUntil?: string | null;
   invoiceId?: string | null;
   client?: QuoteClient | null;
-};
-
-const statusStyles: Record<string, string> = {
-  draft:
-    'bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-300',
-  sent:
-    'bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300',
-  viewed:
-    'bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-300',
-  accepted:
-    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300',
-  invoiced:
-    'bg-cyan-100 text-cyan-700 dark:bg-cyan-950/40 dark:text-cyan-300',
-  declined:
-    'bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300',
-  expired:
-    'bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300',
 };
 
 function formatStatus(status: string) {
@@ -193,40 +178,40 @@ export default function QuotesPage() {
             </p>
           </div>
 
-          <Link
-            href="/admin/quotes/new"
-            className="Button Button--primary"
+          <Button
+            onClick={() => router.push('/admin/quotes/new')}
+            variant="primary"
+            className="text-xs font-sans uppercase tracking-widest"
           >
-            + New Quote
-          </Link>
+            <Plus className="h-3.5 w-3.5" />
+            New Quote
+          </Button>
         </div>
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Total Quotes</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {quotes.length}
-            </p>
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Total Quotes</p>
+            <p className="ui-stat-value">{quotes.length}</p>
           </div>
 
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Accepted</p>
-            <p className="mt-2 text-3xl font-light text-emerald-600 dark:text-emerald-400">
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Accepted</p>
+            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               {acceptedQuotes}
             </p>
           </div>
 
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Invoiced</p>
-            <p className="mt-2 text-3xl font-light text-cyan-600 dark:text-cyan-400">
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Invoiced</p>
+            <p className="ui-stat-value text-cyan-600 dark:text-cyan-400">
               {invoicedQuotes}
             </p>
           </div>
 
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Pipeline Value</p>
-            <p className="mt-2 text-2xl font-light text-slate-900 dark:text-white">
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Pipeline Value</p>
+            <p className="ui-stat-value">
               {formatAmount(totalValue, 'KES')}
             </p>
           </div>
@@ -244,7 +229,7 @@ export default function QuotesPage() {
           onAddItem={() => {
             router.push('/admin/quotes/new');
           }}
-          filterOptions={ [
+          filterOptions={[
             {
               label: 'Status',
               value: 'status',
@@ -279,37 +264,38 @@ export default function QuotesPage() {
               </p>
             </div>
           ) : filteredQuotes.length === 0 ? (
-            <div className="px-6 py-20 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600/10 text-xl text-purple-600 dark:text-purple-400">
-                +
+            <div className="ui-empty-state">
+              <div className="ui-empty-icon">
+                <Plus className="h-6 w-6" />
               </div>
 
-              <h2 className="mt-5 text-lg font-medium text-slate-900 dark:text-white">
+              <h2 className="ui-section-title">
                 {quotes.length === 0
                   ? 'No quotes yet'
                   : 'No matching quotes'}
               </h2>
 
-              <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-zinc-500">
+              <p className="ui-body">
                 {quotes.length === 0
                   ? 'Create your first production quote to start building your sales pipeline.'
                   : 'Try changing your search or status filter.'}
               </p>
 
               {quotes.length === 0 && (
-                <Link
-                  href="/admin/quotes/new"
-                  className="Button Button--primary mt-6"
+                <Button
+                  onClick={() => router.push('/admin/quotes/new')}
+                  variant="primary"
+                  className="mt-6"
                 >
                   Create First Quote
-                </Link>
+                </Button>
               )}
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="ui-table w-full min-w-225">
+              <table className="ui-table">
                 <thead>
-                  <tr className="border-b border-slate-200 text-left dark:border-zinc-800">
+                  <tr>
                     <th className="ui-table-header">Quote</th>
                     <th className="ui-table-header">Client</th>
                     <th className="ui-table-header">Project</th>
@@ -330,23 +316,23 @@ export default function QuotesPage() {
                     return (
                       <tr
                         key={quote.id}
-                        className="border-b border-slate-100 transition last:border-b-0 hover:bg-slate-50 dark:border-zinc-900 dark:hover:bg-zinc-900/50"
+                        className="ui-table-row"
                       >
                         {/* QUOTE */}
-                        <td className="px-6 py-5">
+                        <td className="ui-table-cell">
                           <div className="space-y-1">
                             <p className="font-medium text-slate-900 dark:text-white">
                               {quote.title || 'Untitled Quote'}
                             </p>
 
-                            <p className="text-[11px] font-sans text-slate-400 dark:text-zinc-600">
-                              {quote.quoteNumber || quote.id}
+                            <p className="ui-meta">
+                              {quote.quoteNumber || quote.id.slice(0, 8).toUpperCase()}
                             </p>
                           </div>
                         </td>
 
                         {/* CLIENT */}
-                        <td className="px-6 py-5">
+                        <td className="ui-table-cell">
                           {quote.client ? (
                             <div className="space-y-1">
                               <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
@@ -354,53 +340,56 @@ export default function QuotesPage() {
                               </p>
 
                               {quote.client.company && (
-                                <p className="text-xs text-slate-400 dark:text-zinc-600">
+                                <p className="ui-caption">
                                   {quote.client.company}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span className="text-sm text-slate-400 dark:text-zinc-600">
+                            <span className="ui-caption">
                               No client
                             </span>
                           )}
                         </td>
 
                         {/* PROJECT */}
-                        <td className="px-6 py-5 text-sm text-slate-600 dark:text-zinc-400">
+                        <td className="ui-table-cell">
                           {quote.projectName || '—'}
                         </td>
 
                         {/* STATUS */}
-                        <td className="px-6 py-5">
+                        <td className="ui-table-cell">
                           <div className="flex flex-col items-start gap-2">
                             <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-sans uppercase tracking-wider ${
-                                statusStyles[status] ||
-                                statusStyles.draft
-                              }`}
+                              className={`ui-badge ${status === 'accepted' ? 'ui-badge-success' :
+                                status === 'declined' ? 'ui-badge-danger' :
+                                  status === 'sent' || status === 'viewed' ? 'ui-badge-accent' :
+                                    'ui-badge'
+                                }`}
                             >
                               {formatStatus(status)}
                             </span>
 
                             {hasInvoice && (
-                              <Link
-                                href={`/admin/invoices/${quote.invoiceId}`}
-                                className="Button Button--secondary"
+                              <Button
+                                onClick={() => router.push(`/admin/invoices/${quote.invoiceId}`)}
+                                variant="ghost"
+                                size="sm"
+                                className="h-auto p-0 normal-case tracking-normal"
                               >
                                 View Invoice →
-                              </Link>
+                              </Button>
                             )}
                           </div>
                         </td>
 
                         {/* CREATED */}
-                        <td className="px-6 py-5 text-sm text-slate-500 dark:text-zinc-500">
+                        <td className="ui-table-cell">
                           {formatDate(quote.createdAt)}
                         </td>
 
                         {/* TOTAL */}
-                        <td className="px-6 py-5 text-right font-medium text-slate-900 dark:text-white">
+                        <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
                           {formatAmount(
                             quote.total,
                             quote.currency
@@ -408,13 +397,15 @@ export default function QuotesPage() {
                         </td>
 
                         {/* ACTION */}
-                        <td className="px-6 py-5 text-right">
-                          <Link
-                            href={`/admin/quotes/${quote.id}`}
-                            className="Button Button--secondary"
+                        <td className="ui-table-cell text-right">
+                          <Button
+                            onClick={() => router.push(`/admin/quotes/${quote.id}`)}
+                            variant="secondary"
+                            size="sm"
                           >
-                            View →
-                          </Link>
+                            View
+                            <ArrowRight className="h-3 w-3" />
+                          </Button>
                         </td>
                       </tr>
                     );

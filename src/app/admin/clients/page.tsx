@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -258,25 +259,20 @@ export default function AdminClientsPage() {
   return (
     <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
-          <div>
-            <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">
-              ← Back to Dashboard
-            </Link>
-            <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">Client CRM</h1>
-            <p className="text-xs text-slate-500 dark:text-zinc-500 font-sans mt-2">
-              Database-backed client records and workflow status.
-            </p>
-          </div>
-
-          <Button
-            onClick={openCreateModal}
-            variant="primary"
-            className="text-xs font-sans uppercase tracking-widest"
-          >
-            + Register New Client
-          </Button>
-        </div>
+        <AdminPageHeader
+          title="Client CRM"
+          description="Database-backed client records and workflow status."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={
+            <Button
+              onClick={openCreateModal}
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
+            >
+              + Register New Client
+            </Button>
+          }
+        />
 
         {error && !isAddClientOpen && !selectedClient && (
           <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">

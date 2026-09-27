@@ -285,3 +285,28 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 - Dark mode is toggled via the `html.dark` selector
 - All colors are defined as CSS custom properties for easy theming
 - The system is backward compatible with existing `btn-*` classes
+
+## Recently Added Semantic Classes
+
+### Layout Classes
+- `.ui-page` - Base page container with background and text colors
+- `.ui-page-header` - Page header section with bottom border
+- `.ui-shell` - Content wrapper with max-width and horizontal padding
+- `.ui-page-padded` - Page content with vertical spacing (can be added as needed)
+- `.ui-page-title-lg` - Large page title for secondary pages
+
+### Component Updates
+- All cards now use `.ui-card` base class with `.ui-card-interactive` for hover effects
+- Form elements use standardized `.ui-input`, `.ui-select`, `.ui-textarea`, `.ui-label`
+- Buttons now use the Button component from `src/components/ui/Button.tsx` with semantic variants
+- Status badges use `.ui-badge` with color variants like `.ui-badge-accent`
+- Section headers use `.ui-section-title`
+- Body text uses `.ui-body`
+- Eyebrow text uses `.ui-eyebrow`
+- Metadata text uses `.ui-meta`
+- Page titles use `.ui-page-title`
+
+### Design Tokens Added
+- Added `--spacing-xs` through `--spacing-3xl` tokens
+- Added `--radius-sm` through `--radius-full` tokens
+- Added `--font-size-2xs` through `--font-size-6xl` tokens

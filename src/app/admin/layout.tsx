@@ -24,7 +24,6 @@ import type { LucideIcon } from 'lucide-react';
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
 import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
-import './admin.css';
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
@@ -201,7 +200,7 @@ export default function AdminLayout({
 
   return (
     <SplitViewProvider>
-      <div className="ui-page min-h-screen text-[var(--color-text-primary)] relative">
+      <div className="ui-page admin-page min-h-screen text-[var(--color-text-primary)] relative">
         <aside className="fixed inset-y-0 left-0 z-50 hidden w-[248px] border-r border-[var(--color-border-subtle)] bg-[color-mix(in_srgb,var(--color-bg-page)_92%,transparent)] backdrop-blur-xl lg:flex lg:flex-col">
           <div className="flex h-[calc(100%-3rem)] flex-col">
             <div className="flex h-16 items-center border-b border-[var(--color-border-subtle)] px-5">

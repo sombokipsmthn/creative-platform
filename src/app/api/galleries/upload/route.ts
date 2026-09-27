@@ -9,6 +9,7 @@ import { db } from "@/db";
 import { getLocalUser } from "@/lib/auth/get-local-user";
 import { getGalleryStorage } from "@/lib/gallery/storage";
 import { processImage } from "@/lib/gallery/image-processing";
+import { processVideo } from "@/lib/gallery/video-processing";
 
 export async function POST(request: Request) {
   try {
@@ -66,17 +67,30 @@ export async function POST(request: Request) {
       onBeforeGenerateToken: async (
         pathname
       ) => {
+        // Determine if this is a video or image based on extension
+        const isVideo = /\.(mp4|mov|avi|mkv|webm|flv|wmv)$/i.test(pathname);
+        
         return {
-          allowedContentTypes: [
-            "image/jpeg",
-            "image/png",
-            "image/webp",
-            "image/heic",
-            "image/heif",
-          ],
+          allowedContentTypes: isVideo
+            ? [
+                "video/mp4",
+                "video/quicktime", // .mov
+                "video/x-msvideo", // .avi
+                "video/x-matroska", // .mkv
+                "video/webm",
+                "video/x-flv",
+                "video/x-ms-wmv",
+              ]
+            : [
+                "image/jpeg",
+                "image/png",
+                "image/webp",
+                "image/heic",
+                "image/heif",
+              ],
 
           maximumSizeInBytes:
-            100 * 1024 * 1024,
+            100 * 1024 * 1024, // 100MB limit for both images and videos
 
           addRandomSuffix: true,
 
@@ -84,6 +98,7 @@ export async function POST(request: Request) {
             creatorId: creator.id,
             galleryId,
             pathname,
+            isVideo: isVideo, // Pass this to the upload completed handler
           }),
         };
       },
@@ -95,6 +110,7 @@ export async function POST(request: Request) {
         try {
           const payload =
             JSON.parse(tokenPayload as string);
+          const { isVideo } = payload;
 
           const maxOrder =
             await db.execute(sql`
@@ -152,42 +168,107 @@ export async function POST(request: Request) {
             fontSize: Number(watermarkResult.rows[0]?.font_size ?? 42),
           };
 
-          // Process the image
-          const processed = await processImage(blobBuffer, watermarkOptions);
+          let processed;
+          let mimeType = "image/jpeg"; // default
+          let width = null;
+          let height = null;
+          let duration = null;
+          let videoCodec = null;
+          let audioCodec = null;
+
+          if (isVideo) {
+            // Process as video
+            const videoWatermarkOptions = {
+              enabled: watermarkOptions.enabled,
+              text: watermarkOptions.text,
+              position: watermarkOptions.position,
+              opacity: watermarkOptions.opacity,
+              fontSize: watermarkOptions.fontSize,
+            };
+            
+            processed = await processVideo(blobBuffer, videoWatermarkOptions);
+            mimeType = processed.mimeType;
+            width = processed.width;
+            height = processed.height;
+            duration = processed.duration;
+            videoCodec = processed.videoCodec;
+            audioCodec = processed.audioCodec;
+          } else {
+            // Process as image (existing logic)
+            processed = await processImage(blobBuffer, watermarkOptions);
+            mimeType = processed.mimeType;
+            width = processed.width;
+            height = processed.height;
+          }
 
           // Generate IDs and paths
           const photoId = randomUUID();
           const filename = blob.pathname.split("/").pop() || blob.pathname;
-          const safeFilename = filename.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 180) || "photo.jpg";
+          const safeFilename = filename.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 180) || "media";
           const basePath = `galleries/${payload.galleryId}/${photoId}`;
 
           // Storage
           const storage = getGalleryStorage();
 
-          // Upload processed images
-          const original = await storage.putObject({
-            path: `${basePath}/original.jpg`,
-            body: processed.original,
-            contentType: "image/jpeg",
-          });
+          let originalResult, displayResult, thumbnailResult, watermarkedResult;
 
-          const display = await storage.putObject({
-            path: `${basePath}/display.jpg`,
-            body: processed.display,
-            contentType: "image/jpeg",
-          });
+          if (isVideo) {
+            // For video, we store different versions
+            
+            // Upload original video
+            originalResult = await storage.putObject({
+              path: `${basePath}/original.${getExtensionFromMimeType(processed.mimeType)}`,
+              body: processed.original,
+              contentType: processed.mimeType,
+            });
 
-          const thumbnail = await storage.putObject({
-            path: `${basePath}/thumbnail.jpg`,
-            body: processed.thumbnail,
-            contentType: "image/jpeg",
-          });
+            // For display, we'll use a transcoded version (simplified - using original for now)
+            displayResult = await storage.putObject({
+              path: `${basePath}/display.${getExtensionFromMimeType(processed.mimeType)}`,
+              body: processed.original, // In production, this would be the transcoded display version
+              contentType: processed.mimeType,
+            });
 
-          const watermarked = await storage.putObject({
-            path: `${basePath}/watermark.jpg`,
-            body: processed.watermark,
-            contentType: "image/jpeg",
-          });
+            // Thumbnail (we'll generate a JPEG thumbnail from the video)
+            thumbnailResult = await storage.putObject({
+              path: `${basePath}/thumbnail.jpg`,
+              body: processed.thumbnail,
+              contentType: "image/jpeg",
+            });
+
+            // Watermarked version (simplified - using thumbnail for now)
+            watermarkedResult = await storage.putObject({
+              path: `${basePath}/watermark.jpg`,
+              body: processed.watermark,
+              contentType: "image/jpeg",
+            });
+          } else {
+            // Existing image processing storage logic
+            // Upload processed images
+            originalResult = await storage.putObject({
+              path: `${basePath}/original.jpg`,
+              body: processed.original,
+              contentType: "image/jpeg",
+            });
+
+            displayResult = await storage.putObject({
+              path: `${basePath}/display.jpg`,
+              body: processed.display,
+              contentType: "image/jpeg",
+            });
+
+            thumbnailResult = await storage.putObject({
+              path: `${basePath}/thumbnail.jpg`,
+              body: processed.thumbnail,
+              contentType: "image/jpeg",
+            });
+
+            watermarkedResult = await storage.putObject({
+              path: `${basePath}/watermark.jpg`,
+              body: processed.watermark,
+              contentType: "image/jpeg",
+            });
+          }
 
           // Insert into database
           await db.execute(sql`
@@ -203,20 +284,26 @@ export async function POST(request: Request) {
               file_size,
               width,
               height,
+              duration,
+              video_codec,
+              audio_codec,
               sort_order
             )
             VALUES (
               ${photoId},
               ${payload.galleryId},
               ${safeFilename},
-              ${original.url},
-              ${display.url},
-              ${thumbnail.url},
+              ${originalResult.url},
+              ${displayResult.url},
+              ${thumbnailResult.url},
               ${blob.pathname},
-              ${processed.mimeType},
+              ${mimeType},
               ${processed.original.byteLength},
-              ${processed.width || null},
-              ${processed.height || null},
+              ${width},
+              ${height},
+              ${duration || null},
+              ${videoCodec || null},
+              ${audioCodec || null},
               ${sortOrder}
             )
           `);
@@ -250,4 +337,24 @@ export async function POST(request: Request) {
       }
     );
   }
+}
+
+// Helper function to get file extension from MIME type
+function getExtensionFromMimeType(mimeType: string): string {
+  const mimeToExt: Record<string, string> = {
+    "video/mp4": "mp4",
+    "video/quicktime": "mov",
+    "video/x-msvideo": "avi",
+    "video/x-matroska": "mkv",
+    "video/webm": "webm",
+    "video/x-flv": "flv",
+    "video/x-ms-wmv": "wmv",
+    "image/jpeg": "jpg",
+    "image/png": "png",
+    "image/webp": "webp",
+    "image/heic": "heic",
+    "image/heif": "heif",
+  };
+  
+  return mimeToExt[mimeType] || "bin";
 }

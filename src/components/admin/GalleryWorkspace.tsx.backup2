@@ -78,8 +78,7 @@ export default function GalleryWorkspacePage() {
   const [sortBy, setSortBy] = useState<'custom' | 'filename_asc' | 'filename_desc' | 'date_taken_new' | 'date_taken_old' | 'date_uploaded_new' | 'date_uploaded_old' | 'random'>('custom')
   const [activeCollection, setActiveCollection] = useState<string | null>(null)
   const [showCollectionPicker, setShowCollectionPicker] = useState(false)
-  const [moveDestination, setMoveDestination] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [moveDestination, setMoveDestination] = useState<string | null>(const fileInputRef = useRef<HTMLInputElement>(null)
 
   const refreshGallery = useCallback(async () => {
     const response = await fetch(`/api/galleries/${id}`, { cache: 'no-store' })
@@ -582,7 +581,7 @@ export default function GalleryWorkspacePage() {
                             </div>
                           </div>
                         )
-                      })}
+                      }}
                     </div>
                   ) : (
                     <div className="text-center py-12">

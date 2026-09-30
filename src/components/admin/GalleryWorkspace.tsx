@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash2, Eye, EyeOff, Video } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
-import { upload } from '@vercel/blob/client'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
 import GalleryTopNav from '@/components/ui/GalleryTopNav'
 import GalleryDesignTab from '@/components/gallery/GalleryDesignTab'
@@ -162,7 +161,42 @@ export default function GalleryWorkspacePage() {
       setError(err instanceof Error ? err.message : 'Unable to move photos')
     }
   }
+  const handleCreateCollection = async () => {
+    const title = collectionTitle.trim()
 
+    if (!title || creatingCollection) return
+
+    setCreatingCollection(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/galleries/${id}/collections`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+        }),
+      })
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { error?: string } | null
+        throw new Error(body?.error || 'Unable to create collection')
+      }
+
+      setCollectionTitle('')
+      await refreshGallery()
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to create collection'
+      )
+    } finally {
+      setCreatingCollection(false)
+    }
+  }
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
     setError(null)
     try {

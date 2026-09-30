@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Upload, X, Check, Loader2, Trash2, RefreshCw, Copy } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Upload, X, Check, Loader2, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { upload } from '@vercel/blob/client';
 
@@ -19,18 +19,21 @@ interface PhotoUploaderProps {
   onUploadComplete: () => void;
 }
 
-export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUploaderProps) {
+export default function PhotoUploader({
+  galleryId,
+  onUploadComplete,
+}: PhotoUploaderProps) {
   const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [overallProgress, setOverallProgress] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
-  const addFiles = (files: FileList | null) => {
+  const addFiles = (files: FileList | File[] | null) => {
     if (!files?.length) return;
-    const newItems: UploadItem[] = Array.from(files).map(file => ({
+
+    const newItems: UploadItem[] = Array.from(files).map((file) => ({
       id: generateId(),
       file,
       previewUrl: URL.createObjectURL(file),
@@ -38,14 +41,17 @@ export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUplo
       progress: 0,
       error: null,
     }));
-    setUploadItems(prev => [...prev, ...newItems]);
-    // Start upload process if not already uploading
+
+    setUploadItems((prev) => [...prev, ...newItems]);
+
     if (!isUploading) {
-      processUploadQueue();
+      processUploadQueue(newItems);
     }
   };
 
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     addFiles(e.target.files);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -53,45 +59,65 @@ export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUplo
   };
 
   const removeItem = (id: string) => {
-    setUploadItems(prev => prev.filter(item => item.id !== id));
+    setUploadItems((prev) => {
+      const target = prev.find((item) => item.id === id);
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+      return prev.filter((item) => item.id !== id);
+    });
   };
 
   const retryItem = (id: string) => {
-    setUploadItems(prev =>
-      prev.map(item =>
+    setUploadItems((prev) =>
+      prev.map((item) =>
         item.id === id
           ? { ...item, status: 'queued', progress: 0, error: null }
           : item
       )
     );
     if (!isUploading) {
-      processUploadQueue();
+      processUploadQueue(uploadItems.filter((i) => i.id === id));
     }
   };
 
   const clearCompleted = () => {
-    setUploadItems(prev => prev.filter(item => item.status === 'queued' || item.status === 'failed'));
+    setUploadItems((prev) => {
+      const completed = prev.filter(
+        (item) =>
+          item.status === 'uploaded' || item.status === 'failed'
+      );
+      completed.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return prev.filter(
+        (item) => item.status === 'queued' || item.status === 'uploading'
+      );
+    });
   };
 
-  const processUploadQueue = async () => {
-    setIsUploading(true);
-    const queue = uploadItems.filter(item => item.status === 'queued');
-    if (queue.length === 0) {
+  const processUploadQueue = async (queue: UploadItem[]) => {
+    const items = queue.length > 0 ? queue : [];
+
+    if (items.length === 0) {
       setIsUploading(false);
       onUploadComplete();
       return;
     }
 
+    setIsUploading(true);
+
     // Process one file at a time to avoid overwhelming the server
-    for (const item of queue) {
-      // Update status to uploading
-      setUploadItems(prev =>
-        prev.map(i => (i.id === item.id ? { ...i, status: 'uploading', progress: 0 } : i))
+    for (const item of items) {
+      setUploadItems((prev) =>
+        prev.map((i) =>
+          i.id === item.id
+            ? { ...i, status: 'uploading', progress: 0 }
+            : i
+        )
       );
 
       try {
         // Upload to Vercel Blob
-        const result = await upload(
+        await upload(
           `galleries/${galleryId}/${item.file.name}`,
           item.file,
           {
@@ -101,27 +127,23 @@ export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUplo
           }
         );
 
-        // Simulate progress updates since we don't have real-time progress from the upload function
-        // We'll update progress in intervals to show activity
+        // Simulate progress updates since the upload API does not expose
+        // real-time byte progress.
         let progress = 0;
         const interval = setInterval(() => {
           progress = Math.min(progress + 10, 90);
-          setUploadItems(prev =>
-            prev.map(i =>
+          setUploadItems((prev) =>
+            prev.map((i) =>
               i.id === item.id ? { ...i, progress } : i
             )
           );
         }, 100);
 
-        // Wait for upload to complete
-        await new Promise(resolve => setTimeout(resolve, 500)); // Give time for the upload to initiate
-
-        // Clear the progress interval
+        await new Promise((resolve) => setTimeout(resolve, 500));
         clearInterval(interval);
 
-        // Mark as uploaded
-        setUploadItems(prev =>
-          prev.map(i =>
+        setUploadItems((prev) =>
+          prev.map((i) =>
             i.id === item.id
               ? { ...i, status: 'uploaded', progress: 100, error: null }
               : i
@@ -129,9 +151,12 @@ export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUplo
         );
       } catch (err) {
         const errorMessage =
-          err instanceof Error ? err.message : 'Unknown error occurred';
-        setUploadItems(prev =>
-          prev.map(i =>
+          err instanceof Error
+            ? err.message
+            : 'Unknown error occurred';
+
+        setUploadItems((prev) =>
+          prev.map((i) =>
             i.id === item.id
               ? { ...i, status: 'failed', progress: 0, error: errorMessage }
               : i
@@ -140,35 +165,27 @@ export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUplo
       }
     }
 
-    // After processing all queued items, update overall progress and check if done
-    const completed = uploadItems.filter(
-      item => item.status === 'uploaded' || item.status === 'failed'
-    ).length;
-    setOverallProgress((completed / uploadItems.length) * 100);
-
-    if (completed === uploadItems.length) {
-      setIsUploading(false);
-      // Refresh the gallery to show new photos
-      onUploadComplete();
-      // Clear completed items after a delay
-      setTimeout(() => {
-        clearCompleted();
-      }, 3000);
-    } else {
-      // Continue processing next batch
-      processUploadQueue();
-    }
+    // Continue uploading while the user works on the rest of the page
+    setIsUploading(false);
+    onUploadComplete();
   };
 
   // Clean up object URLs on unmount
   useEffect(() => {
     return () => {
-      uploadItems.forEach(item => URL.revokeObjectURL(item.previewUrl));
-      if (uploadTimerRef.current) {
-        clearTimeout(uploadTimerRef.current);
-      }
+      uploadItems.forEach((item) => URL.revokeObjectURL(item.previewUrl));
     };
   }, [uploadItems]);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -176,216 +193,219 @@ export default function PhotoUploader({ galleryId, onUploadComplete }: PhotoUplo
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    setIsDragging(false);
+
     const files = e.dataTransfer.files;
     if (files.length) {
       addFiles(files);
     }
   };
 
+  const uploadedCount = uploadItems.filter(
+    (i) => i.status === 'uploaded'
+  ).length;
+  const failedCount = uploadItems.filter(
+    (i) => i.status === 'failed'
+  ).length;
+
   return (
-    <div className="space-y-6">
-      {/* Upload Zone */}
+    <div className="space-y-4">
+      {/* File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
+        className="hidden"
+        onChange={handleFileInputChange}
+        aria-label="Select photos to upload"
+      />
+
+      {/* Drop Zone */}
       <div
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className={`relative border-2 border-dashed border-[var(--color-border-subtle)] rounded-lg p-8 text-center cursor-pointer transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-soft)]`}
+        onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        aria-label="Upload photos: drag and drop or press Enter to browse files"
+        className={`relative flex min-h-[9rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
+          isDragging
+            ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
+            : 'border-[var(--color-border-subtle)] hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-soft)]'
+        }`}
       >
-        {/* File Input */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
-          className="hidden"
-          onChange={handleFileInputChange}
+        <Upload
+          className={`mb-3 h-8 w-8 ${
+            isDragging ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
+          }`}
         />
-
-        {/* Drag & Drop Overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          {uploadItems.length === 0 && (
-            <>
-              <Upload className="w-10 h-10 mb-4 text-[var(--color-accent)]" />
-              <h3 className="mb-2 text-lg font-semibold">Drag & drop photos here</h3>
-              <p className="text-sm text-[var(--color-text-muted)]">
-                or browse files
-              </p>
-              <div className="mt-4 flex items-center space-x-3">
-                <Button
-                  variant="secondary"
-                  size="icon"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-4 h-4" />
-                </Button>
-                <span className="text-xs text-[var(--color-text-muted)]">
-                  JPEG, PNG, WebP, HEIC, HEIF, MP4, MOV, AVI, MKV, WEBM, FLV, WMV
-                </span>
-              </div>
-            </>
-          )}
-          {uploadItems.length > 0 && (
-            <>
-              <div className="space-y-4">
-                <div className="flex justify-center">
-                  <span className="px-3 py-1 bg-[var(--color-bg-soft)] rounded-full text-xs font-medium">
-                    {uploadItems.length} file{uploadItems.length !== 1 ? 's' : ''} selected
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {uploadItems.map(item => (
-                    <div
-                      key={item.id}
-                      className="flex items-center gap-4 p-4 bg-[var(--color-bg-soft)] rounded-lg"
-                    >
-                      {/* Thumbnail */}
-                      <div className="flex-shrink-0 w-16 h-16 overflow-hidden rounded-lg border border-[var(--color-border-subtle)]">
-                        {item.previewUrl && (
-                          <img
-                            src={item.previewUrl}
-                            alt={item.file.name}
-                            className="object-cover w-full h-full"
-                          />
-                        )}
-                      </div>
-                      {/* File Info */}
-                      <div className="flex-1 min-w-0 space-y-1">
-                        <p className="truncate font-medium">{item.file.name}</p>
-                        <p className="text-xs text-[var(--color-text-muted)]">
-                          {((item.file.size / 1024 / 1024).toFixed(2))} MB
-                        </p>
-                      </div>
-                      {/* Status & Controls */}
-                      <div className="flex items-center gap-3">
-                        {item.status === 'queued' && (
-                          <button
-                            onClick={() => removeItem(item.id)}
-                            className="text-xs text-[var(--color-danger)] hover:underline"
-                          >
-                            Remove
-                          </button>
-                        )}
-                        {item.status === 'uploading' && (
-                          <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            <span className="text-xs">Uploading...</span>
-                          </>
-                        )}
-                        {item.status === 'uploaded' && (
-                          <>
-                            <Check className="w-4 h-4 text-[var(--color-success)]" />
-                            <span className="text-xs">Uploaded</span>
-                          </>
-                        )}
-                        {item.status === 'failed' && (
-                          <>
-                            <X className="w-4 h-4 text-[var(--color-danger)]" />
-                            <button
-                              onClick={() => retryItem(item.id)}
-                              className="ml-2 text-xs text-[var(--color-accent)] hover:underline"
-                            >
-                              Retry
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    >
-                      <div className="w-0 flex-1 flex items-center">
-                        <div className="w-2 h-2 rounded-full">
-                          {item.status === 'queued' && (
-                            <div className="bg-[var(--color-border-subtle)]" />
-                          )}
-                          {item.status === 'uploading' && (
-                            <div className="bg-[var(--color-accent)] animate-pulse" />
-                          )}
-                          {item.status === 'uploaded' && (
-                            <div className="bg-[var(--color-success)]" />
-                          )}
-                          {item.status === 'failed' && (
-                            <div className="bg-[var(--color-danger)]" />
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <div className="bg-[var(--color-border-subtle)] h-0.5">
-                            <div
-                              className={`h-full bg-[var(--color-accent)] transition-all duration-300`}
-                              style={{ width: `${item.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  )}
-                </div>
-                <div className="mt-4 flex justify-between items-center">
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {uploadItems.filter(i => i.status === 'uploaded').length} of {uploadItems.length} uploaded
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      disabled={isUploading}
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      disabled={isUploading || uploadItems.filter(i => i.status === 'queued').length === 0}
-                      onClick={clearCompleted}
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      disabled={isUploading || uploadItems.filter(i => i.status === 'failed').length === 0}
-                      onClick={() => {
-                        uploadItems
-                          .filter(i => i.status === 'failed')
-                          .forEach(item => retryItem(item.id));
-                      }}
-                    >
-                      <RefreshCw className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-                {isUploading && (
-                  <div className="mt-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium">
-                        Uploading...
-                      </span>
-                      <div className="flex-1">
-                        <div className="bg-[var(--color-border-subtle)] h-2 rounded">
-                          <div
-                            className={`h-full bg-[var(--color-accent)] transition-all duration-300`}
-                            style={{ width: `${overallProgress}%` }}
-                          />
-                        </div>
-                      </span>
-                      <span className="text-xs">{overallProgress.toFixed(0)}%</span>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-          )}
-        </div>
+        <p className="text-sm font-medium">
+          {isDragging
+            ? 'Drop photos to upload'
+            : 'Drag & drop photos here'}
+        </p>
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+          or{' '}
+          <span className="font-medium text-[var(--color-accent)]">
+            browse files
+          </span>{' '}
+          &mdash; JPEG, PNG, WebP, HEIC, HEIF, MP4 (max 100MB each)
+        </p>
       </div>
 
-      {/* Upload Complete Message */}
-      {uploadItems.length > 0 &&
-        uploadItems.every(item => item.status === 'uploaded') && (
-          <div className="ui-card p-4 text-center bg-[var(--color-bg-soft)]">
-            <Check className="w-8 h-8 mb-3 text-[var(--color-success)]" />
-            <p className="font-medium">All photos uploaded successfully!</p>
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Your photos are now available in the gallery.
-            </p>
+      {/* Upload Queue */}
+      {uploadItems.length > 0 && (
+        <div className="space-y-3">
+          {/* Summary Row */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">
+              Uploading
+              {isUploading && ' ·'}
+              {' '}
+              {uploadedCount} of {uploadItems.length} photos
+              {failedCount > 0 && (
+                <span className="ml-2 text-[var(--color-danger)]">
+                  {failedCount} failed
+                </span>
+              )}
+            </span>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Add more
+              </Button>
+              {(failedCount > 0 || uploadedCount > 0) && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={clearCompleted}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear
+                </Button>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* File List */}
+          <ul className="divide-y divide-[var(--color-border-subtle)] rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]">
+            {uploadItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center gap-3 p-3"
+              >
+                {/* Thumbnail */}
+                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--color-bg-soft)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.previewUrl}
+                    alt={item.file.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                {/* File Info */}
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <p className="truncate text-sm font-medium">
+                    {item.file.name}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                    {item.error && (
+                      <span className="ml-2 text-[var(--color-danger)]">
+                        {item.error}
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Status */}
+                <div className="flex w-28 flex-shrink-0 items-center justify-end gap-1.5 text-xs">
+                  {item.status === 'queued' && (
+                    <>
+                      <span className="text-[var(--color-text-muted)]">
+                        Waiting
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.id)}
+                        aria-label={`Remove ${item.file.name}`}
+                        className="rounded-full p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-danger)]"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+
+                  {item.status === 'uploading' && (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-accent)]" />
+                      <span>{item.progress}%</span>
+                    </>
+                  )}
+
+                  {item.status === 'uploaded' && (
+                    <>
+                      <Check className="h-4 w-4 text-[var(--color-success)]" />
+                      <span className="text-[var(--color-success)]">
+                        Uploaded
+                      </span>
+                    </>
+                  )}
+
+                  {item.status === 'failed' && (
+                    <>
+                      <X className="h-4 w-4 text-[var(--color-danger)]" />
+                      <button
+                        type="button"
+                        onClick={() => retryItem(item.id)}
+                        className="inline-flex items-center gap-1 font-medium text-[var(--color-accent)] hover:underline"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        Retry
+                      </button>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Completion Message */}
+          {!isUploading &&
+            uploadItems.length > 0 &&
+            failedCount === 0 && (
+              <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] p-4 text-center">
+                <Check className="mx-auto mb-2 h-6 w-6 text-[var(--color-success)]" />
+                <p className="text-sm font-medium">
+                  {uploadedCount} photo{uploadedCount !== 1 ? 's' : ''}{' '}
+                  uploaded
+                </p>
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                  Your photos are now available in the gallery. You can keep
+                  working or upload more.
+                </p>
+              </div>
+            )}
+        </div>
+      )}
     </div>
   );
 }

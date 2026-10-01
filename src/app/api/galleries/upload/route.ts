@@ -13,63 +13,76 @@ import { processVideo } from "@/lib/gallery/video-processing";
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken || !blobToken.startsWith("vercel_blob_rw_")) {
+      console.error(
+        "BLOB_READ_WRITE_TOKEN is missing or invalid. It must start with 'vercel_blob_rw_'."
       );
-    }
-
-    let creator;
-    try {
-      creator = await getLocalUser(userId);
-    } catch (e) {
-      console.error("Creator not found for upload route:", e);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        {
+          error:
+            "Vercel Blob storage is not configured properly. BLOB_READ_WRITE_TOKEN is missing or invalid in environment variables.",
+        },
+        { status: 500 }
+      );
     }
 
     const body = await request.json();
-    const clientPayload =
-      typeof body.clientPayload === "string"
-        ? JSON.parse(body.clientPayload)
-        : null;
-    const galleryId = body.galleryId || clientPayload?.galleryId;
-
-    if (!galleryId) {
-      return NextResponse.json(
-        { error: "galleryId is required." },
-        { status: 400 }
-      );
-    }
-
-    const gallery = await db.execute(sql`
-      SELECT id
-      FROM galleries
-      WHERE id = ${galleryId}
-        AND creator_id = ${creator.id}
-      LIMIT 1
-    `);
-
-    if (!gallery.rows[0]) {
-      return NextResponse.json(
-        { error: "Gallery not found." },
-        { status: 404 }
-      );
-    }
 
     const response = await handleUpload({
       body,
       request,
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      token: blobToken,
 
-      onBeforeGenerateToken: async (
-        pathname
-      ) => {
+      onBeforeGenerateToken: async (pathname, clientPayload, multipart) => {
+        const { userId } = await auth();
+
+        if (!userId) {
+          throw new Error("Unauthorized");
+        }
+
+        let creator;
+        try {
+          creator = await getLocalUser(userId);
+        } catch (e) {
+          console.error("Creator not found for upload route:", e);
+          throw new Error("Unauthorized");
+        }
+
+        let galleryId: string | null = null;
+        if (clientPayload) {
+          try {
+            const parsed = JSON.parse(clientPayload);
+            galleryId = parsed.galleryId;
+          } catch {
+            throw new Error("Invalid clientPayload");
+          }
+        }
+
+        if (!galleryId) {
+          throw new Error("galleryId is required.");
+        }
+
+        const gallery = await db.execute(sql`
+          SELECT id
+          FROM galleries
+          WHERE id = ${galleryId}
+            AND creator_id = ${creator.id}
+          LIMIT 1
+        `);
+
+        if (!gallery.rows[0]) {
+          throw new Error("Gallery not found.");
+        }
+
         // Determine if this is a video or image based on extension
         const isVideo = /\.(mp4|mov|avi|mkv|webm|flv|wmv)$/i.test(pathname);
-        
+
+        // Provide explicit callbackUrl for reliable onUploadCompleted in all environments
+        const callbackUrl = process.env.VERCEL_BLOB_CALLBACK_URL
+          ? `${process.env.VERCEL_BLOB_CALLBACK_URL}/api/galleries/upload`
+          : undefined;
+
         return {
           allowedContentTypes: isVideo
             ? [
@@ -98,8 +111,10 @@ export async function POST(request: Request) {
             creatorId: creator.id,
             galleryId,
             pathname,
-            isVideo: isVideo, // Pass this to the upload completed handler
+            isVideo,
           }),
+
+          callbackUrl,
         };
       },
 
@@ -108,9 +123,25 @@ export async function POST(request: Request) {
         tokenPayload,
       }) => {
         try {
+          if (!tokenPayload) {
+            throw new Error("Missing tokenPayload");
+          }
           const payload =
             JSON.parse(tokenPayload as string);
-          const { isVideo } = payload;
+          const { isVideo, creatorId, galleryId } = payload;
+
+          // Verify gallery ownership again in callback for security
+          const gallery = await db.execute(sql`
+            SELECT id
+            FROM galleries
+            WHERE id = ${galleryId}
+              AND creator_id = ${creatorId}
+            LIMIT 1
+          `);
+
+          if (!gallery.rows[0]) {
+            throw new Error("Gallery not found or access denied in callback.");
+          }
 
           const maxOrder =
             await db.execute(sql`
@@ -122,7 +153,7 @@ export async function POST(request: Request) {
               FROM gallery_photos
 
               WHERE gallery_id =
-                ${payload.galleryId}
+                ${galleryId}
             `);
 
           const sortOrder =
@@ -135,13 +166,13 @@ export async function POST(request: Request) {
           const blobResponse = await fetch(blob.url, {
             cache: "no-store",
           });
-          
+
           if (!blobResponse.ok) {
             throw new Error(`Failed to fetch uploaded blob: ${blobResponse.status}`);
           }
-          
+
           const blobBuffer = Buffer.from(await blobResponse.arrayBuffer());
-          
+
           // Get watermark settings for this gallery
           const watermarkResult = await db.execute(sql`
             SELECT
@@ -151,10 +182,10 @@ export async function POST(request: Request) {
               opacity,
               font_size
             FROM gallery_watermarks
-            WHERE gallery_id = ${payload.galleryId}
+            WHERE gallery_id = ${galleryId}
             LIMIT 1
           `);
-          
+
           const watermarkOptions = {
             enabled: watermarkResult.rows[0]?.enabled !== false,
             text: String(watermarkResult.rows[0]?.text || "KIPSMTHN"),
@@ -172,9 +203,6 @@ export async function POST(request: Request) {
           let mimeType = "image/jpeg"; // default
           let width = null;
           let height = null;
-          let duration = null;
-          let videoCodec = null;
-          let audioCodec = null;
 
           if (isVideo) {
             // Process as video
@@ -185,14 +213,11 @@ export async function POST(request: Request) {
               opacity: watermarkOptions.opacity,
               fontSize: watermarkOptions.fontSize,
             };
-            
+
             processed = await processVideo(blobBuffer, videoWatermarkOptions);
             mimeType = processed.mimeType;
             width = processed.width;
             height = processed.height;
-            duration = processed.duration;
-            videoCodec = processed.videoCodec;
-            audioCodec = processed.audioCodec;
           } else {
             // Process as image (existing logic)
             processed = await processImage(blobBuffer, watermarkOptions);
@@ -205,16 +230,16 @@ export async function POST(request: Request) {
           const photoId = randomUUID();
           const filename = blob.pathname.split("/").pop() || blob.pathname;
           const safeFilename = filename.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 180) || "media";
-          const basePath = `galleries/${payload.galleryId}/${photoId}`;
+          const basePath = `galleries/${galleryId}/${photoId}`;
 
           // Storage
           const storage = getGalleryStorage();
 
-          let originalResult, displayResult, thumbnailResult, watermarkedResult;
+          let originalResult, displayResult, thumbnailResult;
 
           if (isVideo) {
             // For video, we store different versions
-            
+
             // Upload original video
             originalResult = await storage.putObject({
               path: `${basePath}/original.${getExtensionFromMimeType(processed.mimeType)}`,
@@ -237,7 +262,7 @@ export async function POST(request: Request) {
             });
 
             // Watermarked version (simplified - using thumbnail for now)
-            watermarkedResult = await storage.putObject({
+            await storage.putObject({
               path: `${basePath}/watermark.jpg`,
               body: processed.watermark,
               contentType: "image/jpeg",
@@ -263,14 +288,15 @@ export async function POST(request: Request) {
               contentType: "image/jpeg",
             });
 
-            watermarkedResult = await storage.putObject({
+            await storage.putObject({
               path: `${basePath}/watermark.jpg`,
               body: processed.watermark,
               contentType: "image/jpeg",
             });
           }
 
-          // Insert into database
+          // Insert into database with all required fields including *_path columns
+          // Use INSERT ... ON CONFLICT DO NOTHING to make it idempotent
           await db.execute(sql`
             INSERT INTO gallery_photos (
               id,
@@ -280,32 +306,37 @@ export async function POST(request: Request) {
               display_url,
               thumbnail_url,
               storage_path,
+              original_path,
+              display_path,
+              thumbnail_path,
+              watermark_path,
               mime_type,
               file_size,
               width,
               height,
-              duration,
-              video_codec,
-              audio_codec,
+              processing_status,
               sort_order
             )
             VALUES (
               ${photoId},
-              ${payload.galleryId},
+              ${galleryId},
               ${safeFilename},
               ${originalResult.url},
               ${displayResult.url},
               ${thumbnailResult.url},
               ${blob.pathname},
+              ${originalResult.path},
+              ${displayResult.path},
+              ${thumbnailResult.path},
+              ${basePath}/watermark.jpg,
               ${mimeType},
               ${processed.original.byteLength},
               ${width},
               ${height},
-              ${duration || null},
-              ${videoCodec || null},
-              ${audioCodec || null},
+              'ready',
               ${sortOrder}
             )
+            ON CONFLICT (id) DO NOTHING
           `);
         } catch (error) {
           console.error(
@@ -327,13 +358,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Upload failed.",
+        error: "Upload failed.",
       },
       {
-        status: 500,
+        status: 400,
       }
     );
   }
@@ -355,6 +383,6 @@ function getExtensionFromMimeType(mimeType: string): string {
     "image/heic": "heic",
     "image/heif": "heif",
   };
-  
+
   return mimeToExt[mimeType] || "bin";
 }

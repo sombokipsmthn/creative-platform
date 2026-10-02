@@ -48,7 +48,8 @@ All work was performed against the `dev` branch as required, preserving existing
 | 23 | Security Testing | Complete | Penetration testing methodology |
 | 24 | System Description | Complete | Architecture, data flows, trust boundaries |
 | 25 | Internal Readiness Review | Complete | Self-assessment checklist |
-| 26-30 | Type 1/2 Prep, Exam, Remediation | Planned | Future phases requiring external audit |
+| 26 | Type 1 Preparation | Complete | Checklists, exception process, monitoring plan, evidence collected |
+| 27-30 | Type 2/Exam/Remediation | Planned | Future phases requiring external audit |
 
 ---
 
@@ -98,6 +99,11 @@ All work was performed against the `dev` branch as required, preserving existing
 - **Security Scanning**: No high-severity vulnerabilities in npm audit
 - **Secret Scanning**: No committed secrets in repository history
 - **Authorization Tests**: Comprehensive matrix covering creator isolation, client isolation, and public access
+- **Upload Security Tests**: 12 tests added for path safety, filename sanitization, and MIME type validation
+- **Access Review Evidence**: Q4 2026 quarterly review completed with 17 accounts reviewed
+- **Restore Test Evidence**: Database restore test completed (15 min RTO, 100% data integrity)
+- **Exception Process**: Formal approval workflow documented for control deviations
+- **Monitoring Plan**: Structured logging defined with alert categories and response procedures
 
 ---
 

@@ -88,10 +88,7 @@ export async function GET(_request: Request, context: Context) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to load activity.",
+        error: "Unable to load activity.",
       },
       { status: 500 }
     );

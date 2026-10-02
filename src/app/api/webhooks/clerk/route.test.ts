@@ -30,7 +30,7 @@ import { POST } from "./route";
 describe("POST /api/webhooks/clerk", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env.CLERK_WEBHOOK_SECRET = "wh_test_secret";
+    process.env.CLERK_WEBHOOK_SECRET = "test_webhook_secret_placeholder";
     mockHeaders.get.mockImplementation((key: string) => {
       const values: Record<string, string> = {
         "svix-id": "svix_123",

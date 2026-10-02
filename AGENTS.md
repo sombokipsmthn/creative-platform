@@ -23,6 +23,7 @@ All UI components should use the centralized design system defined in `src/app/g
 ### Card Patterns
 
 **Standard Card:**
+
 ```tsx
 <div className="ui-card">
   <div className="ui-card-header">...</div>
@@ -32,6 +33,7 @@ All UI components should use the centralized design system defined in `src/app/g
 ```
 
 **Stat/Metric Card:**
+
 ```tsx
 <div className="ui-stat-card">
   <p className="ui-stat-label">Label</p>
@@ -41,6 +43,7 @@ All UI components should use the centralized design system defined in `src/app/g
 ```
 
 **Interactive Card:**
+
 ```tsx
 <Link href="/..." className="ui-card ui-card-interactive">
   ...
@@ -50,6 +53,7 @@ All UI components should use the centralized design system defined in `src/app/g
 ### Form Elements
 
 Always use the semantic classes:
+
 - Labels: `.ui-label`
 - Inputs: `.ui-input`
 - Selects: `.ui-select`
@@ -58,6 +62,7 @@ Always use the semantic classes:
 ### Buttons
 
 Use the Button component from `src/components/ui/Button.tsx` with semantic classes:
+
 - Primary: `.ui-button-primary`
 - Secondary: `.ui-button-secondary`
 - Ghost: `.ui-button-ghost`
@@ -82,6 +87,7 @@ npm run build
 ```
 
 Note: If Turbopack fails, try:
+
 ```bash
 NEXT_DISABLE_TURBOPACK=1 npm run build
 ```
@@ -89,11 +95,13 @@ NEXT_DISABLE_TURBOPACK=1 npm run build
 ## Testing
 
 Run tests with:
+
 ```bash
 npm test
 ```
 
 Lint with:
+
 ```bash
 npm run lint
 ```
@@ -105,6 +113,7 @@ Use Drizzle ORM for all database operations. See `src/db/` for schema definition
 ## Authentication
 
 Clerk is used for authentication. Protected routes should use:
+
 ```tsx
 import { useUser } from '@clerk/nextjs';
 ```
@@ -116,3 +125,13 @@ import { useUser } from '@clerk/nextjs';
 - [ ] Create comprehensive component library documentation
 - [ ] Implement theme customization capabilities
 - [ ] Add accessibility auditing and fixes
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

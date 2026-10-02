@@ -86,10 +86,7 @@ async function getAuthenticatedContext() {
     return {
       error: NextResponse.json(
         {
-          error:
-            error instanceof Error
-              ? error.message
-              : "Local creator account not found.",
+          error: "Local creator account not found.",
         },
         { status: 404 }
       ),
@@ -146,7 +143,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("GET /api/onboarding FAILED:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to load onboarding." },
+      { error: "Unable to load onboarding." },
       { status: 500 }
     );
   }
@@ -354,7 +351,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("POST /api/onboarding FAILED:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to save onboarding." },
+      { error: "Unable to save onboarding." },
       { status: 500 }
     );
   }

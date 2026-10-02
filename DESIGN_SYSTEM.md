@@ -11,6 +11,7 @@ This document describes the centralized design system implemented for the KIPSMT
 All colors are defined in `src/app/globals.css` using CSS custom properties:
 
 #### Light Mode Colors
+
 - `--color-bg-page: #f8f9fa` - Page background
 - `--color-bg-card: #ffffff` - Card background
 - `--color-bg-elevated: #ffffff` - Elevated surfaces
@@ -27,6 +28,7 @@ All colors are defined in `src/app/globals.css` using CSS custom properties:
 - `--color-danger: #ef4444` - Error/danger state
 
 #### Dark Mode Colors
+
 - `--color-bg-page: #09090b` - Dark page background
 - `--color-bg-card: #1e1e1e` - Dark card background
 - `--color-text-primary: #f8f9fa` - Light text on dark
@@ -35,7 +37,7 @@ All colors are defined in `src/app/globals.css` using CSS custom properties:
 ### Spacing Scale
 
 | Token | Value | Usage |
-|-------|-------|-------|
+| ------- | ------- | ------- |
 | `--spacing-xs` | 0.25rem (4px) | Tight padding |
 | `--spacing-sm` | 0.5rem (8px) | Small gaps |
 | `--spacing-md` | 1rem (16px) | Standard padding |
@@ -47,7 +49,7 @@ All colors are defined in `src/app/globals.css` using CSS custom properties:
 ### Border Radius
 
 | Token | Value | Usage |
-|-------|-------|-------|
+| ------- | ------- | ------- |
 | `--radius-sm` | 0.375rem (6px) | Small elements |
 | `--radius-md` | 0.5rem (8px) | Inputs, badges |
 | `--radius-lg` | 0.75rem (12px) | Cards, buttons |
@@ -59,7 +61,7 @@ All colors are defined in `src/app/globals.css` using CSS custom properties:
 ### Typography Scale
 
 | Token | Value | Usage |
-|-------|-------|-------|
+| ------- | ------- | ------- |
 | `--font-size-xs` | 0.75rem (12px) | Eyebrow text, metadata |
 | `--font-size-sm` | 0.875rem (14px) | Body text |
 | `--font-size-md` | 1rem (16px) | Standard body |
@@ -191,11 +193,13 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 ### Converting from Hardcoded Styles
 
 **Before:**
+
 ```html
 <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl p-6">
 ```
 
 **After:**
+
 ```html
 <div className="ui-card p-6">
 ```
@@ -203,11 +207,13 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 ### Converting Buttons
 
 **Before:**
+
 ```html
 <button className="bg-purple-600 text-white px-4 py-2 rounded-lg">
 ```
 
 **After:**
+
 ```html
 <Button variant="primary">
 ```
@@ -289,6 +295,7 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 ## Recently Added Semantic Classes
 
 ### Layout Classes
+
 - `.ui-page` - Base page container with background and text colors
 - `.ui-page-header` - Page header section with bottom border
 - `.ui-shell` - Content wrapper with max-width and horizontal padding
@@ -296,6 +303,7 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 - `.ui-page-title-lg` - Large page title for secondary pages
 
 ### Component Updates
+
 - All cards now use `.ui-card` base class with `.ui-card-interactive` for hover effects
 - Form elements use standardized `.ui-input`, `.ui-select`, `.ui-textarea`, `.ui-label`
 - Buttons now use the Button component from `src/components/ui/Button.tsx` with semantic variants
@@ -307,6 +315,7 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 - Page titles use `.ui-page-title`
 
 ### Design Tokens Added
+
 - Added `--spacing-xs` through `--spacing-3xl` tokens
 - Added `--radius-sm` through `--radius-full` tokens
 - Added `--font-size-2xs` through `--font-size-6xl` tokens

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { creatorProfiles, creatorBusinessProfiles, users } from "@/db/schema";
-import getCurrentUser from "@/lib/auth/get-current-user";
+import { withCreatorApi } from "@/lib/api/route-boundaries";
 
 /* =========================================================
    GET /api/profile
@@ -10,35 +10,31 @@ import getCurrentUser from "@/lib/auth/get-current-user";
    Returns the authenticated creator's account, personal profile,
    and business profile. No demo/default creator data is used.
    ========================================================= */
-export async function GET() {
-  try {
-    const user = await getCurrentUser();
+export async function GET(request: Request) {
+  return withCreatorApi(request, async (_request, user) => {
+    try {
+      const [profile, businessProfile] = await Promise.all([
+        db.query.creatorProfiles.findFirst({
+          where: eq(creatorProfiles.userId, user.id),
+        }),
+        db.query.creatorBusinessProfiles.findFirst({
+          where: eq(creatorBusinessProfiles.userId, user.id),
+        }),
+      ]);
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({
+        user,
+        profile,
+        businessProfile,
+      });
+    } catch (error) {
+      console.error("GET /api/profile error:", error);
+      return NextResponse.json(
+        { error: "Failed to fetch profile" },
+        { status: 500 }
+      );
     }
-
-    const [profile, businessProfile] = await Promise.all([
-      db.query.creatorProfiles.findFirst({
-        where: eq(creatorProfiles.userId, user.id),
-      }),
-      db.query.creatorBusinessProfiles.findFirst({
-        where: eq(creatorBusinessProfiles.userId, user.id),
-      }),
-    ]);
-
-    return NextResponse.json({
-      user,
-      profile,
-      businessProfile,
-    });
-  } catch (error) {
-    console.error("GET /api/profile error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 }
-    );
-  }
+  });
 }
 
 /* =========================================================
@@ -47,12 +43,8 @@ export async function GET() {
    Updates only fields that actually exist in the database schema.
    ========================================================= */
 export async function PATCH(request: Request) {
-  try {
-    const user = await getCurrentUser();
-
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  return withCreatorApi(request, async (_request, user) => {
+    try {
 
     const body = await request.json();
     const profile = body?.profile ?? null;
@@ -184,4 +176,5 @@ export async function PATCH(request: Request) {
       { status: 500 }
     );
   }
+  });
 }

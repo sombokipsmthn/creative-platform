@@ -208,10 +208,7 @@ export async function GET(_request: Request, context: Context) {
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to load gallery.",
+        error: "Unable to load gallery.",
       },
       { status: 500 }
     );
@@ -456,10 +453,7 @@ export async function PATCH(
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to update gallery.",
+        error: "Unable to update gallery.",
       },
       { status: 500 }
     );
@@ -515,10 +509,7 @@ export async function DELETE(
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to delete gallery.",
+        error: "Unable to delete gallery.",
       },
       { status: 500 }
     );

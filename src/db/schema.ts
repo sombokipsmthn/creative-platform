@@ -404,3 +404,16 @@ export const contractEvents = pgTable("contract_events", {
   metadata: jsonb("metadata").default({}).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull()
 });
+
+export const uploadAudit = pgTable("upload_audit", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull(),
+  galleryId: uuid("gallery_id").notNull().references(() => galleries.id, { onDelete: "cascade" }),
+  filename: text("filename").notNull(),
+  mimeType: text("mime_type").notNull(),
+  fileSize: bigint("file_size", { mode: "number" }).notNull(),
+  blobPath: text("blob_path").notNull(),
+  success: boolean("success").notNull(),
+  failureReason: text("failure_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull()
+});

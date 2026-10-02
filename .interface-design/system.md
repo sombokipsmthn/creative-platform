@@ -8,7 +8,7 @@
 ## Direction & Feel
 
 | Aspect | Decision | Why |
-|--------|----------|-----|
+| -------- | ---------- | ----- |
 | **Human** | A creative entrepreneur or studio manager who opens the app between client calls, after a shoot, or first thing in the morning. They need to see what's owed, what's next, and what's delivered — quickly. | The interface must serve a working creative professional, not a generic SaaS user. |
 | **Primary verb** | Survey — "what's my status?" — then act — "create quote / invoice / gallery / client record." | The dashboard is a status overview first, action hub second. |
 | **Feel** | Tight but not cramped. Credible, not cute. Like a professional tool you'd trust with financial data. Warm enough to feel human (purple accent, organic shadows), cold enough to feel reliable (neutral backgrounds, clear hierarchy). | The product serves creative people who work with their hands and mind — the interface should feel like a good tool, not a toy. |
@@ -19,7 +19,7 @@
 ## Depth Strategy
 
 | Layer | Light mode | Dark mode | Description |
-|-------|-----------|-----------|-------------|
+| ------- | ----------- | ----------- | ------------- |
 | **Surface 0** | `#f8f9fa` (--color-bg-page) | `#121212` | Page background |
 | **Surface 1** | `#ffffff` (--color-bg-card) | `#1e1e1e` (--color-bg-card) | Cards, modals, panels |
 | **Surface 2** | `#f1f3f5` (--color-bg-input) | `#2d2d2d` (--color-bg-input) | Inputs, form controls |
@@ -65,7 +65,7 @@ meta:       400 / muted
 ## Palette
 
 | Token | Light | Dark | Usage |
-|-------|-------|------|-------|
+| ------- | ------- | ------ | ------- |
 | `--color-bg-page` | `#f8f9fa` | `#121212` | Page background |
 | `--color-bg-card` | `#ffffff` | `#1e1e1e` | Cards, panels |
 | `--color-bg-elevated` | `#ffffff` | `#2d2d2d` | Elevated panels / section backs |
@@ -102,7 +102,7 @@ meta:       400 / muted
 ## Spacing & Sizing
 
 | Base unit | 8px (repeated everywhere) |
-|-----------|--------------------------|
+| ----------- | -------------------------- |
 | Micro gaps (icon / text) | 4px |
 | Component padding (button, card) | 16px vertical, 12px horizontal |
 | Section gap (between groups of cards) | 24px |
@@ -119,7 +119,7 @@ meta:       400 / muted
 ### Button (CVA/variant style)
 
 | Variant | Class | Usage |
-|---------|-------|-------|
+| --------- | ------- | ------- |
 | `primary` | `ui-button ui-button-primary` | Main CTA |
 | `secondary` | `ui-button ui-button-secondary` | Secondary actions |
 | `ghost` | `ui-button ui-button-ghost` | Minimal action |

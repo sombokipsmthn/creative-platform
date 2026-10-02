@@ -8,7 +8,7 @@ import {
   quotes,
 } from "@/db/schema";
 
-import getCurrentUser from "@/lib/auth/get-current-user";
+import { withCreatorApi } from "@/lib/api/route-boundaries";
 
 type RouteContext = {
   params: Promise<{
@@ -206,23 +206,11 @@ async function getQuoteResponse(
 */
 
 export async function GET(
-  _req: Request,
+  request: Request,
   context: RouteContext
 ) {
-  try {
-    const user =
-      await getCurrentUser();
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
+  return withCreatorApi(request, async (_request, user) => {
+    try {
 
     const { id } =
       await context.params;
@@ -276,6 +264,7 @@ export async function GET(
       }
     );
   }
+  });
 }
 
 /*
@@ -294,23 +283,11 @@ export async function GET(
 */
 
 export async function PATCH(
-  req: Request,
+  request: Request,
   context: RouteContext
 ) {
-  try {
-    const user =
-      await getCurrentUser();
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          error: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
+  return withCreatorApi(request, async (_request, user) => {
+    try {
 
     const { id } =
       await context.params;
@@ -351,7 +328,7 @@ export async function PATCH(
     >;
 
     try {
-      body = await req.json();
+      body = await _request.json();
     } catch {
       return NextResponse.json(
         {
@@ -978,6 +955,7 @@ export async function PATCH(
       }
     );
   }
+  });
 }
 
 /*
@@ -992,8 +970,8 @@ export async function PATCH(
 */
 
 export async function PUT(
-  req: Request,
+  request: Request,
   context: RouteContext
 ) {
-  return PATCH(req, context);
+  return PATCH(request, context);
 }

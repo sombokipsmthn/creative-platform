@@ -733,10 +733,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to prepare download.",
+        error: "Unable to prepare download.",
       },
       {
         status: 500,

@@ -10,6 +10,8 @@ export default defineConfig({
     globals: true,
     clearMocks: true,
     restoreMocks: true,
+    include: ["src/**/*.test.ts"],
+    exclude: ["**/node_modules/**", "**/.claude/**"],
   },
   resolve: {
     alias: {

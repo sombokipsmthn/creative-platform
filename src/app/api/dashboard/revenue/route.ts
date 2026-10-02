@@ -1,33 +1,12 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { invoices, users } from "@/db/schema";
+import { invoices } from "@/db/schema";
+import { withCreatorApi } from "@/lib/api/route-boundaries";
 
-export async function GET() {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-
-    const user = await db.query.users.findFirst({
-      where: eq(users.authUserId, userId),
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "Creator account not found" },
-        { status: 404 }
-      );
-    }
-
-
+export async function GET(req: Request) {
+  return withCreatorApi(req, async (_request, user) => {
     const start = new Date();
     start.setMonth(start.getMonth() - 11);
     start.setDate(1);
@@ -47,7 +26,7 @@ export async function GET() {
       .where(
         and(
           eq(invoices.creatorId, user.id),
-         eq(invoices.status, "paid"),
+          eq(invoices.status, "paid"),
           gte(invoices.issueDate, start),
           lt(invoices.issueDate, new Date())
         )
@@ -65,21 +44,5 @@ export async function GET() {
     });
 
 
-  } catch(error){
-
-    console.error(
-      "Revenue API error:",
-      error
-    );
-
-
-    return NextResponse.json(
-      {
-        error:"Failed to load revenue data"
-      },
-      {
-        status:500
-      }
-    );
-  }
+  });
 }

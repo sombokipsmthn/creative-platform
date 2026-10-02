@@ -39,6 +39,16 @@ export async function withCreatorApi<T>(
 
   try {
     const result = await handler(req, user as AuthenticatedUser);
+
+    /*
+     * Allow handlers to return a NextResponse directly (e.g. for
+     * 400/404/401 responses with custom bodies). Re-wrapping those
+     * with NextResponse.json would overwrite their status code.
+     */
+    if (result instanceof NextResponse) {
+      return result;
+    }
+
     return NextResponse.json(result, {
       status: options.status ?? 200,
     });

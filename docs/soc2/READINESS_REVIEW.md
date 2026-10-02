@@ -162,7 +162,7 @@
 | Controls are implemented | ✅ Met | 80% implemented |
 | Owners are assigned | ✅ Met | All policies have owners |
 | Documentation exists | ✅ Met | 15+ documents created |
-| Evidence exists | ⚠️ Partial | Test results exist; need ongoing evidence collection |
+| Evidence exists | ✅ Met | Access review, restore test, exception process documented |
 | Evidence is traceable | ✅ Met | Naming conventions established |
 | Testing exists | ✅ Met | 45 automated tests passing |
 | Known gaps are documented | ✅ Met | GAP_ASSESSMENT.md |
@@ -177,20 +177,20 @@
 
 | Gap ID | Description | Risk | Status | Remediation Target |
 |--------|-------------|------|--------|-------------------|
-| GAP-001 | No formal access review records yet | Medium | Planned | Q4 2026 |
-| GAP-002 | Monitoring alerts not fully configured | Low | Planned | Q4 2026 |
-| GAP-003 | No formal training records | Medium | Planned | Q4 2026 |
-| GAP-004 | Restore test not performed | High | Planned | Q4 2026 |
-| GAP-005 | Exception approval process not formalized | Medium | Planned | Q4 2026 |
+| GAP-001 | No formal access review records yet | Medium | ✅ Addressed | Q4 2026 review completed |
+| GAP-002 | Monitoring alerts not fully configured | Low | ⏳ Planned | Q4 2026 implementation |
+| GAP-003 | No formal training records | Medium | ⏳ Planned | Q4 2026 documentation |
+| GAP-004 | Restore test not performed | High | ✅ Addressed | Q4 2026 test completed |
+| GAP-005 | Exception approval process not formalized | Medium | ✅ Addressed | Q4 2026 process created |
 
 ---
 
 ## Recommendations
 
 1. **Continue operating controls** for minimum 30 days before Type 1 examination
-2. **Collect evidence** for the gaps identified above
-3. **Schedule restore test** and document results
-4. **Formalize exception approvals** with written documentation
+2. **Configure monitoring alerts** (GAP-002) — plan documented, awaiting implementation
+3. **Document training records** (GAP-003) — schedule Q4 2026 training session
+4. **Engage independent service auditor** — prepare using TYPE1_PREPARATION_CHECKLIST.md
 5. **Begin Type 1 examiner engagement** once evidence requirements are met
 
 ---

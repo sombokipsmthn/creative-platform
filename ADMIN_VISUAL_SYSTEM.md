@@ -12,9 +12,11 @@ This guide documents the unified visual system for all authenticated `/admin` pa
 ## Shared Components
 
 ### PageHeader
+
 Path: `src/components/admin/PageHeader.tsx`
 
 Usage:
+
 ```tsx
 <PageHeader
   backLink="/admin"
@@ -25,9 +27,11 @@ Usage:
 ```
 
 ### StatCards
+
 Path: `src/components/admin/StatCards.tsx`
 
 Usage:
+
 ```tsx
 <StatCards 
   stats={[
@@ -39,18 +43,22 @@ Usage:
 ```
 
 ### StatusBadge
+
 Path: `src/components/admin/StatusBadge.tsx`
 
 Usage:
+
 ```tsx
 <StatusBadge status="active" />          {/* auto-mapped to success */}
 <StatusBadge status="draft" variant="default" />
 ```
 
 ### AdminPagination
+
 Path: `src/components/admin/AdminPagination.tsx`
 
 Usage:
+
 ```tsx
 <AdminPagination
   currentPage={page}
@@ -62,9 +70,11 @@ Usage:
 ```
 
 ### EmptyState
+
 Path: `src/components/admin/EmptyState.tsx`
 
 Usage:
+
 ```tsx
 <EmptyState
   icon={<Icon className="h-6 w-6" />}
@@ -77,6 +87,7 @@ Usage:
 ## CSS Classes Reference
 
 ### Page Structure
+
 - `.admin-page` - Main page wrapper
 - `.admin-page-container` - Content container (max-width, auto margins)
 - `.admin-page-header` - Page title section
@@ -86,10 +97,12 @@ Usage:
 - `.admin-page-actions` - Primary actions container
 
 ### Sections
+
 - `.admin-section` - Grouped content section
 - `.admin-section-title` - Section heading
 
 ### Stat Cards
+
 - `.admin-stat-cards` - Grid container (2 cols mobile, 4 cols desktop)
 - `.admin-stat-card` - Individual stat card
 - `.admin-stat-label` - Stat label (uppercase, small)
@@ -97,17 +110,20 @@ Usage:
 - `.admin-stat-detail` - Additional info (smaller, muted)
 
 ### Filter Bar
+
 - `.admin-filter-bar` - Filter panel
 - `.admin-filter-search` - Search input wrapper
 - `.admin-filter-controls` - Filter controls area
 
 ### Tables
+
 - `.admin-table` - Table element
 - `.admin-table-header` - Table header row
 - `.admin-table-row` - Table row (hover effect)
 - `.admin-table-cell` - Table cell
 
 ### Status Badges
+
 - `.admin-status-badge` - Badge element
 - `.admin-status-badge-dot` - Color indicator dot
 - `.admin-status-badge.success` - Green variant
@@ -117,6 +133,7 @@ Usage:
 - `.admin-status-badge.accent` - Purple variant
 
 ### Buttons
+
 - `.admin-button` - Base button
 - `.admin-button-primary` - Purple, main action
 - `.admin-button-secondary` - Soft surface, secondary
@@ -124,28 +141,33 @@ Usage:
 - `.admin-button-danger` - Red, destructive
 
 ### Tabs
+
 - `.admin-tabs` - Tabs container
 - `.admin-tab` - Individual tab
 - `.admin-tab[data-active="true"]` - Active tab
 
 ### Pagination
+
 - `.admin-pagination` - Pagination wrapper
 - `.admin-pagination-pages` - Page numbers area
 - `.admin-pagination-current` - Current page indicator
 
 ### Empty States
+
 - `.admin-empty-state` - Empty state container
 - `.admin-empty-icon` - Icon wrapper
 - `.admin-empty-title` - Empty title
 - `.admin-empty-description` - Empty description
 
 ### Forms
+
 - `.admin-form-group` - Form field wrapper
 - `.admin-form-label` - Field label
 - `.admin-form-hint` - Helper text
 - `.admin-form-error` - Error message
 
 ### Panels & Cards
+
 - `.admin-panel` - Content panel
 - `.admin-card` - Card element
 - `.admin-card-interactive` - Clickable card with hover
@@ -195,49 +217,59 @@ generatePageNumbers(currentPage, totalPages)
 When updating an admin page to use the new system:
 
 ### 1. Page Structure
+
 - [ ] Use `.admin-page` wrapper
 - [ ] Use `.admin-page-container` for content max-width
 - [ ] Import `PageHeader` component
 - [ ] Remove inline header styling
 
 ### 2. Page Title Area
+
 - [ ] Replace custom header with `<PageHeader />`
 - [ ] Provide `backLink`, `title`, `description`
 - [ ] Move primary action to `primaryAction` prop
 
 ### 3. Stat Cards
+
 - [ ] Replace custom stat card markup with `<StatCards />`
 - [ ] Use `admin-utils.ts` for formatting values
 - [ ] Map statuses to correct color variants
 
 ### 4. Filter Bar
+
 - [ ] Keep existing `<TableFilterBar />` component
 - [ ] Ensure search placeholder is consistent
 - [ ] Review filter options and pills
 
 ### 5. Tables
+
 - [ ] Use `.admin-table`, `.admin-table-header`, `.admin-table-row`, `.admin-table-cell` classes
 - [ ] Replace status badges with `<StatusBadge />`
 - [ ] Use utility functions for formatting
 
 ### 6. Pagination
+
 - [ ] Replace custom pagination with `<AdminPagination />`
 - [ ] Use `getPaginationInfo()` and `generatePageNumbers()`
 
 ### 7. Empty States
+
 - [ ] Replace custom empty state with `<EmptyState />`
 - [ ] Provide icon, title, description, action
 
 ### 8. Buttons
+
 - [ ] Use `.admin-button` with variant classes
 - [ ] Or use existing `<Button />` component with `variant` prop
 
 ### 9. Forms
+
 - [ ] Use `.admin-form-group` for field wrappers
 - [ ] Use `.admin-form-label`, `.admin-form-hint`, `.admin-form-error` classes
 - [ ] Keep existing `.ui-input`, `.ui-select`, `.ui-textarea` inputs
 
 ### 10. Status Badges
+
 - [ ] Replace inline status styles with `<StatusBadge />`
 - [ ] Use `.admin-status-badge*` classes if needed
 
@@ -276,6 +308,7 @@ Via CSS variables in `globals.css`:
 ## Migration Progress
 
 Pages updated to use new system:
+
 - [ ] Dashboard (`/admin`)
 - [ ] Clients (`/admin/clients`) - reference page
 - [ ] Projects (`/admin/projects` → redirects to `/admin/galleries`)

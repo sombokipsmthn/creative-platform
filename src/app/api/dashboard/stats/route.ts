@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { and, count, desc, eq, gte, lt, ne, sum } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, galleries, invoices, projects, quotes, users } from "@/db/schema";
+import { clients, galleries, invoices, projects, quotes } from "@/db/schema";
+import { withCreatorApi } from "@/lib/api/route-boundaries";
 
 function startOfDay(date: Date) {
   const value = new Date(date);
@@ -42,20 +42,8 @@ function money(value: unknown) {
 }
 
 export async function GET(request: Request) {
-  try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const user = await db.query.users.findFirst({
-      where: eq(users.authUserId, userId),
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "Creator account not found" }, { status: 404 });
-    }
+  return withCreatorApi(request, async (_request, user) => {
+    const creator = user.id;
 
     const { searchParams } = new URL(request.url);
     const requestedRange = searchParams.get("range") ?? "30d";
@@ -66,7 +54,6 @@ export async function GET(request: Request) {
     const now = new Date();
     const periodStart = startOfPeriod(now, range);
     const periodEnd = addDays(startOfDay(now), 1);
-    const creator = user.id;
 
     const [
       clientLifetime,
@@ -136,7 +123,7 @@ export async function GET(request: Request) {
       ...recentClients.map((item) => ({ id: `client-${item.id}`, type: "client" as const, title: "New client", description: item.name, date: item.createdAt })),
       ...recentProjects.map((item) => ({ id: `project-${item.id}`, type: "project" as const, title: `Project ${item.status}`, description: item.name, date: item.createdAt })),
       ...recentQuotes.map((item) => ({ id: `quote-${item.id}`, type: "quote" as const, title: `Quote ${item.status}`, description: item.title, date: item.createdAt })),
-      ...recentInvoices.map((item) => ({ id: `invoice-${item.id}`, type: "invoice" as const, title: `Invoice ${item.status}`, description: item.invoiceNumber || item.title, date: item.createdAt })),
+      ...recentInvoices.map((item) => ({ id: `invoice-${item.id}`, type: "invoice" as const, title: `Invoice ${item.invoiceNumber || item.title}`, date: item.createdAt })),
       ...recentGalleries.map((item) => ({ id: `gallery-${item.id}`, type: "gallery" as const, title: `Gallery ${item.status}`, description: item.title, date: item.createdAt })),
     ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 8).map((item) => ({ ...item, date: item.date.toISOString() }));
 
@@ -176,8 +163,5 @@ export async function GET(request: Request) {
       },
       activity,
     });
-  } catch (error) {
-    console.error("GET /api/dashboard/stats error:", error);
-    return NextResponse.json({ error: "Failed to load dashboard statistics" }, { status: 500 });
-  }
+  });
 }

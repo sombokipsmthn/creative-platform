@@ -114,9 +114,7 @@ export async function POST() {
     return NextResponse.json(
       {
         error:
-          error instanceof Error
-            ? error.message
-            : "Failed to sync user",
+          "Failed to sync user",
       },
       {
         status: 500,

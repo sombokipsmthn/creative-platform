@@ -138,6 +138,7 @@ export default function AdminLayout({
   const isLoginPage = pathname === '/admin/login';
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
+  const [hasLocalAccount, setHasLocalAccount] = useState(true);
   const splitView = useSplitView();
 
   useEffect(() => {
@@ -162,7 +163,21 @@ export default function AdminLayout({
       }
     }
 
+    async function checkLocalAccount() {
+      try {
+        const res = await fetch('/api/profile', { cache: 'no-store' });
+        if (isMounted) {
+          setHasLocalAccount(res.ok);
+        }
+      } catch {
+        if (isMounted) {
+          setHasLocalAccount(false);
+        }
+      }
+    }
+
     loadBadgeCounts();
+    checkLocalAccount();
 
     return () => {
       isMounted = false;
@@ -196,6 +211,25 @@ export default function AdminLayout({
 
   if (!isSignedIn) {
     return null;
+  }
+
+  if (!hasLocalAccount) {
+    return (
+      <SplitViewProvider>
+        <div className="ui-page flex min-h-screen items-center justify-center">
+          <div className="text-center">
+            <p className="ui-meta uppercase">
+              Redirecting to onboarding...
+            </p>
+          </div>
+        </div>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "window.location.href = '/admin/onboarding';",
+          }}
+        />
+      </SplitViewProvider>
+    );
   }
 
   return (

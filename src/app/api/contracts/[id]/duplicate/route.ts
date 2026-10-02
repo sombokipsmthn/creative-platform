@@ -1,16 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { withCreatorApi } from '@/lib/api/route-boundaries';
 import { duplicateContract } from '@/lib/contracts/server';
 
+type Context = {
+  params: Promise<{ id: string }>;
+};
+
 export async function POST(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  context: Context
 ) {
-  try {
-    const { id } = await params;
-    const duplicate = await duplicateContract(id);
-    return NextResponse.json(duplicate);
-  } catch (error) {
-    console.error('POST /api/contracts/[id]/duplicate error:', error);
-    return NextResponse.json({ error: 'Failed to duplicate contract' }, { status: 500 });
-  }
+  return withCreatorApi(request, async (_req, user) => {
+    try {
+      const { id } = await context.params;
+      const duplicate = await duplicateContract(id);
+      return NextResponse.json(duplicate);
+    } catch (error) {
+      console.error('POST /api/contracts/[id]/duplicate error:', error);
+      return NextResponse.json({ error: 'Failed to duplicate contract' }, { status: 500 });
+    }
+  });
 }

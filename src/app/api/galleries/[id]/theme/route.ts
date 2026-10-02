@@ -168,7 +168,7 @@ export async function GET(_request: Request, context: Context) {
   } catch (error) {
     console.error("GET /api/galleries/[id]/theme failed:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to load theme." },
+      { error: "Unable to load theme." },
       { status: 500 },
     );
   }
@@ -264,7 +264,7 @@ export async function PATCH(request: Request, context: Context) {
   } catch (error) {
     console.error("PATCH /api/galleries/[id]/theme failed:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to update theme." },
+      { error: "Unable to update theme." },
       { status: 500 },
     );
   }

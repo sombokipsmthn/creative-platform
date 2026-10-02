@@ -8,19 +8,17 @@ import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 async function getCreator() {
   try {
     const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY;
-    let userId: string | null = null;
-
-    if (clerkKey) {
-      const { userId: clerkUserId } = await auth();
-      userId = clerkUserId;
-    } else if (process.env.NODE_ENV === 'development') {
-      userId = "dev_admin_user";
-    } else {
+    if (!clerkKey) {
       return null;
     }
 
-    if (!userId) return null;
-    return getOrCreateLocalUser(userId);
+    const { userId: clerkUserId } = await auth();
+
+    if (!clerkUserId) {
+      return null;
+    }
+
+    return getOrCreateLocalUser(clerkUserId);
   } catch (error) {
     console.error("getCreator error:", error);
     return null;
@@ -86,7 +84,7 @@ export async function GET() {
     return NextResponse.json({ galleries: result.rows });
   } catch (error) {
     console.error("GET /api/galleries error:", error);
-    return NextResponse.json({ error: "Unable to load galleries.", details: error instanceof Error ? error.message : String(error) }, { status: 500 });
+    return NextResponse.json({ error: "Unable to load galleries." }, { status: 500 });
   }
 }
 
@@ -172,7 +170,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("POST /api/galleries error:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to create gallery." },
+      { error: "Unable to create gallery." },
       { status: 500 },
     );
   }

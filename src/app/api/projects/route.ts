@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { projects, clients } from "@/db/schema";
-import getCurrentUser from "@/lib/auth/get-current-user";
+import { withCreatorApi } from "@/lib/api/route-boundaries";
 
 /* =========================================================
    GET /api/projects
@@ -10,47 +10,43 @@ import getCurrentUser from "@/lib/auth/get-current-user";
    Returns all projects belonging to the current creator.
    ========================================================= */
 export async function GET(req: Request) {
-  try {
-    const user = await getCurrentUser();
+  return withCreatorApi(req, async (_request, user) => {
+    try {
+      const { searchParams } = new URL(req.url);
+      const status = searchParams.get("status");
+      const clientId = searchParams.get("clientId");
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const conditions = [eq(projects.creatorId, user.id)];
+
+      if (status) {
+        conditions.push(eq(projects.status, status));
+      }
+
+      if (clientId) {
+        conditions.push(eq(projects.clientId, clientId));
+      }
+
+      const results = await db
+        .select({
+          project: projects,
+          client: clients,
+        })
+        .from(projects)
+        .leftJoin(clients, eq(projects.clientId, clients.id))
+        .where(and(...conditions))
+        .orderBy(desc(projects.createdAt));
+
+      return NextResponse.json(
+        results.map(({ project, client }) => ({
+          ...project,
+          client,
+        }))
+      );
+    } catch (error) {
+      console.error("GET /api/projects error:", error);
+      return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
     }
-
-    const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status");
-    const clientId = searchParams.get("clientId");
-
-    const conditions = [eq(projects.creatorId, user.id)];
-
-    if (status) {
-      conditions.push(eq(projects.status, status));
-    }
-
-    if (clientId) {
-      conditions.push(eq(projects.clientId, clientId));
-    }
-
-    const results = await db
-      .select({
-        project: projects,
-        client: clients,
-      })
-      .from(projects)
-      .leftJoin(clients, eq(projects.clientId, clients.id))
-      .where(and(...conditions))
-      .orderBy(desc(projects.createdAt));
-
-    return NextResponse.json(
-      results.map(({ project, client }) => ({
-        ...project,
-        client,
-      }))
-    );
-  } catch (error) {
-    console.error("GET /api/projects error:", error);
-    return NextResponse.json({ error: "Failed to fetch projects" }, { status: 500 });
-  }
+  });
 }
 
 /* =========================================================
@@ -59,48 +55,44 @@ export async function GET(req: Request) {
    Creates a new project.
    ========================================================= */
 export async function POST(request: Request) {
-  try {
-    const user = await getCurrentUser();
+  return withCreatorApi(request, async (_request, user) => {
+    try {
+      const body = await request.json();
+      const name = String(body?.name || "").trim();
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      if (!name) {
+        return NextResponse.json({ error: "Project name is required" }, { status: 400 });
+      }
+
+      const [project] = await db
+        .insert(projects)
+        .values({
+          creatorId: user.id,
+          clientId: body?.clientId || null,
+          name,
+          description: body?.description || null,
+          scopeOfWork: body?.scopeOfWork || null,
+          deliverables: body?.deliverables || null,
+          totalAmount: body?.totalAmount ? Number(body.totalAmount) : null,
+          currency: body?.currency || "KES",
+          paymentTerms: body?.paymentTerms || null,
+          revisionsPolicy: body?.revisionsPolicy || null,
+          licensingTerms: body?.licensingTerms || null,
+          noticePeriod: body?.noticePeriod || null,
+          startDate: body?.startDate ? new Date(body.startDate) : null,
+          endDate: body?.endDate ? new Date(body.endDate) : null,
+          status: body?.status || "active",
+        })
+        .returning();
+
+      if (!project) {
+        throw new Error("Project could not be created");
+      }
+
+      return NextResponse.json(project, { status: 201 });
+    } catch (error) {
+      console.error("POST /api/projects error:", error);
+      return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
     }
-
-    const body = await request.json();
-    const name = String(body?.name || "").trim();
-
-    if (!name) {
-      return NextResponse.json({ error: "Project name is required" }, { status: 400 });
-    }
-
-    const [project] = await db
-      .insert(projects)
-      .values({
-        creatorId: user.id,
-        clientId: body?.clientId || null,
-        name,
-        description: body?.description || null,
-        scopeOfWork: body?.scopeOfWork || null,
-        deliverables: body?.deliverables || null,
-        totalAmount: body?.totalAmount ? Number(body.totalAmount) : null,
-        currency: body?.currency || "KES",
-        paymentTerms: body?.paymentTerms || null,
-        revisionsPolicy: body?.revisionsPolicy || null,
-        licensingTerms: body?.licensingTerms || null,
-        noticePeriod: body?.noticePeriod || null,
-        startDate: body?.startDate ? new Date(body.startDate) : null,
-        endDate: body?.endDate ? new Date(body.endDate) : null,
-        status: body?.status || "active",
-      })
-      .returning();
-
-    if (!project) {
-      throw new Error("Project could not be created");
-    }
-
-    return NextResponse.json(project, { status: 201 });
-  } catch (error) {
-    console.error("POST /api/projects error:", error);
-    return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
-  }
+  });
 }

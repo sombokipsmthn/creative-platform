@@ -484,10 +484,7 @@ export async function POST(
 
     return NextResponse.json(
       {
-        error:
-          error instanceof Error
-            ? error.message
-            : "Unable to add photos.",
+        error: "Unable to add photos.",
       },
       {
         status: 500,

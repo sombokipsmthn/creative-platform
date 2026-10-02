@@ -173,7 +173,7 @@ export default function CreativeOSDashboardPage() {
   const email = activeCreator?.email || user?.primaryEmailAddress?.emailAddress || '';
   const avatar = activeCreator?.profile?.avatarUrl || user?.imageUrl || '';
   const paidRate = useMemo(() => {
-    if (!stats) return 0;
+    if (!stats || !stats.invoices || !stats.invoices.statuses) return 0;
     const total = Object.values(stats.invoices.statuses).reduce((sum, value) => sum + (value || 0), 0);
     return total ? Math.round(((stats.invoices.statuses.paid || 0) / total) * 100) : 0;
   }, [stats]);

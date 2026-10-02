@@ -78,7 +78,7 @@ export const initialUsersDatabase: Record<string, UserAccount> = {
     phone: '+254 722 145 776',
     location: 'Nairobi, Kenya',
     kraPin: 'A012345678X',
-    passcode: 'sombo2026',
+    passcode: 'REDACTED',
     bio: 'Creative director and visual storytelling specialist documenting African startup ecosystems and clean-tech innovation.',
     avatarUrl: 'https://unavatar.io/linkedin/sombo09?fallback=https://github.com/sombokipsmthn.png',
     paymentDetails: {
@@ -133,8 +133,8 @@ export const initialUsersDatabase: Record<string, UserAccount> = {
       { publication: 'HEVA Fund Official Press', title: 'Uhuru Market Brand Identity', link: 'https://www.hevafund.com/', tag: 'Design Feature' },
     ],
     clients: [
-      { id: 'c1', name: 'UNDP Timbuktoo & ccHUB', email: 'timbuktoo@undp.org', token: 'xK9_mQ2pL7v', pin: '4821', status: 'IN_REVIEW' },
-      { id: 'c2', name: 'BURN Manufacturing USA', email: 'media@burnmfg.com', token: 'burn_impact_2025', pin: '1234', status: 'FINAL_DELIVERY' },
+      { id: 'c1', name: 'UNDP Timbuktoo & ccHUB', email: 'timbuktoo@undp.org', token: 'REDACTED', pin: 'REDACTED', status: 'IN_REVIEW' },
+      { id: 'c2', name: 'BURN Manufacturing USA', email: 'media@burnmfg.com', token: 'REDACTED', pin: 'REDACTED', status: 'FINAL_DELIVERY' },
     ],
     expenses: [],
   },
@@ -147,7 +147,7 @@ export const initialUsersDatabase: Record<string, UserAccount> = {
     phone: '+254 700 000 000',
     location: 'Nairobi, Kenya',
     kraPin: 'P000000000X',
-    passcode: 'demo2026',
+    passcode: 'REDACTED',
     bio: 'Lead visual director specializing in commercial photography, brand films, and motion design.',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=1000&q=80',
     paymentDetails: {

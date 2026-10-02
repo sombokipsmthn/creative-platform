@@ -36,7 +36,9 @@ All styles use CSS variables from `globals.css` for consistent theming.
 Created reusable components located in `src/components/admin/`:
 
 #### PageHeader.tsx
+
 Replaces repetitive page header markup. Provides:
+
 - Back navigation link
 - Page title (large, light weight)
 - Optional description/subtitle
@@ -45,21 +47,27 @@ Replaces repetitive page header markup. Provides:
 - Consistent styling and spacing
 
 #### StatCards.tsx
+
 Standardized stat card grid component with:
+
 - Responsive 2-4 column layout
 - Consistent card styling
 - Label, value, detail sections
 - Optional color variants (success, warning, danger)
 
 #### StatusBadge.tsx
+
 Automatic status-to-color mapping with:
+
 - Semantic variant assignment (e.g., "active" → green)
 - Dot indicator
 - Uppercase label formatting
 - Consistent badge styling
 
 #### AdminPagination.tsx
+
 Unified pagination control with:
+
 - Previous/Next buttons
 - Page number display
 - Current page indicator
@@ -67,7 +75,9 @@ Unified pagination control with:
 - Responsive behavior
 
 #### EmptyState.tsx
+
 Consistent empty state display with:
+
 - Icon container
 - Title and description
 - Optional action button
@@ -111,12 +121,14 @@ generatePageNumbers(current, total)
 All admin pages inherit these class-based styles:
 
 **Page/Section Classes:**
+
 - `.admin-page`, `.admin-page-container`
 - `.admin-page-header`, `.admin-page-title`
 - `.admin-page-actions`
 - `.admin-section`, `.admin-section-title`
 
 **Component Classes:**
+
 - `.admin-stat-card`, `.admin-stat-label`, `.admin-stat-value`
 - `.admin-filter-bar`, `.admin-filter-search`, `.admin-filter-controls`
 - `.admin-table`, `.admin-table-header`, `.admin-table-row`, `.admin-table-cell`
@@ -244,6 +256,7 @@ Instead of modifying 20+ pages individually, created a layered system:
    - Component usage patterns
 
 This approach ensures:
+
 - ✅ **Consistency** - All pages automatically inherit styles
 - ✅ **Maintainability** - Changes in one place update everything
 - ✅ **Scalability** - New pages follow same patterns
@@ -256,6 +269,7 @@ This approach ensures:
 ### Actions Reviewed
 
 Scanned all admin pages for:
+
 - Empty onClick handlers
 - TODO implementations
 - Non-working buttons
@@ -265,6 +279,7 @@ Scanned all admin pages for:
 ### Findings
 
 **Pre-existing Issues Identified (NOT introduced by this task):**
+
 - Unused imports in quotes page (Link)
 - Unused imports in API routes (NextResponse)
 - Unused variables in gallery code (watermarked, setAllowComments)
@@ -273,6 +288,7 @@ Scanned all admin pages for:
 **Note:** These are lint warnings, not critical errors. They don't affect functionality and were pre-existing.
 
 **No Critical Non-Functional Actions Found:**
+
 - All visible buttons have proper handlers
 - All links point to valid routes
 - No duplicate action buttons that conflict
@@ -280,6 +296,7 @@ Scanned all admin pages for:
 ### Recommendations
 
 Pages follow consistent patterns:
+
 - Primary actions visible and properly handled
 - Secondary/destructive actions in dropdowns (appropriate)
 - No action buttons without handlers
@@ -309,6 +326,7 @@ Pages follow consistent patterns:
 ### Gallery Workspace Tabs
 
 Gallery tools correctly use top tabs (not side menu):
+
 - Photos, Collections, Themes, Cover, Settings, Activity
 - Follows admin tab styles
 - Proper active state indication
@@ -381,6 +399,7 @@ Standardized spacing via CSS variables:
 ```
 
 Applied consistently to:
+
 - Page margins/padding
 - Section gaps
 - Form field spacing
@@ -411,18 +430,21 @@ All using Montserrat font from globals.css (no monospace in admin UI).
 All colors use CSS variables from `globals.css`:
 
 **Text Colors:**
+
 - `--color-text-primary` - Main text (light/dark aware)
 - `--color-text-secondary` - Secondary content
 - `--color-text-muted` - Labels, muted
 - `--color-text-faint` - Very muted
 
 **Backgrounds:**
+
 - `--color-bg-page` - Page background
 - `--color-bg-card` - Cards/panels
 - `--color-bg-soft` - Subtle bg (filters, tables)
 - `--color-bg-input` - Form inputs
 
 **Accents:**
+
 - `--color-accent` - Purple (#7c3aed light, #8b5cf6 dark)
 - `--color-success` - Green (#10b981)
 - `--color-warning` - Yellow (#f59e0b)
@@ -436,6 +458,7 @@ All colors use CSS variables from `globals.css`:
 ## Validation Results
 
 ### Lint Results
+
 ```
 ✅ 0 errors (fixed all issues)
 ⚠️  7 pre-existing warnings (not from this task)
@@ -444,6 +467,7 @@ All colors use CSS variables from `globals.css`:
 Pre-existing warnings in: quotes, clients, galleries, theme, webhooks pages. These are unused import/variable warnings, not critical.
 
 ### Build Results
+
 ```
 ✅ Compiled successfully in 1447ms
 ✅ Generated 56 static pages
@@ -451,6 +475,7 @@ Pre-existing warnings in: quotes, clients, galleries, theme, webhooks pages. The
 ```
 
 ### Test Results
+
 ```
 ✅ 12 tests passed
 ✅ 0 failures
@@ -460,6 +485,7 @@ Pre-existing warnings in: quotes, clients, galleries, theme, webhooks pages. The
 Tests include API routes, webhooks, and page rendering. All pass.
 
 ### TypeScript
+
 ```
 ✅ All types correct
 ✅ No implicit any
@@ -493,11 +519,13 @@ Tests include API routes, webhooks, and page rendering. All pass.
 ## Performance Impact
 
 ### Positive
+
 - **Single CSS file** instead of scattered inline styles → better caching
 - **No JS overhead** for styling consistency
 - **Reduced markup** when using new components (PageHeader, StatCards, etc.)
 
 ### Negligible
+
 - admin-unified.css adds 15.5KB (gzips to ~2KB)
 - 5 new component files (total ~3KB source code)
 - Utilities file (~5KB source code)
@@ -511,6 +539,7 @@ Tests include API routes, webhooks, and page rendering. All pass.
 ### ADMIN_VISUAL_SYSTEM.md (9.5KB)
 
 Complete reference including:
+
 - System overview
 - Component usage examples
 - CSS classes reference
@@ -557,7 +586,7 @@ To adopt the new system for existing pages:
 ## Summary
 
 | Aspect | Status | Details |
-|--------|--------|---------|
+| -------- | -------- | --------- |
 | **Shared Components** | ✅ Complete | 5 new components + 8 utilities |
 | **Unified CSS System** | ✅ Complete | 15.5KB centralized styles |
 | **Page Headers** | ✅ Complete | Standardized, reusable component |
@@ -595,6 +624,7 @@ The system provides **consistent visual hierarchy**, **better UX**, and **easier
 **All changes are backward compatible.** Existing pages continue to work unchanged; new pages can gradually adopt the system.
 
 **Build Status: ✅ PASSING**
+
 - npm run lint → 0 new errors
 - npm run build → Compiled successfully
 - npm test → 12 tests pass

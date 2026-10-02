@@ -14,6 +14,49 @@
 /* ─── 2. Theme: Typography ─────────────────────────── */
 @theme {
   --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+
+  /*
+   * Neutral + semantic color scales.
+   *
+   * These map Tailwind's default utility names (slate / zinc / purple /
+   * amber / red) onto the semantic tokens defined below, so a className
+   * like `bg-slate-50` or `text-amber-600` stays in sync with the design
+   * system and resolves correctly in both light and dark mode.
+   */
+  --color-slate-50: var(--color-bg-soft);
+  --color-slate-100: var(--color-bg-input);
+  --color-slate-200: var(--color-border-strong);
+  --color-slate-300: #d1d5db;
+  --color-slate-400: #9ca3af;
+  --color-slate-500: var(--color-text-muted);
+  --color-slate-600: var(--color-text-secondary);
+  --color-slate-700: #343a40;
+  --color-slate-800: var(--color-text-primary);
+  --color-slate-900: #121212;
+
+  --color-zinc-50: #fafafa;
+  --color-zinc-100: #f4f4f5;
+  --color-zinc-200: #e4e4e7;
+  --color-zinc-300: #d4d4d8;
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-500: #71717a;
+  --color-zinc-600: #52525b;
+  --color-zinc-700: #3f3f46;
+  --color-zinc-800: #27272a;
+  --color-zinc-900: #18181b;
+  --color-zinc-950: #09090b;
+
+  --color-purple-50: var(--color-accent-soft);
+  --color-purple-600: var(--color-accent);
+  --color-purple-950: #1a0533;
+
+  --color-amber-50: var(--color-amber-soft);
+  --color-amber-600: var(--color-amber);
+  --color-amber-950: #451a03;
+
+  --color-red-50: var(--color-red-soft);
+  --color-red-600: var(--color-red);
+  --color-red-950: #450a0a;
 }
 
 /* ─── 3. Color System ───────────────────────────────── */
@@ -38,6 +81,20 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-info: #3b82f6;
+  /* Semantic surface tokens for attention states (amber / red / green). */
+  --color-amber: #f59e0b;
+  --color-amber-soft: #fef3c7;
+  --color-red: #ef4444;
+  --color-red-soft: #fee2e2;
+  --color-green: #10b981;
+  --color-green-soft: #d1fae5;
+  /* Semantic surface tokens for attention states (amber / red / green). */
+  --color-amber: #f59e0b;
+  --color-amber-soft: #fef3c7;
+  --color-red: #ef4444;
+  --color-red-soft: #fee2e2;
+  --color-green: #10b981;
+  --color-green-soft: #d1fae5;
   --color-header-bg: rgba(248, 249, 250, 0.85);
   --color-btn-primary-bg: var(--color-accent);
   --color-btn-primary-bg-hover: var(--color-accent-hover);
@@ -91,6 +148,42 @@ html.dark {
   --color-btn-secondary-bg: #252525;
   --color-btn-secondary-bg-hover: #3a3a3a;
   --color-btn-secondary-border: #3a3a3a;
+
+  /* Dark-mode overrides for the semantic utility scales above. */
+  --color-slate-50: var(--color-bg-soft);
+  --color-slate-100: var(--color-bg-input);
+  --color-slate-200: var(--color-border-strong);
+  --color-slate-300: #52525b;
+  --color-slate-400: #71717a;
+  --color-slate-500: var(--color-text-muted);
+  --color-slate-600: var(--color-text-secondary);
+  --color-slate-700: #e4e4e7;
+  --color-slate-800: var(--color-text-primary);
+  --color-slate-900: #f8f9fa;
+
+  --color-zinc-50: #09090b;
+  --color-zinc-100: #121212;
+  --color-zinc-200: #18181b;
+  --color-zinc-300: #27272a;
+  --color-zinc-400: #52525b;
+  --color-zinc-500: #71717a;
+  --color-zinc-600: #a1a1aa;
+  --color-zinc-700: #d4d4d8;
+  --color-zinc-800: var(--color-text-primary);
+  --color-zinc-900: var(--color-text-secondary);
+  --color-zinc-950: var(--color-bg-page);
+
+  --color-purple-50: var(--color-accent-soft);
+  --color-purple-600: var(--color-accent);
+  --color-purple-950: #1a0533;
+
+  --color-amber-50: var(--color-amber-soft);
+  --color-amber-600: var(--color-amber);
+  --color-amber-950: #451a03;
+
+  --color-red-50: var(--color-red-soft);
+  --color-red-600: var(--color-red);
+  --color-red-950: #450a0a;
 }
 
 /* ─── 5. Base Layer ─────────────────────────────────── */

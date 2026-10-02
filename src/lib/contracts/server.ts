@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { generateContractNumber } from '@/lib/utils'; // We'll create this helper if it doesn't exist
 
 // Helper to get current user ID from Clerk (assuming we have a helper)
-import { getCurrentUserId } from '@/lib/auth';
+import getCurrentUser from '@/lib/auth/get-current-user';
 
 // Contracts API functions
 
@@ -45,7 +45,9 @@ export async function fetchContracts({ search, status, clientId, limit = 50, off
   limit?: number;
   offset?: number;
 }) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   let where = and(eq(contracts.creatorId, userId));
@@ -77,7 +79,9 @@ export async function fetchContracts({ search, status, clientId, limit = 50, off
 }
 
 export async function fetchContract(id: string) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [contract] = await db.select().from(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId)));
@@ -86,7 +90,9 @@ export async function fetchContract(id: string) {
 }
 
 export async function createContract(data: NewContractInput) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const contractNumber = await generateContractNumber(); // Assuming this function exists
@@ -123,7 +129,9 @@ export async function createContract(data: NewContractInput) {
 }
 
 export async function updateContract(id: string, data: ContractInput) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [updatedContract] = await db.update(contracts).set({
@@ -144,7 +152,9 @@ export async function updateContract(id: string, data: ContractInput) {
 }
 
 export async function deleteContract(id: string) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [deletedContract] = await db.delete(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
@@ -162,7 +172,9 @@ export async function deleteContract(id: string) {
 }
 
 export async function sendContract(id: string) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [updatedContract] = await db.update(contracts).set({
@@ -184,7 +196,9 @@ export async function sendContract(id: string) {
 }
 
 export async function duplicateContract(id: string) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const contract = await fetchContract(id);
@@ -222,7 +236,9 @@ export async function duplicateContract(id: string) {
 }
 
 export async function saveContractAsTemplate(id: string, data: ContractTemplateInput) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const contract = await fetchContract(id);
@@ -255,7 +271,9 @@ export async function saveContractAsTemplate(id: string, data: ContractTemplateI
 }
 
 export async function fetchContractStats() {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const stats = await db.select({
@@ -279,7 +297,9 @@ export async function fetchContractTemplates({ search, category, limit = 50, off
   limit?: number;
   offset?: number;
 }) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   let where = and(
@@ -320,7 +340,9 @@ export async function createContractTemplate(
     content: string;
   },
 ) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [newTemplate] = await db.insert(contractTemplates).values({
@@ -342,7 +364,9 @@ export async function createContractTemplate(
 }
 
 export async function updateContractTemplate(id: string, data: ContractTemplateInput) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [updatedTemplate] = await db.update(contractTemplates).set({
@@ -357,7 +381,9 @@ export async function updateContractTemplate(id: string, data: ContractTemplateI
 }
 
 export async function deleteContractTemplate(id: string) {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
 
   const [deletedTemplate] = await db.delete(contractTemplates).where(and(eq(contractTemplates.id, id), or(
@@ -465,7 +491,9 @@ export async function declinePublicContract(token: string, signatureData: unknow
 // Add the named exports that the API routes expect
 export const fetchContractByToken = getPublicContract;
 export const fetchContractEvents = async (contractId: string) => {
-  const userId = await getCurrentUserId();
+      const user = await getCurrentUser();
+    if (!user) throw new Error("Unauthenticated");
+    const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
   return db.select().from(contractEvents).where(eq(contractEvents.contractId, contractId));
 };

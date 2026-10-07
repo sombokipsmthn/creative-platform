@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Head from 'next/head';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/Button';
@@ -166,6 +167,23 @@ const allProjects = [
 ];
 
 export default function WorkIndexPage() {
+  return (
+    <>
+      <Head>
+        <title>KIPSMTHN Portfolio - Creative Works Across Four Pillars</title>
+        <meta name="description" content="Explore KIPSMTHN's portfolio showcasing photography, videography, branding, and UI/UX projects across East Africa and beyond." />
+        <meta name="keywords" content="creative portfolio, photography, videography, branding, UI/UX, East Africa, creative agency" />
+        <meta property="og:title" content="KIPSMTHN Portfolio" />
+        <meta property="og:description" content="Explore our creative works across photography, videography, branding, and UI/UX" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://kipsmthn.com/work" />
+        <meta property="og:image" content="https://kipsmthn.com/og-image.jpg" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="KIPSMTHN Portfolio" />
+        <meta name="twitter:description" content="Explore our creative works across photography, videography, branding, and UI/UX" />
+        <meta name="twitter:image" content="https://kipsmthn.com/twitter-image.jpg" />
+      </Head>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
   const [selectedPillar, setSelectedPillar] = useState('All');
 
   const filteredProjects = selectedPillar === 'All'
@@ -383,5 +401,6 @@ export default function WorkIndexPage() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

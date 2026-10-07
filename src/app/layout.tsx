@@ -22,7 +22,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    process.env.NEXT_PUBLIC_APP_URL || 'https://creative-platform.vercel.app',
   ),
   title: 'Kipsmthn | Creative Platform',
   description:
@@ -46,9 +46,12 @@ export const metadata: Metadata = {
     images: ['/og-image.svg'],
   },
   icons: {
-    icon: '/site-icon.svg',
-    shortcut: '/site-icon.svg',
-    apple: '/site-icon.svg',
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-icon.png',
+  },
+  alternates: {
+    canonical: 'https://creative-platform.vercel.app/',
   },
 };
 

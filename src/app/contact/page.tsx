@@ -1,7 +1,36 @@
 import Header from '@/components/header';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/Button';
+
+export const metadata: Metadata = {
+  title: "Contact KIPSMTHN | Start a Project",
+  description:
+    "Contact KIPSMTHN in Nairobi, Kenya for commercial photography, brand films, motion graphics, and creative production services.",
+  alternates: {
+    canonical: "/contact",
+  },
+  openGraph: {
+    title: "Contact KIPSMTHN | Start a Project",
+    description:
+      "Contact KIPSMTHN in Nairobi, Kenya for commercial photography, brand films, motion graphics, and creative production services.",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "KIPSMTHN Contact",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Contact KIPSMTHN | Start a Project",
+    description:
+      "Contact KIPSMTHN in Nairobi, Kenya for commercial photography, brand films, motion graphics, and creative production services.",
+  },
+};
 
 export default function ContactPage() {
   return (

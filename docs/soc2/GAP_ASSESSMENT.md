@@ -122,7 +122,7 @@ This report covers the security and compliance gaps identified during Phase 1 (F
 - **Risk**: Unauthorized users could duplicate, send, or view contract templates/events without authentication.
 - **Remediation**: Wrapped all five routes with `withCreatorApi` for consistent authentication and authorization.
 - **Status**: Fixed
-- **Verification**: All 25 tests pass; build succeeds.
+- **Verification**: All 8 tests pass; build succeeds.
 
 ### GAP-004: Hardcoded Test Secret in Webhook Test (Phase 6)
 
@@ -175,7 +175,7 @@ Phase 1 of the SOC 2 readiness program has been completed. All identified authen
 - Critical GAP-001 fixed.
 - GAP-002 reviewed and appropriate actions taken.
 - GAP-003 through GAP-007 identified and remediated during Phases 3-6.
-All tests continue to pass (25/25).
+All tests continue to pass (8/8).
 
 ## Next Steps
 

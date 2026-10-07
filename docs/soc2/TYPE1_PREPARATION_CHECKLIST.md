@@ -80,7 +80,7 @@ This checklist documents the preparation status for SOC 2 Type 1 examination of 
 | System description | ✅ | SYSTEM_DESCRIPTION.md | Complete system documentation |
 | Access review record | ✅ | evidence/access-reviews/ | Q4 2026 review completed |
 | Restore test record | ✅ | evidence/backup-tests/ | Q4 2026 test completed |
-| Authorization tests | ✅ | src/lib/auth/authorization.test.ts | 16 tests passing |
+| Authorization tests | ✅ | src/lib/auth/authorization.test.ts | 8 tests passing |
 
 ### 6. Code & Technical Controls ✅ Complete
 

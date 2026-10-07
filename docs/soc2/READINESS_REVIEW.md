@@ -10,7 +10,7 @@
 ## Executive Summary
 
 | Metric | Value |
-|--------|-------|
+| -------- | ------- |
 | **Total Controls Assessed** | 85 |
 | **Implemented** | 68 (80%) |
 | **Partially Implemented** | 12 (14%) |
@@ -27,7 +27,7 @@
 ### CC1: Control Environment
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC1.1 - Board oversight | Not applicable | N/A | N/A | N/A | Document as N/A | N/A | N/A |
 | CC1.2 - Commitment to integrity | Policy documented | POL-001 | Current | Test procedures | None | None | None |
 | CC1.3 - Organizational structure | Defined roles documented | ORG-001 | Current | Interview | None | None | None |
@@ -37,7 +37,7 @@
 ### CC2: Communication & Information
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC2.1 - Internal communication | Incident response plan | IRP-001 | Quarterly | Test | None | None | None |
 | CC2.2 - External communication | Vendor management policy | VENDOR-001 | Annual | Test | Partial | Document for next review | Planned |
 | CC2.3 - Information security | Security policies documented | POL-001 to POL-018 | Current | Review | None | None | None |
@@ -46,7 +46,7 @@
 ### CC3: Risk Management
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC3.1 - Risk identification | Risk register maintained | RISK-001 | Quarterly | Review | None | None | None |
 | CC3.2 - Risk assessment | Vulnerability management | VULN-001 | Weekly | Test | None | None | None |
 | CC3.3 - Risk mitigation | Security controls documented | SECURITY-001 | Current | Test | None | None | None |
@@ -56,7 +56,7 @@
 ### CC4: Monitoring Activities
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC4.1 - Monitoring framework | Security logging in place | LOG-001 | Real-time | Test | None | None | None |
 | CC4.2 - Identifying anomalies | Alert thresholds defined | ALERT-001 | Current | Test | Partial | Configure alerting | Planned |
 | CC4.3 - Evaluating incidents | Incident response process | IR-001 | As needed | Test | None | None | None |
@@ -66,7 +66,7 @@
 ### CC5: Control Activities
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC5.1 - Authorization | withCreatorApi wrapper | AUTH-001 | All API routes | Test | None | None | None |
 | CC5.2 - Authentication | Clerk authentication | CLERK-001 | All routes | Test | None | None | None |
 | CC5.3 - Access restrictions | Role-based access | RBAC-001 | Current | Test | None | None | None |
@@ -78,7 +78,7 @@
 ### CC6: Logical & Physical Access Controls
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC6.1 - Access control | Authorization tests | AUTHZ-001 | 25 tests passing | Test | None | None | None |
 | CC6.2 - Authentication | MFA for admin | MFA-001 | 100% admin adoption | Test | None | None | None |
 | CC6.3 - Authorization | Ownership checks | OWNER-001 | All API routes | Test | None | None | None |
@@ -92,7 +92,7 @@
 ### CC7: System Operations
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC7.1 - Vulnerability ID | Automated scanning | VULN-ID-001 | Daily scans | Test | None | None | None |
 | CC7.2 - Vulnerability assessment | Risk scoring | VULN-ASSESS-001 | Quarterly | Review | None | None | None |
 | CC7.3 - Vulnerability remediation | Remediation process | VULN-REMED-001 | SLA tracked | Test | None | None | None |
@@ -105,7 +105,7 @@
 ### CC8: Change Management
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC8.1 - Change control | PR requirements | CHANGE-CONTROL-001 | Enforced | Test | None | None | None |
 | CC8.2 - Change authorization | Approval process | CHANGE-AUTH-001 | Documented | Test | None | None | None |
 | CC8.3 - Testing | CI/CD pipeline | CHANGE-TEST-001 | Automated | Test | None | None | None |
@@ -115,7 +115,7 @@
 ### CC9: Risk Mitigation
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | CC9.1 - Risk mitigation | Risk treatment | RISK-MITIGATE-001 | Documented | Test | None | None | None |
 | CC9.2 - Control monitoring | Ongoing monitoring | RISK-MONITOR-001 | Continuous | Test | None | None | None |
 | CC9.3 - Migration | Backup procedures | MIGRATE-001 | Documented | Test | None | None | None |
@@ -125,7 +125,7 @@
 ### A1: Availability
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | A1.1 - Availability commitments | SLA monitoring | AVAIL-001 | 99.9% target | Test | None | None | None |
 | A1.2 - Recovery procedures | DR plan | RECOVERY-001 | Documented | Test | None | None | None |
 | A1.3 - Recovery objectives | RTO/RPO defined | RTO-RPO-001 | 4hr/1hr | Test | None | None | None |
@@ -134,7 +134,7 @@
 ### P1: Processing Integrity
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | P1.1 - Processing completeness | Data validation | PROCESS-001 | Input validation | Test | None | None | None |
 | P1.2 - Processing accuracy | Calculation checks | PROCESS-002 | Verified | Test | None | None | None |
 | P1.3 - Processing authorization | Access controls | PROCESS-003 | Auth required | Test | None | None | None |
@@ -143,7 +143,7 @@
 ### P2: Privacy
 
 | Control | Implementation | Evidence | Operating History | Test | Gap | Remediation | Retest |
-|---------|---------------|----------|-------------------|------|-----|-------------|--------|
+| --------- | --------------- | ---------- | ------------------- | ------ | ----- | ------------- | -------- |
 | P2.1 - Privacy notice | Privacy policy | PRIVACY-001 | Published | Test | None | None | None |
 | P2.2 - Individual rights | Data subject requests | RIGHTS-001 | Process documented | Test | None | None | None |
 | P2.3 - Consent | Consent management | CONSENT-001 | Documented | Test | None | None | None |
@@ -158,7 +158,7 @@
 ## Readiness Exit Criteria Assessment
 
 | Criterion | Status | Evidence |
-|-----------|--------|----------|
+| ----------- | -------- | ---------- |
 | Controls are implemented | ✅ Met | 80% implemented |
 | Owners are assigned | ✅ Met | All policies have owners |
 | Documentation exists | ✅ Met | 15+ documents created |
@@ -176,7 +176,7 @@
 ## Known Gaps & Exceptions
 
 | Gap ID | Description | Risk | Status | Remediation Target |
-|--------|-------------|------|--------|-------------------|
+| -------- | ------------- | ------ | -------- | ------------------- |
 | GAP-001 | No formal access review records yet | Medium | ✅ Addressed | Q4 2026 review completed |
 | GAP-002 | Monitoring alerts not fully configured | Low | ⏳ Planned | Q4 2026 implementation |
 | GAP-003 | No formal training records | Medium | ⏳ Planned | Q4 2026 documentation |
@@ -198,7 +198,7 @@
 ## Sign-off
 
 | Role | Name | Date | Signature |
-|------|------|------|-----------|
+| ------ | ------ | ------ | ----------- |
 | **Security Lead** | [REDACTED] | 2026-10-02 | _________________ |
 | **Engineering Manager** | [REDACTED] | 2026-10-02 | _________________ |
 | **Chief Executive Officer** | [REDACTED] | 2026-10-02 | _________________ |

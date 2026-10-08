@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/auth/auth";
+import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
   FileText,
@@ -101,9 +101,7 @@ function SignOutButton({ compact }: { compact?: boolean }) {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await auth.api.signOut({
-      headers: new Headers(),
-    });
+    await authClient.signOut();
     router.push('/admin/login');
   };
 
@@ -154,29 +152,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { data: session, isPending: authPending } = authClient.useSession();
+  const isAuthenticated = Boolean(session?.user);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const [hasLocalAccount, setHasLocalAccount] = useState(true);
   const splitView = useSplitView();
-
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const session = await auth.api.getSession({
-          headers: new Headers(),
-        });
-        setIsAuthenticated(!!session);
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    checkAuth();
-  }, []);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -229,7 +210,7 @@ export default function AdminLayout({
     );
   }
 
-  if (loading) {
+  if (authPending) {
     return (
       <SplitViewProvider>
         <div className="ui-page flex min-h-screen items-center justify-center">

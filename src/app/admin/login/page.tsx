@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/lib/auth/client";
+import { authClient } from "@/lib/auth-client";
 import { useCreator } from '@/context/CreatorContext';
 
 export default function AdminLoginPage() {

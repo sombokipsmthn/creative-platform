@@ -21,8 +21,6 @@ export const users = pgTable("users", {
   handle: text("handle").unique(),
   onboardingStatus: text("onboarding_status").default("incomplete").notNull(),
   onboardingStep: integer("onboarding_step").default(1).notNull(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
-  image: text("image"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 

@@ -27,6 +27,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".agents/**",
     "clerk-nextjs/**",
+    ".claude/worktrees/**",
+    "**/*.bak",
+    "**/*.bak2",
+    "**/*.bak3",
+    "**/*.before",
   ]),
 ]);
 

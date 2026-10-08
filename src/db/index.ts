@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 
-dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env.local", quiet: true });
 
 import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
@@ -34,4 +34,4 @@ export const db: NodePgDatabase<typeof schema> = drizzle(pool, {
   schema,
 });
 
-console.log("✅ Database connected successfully");
+// Creating a pool is lazy; no database connection is opened during module import.

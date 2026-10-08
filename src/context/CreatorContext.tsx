@@ -8,10 +8,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { auth } from "@/lib/auth/auth";
-import { eq } from "drizzle-orm";
-import { db } from "@/db";
-import { users, creatorProfiles, creatorServices, creatorBusinessProfiles } from "@/db/schema";
 
 export interface CreatorProfile {
   id: string;
@@ -26,7 +22,7 @@ export interface CreatorProfile {
 
 export interface CreatorData {
   id: string;
-  authUserId: string;
+  authUserId: string | null;
   email: string;
   name: string;
   handle: string | null;
@@ -68,63 +64,28 @@ export function CreatorProvider({
 
   const syncCreator = useCallback(async function syncCreator() {
     try {
-      const session = await auth.api.getSession({
-        headers: new Headers(),
+      const response = await fetch("/api/users/sync", {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
       });
+      const payload = await response.json();
 
-      if (!session?.user) {
+      if (!response.ok || !payload.user) {
         setActiveUser(null);
         setUsersDb({});
-        setLoading(false);
         return;
       }
-
-      setLoading(true);
-
-      /*
-       * -------------------------------------------------------
-       * SYNC LOCAL CREATOR ACCOUNT
-       * -------------------------------------------------------
-       */
-      const localUser = await db.query.users.findFirst({
-        where: eq(users.authUserId, session.user.id),
-        limit: 1,
-      });
-
-      if (!localUser) {
-        setActiveUser(null);
-        setUsersDb({});
-        setLoading(false);
-        return;
-      }
-
-      const profile = await db.query.creatorProfiles.findFirst({
-        where: eq(creatorProfiles.userId, localUser.id),
-        limit: 1,
-      });
 
       const creator: CreatorData = {
-        id: localUser.id,
-        authUserId: localUser.authUserId,
-        email: localUser.email,
-        name: localUser.name,
-        handle: localUser.handle,
-        createdAt: localUser.createdAt,
-        updatedAt: localUser.updatedAt,
-        profile: profile ?? null,
+        ...payload.user,
+        profile: payload.profile ?? null,
       };
 
       setActiveUser(creator);
-
-      setUsersDb({
-        [creator.id]: creator,
-      });
+      setUsersDb({ [creator.id]: creator });
     } catch (error) {
-      console.error(
-        "CreatorContext sync error:",
-        error
-      );
-
+      console.error("CreatorContext sync error:", error);
       setActiveUser(null);
       setUsersDb({});
     } finally {
@@ -138,6 +99,8 @@ export function CreatorProvider({
    * -------------------------------------------------------
    */
   useEffect(() => {
+    // This effect intentionally hydrates context state from the authenticated session.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void syncCreator();
   }, [syncCreator]);
 

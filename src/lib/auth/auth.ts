@@ -1,18 +1,43 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { dash } from "@better-auth/infra";
 import { db } from "@/db";
 import { users, sessions, accounts, verifications } from "@/db/schema";
-import { emailOTP } from "better-auth/plugins";
+
+const googleProvider =
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      }
+    : undefined;
+
+const appleProvider =
+  process.env.APPLE_CLIENT_ID &&
+  process.env.APPLE_CLIENT_SECRET &&
+  process.env.APPLE_TEAM_ID &&
+  process.env.APPLE_KEY_ID &&
+  process.env.APPLE_PRIVATE_KEY
+    ? {
+        clientId: process.env.APPLE_CLIENT_ID,
+        clientSecret: process.env.APPLE_CLIENT_SECRET,
+        teamId: process.env.APPLE_TEAM_ID,
+        keyId: process.env.APPLE_KEY_ID,
+        privateKey: process.env.APPLE_PRIVATE_KEY,
+        scope: ["name", "email"],
+      }
+    : undefined;
+
+const socialProviders = {
+  ...(googleProvider ? { google: googleProvider } : {}),
+  ...(appleProvider ? { apple: appleProvider } : {}),
+};
 
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005",
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: {
-      user: users,
-      session: sessions,
-      account: accounts,
-      verification: verifications,
-    },
+    schema: { user: users, session: sessions, account: accounts, verification: verifications },
   }),
   emailAndPassword: {
     enabled: true,
@@ -24,35 +49,17 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
-    expiresIn: 60 * 60 * 24, // 24 hours
+    expiresIn: 60 * 60 * 24,
   },
-  socialProviders: {
-    google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    },
-    apple: {
-      clientId: process.env.APPLE_CLIENT_ID!,
-      clientSecret: process.env.APPLE_CLIENT_SECRET!,
-      teamId: process.env.APPLE_TEAM_ID!,
-      keyId: process.env.APPLE_KEY_ID!,
-      privateKey: process.env.APPLE_PRIVATE_KEY!,
-      scope: ["name", "email"],
-    },
-  },
+  ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   session: {
-    expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24, // 1 day
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5, // 5 minutes
-    },
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
   advanced: {
     cookiePrefix: "kipsmthn",
-    crossSubDomainCookies: {
-      enabled: true,
-    },
+    crossSubDomainCookies: { enabled: true },
     defaultCookieAttributes: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -60,9 +67,8 @@ export const auth = betterAuth({
       path: "/",
     },
   },
-  trustedOrigins: [
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005",
-  ],
+  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005"],
+  plugins: [dash()],
 });
 
 export type Session = typeof auth.$Infer.Session;

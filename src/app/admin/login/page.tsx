@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const { data, error: signInError } = await authClient.signInEmail({
+      const { data, error: signInError } = await authClient.signIn.email({
         email,
         password,
       });

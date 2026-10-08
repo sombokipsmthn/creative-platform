@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,9 +17,9 @@ import { ContractBuilder } from '@/components/contracts/ContractBuilder';
 export default function ContractDetailPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = params;
+  const { id } = use(params);
   const router = useRouter();
   const [contract, setContract] = useState<Contract | null>(null);
   const [loading, setLoading] = useState(true);

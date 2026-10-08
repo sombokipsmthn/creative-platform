@@ -233,4 +233,3 @@ export async function DELETE() {
   metricsStore.clear();
   return NextResponse.json({ success: true, message: "Metrics cleared" });
 }
-

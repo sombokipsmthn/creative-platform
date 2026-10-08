@@ -73,8 +73,7 @@ async function getAuthenticatedContext() {
 
   try {
     const localUser = await db.query.users.findFirst({
-      where: eq(users.authUserId, session.user.id),
-      limit: 1,
+      where: eq(users.authUserId, session.user.id)
     });
 
     if (!localUser) {

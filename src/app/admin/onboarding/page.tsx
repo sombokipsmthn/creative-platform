@@ -137,7 +137,7 @@ export default function CreatorOnboardingPage() {
 
   const displayName = useMemo(() => {
     if (!user) return "";
-    return user.fullName || [user.firstName || "", user.lastName || ""].filter(Boolean).join(" ");
+    return [user.firstName || "", user.lastName || ""].filter(Boolean).join(" ");
   }, [user]);
 
   const suggestedHandle = useMemo(() => {

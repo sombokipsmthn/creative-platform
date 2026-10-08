@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
-export { isPathSafe, sanitizeFilename, validateMimeTypeByExtension } from "./security";
-
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { handleUpload } from "@vercel/blob/client";
 import { sql } from "drizzle-orm";
 
@@ -49,7 +47,8 @@ export async function POST(request: Request) {
       token: blobToken,
 
       onBeforeGenerateToken: async (pathname, clientPayload, multipart) => {
-        const { userId } = await auth();
+        const session = await auth.api.getSession({ headers: request.headers });
+        const userId = session?.user?.id;
 
         if (!userId) {
           throw new Error("Unauthorized");

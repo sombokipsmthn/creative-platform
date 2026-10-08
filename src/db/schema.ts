@@ -13,9 +13,11 @@ import {
 
 export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  authUserId: text("auth_user_id").notNull().unique(),
+  authUserId: text("auth_user_id").unique(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  image: text("image"),
   handle: text("handle").unique(),
   onboardingStatus: text("onboarding_status").default("incomplete").notNull(),
   onboardingStep: integer("onboarding_step").default(1).notNull(),
@@ -538,7 +540,7 @@ export const authUsers = pgTable("user", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const authSessions = pgTable("session", {
+export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expires_at").notNull(),
   token: text("token").notNull().unique(),
@@ -549,7 +551,7 @@ export const authSessions = pgTable("session", {
   userId: text("user_id").notNull().references(() => authUsers.id, { onDelete: "cascade" }),
 });
 
-export const authAccounts = pgTable("account", {
+export const accounts = pgTable("accounts", {
   id: text("id").primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
@@ -565,7 +567,7 @@ export const authAccounts = pgTable("account", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const authVerifications = pgTable("verification", {
+export const verifications = pgTable("verifications", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),

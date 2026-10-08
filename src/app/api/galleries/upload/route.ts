@@ -1,6 +1,8 @@
-import { randomUUID } from 'crypto';
-
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+
+export { isPathSafe, sanitizeFilename, validateMimeTypeByExtension } from "./security";
+
 import { auth } from "@clerk/nextjs/server";
 import { handleUpload } from "@vercel/blob/client";
 import { sql } from "drizzle-orm";
@@ -397,49 +399,4 @@ function getExtensionFromMimeType(mimeType: string): string {
   };
 
   return mimeToExt[mimeType] || "bin";
-}
-
-// Validate that a pathname is safe for storage (no path traversal, no leading /, no spaces)
-export function isPathSafe(pathname: string): boolean {
-  if (pathname.startsWith("/")) return false;
-  if (pathname.includes("..")) return false;
-  if (/\s/.test(pathname)) return false;
-  return true;
-}
-
-// Sanitize a filename: remove dangerous characters, strip empty segments, enforce max length
-export function sanitizeFilename(filename: string): string {
-  if (!filename) return "media";
-  let cleaned = filename
-    .replace(/[<>:"|?*\\]/g, "_")
-    .replace(/\/+/g, "/")
-    .replace(/\.\./g, "");
-  cleaned = cleaned.replace(/^\/+/, "").replace(/\/+$/, "");
-  // Strip leading/trailing dots and check if result is empty or all dots
-  cleaned = cleaned.replace(/^\.+/, "").replace(/\.+$/, "");
-  if (!cleaned || cleaned.match(/^\.+$/)) return "media";
-  if (cleaned.length > 200) cleaned = cleaned.slice(0, 200);
-  return cleaned;
-}
-
-// Validate that a file extension matches its declared MIME type
-export function validateMimeTypeByExtension(filename: string, mimeType: string): boolean {
-  const ext = filename.toLowerCase().split(".").pop() || "";
-  const mime = mimeType.toLowerCase();
-  const map: Record<string, string[]> = {
-    jpg: ["image/jpeg"],
-    jpeg: ["image/jpeg"],
-    png: ["image/png"],
-    webp: ["image/webp"],
-    heic: ["image/heic"],
-    heif: ["image/heif"],
-    mp4: ["video/mp4"],
-    mov: ["video/quicktime"],
-    avi: ["video/x-msvideo"],
-    mkv: ["video/x-matroska"],
-    webm: ["video/webm"],
-    flv: ["video/x-flv"],
-    wmv: ["video/x-ms-wmv"],
-  };
-  return map[ext]?.includes(mime) ?? false;
 }

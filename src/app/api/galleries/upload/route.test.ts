@@ -1,5 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { isPathSafe, sanitizeFilename, validateMimeTypeByExtension } from './route';
+import { describe, it, expect } from "vitest";
+import {
+  isPathSafe,
+  sanitizeFilename,
+  validateMimeTypeByExtension,
+} from "./security";
 
 describe('Upload Security', () => {
   describe('isPathSafe', () => {

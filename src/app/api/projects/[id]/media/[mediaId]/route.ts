@@ -153,12 +153,10 @@ export async function DELETE(_request: Request, context: Context) {
           media.display_path,
           media.thumbnail_path,
           media.watermark_path,
-        ].filter(Boolean);
+        ].filter((path): path is string => typeof path === 'string' && path.length > 0);
 
         for (const path of paths) {
-          if (path) {
-            await storage.deleteObject(path).catch((e) => console.warn("Storage delete failed:", e));
-          }
+          await storage.deleteObject(path).catch((e) => console.warn("Storage delete failed:", e));
         }
       } catch (storageError) {
         console.warn("Storage cleanup failed:", storageError);

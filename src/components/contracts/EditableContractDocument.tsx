@@ -95,11 +95,14 @@ export function EditableContractDocument({
       };
 
       elements.push(
-        React.createElement(tagName, {
-          key: `heading-${lineIndex}`,
-          className: `${headingClassMap[level]} text-gray-900 dark:text-gray-50`,
-          children: text,
-        })
+        React.createElement(
+          tagName,
+          {
+            key: `heading-${lineIndex}`,
+            className: `${headingClassMap[level]} text-gray-900 dark:text-gray-50`,
+          },
+          text,
+        )
       );
       return;
     }

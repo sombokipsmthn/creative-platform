@@ -1,10 +1,9 @@
 'use client';
 
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
 import { useClerk, useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import {
   BarChart3,
   FileText,
@@ -18,6 +17,7 @@ import {
   WalletCards,
   FileSignature,
   UserRound,
+  Image,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -75,6 +75,7 @@ const sections = [
     label: 'Content',
     items: [
       { name: 'Clients', href: '/admin/clients', icon: Users },
+      { name: 'Portfolio', href: '/admin/projects', icon: Image },
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
     ],
   },
@@ -125,6 +126,24 @@ function SignOutButton({ compact }: { compact?: boolean }) {
       <LogOut className="h-4 w-4" />
       <span>Sign out</span>
     </button>
+  );
+}
+
+function RedirectToOnboarding() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/admin/onboarding");
+  }, [router]);
+
+  return (
+    <SplitViewProvider>
+      <div className="ui-page flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="ui-meta uppercase">Redirecting to onboarding...</p>
+        </div>
+      </div>
+    </SplitViewProvider>
   );
 }
 
@@ -215,20 +234,7 @@ export default function AdminLayout({
 
   if (!hasLocalAccount) {
     return (
-      <SplitViewProvider>
-        <div className="ui-page flex min-h-screen items-center justify-center">
-          <div className="text-center">
-            <p className="ui-meta uppercase">
-              Redirecting to onboarding...
-            </p>
-          </div>
-        </div>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: "window.location.href = '/admin/onboarding';",
-          }}
-        />
-      </SplitViewProvider>
+      <RedirectToOnboarding />
     );
   }
 

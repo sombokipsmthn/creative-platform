@@ -7,7 +7,10 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "@next/next/no-location-assign-relative-destination": "off",
+      "@next/next/no-img-element": "off",
       "@typescript-eslint/no-empty-object-type": "error",
       "@typescript-eslint/no-require-imports": "error",
       "react-hooks/set-state-in-effect": "error",

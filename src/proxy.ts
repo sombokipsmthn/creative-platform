@@ -1,23 +1,21 @@
-import {
-  clerkMiddleware,
-  createRouteMatcher,
-} from "@clerk/nextjs/server";
+import { clerkMiddleware, auth } from "@clerk/nextjs/server";
 
-const isAdminRoute = createRouteMatcher([
-  "/admin(.*)",
-]);
+function isAdminRoute(url: URL) {
+  return url.pathname.startsWith("/admin");
+}
 
-const isOnboardingRoute = createRouteMatcher([
-  "/admin/onboarding(.*)",
-]);
+function isOnboardingRoute(url: URL) {
+  return url.pathname.startsWith("/admin/onboarding");
+}
 
-const isAuthRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
+function isAuthRoute(url: URL) {
+  return url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up");
+}
 
 const customMiddleware = clerkMiddleware(
   async (auth, req) => {
+    const url = new URL(req.url);
+
     /*
      * -------------------------------------------------------
      * PUBLIC AUTH ROUTES
@@ -26,7 +24,7 @@ const customMiddleware = clerkMiddleware(
      * Sign-in and sign-up must remain publicly accessible.
      */
 
-    if (isAuthRoute(req)) {
+    if (isAuthRoute(url)) {
       return;
     }
 
@@ -43,21 +41,11 @@ const customMiddleware = clerkMiddleware(
      * retrieving the local creator account.
      */
 
-    if (isOnboardingRoute(req)) {
-      try {
-        const {
-          userId,
-          redirectToSignIn,
-        } = await auth();
+    if (isOnboardingRoute(url)) {
+      const { userId, redirectToSignIn } = await auth();
 
-        if (!userId) {
-          return redirectToSignIn();
-        }
-      } catch (error) {
-        console.error('[Middleware] Auth error in onboarding route:', error);
-        // Do not attempt to call auth() again in catch block
-        // Let the error propagate to Next.js error handler
-        throw error;
+      if (!userId) {
+        return redirectToSignIn();
       }
 
       return;
@@ -92,21 +80,11 @@ const customMiddleware = clerkMiddleware(
      * has a creator account and what they can access.
      */
 
-    if (isAdminRoute(req)) {
-      try {
-        const {
-          userId,
-          redirectToSignIn,
-        } = await auth();
+    if (isAdminRoute(url)) {
+      const { userId, redirectToSignIn } = await auth();
 
-        if (!userId) {
-          return redirectToSignIn();
-        }
-      } catch (error) {
-        console.error('[Middleware] Auth error in admin route:', error);
-        // Do not attempt to call auth() again in catch block
-        // Let the error propagate to Next.js error handler
-        throw error;
+      if (!userId) {
+        return redirectToSignIn();
       }
 
       return;

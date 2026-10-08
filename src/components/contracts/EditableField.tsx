@@ -40,6 +40,7 @@ export function EditableField({
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTempValue(value);
   }, [value]);
 

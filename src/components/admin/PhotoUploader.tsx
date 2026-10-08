@@ -313,7 +313,6 @@ export default function PhotoUploader({
               >
                 {/* Thumbnail */}
                 <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--color-bg-soft)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item.previewUrl}
                     alt={item.file.name}

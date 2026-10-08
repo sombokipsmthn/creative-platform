@@ -400,4 +400,3 @@ function getExtensionFromMimeType(mimeType: string): string {
 
   return mimeToExt[mimeType] || "bin";
 }
-

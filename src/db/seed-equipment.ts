@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import readXlsxFile from "read-excel-file/node";
 import path from "node:path";
 import { sql } from "drizzle-orm";
 import { db } from "./index";
@@ -25,14 +25,11 @@ async function seed() {
     throw new Error("DATABASE_URL is required to seed equipment.");
   }
 
-  const workbook = XLSX.readFile(workbookPath);
-  const sheet = workbook.Sheets["Equipment"];
-  if (!sheet) throw new Error('The workbook does not contain an "Equipment" sheet.');
-  const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: null });
+  const rows = await readXlsxFile(workbookPath, { sheet: "Equipment" });
   if (rows.length < 2) throw new Error("The Equipment sheet is empty.");
 
   const headers = new Map<string, number>();
-  (rows[0] || []).forEach((value: unknown, index: number) => {
+  rows[0].forEach((value, index) => {
     const header = clean(value);
     if (header) headers.set(header, index);
   });

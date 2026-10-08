@@ -1,130 +1,103 @@
-import {
-  clerkMiddleware,
-  createRouteMatcher,
-} from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth/auth";
+import { NextResponse } from "next/server";
 
-const isAdminRoute = createRouteMatcher([
-  "/admin(.*)",
-]);
+function isAdminRoute(pathname: string) {
+  return pathname.startsWith("/admin");
+}
 
-const isOnboardingRoute = createRouteMatcher([
-  "/admin/onboarding(.*)",
-]);
+function isOnboardingRoute(pathname: string) {
+  return pathname.startsWith("/admin/onboarding");
+}
 
-const isAuthRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
+function isAuthRoute(pathname: string) {
+  return pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
+}
 
-const customMiddleware = clerkMiddleware(
-  async (auth, req) => {
-    /*
-     * -------------------------------------------------------
-     * PUBLIC AUTH ROUTES
-     * -------------------------------------------------------
-     *
-     * Sign-in and sign-up must remain publicly accessible.
-     */
+function isApiAuthRoute(pathname: string) {
+  return pathname.startsWith("/api/auth");
+}
 
-    if (isAuthRoute(req)) {
-      return;
-    }
+export default async function customMiddleware(request: Request) {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
 
-    /*
-     * -------------------------------------------------------
-     * CREATOR ONBOARDING
-     * -------------------------------------------------------
-     *
-     * Onboarding requires a valid Clerk session, but does not
-     * require the creator to already have a completed local
-     * account.
-     *
-     * The onboarding API is responsible for creating/
-     * retrieving the local creator account.
-     */
+  /*
+   * -------------------------------------------------------
+   * PUBLIC AUTH ROUTES
+   * -------------------------------------------------------
+   *
+   * Sign-in and sign-up must remain publicly accessible.
+   * Also allow the Better Auth API routes to pass through.
+   */
 
-    if (isOnboardingRoute(req)) {
-      try {
-        const {
-          userId,
-          redirectToSignIn,
-        } = await auth();
-
-        if (!userId) {
-          return redirectToSignIn();
-        }
-      } catch (error) {
-        console.error('[Middleware] Auth error in onboarding route:', error);
-        // Do not attempt to call auth() again in catch block
-        // Let the error propagate to Next.js error handler
-        throw error;
-      }
-
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * CREATOR ADMIN PORTAL
-     * -------------------------------------------------------
-     *
-     * The creator portal is for authenticated creators.
-     *
-     * IMPORTANT:
-     *
-     * Do NOT use ADMIN_EMAIL here.
-     *
-     * ADMIN_EMAIL was previously being used as an owner-only
-     * authorization gate. That caused a completed creator
-     * onboarding flow to do this:
-     *
-     *   /admin/onboarding
-     *        ↓
-     *   /admin
-     *        ↓
-     *   ADMIN_EMAIL check
-     *        ↓
-     *   /
-     *
-     * Authentication and creator authorization are separate
-     * concerns. Clerk authentication is enforced here, while
-     * the application/database determines whether the user
-     * has a creator account and what they can access.
-     */
-
-    if (isAdminRoute(req)) {
-      try {
-        const {
-          userId,
-          redirectToSignIn,
-        } = await auth();
-
-        if (!userId) {
-          return redirectToSignIn();
-        }
-      } catch (error) {
-        console.error('[Middleware] Auth error in admin route:', error);
-        // Do not attempt to call auth() again in catch block
-        // Let the error propagate to Next.js error handler
-        throw error;
-      }
-
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * ALL OTHER ROUTES
-     * -------------------------------------------------------
-     *
-     * Public routes continue normally.
-     */
-
-    return;
+  if (isAuthRoute(pathname) || isApiAuthRoute(pathname)) {
+    return NextResponse.next();
   }
-);
 
-export default customMiddleware;
+  /*
+   * -------------------------------------------------------
+   * CREATOR ONBOARDING
+   * -------------------------------------------------------
+   *
+   * Onboarding requires a valid session, but does not
+   * require the creator to already have a completed local
+   * account.
+   *
+   * The onboarding API is responsible for creating/
+   * retrieving the local creator account.
+   */
+
+  if (isOnboardingRoute(pathname)) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      const signInUrl = new URL("/sign-in", url.origin);
+      signInUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    return NextResponse.next();
+  }
+
+  /*
+   * -------------------------------------------------------
+   * CREATOR ADMIN PORTAL
+   * -------------------------------------------------------
+   *
+   * The creator portal is for authenticated creators.
+   *
+   * Authentication and creator authorization are separate
+   * concerns. Better Auth authentication is enforced here, while
+   * the application/database determines whether the user
+   * has a creator account and what they can access.
+   */
+
+  if (isAdminRoute(pathname)) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      const signInUrl = new URL("/sign-in", url.origin);
+      signInUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    return NextResponse.next();
+  }
+
+  /*
+   * -------------------------------------------------------
+   * ALL OTHER ROUTES
+   * -------------------------------------------------------
+   *
+   * Public routes continue normally.
+   */
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

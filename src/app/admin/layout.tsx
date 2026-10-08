@@ -1,10 +1,9 @@
 'use client';
 
-import { useClerk, useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { auth } from "@/lib/auth/auth";
 import {
   BarChart3,
   FileText,
@@ -18,6 +17,7 @@ import {
   WalletCards,
   FileSignature,
   UserRound,
+  Image,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -75,6 +75,7 @@ const sections = [
     label: 'Content',
     items: [
       { name: 'Clients', href: '/admin/clients', icon: Users },
+      { name: 'Portfolio', href: '/admin/projects', icon: Image },
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
     ],
   },
@@ -97,11 +98,12 @@ const sections = [
 ];
 
 function SignOutButton({ compact }: { compact?: boolean }) {
-  const { signOut } = useClerk();
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut({ redirectUrl: '/admin/login' });
+    await auth.api.signOut({
+      headers: new Headers(),
+    });
     router.push('/admin/login');
   };
 
@@ -128,20 +130,56 @@ function SignOutButton({ compact }: { compact?: boolean }) {
   );
 }
 
+function RedirectToOnboarding() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/admin/onboarding");
+  }, [router]);
+
+  return (
+    <SplitViewProvider>
+      <div className="ui-page flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <p className="ui-meta uppercase">Redirecting to onboarding...</p>
+        </div>
+      </div>
+    </SplitViewProvider>
+  );
+}
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { isLoaded, isSignedIn } = useUser();
-  const isLoginPage = pathname === '/admin/login';
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
+  const [hasLocalAccount, setHasLocalAccount] = useState(true);
   const splitView = useSplitView();
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) return;
+    async function checkAuth() {
+      try {
+        const session = await auth.api.getSession({
+          headers: new Headers(),
+        });
+        setIsAuthenticated(!!session);
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     let isMounted = true;
 
     async function loadBadgeCounts() {
@@ -162,14 +200,28 @@ export default function AdminLayout({
       }
     }
 
+    async function checkLocalAccount() {
+      try {
+        const res = await fetch('/api/profile', { cache: 'no-store' });
+        if (isMounted) {
+          setHasLocalAccount(res.ok);
+        }
+      } catch {
+        if (isMounted) {
+          setHasLocalAccount(false);
+        }
+      }
+    }
+
     loadBadgeCounts();
+    checkLocalAccount();
 
     return () => {
       isMounted = false;
     };
-  }, [isLoaded, isSignedIn, pathname]);
+  }, [isAuthenticated, pathname]);
 
-  if (isLoginPage) {
+  if (pathname === '/admin/login') {
     return (
       <SplitViewProvider>
         <>{children}</>
@@ -177,7 +229,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!isLoaded) {
+  if (loading) {
     return (
       <SplitViewProvider>
         <div className="ui-page flex min-h-screen items-center justify-center">
@@ -194,8 +246,12 @@ export default function AdminLayout({
     );
   }
 
-  if (!isSignedIn) {
+  if (!isAuthenticated) {
     return null;
+  }
+
+  if (!hasLocalAccount) {
+    return <RedirectToOnboarding />;
   }
 
   return (

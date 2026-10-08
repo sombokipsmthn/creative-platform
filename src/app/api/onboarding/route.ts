@@ -74,7 +74,7 @@ async function getAuthenticatedContext() {
 
   if (!betterAuthUser) {
     return {
-      error: NextResponse.json({ error: "authenticated user not found." }, { status: 401 }),
+      error: NextResponse.json({ error: "Authenticated user not found." }, { status: 401 }),
     };
   }
 
@@ -166,13 +166,12 @@ export async function POST(request: Request) {
     }
 
     if (section === "profile") {
-      const email =
-        betterAuthUser.emailAddresses.find((item: any) => item.id === betterAuthUser.primaryEmailAddressId)?.emailAddress ??
-        betterAuthUser.emailAddresses[0]?.emailAddress ??
-        "";
+      const email = cleanString(betterAuthUser.email).toLowerCase();
       const name =
         cleanString(body.name) ||
-        [betterAuthUser.firstName, betterAuthUser.lastName].filter(Boolean).join(" ").trim();
+        cleanString(betterAuthUser.name) ||
+        email.split("@")[0] ||
+        "Creator";
       const handle = normaliseHandle(body.handle);
       const avatarUrl = body.avatarUrl === null ? null : cleanString(body.avatarUrl) || null;
 

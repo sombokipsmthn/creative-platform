@@ -53,9 +53,16 @@ export const auth = betterAuth({
   },
   ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   session: {
+    modelName: "sessions",
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: { enabled: true, maxAge: 60 * 5 },
+  },
+  account: {
+    modelName: "accounts",
+  },
+  verification: {
+    modelName: "verifications",
   },
   advanced: {
     cookiePrefix: "kipsmthn",

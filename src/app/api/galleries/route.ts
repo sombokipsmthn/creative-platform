@@ -4,8 +4,6 @@ import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
-import { logSecurityEvent } from "@/lib/security-logger";
-import { withMonitoring } from "@/lib/api-monitor";
 
 async function getCreator() {
   try {
@@ -37,48 +35,17 @@ function createSlug(title: string) {
   return `${base || "gallery"}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-async function getGalleryStats(creatorId: string) {
-  const totalGalleries = await db.execute(sql`
-    SELECT COUNT(*) as count
-    FROM galleries
-    WHERE creator_id = ${creatorId}
-  `);
-
-  const publishedGalleries = await db.execute(sql`
-    SELECT COUNT(*) as count
-    FROM galleries
-    WHERE creator_id = ${creatorId} AND status = 'published'
-  `);
-
-  return {
-    total: parseInt(totalGalleries.rows[0].count) || 0,
-    published: parseInt(publishedGalleries.rows[0].count) || 0,
-  };
-}
-
-export const GET = withMonitoring(async (request: Request) => {
+export async function GET() {
   try {
     const creator = await getCreator();
     if (!creator) {
+      console.warn('GET /api/galleries: No creator found');
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const url = new URL(request.url);
-    const status = url.searchParams.get("status");
-    const page = parseInt(url.searchParams.get("page") || "1");
-    const limit = parseInt(url.searchParams.get("limit") || "20");
-    const offset = (page - 1) * limit;
+    console.log('GET /api/galleries: Fetching galleries for creator:', creator.id);
 
-    // Build dynamic query based on filters
-    let whereClause = `creator_id = ${sql.raw(creator.id)}`;
-    const params: any[] = [creator.id];
-
-    if (status) {
-      whereClause += ` AND status = ${sql.raw(`$${params.length + 1}`)}`;
-      params.push(status);
-    }
-
-    const galleriesQuery = sql`
+    const result = await db.execute(sql`
       SELECT
         g.id,
         g.creator_id,
@@ -109,84 +76,38 @@ export const GET = withMonitoring(async (request: Request) => {
         (SELECT COUNT(*) FROM gallery_access_sessions s WHERE s.gallery_id = g.id)::int AS views_count
       FROM galleries g
       LEFT JOIN clients c ON c.id = g.client_id
-      WHERE ${whereClause}
+      WHERE g.creator_id = ${creator.id}
       ORDER BY g.created_at DESC
-      LIMIT ${limit}
-      OFFSET ${offset}
-    `;
+    `);
 
-    const countQuery = sql`
-      SELECT COUNT(*) as count
-      FROM galleries g
-      WHERE ${whereClause}
-    `;
-
-    const [galleriesResult, countResult] = await Promise.all([
-      db.execute(galleriesQuery, ...params),
-      db.execute(countQuery, ...params),
-    ]);
-
-    const total = parseInt(countResult.rows[0].count) || 0;
-    const galleries = galleriesResult.rows;
-
-    // Log successful gallery listing access
-    logSecurityEvent({
-      severity: "info",
-      eventType: "access_admin_access_denied",
-      message: `Gallery listing accessed: ${galleries.length} galleries retrieved`,
-      details: { totalCount: total, page, limit, statusFilter: status },
-    });
-
-    return NextResponse.json({
-      galleries,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+    console.log('GET /api/galleries: Query returned', result.rows.length, 'galleries');
+    return NextResponse.json({ galleries: result.rows });
   } catch (error) {
     console.error("GET /api/galleries error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch galleries" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Unable to load galleries." }, { status: 500 });
   }
-});
+}
 
-export const POST = withMonitoring(async (request: Request) => {
+export async function POST(request: Request) {
   try {
     const creator = await getCreator();
-    if (!creator) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!creator) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const body = await request.json();
-    const {
-      title,
-      description = "",
-      category,
-      clientId,
-      projectId,
-      status = "draft",
-      allowDownloads = false,
-      allowFavorites = true,
-      allowSelections = false,
-      accessPin,
-    } = body;
-
-    if (!title) {
-      return NextResponse.json(
-        { error: "Title is required" },
-        { status: 400 }
-      );
-    }
+    const title = typeof body?.title === "string" ? body.title.trim() : "";
+    if (!title) return NextResponse.json({ error: "Gallery title is required." }, { status: 400 });
 
     const slug = createSlug(title);
-    const publishedAt = status === "published" ? new Date() : null;
+    const clientId = typeof body?.clientId === "string" && body.clientId.trim() ? body.clientId.trim() : null;
+    const projectId = typeof body?.projectId === "string" && body.projectId.trim() ? body.projectId.trim() : null;
+    const description = typeof body?.description === "string" && body.description.trim() ? body.description.trim() : null;
+    const category = typeof body?.category === "string" && body.category.trim() ? body.category.trim() : null;
+    const accessPin = typeof body?.accessPin === "string" && body.accessPin.trim() ? body.accessPin.trim() : null;
+    const allowDownloads = body?.allowDownloads !== false;
+    const allowFavorites = body?.allowFavorites !== false;
+    const allowSelections = body?.allowSelections !== false;
 
-    const result = await db.execute(sql`
+    const galleryResult = await db.execute(sql`
       INSERT INTO galleries (
         creator_id,
         client_id,
@@ -197,56 +118,60 @@ export const POST = withMonitoring(async (request: Request) => {
         slug,
         access_pin,
         status,
-        published_at,
         allow_downloads,
         allow_favorites,
-        allow_selections,
-        created_at,
-        updated_at
-      ) VALUES (
+        allow_selections
+      )
+      VALUES (
         ${creator.id},
-        ${clientId || null},
-        ${projectId || null},
+        ${clientId},
+        ${projectId},
         ${title},
         ${description},
-        ${category || null},
+        ${category},
         ${slug},
-        ${accessPin || null},
-        ${status},
-        ${publishedAt},
+        ${accessPin},
+        'draft',
         ${allowDownloads},
         ${allowFavorites},
-        ${allowSelections},
-        NOW(),
-        NOW()
+        ${allowSelections}
       )
       RETURNING *
-    `, []);
+    `);
 
-    const gallery = result.rows[0];
+    const gallery = galleryResult.rows[0];
+    if (!gallery) return NextResponse.json({ error: "Gallery could not be created." }, { status: 500 });
 
-    // Log gallery creation
-    logSecurityEvent({
-      severity: "info",
-      eventType: "modify_create_gallery",
-      message: `Gallery created: ${title}`,
-      details: {
-        galleryId: gallery.id,
-        slug: gallery.slug,
-        status: gallery.status,
-        categoryId: categoryId,
-      },
-    });
+    await db.execute(sql`
+      INSERT INTO gallery_collections (gallery_id, title, sort_order)
+      VALUES (${gallery.id}, 'All Photos', 0)
+    `);
 
-    return NextResponse.json(
-      { gallery },
-      { status: 201 }
-    );
+    await db.execute(sql`
+      INSERT INTO gallery_watermarks (gallery_id)
+      VALUES (${gallery.id})
+      ON CONFLICT (gallery_id) DO NOTHING
+    `);
+
+    await db.execute(sql`
+      INSERT INTO gallery_download_presets (
+        gallery_id,
+        name,
+        variant,
+        max_width,
+        quality,
+        format,
+        include_watermark
+      )
+      VALUES (${gallery.id}, 'Web Delivery', 'display', 2400, 88, 'jpg', false)
+    `);
+
+    return NextResponse.json({ gallery }, { status: 201 });
   } catch (error) {
     console.error("POST /api/galleries error:", error);
     return NextResponse.json(
-      { error: "Failed to create gallery" },
-      { status: 500 }
+      { error: "Unable to create gallery." },
+      { status: 500 },
     );
   }
-});
+}

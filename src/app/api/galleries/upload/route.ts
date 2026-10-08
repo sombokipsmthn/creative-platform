@@ -1,6 +1,8 @@
-import { randomUUID } from 'crypto';
-
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
+
+export { isPathSafe, sanitizeFilename, validateMimeTypeByExtension } from "./security";
+
 import { auth } from "@clerk/nextjs/server";
 import { handleUpload } from "@vercel/blob/client";
 import { sql } from "drizzle-orm";
@@ -398,3 +400,4 @@ function getExtensionFromMimeType(mimeType: string): string {
 
   return mimeToExt[mimeType] || "bin";
 }
+

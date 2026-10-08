@@ -7,6 +7,8 @@
  * consider replacing with a persistent store (Redis, KV).
  */
 
+import { auth } from "@clerk/nextjs/server";
+
 interface RateLimitEntry {
   timestamps: number[];
 }
@@ -25,7 +27,13 @@ class RateLimiter {
    * Check if the given key has exceeded the rate limit.
    * Returns true if the request is ALLOWED, false if RATE LIMITED.
    */
-  isAllowed(key: string): boolean {
+  async limit(request: Request): Promise<{ success: boolean }> {
+    const { userId } = await auth();
+    if (!userId) return { success: true }; // Allow if not authenticated (adjust as needed)
+    return { success: this.isAllowed(userId) };
+  }
+
+  public isAllowed(key: string): boolean {
     const now = Date.now();
     const windowStart = now - this.windowMs;
 

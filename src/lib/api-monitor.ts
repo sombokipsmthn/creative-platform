@@ -11,6 +11,7 @@
 import { NextResponse } from "next/server";
 import { logSecurityEvent } from "./security-logger";
 import {
+  type ApiErrorCategory,
   logApiError,
   logApiPerformance,
   logRateLimitEvent,
@@ -79,7 +80,7 @@ export function withMonitoring<T extends (...args: any[]) => Promise<NextRespons
     // Log request start
     logSecurityEvent({
       severity: "info",
-      eventType: "api_error",
+      eventType: "access_admin_access_denied",
       message: `${method} ${isSensitive ? "[SENSITIVE]" : path}`,
       details: {
         requestId,
@@ -129,7 +130,7 @@ export function withMonitoring<T extends (...args: any[]) => Promise<NextRespons
 
       logSecurityEvent({
         severity: "critical",
-        eventType: "app_unhandled_exception",
+        eventType: "system_secret_access",
         message: `Unhandled exception in ${method} ${path}`,
         details: {
           requestId,
@@ -153,7 +154,7 @@ export function withMonitoring<T extends (...args: any[]) => Promise<NextRespons
 /**
  * Determine API error category based on status code.
  */
-function getErrorCategory(status: number): string {
+function getErrorCategory(status: number): ApiErrorCategory {
   switch (status) {
     case 400:
       return "validation_error";

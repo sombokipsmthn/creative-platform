@@ -66,8 +66,8 @@ class MetricsStore {
     const metrics: MetricPoint[] = [];
 
     // Count events by severity
-    const severityCounts = { critical: 0, high: 0, medium: 0, low: 0, info: 0, debug: 0 };
-    const categoryCounts = { security: 0, api: 0, database: 0, infrastructure: 0, application: 0 };
+    const severityCounts: Record<string, number> = { critical: 0, high: 0, medium: 0, low: 0, info: 0, debug: 0 };
+    const categoryCounts: Record<string, number> = { security: 0, api: 0, database: 0, infrastructure: 0, application: 0 };
     const eventTypeCounts: Record<string, number> = {};
 
     for (const event of this.events) {
@@ -121,7 +121,7 @@ class MetricsStore {
   }
 
   getSummary() {
-    const severityCounts = { critical: 0, high: 0, medium: 0, low: 0, info: 0, debug: 0 };
+    const severityCounts: Record<string, number> = { critical: 0, high: 0, medium: 0, low: 0, info: 0, debug: 0 };
 
     for (const event of this.events) {
       severityCounts[event.severity] = (severityCounts[event.severity] || 0) + 1;

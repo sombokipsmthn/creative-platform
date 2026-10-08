@@ -7,7 +7,7 @@
  * consider replacing with a persistent store (Redis, KV).
  */
 
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 
 interface RateLimitEntry {
   timestamps: number[];

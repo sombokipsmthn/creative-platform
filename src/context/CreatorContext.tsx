@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth-client";
 
 export interface CreatorProfile {
   id: string;

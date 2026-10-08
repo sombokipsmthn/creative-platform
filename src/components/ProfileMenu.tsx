@@ -4,7 +4,7 @@
 import {
   useClerk,
   useUser,
-} from '@clerk/nextjs';
+} from "@/lib/auth-client";
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';

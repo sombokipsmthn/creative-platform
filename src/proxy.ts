@@ -1,134 +1,16 @@
-import {
-  clerkMiddleware,
-  createRouteMatcher,
-} from "@clerk/nextjs/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { betterAuthInstance } from "@/lib/auth";
 
-const isAdminRoute = createRouteMatcher([
-  "/admin(.*)",
-]);
-
-const isOnboardingRoute = createRouteMatcher([
-  "/admin/onboarding(.*)",
-]);
-
-const isAuthRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-]);
-
-const customMiddleware = clerkMiddleware(
-  async (auth, req) => {
-    /*
-     * -------------------------------------------------------
-     * PUBLIC AUTH ROUTES
-     * -------------------------------------------------------
-     *
-     * Sign-in and sign-up must remain publicly accessible.
-     */
-
-    if (isAuthRoute(req)) {
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * CREATOR ONBOARDING
-     * -------------------------------------------------------
-     *
-     * Onboarding requires a valid Clerk session, but does not
-     * require the creator to already have a completed local
-     * account.
-     *
-     * The onboarding API is responsible for creating/
-     * retrieving the local creator account.
-     */
-
-    if (isOnboardingRoute(req)) {
-      try {
-        const {
-          userId,
-          redirectToSignIn,
-        } = await auth();
-
-        if (!userId) {
-          return redirectToSignIn();
-        }
-      } catch (error) {
-        console.error('[Middleware] Auth error in onboarding route:', error);
-        // Do not attempt to call auth() again in catch block
-        // Let the error propagate to Next.js error handler
-        throw error;
-      }
-
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * CREATOR ADMIN PORTAL
-     * -------------------------------------------------------
-     *
-     * The creator portal is for authenticated creators.
-     *
-     * IMPORTANT:
-     *
-     * Do NOT use ADMIN_EMAIL here.
-     *
-     * ADMIN_EMAIL was previously being used as an owner-only
-     * authorization gate. That caused a completed creator
-     * onboarding flow to do this:
-     *
-     *   /admin/onboarding
-     *        ↓
-     *   /admin
-     *        ↓
-     *   ADMIN_EMAIL check
-     *        ↓
-     *   /
-     *
-     * Authentication and creator authorization are separate
-     * concerns. Clerk authentication is enforced here, while
-     * the application/database determines whether the user
-     * has a creator account and what they can access.
-     */
-
-    if (isAdminRoute(req)) {
-      try {
-        const {
-          userId,
-          redirectToSignIn,
-        } = await auth();
-
-        if (!userId) {
-          return redirectToSignIn();
-        }
-      } catch (error) {
-        console.error('[Middleware] Auth error in admin route:', error);
-        // Do not attempt to call auth() again in catch block
-        // Let the error propagate to Next.js error handler
-        throw error;
-      }
-
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * ALL OTHER ROUTES
-     * -------------------------------------------------------
-     *
-     * Public routes continue normally.
-     */
-
-    return;
+export default async function proxy(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  if (!path.startsWith("/admin") || path.startsWith("/admin/login") || path.startsWith("/admin/onboarding")) {
+    return NextResponse.next();
   }
-);
+  const session = await betterAuthInstance.api.getSession({ headers: request.headers });
+  if (!session?.user) {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
+  return NextResponse.next();
+}
 
-export default customMiddleware;
-
-export const config = {
-  matcher: [
-    "/((?!_next|.*\\..*).*)",
-    "/api/(.*)",
-  ],
-};
+export const config = { matcher: ["/((?!_next|.*\\..*).*)", "/api/(.*)"] };

@@ -9,7 +9,7 @@
  * @see docs/soc2/LOGGING_MONITORING_PLAN.md
  */
 
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 
 /** Severity levels for security events. */
 export type SecuritySeverity = "critical" | "high" | "medium" | "low" | "info" | "debug";
@@ -115,7 +115,7 @@ export async function getUserContext(): Promise<{
   actorType?: "creator" | "client" | "admin" | "system";
 }> {
   const { userId, sessionClaims } = await auth();
-  const metadata = sessionClaims?.metadata as { role?: "admin" | "client" } | undefined;
+  const metadata = (sessionClaims as any)?.metadata as { role?: "admin" | "client" } | undefined;
   return {
     userId: userId || undefined,
     sessionId: undefined,

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUser } from "@/lib/auth-client";
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
@@ -169,7 +169,7 @@ export default function AdminProfilePage() {
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map((part) => part.charAt(0))
+    .map((part: any) => part.charAt(0))
     .join('')
     .toUpperCase() || 'C';
 

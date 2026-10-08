@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@/lib/auth";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -100,7 +100,7 @@ export async function getOrCreateLocalUser(
 
   const email =
     clerkUser.emailAddresses.find(
-      (item) =>
+      (item: any) =>
         item.id ===
         clerkUser.primaryEmailAddressId
     )?.emailAddress ??

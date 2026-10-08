@@ -1,6 +1,6 @@
 import {
   auth,
-} from "@clerk/nextjs/server";
+} from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 

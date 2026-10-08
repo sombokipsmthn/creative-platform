@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth } from "@/lib/auth-client";
 import { LogIn, LogOut } from "lucide-react";
 
 import ThemeToggle from "@/components/ThemeToggle";

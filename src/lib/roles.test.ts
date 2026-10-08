@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 
 import { getCurrentRole, requireRole } from "./roles";
 

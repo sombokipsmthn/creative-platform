@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@/lib/auth";
 import { and, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -167,7 +167,7 @@ export async function POST(request: Request) {
 
     if (section === "profile") {
       const email =
-        clerkUser.emailAddresses.find((item) => item.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
+        clerkUser.emailAddresses.find((item: any) => item.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
         clerkUser.emailAddresses[0]?.emailAddress ??
         "";
       const name =

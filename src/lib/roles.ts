@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 
 export type Role = "admin" | "client";
 
@@ -11,7 +11,7 @@ export type Role = "admin" | "client";
  */
 export async function getCurrentRole(): Promise<Role | null> {
   const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: Role } | undefined)?.role;
+  const role = ((sessionClaims as any)?.metadata as { role?: Role } | undefined)?.role;
   return role ?? null;
 }
 

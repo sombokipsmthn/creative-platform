@@ -3,7 +3,7 @@ import { randomUUID } from "crypto";
 
 export { isPathSafe, sanitizeFilename, validateMimeTypeByExtension } from "./security";
 
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth";
 import { handleUpload } from "@vercel/blob/client";
 import { sql } from "drizzle-orm";
 

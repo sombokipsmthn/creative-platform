@@ -1,6 +1,6 @@
 'use client';
 
-import { useClerk, useUser } from '@clerk/nextjs';
+import { useClerk, useUser } from "@/lib/auth-client";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';

@@ -4,11 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 
-function createInitialHandle(
-  name: string,
-  email: string,
-  userId: string
-) {
+function createInitialHandle(name: string, email: string, userId: string) {
   const base =
     name
       .toLowerCase()
@@ -20,413 +16,122 @@ function createInitialHandle(
       .replace(/[^a-z0-9_-]/g, "") ||
     "creator";
 
-  const suffix = userId
-    .replace(/[^a-zA-Z0-9]/g, "")
-    .slice(-8)
-    .toLowerCase();
-
+  const suffix = userId.replace(/[^a-zA-Z0-9]/g, "").slice(-8).toLowerCase();
   return `${base}-${suffix}`;
 }
 
-/**
- * Find the local creator account associated with a authenticated user.
- *
- * Resolution order:
- *
- * 1. authUserId
- *    - This is the canonical Better Auth → local-user relationship.
- *
- * 2. email
- *    - Handles existing local accounts that were created before
- *      authUserId was correctly associated.
- *
- * 3. Create a new local user.
- *
- * The email reconciliation step is important because `users.email`
- * is unique. Without it, an existing local account can cause a
- * duplicate-email error when Better Auth tries to create the account again.
- */
-export async function getOrCreateLocalUser(
-  userId: string
-) {
-  /*
-   * -------------------------------------------------------
-   * 1. FIND BY BETTER_AUTH USER ID
-   * -------------------------------------------------------
-   */
+export async function getOrCreateLocalUser(userId: string) {
+  const existingByAuthUserId = (
+    await db
+      .select()
+      .from(users)
+      .where(eq(users.authUserId, userId))
+      .limit(1)
+  )[0];
 
-  const existingByAuthUserId =
-    (
-      await db
-        .select()
-        .from(users)
-        .where(
-          eq(
-            users.authUserId,
-            userId
-          )
-        )
-        .limit(1)
-    )[0];
-
-  if (existingByAuthUserId) {
-    console.log(
-      "Creator sync: local user found by authUserId",
-      {
-        id: existingByAuthUserId.id,
-        authUserId:
-          existingByAuthUserId.authUserId,
-        email:
-          existingByAuthUserId.email,
-      }
-    );
-
-    return existingByAuthUserId;
-  }
-
-  /*
-   * -------------------------------------------------------
-   * 2. GET BETTER_AUTH USER
-   * -------------------------------------------------------
-   */
+  if (existingByAuthUserId) return existingByAuthUserId;
 
   const betterAuthUser = await currentUser();
 
   if (!betterAuthUser) {
-    throw new Error(
-      "Authenticated authenticated user could not be loaded."
-    );
+    throw new Error("Authenticated user could not be loaded.");
   }
 
-  const email =
-    betterAuthUser.emailAddresses.find(
-      (item: any) =>
-        item.id ===
-        betterAuthUser.primaryEmailAddressId
-    )?.emailAddress ??
-    betterAuthUser.emailAddresses[0]
-      ?.emailAddress ??
-    "";
+  const normalizedEmail = String(betterAuthUser.email || "").toLowerCase().trim();
 
-  if (!email) {
-    throw new Error(
-      "No email address is available for this authenticated account."
-    );
+  if (!normalizedEmail) {
+    throw new Error("No email address is available for this authenticated account.");
   }
-
-  const normalizedEmail =
-    email.toLowerCase().trim();
 
   const name =
-    [
-      betterAuthUser.firstName,
-      betterAuthUser.lastName,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .trim() ||
+    String(betterAuthUser.name || "").trim() ||
     normalizedEmail.split("@")[0] ||
     "Creator";
 
-  /*
-   * -------------------------------------------------------
-   * 3. FIND EXISTING USER BY EMAIL
-   * -------------------------------------------------------
-   *
-   * This is the important fix.
-   *
-   * The database has a unique constraint on email. If the user
-   * was previously created without the current auth user ID, we
-   * should claim that existing account rather than attempting
-   * another INSERT.
-   */
-
-  const existingByEmail =
-    (
-      await db
-        .select()
-        .from(users)
-        .where(
-          eq(
-            users.email,
-            normalizedEmail
-          )
-        )
-        .limit(1)
-    )[0];
+  const existingByEmail = (
+    await db
+      .select()
+      .from(users)
+      .where(eq(users.email, normalizedEmail))
+      .limit(1)
+  )[0];
 
   if (existingByEmail) {
-    /*
-     * If the existing record already belongs to a different
-     * authenticated account, do NOT silently steal it.
-     *
-     * This protects against two real authenticated accounts sharing
-     * a local account/email unexpectedly.
-     */
-
-    if (
-      existingByEmail.authUserId &&
-      existingByEmail.authUserId !==
-        userId
-    ) {
+    if (existingByEmail.authUserId && existingByEmail.authUserId !== userId) {
       throw new Error(
         "A local creator account already exists for this email but is linked to a different authenticated account."
       );
     }
 
-    /*
-     * The existing local user has no auth user ID.
-     *
-     * Claim/reconcile the account.
-     */
+    const updated = await db
+      .update(users)
+      .set({
+        authUserId: userId,
+        email: normalizedEmail,
+        name: existingByEmail.name || name,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, existingByEmail.id))
+      .returning();
 
-    console.log(
-      "Creator sync: reconciling existing local user by email",
-      {
-        localUserId:
-          existingByEmail.id,
-        email:
-          existingByEmail.email,
-        betterAuthUserId:
-          userId,
-      }
-    );
-
-    const updated =
-      await db
-        .update(users)
-        .set({
-          authUserId: userId,
-          email: normalizedEmail,
-          name:
-            existingByEmail.name ||
-            name,
-          updatedAt:
-            new Date(),
-        })
-        .where(
-          eq(
-            users.id,
-            existingByEmail.id
-          )
-        )
-        .returning();
-
-    if (updated[0]) {
-      console.log(
-        "Creator sync: existing local user reconciled",
-        {
-          id: updated[0].id,
-          authUserId:
-            updated[0].authUserId,
-          email:
-            updated[0].email,
-        }
-      );
-
-      return updated[0];
-    }
-
-    /*
-     * Extremely unlikely, but re-read the account in case
-     * another request updated it concurrently.
-     */
-
-    const reconciled =
-      (
-        await db
-          .select()
-          .from(users)
-          .where(
-            eq(
-              users.id,
-              existingByEmail.id
-            )
-          )
-          .limit(1)
-      )[0];
-
-    if (reconciled) {
-      return reconciled;
-    }
-
-    throw new Error(
-      "Existing creator account could not be reconciled."
-    );
+    if (updated[0]) return updated[0];
+    return existingByEmail;
   }
 
-  /*
-   * -------------------------------------------------------
-   * 4. CREATE A BRAND-NEW LOCAL USER
-   * -------------------------------------------------------
-   */
-
-  const handle =
-    createInitialHandle(
-      name,
-      normalizedEmail,
-      userId
-    );
-
-  console.log(
-    "Creator sync: creating local user",
-    {
-      betterAuthUserId: userId,
-      email: normalizedEmail,
-      name,
-      handle,
-    }
-  );
+  const handle = createInitialHandle(name, normalizedEmail, userId);
 
   try {
-    const inserted =
-      await db
-        .insert(users)
-        .values({
-          authUserId: userId,
-          email: normalizedEmail,
-          name,
-          handle,
-          onboardingStatus:
-            "incomplete",
-          onboardingStep: 1,
-        })
-        .onConflictDoNothing({
-          target:
-            users.authUserId,
-        })
-        .returning();
+    const inserted = await db
+      .insert(users)
+      .values({
+        authUserId: userId,
+        email: normalizedEmail,
+        name,
+        handle,
+        onboardingStatus: "incomplete",
+        onboardingStep: 1,
+      })
+      .onConflictDoNothing({ target: users.authUserId })
+      .returning();
 
-    if (inserted[0]) {
-      console.log(
-        "Creator sync: local user created",
-        {
-          id: inserted[0].id,
-          authUserId:
-            inserted[0].authUserId,
-        }
-      );
-
-      return inserted[0];
-    }
+    if (inserted[0]) return inserted[0];
   } catch (error) {
-    /*
-     * A concurrent request may have created the account,
-     * or another unique constraint may have been hit.
-     *
-     * Do not immediately fail. Re-read using both identifiers.
-     */
-
-    console.error(
-      "Creator sync: local user insert failed, attempting reconciliation:",
-      error
-    );
+    console.error("Creator sync: local user insert failed:", error);
   }
 
-  /*
-   * -------------------------------------------------------
-   * 5. RETRIEVE AFTER CONCURRENT INSERT / CONFLICT
-   * -------------------------------------------------------
-   */
+  const afterInsert = (
+    await db
+      .select()
+      .from(users)
+      .where(eq(users.authUserId, userId))
+      .limit(1)
+  )[0];
 
-  const afterInsertByAuthUserId =
-    (
-      await db
-        .select()
-        .from(users)
-        .where(
-          eq(
-            users.authUserId,
-            userId
-          )
-        )
-        .limit(1)
-    )[0];
+  if (afterInsert) return afterInsert;
 
-  if (afterInsertByAuthUserId) {
-    console.log(
-      "Creator sync: local user found after insert conflict",
-      {
-        id:
-          afterInsertByAuthUserId.id,
-        authUserId:
-          afterInsertByAuthUserId.authUserId,
-      }
-    );
+  const afterEmailConflict = (
+    await db
+      .select()
+      .from(users)
+      .where(eq(users.email, normalizedEmail))
+      .limit(1)
+  )[0];
 
-    return afterInsertByAuthUserId;
-  }
-
-  /*
-   * It is possible that the conflict was caused by the email
-   * unique constraint rather than authUserId. Check email again.
-   */
-
-  const afterInsertByEmail =
-    (
-      await db
-        .select()
-        .from(users)
-        .where(
-          eq(
-            users.email,
-            normalizedEmail
-          )
-        )
-        .limit(1)
-    )[0];
-
-  if (afterInsertByEmail) {
-    if (
-      afterInsertByEmail.authUserId &&
-      afterInsertByEmail.authUserId !==
-        userId
-    ) {
+  if (afterEmailConflict) {
+    if (afterEmailConflict.authUserId && afterEmailConflict.authUserId !== userId) {
       throw new Error(
         "A local creator account already exists for this email but is linked to a different authenticated account."
       );
     }
 
-    const reconciled =
-      await db
-        .update(users)
-        .set({
-          authUserId: userId,
-          updatedAt:
-            new Date(),
-        })
-        .where(
-          eq(
-            users.id,
-            afterInsertByEmail.id
-          )
-        )
-        .returning();
+    const reconciled = await db
+      .update(users)
+      .set({ authUserId: userId, updatedAt: new Date() })
+      .where(eq(users.id, afterEmailConflict.id))
+      .returning();
 
-    if (reconciled[0]) {
-      console.log(
-        "Creator sync: local user reconciled after insert conflict",
-        {
-          id:
-            reconciled[0].id,
-          authUserId:
-            reconciled[0].authUserId,
-        }
-      );
-
-      return reconciled[0];
-    }
-
-    return afterInsertByEmail;
+    if (reconciled[0]) return reconciled[0];
   }
 
-  /*
-   * -------------------------------------------------------
-   * 6. GENUINE FAILURE
-   * -------------------------------------------------------
-   */
-
-  throw new Error(
-    "Creator account could not be created."
-  );
+  throw new Error("Creator account could not be created.");
 }

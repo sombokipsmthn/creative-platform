@@ -1,10 +1,93 @@
 "use client";
+
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+
 export default function SignUpPage() {
-  const router=useRouter(); const [name,setName]=useState(""); const [email,setEmail]=useState(""); const [password,setPassword]=useState(""); const [error,setError]=useState<string|null>(null); const [loading,setLoading]=useState(false);
-  async function submit(e:React.FormEvent){e.preventDefault();setLoading(true);setError(null);const r=await authClient.signUp.email({name,email,password});if(r.error)setError(r.error.message||"Unable to create account");else router.replace("/admin/onboarding");setLoading(false);}
-  return <main className="min-h-screen flex items-center justify-center px-6"><form onSubmit={submit} className="w-full max-w-md space-y-4"><h1 className="text-2xl font-semibold">Create your workspace</h1><input required value={name} onChange={e=>setName(e.target.value)} placeholder="Name" className="w-full rounded-xl border px-4 py-3"/><input required type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" className="w-full rounded-xl border px-4 py-3"/><input required minLength={8} type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Password" className="w-full rounded-xl border px-4 py-3"/>{error&&<p className="text-red-600">{error}</p>}<button disabled={loading} className="w-full rounded-xl bg-purple-600 px-4 py-3 text-white">{loading?"Creating…":"Create account"}</button><Link href="/sign-in" className="block text-center text-purple-600">Already have an account?</Link></form></main>;
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function submit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    const result = await authClient.signUp.email({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password,
+    });
+
+    if (result.error) {
+      setError(result.error.message || "Unable to create account.");
+      setLoading(false);
+      return;
+    }
+
+    router.replace("/auth");
+  }
+
+  return (
+    <main className="flex min-h-screen items-center justify-center px-6">
+      <form onSubmit={submit} className="w-full max-w-md space-y-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-purple-600">
+            KIPSMTHN
+          </p>
+          <h1 className="mt-3 text-2xl font-semibold">Create your workspace</h1>
+          <p className="mt-2 text-sm text-slate-500">
+            Create your account and we&apos;ll take you through your creator setup.
+          </p>
+        </div>
+
+        <input
+          required
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          placeholder="Name"
+          autoComplete="name"
+          className="w-full rounded-xl border px-4 py-3"
+        />
+        <input
+          required
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="Email"
+          autoComplete="email"
+          className="w-full rounded-xl border px-4 py-3"
+        />
+        <input
+          required
+          minLength={8}
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          placeholder="Password"
+          autoComplete="new-password"
+          className="w-full rounded-xl border px-4 py-3"
+        />
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-xl bg-purple-600 px-4 py-3 font-semibold text-white disabled:opacity-60"
+        >
+          {loading ? "Creating…" : "Create account"}
+        </button>
+
+        <Link href="/sign-in" className="block text-center text-sm text-purple-600">
+          Already have an account? Sign in
+        </Link>
+      </form>
+    </main>
+  );
 }

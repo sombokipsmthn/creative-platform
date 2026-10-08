@@ -1,6 +1,6 @@
 import {
   auth,
-} from "@clerk/nextjs/server";
+} from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 
@@ -16,7 +16,7 @@ import {
 export default async function AuthRedirectPage() {
   /*
    * -------------------------------------------------------
-   * REQUIRE CLERK AUTHENTICATION
+   * REQUIRE BETTER_AUTH AUTHENTICATION
    * -------------------------------------------------------
    */
 
@@ -72,7 +72,7 @@ export default async function AuthRedirectPage() {
     console.error(
       "Auth redirect: local user still missing",
       {
-        clerkUserId: userId,
+        betterAuthUserId: userId,
       }
     );
 

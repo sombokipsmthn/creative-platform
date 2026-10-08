@@ -4,7 +4,7 @@ import { eq, and, or, ilike, desc, sql } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { generateContractNumber } from '@/lib/utils'; // We'll create this helper if it doesn't exist
 
-// Helper to get current user ID from Clerk (assuming we have a helper)
+// Helper to get current user ID from Better Auth (assuming we have a helper)
 import getCurrentUser from '@/lib/auth/get-current-user';
 
 // Contracts API functions

@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
+import { useUser } from "@/lib/auth-client";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCreator } from '@/context/CreatorContext';

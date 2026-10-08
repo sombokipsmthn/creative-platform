@@ -5,6 +5,72 @@ import { ArrowRight, Check, FileText, FolderKanban, Images, LayoutDashboard, Use
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
 
+export const metadata = {
+  title: {
+    template: "%s | KIPSMTHN",
+    default: "KIPSMTHN - Creative Business Platform",
+  },
+  description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+  openGraph: {
+    title: "KIPSMTHN - Creative Business Platform",
+    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://kipsmthn.com',
+    siteName: "KIPSMTHN",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80",
+        width: 1200,
+        height: 800,
+        alt: "Creative business platform with workspace and tools",
+      },
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "KIPSMTHN Creative Business Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KIPSMTHN - Creative Business Platform",
+    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+    images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  keywords: [
+    "creative business platform",
+    "photography business software",
+    "filmmaker workflow management",
+    "studio management software",
+    "creative freelancer tools",
+    "client project management",
+    "creative invoicing software",
+    "private gallery delivery",
+    "creative quotes and estimates",
+    "photographer business tools"
+  ],
+  authors: [
+    {
+      name: "KIPSMTHN",
+      url: "https://kipsmthn.com",
+    },
+  ],
+  creator: "KIPSMTHN",
+  publisher: "KIPSMTHN",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+};
+
 const platformFeatures = [
   { number: "01", title: "Build your creative presence", description: "Create a polished portfolio that gives your work a professional home and makes it easier for the right clients to discover you." },
   { number: "02", title: "Manage clients in one place", description: "Keep client information, projects, quotes, invoices, and production details connected instead of scattered across different tools." },

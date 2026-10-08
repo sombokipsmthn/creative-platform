@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@/lib/auth";
 import { and, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -70,17 +70,17 @@ async function getAuthenticatedContext() {
     };
   }
 
-  const clerkUser = await currentUser();
+  const betterAuthUser = await currentUser();
 
-  if (!clerkUser) {
+  if (!betterAuthUser) {
     return {
-      error: NextResponse.json({ error: "Clerk user not found." }, { status: 401 }),
+      error: NextResponse.json({ error: "Authenticated user not found." }, { status: 401 }),
     };
   }
 
   try {
     const localUser = await getLocalUser(userId);
-    return { userId, clerkUser, localUser };
+    return { userId, betterAuthUser, localUser };
   } catch (error) {
     console.error("ONBOARDING: local user missing", error);
     return {
@@ -157,7 +157,7 @@ export async function POST(request: Request) {
       return context.error;
     }
 
-    const { localUser, clerkUser } = context;
+    const { localUser, betterAuthUser } = context;
     const body = (await request.json()) as OnboardingBody;
     const section = body.section;
 
@@ -166,13 +166,12 @@ export async function POST(request: Request) {
     }
 
     if (section === "profile") {
-      const email =
-        clerkUser.emailAddresses.find((item) => item.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
-        clerkUser.emailAddresses[0]?.emailAddress ??
-        "";
+      const email = cleanString(betterAuthUser.email).toLowerCase();
       const name =
         cleanString(body.name) ||
-        [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ").trim();
+        cleanString(betterAuthUser.name) ||
+        email.split("@")[0] ||
+        "Creator";
       const handle = normaliseHandle(body.handle);
       const avatarUrl = body.avatarUrl === null ? null : cleanString(body.avatarUrl) || null;
 

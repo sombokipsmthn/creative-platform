@@ -81,14 +81,19 @@ export function ContractBuilder({
   });
 
   // Set template when loaded
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (templateId && templatesQuery.data && !template) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
-      if (found) setTemplate(found);
+      if (found) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setTemplate(found);
+      }
     }
   }, [templateId, templatesQuery.data, template]);
 
   // Initialize values from client/project when they change
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!template) return;
 
@@ -161,6 +166,7 @@ export function ContractBuilder({
       newValues.effective_date = new Date().toISOString().slice(0, 10);
     }
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setValues(newValues);
   }, [template, selectedClient, selectedProject]);
 

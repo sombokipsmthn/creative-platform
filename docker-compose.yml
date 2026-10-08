@@ -14,9 +14,6 @@ services:
       # Database
       DATABASE_URL: ${DATABASE_URL}
       # Auth
-      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
-      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
-      CLERK_WEBHOOK_SECRET: ${CLERK_WEBHOOK_SECRET}
       # Vercel Blob (optional)
       BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN}
       # Svix (optional)

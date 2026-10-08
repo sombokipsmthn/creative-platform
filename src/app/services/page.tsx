@@ -1,7 +1,36 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
+
+export const metadata: Metadata = {
+  title: "Services | KIPSMTHN",
+  description:
+    "Production and creative storytelling services: startup ecosystem media, brand films, commercial photography, and visual identity systems.",
+  alternates: {
+    canonical: "/services",
+  },
+  openGraph: {
+    title: "Services | KIPSMTHN",
+    description:
+      "Production and creative storytelling services: startup ecosystem media, brand films, commercial photography, and visual identity systems.",
+    images: [
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "KIPSMTHN Services",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Services | KIPSMTHN",
+    description:
+      "Production and creative storytelling services: startup ecosystem media, brand films, commercial photography, and visual identity systems.",
+  },
+};
 
 const resolveImage = (source?: string, fallbackUrl?: string) => {
   if (!source) return fallbackUrl || 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=1200&q=80';

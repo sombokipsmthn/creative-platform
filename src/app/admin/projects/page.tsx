@@ -35,6 +35,8 @@ type Project = {
   } | null;
 };
 
+type Client = NonNullable<Project['client']>;
+
 const emptyForm = {
   name: '',
   description: '',
@@ -101,7 +103,7 @@ function statusClass(status: string) {
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Client[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | ProjectStatus>('ALL');
   const [filterClient, setFilterClient] = useState<string | null>(null);
@@ -150,7 +152,7 @@ export default function AdminProjectsPage() {
         if (!cancelled) {
           setClients(Array.isArray(clientsData) ? clientsData : []);
           setProjects(
-            projectsData.map((proj: any) => ({
+            projectsData.map((proj: Project) => ({
               ...proj,
               client: proj.client
                 ? {
@@ -162,7 +164,7 @@ export default function AdminProjectsPage() {
                     location: proj.client.location,
                   }
                 : null,
-            }))
+            } as Project))
           );
         }
       } catch (err) {

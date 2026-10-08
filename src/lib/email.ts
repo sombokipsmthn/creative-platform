@@ -3,34 +3,28 @@ export interface EmailOptions {
   subject: string;
   text?: string;
   html?: string;
-  attachments?: Array<{
-    filename: string;
-    content: Buffer | string;
-    contentType?: string;
-  }>;
+  attachments?: Array<{ filename: string; content: Buffer | string; contentType?: string }>;
 }
 
-/**
- * Send email via Resend or configured provider.
- * 
- * Requires RESEND_API_KEY in environment variables.
- * For development, set SKIP_EMAIL_SENDING=true to mock.
- */
 export async function sendEmail(options: EmailOptions): Promise<void> {
-  // Mock mode for development
-  if (process.env.SKIP_EMAIL_SENDING === 'true') {
-    console.log('[DEV] Email (not sent):', {
-      to: options.to,
-      subject: options.subject,
-    });
+  if (process.env.SKIP_EMAIL_SENDING === "true") {
+    console.warn("Email sending skipped by configuration.");
     return;
   }
 
-  // TODO: Implement using Resend SDK
-  // import { Resend } from 'resend';
-  // const resend = new Resend(process.env.RESEND_API_KEY);
-  // const { error } = await resend.emails.send({ from: 'noreply@example.com', ...options });
-  // if (error) throw new Error(`Email send failed: ${error.message}`);
-  
-  throw new Error('Email sending not configured. Set up Resend or email provider.');
+  const apiKey = process.env.RESEND_API_KEY;
+  const from = process.env.EMAIL_FROM;
+  if (!apiKey || !from) {
+    throw new Error("Email delivery is not configured. Set RESEND_API_KEY and EMAIL_FROM.");
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to: [options.to], subject: options.subject, text: options.text, html: options.html }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Email delivery failed with status ${response.status}.`);
+  }
 }

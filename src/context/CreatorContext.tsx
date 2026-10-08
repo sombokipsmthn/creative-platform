@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth-client";
 
 export interface CreatorProfile {
   id: string;
@@ -68,10 +68,10 @@ export function CreatorProvider({
   const syncCreator = useCallback(async function syncCreator() {
     // The context no longer blocks synchronization on the onboarding route.
     // Routing decisions are handled by /auth, so we always attempt to fetch the
-    // creator state when Clerk reports the user as signed in.
+    // creator state when Better Auth reports the user as signed in.
 
     /*
-     * Clerk has not finished loading yet.
+     * Better Auth has not finished loading yet.
      */
     if (!isLoaded) {
       return;
@@ -138,7 +138,7 @@ export function CreatorProvider({
 
       /*
        * -------------------------------------------------------
-       * NEW CLERK USER
+       * NEW BETTER_AUTH USER
        * -------------------------------------------------------
        *
        * /api/users/sync does not create a database user.

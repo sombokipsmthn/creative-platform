@@ -33,7 +33,6 @@ export default async function AuthRedirectPage() {
 
   const localUser = await db.query.users.findFirst({
     where: eq(users.authUserId, session.user.id),
-    limit: 1,
   });
 
   if (!localUser) {
@@ -78,7 +77,6 @@ export default async function AuthRedirectPage() {
 
   const profile = await db.query.creatorProfiles.findFirst({
     where: eq(creatorProfiles.userId, localUser.id),
-    limit: 1,
   });
 
   /*

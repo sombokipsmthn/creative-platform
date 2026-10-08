@@ -11,7 +11,13 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
-RUN npm run build
+
+ARG DATABASE_URL=postgresql://build:[REDACTED]@localhost:5432/build
+ARG BETTER_AUTH_SECRET=build-only-secret
+ENV DATABASE_URL=${DATABASE_URL}
+ENV BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+
+RUN npx next build --webpack
 
 FROM node:22-alpine AS runtime
 WORKDIR /app

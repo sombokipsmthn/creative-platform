@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { auth } from "@/lib/auth/auth";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -101,8 +101,27 @@ async function makeAvatarDataUrl(file: File): Promise<string> {
 
 export default function CreatorOnboardingPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const [user, setUser] = useState<{ id: string; firstName: string; lastName: string; primaryEmailAddress: { emailAddress: string } } | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const session = await auth.api.getSession({
+        headers: new Headers(),
+      });
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          firstName: session.user.name || "",
+          lastName: "",
+          primaryEmailAddress: { emailAddress: session.user.email },
+        });
+      }
+      setIsLoaded(true);
+    }
+    getUser();
+  }, []);
 
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth/auth";
 import { and, eq, ne } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -9,7 +9,6 @@ import {
   creatorServices,
   users,
 } from "@/db/schema";
-import { getLocalUser } from "@/lib/auth/get-local-user";
 
 type ServiceInput = {
   id?: string;
@@ -62,25 +61,34 @@ function normaliseHandle(value: unknown): string {
 }
 
 async function getAuthenticatedContext() {
-  const { userId } = await auth();
+  const session = await auth.api.getSession({
+    headers: new Headers(),
+  });
 
-  if (!userId) {
+  if (!session?.user) {
     return {
       error: NextResponse.json({ error: "You must be signed in." }, { status: 401 }),
     };
   }
 
-  const clerkUser = await currentUser();
-
-  if (!clerkUser) {
-    return {
-      error: NextResponse.json({ error: "Clerk user not found." }, { status: 401 }),
-    };
-  }
-
   try {
-    const localUser = await getLocalUser(userId);
-    return { userId, clerkUser, localUser };
+    const localUser = await db.query.users.findFirst({
+      where: eq(users.authUserId, session.user.id),
+      limit: 1,
+    });
+
+    if (!localUser) {
+      return {
+        error: NextResponse.json(
+          {
+            error: "Local creator account not found. Please complete sign-up first.",
+          },
+          { status: 404 }
+        ),
+      };
+    }
+
+    return { session, localUser };
   } catch (error) {
     console.error("ONBOARDING: local user missing", error);
     return {
@@ -160,7 +168,7 @@ export async function POST(request: Request) {
       return context.error;
     }
 
-    const { localUser, clerkUser } = context;
+    const { session, localUser } = context;
     const body = (await request.json()) as OnboardingBody;
     const section = body.section;
 
@@ -169,13 +177,8 @@ export async function POST(request: Request) {
     }
 
     if (section === "profile") {
-      const email =
-        clerkUser.emailAddresses.find((item) => item.id === clerkUser.primaryEmailAddressId)?.emailAddress ??
-        clerkUser.emailAddresses[0]?.emailAddress ??
-        "";
-      const name =
-        cleanString(body.name) ||
-        [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ").trim();
+      const email = session?.user?.email || localUser.email;
+      const name = cleanString(body.name) || localUser.name;
       const handle = normaliseHandle(body.handle);
       const avatarUrl = body.avatarUrl === null ? null : cleanString(body.avatarUrl) || null;
 

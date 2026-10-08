@@ -66,11 +66,11 @@ const DEFAULT_OPTIONS: MonitorOptions = {
  * @param options - Monitoring options
  * @returns Wrapped handler with automatic logging
  */
-export function withMonitoring<T extends (...args: any[]) => Promise<NextResponse>>(
-  handler: T,
+export function withMonitoring<P extends unknown[]>(
+  handler: (request: Request, ...args: P) => Promise<NextResponse>,
   options: MonitorOptions = DEFAULT_OPTIONS
-): T {
-  return (async (request, ...args) => {
+): (request: Request, ...args: P) => Promise<NextResponse> {
+  return async (request, ...args) => {
     const startTime = Date.now();
     const path = new URL(request.url).pathname;
     const method = request.method;
@@ -148,7 +148,7 @@ export function withMonitoring<T extends (...args: any[]) => Promise<NextRespons
         { status: 500 }
       );
     }
-  }) as T;
+  };
 }
 
 /**

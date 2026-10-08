@@ -10,7 +10,7 @@
  */
 
 import { NextResponse } from "next/server";
-import { logSecurityEvent } from "@/lib/security-logger";
+import { logSecurityEvent, type SecurityEventType, type SecuritySeverity } from "@/lib/security-logger";
 
 /**
  * Metric point for time-series data.
@@ -158,7 +158,6 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const format = url.searchParams.get("format") || "json";
-  const range = url.searchParams.get("range") || "24h";
 
   const metrics = metricsStore.getMetrics();
   const summary = metricsStore.getSummary();
@@ -212,8 +211,8 @@ export async function POST(request: Request) {
 
     // Also log to security logger
     logSecurityEvent({
-      severity: event.severity as any,
-      eventType: event.eventType as any,
+      severity: event.severity as SecuritySeverity,
+      eventType: event.eventType as SecurityEventType,
       message: event.eventType,
       details: body.details,
     });
@@ -235,5 +234,3 @@ export async function DELETE() {
   return NextResponse.json({ success: true, message: "Metrics cleared" });
 }
 
-// Export for testing
-export { metricsStore, MetricsStore };

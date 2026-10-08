@@ -1,0 +1,282 @@
+name: Build, Test & Deploy Docker
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ needs.build-and-push.outputs.image }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy-container'
+
+  test-image:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kipsmthn
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: kipsmthn_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Pull image
+        run: docker pull ${{ needs.build-and-push.outputs.image }}
+
+      - name: Start container
+        run: |
+          docker run -d \
+            --name test-container \
+            -p 3000:3000 \
+            -e NODE_ENV=test \
+            -e DATABASE_URL="postgresql://kipsmthn:[REDACTED]@host.docker.internal:5432/kipsmthn_test" \
+            -e BETTER_AUTH_SECRET="test-secret" \
+            -e NEXT_TELEMETRY_DISABLED=1 \
+            ${{ needs.build-and-push.outputs.image }}
+
+      - name: Wait for container health
+        run: |
+          max_attempts=30
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            if docker exec test-container curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+              echo "Container is healthy"
+              exit 0
+            fi
+            echo "Attempt $attempt/$max_attempts - waiting for container health..."
+            sleep 2
+            attempt=$((attempt + 1))
+          done
+          echo "Container failed to become healthy"
+          docker logs test-container
+          exit 1
+
+      - name: Run health check
+        run: docker exec test-container npm run healthcheck
+
+      - name: Cleanup
+        if: always()
+        run: docker stop test-container && docker rm test-container
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [build-and-push, security-scan, test-image]
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    environment:
+      name: staging
+      url: https://staging.kipsmthn.com
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying ${{ needs.build-and-push.outputs.image }} to staging..."
+          # Replace with your actual deployment command
+          # Example: kubectl set image deployment/creative-platform app=${{ needs.build-and-push.outputs.image }}
+          echo "Deployment initiated"
+
+      - name: Run database migrations
+        run: |
+          echo "Running database migrations..."
+          docker run --rm \
+            -e DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} \
+            -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
+            ${{ needs.build-and-push.outputs.image }} \
+            npm run db:migrate
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying staging deployment..."
+          max_attempts=60
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            if curl -f https://staging.kipsmthn.com/api/health > /dev/null 2>&1; then
+              echo "Staging deployment verified"
+              exit 0
+            fi
+            echo "Attempt $attempt/$max_attempts - waiting for deployment..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+          echo "Staging deployment verification failed"
+          exit 1
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [build-and-push, security-scan, test-image]
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: production
+      url: https://kipsmthn.com
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying ${{ needs.build-and-push.outputs.image }} to production..."
+          # Replace with your actual deployment command
+          # Example: kubectl set image deployment/creative-platform-prod app=${{ needs.build-and-push.outputs.image }}
+          echo "Production deployment initiated"
+
+      - name: Run database migrations
+        run: |
+          echo "Running production database migrations..."
+          docker run --rm \
+            -e DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }} \
+            -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
+            ${{ needs.build-and-push.outputs.image }} \
+            npm run db:migrate
+
+      - name: Health check
+        run: |
+          echo "Running production health checks..."
+          max_attempts=120
+          attempt=1
+          while [ $attempt -le $max_attempts ]; do
+            if curl -f https://kipsmthn.com/api/health > /dev/null 2>&1; then
+              echo "Production deployment verified"
+              exit 0
+            fi
+            echo "Attempt $attempt/$max_attempts - waiting for deployment..."
+            sleep 5
+            attempt=$((attempt + 1))
+          done
+          echo "Production deployment verification failed"
+          exit 1
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            Docker image: ${{ needs.build-and-push.outputs.image }}
+            Digest: ${{ needs.build-and-push.outputs.digest }}
+            
+            Production deployment completed and verified.
+          draft: false
+          prerelease: false
+
+  notify-deployment:
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging, deploy-production]
+    if: always()
+    steps:
+      - name: Determine status
+        id: status
+        run: |
+          if [ "${{ needs.deploy-production.result }}" = "success" ]; then
+            echo "status=✅ Production deployment successful" >> $GITHUB_OUTPUT
+          elif [ "${{ needs.deploy-staging.result }}" = "success" ]; then
+            echo "status=✅ Staging deployment successful" >> $GITHUB_OUTPUT
+          else
+            echo "status=❌ Deployment failed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Notify deployment status
+        run: |
+          echo "${{ steps.status.outputs.status }}"
+          echo "Image: ${{ needs.build-and-push.outputs.image }}"
+          # Add your notification webhook here (Slack, Discord, etc.)

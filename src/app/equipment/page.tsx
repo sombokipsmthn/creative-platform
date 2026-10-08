@@ -8,6 +8,8 @@ import { db } from "@/db";
 import { equipment } from "@/db/schema";
 import { asc } from "drizzle-orm";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Production Equipment | KIPSMTHN",
   description:

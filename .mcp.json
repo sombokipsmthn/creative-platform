@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "agensi": {
-      "type": "http",
-      "url": "https://mcp.agensi.io/mcp",
-      "transport": "streamable-http"
-    }
-  }
-}

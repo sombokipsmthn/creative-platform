@@ -8,7 +8,7 @@ import {
 } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { auth } from "@/lib/auth/auth";
+import { authClient } from "@/lib/auth-client";
 import { useCreator } from '@/context/CreatorContext';
 
 export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {
@@ -64,9 +64,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
   const avatarUrl = activeCreator?.profile?.avatarUrl;
 
   async function handleSignOut() {
-    await auth.api.signOut({
-      headers: new Headers(),
-    });
+    await authClient.signOut();
     window.location.href = '/';
   }
 

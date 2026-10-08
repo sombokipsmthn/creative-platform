@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { auth } from "@/lib/auth/auth";
+import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
   FileText,
@@ -101,9 +101,7 @@ function SignOutButton({ compact }: { compact?: boolean }) {
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await auth.api.signOut({
-      headers: new Headers(),
-    });
+    await authClient.signOut();
     router.push('/admin/login');
   };
 
@@ -164,9 +162,7 @@ export default function AdminLayout({
   useEffect(() => {
     async function checkAuth() {
       try {
-        const session = await auth.api.getSession({
-          headers: new Headers(),
-        });
+        const { data: session } = await authClient.getSession();
         setIsAuthenticated(!!session);
       } catch {
         setIsAuthenticated(false);

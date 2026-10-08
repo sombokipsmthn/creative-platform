@@ -29,7 +29,7 @@ async function seed() {
   if (rows.length < 2) throw new Error("The Equipment sheet is empty.");
 
   const headers = new Map<string, number>();
-  (rows[0] || []).forEach((value: unknown, index: number) => {
+  rows[0].forEach((value, index) => {
     const header = clean(value);
     if (header) headers.set(header, index);
   });

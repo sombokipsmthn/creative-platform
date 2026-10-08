@@ -1,28 +1,25 @@
-import {
-  auth,
-} from "@/lib/auth";
+import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
   creatorProfiles,
+  users,
 } from "@/db/schema";
-
-import {
-  getOrCreateLocalUser,
-} from "@/lib/auth/get-or-create-local-user";
 
 export default async function AuthRedirectPage() {
   /*
    * -------------------------------------------------------
-   * REQUIRE BETTER_AUTH AUTHENTICATION
+   * REQUIRE BETTER AUTH SESSION
    * -------------------------------------------------------
    */
 
-  const { userId } = await auth();
+  const session = await auth.api.getSession({
+    headers: new Headers(),
+  });
 
-  if (!userId) {
+  if (!session?.user) {
     redirect("/sign-in");
   }
 
@@ -31,35 +28,29 @@ export default async function AuthRedirectPage() {
    * GET OR CREATE LOCAL USER
    * -------------------------------------------------------
    *
-   * All local-user creation/reconciliation is handled by
-   * the shared helper.
-   *
-   * This prevents /auth from having a separate user-creation
-   * implementation that can conflict with CreatorContext or
-   * the onboarding API.
+   * Find the local creator account associated with the Better Auth user.
    */
 
-  let localUser;
+  const localUser = await db.query.users.findFirst({
+    where: eq(users.authUserId, session.user.id),
+    limit: 1,
+  });
 
-  try {
-    localUser =
-      await getOrCreateLocalUser(
-        userId
-      );
-  } catch (error) {
-    console.error(
-      "Auth redirect: unable to resolve local user:",
-      error
-    );
+  if (!localUser) {
+    // Create local user record if it doesn't exist
+    const [newUser] = await db.insert(users).values({
+      authUserId: session.user.id,
+      email: session.user.email,
+      name: session.user.name || session.user.email.split("@")[0],
+      onboardingStatus: "incomplete",
+      onboardingStep: 1,
+      emailVerified: session.user.emailVerified || false,
+      image: session.user.image,
+    }).returning();
 
-    /*
-     * Do not attempt another INSERT here.
-     *
-     * The shared helper is the single source of truth for
-     * creating/reconciling local creator accounts.
-     */
-
-    redirect("/admin/onboarding");
+    if (newUser) {
+      redirect("/admin/onboarding");
+    }
   }
 
   /*
@@ -72,7 +63,7 @@ export default async function AuthRedirectPage() {
     console.error(
       "Auth redirect: local user still missing",
       {
-        betterAuthUserId: userId,
+        authUserId: session.user.id,
       }
     );
 
@@ -85,19 +76,10 @@ export default async function AuthRedirectPage() {
    * -------------------------------------------------------
    */
 
-  const profile =
-    (
-      await db
-        .select()
-        .from(creatorProfiles)
-        .where(
-          eq(
-            creatorProfiles.userId,
-            localUser.id
-          )
-        )
-        .limit(1)
-    )[0];
+  const profile = await db.query.creatorProfiles.findFirst({
+    where: eq(creatorProfiles.userId, localUser.id),
+    limit: 1,
+  });
 
   /*
    * -------------------------------------------------------
@@ -111,12 +93,9 @@ export default async function AuthRedirectPage() {
 
   if (
     !profile ||
-    localUser.onboardingStatus !==
-      "complete"
+    localUser.onboardingStatus !== "complete"
   ) {
-    redirect(
-      "/admin/onboarding"
-    );
+    redirect("/admin/onboarding");
   }
 
   /*

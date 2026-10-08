@@ -2,17 +2,16 @@
 'use client';
 
 import {
-  useAuth,
-  useUser,
-} from "@/lib/auth-client";
+  useRef,
+  useState,
+  useEffect,
+} from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { auth } from "@/lib/auth/auth";
 import { useCreator } from '@/context/CreatorContext';
 
 export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {
-  const { user, isLoaded } = useUser();
-  const { signOut } = useAuth();
   const { activeCreator } = useCreator();
 
   const [open, setOpen] = useState(false);
@@ -59,30 +58,16 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
     };
   }, []);
 
-  if (!isLoaded || !user) {
-    return null;
-  }
-
-  const fullName =
-    user.fullName ||
-    user.firstName ||
-    'Creator';
-
-  const email =
-    user.primaryEmailAddress?.emailAddress ||
-    '';
-
-  const initials =
-    user.firstName?.charAt(0) ||
-    user.username?.charAt(0) ||
-    email.charAt(0) ||
-    'C';
-  const avatarUrl = activeCreator?.profile?.avatarUrl || user.imageUrl;
+  const fullName = activeCreator?.name || 'Creator';
+  const email = activeCreator?.email || '';
+  const initials = fullName.charAt(0).toUpperCase() || 'C';
+  const avatarUrl = activeCreator?.profile?.avatarUrl;
 
   async function handleSignOut() {
-    await signOut({
-      redirectUrl: "/",
+    await auth.api.signOut({
+      headers: new Headers(),
     });
+    window.location.href = '/';
   }
 
   return (
@@ -232,7 +217,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
                   cy="12"
                   r="3"
                 />
-                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.55V20h-2.4v-.09a1.7 1.7 0 0 0-1.03-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.46 15a1.7 1.7 0 0 0-1.55-1.03H6.8v-2.4h.11a1.7 1.7 0 0 0 1.55-1.03 1.7 1.7 0 0 0-.34-1.88l-.06-.06 1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.55V5.6h2.4v.11a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.03h.11v2.4h-.11A1.7 1.7 0 0 0 19.4 15Z" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.55V20h-2.4v-.09a1.7 1.7 0 0 0-1.03-1.55 1.7 1.7 0 0 0-1.88.34l-.06-.06 1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1.03-1.55V5.6h2.4v.11a1.7 1.7 0 0 0 1.03 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.55 1.03h.11v2.4h-.11A1.7 1.7 0 0 0 19.4 15Z" />
               </svg>
 
               <span>Platform settings</span>
@@ -257,7 +242,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
               >
                 <path d="M14 3h7v7" />
                 <path d="M10 14 21 3" />
-                <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
+                <path d="M21 14v5a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" />
               </svg>
 
               <span>Public Site</span>

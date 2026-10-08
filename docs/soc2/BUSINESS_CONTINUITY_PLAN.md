@@ -29,7 +29,7 @@ This plan applies to:
 ### Critical Business Functions
 
 | Function | Criticality | Max Downtime Tolerance | Impact of Disruption |
-|----------|-------------|----------------------|--------------------|
+| ---------- | ------------- | ---------------------- | -------------------- |
 | **Gallery Access** | Critical | 4 hours | Client cannot view delivered work; revenue impact |
 | **Client Management** | High | 8 hours | Cannot manage client relationships; operational delay |
 | **Quote/Invoice Generation** | High | 24 hours | Billing delays; cash flow impact |
@@ -40,7 +40,7 @@ This plan applies to:
 ### Resource Dependencies
 
 | Resource | Primary Provider | Fallback | Recovery Priority |
-|----------|------------------|----------|-------------------|
+| ---------- | ------------------ | ---------- | ------------------- |
 | **Database** | Neon (Vercel) | Vercel restore | P1 |
 | **Authentication** | Clerk | Manual verification | P1 |
 | **Storage** | Vercel Blob | R2 fallback | P2 |
@@ -55,16 +55,19 @@ This plan applies to:
 ### Scenario 1: Vercel Platform Outage
 
 **Impact**:
+
 - Application completely unavailable
 - No access to galleries, admin, or client portal
 - Revenue impact during outage
 
 **Immediate Response**:
+
 1. Monitor Vercel status page and incident notifications
 2. Notify customers via status page and social media
 3. Engage recovery team per Incident Response Plan
 
 **Recovery Strategy**:
+
 1. If outage < 1 hour: Wait for Vercel restoration
 2. If outage > 1 hour: Consider manual deployment to alternative hosting
 3. Restore database from Neon backup if needed
@@ -75,16 +78,19 @@ This plan applies to:
 ### Scenario 2: Database Outage (Neon)
 
 **Impact**:
+
 - All data inaccessible
 - Application cannot function
 - Potential data loss if not recovered quickly
 
 **Immediate Response**:
+
 1. Check Neon status page and alerts
 2. Attempt connection to alternative database endpoint (if configured)
 3. Notify recovery team
 
 **Recovery Strategy**:
+
 1. **Minor outage**: Wait for Neon restoration (monitor status page)
 2. **Data corruption**: Initiate point-in-time recovery from backup
 3. **Major outage**: Restore from latest verified backup
@@ -95,16 +101,19 @@ This plan applies to:
 ### Scenario 3: Authentication Outage (Clerk)
 
 **Impact**:
+
 - Users cannot sign in
 - API calls fail without authentication
 - Application effectively unusable
 
 **Immediate Response**:
+
 1. Check Clerk status page
 2. Implement temporary access for internal team (if needed)
 3. Communicate to customers
 
 **Recovery Strategy**:
+
 1. **Short outage**: Wait for Clerk restoration
 2. **Extended outage**: Enable bypass authentication for critical operations (with audit logging)
 3. **Data concern**: Implement manual verification process
@@ -115,16 +124,19 @@ This plan applies to:
 ### Scenario 4: Storage Outage (Vercel Blob)
 
 **Impact**:
+
 - Gallery images unavailable
 - Media downloads fail
 - User experience degraded
 
 **Immediate Response**:
+
 1. Check Vercel Blob status
 2. Attempt to serve from cache where possible
 3. Notify affected customers
 
 **Recovery Strategy**:
+
 1. **Minor outage**: Wait for service restoration
 2. **Data loss**: Restore from backup or re-upload from local archives
 3. **Migration**: Failover to Cloudflare R2 if available
@@ -135,16 +147,19 @@ This plan applies to:
 ### Scenario 5: DNS/Domain Outage
 
 **Impact**:
+
 - Application unreachable via domain name
 - Email delivery affected
 - CDN/cache invalidation
 
 **Immediate Response**:
+
 1. Check DNS provider status
 2. Attempt direct IP access (if available)
 3. Notify stakeholders
 
 **Recovery Strategy**:
+
 1. Switch to backup DNS provider (if configured)
 2. Update DNS records manually if provider down
 3. Communicate DNS issues to users
@@ -155,16 +170,19 @@ This plan applies to:
 ### Scenario 6: Email Service Outage (Resend)
 
 **Impact**:
+
 - Customer notifications delayed
 - Contract delivery failures
 - Communication breakdown
 
 **Immediate Response**:
+
 1. Check Resend status page
 2. Queue emails for later delivery
 3. Implement manual communication for critical items
 
 **Recovery Strategy**:
+
 1. **Short outage**: Wait for service restoration; emails auto-retry
 2. **Extended outage**: Failover to SendGrid backup integration
 3. **Critical communications**: Manual email via personal accounts with audit trail
@@ -175,17 +193,20 @@ This plan applies to:
 ### Scenario 7: Major Security Incident
 
 **Impact**:
+
 - Potential data breach
 - System compromise
 - Customer trust impact
 - Regulatory notification requirements
 
 **Immediate Response**:
+
 1. Isolate affected systems
 2. Engage Incident Response Team
 3. Begin containment procedures
 
 **Recovery Strategy**:
+
 1. **Eradicate**: Remove threat, patch vulnerabilities
 2. **Recover**: Restore from clean backups
 3. **Communicate**: Notify affected parties per legal requirements
@@ -197,16 +218,19 @@ This plan applies to:
 ### Scenario 8: Key Personnel Unavailability
 
 **Impact**:
+
 - Decision-making delays
 - Technical knowledge gaps
 - Project delays
 
 **Immediate Response**:
+
 1. Activate backup contacts
 2. Distribute knowledge assets
 3. Adjust project timelines
 
 **Recovery Strategy**:
+
 1. **Temporary absence**: Backup engineer takes over critical tasks
 2. **Extended absence**: Engage contractor or redistribute work
 3. **Permanent departure**: Hire replacement, knowledge transfer
@@ -217,16 +241,19 @@ This plan applies to:
 ### Scenario 9: Vendor Failure (Multiple Providers)
 
 **Impact**:
+
 - Cascading service failures
 - Integration breakages
 - Data access issues
 
 **Immediate Response**:
+
 1. Identify which vendors are affected
 2. Activate vendor-specific fallbacks
 3. Communicate to stakeholders
 
 **Recovery Strategy**:
+
 1. **Partial failure**: Use alternative vendors for affected services
 2. **Complete ecosystem failure**: Manual processes, extended recovery time
 3. **Long-term**: Migrate to redundant multi-vendor strategy
@@ -241,12 +268,14 @@ This plan applies to:
 ### Phase 1: Emergency Response (0-4 hours)
 
 **Objectives**:
+
 - Ensure safety of people (if physical)
 - Stabilize critical systems
 - Assess scope of disruption
 - Activate recovery team
 
 **Actions**:
+
 1. Declare incident and activate Emergency Response Team
 2. Notify key stakeholders and customers
 3. Implement immediate containment measures
@@ -256,12 +285,14 @@ This plan applies to:
 ### Phase 2: Short-term Recovery (4-24 hours)
 
 **Objectives**:
+
 - Restore critical business functions
 - Minimize operational disruption
 - Communicate status to stakeholders
 - Begin long-term recovery planning
 
 **Actions**:
+
 1. Implement recovery procedures from this plan
 2. Restore critical systems from backups
 3. Establish temporary workarounds where needed
@@ -271,12 +302,14 @@ This plan applies to:
 ### Phase 3: Long-term Recovery (24 hours - 1 week)
 
 **Objectives**:
+
 - Return to normal operations
 - Address root causes
 - Implement improvements
 - Document lessons learned
 
 **Actions**:
+
 1. Complete system restoration
 2. Validate all business functions
 3. Conduct root cause analysis
@@ -286,12 +319,14 @@ This plan applies to:
 ### Phase 4: Business Recovery (1 week - 1 month)
 
 **Objectives**:
+
 - Full operational capability
 - Customer confidence restoration
 - Process improvements
 - Compliance verification
 
 **Actions**:
+
 1. Verify all systems fully operational
 2. Conduct customer outreach if needed
 3. Implement process improvements
@@ -305,7 +340,7 @@ This plan applies to:
 ### Internal Communications
 
 | Audience | Message Type | Frequency | Channel | Owner |
-|----------|-------------|-----------|---------|-------|
+| ---------- | ------------- | ----------- | --------- | ------- |
 | **Recovery Team** | Incident status, actions | Real-time | Encrypted chat, phone | Incident Commander |
 | **Executive Leadership** | Business impact, recovery progress | Every 4 hours (P1) | Phone, email, meeting | Engineering Manager |
 | **All Employees** | General awareness, precautionary advice | After resolution | Email, intranet | Communications Lead |
@@ -314,7 +349,7 @@ This plan applies to:
 ### External Communications
 
 | Audience | Message Type | Frequency | Channel | Owner |
-|----------|-------------|-----------|---------|-------|
+| ---------- | ------------- | ----------- | --------- | ------- |
 | **Customers** | Service impact, protective measures | Within 24 hours (P1) | Email, website, social | Communications Lead |
 | **Partners** | Business impact, cooperation needed | As needed | Email, phone | Engineering Manager |
 | **Regulators** | Mandatory disclosures | As required by law | Formal submission | Legal Counsel |
@@ -323,6 +358,7 @@ This plan applies to:
 ### Communication Templates
 
 **Customer Notification**:
+
 ```
 Subject: Service Disruption Update - KIPSMTHN Creative Platform
 
@@ -360,7 +396,7 @@ KIPSMTHN Team
 ### Emergency Response Team
 
 | Role | Name | Primary Contact | Secondary Contact | Responsibilities |
-|------|------|-----------------|-------------------|------------------|
+| ------ | ------ | ----------------- | ------------------- | ------------------ |
 | **Incident Commander** | [REDACTED] | [REDACTED] | [REDACTED] | Overall coordination, decision-making, stakeholder communication |
 | **Platform Engineer** | [REDACTED] | [REDACTED] | [REDACTED] | Infrastructure recovery, database restore, system restoration |
 | **Security Lead** | [REDACTED] | [REDACTED] | [REDACTED] | Security incident response, access control, threat assessment |
@@ -371,7 +407,7 @@ KIPSMTHN Team
 ### Escalation Matrix
 
 | Severity | Initial Response | Escalation Time | Executive Notification | Recovery Team Activation |
-|----------|-----------------|-----------------|----------------------|-------------------------|
+| ---------- | ----------------- | ----------------- | ---------------------- | ------------------------- |
 | **P1 (Critical)** | Immediate | < 1 hour | < 1 hour | Immediate |
 | **P2 (High)** | < 1 hour | < 4 hours | < 24 hours | < 4 hours |
 | **P3 (Medium)** | < 4 hours | As needed | As needed | < 24 hours |
@@ -389,6 +425,7 @@ KIPSMTHN Team
 **Format**: Tabletop exercise with selective live testing
 
 **Test Scenarios** (rotate annually):
+
 - Year 1: Database failure and restore
 - Year 2: Authentication service outage
 - Year 3: Major security incident
@@ -399,6 +436,7 @@ KIPSMTHN Team
 **Schedule**: Last week of each quarter
 **Participants**: Engineering Manager, Platform Engineer
 **Activities**:
+
 - Review and update contact information
 - Verify backup freshness and test results
 - Assess changes in business requirements
@@ -409,6 +447,7 @@ KIPSMTHN Team
 **Schedule**: Within 7 days of any BCP activation
 **Participants**: Full recovery team
 **Activities**:
+
 - Document timeline of events
 - Assess effectiveness of response
 - Identify gaps and improvements
@@ -445,7 +484,7 @@ KIPSMTHN Team
 ## Integration with SOC 2 Controls
 
 | SOC 2 Criteria | Control | Evidence |
-|----------------|---------|----------|
+| ---------------- | --------- | ---------- |
 | A1.1 | Availability commitments | Business impact analysis, continuity procedures |
 | A1.2 | Recovery procedures | DR plan, restore test results, BCP test records |
 | CC7.1 | Vulnerability identification | Business risk assessments, continuity planning |

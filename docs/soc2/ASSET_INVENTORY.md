@@ -20,7 +20,7 @@ Assets are organized into the following categories:
 The platform utilizes cloud infrastructure and does not own physical hardware assets. However, the following hardware assets are relevant to the platform:
 
 | Asset ID | Asset Type | Description | Owner | Location | Criticality |
-|----------|------------|-------------|-------|----------|-------------|
+| ---------- | ------------ | ------------- | ------- | ---------- | ------------- |
 | HW-001 | Development Laptops | Developer laptops used for platform development | Engineering Team | Remote | Medium |
 | HW-002 | Mobile Devices | Mobile devices used for testing | QA Team | Remote | Low |
 | HW-003 | Servers | Virtual servers hosted on Vercel | Platform Engineer | Vercel Cloud | High |
@@ -32,7 +32,7 @@ The platform utilizes cloud infrastructure and does not own physical hardware as
 The platform utilizes the following software assets:
 
 | Asset ID | Asset Type | Description | Version | Owner | License | Criticality |
-|----------|------------|-------------|---------|-------|---------|-------------|
+| ---------- | ------------ | ------------- | --------- | ------- | --------- | ------------- |
 | SW-001 | Operating System | Linux (Ubuntu) | Latest | Platform Engineer | Open Source | High |
 | SW-002 | Web Framework | Next.js | 14.x | Platform Engineer | MIT | High |
 | SW-003 | UI Library | React | 18.x | Platform Engineer | MIT | High |
@@ -55,7 +55,7 @@ The platform utilizes the following software assets:
 The platform manages the following data assets:
 
 | Asset ID | Asset Type | Description | Owner | Location | Retention Period | Sensitivity |
-|----------|------------|-------------|-------|----------|------------------|-------------|
+| ---------- | ------------ | ------------- | ------- | ---------- | ------------------ | ------------- |
 | DA-001 | User Profiles | Creator and client profile information | Platform Engineer | Neon/Postgres | 7 years | Confidential |
 | DA-002 | Gallery Metadata | Gallery information and metadata | Platform Engineer | Neon/Postgres | 7 years | Confidential |
 | DA-003 | Media Files | Photos and videos uploaded to galleries | Platform Engineer | Vercel Blob | 7 years | Confidential |
@@ -72,7 +72,7 @@ The platform manages the following data assets:
 The platform utilizes the following network assets:
 
 | Asset ID | Asset Type | Description | Owner | Location | Criticality |
-|----------|------------|-------------|-------|----------|-------------|
+| ---------- | ------------ | ------------- | ------- | ---------- | ------------- |
 | NW-001 | Internet Connection | Connection to Vercel platform | Platform Engineer | Vercel Cloud | High |
 | NW-002 | API Endpoints | Public and private API endpoints | Platform Engineer | Vercel Cloud | High |
 | NW-003 | Database Connections | Connections to Neon/Postgres database | Platform Engineer | Neon Cloud | High |
@@ -86,7 +86,7 @@ The platform utilizes the following network assets:
 The platform utilizes cloud infrastructure and does not own physical facilities assets. However, the following facilities assets are relevant to the platform:
 
 | Asset ID | Asset Type | Description | Owner | Location | Criticality |
-|----------|------------|-------------|-------|----------|-------------|
+| ---------- | ------------ | ------------- | ------- | ---------- | ------------- |
 | FA-001 | Office Space | Office space used by platform team | Engineering Team | Remote | Low |
 | FA-002 | Data Centers | Vercel, Neon, and other cloud provider data centers | Platform Engineer | Various Locations | High |
 | FA-003 | Backup Facilities | Backup storage facilities | Platform Engineer | Various Locations | High |
@@ -96,7 +96,7 @@ The platform utilizes cloud infrastructure and does not own physical facilities 
 The platform has the following personnel assets:
 
 | Asset ID | Asset Type | Description | Owner | Location | Criticality |
-|----------|------------|-------------|-------|----------|-------------|
+| ---------- | ------------ | ------------- | ------- | ---------- | ------------- |
 | PE-001 | Engineering Team | Developers and engineers maintaining the platform | Engineering Manager | Remote | High |
 | PE-002 | Security Team | Security personnel responsible for platform security | Security Lead | Remote | High |
 | PE-003 | QA Team | Quality assurance personnel testing the platform | Engineering Manager | Remote | Medium |

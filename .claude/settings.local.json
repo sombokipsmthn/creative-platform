@@ -4,7 +4,10 @@
       "Bash(rm 'src/app/admin/quotes/new/page.tsx`')",
       "Bash(npm install *)",
       "Bash(gh pr *)",
-      "Bash(git log *)"
+      "Bash(git log *)",
+      "Bash(git worktree *)",
+      "Read(//Users/kipsmthn/creative-platform/**)",
+      "Bash(npx tsc *)"
     ]
   }
 }

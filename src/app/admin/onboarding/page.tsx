@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/lib/auth-client";
+import { auth } from "@/lib/auth/auth";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -101,8 +101,27 @@ async function makeAvatarDataUrl(file: File): Promise<string> {
 
 export default function CreatorOnboardingPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const [user, setUser] = useState<{ id: string; firstName: string; lastName: string; primaryEmailAddress: { emailAddress: string } } | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function getUser() {
+      const session = await auth.api.getSession({
+        headers: new Headers(),
+      });
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          firstName: session.user.name || "",
+          lastName: "",
+          primaryEmailAddress: { emailAddress: session.user.email },
+        });
+      }
+      setIsLoaded(true);
+    }
+    getUser();
+  }, []);
 
   const [currentStep, setCurrentStep] = useState<Step>(1);
   const [loading, setLoading] = useState(true);
@@ -409,7 +428,7 @@ export default function CreatorOnboardingPage() {
                       <span className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-[9px] font-medium text-white opacity-0 transition group-hover:opacity-100">Change photo</span>
                     </button>
                     <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(event) => { const file = event.target.files?.[0]; if (file) void chooseAvatar(file); event.target.value = ""; }} />
-                    <div className="min-w-0"><p className="text-sm font-medium">Profile image</p><p className="mt-1 text-xs leading-5 text-gray-500">Upload your own photo. It is automatically cropped square and saved to your creator profile, not taken from your account profile.</p><div className="mt-2 flex gap-2">{avatarUrl && <button type="button" onClick={() => setAvatarUrl(null)} className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-red-500"><X className="h-3 w-3" />Remove</button>}{avatarBusy && <span className="inline-flex items-center gap-1 text-xs text-gray-400"><Loader2 className="h-3 w-3 animate-spin" />Editing...</span>}</div></div>
+                    <div className="min-w-0"><p className="text-sm font-medium">Profile image</p><p className="mt-1 text-xs leading-5 text-gray-500">Upload your own photo. It is automatically cropped square and saved to your creator profile, not taken from your Clerk profile.</p><div className="mt-2 flex gap-2">{avatarUrl && <button type="button" onClick={() => setAvatarUrl(null)} className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-red-500"><X className="h-3 w-3" />Remove</button>}{avatarBusy && <span className="inline-flex items-center gap-1 text-xs text-gray-400"><Loader2 className="h-3 w-3 animate-spin" />Editing...</span>}</div></div>
                   </div>
 
                   <div className="mt-8"><label htmlFor="name" className="text-sm font-medium">Display name</label><input id="name" type="text" value={profile.name} onChange={(e) => updateProfile("name", e.target.value)} placeholder="Your name" className="mt-2 h-12 w-full rounded-xl border border-gray-200 px-4 text-sm outline-none focus:border-[#6D28D9] focus:ring-4 focus:ring-purple-100" /></div>

@@ -15,6 +15,8 @@ export async function GET(req: Request) {
       const { searchParams } = new URL(req.url);
       const status = searchParams.get("status");
       const clientId = searchParams.get("clientId");
+      const visibility = searchParams.get("visibility");
+      const featured = searchParams.get("featured");
 
       const conditions = [eq(projects.creatorId, user.id)];
 
@@ -24,6 +26,14 @@ export async function GET(req: Request) {
 
       if (clientId) {
         conditions.push(eq(projects.clientId, clientId));
+      }
+
+      if (visibility) {
+        conditions.push(eq(projects.visibility, visibility));
+      }
+
+      if (featured !== null) {
+        conditions.push(eq(projects.featured, featured === "true"));
       }
 
       const results = await db
@@ -64,6 +74,28 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Project name is required" }, { status: 400 });
       }
 
+      // Generate slug from name
+      let slug = String(body?.slug || "").trim().toLowerCase();
+      if (!slug) {
+        slug = name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "");
+      }
+
+      // Check slug uniqueness
+      if (slug) {
+        const existing = await db
+          .select({ id: projects.id })
+          .from(projects)
+          .where(and(eq(projects.slug, slug), eq(projects.creatorId, user.id)))
+          .limit(1);
+
+        if (existing.length > 0) {
+          slug = `${slug}-${Date.now().toString(36)}`;
+        }
+      }
+
       const [project] = await db
         .insert(projects)
         .values({
@@ -71,6 +103,15 @@ export async function POST(request: Request) {
           clientId: body?.clientId || null,
           name,
           description: body?.description || null,
+          shortDescription: body?.shortDescription || null,
+          slug: slug || null,
+          category: body?.category || null,
+          year: body?.year || null,
+          location: body?.location || null,
+          services: body?.services || [],
+          disciplines: body?.disciplines || [],
+          collaborators: body?.collaborators || [],
+          role: body?.role || null,
           scopeOfWork: body?.scopeOfWork || null,
           deliverables: body?.deliverables || null,
           totalAmount: body?.totalAmount ? Number(body.totalAmount) : null,
@@ -79,9 +120,16 @@ export async function POST(request: Request) {
           revisionsPolicy: body?.revisionsPolicy || null,
           licensingTerms: body?.licensingTerms || null,
           noticePeriod: body?.noticePeriod || null,
+          storyOverview: body?.storyOverview || null,
+          storyChallenge: body?.storyChallenge || null,
+          storyApproach: body?.storyApproach || null,
+          storyOutcome: body?.storyOutcome || null,
+          storyCredits: body?.storyCredits || null,
+          status: body?.status || "draft",
+          visibility: body?.visibility || "private",
+          featured: body?.featured || false,
           startDate: body?.startDate ? new Date(body.startDate) : null,
           endDate: body?.endDate ? new Date(body.endDate) : null,
-          status: body?.status || "active",
         })
         .returning();
 

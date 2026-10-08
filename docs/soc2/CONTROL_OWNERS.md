@@ -18,7 +18,7 @@ Control ownership is organized by Trust Services Criteria (TSC) category and con
 ## Control Ownership Matrix
 
 | Control ID | TSC Area | Control Description | Owner | Responsibility | Frequency |
-|------------|----------|-------------------|-------|----------------|-----------|
+| ------------ | ---------- | ------------------- | ------- | ---------------- | ----------- |
 | CC1.1 | Control Environment | Commitment to integrity and ethical values | Security Lead | Establish and communicate ethical standards | Ongoing |
 | CC1.2 | Control Environment | Board oversight | CEO | Oversee security program and risk management | Quarterly |
 | CC1.3 | Control Environment | Organizational structure | Engineering Manager | Define roles, responsibilities, and authority | Ongoing |

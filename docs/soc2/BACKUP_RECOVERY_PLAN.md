@@ -16,7 +16,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ## Recovery Objectives
 
 | Objective | Target | Description |
-|-----------|--------|-------------|
+| ----------- | -------- | ------------- |
 | **RTO (Recovery Time Objective)** | 4 hours | Maximum acceptable downtime before business impact is critical |
 | **RPO (Recovery Point Objective)** | 1 hour | Maximum acceptable data loss measured in time |
 | **MTTR (Mean Time to Recover)** | < 2 hours | Target recovery time based on historical performance |
@@ -28,7 +28,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ### What Is Backed Up
 
 | Data Type | Backup Method | Frequency | Retention | Encryption |
-|-----------|---------------|-----------|-----------|------------|
+| ----------- | --------------- | ----------- | ----------- | ------------ |
 | **Neon PostgreSQL Database** | Automated daily snapshots + continuous WAL archiving | Daily full + hourly incremental | 30 days | At rest (Vercel-managed) |
 | **Vercel Blob Storage** | Replicated across regions automatically | Continuous | N/A (provider-managed) | At rest + in transit (TLS) |
 | **GitHub Repository** | Git native redundancy + Vercel deployments | Continuous | Indefinite (git history) | At rest + in transit |
@@ -58,10 +58,12 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 1. **Identify** the affected table(s) and time of deletion
 2. **Assess** backup availability for the target time
 3. **Test** restore in staging environment first:
+
    ```bash
    # Export staging database URL
    NEON_DATABASE_URL=... npm run db:restore -- --from <backup_timestamp>
    ```
+
 4. **Verify** restored data integrity
 5. **Execute** production restore during maintenance window
 6. **Validate** application functionality post-restore
@@ -98,7 +100,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ### DR Scenarios
 
 | Scenario | Impact | Recovery Strategy | Owner | Dependencies |
-|----------|--------|-------------------|-------|--------------|
+| ---------- | -------- | ------------------- | ------- | -------------- |
 | **Neon Database Outage** | Complete data unavailability | Point-in-time recovery from backup | Platform Engineer | Vercel support, DB credentials |
 | **Vercel Platform Outage** | Application unavailable | Failover to secondary region (if configured) | Platform Engineer | Vercel status, DNS propagation |
 | **Clerk Authentication Outage** | Users cannot sign in | Enable fallback authentication or wait for recovery | Security Lead | Clerk status, communication plan |
@@ -108,7 +110,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ### Recovery Team Contacts
 
 | Role | Name | Contact | Responsibilities |
-|------|------|---------|------------------|
+| ------ | ------ | --------- | ------------------ |
 | **Incident Commander** | [REDACTED] | [REDACTED] | Overall coordination, decision-making |
 | **Platform Engineer** | [REDACTED] | [REDACTED] | Infrastructure recovery, database restores |
 | **Security Lead** | [REDACTED] | [REDACTED] | Security incident response, access control |
@@ -117,18 +119,21 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ### Escalation Procedures
 
 **P1 (Critical) - Immediate Escalation**:
+
 1. Notify Incident Commander within 15 minutes
 2. Engage full recovery team within 30 minutes
 3. Executive notification within 1 hour
 4. Customer communication within 2 hours (if applicable)
 
 **P2 (High) - Standard Escalation**:
+
 1. Notify relevant team members within 1 hour
 2. Assess scope and impact within 2 hours
 3. Begin recovery procedures within 4 hours
 4. Status update to stakeholders every 4 hours
 
 **P3/P4 (Medium/Low) - Normal Escalation**:
+
 1. Log incident in tracking system
 2. Assign to appropriate team member
 3. Resolve within business SLA
@@ -141,7 +146,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ### Quarterly Tests
 
 | Test Type | Frequency | Last Test Date | Next Test Date | Status |
-|-----------|-----------|----------------|----------------|--------|
+| ----------- | ----------- | ---------------- | ---------------- | -------- |
 | Database point-in-time restore | Quarterly | [REDACTED] | [REDACTED] | Planned |
 | Storage file recovery | Quarterly | [REDACTED] | [REDACTED] | Planned |
 | DR failover simulation | Annually | [REDACTED] | [REDACTED] | Planned |
@@ -191,7 +196,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ## Integration with SOC 2 Controls
 
 | SOC 2 Criteria | Control | Evidence |
-|----------------|---------|----------|
+| ---------------- | --------- | ---------- |
 | A1.1 | Availability commitments | Backup schedules, DR plans, restore test results |
 | A1.2 | Recovery procedures | Restore procedures, DR playbooks, test records |
 | CC7.1 | Vulnerability identification | Backup integrity checks, vulnerability scanning |
@@ -207,7 +212,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 ## Regulatory Compliance
 
 | Regulation | Backup Requirement | Platform Compliance |
-|------------|--------------------|--------------------|
+| ------------ | -------------------- | -------------------- |
 | **SOC 2** | Maintain reliable backup and recovery | Automated daily backups with 30-day retention |
 | **GDPR** | Ensure data availability and integrity | Point-in-time recovery capability |
 | **CCPA** | Protect consumer data availability | Redundant storage with automated backups |

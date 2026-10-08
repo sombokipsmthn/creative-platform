@@ -37,7 +37,7 @@ This document provides a comprehensive control matrix for the KIPSMTHN Creative 
 ## Control Matrix
 
 | Control ID | TSC Area | Control Description | Implementation Status | Owner | Frequency | Evidence Required | System Component | Test Method |
-|------------|----------|-------------------|----------------------|-------|-----------|-------------------|------------------|-------------|
+| ------------ | ---------- | ------------------- | ---------------------- | ------- | ----------- | ------------------- | ------------------ | ------------- |
 | CC1.1 | CC | Commitment to integrity and ethical values | Implemented | Security Lead | Ongoing | POL-001, TRAIN | Organization | Review policies, interview personnel |
 | CC1.2 | CC | Board oversight | Implemented | CEO | Quarterly | MINUTES, POL-001 | Organization | Review meeting minutes |
 | CC1.3 | CC | Organizational structure | Implemented | Engineering Manager | Ongoing | ORG-CHART, POL-001 | Organization | Review organizational chart |

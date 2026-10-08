@@ -1,63 +1,74 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { dash } from "@better-auth/infra";
 import { db } from "@/db";
-import { emailOTP } from "better-auth/plugins";
-import { sendEmail } from "@/lib/email";
 import { users, sessions, accounts, verifications } from "@/db/schema";
 
-const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3005";
-const trustedOrigins = [baseURL, "http://localhost:3005"];
+const googleProvider =
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      }
+    : undefined;
 
-if (!process.env.BETTER_AUTH_SECRET || process.env.BETTER_AUTH_SECRET.length < 32) {
-  throw new Error("BETTER_AUTH_SECRET must be configured with at least 32 characters.");
-}
+const appleProvider =
+  process.env.APPLE_CLIENT_ID &&
+  process.env.APPLE_CLIENT_SECRET &&
+  process.env.APPLE_TEAM_ID &&
+  process.env.APPLE_KEY_ID &&
+  process.env.APPLE_PRIVATE_KEY
+    ? {
+        clientId: process.env.APPLE_CLIENT_ID,
+        clientSecret: process.env.APPLE_CLIENT_SECRET,
+        teamId: process.env.APPLE_TEAM_ID,
+        keyId: process.env.APPLE_KEY_ID,
+        privateKey: process.env.APPLE_PRIVATE_KEY,
+        scope: ["name", "email"],
+      }
+    : undefined;
+
+const socialProviders = {
+  ...(googleProvider ? { google: googleProvider } : {}),
+  ...(appleProvider ? { apple: appleProvider } : {}),
+};
 
 export const auth = betterAuth({
-  baseURL,
-  secret: process.env.BETTER_AUTH_SECRET,
-  trustedOrigins,
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005",
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: { user: users, session: sessions, account: accounts, verification: verifications, users, sessions, accounts, verifications },
+    schema: { user: users, session: sessions, account: accounts, verification: verifications },
   }),
-  user: { modelName: "users" },
-  session: {
-    modelName: "sessions",
-    expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
-    cookieCache: { enabled: true, maxAge: 60 },
-  },
-  account: { modelName: "accounts" },
-  verification: { modelName: "verifications" },
-  plugins: [emailOTP({
-    async sendVerificationOTP({ email, otp, type }) {
-      await sendEmail({
-        to: email,
-        subject: type === "sign-in" ? "Your sign-in code" : "Your verification code",
-        text: `Your one-time code is ${otp}. It expires soon.`,
-      });
-    },
-  })],
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    requireEmailVerification: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
-    resetPasswordTokenExpiresIn: 60 * 60,
-    sendResetPassword: async ({ user, url }) => {
-      await sendEmail({
-        to: user.email,
-        subject: "Reset your KIPSMTHN password",
-        text: `Reset your password using this link: ${url}`,
-        html: `<p>Reset your KIPSMTHN password by clicking <a href="${url}">this secure link</a>.</p>`,
-      });
-    },
+    autoSignIn: false,
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60 * 24,
+  },
+  ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
   advanced: {
-    database: { joins: false, validateSchema: false },
     cookiePrefix: "kipsmthn",
-    defaultCookieAttributes: { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/" },
+    crossSubDomainCookies: { enabled: true },
+    defaultCookieAttributes: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+    },
   },
+  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005"],
+  plugins: [dash()],
 });
 
 export type Session = typeof auth.$Infer.Session;

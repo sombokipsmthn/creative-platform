@@ -81,19 +81,15 @@ export function ContractBuilder({
   });
 
   // Set template when loaded
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (templateId && templatesQuery.data && !template) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
-      if (found) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setTemplate(found);
-      }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (found) setTemplate(found);
     }
   }, [templateId, templatesQuery.data, template]);
 
   // Initialize values from client/project when they change
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
     if (!template) return;
 

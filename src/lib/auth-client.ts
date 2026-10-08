@@ -1,7 +1,8 @@
 import { createAuthClient } from "better-auth/react";
-import { emailOTPClient } from "better-auth/client/plugins";
+import { sentinelClient } from "@better-auth/infra/client";
+
+const identifyUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_IDENTIFY_URL?.trim();
 
 export const authClient = createAuthClient({
-  baseURL: process.env.NEXT_PUBLIC_APP_URL || undefined,
-  plugins: [emailOTPClient()],
+  plugins: identifyUrl ? [sentinelClient({ identifyUrl })] : [],
 });

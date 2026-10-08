@@ -8,7 +8,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useUser } from "@/lib/auth-client";
 
 export interface CreatorProfile {
   id: string;
@@ -23,7 +22,7 @@ export interface CreatorProfile {
 
 export interface CreatorData {
   id: string;
-  authUserId: string;
+  authUserId: string | null;
   email: string;
   name: string;
   handle: string | null;
@@ -54,8 +53,6 @@ export function CreatorProvider({
 }: {
   children: ReactNode;
 }) {
-  const { isLoaded, isSignedIn, user } = useUser();
-
   const [activeUser, setActiveUser] =
     useState<CreatorData | null>(null);
 
@@ -66,139 +63,35 @@ export function CreatorProvider({
   const [loading, setLoading] = useState(true);
 
   const syncCreator = useCallback(async function syncCreator() {
-    // The context no longer blocks synchronization on the onboarding route.
-    // Routing decisions are handled by /auth, so we always attempt to fetch the
-    // creator state when Better Auth reports the user as signed in.
-
-    /*
-     * Better Auth has not finished loading yet.
-     */
-    if (!isLoaded) {
-      return;
-    }
-
-    /*
-     * User is signed out.
-     */
-    if (!isSignedIn || !user?.id) {
-      setActiveUser(null);
-      setUsersDb({});
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
     try {
-      /*
-       * -------------------------------------------------------
-       * SYNC LOCAL CREATOR ACCOUNT
-       * -------------------------------------------------------
-       */
-      const response = await fetch(
-        "/api/users/sync",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-        }
-      );
+      const response = await fetch("/api/users/sync", {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+      });
+      const payload = await response.json();
 
-      /*
-       * Handle HTTP errors explicitly.
-       *
-       * This makes API problems much easier to diagnose
-       * than a generic JSON parsing/fetch error.
-       */
-      if (!response.ok) {
-        const text = await response.text();
-
-        console.error(
-          "Creator sync HTTP error:",
-          response.status,
-          text
-        );
-
-        // 401 is expected when user is not signed in
-        if (response.status === 401) {
-          setActiveUser(null);
-          setUsersDb({});
-          setLoading(false);
-          return;
-        }
-
-        throw new Error(
-          `Creator sync failed with HTTP ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-
-      /*
-       * -------------------------------------------------------
-       * NEW BETTER_AUTH USER
-       * -------------------------------------------------------
-       *
-       * /api/users/sync does not create a database user.
-       *
-       * It tells us that onboarding is required.
-       */
-  if (data.needsOnboarding) {
-  setActiveUser(null);
-  setUsersDb({});
-  setLoading(false);
-  return;
-}
-
-      /*
-       * -------------------------------------------------------
-       * NO LOCAL CREATOR
-       * -------------------------------------------------------
-       */
-      if (!data.user) {
+      if (!response.ok || !payload.user) {
         setActiveUser(null);
         setUsersDb({});
-        setLoading(false);
         return;
       }
 
-      /*
-       * -------------------------------------------------------
-       * EXISTING CREATOR
-       * -------------------------------------------------------
-       */
       const creator: CreatorData = {
-        ...data.user,
-        profile: data.profile ?? null,
+        ...payload.user,
+        profile: payload.profile ?? null,
       };
 
       setActiveUser(creator);
-
-      setUsersDb({
-        [creator.id]: creator,
-      });
+      setUsersDb({ [creator.id]: creator });
     } catch (error) {
-      /*
-       * IMPORTANT:
-       *
-       * Do not redirect here.
-       *
-       * If the API temporarily fails, redirecting would
-       * create another possible navigation loop.
-       */
-      console.error(
-        "CreatorContext sync error:",
-        error
-      );
-
+      console.error("CreatorContext sync error:", error);
       setActiveUser(null);
       setUsersDb({});
     } finally {
       setLoading(false);
     }
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, []);
 
   /*
    * -------------------------------------------------------
@@ -206,21 +99,10 @@ export function CreatorProvider({
    * -------------------------------------------------------
    */
   useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void syncCreator();
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [
-    isLoaded,
-    syncCreator,
-  ]);
+    // This effect intentionally hydrates context state from the authenticated session.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void syncCreator();
+  }, [syncCreator]);
 
   /*
    * -------------------------------------------------------

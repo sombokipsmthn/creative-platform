@@ -98,6 +98,7 @@ export default function ContractDetailPage({
 
   // Otherwise, show read-only detail view
 
+
   const handleSend = async () => {
     if (!window.confirm('Are you sure you want to send this contract?')) return;
     setIsSending(true);

@@ -152,14 +152,15 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { data: session, isPending: authPending } = authClient.useSession();
+  const isAuthenticated = Boolean(session?.user);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const [hasLocalAccount, setHasLocalAccount] = useState(true);
   const splitView = useSplitView();
 
   useEffect(() => {
+<<<<<<< HEAD
     async function checkAuth() {
       try {
         const { data: session } = await authClient.getSession();
@@ -175,6 +176,8 @@ export default function AdminLayout({
   }, []);
 
   useEffect(() => {
+=======
+>>>>>>> c9a053ac0c9cc73dd4f9efc062839b7df9d54f87
     if (!isAuthenticated) return;
     let isMounted = true;
 
@@ -225,7 +228,7 @@ export default function AdminLayout({
     );
   }
 
-  if (loading) {
+  if (authPending) {
     return (
       <SplitViewProvider>
         <div className="ui-page flex min-h-screen items-center justify-center">

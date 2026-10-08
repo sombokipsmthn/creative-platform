@@ -22,7 +22,13 @@ export const users = pgTable("users", {
   onboardingStatus: text("onboarding_status").default("incomplete").notNull(),
   onboardingStep: integer("onboarding_step").default(1).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
+}, (table) => ({
+  emailIdx: index("users_email_idx").on(table.email),
+  authUserIdIdx: index("users_auth_user_id_idx").on(table.authUserId),
+  emailVerifiedIdx: index("users_email_verified_idx").on(table.emailVerified),
+  createdAtIdx: index("users_created_at_idx").on(table.createdAt),
+}));
 
 export const sessions = pgTable("sessions", {
   id: text("id").primaryKey(),

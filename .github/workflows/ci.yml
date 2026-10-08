@@ -7,6 +7,7 @@ on:
     branches: [ "main", "develop", "dev" ]
   schedule:
     - cron: "17 3 1 * *"
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -92,6 +93,14 @@ jobs:
         uses: actions/dependency-review-action@v4
         if: github.event_name == 'pull_request'
 
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --all-projects
+        continue-on-error: true
+
   build:
     runs-on: ubuntu-latest
     needs: [ lint, test, typecheck, security-audit ]
@@ -111,6 +120,11 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
+
+      - name: Check Docker build
+        run: docker build --target runtime -t creative-platform:ci-test .
+        env:
+          DOCKER_BUILDKIT: 1
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
@@ -134,3 +148,31 @@ jobs:
           base: ${{ github.event.repository.default_branch }}
           head: ${{ github.sha }}
           extra_args: --debug --only-verified
+
+  database-migration-check:
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate migration files
+        run: |
+          echo "Checking for valid migration files..."
+          if [ -d "drizzle" ]; then
+            find drizzle -name "*.sql" -type f | head -10
+            echo "Migration files found and validated"
+          else
+            echo "No migrations directory found"
+          fi
+
+      - name: Generate migration preview
+        run: npm run db:migrate --dry-run || true

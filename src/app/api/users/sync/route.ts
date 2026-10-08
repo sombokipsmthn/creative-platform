@@ -5,10 +5,10 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { creatorProfiles, users } from "@/db/schema";
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   try {
     const session = await auth.api.getSession({
-      headers: new Headers(),
+      headers: request.headers,
     });
 
     /*

@@ -1,6 +1,57 @@
 version: '3.9'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: creative-platform-postgres
+    environment:
+      POSTGRES_USER: kipsmthn
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: kipsmthn
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - staging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kipsmthn"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    container_name: creative-platform-pgbouncer
+    environment:
+      DATABASES_HOST: postgres
+      DATABASES_PORT: 5432
+      DATABASES_USER: kipsmthn
+      DATABASES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      DATABASES_DBNAME: kipsmthn
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 1000
+      PGBOUNCER_DEFAULT_POOL_SIZE: 25
+      PGBOUNCER_MIN_POOL_SIZE: 10
+      PGBOUNCER_RESERVE_POOL_SIZE: 5
+      PGBOUNCER_RESERVE_POOL_TIMEOUT: 3
+      PGBOUNCER_SERVER_LIFETIME: 3600
+      PGBOUNCER_SERVER_IDLE_TIMEOUT: 600
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - staging
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   app:
     build:
       context: .
@@ -11,8 +62,8 @@ services:
     environment:
       NODE_ENV: staging
       NEXT_TELEMETRY_DISABLED: 1
-      # Database
-      DATABASE_URL: ${DATABASE_URL}
+      # Use PgBouncer for connection pooling
+      DATABASE_URL: postgresql://kipsmthn:${POSTGRES_PASSWORD:-password}@pgbouncer:6432/kipsmthn?sslmode=disable
       # Auth
       # Vercel Blob (optional)
       BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN}
@@ -23,6 +74,9 @@ services:
     volumes:
       - ./src:/app/src
       - ./public:/app/public
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
     networks:
       - staging
     healthcheck:
@@ -32,6 +86,10 @@ services:
       retries: 3
       start_period: 10s
     restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
 
 networks:
   staging:

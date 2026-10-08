@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCreator } from '@/context/CreatorContext';
-import { auth } from "@/lib/auth/auth";
 import { formatCurrency } from '@/lib/utils';
 import {
   AlertCircle,

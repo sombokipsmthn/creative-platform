@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/auth/auth";
+import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
 import {
   ArrowLeft,
@@ -107,9 +107,7 @@ export default function CreatorOnboardingPage() {
 
   useEffect(() => {
     async function getUser() {
-      const session = await auth.api.getSession({
-        headers: new Headers(),
-      });
+      const { data: session } = await authClient.getSession();
       if (session?.user) {
         setUser({
           id: session.user.id,

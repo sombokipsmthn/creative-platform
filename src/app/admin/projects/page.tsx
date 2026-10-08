@@ -2,42 +2,64 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
+import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
-type ProjectStatus = 'active' | 'inactive' | 'completed' | 'on hold' | 'cancelled';
+type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
 type Project = {
   id: string;
   name: string;
-  description?: string | null;
-  scopeOfWork?: string | null;
-  deliverables?: string | null;
-  totalAmount?: number | null;
-  currency?: string | null;
-  paymentTerms?: string | null;
-  revisionsPolicy?: string | null;
-  licensingTerms?: string | null;
-  noticePeriod?: string | null;
-  startDate?: string | null;
-  endDate?: string | null;
+  description: string | null;
+  shortDescription: string | null;
+  slug: string | null;
+  category: string | null;
+  year: string | null;
+  location: string | null;
+  services: string[] | null;
+  disciplines: string[] | null;
+  collaborators: string[] | null;
+  role: string | null;
+  scopeOfWork: string | null;
+  deliverables: string | null;
+  totalAmount: number | null;
+  currency: string | null;
+  paymentTerms: string | null;
+  revisionsPolicy: string | null;
+  licensingTerms: string | null;
+  noticePeriod: string | null;
+  storyOverview: string | null;
+  storyChallenge: string | null;
+  storyApproach: string | null;
+  storyOutcome: string | null;
+  storyCredits: string | null;
   status: ProjectStatus | string;
+  visibility: string | null;
+  featured: boolean | null;
+  publishedAt: string | null;
+  startDate: string | null;
+  endDate: string | null;
   createdAt: string;
   updatedAt: string;
   client: {
     id: string;
     name: string;
-    company?: string | null;
-    email?: string | null;
-    phone?: string | null;
-    location?: string | null;
+    company: string | null;
+    email: string | null;
+    phone: string | null;
+    location: string | null;
   } | null;
 };
 
 const emptyForm = {
   name: '',
   description: '',
+  shortDescription: '',
+  slug: '',
+  category: '',
+  year: '',
+  location: '',
   scopeOfWork: '',
   deliverables: '',
   totalAmount: '',
@@ -46,7 +68,9 @@ const emptyForm = {
   revisionsPolicy: '',
   licensingTerms: '',
   noticePeriod: '',
-  status: 'active' as ProjectStatus,
+  status: 'draft' as ProjectStatus,
+  visibility: 'private' as 'public' | 'private' | 'draft',
+  featured: false,
   startDate: '',
   endDate: '',
   clientId: '',
@@ -101,10 +125,12 @@ function statusClass(status: string) {
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
+  const [clients, setClients] = useState<Array<{ id: string; name: string; company?: string | null }>>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | ProjectStatus>('ALL');
   const [filterClient, setFilterClient] = useState<string | null>(null);
+  const [filterVisibility, setFilterVisibility] = useState<'ALL' | 'public' | 'private' | 'draft'>('ALL');
+  const [filterFeatured, setFilterFeatured] = useState<'ALL' | 'true' | 'false'>('ALL');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
@@ -136,6 +162,12 @@ export default function AdminProjectsPage() {
         if (filterStatus && filterStatus !== 'ALL') {
           params.append('status', filterStatus);
         }
+        if (filterVisibility && filterVisibility !== 'ALL') {
+          params.append('visibility', filterVisibility);
+        }
+        if (filterFeatured && filterFeatured !== 'ALL') {
+          params.append('featured', filterFeatured);
+        }
 
         const projectsResponse = await fetch(`/api/projects?${params.toString()}`, {
           cache: 'no-store',
@@ -150,7 +182,7 @@ export default function AdminProjectsPage() {
         if (!cancelled) {
           setClients(Array.isArray(clientsData) ? clientsData : []);
           setProjects(
-            projectsData.map((proj: any) => ({
+            projectsData.map((proj: Project) => ({
               ...proj,
               client: proj.client
                 ? {
@@ -207,14 +239,23 @@ export default function AdminProjectsPage() {
       const matchesClient =
         !filterClient || project.client?.id === filterClient;
 
-      return matchesSearch && matchesStatus && matchesClient;
+      const matchesVisibility =
+        filterVisibility === 'ALL' || project.visibility === filterVisibility;
+
+      const matchesFeatured =
+        filterFeatured === 'ALL' || (filterFeatured === 'true' ? project.featured : !project.featured);
+
+      return matchesSearch && matchesStatus && matchesClient && matchesVisibility && matchesFeatured;
     });
-  }, [projects, filterClient, filterStatus, searchQuery]);
+  }, [projects, filterClient, filterStatus, filterVisibility, filterFeatured, searchQuery]);
 
   const activeCount = projects.filter((p) => p.status === 'active').length;
   const completedCount = projects.filter((p) => p.status === 'completed').length;
   const onHoldCount = projects.filter((p) => p.status === 'on hold').length;
   const cancelledCount = projects.filter((p) => p.status === 'cancelled').length;
+  const draftCount = projects.filter((p) => p.status === 'draft').length;
+  const publishedCount = projects.filter((p) => p.visibility === 'public').length;
+  const featuredCount = projects.filter((p) => p.featured).length;
 
   function openCreateModal(clientId?: string) {
     setForm({
@@ -250,6 +291,11 @@ export default function AdminProjectsPage() {
         body: JSON.stringify({
           name: form.name,
           description: form.description,
+          shortDescription: form.shortDescription,
+          slug: form.slug,
+          category: form.category,
+          year: form.year,
+          location: form.location,
           scopeOfWork: form.scopeOfWork,
           deliverables: form.deliverables,
           totalAmount: form.totalAmount ? Number(form.totalAmount) : null,
@@ -259,6 +305,8 @@ export default function AdminProjectsPage() {
           licensingTerms: form.licensingTerms,
           noticePeriod: form.noticePeriod,
           status: form.status,
+          visibility: form.visibility,
+          featured: form.featured,
           startDate: form.startDate || null,
           endDate: form.endDate || null,
           clientId: form.clientId || null,
@@ -343,13 +391,14 @@ export default function AdminProjectsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
           {[
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
-            ['Active', activeCount, 'text-emerald-600 dark:text-emerald-400'],
-            ['Completed', completedCount, 'text-blue-600 dark:text-blue-400'],
-            ['On Hold', onHoldCount, 'text-amber-600 dark:text-amber-400'],
-            ['Cancelled', cancelledCount, 'text-red-600 dark:text-red-400'],
+            ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
+            ['Published', publishedCount, 'text-emerald-600 dark:text-emerald-400'],
+            ['Featured', featuredCount, 'text-purple-600 dark:text-purple-400'],
+            ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
+            ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
             <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
               <p className={`ui-stat-label ${color}`}>{label}</p>
@@ -390,6 +439,7 @@ export default function AdminProjectsPage() {
                 ['completed', completedCount],
                 ['on hold', onHoldCount],
                 ['cancelled', cancelledCount],
+                ['draft', draftCount],
               ] as const
             ).map(([status, count]) => (
               <Button
@@ -401,6 +451,34 @@ export default function AdminProjectsPage() {
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
               </Button>
             ))}
+
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Visibility:</span>
+              {(['ALL', 'public', 'private', 'draft'] as const).map((vis) => (
+                <Button
+                  key={vis}
+                  variant={filterVisibility === vis ? 'primary' : 'secondary'}
+                  onClick={() => setFilterVisibility(vis)}
+                  className="text-xs font-sans uppercase tracking-widest"
+                >
+                  {vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}
+                </Button>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Featured:</span>
+              {(['ALL', 'true', 'false'] as const).map((feat) => (
+                <Button
+                  key={feat}
+                  variant={filterFeatured === feat ? 'primary' : 'secondary'}
+                  onClick={() => setFilterFeatured(feat)}
+                  className="text-xs font-sans uppercase tracking-widest"
+                >
+                  {feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -441,6 +519,29 @@ export default function AdminProjectsPage() {
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(project.status)}`}>
                         {statusLabel(project.status)}
                       </span>
+                      {project.featured && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                          <Star className="h-3 w-3" />
+                          Featured
+                        </span>
+                      )}
+                      {project.visibility === 'public' && project.publishedAt && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                          <Eye className="h-3 w-3" />
+                          Published
+                        </span>
+                      )}
+                      {project.visibility === 'private' && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
+                          <EyeOff className="h-3 w-3" />
+                          Private
+                        </span>
+                      )}
+                      {project.visibility === 'draft' && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                          Draft
+                        </span>
+                      )}
                     </div>
 
                     <p className="text-sm text-slate-500 dark:text-zinc-400">
@@ -474,17 +575,61 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <Button
-                  onClick={() => {
-                    setError('');
-                    setSelectedProject(project);
-                  }}
-                  variant="secondary"
-                  className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
-                >
-                  View project
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Button>
+                <div className="flex flex-wrap gap-2 w-full lg:w-auto lg:justify-end">
+                  <Button
+                    onClick={() => {
+                      setError('');
+                      setSelectedProject(project);
+                    }}
+                    variant="secondary"
+                    className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
+                  >
+                    View project
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </Button>
+                  <Link
+                    href={`/admin/projects/${project.id}`}
+                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-2 text-xs font-sans text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900 transition"
+                  >
+                    Edit
+                  </Link>
+                  {project.slug && project.visibility === 'public' && (
+                    <a
+                      href={`/work/${project.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-sans text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      Preview
+                    </a>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                    onClick={async () => {
+                      if (!confirm('Delete this project? This cannot be undone.')) return;
+                      try {
+                        setError('');
+                        const response = await fetch(`/api/projects/${project.id}`, {
+                          method: 'DELETE',
+                        });
+                        if (!response.ok) {
+                          const data = await response.json();
+                          throw new Error(data?.error || 'Failed to delete project');
+                        }
+                        setProjects((current) => current.filter((p) => p.id !== project.id));
+                      } catch (err) {
+                        console.error('Failed to delete project:', err);
+                        setError(err instanceof Error ? err.message : 'Failed to delete project.');
+                      }
+                    }}
+                    aria-label="Delete project"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ))}
           </div>
@@ -543,16 +688,93 @@ export default function AdminProjectsPage() {
                     />
                   </div>
                   <div className="space-y-1">
+                    <label className="ui-label">Short Description</label>
+                    <input
+                      type="text"
+                      placeholder="One-line summary for portfolio cards"
+                      value={form.shortDescription}
+                      onChange={(event) => setForm({ ...form, shortDescription: event.target.value })}
+                      className="ui-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="ui-label">Category</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => setForm({ ...form, category: e.target.value })}
+                      className="ui-input"
+                    >
+                      <option value="">Select category</option>
+                      <option value="Photography">Photography</option>
+                      <option value="Videography">Videography</option>
+                      <option value="Branding">Branding</option>
+                      <option value="UI/UX">UI/UX</option>
+                      <option value="Motion">Motion Graphics</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Year</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 2026"
+                      value={form.year}
+                      onChange={(event) => setForm({ ...form, year: event.target.value })}
+                      className="ui-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="ui-label">Location</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Nairobi, Kenya"
+                      value={form.location}
+                      onChange={(event) => setForm({ ...form, location: event.target.value })}
+                      className="ui-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Slug</label>
+                    <input
+                      type="text"
+                      placeholder="auto-generated from name"
+                      value={form.slug}
+                      onChange={(event) => setForm({ ...form, slug: event.target.value })}
+                      className="ui-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
                     <label className="ui-label">Status</label>
                     <select
                       value={form.status}
                       onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
                       className="ui-input"
                     >
+                      <option value="draft">Draft</option>
                       <option value="active">Active</option>
                       <option value="completed">Completed</option>
                       <option value="on hold">On Hold</option>
                       <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Visibility</label>
+                    <select
+                      value={form.visibility}
+                      onChange={(e) => setForm({ ...form, visibility: e.target.value as 'public' | 'private' | 'draft' })}
+                      className="ui-input"
+                    >
+                      <option value="private">Private</option>
+                      <option value="public">Public</option>
                       <option value="draft">Draft</option>
                     </select>
                   </div>
@@ -630,15 +852,28 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="ui-label">Licensing Terms</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Commercial use rights"
-                    value={form.licensingTerms}
-                    onChange={(event) => setForm({ ...form, licensingTerms: event.target.value })}
-                    className="ui-input"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="ui-label">Licensing Terms</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Commercial use rights"
+                      value={form.licensingTerms}
+                      onChange={(event) => setForm({ ...form, licensingTerms: event.target.value })}
+                      className="ui-input"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Featured</label>
+                    <select
+                      value={form.featured ? 'true' : 'false'}
+                      onChange={(e) => setForm({ ...form, featured: e.target.value === 'true' })}
+                      className="ui-input"
+                    >
+                      <option value="false">No</option>
+                      <option value="true">Yes</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="space-y-1">

@@ -8,6 +8,7 @@ import {
   bigint,
   unique,
   jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
@@ -39,6 +40,7 @@ export const creatorServices = pgTable("creator_services", {
   category: text("category"),
   defaultRate: integer("default_rate").default(0).notNull(),
   currency: text("currency").default("KES").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
@@ -80,6 +82,15 @@ export const projects = pgTable("projects", {
   clientId: text("client_id").references(() => clients.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   description: text("description"),
+  shortDescription: text("short_description"),
+  slug: text("slug").unique(),
+  category: text("category"),
+  year: text("year"),
+  location: text("location"),
+  services: jsonb("services").default([]).notNull(),
+  disciplines: jsonb("disciplines").default([]).notNull(),
+  collaborators: jsonb("collaborators").default([]).notNull(),
+  role: text("role"),
   scopeOfWork: text("scope_of_work"),
   deliverables: text("deliverables"),
   totalAmount: integer("total_amount"),
@@ -88,11 +99,60 @@ export const projects = pgTable("projects", {
   revisionsPolicy: text("revisions_policy"),
   licensingTerms: text("licensing_terms"),
   noticePeriod: text("notice_period"),
-  status: text("status").default("active").notNull(),
+  storyOverview: text("story_overview"),
+  storyChallenge: text("story_challenge"),
+  storyApproach: text("story_approach"),
+  storyOutcome: text("story_outcome"),
+  storyCredits: text("story_credits"),
+  status: text("status").default("draft").notNull(),
+  visibility: text("visibility").default("private").notNull(),
+  featured: boolean("featured").default(false).notNull(),
+  coverMediaId: uuid("cover_media_id"),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
+  publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    creatorIdx: index("projects_creator_id_idx").on(table.creatorId),
+    clientIdx: index("projects_client_id_idx").on(table.clientId),
+    slugIdx: index("projects_slug_idx").on(table.slug),
+    featuredIdx: index("projects_featured_idx").on(table.featured),
+    publishedIdx: index("projects_published_at_idx").on(table.publishedAt),
+    visibilityIdx: index("projects_visibility_idx").on(table.visibility),
+  }));
+
+export const projectMedia = pgTable("project_media", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  filename: text("filename").notNull(),
+  originalUrl: text("original_url").notNull(),
+  displayUrl: text("display_url").notNull(),
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  storagePath: text("storage_path"),
+  originalPath: text("original_path"),
+  displayPath: text("display_path"),
+  thumbnailPath: text("thumbnail_path"),
+  watermarkPath: text("watermark_path"),
+  processingStatus: text("processing_status").default("ready").notNull(),
+  processingError: text("processing_error"),
+  mimeType: text("mime_type"),
+  fileSize: bigint("file_size", { mode: "number" }),
+  width: integer("width"),
+  height: integer("height"),
+  altText: text("alt_text"),
+  caption: text("caption"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isHidden: boolean("is_hidden").default(false).notNull(),
+  isCover: boolean("is_cover").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    projectIdx: index("project_media_project_id_idx").on(table.projectId),
+    creatorIdx: index("project_media_creator_id_idx").on(table.creatorId),
+    projectSortIdx: index("project_media_project_sort_idx").on(table.projectId, table.sortOrder),
+  }));
 
 export const quotes = pgTable("quotes", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -183,14 +243,22 @@ export const galleries = pgTable("galleries", {
   slug: text("slug").notNull().unique(),
   accessPin: text("access_pin"),
   status: text("status").default("draft").notNull(),
-  coverPhotoId: uuid("cover_photo_id"),
+  coverPhotoId: uuid("cover_photo_id"), // FK to gallery_photos.id enforced at DB level (circular ref)
   allowDownloads: boolean("allow_downloads").default(true).notNull(),
   allowFavorites: boolean("allow_favorites").default(true).notNull(),
   allowSelections: boolean("allow_selections").default(true).notNull(),
   focal_point: jsonb("focal_point").default("{}"),
+  expiresAt: timestamp("expires_at"),
+  expiryBehavior: text("expiry_behavior").default("hide").notNull(),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    creatorIdx: index("galleries_creator_id_idx").on(table.creatorId),
+    clientIdx: index("galleries_client_id_idx").on(table.clientId),
+    projectIdx: index("galleries_project_id_idx").on(table.projectId),
+    slugIdx: index("galleries_slug_idx").on(table.slug),
+  }));
 
 export const galleryCollections = pgTable("gallery_collections", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -199,7 +267,10 @@ export const galleryCollections = pgTable("gallery_collections", {
   description: text("description"),
   sortOrder: integer("sort_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    galleryIdx: index("gallery_collections_gallery_id_idx").on(table.galleryId),
+  }));
 
 export const galleryPhotos = pgTable("gallery_photos", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -215,6 +286,7 @@ export const galleryPhotos = pgTable("gallery_photos", {
   thumbnailPath: text("thumbnail_path"),
   watermarkPath: text("watermark_path"),
   processingStatus: text("processing_status").default("ready").notNull(),
+  processingError: text("processing_error"),
   mimeType: text("mime_type"),
   fileSize: bigint("file_size", { mode: "number" }),
   width: integer("width"),
@@ -226,7 +298,12 @@ export const galleryPhotos = pgTable("gallery_photos", {
   isSelected: boolean("is_selected").default(false).notNull(),
   downloadCount: integer("download_count").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    galleryIdx: index("gallery_photos_gallery_id_idx").on(table.galleryId),
+    collectionIdx: index("gallery_photos_collection_id_idx").on(table.collectionId),
+    galleryCollectionSortIdx: index("gallery_photos_gallery_collection_sort_idx").on(table.galleryId, table.collectionId, table.sortOrder),
+  }));
 
 export const galleryThemes = pgTable("gallery_themes", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -264,7 +341,10 @@ export const galleryAccessSessions = pgTable("gallery_access_sessions", {
   tokenHash: text("token_hash").notNull().unique(),
   expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull()});
+  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull()},
+  (table) => ({
+    galleryIdx: index("gallery_access_sessions_gallery_idx").on(table.galleryId),
+  }));
 
 export const galleryAccessAttempts = pgTable("gallery_access_attempts", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -282,7 +362,12 @@ export const galleryPhotoActions = pgTable("gallery_photo_actions", {
   photoId: uuid("photo_id").notNull().references(() => galleryPhotos.id, { onDelete: "cascade" }),
   isFavorite: boolean("is_favorite").default(false).notNull(),
   isSelected: boolean("is_selected").default(false).notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    sessionPhotoUnique: unique("gallery_photo_actions_session_photo_unique").on(table.sessionId, table.photoId),
+    galleryIdx: index("gallery_photo_actions_gallery_idx").on(table.galleryId),
+    photoIdx: index("gallery_photo_actions_photo_idx").on(table.photoId),
+  }));
 
 export const galleryComments = pgTable("gallery_comments", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -294,7 +379,10 @@ export const galleryComments = pgTable("gallery_comments", {
   body: text("body").notNull(),
   resolvedAt: timestamp("resolved_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    photoCreatedIdx: index("gallery_comments_photo_created_idx").on(table.photoId, table.createdAt),
+  }));
 
 export const galleryActivity = pgTable("gallery_activity", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -339,7 +427,10 @@ export const galleryDownloadPresets = pgTable("gallery_download_presets", {
   format: text("format").default("jpg").notNull(),
   includeWatermark: boolean("include_watermark").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    galleryIdx: index("gallery_download_presets_gallery_idx").on(table.galleryId),
+  }));
 
 export const galleryDownloads = pgTable("gallery_downloads", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -352,7 +443,11 @@ export const galleryDownloads = pgTable("gallery_downloads", {
   bytes: bigint("bytes", { mode: "number" }),
   ipHash: text("ip_hash"),
   userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").defaultNow().notNull()});
+  createdAt: timestamp("created_at").defaultNow().notNull()},
+  (table) => ({
+    galleryCreatedIdx: index("gallery_downloads_gallery_created_idx").on(table.galleryId, table.createdAt),
+    photoCreatedIdx: index("gallery_downloads_photo_created_idx").on(table.photoId, table.createdAt),
+  }));
 
 export const contractTemplates = pgTable("contract_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -366,8 +461,11 @@ export const contractTemplates = pgTable("contract_templates", {
   isSystemTemplate: boolean("is_system_template").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
-});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    creatorIdx: index("contract_templates_creator_id_idx").on(table.creatorId),
+    systemIdx: index("contract_templates_is_system_idx").on(table.isSystemTemplate),
+  }));
 
 export const contracts = pgTable("contracts", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -394,16 +492,26 @@ export const contracts = pgTable("contracts", {
   declinedAt: timestamp("declined_at"),
   cancelledAt: timestamp("cancelled_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()
-});
+  updatedAt: timestamp("updated_at").defaultNow().notNull()},
+  (table) => ({
+    creatorIdx: index("contracts_creator_id_idx").on(table.creatorId),
+    clientIdx: index("contracts_client_id_idx").on(table.clientId),
+    projectIdx: index("contracts_project_id_idx").on(table.projectId),
+    quoteIdx: index("contracts_quote_id_idx").on(table.quoteId),
+    templateIdx: index("contracts_template_id_idx").on(table.templateId),
+    statusIdx: index("contracts_status_idx").on(table.status),
+    tokenIdx: index("contracts_token_idx").on(table.token),
+  }));
 
 export const contractEvents = pgTable("contract_events", {
   id: uuid("id").defaultRandom().primaryKey(),
   contractId: uuid("contract_id").notNull().references(() => contracts.id, { onDelete: "cascade" }),
   eventType: text("event_type").notNull(),
   metadata: jsonb("metadata").default({}).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull()
-});
+  createdAt: timestamp("created_at").defaultNow().notNull()},
+  (table) => ({
+    contractIdx: index("contract_events_contract_id_idx").on(table.contractId),
+  }));
 
 export const uploadAudit = pgTable("upload_audit", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -415,5 +523,6 @@ export const uploadAudit = pgTable("upload_audit", {
   blobPath: text("blob_path").notNull(),
   success: boolean("success").notNull(),
   failureReason: text("failure_reason"),
-  createdAt: timestamp("created_at").defaultNow().notNull()
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
 });

@@ -30,12 +30,14 @@ This policy applies to all data:
 **Definition**: Data that is intentionally made available to the public and has no sensitivity.
 
 **Examples**:
+
 - Public portfolio images and galleries
 - Marketing materials and press releases
 - Public website content
 - Published case studies
 
 **Protection Requirements**:
+
 - Encryption in transit (TLS 1.2+)
 - Standard web security controls
 - No specific access restrictions
@@ -49,12 +51,14 @@ This policy applies to all data:
 **Definition**: Data intended for internal use only. Disclosure could cause minor inconvenience or harm.
 
 **Examples**:
+
 - Internal operational documents
 - Employee directories (non-sensitive)
 - Internal process documentation
 - Non-sensitive business reports
 
 **Protection Requirements**:
+
 - Encryption in transit (TLS 1.2+)
 - Access limited to employees and authorized contractors
 - Standard authentication controls
@@ -69,6 +73,7 @@ This policy applies to all data:
 **Definition**: Sensitive data that could cause significant harm if disclosed unauthorizedly.
 
 **Examples**:
+
 - Client contact information (name, email, phone)
 - Project details and scopes
 - Quote and invoice data (non-payment)
@@ -76,6 +81,7 @@ This policy applies to all data:
 - Internal communications
 
 **Protection Requirements**:
+
 - Encryption in transit (TLS 1.2+)
 - Encryption at rest (AES-256)
 - Strict access controls (need-to-know basis)
@@ -93,6 +99,7 @@ This policy applies to all data:
 **Definition**: Highly sensitive data that could cause severe harm if disclosed. Requires the highest level of protection.
 
 **Examples**:
+
 - Client payment information (bank details, credit cards)
 - KRA PIN and tax identification numbers
 - Authentication credentials and secrets
@@ -101,6 +108,7 @@ This policy applies to all data:
 - Legal documents and contracts
 
 **Protection Requirements**:
+
 - Encryption in transit (TLS 1.3+)
 - Encryption at rest (AES-256 with key rotation)
 - Strict access controls with approval workflow
@@ -118,7 +126,7 @@ This policy applies to all data:
 ## Data Classification Matrix
 
 | Data Type | Classification | Storage | Transmission | Access Control |
-|-----------|---------------|---------|--------------|----------------|
+| ----------- | --------------- | --------- | -------------- | ---------------- |
 | Customer names/emails | Confidential | Encrypted at rest | TLS | Role-based |
 | Customer phone numbers | Confidential | Encrypted at rest | TLS | Role-based |
 | Project details | Confidential | Encrypted at rest | TLS | Role-based |
@@ -135,30 +143,35 @@ This policy applies to all data:
 ## Data Handling Requirements
 
 ### Collection
+
 - Collect only data necessary for business purposes
 - Inform data subjects of collection purpose
 - Obtain consent where required
 - Classify data at point of collection
 
 ### Storage
+
 - Store data according to classification level
 - Apply appropriate encryption
 - Implement access controls
 - Regular backup and integrity checks
 
 ### Use
+
 - Use data only for stated purposes
 - Restrict access to authorized personnel
 - Monitor for unauthorized use
 - Maintain audit trails
 
 ### Transmission
+
 - Encrypt all transmissions (TLS 1.2+ minimum)
 - Use secure protocols (SFTP, HTTPS)
 - Verify recipient identity
 - Log transmission events
 
 ### Disposal
+
 - Dispose according to classification level
 - Use secure deletion methods
 - Verify destruction
@@ -169,6 +182,7 @@ This policy applies to all data:
 ## Data Owner Responsibilities
 
 ### Business Data Owners
+
 1. Define classification for data they own
 2. Approve access requests
 3. Review access periodically
@@ -176,6 +190,7 @@ This policy applies to all data:
 5. Authorize data sharing
 
 ### Technical Data Owners
+
 1. Implement classification controls
 2. Configure access controls
 3. Maintain encryption standards
@@ -187,24 +202,28 @@ This policy applies to all data:
 ## Data Subject Rights
 
 ### Access Requests
+
 - Individuals may request access to their personal data
 - Verify identity before disclosure
 - Provide data within 30 days
 - Charge no fee (unless excessive)
 
 ### Correction Requests
+
 - Individuals may request correction of inaccurate data
 - Verify identity before changes
 - Update within 30 days
 - Document changes made
 
 ### Deletion Requests
+
 - Individuals may request deletion of their data
 - Verify identity before action
 - Delete within 30 days (subject to legal retention)
 - Notify downstream processors
 
 ### Portability Requests
+
 - Individuals may request data export
 - Provide in structured, machine-readable format
 - Complete within 30 days
@@ -215,12 +234,14 @@ This policy applies to all data:
 ## Cross-Border Data Transfers
 
 ### Requirements
+
 - Assess data protection laws in destination country
 - Implement appropriate safeguards (standard contractual clauses)
 - Document transfer impact assessment
 - Notify data subjects where required
 
 ### Prohibited Transfers
+
 - Do not transfer Restricted data to jurisdictions without adequate protection
 - Do not transfer without proper legal basis
 - Obtain legal counsel approval for uncertain situations
@@ -230,18 +251,21 @@ This policy applies to all data:
 ## Monitoring and Compliance
 
 ### Access Monitoring
+
 - Log all access to Confidential and Restricted data
 - Review access patterns regularly
 - Alert on suspicious activity
 - Investigate anomalies
 
 ### Data Flow Mapping
+
 - Maintain data flow diagrams
 - Update when systems change
 - Document all data transfers
 - Identify critical data handling points
 
 ### Compliance Audits
+
 - Annual classification compliance audit
 - Quarterly access review
 - Real-time monitoring for Restricted data
@@ -252,12 +276,14 @@ This policy applies to all data:
 ## Training and Awareness
 
 ### Required Training
+
 - Annual data classification training for all employees
 - Role-specific training for data handlers
 - Security awareness training incorporating classification
 - Vendor training on data protection requirements
 
 ### Training Content
+
 - Classification levels and criteria
 - Handling requirements per level
 - Reporting procedures for suspected breaches
@@ -282,7 +308,7 @@ This policy applies to all data:
 ## Integration with SOC 2 Controls
 
 | SOC 2 Criteria | Control | Evidence |
-|----------------|---------|----------|
+| ---------------- | --------- | ---------- |
 | CC6.1 | Logical access security | Classification-based access controls |
 | CC6.3 | Authorization | Data access rules based on classification |
 | CC6.4 | Network security | Encryption standards per classification |

@@ -36,7 +36,7 @@ This process applies to access reviews for:
 ## Review Schedule
 
 | Review Type | Frequency | Trigger | Owner |
-|-------------|-----------|---------|-------|
+| ------------- | ----------- | --------- | ------- |
 | **Quarterly Access Review** | Every quarter (Jan, Apr, Jul, Oct) | First Monday of month | Engineering Manager |
 | **Ad-hoc Access Review** | As needed | Role change, termination, security incident | Engineering Manager |
 | **Access Request Review** | Per request | New access request | System Owner |
@@ -49,6 +49,7 @@ This process applies to access reviews for:
 ### 1. Preparation (Days 1-3)
 
 **Engineering Manager Responsibilities**:
+
 1. Generate access reports from each provider:
    - Vercel: Team members, environment variables, integrations, deployment permissions
    - Neon: Database users, roles, connection strings in use
@@ -63,6 +64,7 @@ This process applies to access reviews for:
 ### 2. Conduct Review (Days 4-10)
 
 **Review Team Responsibilities** (minimum 2 reviewers, including Engineering Manager):
+
 1. Verify principle of least privilege:
    - Each user/service account has only the permissions necessary for their role
    - No excessive permissions (e.g., write access when read-only suffices)
@@ -88,6 +90,7 @@ This process applies to access reviews for:
 ### 3. Remediation (Days 11-20)
 
 **Engineering Manager Responsibilities**:
+
 1. Create remediation tickets for all findings requiring action:
    - Access revocation
    - Permission reduction
@@ -102,6 +105,7 @@ This process applies to access reviews for:
 ### 4. Approval & Closure (Days 21-25)
 
 **Engineering Manager Responsibilities**:
+
 1. Compile final review report:
    - Summary of findings
    - Remediation actions taken
@@ -123,6 +127,7 @@ This process applies to access reviews for:
 ### 5. Reporting & Metrics (Ongoing)
 
 **Quarterly Metrics to Track**:
+
 - % of reviews completed on schedule
 - Average time to remediate findings
 - Number of excessive permissions identified
@@ -136,6 +141,7 @@ This process applies to access reviews for:
 ## Evidence Collection
 
 **Required Records (Retained 3 Years)**:
+
 1. Access reports from each provider (CSV/JSON export)
 2. Review worksheet with findings and decisions
 3. Remediation tickets (GitHub Issues, Jira tickets, etc.)
@@ -145,6 +151,7 @@ This process applies to access reviews for:
 7. Exception register (if any)
 
 **Storage Location**:
+
 - Secure, access-controlled repository (e.g., encrypted GitHub repo with limited access)
 - Access restricted to Engineering Manager, Security Lead, and Platform Owner
 - Backup in secure, geographically-separated location
@@ -156,25 +163,25 @@ This process applies to access reviews for:
 ### Infrastructure Provider: [Provider Name]
 
 | User/Service Account | Role/Permission | Justification | Last Activity (days) | MFA Enforced? | Action Required | Notes |
-|----------------------|-----------------|---------------|----------------------|---------------|-----------------|-------|
-| example@company.com | Admin | Platform engineering | 5 | Yes | None | - |
+| ---------------------- | ----------------- | --------------- | ---------------------- | --------------- | ----------------- | ------- |
+| <example@company.com> | Admin | Platform engineering | 5 | Yes | None | - |
 | service-account-vercel | Deploy | CI/CD pipeline | 1 | N/A (token) | Rotate token | Token age: 180 days |
-| former-employee@company.com | Read | N/A | 120 | Yes | Revoke access | Employee terminated 2026-06-15 |
+| <former-employee@company.com> | Read | N/A | 120 | Yes | Revoke access | Employee terminated 2026-06-15 |
 
 ### Application Access: [Application Component]
 
 | User Email | Creator ID | Last Login (days) | Galleries Accessed | API Usage (req/day) | Action Required | Notes |
-|------------|------------|-------------------|--------------------|---------------------|-----------------|-------|
-| creator@example.com | usr_123 | 2 | 3 galleries | 45 | None | Active creator |
-| client@example.com | N/A | 45 | 1 gallery (token) | 0 | Investigate | Client gallery access |
-| inactive@example.com | usr_456 | 200 | 0 | 0 | Disable account | No activity >90 days |
+| ------------ | ------------ | ------------------- | -------------------- | --------------------- | ----------------- | ------- |
+| <creator@example.com> | usr_123 | 2 | 3 galleries | 45 | None | Active creator |
+| <client@example.com> | N/A | 45 | 1 gallery (token) | 0 | Investigate | Client gallery access |
+| <inactive@example.com> | usr_456 | 200 | 0 | 0 | Disable account | No activity >90 days |
 
 ---
 
 ## Integration with SOC 2 Controls
 
 | SOC 2 Criteria | Control | Evidence |
-|----------------|---------|----------|
+| ---------------- | --------- | ---------- |
 | CC6.1 | Logical access security measures | Access review reports, remediation tickets |
 | CC6.2 | Authentication credentials | MFA enforcement reports, password policies |
 | CC6.3 | Authorization | Access justification documentation, least privilege reviews |

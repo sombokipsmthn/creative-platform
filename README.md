@@ -6,7 +6,9 @@
 
 **KIPSMTHN Creative Platform** is a creative business platform built for photography, video, brand films, and visual storytelling.
 
-It brings the different parts of running a creative production business into one place — from presenting work and managing clients to creating quotes, tracking projects, invoicing, and delivering finished work through private galleries.
+For detailed technical documentation, architecture, feature status, and implementation roadmap, see [`KIPSMTHN-IMPLEMENTATION-SPEC.md`](./KIPSMTHN-IMPLEMENTATION-SPEC.md).
+
+The platform brings the different parts of running a creative production business into one place — from presenting work and managing clients to creating quotes, tracking projects, invoicing, and delivering finished work through private galleries.
 
 The platform is designed around the needs of independent creatives and production studios, with a focus on simplifying the journey from **client inquiry to project delivery**.
 

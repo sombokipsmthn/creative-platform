@@ -24,10 +24,6 @@ export function useAuth() {
   return { isLoaded: !session.isPending, isSignedIn: Boolean(session.data?.user), signOut: (options?: { redirectUrl?: string }) => authClient.signOut({ callbackURL: options?.redirectUrl }) };
 }
 
-export function useClerk() {
-  return { signOut: (options?: { redirectUrl?: string }) => authClient.signOut({ callbackURL: options?.redirectUrl }) };
-}
-
 export function SignIn() {
   return null;
 }

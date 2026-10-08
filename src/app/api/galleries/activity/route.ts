@@ -7,18 +7,14 @@ import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 
 async function getCreator() {
   try {
-    const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY;
-    if (!clerkKey) {
+
+    const { userId: authUserId } = await auth();
+
+    if (!authUserId) {
       return null;
     }
 
-    const { userId: clerkUserId } = await auth();
-
-    if (!clerkUserId) {
-      return null;
-    }
-
-    return getOrCreateLocalUser(clerkUserId);
+    return getOrCreateLocalUser(authUserId);
   } catch {
     return null;
   }

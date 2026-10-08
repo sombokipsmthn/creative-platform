@@ -16,7 +16,7 @@ const { mockAuth, mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: mockAuth,
 }));
 

@@ -8,7 +8,7 @@ const { mockAuth, mockCurrentUser, mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: mockAuth,
   currentUser: mockCurrentUser,
 }));
@@ -25,7 +25,7 @@ describe("POST /api/users/sync", () => {
     mockAuth.mockResolvedValue({ userId: "user_123" });
   });
 
-  it("creates a database record for a Clerk user when one does not exist", async () => {
+  it("creates a database record for a authenticated user when one does not exist", async () => {
     mockCurrentUser.mockResolvedValue({
       emailAddresses: [{ emailAddress: "creator@example.com" }],
       firstName: "Creator",
@@ -88,7 +88,7 @@ describe("POST /api/users/sync", () => {
     });
   });
 
-  it("rejects a request that lacks a Clerk session user id", async () => {
+  it("rejects a request that lacks a Better Auth session user id", async () => {
     mockAuth.mockResolvedValue({ userId: null });
 
     const response = await POST();

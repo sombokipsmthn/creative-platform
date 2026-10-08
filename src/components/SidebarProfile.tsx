@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  useClerk,
+  useAuth,
   useUser,
 } from "@/lib/auth-client";
 import Image from 'next/image';
@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function SidebarProfile() {
   const { user, isLoaded } = useUser();
-  const { signOut } = useClerk();
+  const { signOut } = useAuth();
 
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);

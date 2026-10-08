@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 
 import { getCurrentRole, requireRole } from "./roles";
 
-vi.mock("@clerk/nextjs/server", () => ({
+vi.mock("@/lib/auth", () => ({
   auth: vi.fn(),
 }));
 
@@ -12,7 +12,7 @@ describe("roles", () => {
     vi.mocked(auth).mockReset();
   });
 
-  it("reads the current role from Clerk session metadata", async () => {
+  it("reads the current role from Better Auth session metadata", async () => {
     vi.mocked(auth).mockResolvedValue({
       sessionClaims: {
         metadata: { role: "admin" },

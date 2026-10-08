@@ -107,7 +107,7 @@ export async function getIpHash(request: Request): Promise<string | undefined> {
 }
 
 /**
- * Get current user context from Clerk session.
+ * Get current user context from Better Auth session.
  */
 export async function getUserContext(): Promise<{
   userId?: string;

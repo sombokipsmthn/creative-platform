@@ -12,7 +12,7 @@ export async function POST() {
 
     /*
      * -------------------------------------------------------
-     * REQUIRE CLERK AUTHENTICATION
+     * REQUIRE BETTER_AUTH AUTHENTICATION
      * -------------------------------------------------------
      */
 
@@ -29,7 +29,7 @@ export async function POST() {
     }
 
     console.log(
-      "Creator sync: checking Clerk user",
+      "Creator sync: checking authenticated user",
       userId
     );
 
@@ -38,16 +38,16 @@ export async function POST() {
      * GET OR CREATE LOCAL USER
      * -------------------------------------------------------
      *
-     * A Clerk account is not useful to the application
+     * A authenticated account is not useful to the application
      * until there is a corresponding local users row.
      *
      * This function safely handles both:
      *
      * 1. Existing local users
-     * 2. Brand-new Clerk users
+     * 2. Brand-new authenticated users
      */
 
-    // Fetch the local user by the Clerk authUserId. Do **not** create a new
+    // Fetch the local user by the Better Auth authUserId. Do **not** create a new
     // record here – creation should happen only in /auth or the onboarding flow.
     const [localUser] = await db
       .select()
@@ -60,7 +60,7 @@ export async function POST() {
     // accessing `localUser.id` when undefined.
     if (!localUser) {
       console.log(
-        "Creator sync: no local user found for Clerk ID",
+        "Creator sync: no local user found for auth user ID",
         userId
       );
       return NextResponse.json({

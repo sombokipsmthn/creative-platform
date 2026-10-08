@@ -29,12 +29,12 @@ function createInitialHandle(
 }
 
 /**
- * Find the local creator account associated with a Clerk user.
+ * Find the local creator account associated with a authenticated user.
  *
  * Resolution order:
  *
  * 1. authUserId
- *    - This is the canonical Clerk → local-user relationship.
+ *    - This is the canonical Better Auth → local-user relationship.
  *
  * 2. email
  *    - Handles existing local accounts that were created before
@@ -44,14 +44,14 @@ function createInitialHandle(
  *
  * The email reconciliation step is important because `users.email`
  * is unique. Without it, an existing local account can cause a
- * duplicate-email error when Clerk tries to create the account again.
+ * duplicate-email error when Better Auth tries to create the account again.
  */
 export async function getOrCreateLocalUser(
   userId: string
 ) {
   /*
    * -------------------------------------------------------
-   * 1. FIND BY CLERK USER ID
+   * 1. FIND BY BETTER_AUTH USER ID
    * -------------------------------------------------------
    */
 
@@ -86,31 +86,31 @@ export async function getOrCreateLocalUser(
 
   /*
    * -------------------------------------------------------
-   * 2. GET CLERK USER
+   * 2. GET BETTER_AUTH USER
    * -------------------------------------------------------
    */
 
-  const clerkUser = await currentUser();
+  const betterAuthUser = await currentUser();
 
-  if (!clerkUser) {
+  if (!betterAuthUser) {
     throw new Error(
-      "Authenticated Clerk user could not be loaded."
+      "Authenticated authenticated user could not be loaded."
     );
   }
 
   const email =
-    clerkUser.emailAddresses.find(
+    betterAuthUser.emailAddresses.find(
       (item: any) =>
         item.id ===
-        clerkUser.primaryEmailAddressId
+        betterAuthUser.primaryEmailAddressId
     )?.emailAddress ??
-    clerkUser.emailAddresses[0]
+    betterAuthUser.emailAddresses[0]
       ?.emailAddress ??
     "";
 
   if (!email) {
     throw new Error(
-      "No email address is available for this Clerk account."
+      "No email address is available for this authenticated account."
     );
   }
 
@@ -119,8 +119,8 @@ export async function getOrCreateLocalUser(
 
   const name =
     [
-      clerkUser.firstName,
-      clerkUser.lastName,
+      betterAuthUser.firstName,
+      betterAuthUser.lastName,
     ]
       .filter(Boolean)
       .join(" ")
@@ -136,7 +136,7 @@ export async function getOrCreateLocalUser(
    * This is the important fix.
    *
    * The database has a unique constraint on email. If the user
-   * was previously created without the current Clerk ID, we
+   * was previously created without the current auth user ID, we
    * should claim that existing account rather than attempting
    * another INSERT.
    */
@@ -158,9 +158,9 @@ export async function getOrCreateLocalUser(
   if (existingByEmail) {
     /*
      * If the existing record already belongs to a different
-     * Clerk account, do NOT silently steal it.
+     * authenticated account, do NOT silently steal it.
      *
-     * This protects against two real Clerk accounts sharing
+     * This protects against two real authenticated accounts sharing
      * a local account/email unexpectedly.
      */
 
@@ -170,12 +170,12 @@ export async function getOrCreateLocalUser(
         userId
     ) {
       throw new Error(
-        "A local creator account already exists for this email but is linked to a different Clerk account."
+        "A local creator account already exists for this email but is linked to a different authenticated account."
       );
     }
 
     /*
-     * The existing local user has no Clerk ID.
+     * The existing local user has no auth user ID.
      *
      * Claim/reconcile the account.
      */
@@ -187,7 +187,7 @@ export async function getOrCreateLocalUser(
           existingByEmail.id,
         email:
           existingByEmail.email,
-        clerkUserId:
+        betterAuthUserId:
           userId,
       }
     );
@@ -271,7 +271,7 @@ export async function getOrCreateLocalUser(
   console.log(
     "Creator sync: creating local user",
     {
-      clerkUserId: userId,
+      betterAuthUserId: userId,
       email: normalizedEmail,
       name,
       handle,
@@ -383,7 +383,7 @@ export async function getOrCreateLocalUser(
         userId
     ) {
       throw new Error(
-        "A local creator account already exists for this email but is linked to a different Clerk account."
+        "A local creator account already exists for this email but is linked to a different authenticated account."
       );
     }
 

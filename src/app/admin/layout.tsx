@@ -1,6 +1,6 @@
 'use client';
 
-import { useClerk, useUser } from "@/lib/auth-client";
+import { useAuth, useUser } from "@/lib/auth-client";
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -97,7 +97,7 @@ const sections = [
 ];
 
 function SignOutButton({ compact }: { compact?: boolean }) {
-  const { signOut } = useClerk();
+  const { signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {

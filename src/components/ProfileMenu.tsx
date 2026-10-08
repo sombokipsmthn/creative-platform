@@ -2,7 +2,7 @@
 'use client';
 
 import {
-  useClerk,
+  useAuth,
   useUser,
 } from "@/lib/auth-client";
 import Image from 'next/image';
@@ -12,7 +12,7 @@ import { useCreator } from '@/context/CreatorContext';
 
 export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {
   const { user, isLoaded } = useUser();
-  const { signOut } = useClerk();
+  const { signOut } = useAuth();
   const { activeCreator } = useCreator();
 
   const [open, setOpen] = useState(false);

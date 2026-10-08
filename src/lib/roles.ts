@@ -3,10 +3,10 @@ import { auth } from "@/lib/auth";
 export type Role = "admin" | "client";
 
 /**
- * Reads the signed-in user's role from Clerk session claims.
+ * Reads the signed-in user's role from Better Auth session claims.
  * Role lives in publicMetadata.role — set it:
- *   - manually per-user in the Clerk dashboard (Users -> select user -> Metadata), or
- *   - programmatically via clerkClient().users.updateUserMetadata() when you
+ *   - manually per-user in the Better Auth dashboard (Users -> select user -> Metadata), or
+ *   - programmatically via betterAuthClient().users.updateUserMetadata() when you
  *     invite a client from /admin/clients.
  */
 export async function getCurrentRole(): Promise<Role | null> {

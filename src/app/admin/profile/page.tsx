@@ -103,7 +103,7 @@ export default function AdminProfilePage() {
       const firstName = nameParts.shift() || '';
       const lastName = nameParts.join(' ');
 
-      // Keep Clerk identity and the local creator record aligned.
+      // Keep account identity and the local creator record aligned.
       await currentUser.update({
         firstName,
         lastName,
@@ -275,7 +275,7 @@ export default function AdminProfilePage() {
                   className="ui-input cursor-not-allowed opacity-70"
                 />
                 <span className="ui-meta">
-                  Managed by Clerk authentication.
+                  Managed by Better Auth authentication.
                 </span>
               </label>
 

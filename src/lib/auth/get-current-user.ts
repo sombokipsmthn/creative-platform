@@ -5,7 +5,7 @@ import { getLocalUser } from "./get-local-user";
  * Retrieves the currently authenticated creator user from the database.
  *
  * This function:
- * 1. Uses Clerk to verify the session and retrieve the authUserId.
+ * 1. Uses Better Auth to verify the session and retrieve the authUserId.
  * 2. Uses getOrCreateLocalUser to ensure a corresponding local record exists in the database.
  * 3. Returns the local user record or null if not authenticated/not found.
  *
@@ -23,7 +23,7 @@ export async function getCurrentUser() {
       return await getLocalUser(userId);
     } catch {
       throw new Error(
-        `Local creator account not found for Clerk ID ${userId}. ` +
+        `Local creator account not found for auth user ID ${userId}. ` +
         "Ensure the user has been created via /auth before calling this function."
       );
     }

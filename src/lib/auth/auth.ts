@@ -1,22 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
-
+import { dash } from "@better-auth/infra";
 import { db } from "@/db";
 import { users, sessions, accounts, verifications } from "@/db/schema";
-
-const appUrl =
-  process.env.BETTER_AUTH_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  "http://localhost:3005";
-
-const trustedOrigins = Array.from(
-  new Set([
-    appUrl,
-    process.env.NEXT_PUBLIC_APP_URL,
-    "http://localhost:3005",
-    "http://localhost:3000",
-  ].filter((value): value is string => Boolean(value)))
-);
 
 const googleProvider =
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -48,89 +34,39 @@ const socialProviders = {
 };
 
 export const auth = betterAuth({
-  appName: "KIPSMTHN",
-  baseURL: appUrl,
+  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005",
   database: drizzleAdapter(db, {
     provider: "pg",
-    schema: {
-      user: users,
-      session: sessions,
-      account: accounts,
-      verification: verifications,
-    },
+    schema: { user: users, session: sessions, account: accounts, verification: verifications },
   }),
-
-  user: {
-    modelName: "users",
-    additionalFields: {
-      authUserId: {
-        type: "string",
-        required: false,
-        input: false,
-      },
-      onboardingStatus: {
-        type: "string",
-        required: false,
-        input: false,
-      },
-      onboardingStep: {
-        type: "number",
-        required: false,
-        input: false,
-      },
-      handle: {
-        type: "string",
-        required: false,
-        input: false,
-      },
-    },
-  },
-
   emailAndPassword: {
     enabled: true,
-    autoSignIn: true,
+    requireEmailVerification: true,
     minPasswordLength: 8,
     maxPasswordLength: 128,
+    autoSignIn: false,
   },
-
-  ...(Object.keys(socialProviders).length > 0
-    ? { socialProviders }
-    : {}),
-
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60 * 24,
+  },
+  ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   session: {
+    modelName: "sessions",
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
-    cookieCache: {
-      enabled: true,
-      maxAge: 60 * 5,
-    },
+    cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
-
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => ({
-          data: {
-            ...user,
-            authUserId: user.id,
-          },
-        }),
-      },
-      update: {
-        before: async (user) => ({
-          data: {
-            ...user,
-            updatedAt: new Date(),
-          },
-        }),
-      },
-    },
+  account: {
+    modelName: "accounts",
   },
-
-  trustedOrigins,
-
+  verification: {
+    modelName: "verifications",
+  },
   advanced: {
     cookiePrefix: "kipsmthn",
+    crossSubDomainCookies: { enabled: true },
     defaultCookieAttributes: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -138,6 +74,8 @@ export const auth = betterAuth({
       path: "/",
     },
   },
+  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005"],
+  plugins: [dash()],
 });
 
 export type Session = typeof auth.$Infer.Session;

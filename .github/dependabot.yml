@@ -1,0 +1,48 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Africa/Nairobi"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "deps"
+    groups:
+      dev-dependencies:
+        patterns:
+          - "@types/*"
+          - "eslint*"
+          - "vitest*"
+          - "prettier*"
+      nextjs:
+        patterns:
+          - "next*"
+          - "react*"
+          - "@next/*"
+      clerk:
+        patterns:
+          - "@clerk/*"
+      drizzle:
+        patterns:
+          - "drizzle*"
+      vercel:
+        patterns:
+          - "@vercel/*"
+          - "vercel*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Africa/Nairobi"
+    labels:
+      - "github-actions"
+      - "automated"

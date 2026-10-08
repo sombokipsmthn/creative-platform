@@ -151,20 +151,6 @@ export default function ContractsPage() {
               Create, send and manage agreements with your clients.
             </p>
           </div>
-          <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
-            <Link
-              href="/admin/contracts/templates"
-              className="Button Button--secondary"
-            >
-              Browse Templates
-            </Link>
-            <Link
-              href="/admin/contracts/new"
-              className="Button Button--primary"
-            >
-              New Contract
-            </Link>
-          </div>
         </div>
       </header>
 

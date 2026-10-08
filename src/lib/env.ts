@@ -21,10 +21,15 @@ const optionalEnvVars = {
 };
 
 /**
- * Validate required environment variables
- * Throws an error if any required variable is missing
+ * Validate required environment variables.
+ * During Next.js build-time static generation (NEXT_PHASE=phase-production-build),
+ * env vars injected at runtime (e.g. Clerk keys) are not available, so we skip
+ * throwing and only warn — preventing build failures on Vercel.
  */
 export function validateEnv() {
+  // Skip strict validation during Next.js static build phase
+  const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+
   const missing: string[] = [];
 
   for (const [key, value] of Object.entries(requiredEnvVars)) {
@@ -35,6 +40,12 @@ export function validateEnv() {
 
   if (missing.length > 0) {
     const missingList = missing.join(', ');
+    if (isBuildPhase) {
+      console.warn(
+        `⚠️  Missing env vars at build time (expected on Vercel): ${missingList}`
+      );
+      return;
+    }
     console.error(`❌ Missing required environment variables: ${missingList}`);
     throw new Error(
       `Missing required environment variables: ${missingList}. Please check your .env file.`

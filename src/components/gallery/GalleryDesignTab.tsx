@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Loader2, AlertCircle, Check } from 'lucide-react'
 import Image from 'next/image'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
@@ -123,7 +123,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     }
   }, [savedTheme, galleryId])
 
-  const applyThemePreset = useCallback(async (themeId: GalleryThemeId, customName: string) => {
+  const applyThemePreset = useCallback(async (themeId: GalleryThemeId | null, customName: string) => {
+    if (!themeId) return
     const theme = GALLERY_THEMES.find(t => t.id === themeId)
     if (!theme) return
 
@@ -205,7 +206,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   const currentThemeId = GALLERY_THEMES.find(
     t => t.label === savedTheme.name && savedTheme.type === 'preset'
-  )?.id
+  )?.id ?? null
 
   const currentCover = photos.find(p => p.id === coverPhotoId)
 
@@ -602,7 +603,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
             >
               <option value="tight">Tight (Minimal Gap)</option>
               <option value="regular">Regular (Balanced Gap)</option>
-              <option value="wide">Wide (Spacious Gap)</option
+              <option value="wide">Wide (Spacious Gap)</option>
             </select>
           </div>
 

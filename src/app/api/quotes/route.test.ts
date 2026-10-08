@@ -16,20 +16,21 @@ const { mockAuth, mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: mockAuth,
+vi.mock("@/lib/auth/auth", () => ({
+  auth: { api: { getSession: mockAuth } },
 }));
 
 vi.mock("@/db", () => ({
   db: mockDb,
 }));
 
-import { POST, calculateTotals, normalizeCurrency, normalizeItems, normalizeStatus } from "./route";
+import { calculateTotals, normalizeCurrency, normalizeItems, normalizeStatus } from "@/lib/services/quotes";
+import { POST } from "./route";
 
 describe("quotes route", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue({ userId: "user_456" });
+    mockAuth.mockResolvedValue({ user: { id: "user_456", email: "creator@example.com" }, session: { id: "session_1" } });
   });
 
   it("normalizes status, currency, and line items before quote creation", () => {
@@ -73,7 +74,7 @@ describe("quotes route", () => {
   });
 
   it("creates a quote in draft state even when the caller sends an accepted status", async () => {
-    const user = { id: "creator_1", authUserId: "user_456" };
+    const user = { id: "creator_1", userId: "user_456" };
     mockDb.query.users.findFirst.mockResolvedValue(user);
     mockDb.query.clients.findFirst.mockResolvedValue({ id: "client_1", creatorId: "creator_1" });
 
@@ -133,7 +134,7 @@ describe("quotes route", () => {
   });
 
   it("rejects quote creation when the payload is missing required data", async () => {
-    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_1", authUserId: "user_456" });
+    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_1", userId: "user_456" });
 
     const response = await POST(
       new Request("https://example.com/api/quotes", {

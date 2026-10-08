@@ -1,18 +1,17 @@
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentSession } from "@/lib/auth";
 
 export type Role = "admin" | "client";
 
 /**
- * Reads the signed-in user's role from Clerk session claims.
- * Role lives in publicMetadata.role — set it:
- *   - manually per-user in the Clerk dashboard (Users -> select user -> Metadata), or
- *   - programmatically via clerkClient().users.updateUserMetadata() when you
- *     invite a client from /admin/clients.
+ * Determines the application role from the authenticated Better Auth user.
+ * The configured admin email receives the admin role.
  */
 export async function getCurrentRole(): Promise<Role | null> {
-  const { sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: Role } | undefined)?.role;
-  return role ?? null;
+  const session = await getCurrentSession();
+  if (!session?.user) return null;
+
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  return adminEmail && session.user.email.toLowerCase() === adminEmail ? "admin" : null;
 }
 
 export async function requireRole(role: Role) {

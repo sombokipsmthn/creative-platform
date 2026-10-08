@@ -9,7 +9,7 @@
  * @see docs/soc2/LOGGING_MONITORING_PLAN.md
  */
 
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentSession } from "@/lib/auth";
 
 /** Severity levels for security events. */
 export type SecuritySeverity = "critical" | "high" | "medium" | "low" | "info" | "debug";
@@ -107,19 +107,21 @@ export async function getIpHash(request: Request): Promise<string | undefined> {
 }
 
 /**
- * Get current user context from Clerk session.
+ * Get current user context from Better Auth session.
  */
 export async function getUserContext(): Promise<{
   userId?: string;
   sessionId?: string;
   actorType?: "creator" | "client" | "admin" | "system";
 }> {
-  const { userId, sessionClaims } = await auth();
-  const metadata = sessionClaims?.metadata as { role?: "admin" | "client" } | undefined;
+  const session = await getCurrentSession();
+  const userId = session?.user?.id;
+  const sessionId = session?.session?.id;
+  const actorType = "creator" as const;
   return {
-    userId: userId || undefined,
-    sessionId: undefined,
-    actorType: metadata?.role === "client" ? "client" : metadata?.role === "admin" ? "admin" : "creator",
+    userId,
+    sessionId,
+    actorType,
   };
 }
 

@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth/auth";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { creatorProfiles, users } from "@/db/schema";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
-    const { userId } =
-      await auth();
+    const session = await auth.api.getSession({ headers: request.headers });
+    const userId = session?.user?.id;
 
     /*
      * -------------------------------------------------------
@@ -29,7 +29,7 @@ export async function POST() {
     }
 
     console.log(
-      "Creator sync: checking Clerk user",
+      "Creator sync: checking Better Auth user",
       userId
     );
 
@@ -38,21 +38,21 @@ export async function POST() {
      * GET OR CREATE LOCAL USER
      * -------------------------------------------------------
      *
-     * A Clerk account is not useful to the application
+     * A Better Auth account is not useful to the application
      * until there is a corresponding local users row.
      *
      * This function safely handles both:
      *
      * 1. Existing local users
-     * 2. Brand-new Clerk users
+     * 2. Brand-new Better Auth users
      */
 
-    // Fetch the local user by the Clerk authUserId. Do **not** create a new
+    // Fetch the local user by the Better Auth userId. Do **not** create a new
     // record here – creation should happen only in /auth or the onboarding flow.
     const [localUser] = await db
       .select()
       .from(users)
-      .where(eq(users.authUserId, userId))
+      .where(eq(users.id, userId))
       .limit(1);
 
     // If there is no local user yet, we can immediately respond that
@@ -60,7 +60,7 @@ export async function POST() {
     // accessing `localUser.id` when undefined.
     if (!localUser) {
       console.log(
-        "Creator sync: no local user found for Clerk ID",
+        "Creator sync: no local user found for Better Auth ID",
         userId
       );
       return NextResponse.json({
@@ -74,7 +74,6 @@ export async function POST() {
       "Creator sync: local user confirmed",
       {
         id: localUser.id,
-        authUserId: localUser.authUserId,
         onboardingStatus: localUser.onboardingStatus,
         onboardingStep: localUser.onboardingStep,
       }

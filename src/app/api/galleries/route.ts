@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentSession } from "@/lib/auth";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -7,18 +7,10 @@ import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 
 async function getCreator() {
   try {
-    const clerkKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY;
-    if (!clerkKey) {
-      return null;
-    }
-
-    const { userId: clerkUserId } = await auth();
-
-    if (!clerkUserId) {
-      return null;
-    }
-
-    return getOrCreateLocalUser(clerkUserId);
+    const session = await getCurrentSession();
+    const userId = session?.user?.id;
+    if (!userId) return null;
+    return getOrCreateLocalUser(userId);
   } catch (error) {
     console.error("getCreator error:", error);
     return null;

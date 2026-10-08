@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import getCurrentUser from "@/lib/auth/get-current-user";
+import getCurrentUser, { getCurrentUserFromRequest } from "@/lib/auth/get-current-user";
 
 export class ApiError extends Error {
   statusCode: number;
@@ -20,7 +20,6 @@ export class ApiError extends Error {
 
 export type AuthenticatedUser = {
   id: string;
-  authUserId?: string | null;
 };
 
 export async function withCreatorApi<T>(
@@ -28,7 +27,7 @@ export async function withCreatorApi<T>(
   handler: (req: Request, user: AuthenticatedUser) => Promise<T>,
   options: { status?: number } = {}
 ): Promise<NextResponse> {
-  const user = await getCurrentUser();
+  const user = await getCurrentUserFromRequest(req);
 
   if (!user) {
     return NextResponse.json(

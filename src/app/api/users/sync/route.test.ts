@@ -1,16 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockAuth, mockCurrentUser, mockDb } = vi.hoisted(() => ({
+const { mockAuth, mockDb } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
-  mockCurrentUser: vi.fn(),
   mockDb: {
     select: vi.fn(),
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: mockAuth,
-  currentUser: mockCurrentUser,
+vi.mock("@/lib/auth/auth", () => ({
+  auth: { api: { getSession: mockAuth } },
 }));
 
 vi.mock("@/db", () => ({
@@ -22,15 +20,10 @@ import { POST } from "./route";
 describe("POST /api/users/sync", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue({ userId: "user_123" });
+    mockAuth.mockResolvedValue({ user: { id: "user_123", email: "creator@example.com", name: "Creator", emailVerified: true, image: null }, session: { id: "session_1" } });
   });
 
-  it("creates a database record for a Clerk user when one does not exist", async () => {
-    mockCurrentUser.mockResolvedValue({
-      emailAddresses: [{ emailAddress: "creator@example.com" }],
-      firstName: "Creator",
-      lastName: null,
-    });
+  it("creates a database record for a authenticated user when one does not exist", async () => {
     mockDb.select.mockReturnValue({
       from: vi.fn(() => ({
         where: vi.fn(() => ({
@@ -39,7 +32,8 @@ describe("POST /api/users/sync", () => {
       })),
     });
 
-    const response = await POST();
+    const request = new Request("http://localhost/api/users/sync");
+    const response = await POST(request);
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
@@ -52,16 +46,11 @@ describe("POST /api/users/sync", () => {
   it("returns the existing user and does not create a duplicate record", async () => {
     const existingUser = {
       id: "db_user_2",
-      authUserId: "user_123",
+      userId: "user_123",
       email: "creator@example.com",
       name: "Creator",
     };
 
-    mockCurrentUser.mockResolvedValue({
-      emailAddresses: [{ emailAddress: "creator@example.com" }],
-      firstName: "Creator",
-      lastName: "",
-    });
     mockDb.select
       .mockReturnValueOnce({
         from: vi.fn(() => ({
@@ -78,7 +67,8 @@ describe("POST /api/users/sync", () => {
         })),
       });
 
-    const response = await POST();
+    const request = new Request("http://localhost/api/users/sync");
+    const response = await POST(request);
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
@@ -88,10 +78,11 @@ describe("POST /api/users/sync", () => {
     });
   });
 
-  it("rejects a request that lacks a Clerk session user id", async () => {
-    mockAuth.mockResolvedValue({ userId: null });
+  it("rejects a request that lacks a Better Auth session user id", async () => {
+    mockAuth.mockResolvedValue(null);
 
-    const response = await POST();
+    const request = new Request("http://localhost/api/users/sync");
+    const response = await POST(request);
 
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ error: "Unauthorized" });

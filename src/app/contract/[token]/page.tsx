@@ -7,21 +7,21 @@ type PageProps = {
   };
 };
 
-export default async function ContractPage({ params }: PageProps) {
-  // Contract data fetched via API in client component
+export default async function ContractPage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
   return (
     <div className="ui-page">
       <div className="ui-page-header">
         <h1 className="ui-page-title">Contract</h1>
       </div>
       <div className="ui-contract-viewer">
-        <ContractDocument token={params.token} />
+        <ContractDocument token={token} />
       </div>
       <div className="ui-contract-actions mt-6">
         <button className="ui-button ui-button-outline">
           Download PDF
         </button>
-        <UpdateContractStatus token={params.token} />
+        <UpdateContractStatus token={token} />
       </div>
     </div>
   );

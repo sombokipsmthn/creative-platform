@@ -1,36 +1,21 @@
 import { NextResponse } from "next/server";
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { getCurrentSession } from "@/lib/auth";
 import { db } from "@/db/index";
 import { users } from "@/db/schema";
 
 export async function GET() {
   try {
-    const clerkKey =
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ||
-      process.env.CLERK_PUBLISHABLE_KEY;
+    const session = await getCurrentSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (clerkKey) {
-      const { userId } = await auth();
-
-      if (!userId) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
-      const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-
-      if (adminEmail) {
-        const clerk = await clerkClient();
-        const user = await clerk.users.getUser(userId);
-        const email = user.primaryEmailAddress?.emailAddress.toLowerCase();
-
-        if (email && email !== adminEmail) {
-          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-      }
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+    if (adminEmail && session.user.email.toLowerCase() !== adminEmail) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const result = await db.select().from(users);
-
     return NextResponse.json({
       success: true,
       count: Array.isArray(result) ? result.length : 0,
@@ -38,13 +23,12 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Database test failed:", error);
-
     return NextResponse.json(
       {
         success: false,
         error: error instanceof Error ? error.message : "Database connection failed",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

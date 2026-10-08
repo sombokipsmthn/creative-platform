@@ -1,6 +1,6 @@
 'use client';
 
-import { useUser } from '@clerk/nextjs';
+import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState, useEffect } from 'react';
@@ -187,7 +187,8 @@ function StatusBar({ label, value, total }: { label: string; value: number; tota
 // Main Dashboard Page
 
 export default function CreativeOSDashboardPage() {
-  const { isLoaded, user } = useUser();
+  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const user = session?.user ?? null;
   const { activeCreator } = useCreator();
   const [range, setRange] = useState<'7d' | '30d' | '90d' | '12m' | 'all'>('30d');
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -213,9 +214,9 @@ export default function CreativeOSDashboardPage() {
     void loadStats();
   }, [isLoaded, user, range]);
 
-  const name = activeCreator?.name || user?.fullName || user?.firstName || 'Creator';
-  const email = activeCreator?.email || user?.primaryEmailAddress?.emailAddress || '';
-  const avatar = activeCreator?.profile?.avatarUrl || user?.imageUrl || '';
+  const name = activeCreator?.name || user?.name || 'Creator';
+  const email = activeCreator?.email || user?.email || '';
+  const avatar = activeCreator?.profile?.avatarUrl || user?.image || '';
 
   const invoicePaidRate = useMemo(() => {
     if (!stats) return 0;

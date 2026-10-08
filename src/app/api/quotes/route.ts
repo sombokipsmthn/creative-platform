@@ -1,15 +1,10 @@
 import { withCreatorApi } from "@/lib/api/route-boundaries";
+import { calculateTotals, normalizeCurrency, normalizeItems, normalizeStatus } from "@/lib/services/quotes";
+
 import {
-  calculateTotals,
   createQuoteForCreator,
   listQuotesForCreator,
-  normalizeCurrency,
-  normalizeItems,
-  normalizeStatus,
 } from "@/lib/services/quotes";
-
-export { calculateTotals, normalizeCurrency, normalizeItems, normalizeStatus };
-
 /*
 |--------------------------------------------------------------------------
 | GET /api/quotes

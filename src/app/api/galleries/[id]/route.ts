@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentSession } from "@/lib/auth";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -11,7 +11,8 @@ type Context = {
 };
 
 async function getCreator() {
-  const { userId } = await auth();
+  const session = await getCurrentSession();
+    const userId = session?.user?.id ?? null;
 
   if (!userId) {
     return null;

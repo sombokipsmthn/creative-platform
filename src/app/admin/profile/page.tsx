@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
@@ -34,7 +34,8 @@ const emptyProfile: ProfileForm = {
 };
 
 export default function AdminProfilePage() {
-  const { isLoaded, user } = useUser();
+  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const user = session?.user ?? null;
   const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -43,7 +44,7 @@ export default function AdminProfilePage() {
   useEffect(() => {
     if (!isLoaded || !user) return;
 
-    const currentUser = user;
+    const sessionUser = user;
     let ignore = false;
 
     async function loadProfile() {
@@ -61,16 +62,16 @@ export default function AdminProfilePage() {
         if (ignore) return;
 
         setProfile({
-          name: data?.user?.name || currentUser.fullName || currentUser.firstName || '',
-          handle: data?.user?.handle || currentUser.username || '',
-          email: data?.user?.email || currentUser.primaryEmailAddress?.emailAddress || '',
+          name: data?.user?.name || sessionUser.name || '',
+          handle: data?.user?.handle || '',
+          email: data?.user?.email || sessionUser.email || '',
           phone: data?.businessProfile?.phone || '',
           kraPin: data?.businessProfile?.kraPin || '',
           location: data?.profile?.location || '',
           bio: data?.profile?.bio || '',
           website: data?.profile?.website || '',
           businessName: data?.businessProfile?.businessName || '',
-          avatarUrl: data?.profile?.avatarUrl || currentUser.imageUrl || '',
+          avatarUrl: data?.profile?.avatarUrl || sessionUser.image || '',
         });
       } catch (error) {
         console.error('Failed to load creator profile:', error);
@@ -94,21 +95,10 @@ export default function AdminProfilePage() {
 
     if (!user) return;
 
-    const currentUser = user;
     setIsSaving(true);
     setMessage(null);
 
     try {
-      const nameParts = profile.name.trim().split(/\s+/).filter(Boolean);
-      const firstName = nameParts.shift() || '';
-      const lastName = nameParts.join(' ');
-
-      // Keep Clerk identity and the local creator record aligned.
-      await currentUser.update({
-        firstName,
-        lastName,
-      });
-
       const response = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -163,8 +153,8 @@ export default function AdminProfilePage() {
     return null;
   }
 
-  const displayName = profile.name || user.fullName || user.firstName || 'Creator';
-  const avatar = profile.avatarUrl || user.imageUrl;
+  const displayName = profile.name || user.name || 'Creator';
+  const avatar = profile.avatarUrl || user.image;
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -226,7 +216,7 @@ export default function AdminProfilePage() {
                   {displayName}
                 </h2>
                 <p className="ui-meta">
-                  {profile.email || user.primaryEmailAddress?.emailAddress || 'No email available'}
+                  {profile.email || user.email || 'No email available'}
                 </p>
                 {profile.handle && (
                   <p className="ui-eyebrow mt-1">
@@ -275,7 +265,7 @@ export default function AdminProfilePage() {
                   className="ui-input cursor-not-allowed opacity-70"
                 />
                 <span className="ui-meta">
-                  Managed by Clerk authentication.
+                  Managed by Better Auth.
                 </span>
               </label>
 

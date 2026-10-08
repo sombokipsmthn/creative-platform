@@ -1,147 +1,192 @@
-# Logging & Monitoring Plan
+# Logging and Monitoring Plan
 
-**Document Version**: 1.0
-**Last Updated**: 2026-10-02
-**Owner**: Engineering Manager
-**Review Cycle**: Annually or after infrastructure changes
+## Objective
+Detect security and availability events.
 
----
+## Required Monitoring Areas
 
-## Purpose
+- Authentication events
+- Failed authentication
+- Privileged actions
+- Administrative actions
+- Permission changes
+- Sensitive data access
+- Upload failures
+- Download anomalies
+- API errors
+- Application errors
+- Infrastructure failures
+- Database issues
+- Deployment failures
+- Security alerts
 
-This document defines the logging and monitoring strategy for the KIPSMTHN Creative Platform. It establishes the frameworks for structured security logging, anomaly detection, and alerting that support SOC 2 monitoring requirements (CC4.1, CC4.2).
+## Logging Requirements
 
----
+Logs must avoid exposing:
+- Passwords
+- Tokens
+- API keys
+- Private secrets
+- Unnecessary personal data
 
-## Security Event Logging
+## Implementation Details
 
-### Logger Implementation
+### Log Structure
 
-All security events are emitted via `src/lib/security-logger.ts` using structured JSON output:
+All security logs are emitted as structured JSON objects through the security logger (`@/lib/security-logger`) for easy parsing by SIEM and monitoring tools.
 
-```json
-{
-  "timestamp": "2026-10-02T10:30:00Z",
-  "severity": "high",
-  "event_type": "authz_access_denied",
-  "actor_id": "creator_a_123",
-  "action": "read",
-  "resource_type": "client",
-  "resource_id": "client_b_456",
-  "source_ip_hash": "a1b2c3...",
-  "user_agent": "Mozilla/5.0..."
-}
-```
+### What is Monitored
 
-### Event Types
+1. **Authentication Events**
+   - Successful logins
+   - Failed login attempts
+   - Session expiration
+   - Token refresh events
+   - MFA challenges and outcomes
 
-| Category | Events | Severity Default |
-|----------|--------|------------------|
-| Authentication | `auth_login_success`, `auth_login_failure`, `auth_session_expired`, `auth_mfa_challenge`, `auth_mfa_success`, `auth_mfa_failure` | low–high |
-| Authorization | `authz_access_denied`, `authz_privilege_escalation_attempt`, `authz_role_change`, `authz_permission_update` | medium–critical |
-| Access | `access_gallery_login_success`, `access_gallery_login_failure`, `access_gallery_pin_success`, `access_gallery_pin_failure`, `access_gallery_rate_limited`, `access_gallery_lockout` | low–high |
-| Data Operations | `data_create`, `data_read`, `data_update`, `data_delete` | low–medium |
-| System | `system_startup`, `system_config_change`, `system_backup_started`, `system_backup_completed` | info–medium |
-| Incident | `incident_detected`, `incident_escalated`, `incident_resolved` | critical |
+2. **Authorization Events**
+   - Access denied events
+   - Privilege escalation attempts
+   - Role changes
+   - Permission updates
 
-### Log Storage
+3. **Access Events**
+   - Gallery access (success/failure)
+   - Admin panel access
+   - API endpoint access
+   - Sensitive data access patterns
 
-- **Primary**: Platform-native stdout → Vercel Functions logs (Node.js runtime)
-- **Retention**: 90 days in Vercel log retention (configurable in dashboard)
-- **Archival**: Export to S3-compatible storage for long-term retention (planned)
+4. **Modification Events**
+   - Create/update/delete operations on clients, galleries, contracts, quotes, invoices
+   - Media upload/download events
+   - Contract signing/declining events
 
----
+5. **System Events**
+   - Configuration changes
+   - Database migrations
+   - API key rotations
+   - Secret access events
+   - Onboarding completion
 
-## Monitoring & Alerting
+6. **Anomaly Detection**
+   - Repeated login failures
+   - Unusual geographic access patterns
+   - Off-hours access
+   - Large data exports
 
-### Current State
+### Who Receives Alerts
 
-The platform implements **structured logging** but has not yet configured automated alerting thresholds. This is documented as GAP-002 in the readiness review.
+- **Security Team**: Real-time alerts for critical and high severity events
+- **Platform Owner**: Daily summary reports and immediate notification for critical incidents
+- **Engineering Team**: Operational alerts for infrastructure and application errors
+- **Compliance Officer**: Weekly compliance reports and audit trail access
 
-### Alert Categories (Planned)
+### Alert Severity Levels
 
-| Alert Name | Condition | Severity | Notification | Owner |
-|------------|-----------|----------|--------------|-------|
-| Failed Login Spike | >10 failures/minute from single IP | High | Slack #security | On-call Eng |
-| Auth Failure Rate | >5% login failures over 5min window | Medium | Slack #engineering | Eng Manager |
-| Privilege Escalation Attempt | Any `authz_privilege_escalation_attempt` event | Critical | PagerDuty + Slack | Security Lead |
-| Gallery Rate Limit Exceeded | >50 rate-limited requests/hour per gallery | Medium | Slack #gallery | Eng Manager |
-| Unauthorized Access | Any `authz_access_denied` on admin endpoints | High | Slack #security | Security Lead |
-| Session Anomaly | Multiple session tokens from different IPs in 1h | Medium | Slack #security | Security Lead |
-| Database Connection Error | Connection timeout or refusal | Critical | PagerDuty | DevOps |
-| API Error Rate | >1% 5xx responses over 5min | High | Slack #engineering | Eng Manager |
+- **Critical**: Immediate response required (e.g., successful breach, privilege escalation)
+- **High**: Response within 1 hour (e.g., multiple failed auth attempts, access denied)
+- **Medium**: Response within 4 hours (e.g., configuration changes, moderate anomalies)
+- **Low**: Response within 24 hours (e.g., informational events, low-priority anomalies)
+- **Info/Debug**: Logged for audit trail, no immediate response required
 
-### Alert Configuration Process
+### Response Expectations
 
-1. **Define** alert condition and threshold in this document
-2. **Implement** alert rule in monitoring platform (Vercel/external)
-3. **Configure** notification channel (Slack, PagerDuty, email)
-4. **Document** alert owner and escalation path
-5. **Test** alert with synthetic event
-6. **Review** alert effectiveness quarterly
+- **Critical Events**: Security team responds within 15 minutes with initial assessment
+- **High Events**: Investigation initiated within 1 hour, containment within 4 hours
+- **Medium Events**: Investigation initiated within 4 hours
+- **Low Events**: Reviewed during daily security operations
 
-### Monitoring Platforms
+### Escalation Path
 
-| Service | Purpose | Status |
-|---------|---------|--------|
-| **Vercel Analytics** | Request metrics, error rates, response times | ✅ Configured |
-| **Vercel Logs** | Structured log retention and search | ✅ Configured |
-| **Clerk Dashboard** | Authentication events, session monitoring | ✅ Provider-managed |
-| **Neon Dashboard** | Database metrics, connection monitoring | ✅ Provider-managed |
-| **GitHub Actions** | CI/CD pipeline monitoring | ✅ Configured |
-| **External SIEM** | Centralized log aggregation and alerting | ⏳ Planned |
+1. **Level 1**: Security Analyst (initial triage)
+2. **Level 2**: Security Engineer (investigation and containment)
+3. **Level 3**: Security Lead (major incident declaration)
+4. **Level 4**: Platform Owner/CISO (executive notification and business impact assessment)
+5. **Level 5**: External Partners/Authorities (if legally required)
 
----
+### Retention Period
 
-## Log Retention & Privacy
+- **Security Logs**: 365 days (hot storage) + 7 years (cold/archive storage for compliance)
+- **Application Logs**: 90 days
+- **Infrastructure Logs**: 365 days
+- **Audit Trail**: 7 years minimum (SOC 2 Type II requirement)
 
-### Retention Schedule
+## Integration Points
 
-| Log Type | Retention Period | Storage |
-|----------|------------------|---------|
-| Security events | 90 days | Vercel Logs |
-| Audit trail | 1 year | Archived to object storage |
-| Authentication logs | 1 year | Cloud provider logs |
-| Error logs | 30 days | Vercel Logs |
-| Performance metrics | 90 days | Vercel Analytics |
+### Existing Security Logger
 
-### Privacy Protections
+The platform already implements a structured security logger at `@/lib/security-logger` that:
+- Emits JSON-structured logs for SIEM ingestion
+- Hashes IP addresses for privacy preservation
+- Provides convenience functions for common event types
+- Integrates with Clerk authentication for user context
+- Avoids logging sensitive data (passwords, tokens, etc.)
 
-- **IP addresses** are hashed before logging (SHA-256)
-- **Personal data** (names, emails) is excluded from security event logs
-- **Gallery session tokens** are anonymized in logs
-- **PII redaction** is applied to all structured log output
+### Monitoring Implementation
 
----
+1. **Vercel Platform Logs**: Utilize Vercel's built-in logging for platform-level events
+2. **Application Logging**: Extend existing security-logger.ts to cover all required monitoring areas
+3. **Database Monitoring**: Monitor connection pools, query performance, and failed queries
+4. **API Monitoring**: Track error rates, latency, and throughput for all API endpoints
+5. **Infrastructure Monitoring**: Monitor deployment status, resource utilization, and service health
 
-## Alert Response Procedures
+### Alerting Mechanisms
 
-### Tier 1: Low/Medium Severity
+1. **Real-time Alerts**: Webhook integrations to Slack/email for critical/high severity events
+2. **Dashboard**: Internal security dashboard showing real-time metrics and trends
+3. **Reports**: Automated daily/weekly compliance and security reports
+4. **SIEM Integration**: Structured JSON logs forwarded to centralized SIEM for correlation
 
-1. Acknowledge alert within 4 hours
-2. Investigate root cause
-3. Document findings in incident record
-4. Close within 24 hours
+## Implementation Roadmap
 
-### Tier 2: High/Critical Severity
+### Phase 1: Foundation (Weeks 1-2)
+- Extend security-logger.ts to cover all required event types
+- Implement structured logging for all API routes
+- Add IP hashing and PII protection mechanisms
+- Create initial alerting rules for critical events
 
-1. Acknowledge alert within 15 minutes
-2. Initiate incident response process
-3. Escalate to Security Lead
-4. Document findings in incident report
-5. Conduct post-incident review within 48 hours
+### Phase 2: Enhancement (Weeks 3-4)
+- Implement anomaly detection algorithms
+- Add dashboard for security metrics visualization
+- Configure retention policies and log rotation
+- Test SIEM integration with structured logs
 
----
+### Phase 3: Optimization (Weeks 5-6)
+- Fine-tune alert thresholds to reduce false positives
+- Implement automated response playbooks for common scenarios
+- Conduct penetration testing to validate monitoring effectiveness
+- Document procedures and train security team
 
-## Quarterly Review
+## Compliance Mapping
 
-This plan must be reviewed quarterly as part of the security review process:
+This logging and monitoring plan addresses the following SOC 2 Trust Services Criteria:
 
-- Verify all alerts are functional
-- Review false positive/negative rates
-- Update thresholds based on operational experience
-- Document any new alert requirements
+- **CC6.1**: Logical and physical access controls
+- **CC6.2**: Prior to issuing new system access credentials
+- **CC6.3**: Removal of access
+- **CC6.4**: Preventing unauthorized access
+- **CC6.5**: Detecting unauthorized access
+- **CC6.6**: Reporting discovered vulnerabilities
+- **CC7.1**: Monitoring system components
+- **CC7.2**: Vulnerability assessments
+- **CC7.3**: Vulnerability remediation
+- **CC7.4**: Vulnerability verification
+- **CC8.1**: Authorizing, designing, developing or acquiring applications
+- **CC8.2**: Change management procedures
+- **CC8.3**: Preventing execution of unauthorized software
 
----
+## Related Documents
 
-*This document is classified as: Internal*
+- INCIDENT_RESPONSE_PLAN.md - Procedures for responding to detected events
+- DATA_CLASSIFICATION_POLICY.md - Classification of data for appropriate monitoring
+- ACCESS_REVIEW_PROCESS.md - Review processes for access rights
+- RISK_REGISTER.md - Identified risks that monitoring helps mitigate
+- SECURITY_POLICIES.md - Overall security framework
+
+## Review and Approval
+
+This plan will be reviewed quarterly and updated as needed to address emerging threats, changes in the threat landscape, or updates to compliance requirements.
+
+Last Reviewed: 2026-10-01
+Next Review: 2027-01-01
+Approved by: Security Lead

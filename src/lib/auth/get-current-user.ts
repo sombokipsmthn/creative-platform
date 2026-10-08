@@ -1,36 +1,25 @@
-import { auth } from "@clerk/nextjs/server";
-import { getLocalUser } from "./get-local-user";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth/auth";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
-/**
- * Retrieves the currently authenticated creator user from the database.
- *
- * This function:
- * 1. Uses Clerk to verify the session and retrieve the authUserId.
- * 2. Uses getOrCreateLocalUser to ensure a corresponding local record exists in the database.
- * 3. Returns the local user record or null if not authenticated/not found.
- *
- * This is the canonical way to identify the creator for admin API requests.
- */
 export async function getCurrentUser() {
   try {
-    const { userId } = await auth();
+    const session = await auth.api.getSession({ headers: await headers() });
+    return session?.user ? await db.query.users.findFirst({ where: eq(users.id, session.user.id) }) ?? null : null;
+  } catch { return null; }
+}
 
-    if (!userId) {
-      return null;
-    }
+export async function getCurrentUserFromRequest(request: Request) {
+  try {
+    const session = await auth.api.getSession({ headers: request.headers });
+    return session?.user ? await db.query.users.findFirst({ where: eq(users.id, session.user.id) }) ?? null : null;
+  } catch { return null; }
+}
 
-    try {
-      return await getLocalUser(userId);
-    } catch {
-      throw new Error(
-        `Local creator account not found for Clerk ID ${userId}. ` +
-        "Ensure the user has been created via /auth before calling this function."
-      );
-    }
-  } catch (error) {
-    console.error("getCurrentUser error:", error);
-    return null;
-  }
+export async function getLocalUser(userId: string) {
+  return db.query.users.findFirst({ where: eq(users.id, userId) });
 }
 
 export default getCurrentUser;

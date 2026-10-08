@@ -16,8 +16,8 @@ const { mockAuth, mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: mockAuth,
+vi.mock("@/lib/auth/auth", () => ({
+  auth: { api: { getSession: mockAuth } },
 }));
 
 vi.mock("@/db", () => ({
@@ -27,10 +27,6 @@ vi.mock("@/db", () => ({
 import { GET as getClients, POST as createClient } from "@/app/api/clients/route";
 import { GET as getClient, PATCH as updateClient } from "@/app/api/clients/[id]/route";
 import { GET as getPublicGallery } from "@/app/api/public/galleries/[slug]/route";
-
-function clerkSession(userId: string) {
-  return { userId, sessionClaims: { exp: Math.floor(Date.now() / 1000) + 3600 } };
-}
 
 describe("Authorization matrix", () => {
   beforeEach(() => {
@@ -42,9 +38,9 @@ describe("Authorization matrix", () => {
   // ------------------------------------------------------------------
 
   it("creator A cannot read creator B's client", async () => {
-    mockAuth.mockResolvedValue(clerkSession("clerk_a"));
+    mockAuth.mockResolvedValue({ user: { id: "auth_a", email: "a@example.com" }, session: { id: "session_a" } });
 
-    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_a", authUserId: "clerk_a" });
+    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_a", userId: "auth_a" });
 
     mockDb.query.clients.findFirst.mockResolvedValue(null);
 
@@ -55,9 +51,9 @@ describe("Authorization matrix", () => {
   });
 
   it("creator A can read their own client", async () => {
-    mockAuth.mockResolvedValue(clerkSession("clerk_a"));
+    mockAuth.mockResolvedValue({ user: { id: "auth_a", email: "a@example.com" }, session: { id: "session_a" } });
 
-    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_a", authUserId: "clerk_a" });
+    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_a", userId: "auth_a" });
 
     mockDb.query.clients.findFirst.mockResolvedValue({
       id: "client_a_id",
@@ -74,7 +70,7 @@ describe("Authorization matrix", () => {
   });
 
   it("unauthenticated request to clients list returns 401", async () => {
-    mockAuth.mockResolvedValue({ userId: null });
+    mockAuth.mockResolvedValue(null);
 
     const req = new Request("https://example.com/api/clients");
     const res = await getClients(req);
@@ -83,7 +79,7 @@ describe("Authorization matrix", () => {
   });
 
   it("unauthenticated client creation returns 401", async () => {
-    mockAuth.mockResolvedValue({ userId: null });
+    mockAuth.mockResolvedValue(null);
 
     const req = new Request("https://example.com/api/clients", {
       method: "POST",
@@ -96,9 +92,9 @@ describe("Authorization matrix", () => {
   });
 
   it("creator A cannot update creator B's client", async () => {
-    mockAuth.mockResolvedValue(clerkSession("clerk_a"));
+    mockAuth.mockResolvedValue({ user: { id: "auth_a", email: "a@example.com" }, session: { id: "session_a" } });
 
-    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_a", authUserId: "clerk_a" });
+    mockDb.query.users.findFirst.mockResolvedValue({ id: "creator_a", userId: "auth_a" });
 
     mockDb.query.clients.findFirst.mockResolvedValue(null);
 

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentSession } from "@/lib/auth";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -8,7 +8,8 @@ import { getLocalUser } from "@/lib/auth/get-local-user";
 type Context = { params: Promise<{ id: string }> };
 
 async function getCreator() {
-  const { userId } = await auth();
+  const session = await getCurrentSession();
+    const userId = session?.user?.id ?? null;
   if (!userId) return null;
   try {
     return await getLocalUser(userId);

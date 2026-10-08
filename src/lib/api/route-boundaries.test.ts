@@ -15,8 +15,8 @@ const { mockAuth, mockDb } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock("@clerk/nextjs/server", () => ({
-  auth: mockAuth,
+vi.mock("@/lib/auth/auth", () => ({
+  auth: { api: { getSession: mockAuth } },
 }));
 
 vi.mock("@/db", () => ({
@@ -30,8 +30,8 @@ describe("withCreatorApi authorization boundary", () => {
     vi.clearAllMocks();
   });
 
-  it("returns 401 when the request is unauthenticated (no Clerk user)", async () => {
-    mockAuth.mockResolvedValue({ userId: null });
+  it("returns 401 when the request is unauthenticated (no authenticated user)", async () => {
+    mockAuth.mockResolvedValue(null);
 
     const req = new Request("https://example.com/api/test");
     const handler = vi.fn();
@@ -43,8 +43,8 @@ describe("withCreatorApi authorization boundary", () => {
     expect(handler).not.toHaveBeenCalled();
   });
 
-  it("returns 401 when the Clerk user has no local creator account", async () => {
-    mockAuth.mockResolvedValue({ userId: "clerk_unknown" });
+  it("returns 401 when the authenticated user has no local creator account", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "auth_unknown", email: "unknown@example.com" }, session: { id: "session_1" } });
     mockDb.query.users.findFirst.mockResolvedValue(null);
 
     const req = new Request("https://example.com/api/test");
@@ -58,10 +58,10 @@ describe("withCreatorApi authorization boundary", () => {
   });
 
   it("allows access and passes authenticated user when creator exists", async () => {
-    mockAuth.mockResolvedValue({ userId: "clerk_123" });
+    mockAuth.mockResolvedValue({ user: { id: "auth_123", email: "creator@example.com" }, session: { id: "session_1" } });
     mockDb.query.users.findFirst.mockResolvedValue({
       id: "creator_abc",
-      authUserId: "clerk_123",
+      userId: "auth_123",
     });
 
     const req = new Request("https://example.com/api/test");
@@ -73,15 +73,15 @@ describe("withCreatorApi authorization boundary", () => {
     expect(await response.json()).toEqual({ success: true });
     expect(handler).toHaveBeenCalledWith(
       req,
-      expect.objectContaining({ id: "creator_abc", authUserId: "clerk_123" })
+      expect.objectContaining({ id: "creator_abc", userId: "auth_123" })
     );
   });
 
   it("handles custom ApiError with correct status code", async () => {
-    mockAuth.mockResolvedValue({ userId: "clerk_123" });
+    mockAuth.mockResolvedValue({ user: { id: "auth_123", email: "creator@example.com" }, session: { id: "session_1" } });
     mockDb.query.users.findFirst.mockResolvedValue({
       id: "creator_abc",
-      authUserId: "clerk_123",
+      userId: "auth_123",
     });
 
     const req = new Request("https://example.com/api/test");
@@ -94,10 +94,10 @@ describe("withCreatorApi authorization boundary", () => {
   });
 
   it("handles unexpected server errors with 500 without leaking stack traces", async () => {
-    mockAuth.mockResolvedValue({ userId: "clerk_123" });
+    mockAuth.mockResolvedValue({ user: { id: "auth_123", email: "creator@example.com" }, session: { id: "session_1" } });
     mockDb.query.users.findFirst.mockResolvedValue({
       id: "creator_abc",
-      authUserId: "clerk_123",
+      userId: "auth_123",
     });
 
     const req = new Request("https://example.com/api/test");

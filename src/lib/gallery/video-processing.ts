@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegStatic from 'ffmpeg-static';
-import { writeFile, unlink, readFile } from 'fs/promises';
+import { readFile, unlink, writeFile } from 'fs/promises';
 import { randomUUID } from 'crypto';
-import { PassThrough } from 'stream';
 
 // ffmpegStatic is a string (path to ffmpeg binary)
 if (!ffmpegStatic || typeof ffmpegStatic !== 'string') {
@@ -28,6 +27,18 @@ export type VideoProcessingOptions = {
     maxWidth?: number;
     quality?: number;
     fps?: number;
+};
+
+type VideoStreamMetadata = {
+  codec_type?: string;
+  codec_name?: string;
+  width?: number;
+  height?: number;
+};
+
+type VideoMetadata = {
+  streams: VideoStreamMetadata[];
+  format: { duration?: number };
 };
 
 export type ProcessedVideo = {
@@ -61,15 +72,15 @@ export async function processVideo(
         await writeFile(tmpFilePath, input);
 
         // Probe the video to get metadata
-        const metadata = await new Promise<any>((resolve, reject) => {
-            ffmpeg.ffprobe(tmpFilePath!, (err: any, meta: any) => {
+        const metadata = await new Promise<VideoMetadata>((resolve, reject) => {
+            ffmpeg.ffprobe(tmpFilePath!, (err: Error | null, meta: VideoMetadata) => {
                 if (err) reject(err);
                 else resolve(meta);
             });
         });
 
         const videoStream = metadata.streams.find(
-            (stream: any) => stream.codec_type === 'video'
+            (stream: VideoStreamMetadata) => stream.codec_type === 'video'
         );
         
         if (!videoStream) {
@@ -81,7 +92,7 @@ export async function processVideo(
         const duration = metadata.format.duration || 0;
         const videoCodec = videoStream.codec_name || '';
         const audioStream = metadata.streams.find(
-            (stream: any) => stream.codec_type === 'audio'
+            (stream: VideoStreamMetadata) => stream.codec_type === 'audio'
         );
         const audioCodec = audioStream ? (audioStream.codec_name || null) : null;
 
@@ -164,7 +175,7 @@ async function transcodeVideoForDisplay(
                     reject(err);
                 }
             })
-            .on('error', async (err: any) => {
+            .on('error', async (err: Error) => {
                 await unlink(tempOutputPath).catch(() => {});
                 reject(new Error(`Video transcoding failed: ${err.message}`));
             })
@@ -198,7 +209,7 @@ async function generateThumbnail(
                     resolve(Buffer.alloc(0));
                 }
             })
-            .on('error', async (err: any) => {
+            .on('error', async (err: Error) => {
                 try {
                     await unlink(tempPath).catch(() => {});
                 } finally {

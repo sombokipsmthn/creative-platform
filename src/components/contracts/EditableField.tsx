@@ -39,6 +39,8 @@ export function EditableField({
   const [tempValue, setTempValue] = useState(value);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // Synchronize the local editor buffer when the parent value changes.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTempValue(value);

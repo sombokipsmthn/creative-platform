@@ -22,9 +22,6 @@ metadata:
 type: Opaque
 stringData:
   DATABASE_URL: "postgresql://user:password@postgres-service:5432/creative_platform"
-  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_live_xxx"
-  CLERK_SECRET_KEY: "sk_live_xxx"
-  CLERK_WEBHOOK_SECRET: "whsec_xxx"
   BLOB_READ_WRITE_TOKEN: "vercel_blob_token"
   SVIX_AUTH_TOKEN: "svix_token"
 

@@ -8,7 +8,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useUser } from "@clerk/nextjs";
+import { auth } from "@/lib/auth/auth";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { users, creatorProfiles, creatorServices, creatorBusinessProfiles } from "@/db/schema";
 
 export interface CreatorProfile {
   id: string;
@@ -54,8 +57,6 @@ export function CreatorProvider({
 }: {
   children: ReactNode;
 }) {
-  const { isLoaded, isSignedIn, user } = useUser();
-
   const [activeUser, setActiveUser] =
     useState<CreatorData | null>(null);
 
@@ -66,112 +67,51 @@ export function CreatorProvider({
   const [loading, setLoading] = useState(true);
 
   const syncCreator = useCallback(async function syncCreator() {
-    // The context no longer blocks synchronization on the onboarding route.
-    // Routing decisions are handled by /auth, so we always attempt to fetch the
-    // creator state when Clerk reports the user as signed in.
-
-    /*
-     * Clerk has not finished loading yet.
-     */
-    if (!isLoaded) {
-      return;
-    }
-
-    /*
-     * User is signed out.
-     */
-    if (!isSignedIn || !user?.id) {
-      setActiveUser(null);
-      setUsersDb({});
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-
     try {
-      /*
-       * -------------------------------------------------------
-       * SYNC LOCAL CREATOR ACCOUNT
-       * -------------------------------------------------------
-       */
-      const response = await fetch(
-        "/api/users/sync",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          cache: "no-store",
-        }
-      );
+      const session = await auth.api.getSession({
+        headers: new Headers(),
+      });
 
-      /*
-       * Handle HTTP errors explicitly.
-       *
-       * This makes API problems much easier to diagnose
-       * than a generic JSON parsing/fetch error.
-       */
-      if (!response.ok) {
-        const text = await response.text();
-
-        console.error(
-          "Creator sync HTTP error:",
-          response.status,
-          text
-        );
-
-        // 401 is expected when user is not signed in
-        if (response.status === 401) {
-          setActiveUser(null);
-          setUsersDb({});
-          setLoading(false);
-          return;
-        }
-
-        throw new Error(
-          `Creator sync failed with HTTP ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-
-      /*
-       * -------------------------------------------------------
-       * NEW CLERK USER
-       * -------------------------------------------------------
-       *
-       * /api/users/sync does not create a database user.
-       *
-       * It tells us that onboarding is required.
-       */
-  if (data.needsOnboarding) {
-  setActiveUser(null);
-  setUsersDb({});
-  setLoading(false);
-  return;
-}
-
-      /*
-       * -------------------------------------------------------
-       * NO LOCAL CREATOR
-       * -------------------------------------------------------
-       */
-      if (!data.user) {
+      if (!session?.user) {
         setActiveUser(null);
         setUsersDb({});
         setLoading(false);
         return;
       }
 
+      setLoading(true);
+
       /*
        * -------------------------------------------------------
-       * EXISTING CREATOR
+       * SYNC LOCAL CREATOR ACCOUNT
        * -------------------------------------------------------
        */
+      const localUser = await db.query.users.findFirst({
+        where: eq(users.authUserId, session.user.id),
+        limit: 1,
+      });
+
+      if (!localUser) {
+        setActiveUser(null);
+        setUsersDb({});
+        setLoading(false);
+        return;
+      }
+
+      const profile = await db.query.creatorProfiles.findFirst({
+        where: eq(creatorProfiles.userId, localUser.id),
+        limit: 1,
+      });
+
       const creator: CreatorData = {
-        ...data.user,
-        profile: data.profile ?? null,
+        id: localUser.id,
+        authUserId: localUser.authUserId,
+        email: localUser.email,
+        name: localUser.name,
+        handle: localUser.handle,
+        createdAt: localUser.createdAt,
+        updatedAt: localUser.updatedAt,
+        profile: profile ?? null,
       };
 
       setActiveUser(creator);
@@ -180,14 +120,6 @@ export function CreatorProvider({
         [creator.id]: creator,
       });
     } catch (error) {
-      /*
-       * IMPORTANT:
-       *
-       * Do not redirect here.
-       *
-       * If the API temporarily fails, redirecting would
-       * create another possible navigation loop.
-       */
       console.error(
         "CreatorContext sync error:",
         error
@@ -198,7 +130,7 @@ export function CreatorProvider({
     } finally {
       setLoading(false);
     }
-  }, [isLoaded, isSignedIn, user?.id]);
+  }, []);
 
   /*
    * -------------------------------------------------------
@@ -206,21 +138,8 @@ export function CreatorProvider({
    * -------------------------------------------------------
    */
   useEffect(() => {
-    if (!isLoaded) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void syncCreator();
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [
-    isLoaded,
-    syncCreator,
-  ]);
+    void syncCreator();
+  }, [syncCreator]);
 
   /*
    * -------------------------------------------------------

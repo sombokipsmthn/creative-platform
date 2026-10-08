@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { useClerk, useUser } from '@clerk/nextjs';
+import { auth } from "@/lib/auth/auth";
 import {
   BarChart3,
   FileText,
@@ -98,11 +98,12 @@ const sections = [
 ];
 
 function SignOutButton({ compact }: { compact?: boolean }) {
-  const { signOut } = useClerk();
   const router = useRouter();
 
   const handleSignOut = async () => {
-    await signOut({ redirectUrl: '/admin/login' });
+    await auth.api.signOut({
+      headers: new Headers(),
+    });
     router.push('/admin/login');
   };
 
@@ -153,15 +154,32 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { isLoaded, isSignedIn } = useUser();
-  const isLoginPage = pathname === '/admin/login';
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const [hasLocalAccount, setHasLocalAccount] = useState(true);
   const splitView = useSplitView();
 
   useEffect(() => {
-    if (!isLoaded || !isSignedIn) return;
+    async function checkAuth() {
+      try {
+        const session = await auth.api.getSession({
+          headers: new Headers(),
+        });
+        setIsAuthenticated(!!session);
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
     let isMounted = true;
 
     async function loadBadgeCounts() {
@@ -201,9 +219,9 @@ export default function AdminLayout({
     return () => {
       isMounted = false;
     };
-  }, [isLoaded, isSignedIn, pathname]);
+  }, [isAuthenticated, pathname]);
 
-  if (isLoginPage) {
+  if (pathname === '/admin/login') {
     return (
       <SplitViewProvider>
         <>{children}</>
@@ -211,7 +229,7 @@ export default function AdminLayout({
     );
   }
 
-  if (!isLoaded) {
+  if (loading) {
     return (
       <SplitViewProvider>
         <div className="ui-page flex min-h-screen items-center justify-center">
@@ -228,14 +246,12 @@ export default function AdminLayout({
     );
   }
 
-  if (!isSignedIn) {
+  if (!isAuthenticated) {
     return null;
   }
 
   if (!hasLocalAccount) {
-    return (
-      <RedirectToOnboarding />
-    );
+    return <RedirectToOnboarding />;
   }
 
   return (

@@ -1,108 +1,103 @@
-import { clerkMiddleware, auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth/auth";
+import { NextResponse } from "next/server";
 
-function isAdminRoute(url: URL) {
-  return url.pathname.startsWith("/admin");
+function isAdminRoute(pathname: string) {
+  return pathname.startsWith("/admin");
 }
 
-function isOnboardingRoute(url: URL) {
-  return url.pathname.startsWith("/admin/onboarding");
+function isOnboardingRoute(pathname: string) {
+  return pathname.startsWith("/admin/onboarding");
 }
 
-function isAuthRoute(url: URL) {
-  return url.pathname.startsWith("/sign-in") || url.pathname.startsWith("/sign-up");
+function isAuthRoute(pathname: string) {
+  return pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 }
 
-const customMiddleware = clerkMiddleware(
-  async (auth, req) => {
-    const url = new URL(req.url);
+function isApiAuthRoute(pathname: string) {
+  return pathname.startsWith("/api/auth");
+}
 
-    /*
-     * -------------------------------------------------------
-     * PUBLIC AUTH ROUTES
-     * -------------------------------------------------------
-     *
-     * Sign-in and sign-up must remain publicly accessible.
-     */
+export default async function customMiddleware(request: Request) {
+  const url = new URL(request.url);
+  const pathname = url.pathname;
 
-    if (isAuthRoute(url)) {
-      return;
-    }
+  /*
+   * -------------------------------------------------------
+   * PUBLIC AUTH ROUTES
+   * -------------------------------------------------------
+   *
+   * Sign-in and sign-up must remain publicly accessible.
+   * Also allow the Better Auth API routes to pass through.
+   */
 
-    /*
-     * -------------------------------------------------------
-     * CREATOR ONBOARDING
-     * -------------------------------------------------------
-     *
-     * Onboarding requires a valid Clerk session, but does not
-     * require the creator to already have a completed local
-     * account.
-     *
-     * The onboarding API is responsible for creating/
-     * retrieving the local creator account.
-     */
-
-    if (isOnboardingRoute(url)) {
-      const { userId, redirectToSignIn } = await auth();
-
-      if (!userId) {
-        return redirectToSignIn();
-      }
-
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * CREATOR ADMIN PORTAL
-     * -------------------------------------------------------
-     *
-     * The creator portal is for authenticated creators.
-     *
-     * IMPORTANT:
-     *
-     * Do NOT use ADMIN_EMAIL here.
-     *
-     * ADMIN_EMAIL was previously being used as an owner-only
-     * authorization gate. That caused a completed creator
-     * onboarding flow to do this:
-     *
-     *   /admin/onboarding
-     *        ↓
-     *   /admin
-     *        ↓
-     *   ADMIN_EMAIL check
-     *        ↓
-     *   /
-     *
-     * Authentication and creator authorization are separate
-     * concerns. Clerk authentication is enforced here, while
-     * the application/database determines whether the user
-     * has a creator account and what they can access.
-     */
-
-    if (isAdminRoute(url)) {
-      const { userId, redirectToSignIn } = await auth();
-
-      if (!userId) {
-        return redirectToSignIn();
-      }
-
-      return;
-    }
-
-    /*
-     * -------------------------------------------------------
-     * ALL OTHER ROUTES
-     * -------------------------------------------------------
-     *
-     * Public routes continue normally.
-     */
-
-    return;
+  if (isAuthRoute(pathname) || isApiAuthRoute(pathname)) {
+    return NextResponse.next();
   }
-);
 
-export default customMiddleware;
+  /*
+   * -------------------------------------------------------
+   * CREATOR ONBOARDING
+   * -------------------------------------------------------
+   *
+   * Onboarding requires a valid session, but does not
+   * require the creator to already have a completed local
+   * account.
+   *
+   * The onboarding API is responsible for creating/
+   * retrieving the local creator account.
+   */
+
+  if (isOnboardingRoute(pathname)) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      const signInUrl = new URL("/sign-in", url.origin);
+      signInUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    return NextResponse.next();
+  }
+
+  /*
+   * -------------------------------------------------------
+   * CREATOR ADMIN PORTAL
+   * -------------------------------------------------------
+   *
+   * The creator portal is for authenticated creators.
+   *
+   * Authentication and creator authorization are separate
+   * concerns. Better Auth authentication is enforced here, while
+   * the application/database determines whether the user
+   * has a creator account and what they can access.
+   */
+
+  if (isAdminRoute(pathname)) {
+    const session = await auth.api.getSession({
+      headers: request.headers,
+    });
+
+    if (!session) {
+      const signInUrl = new URL("/sign-in", url.origin);
+      signInUrl.searchParams.set("redirect", pathname);
+      return NextResponse.redirect(signInUrl);
+    }
+
+    return NextResponse.next();
+  }
+
+  /*
+   * -------------------------------------------------------
+   * ALL OTHER ROUTES
+   * -------------------------------------------------------
+   *
+   * Public routes continue normally.
+   */
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

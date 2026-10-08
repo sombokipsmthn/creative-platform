@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { auth } from "@/lib/auth/auth";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -7,20 +7,20 @@ import { creatorProfiles, users } from "@/db/schema";
 
 export async function POST() {
   try {
-    const { userId } =
-      await auth();
+    const session = await auth.api.getSession({
+      headers: new Headers(),
+    });
 
     /*
      * -------------------------------------------------------
-     * REQUIRE CLERK AUTHENTICATION
+     * REQUIRE BETTER AUTH AUTHENTICATION
      * -------------------------------------------------------
      */
 
-    if (!userId) {
+    if (!session?.user) {
       return NextResponse.json(
         {
-          error:
-            "Unauthorized",
+          error: "Unauthorized",
         },
         {
           status: 401,
@@ -29,8 +29,8 @@ export async function POST() {
     }
 
     console.log(
-      "Creator sync: checking Clerk user",
-      userId
+      "Creator sync: checking Better Auth user",
+      session.user.id
     );
 
     /*
@@ -38,21 +38,21 @@ export async function POST() {
      * GET OR CREATE LOCAL USER
      * -------------------------------------------------------
      *
-     * A Clerk account is not useful to the application
+     * A Better Auth account is not useful to the application
      * until there is a corresponding local users row.
      *
      * This function safely handles both:
      *
      * 1. Existing local users
-     * 2. Brand-new Clerk users
+     * 2. Brand-new Better Auth users
      */
 
-    // Fetch the local user by the Clerk authUserId. Do **not** create a new
+    // Fetch the local user by the Better Auth user ID. Do **not** create a new
     // record here – creation should happen only in /auth or the onboarding flow.
     const [localUser] = await db
       .select()
       .from(users)
-      .where(eq(users.authUserId, userId))
+      .where(eq(users.authUserId, session.user.id))
       .limit(1);
 
     // If there is no local user yet, we can immediately respond that
@@ -60,8 +60,8 @@ export async function POST() {
     // accessing `localUser.id` when undefined.
     if (!localUser) {
       console.log(
-        "Creator sync: no local user found for Clerk ID",
-        userId
+        "Creator sync: no local user found for auth ID",
+        session.user.id
       );
       return NextResponse.json({
         needsOnboarding: true,
@@ -114,7 +114,9 @@ export async function POST() {
     return NextResponse.json(
       {
         error:
-          "Failed to sync user",
+          error instanceof Error
+            ? error.message
+            : "Failed to sync user",
       },
       {
         status: 500,

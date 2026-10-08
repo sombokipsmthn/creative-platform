@@ -9,7 +9,7 @@ export const betterAuthInstance = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   secret: process.env.BETTER_AUTH_SECRET,
   plugins: [dash({ apiUrl: process.env.BETTER_AUTH_API_URL, kvUrl: process.env.BETTER_AUTH_KV_URL, apiKey: process.env.BETTER_AUTH_API_KEY })],
-  emailAndPassword: { enabled: true },
+  emailAndPassword: { enabled: true, autoSignIn: true },
   session: { expiresIn: 60 * 60 * 24 * 30, updateAge: 60 * 60 * 24 },
 });
 

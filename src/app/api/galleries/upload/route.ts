@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       request,
       token: blobToken,
 
-      onBeforeGenerateToken: async (pathname, clientPayload, multipart) => {
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
         const { userId } = await auth();
 
         if (!userId) {

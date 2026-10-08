@@ -1,164 +1,41 @@
-# KIPSMTHN Creative Platform - LLMS.txt
+# KIPSMTHN Creative Platform
 
-## Platform Overview
-KIPSMTHN Creative Platform is a comprehensive SaaS solution built for creative professionals to manage galleries, clients, contracts, and business operations. Built with Next.js 14, React 18, TypeScript, and deployed on Vercel.
+KIPSMTHN is a creative business platform for photographers, filmmakers, studios, and creative teams. It provides a connected workspace for managing clients, projects, quotes, invoices, and private gallery delivery.
 
-## Public Sections (Accessible Without Authentication)
+## Major Public Sections
 
-### 1. Home Page
-- URL: `/`
-- Description: Landing page introducing the platform, key features, and value proposition for creative professionals
-- Content: Hero section, feature overview, testimonials, call-to-action for sign-up
+- **Home** (`/`): Platform overview, features, workflow, and workspace modules
+- **About** (`/about`): Platform information and creator profiles
+- **Services** (`/services`): Production and creative storytelling services including:
+  - Startup Ecosystem Storytelling (Accelerator & Donor Program Media)
+  - Brand Films & Documentary Production
+  - Commercial & E-Commerce Photography
+  - Visual Identity, Motion & UI/UX Systems
+- **Work** (`/work`): Portfolio archive across four creative pillars:
+  - Photography
+  - Videography
+  - Branding & Graphic Design
+  - UI/UX
+- **Contact** (`/contact`): Direct inquiries and social channels
 
-### 2. About Page
-- URL: `/about`
-- Description: Company information, mission, vision, and team details
-- Content: Company background, core values, team bios, contact information
+## Services Offered
 
-### 3. Work/Portfolio Showcase
-- URL: `/work`
-- Description: Public portfolio showcasing sample galleries and creative work
-- Content: Curated gallery displays, case studies, client success stories
+KIPSMTHN provides commercial photography, brand films, motion graphics, and creative production services for African startup ecosystem programs, venture studios, and corporate clients. Based in Nairobi, Kenya with KRA eTIMS compliance.
 
-### 4. Services Page
-- URL: `/services`
-- Description: Overview of services offered through the platform
-- Content: Service categories, pricing information (where applicable), service descriptions
+## Note on Private Areas
 
-### 5. Contact Page
-- URL: `/contact`
-- Description: Contact information and inquiry form
-- Content: Contact form, business address, phone/email, social media links
+The following areas are NOT public content and should not be indexed:
+- `/admin/**` - Administrative interfaces
+- `/api/**` - API endpoints
+- Authentication routes (sign-in, sign-up, onboarding)
+- Private client portal routes (`/portal/**`)
+- Tokenized gallery URLs
+- Internal/private routes
 
-### 6. Privacy Policy
-- URL: `/privacy`
-- Description: Data protection and privacy policy
-- Content: GDPR/CCPA compliance information, data handling practices, user rights
+## Canonical Links
 
-### 7. Sign-Up Page
-- URL: `/sign-up`
-- Description: User registration page for new accounts
-- Content: Registration form, terms of service acceptance, email verification process
-
-### 8. Sign-In Page
-- URL: `/sign-in`
-- Description: User authentication page for existing accounts
-- Content: Login form, password recovery, social login options (when available)
-
-### 9. Public Gallery Access
-- URL: `/public/galleries/[slug]`
-- Description: Publicly shareable galleries via secure links
-- Content: Gallery viewing experience, media display, basic interaction (comments/likes when enabled)
-- Access: Token-based or slug-based public sharing
-
-### 10. Public Contract Access
-- URL: `/public/contracts/[token]`
-- Description: Publicly accessible contracts for review and signing
-- Content: Contract viewing, electronic signature workflow (when implemented)
-- Access: Secure token-based access
-
-### 11. Health Check Endpoint
-- URL: `/api/health`
-- Description: System health monitoring endpoint
-- Content: JSON response indicating system status, version, and basic metrics
-- Access: Publicly accessible for monitoring purposes
-
-## Authentication-Protected Sections (Require Login)
-
-### Dashboard
-- URL: `/dashboard`
-- Description: User dashboard with key metrics and quick access
-- Content: Badge counts, recent activity, financial overview, navigation to all features
-
-### Gallery Management
-- URL: `/app/galleries`
-- Description: Complete gallery creation, management, and organization
-- Features: Upload, watermarking, theming, approval workflows, client sharing
-
-### Client Management
-- URL: `/app/clients`
-- Description: Customer relationship management
-- Features: Client profiles, communication history, project tracking
-
-### Contract Management
-- URL: `/app/contracts`
-- Description: Legal agreement creation and management
-- Features: Templates, e-signature workflow, renewal tracking, audit trails
-
-### Financial Management
-- URL: `/app/financial`
-- Description: Invoicing, quotes, and financial tracking
-- Features: Invoice generation, payment tracking, revenue reporting
-
-### Settings
-- URL: `/app/settings`
-- Description: User preferences and account configuration
-- Features: Profile management, notification preferences, billing information
-
-## Technical Stack
-- Frontend: Next.js 14, React 18, TypeScript, Tailwind CSS, Framer Motion
-- Backend: Next.js API Routes, Drizzle ORM with PostgreSQL (Neon)
-- Storage: Vercel Blob for media assets
-- Authentication: Clerk (email/password, with planned social login)
-- Email: Resend (planned integration)
-- Payments: Stripe (planned integration)
-- Infrastructure: Vercel hosting with automatic SSL
-
-## Key Features Available
-- Gallery creation and management with media upload (images/videos)
-- Watermarking and theming capabilities
-- Client relationship management
-- Contract creation and management
-- Invoice and quote generation
-- Dashboard analytics and reporting
-- Public sharing via secure links
-- Approval workflows for client collaboration
-- Role-based access control ( ownership verification )
-
-## API Endpoints (Select Public Ones)
-- GET `/api/health` - Health check
-- GET `/api/public/galleries/[slug]` - Public gallery data
-- GET `/api/public/contracts/[token]` - Public contract data
-- POST `/api/webhooks/clerk` - Clerk authentication webhooks (Svix verified)
-
-## Data & Content Types
-- Galleries: Collections of images and videos with metadata
-- Media Assets: Uploaded images (JPEG, PNG, GIF, WebP) and videos (MP4, MOV)
-- Clients: Customer records with contact information and project history
-- Contracts: Legal agreements with templates and e-signature capability
-- Invoices: Billing documents with payment tracking
-- Services: Service catalog with descriptions and pricing
-
-## Accessibility & Performance
-- Built with accessibility considerations (WCAG 2.1 AA target)
-- Optimized for performance with Next.js automatic code splitting
-- Image optimization via Next.js Image component
-- Responsive design for mobile, tablet, and desktop
-- Target: <2s page load time, <200ms API response time
-
-## Security & Compliance
-- SOC 2 Type 2 compliance in preparation
-- Authentication via Clerk with session management
-- Ownership verification for all data access
-- Input validation and sanitization on all user inputs
-- Rate limiting on sensitive endpoints (especially uploads)
-- Environment variables managed through Vercel
-- No sensitive data stored in client-side code
-
-## Current Development Phase
-- Phase 1: Foundation & Stability (Current - Next 2 Months)
-  - Focus: Stabilize implementation, address technical debt, establish foundations
-  - Current work: Rate limiting implementation, input validation standardization, test coverage improvement
-
-## Documentation & Support
-- Comprehensive user documentation available in-platform
-- API reference documentation (in development)
-- Troubleshooting guides and runbooks
-- Changelog maintained for release tracking
-- Community support and feedback channels
-
-## Last Updated
-2026-10-08
-
----
-*This file is optimized for AI/LLM discovery and understanding of the KIPSMTHN Creative Platform's public-facing sections and capabilities.*
+- Home: https://creative-platform.vercel.app/
+- About: https://creative-platform.vercel.app/about
+- Services: https://creative-platform.vercel.app/services
+- Work: https://creative-platform.vercel.app/work
+- Contact: https://creative-platform.vercel.app/contact

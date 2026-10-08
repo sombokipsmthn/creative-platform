@@ -4,12 +4,12 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash2, Eye, EyeOff, Video } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
-import { upload } from '@vercel/blob/client'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
 import GalleryTopNav from '@/components/ui/GalleryTopNav'
 import GalleryDesignTab from '@/components/gallery/GalleryDesignTab'
 import GallerySettingsTab from '@/components/gallery/GallerySettingsTab'
 import GalleryActivityTab from '@/components/gallery/GalleryActivityTab'
+import PhotoUploader from '@/components/admin/PhotoUploader'
 
 interface GalleryCollection {
   id: string
@@ -70,7 +70,6 @@ export default function GalleryWorkspacePage() {
   const [gallery, setGallery] = useState<GalleryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [collectionTitle, setCollectionTitle] = useState('')
@@ -122,52 +121,6 @@ export default function GalleryWorkspacePage() {
     fetchGallery()
   }, [id])
 
-  const handleUpload = async (files: FileList | null) => {
-    if (!files?.length) return
-    setUploading(true)
-    setError(null)
-    try {
-      for (const file of Array.from(files)) {
-        await upload(`galleries/${id}/${file.name}`, file, {
-          access: 'public',
-          handleUploadUrl: '/api/galleries/upload',
-          clientPayload: JSON.stringify({ galleryId: id }),
-        })
-      }
-      await refreshGallery()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to upload photos')
-    } finally {
-      setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    }
-  }
-
-  const handleCreateCollection = async () => {
-    const title = collectionTitle.trim()
-    if (!title) return
-    setCreatingCollection(true)
-    setError(null)
-    try {
-      const response = await fetch(`/api/galleries/${id}/collections`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title }),
-      })
-      if (!response.ok) {
-        const body = await response.json().catch(() => null) as { error?: string } | null
-        throw new Error(body?.error || 'Unable to create collection')
-      }
-
-      setCollectionTitle('')
-      await refreshGallery()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create collection')
-    } finally {
-      setCreatingCollection(false)
-    }
-  }
-
   const handlePhotoToggle = (photoId: string) => {
     setSelectedPhotos((prev) => {
       const next = new Set(prev)
@@ -208,7 +161,42 @@ export default function GalleryWorkspacePage() {
       setError(err instanceof Error ? err.message : 'Unable to move photos')
     }
   }
+  const handleCreateCollection = async () => {
+    const title = collectionTitle.trim()
 
+    if (!title || creatingCollection) return
+
+    setCreatingCollection(true)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/galleries/${id}/collections`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title,
+        }),
+      })
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => null) as { error?: string } | null
+        throw new Error(body?.error || 'Unable to create collection')
+      }
+
+      setCollectionTitle('')
+      await refreshGallery()
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'Unable to create collection'
+      )
+    } finally {
+      setCreatingCollection(false)
+    }
+  }
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
     setError(null)
     try {
@@ -343,7 +331,7 @@ export default function GalleryWorkspacePage() {
               <div className="flex flex-wrap items-center gap-2">
                 {gallery.slug && (
                   <a
-                    href={`/portal/g/${gallery.id}/${gallery.slug}`}
+                    href={`/portal/g/${gallery.id}`}
                     target="_blank"
                     rel="noreferrer"
                     className="gallery-btn gallery-btn-secondary"
@@ -355,11 +343,11 @@ export default function GalleryWorkspacePage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  disabled={uploading}
+                  disabled={false}
                   className="gallery-btn gallery-btn-primary"
                 >
-                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                  {uploading ? 'Uploading...' : 'Upload'}
+                  <Upload className="w-4 h-4" />
+                  Upload Photos
                 </button>
                 <button
                   type="button"
@@ -404,13 +392,11 @@ export default function GalleryWorkspacePage() {
             {/* PHOTOS TAB */}
             {activeTab === 'photos' && (
               <section className="os-reveal space-y-6">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
-                  multiple
-                  className="hidden"
-                  onChange={(event) => void handleUpload(event.target.files)}
+                <PhotoUploader 
+                  galleryId={id} 
+                  onUploadComplete={() => {
+                    refreshGallery()
+                  }}
                 />
 
                 {/* SELECTION TOOLBAR */}
@@ -633,22 +619,11 @@ export default function GalleryWorkspacePage() {
                       })}
                     </div>
                   ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="gallery-dropzone"
-                    >
-                      <div className="gallery-dropzone-icon">
-                        <Upload className="w-5 h-5" />
-                      </div>
-                      <h3 className="gallery-dropzone-title">Drop in your first photos or videos</h3>
-                      <p className="gallery-dropzone-text">
-                        Choose multiple images and videos at once. We will prepare web-ready versions and keep the originals safe.
+                    <div className="text-center py-12">
+                      <p className="text-sm text-[var(--color-text-muted)]">
+                        No photos in this gallery yet. Use the upload area above to add photos.
                       </p>
-                      <span className="inline-flex items-center justify-center gap-2 gallery-btn gallery-btn-secondary mt-5">
-                        CHOOSE MEDIA
-                      </span>
-                    </button>
+                    </div>
                   )}
                 </div>
 

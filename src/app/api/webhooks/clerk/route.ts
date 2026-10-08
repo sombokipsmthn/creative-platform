@@ -4,6 +4,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logSecurityEvent } from "@/lib/security-logger";
+import { logInfrastructureFailure } from "@/lib/monitoring";
 
 type ClerkEmailAddress = {
   id?: string;
@@ -26,7 +28,11 @@ export async function POST(req: Request) {
   const webhookSecret = process.env.CLERK_WEBHOOK_SECRET;
 
   if (!webhookSecret) {
-    console.error("WEBHOOK ERROR: CLERK_WEBHOOK_SECRET is missing");
+    logInfrastructureFailure(
+      "webhook",
+      "CLERK_WEBHOOK_SECRET is missing - webhook verification disabled",
+      { timestamp: new Date().toISOString() }
+    );
 
     return NextResponse.json(
       { error: "CLERK_WEBHOOK_SECRET is missing" },
@@ -41,14 +47,20 @@ export async function POST(req: Request) {
   const svixTimestamp = headerPayload.get("svix-timestamp");
   const svixSignature = headerPayload.get("svix-signature");
 
-  console.log("WEBHOOK HEADERS:", {
-    hasSvixId: Boolean(svixId),
-    hasSvixTimestamp: Boolean(svixTimestamp),
-    hasSvixSignature: Boolean(svixSignature),
+  logSecurityEvent({
+    severity: "info",
+    eventType: "system_secret_access",
+    message: "Clerk webhook received",
+    details: { svixId: Boolean(svixId), svixTimestamp: Boolean(svixTimestamp), svixSignature: Boolean(svixSignature) },
   });
 
   if (!svixId || !svixTimestamp || !svixSignature) {
-    console.error("WEBHOOK ERROR: Missing Svix headers");
+    logSecurityEvent({
+      severity: "high",
+      eventType: "system_secret_access",
+      message: "Clerk webhook missing required headers",
+      details: { hasSvixId: Boolean(svixId), hasSvixTimestamp: Boolean(svixTimestamp), hasSvixSignature: Boolean(svixSignature) },
+    });
 
     return NextResponse.json(
       { error: "Missing Svix webhook headers" },
@@ -67,8 +79,12 @@ export async function POST(req: Request) {
       "svix-signature": svixSignature,
     }) as unknown as ClerkWebhookEvent;
   } catch (error) {
-    console.error("WEBHOOK ERROR: Signature verification failed");
-    console.error(error);
+    logSecurityEvent({
+      severity: "critical",
+      eventType: "auth_login_failure",
+      message: "Clerk webhook signature verification failed",
+      details: { error: error instanceof Error ? error.message : "Unknown verification error" },
+    });
 
     return NextResponse.json(
       { error: "Invalid webhook signature" },
@@ -76,7 +92,13 @@ export async function POST(req: Request) {
     );
   }
 
-  console.log("WEBHOOK EVENT:", event.type);
+  // Log the event type (without sensitive data)
+  logSecurityEvent({
+    severity: "info",
+    eventType: "system_config_change",
+    message: `Clerk webhook event: ${event.type}`,
+    details: { eventType: event.type, userId: event.data.id },
+  });
 
   /*
    * USER CREATED / UPDATED
@@ -84,10 +106,11 @@ export async function POST(req: Request) {
   if (event.type === "user.created" || event.type === "user.updated") {
     const clerkUser = event.data;
 
-    console.log("WEBHOOK USER:", {
-      userId: clerkUser.id,
-      emailAddresses: clerkUser.email_addresses ?? [],
-      primaryEmailAddressId: clerkUser.primary_email_address_id ?? null,
+    logSecurityEvent({
+      severity: "info",
+      eventType: event.type === "user.created" ? "system_onboarding_complete" : "auth_token_refresh",
+      message: `User ${event.type.replace(".", " ")}: ${clerkUser.id}`,
+      details: { userId: clerkUser.id, hasEmail: Boolean(clerkUser.email_addresses) },
     });
 
     /*
@@ -116,12 +139,12 @@ export async function POST(req: Request) {
      * event will synchronize the user once the email is available.
      */
     if (!email) {
-      console.warn(
-        "WEBHOOK: User has no email yet. Waiting for a later user.updated event.",
-        {
-          userId: clerkUser.id,
-        }
-      );
+      logSecurityEvent({
+        severity: "medium",
+        eventType: "system_config_change",
+        message: "User created but email not available yet",
+        details: { userId: clerkUser.id },
+      });
 
       return NextResponse.json({
         success: true,
@@ -161,9 +184,11 @@ export async function POST(req: Request) {
           },
         });
 
-      console.log("WEBHOOK SUCCESS: User synced:", {
-        userId: clerkUser.id,
-        email,
+      logSecurityEvent({
+        severity: "info",
+        eventType: "system_onboarding_complete",
+        message: `User synced successfully: ${clerkUser.id}`,
+        details: { userId: clerkUser.id, email: email.split("@")[0] + "@***" },
       });
 
       return NextResponse.json({
@@ -171,8 +196,12 @@ export async function POST(req: Request) {
         synced: true,
       });
     } catch (error) {
-      console.error("WEBHOOK ERROR: Database sync failed");
-      console.error(error);
+      logSecurityEvent({
+        severity: "high",
+        eventType: "system_db_migration",
+        message: `Database sync failed for user: ${clerkUser.id}`,
+        details: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
 
       return NextResponse.json(
         { error: "Database sync failed" },
@@ -188,15 +217,24 @@ export async function POST(req: Request) {
     try {
       await db.delete(users).where(eq(users.authUserId, event.data.id));
 
-      console.log("WEBHOOK SUCCESS: User deleted:", event.data.id);
+      logSecurityEvent({
+        severity: "high",
+        eventType: "modify_delete_client",
+        message: `User deleted from system: ${event.data.id}`,
+        details: { userId: event.data.id },
+      });
 
       return NextResponse.json({
         success: true,
         deleted: true,
       });
     } catch (error) {
-      console.error("WEBHOOK ERROR: Failed to delete user");
-      console.error(error);
+      logSecurityEvent({
+        severity: "high",
+        eventType: "system_db_migration",
+        message: `Failed to delete user from database: ${event.data.id}`,
+        details: { error: error instanceof Error ? error.message : "Unknown error" },
+      });
 
       return NextResponse.json(
         { error: "Database delete failed" },
@@ -211,7 +249,12 @@ export async function POST(req: Request) {
    * We acknowledge it because this endpoint is only responsible
    * for user synchronization.
    */
-  console.log("WEBHOOK: Event ignored:", event.type);
+  logSecurityEvent({
+    severity: "debug",
+    eventType: "system_config_change",
+    message: `Ignored Clerk webhook event: ${event.type}`,
+    details: { eventType: event.type },
+  });
 
   return NextResponse.json({
     success: true,

@@ -1,8 +1,75 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Check, FileText, FolderKanban, Images, LayoutDashboard, Users, Wallet } from "lucide-react";
 
 import Header from "@/components/header";
 import ThemeToggle from "@/components/ThemeToggle";
+
+export const metadata = {
+  title: {
+    template: "%s | KIPSMTHN",
+    default: "KIPSMTHN - Creative Business Platform",
+  },
+  description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+  openGraph: {
+    title: "KIPSMTHN - Creative Business Platform",
+    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://kipsmthn.com',
+    siteName: "KIPSMTHN",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80",
+        width: 1200,
+        height: 800,
+        alt: "Creative business platform with workspace and tools",
+      },
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "KIPSMTHN Creative Business Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KIPSMTHN - Creative Business Platform",
+    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+    images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  keywords: [
+    "creative business platform",
+    "photography business software",
+    "filmmaker workflow management",
+    "studio management software",
+    "creative freelancer tools",
+    "client project management",
+    "creative invoicing software",
+    "private gallery delivery",
+    "creative quotes and estimates",
+    "photographer business tools"
+  ],
+  authors: [
+    {
+      name: "KIPSMTHN",
+      url: "https://kipsmthn.com",
+    },
+  ],
+  creator: "KIPSMTHN",
+  publisher: "KIPSMTHN",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+};
 
 const platformFeatures = [
   { number: "01", title: "Build your creative presence", description: "Create a polished portfolio that gives your work a professional home and makes it easier for the right clients to discover you." },
@@ -41,6 +108,14 @@ export default function HomePage() {
               <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative Business Platform</p>
               <h1 className="mt-7 max-w-5xl text-5xl font-light leading-[0.94] tracking-tight text-slate-950 dark:text-white md:text-7xl lg:text-[6.5rem]">The operating system for your creative business.</h1>
               <p className="mt-8 max-w-2xl text-base leading-8 text-slate-600 dark:text-zinc-400 md:text-lg">Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.</p>
+              <div className="relative mt-10 h-48 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800 md:h-64">
+                <Image
+                  src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"
+                  alt="Creative business platform with workspace and tools"
+                  fill
+                  className="object-cover"
+                />
+              </div>
               <div className="mt-10 flex flex-wrap gap-3">
                 <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700">Get started<ArrowRight className="h-4 w-4" /></Link>
                 <Link href="#platform" className="inline-flex items-center rounded-full border border-slate-200 px-7 py-4 text-sm font-medium transition hover:border-purple-400 hover:text-purple-600 dark:border-zinc-800 dark:hover:border-purple-800 dark:hover:text-purple-400">Explore the platform</Link>

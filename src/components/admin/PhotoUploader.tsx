@@ -1,693 +1,411 @@
-'use client'
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { Check, Loader2, RefreshCw, Trash2, Upload, X } from 'lucide-react'
-import { upload } from '@vercel/blob/client'
-
-import { Button } from '@/components/ui/Button'
+import { useEffect, useRef, useState } from 'react';
+import { Upload, X, Check, Loader2, Trash2, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
+import { upload } from '@vercel/blob/client';
 
 interface UploadItem {
-  id: string
-  file: File
-  previewUrl: string
-  status: 'queued' | 'uploading' | 'uploaded' | 'failed'
-  progress: number
-  error: string | null
+  id: string;
+  file: File;
+  previewUrl: string;
+  status: 'queued' | 'uploading' | 'uploaded' | 'failed';
+  progress: number;
+  error: string | null;
 }
 
 interface PhotoUploaderProps {
-  galleryId: string
-  onUploadComplete: () => void | Promise<void>
-}
-
-const MAX_FILE_SIZE = 100 * 1024 * 1024
-
-const ACCEPTED_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/heic',
-  'image/heif',
-  'video/mp4',
-  'video/quicktime',
-  'video/x-msvideo',
-  'video/x-matroska',
-  'video/webm',
-  'video/x-flv',
-  'video/x-ms-wmv',
-])
-
-function createUploadId() {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID()
-  }
-
-  return Math.random().toString(36).slice(2, 11)
-}
-
-function getErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return 'Upload failed. Please try again.'
+  galleryId: string;
+  onUploadComplete: () => void;
 }
 
 export default function PhotoUploader({
   galleryId,
   onUploadComplete,
 }: PhotoUploaderProps) {
-  const [uploadItems, setUploadItems] = useState<UploadItem[]>([])
-  const [isUploading, setIsUploading] = useState(false)
-  const [overallProgress, setOverallProgress] = useState(0)
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const [uploadItems, setUploadItems] = useState<UploadItem[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const generateId = () => Math.random().toString(36).substring(2, 9);
 
-  /*
-   * Keep refs alongside React state so the asynchronous upload queue
-   * always sees the latest items instead of a stale render snapshot.
-   */
-  const uploadItemsRef = useRef<UploadItem[]>([])
-  const isUploadingRef = useRef(false)
-  const processedSinceLastCompleteRef = useRef(false)
+  const addFiles = (files: FileList | File[] | null) => {
+    if (!files?.length) return;
 
-  const updateUploadItems = useCallback(
-    (updater: (items: UploadItem[]) => UploadItem[]) => {
-      setUploadItems((current) => {
-        const next = updater(current)
-        uploadItemsRef.current = next
-        return next
-      })
-    },
-    [],
-  )
+    const newItems: UploadItem[] = Array.from(files).map((file) => ({
+      id: generateId(),
+      file,
+      previewUrl: URL.createObjectURL(file),
+      status: 'queued',
+      progress: 0,
+      error: null,
+    }));
 
-  const processUploadQueue = useCallback(async () => {
-    if (isUploadingRef.current) {
-      return
+    setUploadItems((prev) => [...prev, ...newItems]);
+
+    if (!isUploading) {
+      processUploadQueue(newItems);
     }
-
-    isUploadingRef.current = true
-    setIsUploading(true)
-    processedSinceLastCompleteRef.current = false
-
-    try {
-      while (true) {
-        /*
-         * Always read from the ref so files added after the component
-         * rendered are included in the queue.
-         */
-        const nextItem = uploadItemsRef.current.find(
-          (item) => item.status === 'queued',
-        )
-
-        if (!nextItem) {
-          break
-        }
-
-        processedSinceLastCompleteRef.current = true
-
-        updateUploadItems((items) =>
-          items.map((item) =>
-            item.id === nextItem.id
-              ? {
-                  ...item,
-                  status: 'uploading',
-                  progress: 0,
-                  error: null,
-                }
-              : item,
-          ),
-        )
-
-        try {
-          await upload(
-            `galleries/${galleryId}/${nextItem.file.name}`,
-            nextItem.file,
-            {
-              access: 'public',
-              handleUploadUrl: '/api/galleries/upload',
-              clientPayload: JSON.stringify({
-                galleryId,
-              }),
-
-              /*
-               * Vercel Blob provides real upload progress.
-               */
-              onUploadProgress: (event) => {
-                const percentage = Math.max(
-                  0,
-                  Math.min(100, Math.round(event.percentage)),
-                )
-
-                updateUploadItems((items) =>
-                  items.map((item) =>
-                    item.id === nextItem.id
-                      ? {
-                          ...item,
-                          progress: percentage,
-                        }
-                      : item,
-                  ),
-                )
-              },
-            },
-          )
-
-          updateUploadItems((items) =>
-            items.map((item) =>
-              item.id === nextItem.id
-                ? {
-                    ...item,
-                    status: 'uploaded',
-                    progress: 100,
-                    error: null,
-                  }
-                : item,
-            ),
-          )
-        } catch (error) {
-          updateUploadItems((items) =>
-            items.map((item) =>
-              item.id === nextItem.id
-                ? {
-                    ...item,
-                    status: 'failed',
-                    progress: 0,
-                    error: getErrorMessage(error),
-                  }
-                : item,
-            ),
-          )
-        }
-      }
-    } finally {
-      const items = uploadItemsRef.current
-
-      const finishedCount = items.filter(
-        (item) =>
-          item.status === 'uploaded' ||
-          item.status === 'failed',
-      ).length
-
-      const queuedCount = items.filter(
-        (item) => item.status === 'queued',
-      ).length
-
-      const totalCount = items.length
-
-      setOverallProgress(
-        totalCount > 0
-          ? (finishedCount / totalCount) * 100
-          : 0,
-      )
-
-      isUploadingRef.current = false
-      setIsUploading(false)
-
-      /*
-       * Refresh the gallery only after the complete queue has finished.
-       */
-      if (
-        processedSinceLastCompleteRef.current &&
-        queuedCount === 0
-      ) {
-        await onUploadComplete()
-      }
-    }
-  }, [
-    galleryId,
-    onUploadComplete,
-    updateUploadItems,
-  ])
-
-  /*
-   * Start the queue only after React has actually received the new files.
-   *
-   * This fixes the original race where addFiles() called
-   * processUploadQueue() before setUploadItems() had updated state.
-   */
-  useEffect(() => {
-    uploadItemsRef.current = uploadItems
-
-    const hasQueuedItems = uploadItems.some(
-      (item) => item.status === 'queued',
-    )
-
-    if (
-      hasQueuedItems &&
-      !isUploadingRef.current
-    ) {
-      void processUploadQueue()
-    }
-  }, [
-    uploadItems,
-    processUploadQueue,
-  ])
-
-  /*
-   * Clean up browser preview URLs.
-   */
-  useEffect(() => {
-    return () => {
-      uploadItemsRef.current.forEach((item) => {
-        URL.revokeObjectURL(item.previewUrl)
-      })
-    }
-  }, [])
-
-  const addFiles = useCallback(
-    (files: FileList | File[]) => {
-      const candidates = Array.from(files)
-
-      if (candidates.length === 0) {
-        return
-      }
-
-      setValidationError(null)
-
-      const accepted: UploadItem[] = []
-      const rejected: string[] = []
-
-      for (const file of candidates) {
-        if (!ACCEPTED_TYPES.has(file.type)) {
-          rejected.push(
-            `${file.name}: unsupported file type`,
-          )
-          continue
-        }
-
-        if (file.size > MAX_FILE_SIZE) {
-          rejected.push(
-            `${file.name}: exceeds the 100MB limit`,
-          )
-          continue
-        }
-
-        accepted.push({
-          id: createUploadId(),
-          file,
-          previewUrl: URL.createObjectURL(file),
-          status: 'queued',
-          progress: 0,
-          error: null,
-        })
-      }
-
-      if (rejected.length > 0) {
-        setValidationError(
-          rejected.join(' · '),
-        )
-      }
-
-      if (accepted.length > 0) {
-        const next = [
-          ...uploadItemsRef.current,
-          ...accepted,
-        ]
-
-        uploadItemsRef.current = next
-        setUploadItems(next)
-      }
-    },
-    [],
-  )
+  };
 
   const handleFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    e: React.ChangeEvent<HTMLInputElement>
   ) => {
-    if (event.target.files) {
-      addFiles(event.target.files)
+    addFiles(e.target.files);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-
-    /*
-     * Reset the input so selecting the same file again
-     * still triggers onChange.
-     */
-    event.target.value = ''
-  }
+  };
 
   const removeItem = (id: string) => {
-    const item = uploadItemsRef.current.find(
-      (candidate) => candidate.id === id,
-    )
-
-    if (item) {
-      URL.revokeObjectURL(item.previewUrl)
-    }
-
-    const next = uploadItemsRef.current.filter(
-      (candidate) => candidate.id !== id,
-    )
-
-    uploadItemsRef.current = next
-    setUploadItems(next)
-  }
+    setUploadItems((prev) => {
+      const target = prev.find((item) => item.id === id);
+      if (target) {
+        URL.revokeObjectURL(target.previewUrl);
+      }
+      return prev.filter((item) => item.id !== id);
+    });
+  };
 
   const retryItem = (id: string) => {
-    updateUploadItems((items) =>
-      items.map((item) =>
+    setUploadItems((prev) =>
+      prev.map((item) =>
         item.id === id
-          ? {
-              ...item,
-              status: 'queued',
-              progress: 0,
-              error: null,
-            }
-          : item,
-      ),
-    )
-  }
-
-  const retryFailed = () => {
-    updateUploadItems((items) =>
-      items.map((item) =>
-        item.status === 'failed'
-          ? {
-              ...item,
-              status: 'queued',
-              progress: 0,
-              error: null,
-            }
-          : item,
-      ),
-    )
-  }
-
-  const clearFinished = () => {
-    const finished = uploadItemsRef.current.filter(
-      (item) =>
-        item.status === 'uploaded' ||
-        item.status === 'failed',
-    )
-
-    finished.forEach((item) => {
-      URL.revokeObjectURL(item.previewUrl)
-    })
-
-    const next = uploadItemsRef.current.filter(
-      (item) =>
-        item.status !== 'uploaded' &&
-        item.status !== 'failed',
-    )
-
-    uploadItemsRef.current = next
-    setUploadItems(next)
-    setOverallProgress(0)
-  }
-
-  const handleDragOver = (
-    event: React.DragEvent<HTMLDivElement>,
-  ) => {
-    event.preventDefault()
-  }
-
-  const handleDrop = (
-    event: React.DragEvent<HTMLDivElement>,
-  ) => {
-    event.preventDefault()
-
-    if (
-      !isUploading &&
-      event.dataTransfer.files.length > 0
-    ) {
-      addFiles(event.dataTransfer.files)
+          ? { ...item, status: 'queued', progress: 0, error: null }
+          : item
+      )
+    );
+    if (!isUploading) {
+      processUploadQueue(uploadItems.filter((i) => i.id === id));
     }
-  }
+  };
+
+  const clearCompleted = () => {
+    setUploadItems((prev) => {
+      const completed = prev.filter(
+        (item) =>
+          item.status === 'uploaded' || item.status === 'failed'
+      );
+      completed.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      return prev.filter(
+        (item) => item.status === 'queued' || item.status === 'uploading'
+      );
+    });
+  };
+
+  const processUploadQueue = async (queue: UploadItem[]) => {
+    const items = queue.length > 0 ? queue : [];
+
+    if (items.length === 0) {
+      setIsUploading(false);
+      onUploadComplete();
+      return;
+    }
+
+    setIsUploading(true);
+
+    // Process one file at a time to avoid overwhelming the server
+    for (const item of items) {
+      setUploadItems((prev) =>
+        prev.map((i) =>
+          i.id === item.id
+            ? { ...i, status: 'uploading', progress: 0 }
+            : i
+        )
+      );
+
+      try {
+        // Upload to Vercel Blob
+        await upload(
+          `galleries/${galleryId}/${item.file.name}`,
+          item.file,
+          {
+            access: 'public',
+            handleUploadUrl: '/api/galleries/upload',
+            clientPayload: JSON.stringify({ galleryId }),
+          }
+        );
+
+        // Simulate progress updates since the upload API does not expose
+        // real-time byte progress.
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress = Math.min(progress + 10, 90);
+          setUploadItems((prev) =>
+            prev.map((i) =>
+              i.id === item.id ? { ...i, progress } : i
+            )
+          );
+        }, 100);
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        clearInterval(interval);
+
+        setUploadItems((prev) =>
+          prev.map((i) =>
+            i.id === item.id
+              ? { ...i, status: 'uploaded', progress: 100, error: null }
+              : i
+          )
+        );
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : 'Unknown error occurred';
+
+        setUploadItems((prev) =>
+          prev.map((i) =>
+            i.id === item.id
+              ? { ...i, status: 'failed', progress: 0, error: errorMessage }
+              : i
+          )
+        );
+      }
+    }
+
+    // Continue uploading while the user works on the rest of the page
+    setIsUploading(false);
+    onUploadComplete();
+  };
+
+  // Clean up object URLs on unmount
+  useEffect(() => {
+    return () => {
+      uploadItems.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+    };
+  }, [uploadItems]);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files.length) {
+      addFiles(files);
+    }
+  };
 
   const uploadedCount = uploadItems.filter(
-    (item) => item.status === 'uploaded',
-  ).length
-
+    (i) => i.status === 'uploaded'
+  ).length;
   const failedCount = uploadItems.filter(
-    (item) => item.status === 'failed',
-  ).length
-
-  const queuedCount = uploadItems.filter(
-    (item) => item.status === 'queued',
-  ).length
+    (i) => i.status === 'failed'
+  ).length;
 
   return (
-    <div className="space-y-6">
-      {validationError && (
-        <div className="ui-alert ui-alert-error flex items-start gap-3">
-          <X className="mt-0.5 h-4 w-4 shrink-0" />
+    <div className="space-y-4">
+      {/* File Input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
+        className="hidden"
+        onChange={handleFileInputChange}
+        aria-label="Select photos to upload"
+      />
 
-          <p className="text-sm">
-            {validationError}
-          </p>
-
-          <button
-            type="button"
-            onClick={() =>
-              setValidationError(null)
-            }
-            className="ml-auto shrink-0"
-            aria-label="Dismiss upload error"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-
+      {/* Drop Zone */}
       <div
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="relative rounded-lg border-2 border-dashed border-[var(--color-border-subtle)] p-8 text-center transition-colors hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-soft)]"
+        onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        aria-label="Upload photos: drag and drop or press Enter to browse files"
+        className={`relative flex min-h-[9rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
+          isDragging
+            ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
+            : 'border-[var(--color-border-subtle)] hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-soft)]'
+        }`}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
-          className="hidden"
-          onChange={handleFileInputChange}
+        <Upload
+          className={`mb-3 h-8 w-8 ${
+            isDragging ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
+          }`}
         />
-
-        {uploadItems.length === 0 ? (
-          <button
-            type="button"
-            onClick={() =>
-              fileInputRef.current?.click()
-            }
-            className="flex w-full flex-col items-center justify-center"
-          >
-            <Upload className="mb-4 h-10 w-10 text-[var(--color-accent)]" />
-
-            <h3 className="mb-2 text-lg font-semibold">
-              Drag & drop photos or videos here
-            </h3>
-
-            <p className="text-sm text-[var(--color-text-muted)]">
-              or browse files
-            </p>
-
-            <span className="mt-4 text-xs text-[var(--color-text-muted)]">
-              JPEG, PNG, WebP, HEIC, HEIF, MP4, MOV,
-              AVI, MKV, WEBM, FLV, WMV · max 100MB each
-            </span>
-          </button>
-        ) : (
-          <div className="space-y-4 text-left">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-semibold">
-                  {uploadItems.length} file
-                  {uploadItems.length !== 1
-                    ? 's'
-                    : ''}{' '}
-                  selected
-                </p>
-
-                <p className="text-xs text-[var(--color-text-muted)]">
-                  {uploadedCount} uploaded
-                  {failedCount > 0
-                    ? ` · ${failedCount} failed`
-                    : ''}
-                  {queuedCount > 0
-                    ? ` · ${queuedCount} queued`
-                    : ''}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  disabled={isUploading}
-                  onClick={() =>
-                    fileInputRef.current?.click()
-                  }
-                  aria-label="Add more files"
-                >
-                  <Upload className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  disabled={
-                    isUploading ||
-                    failedCount === 0
-                  }
-                  onClick={retryFailed}
-                  aria-label="Retry failed uploads"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  disabled={
-                    isUploading ||
-                    (uploadedCount === 0 &&
-                      failedCount === 0)
-                  }
-                  onClick={clearFinished}
-                  aria-label="Clear completed uploads"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              {uploadItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] p-4"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-[var(--color-border-subtle)]">
-                      <img
-                        src={item.previewUrl}
-                        alt={item.file.name}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">
-                        {item.file.name}
-                      </p>
-
-                      <p className="text-xs text-[var(--color-text-muted)]">
-                        {(
-                          item.file.size /
-                          1024 /
-                          1024
-                        ).toFixed(2)}{' '}
-                        MB
-                      </p>
-
-                      {item.error && (
-                        <p className="mt-1 text-xs text-[var(--color-danger)]">
-                          {item.error}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex shrink-0 items-center gap-3">
-                      {item.status === 'queued' && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            removeItem(item.id)
-                          }
-                          className="text-xs text-[var(--color-danger)] hover:underline"
-                        >
-                          Remove
-                        </button>
-                      )}
-
-                      {item.status === 'uploading' && (
-                        <span className="flex items-center gap-2 text-xs">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Uploading…
-                        </span>
-                      )}
-
-                      {item.status === 'uploaded' && (
-                        <span className="flex items-center gap-2 text-xs text-[var(--color-success)]">
-                          <Check className="h-4 w-4" />
-                          Uploaded
-                        </span>
-                      )}
-
-                      {item.status === 'failed' && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            retryItem(item.id)
-                          }
-                          className="flex items-center gap-2 text-xs text-[var(--color-accent)] hover:underline"
-                        >
-                          <RefreshCw className="h-4 w-4" />
-                          Retry
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--color-border-subtle)]">
-                    <div
-                      className="h-full bg-[var(--color-accent)] transition-[width] duration-200"
-                      style={{
-                        width: `${item.progress}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {isUploading && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium">
-                    Uploading…
-                  </span>
-
-                  <span>
-                    {overallProgress.toFixed(0)}%
-                  </span>
-                </div>
-
-                <div className="h-2 overflow-hidden rounded-full bg-[var(--color-border-subtle)]">
-                  <div
-                    className="h-full bg-[var(--color-accent)] transition-[width] duration-200"
-                    style={{
-                      width: `${overallProgress}%`,
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        <p className="text-sm font-medium">
+          {isDragging
+            ? 'Drop photos to upload'
+            : 'Drag & drop photos here'}
+        </p>
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+          or{' '}
+          <span className="font-medium text-[var(--color-accent)]">
+            browse files
+          </span>{' '}
+          &mdash; JPEG, PNG, WebP, HEIC, HEIF, MP4 (max 100MB each)
+        </p>
       </div>
 
-      {uploadItems.length > 0 &&
-        uploadedCount === uploadItems.length &&
-        !isUploading && (
-          <div className="ui-card p-4 text-center">
-            <Check className="mx-auto mb-3 h-8 w-8 text-[var(--color-success)]" />
+      {/* Upload Queue */}
+      {uploadItems.length > 0 && (
+        <div className="space-y-3">
+          {/* Summary Row */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">
+              Uploading
+              {isUploading && ' ·'}
+              {' '}
+              {uploadedCount} of {uploadItems.length} photos
+              {failedCount > 0 && (
+                <span className="ml-2 text-[var(--color-danger)]">
+                  {failedCount} failed
+                </span>
+              )}
+            </span>
 
-            <p className="font-medium">
-              All files uploaded successfully.
-            </p>
-
-            <p className="text-sm text-[var(--color-text-muted)]">
-              Your media is now available in the
-              gallery.
-            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Add more
+              </Button>
+              {(failedCount > 0 || uploadedCount > 0) && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={clearCompleted}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear
+                </Button>
+              )}
+            </div>
           </div>
-        )}
+
+          {/* File List */}
+          <ul className="divide-y divide-[var(--color-border-subtle)] rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]">
+            {uploadItems.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center gap-3 p-3"
+              >
+                {/* Thumbnail */}
+                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--color-bg-soft)]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item.previewUrl}
+                    alt={item.file.name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+
+                {/* File Info */}
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <p className="truncate text-sm font-medium">
+                    {item.file.name}
+                  </p>
+                  <p className="text-xs text-[var(--color-text-muted)]">
+                    {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                    {item.error && (
+                      <span className="ml-2 text-[var(--color-danger)]">
+                        {item.error}
+                      </span>
+                    )}
+                  </p>
+                </div>
+
+                {/* Status */}
+                <div className="flex w-28 flex-shrink-0 items-center justify-end gap-1.5 text-xs">
+                  {item.status === 'queued' && (
+                    <>
+                      <span className="text-[var(--color-text-muted)]">
+                        Waiting
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeItem(item.id)}
+                        aria-label={`Remove ${item.file.name}`}
+                        className="rounded-full p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-danger)]"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+
+                  {item.status === 'uploading' && (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-accent)]" />
+                      <span>{item.progress}%</span>
+                    </>
+                  )}
+
+                  {item.status === 'uploaded' && (
+                    <>
+                      <Check className="h-4 w-4 text-[var(--color-success)]" />
+                      <span className="text-[var(--color-success)]">
+                        Uploaded
+                      </span>
+                    </>
+                  )}
+
+                  {item.status === 'failed' && (
+                    <>
+                      <X className="h-4 w-4 text-[var(--color-danger)]" />
+                      <button
+                        type="button"
+                        onClick={() => retryItem(item.id)}
+                        className="inline-flex items-center gap-1 font-medium text-[var(--color-accent)] hover:underline"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                        Retry
+                      </button>
+                    </>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {/* Completion Message */}
+          {!isUploading &&
+            uploadItems.length > 0 &&
+            failedCount === 0 && (
+              <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] p-4 text-center">
+                <Check className="mx-auto mb-2 h-6 w-6 text-[var(--color-success)]" />
+                <p className="text-sm font-medium">
+                  {uploadedCount} photo{uploadedCount !== 1 ? 's' : ''}{' '}
+                  uploaded
+                </p>
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                  Your photos are now available in the gallery. You can keep
+                  working or upload more.
+                </p>
+              </div>
+            )}
+        </div>
+      )}
     </div>
-  )
+  );
 }

@@ -5,6 +5,7 @@ import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Lock } from 'lucide-react'
 import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/components/gallery/viewers/wrapper'
+import { isValidThemeId } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'
 import ThemeToggle from '@/components/ThemeToggle'
 
@@ -113,8 +114,12 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
 
         // Determine theme ID from saved theme
         const savedTheme = data.theme as SavedTheme | null
-        if (savedTheme && savedTheme.name) {
-          // Map saved theme name back to theme ID
+        if (savedTheme) {
+          // Resolve theme ID robustly:
+          // 1. Check if `type` stores a valid preset id (preset themes set type = preset id)
+          // 2. Check if the lowercased name is a valid theme id
+          // 3. Fall back to a label→id map for backward compat
+          // 4. Default to 'minimal'
           const themeMap: Record<string, GalleryThemeId> = {
             'Minimal': 'minimal',
             'Editorial': 'editorial',
@@ -122,8 +127,12 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             'Mosaic': 'mosaic',
             'Story': 'story',
           }
-          const id = themeMap[savedTheme.name] || 'minimal'
-          setThemeId(id)
+          const resolvedId: GalleryThemeId =
+            (isValidThemeId(savedTheme.type) && savedTheme.type) ||
+            (isValidThemeId(savedTheme.name?.toLowerCase()) && (savedTheme.name.toLowerCase() as GalleryThemeId)) ||
+            themeMap[savedTheme.name] ||
+            'minimal'
+          setThemeId(resolvedId)
         }
 
         // Transform photos

@@ -1,0 +1,33 @@
+# CODEOWNERS
+# These owners will be requested for review when someone opens a pull request
+# modifying code in these directories/files.
+
+# Global
+* @Kipsmthn
+
+# Security-sensitive areas
+/src/lib/auth/ @Kipsmthn
+/src/lib/api/route-boundaries.ts @Kipsmthn
+/src/middleware.ts @Kipsmthn
+/src/proxy.ts @Kipsmthn
+/src/lib/gallery/pin.ts @Kipsmthn
+/src/lib/gallery/session.ts @Kipsmthn
+/src/lib/contracts/server.ts @Kipsmthn
+
+# Database schema and migrations
+/src/db/schema.ts @Kipsmthn
+/drizzle/ @Kipsmthn
+
+# API routes
+/src/app/api/ @Kipsmthn
+
+# CI/CD and infrastructure
+/.github/workflows/ @Kipsmthn
+/.github/dependabot.yml @Kipsmthn
+/vercel.json @Kipsmthn
+/vercel.ts @Kipsmthn
+/docker-compose.yml @Kipsmthn
+/Dockerfile @Kipsmthn
+
+# Documentation
+/docs/soc2/ @Kipsmthn

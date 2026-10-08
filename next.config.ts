@@ -1,5 +1,6 @@
 // next.config.ts
 import type { NextConfig } from 'next';
+import webpack from 'webpack';
 
 const nextConfig: NextConfig = {
   // Next.js 16 defaults to Turbopack. This project's webpack config (client
@@ -44,6 +45,10 @@ const nextConfig: NextConfig = {
   },
 
   webpack: (config, { isServer }) => {
+    config.plugins.push(
+      new webpack.IgnorePlugin({ resourceRegExp: /^pg-native$/ }),
+    );
+
     if (!isServer) {
       // Don't bundle Node.js modules on the client
       config.resolve.fallback = {

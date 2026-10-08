@@ -13,7 +13,8 @@
     "audit:development": "env -u npm_config_allow_scripts npm audit --audit-level=high || true",
     "db:migrate": "drizzle-kit migrate",
     "db:seed:equipment": "tsx src/db/seed-equipment.ts",
-    "db:seed:templates": "tsx src/db/seed-templates.ts"
+    "db:seed:templates": "tsx src/db/seed-templates.ts",
+    "healthcheck": "node scripts/healthcheck.mjs"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.7",

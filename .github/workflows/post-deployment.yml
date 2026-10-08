@@ -1,0 +1,21 @@
+name: Post-deployment smoke test
+
+on:
+  deployment_status:
+
+jobs:
+  healthcheck:
+    if: >-
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Check production health endpoint
+        run: npm run healthcheck -- "${{ github.event.deployment_status.target_url || github.event.deployment_status.environment_url }}"

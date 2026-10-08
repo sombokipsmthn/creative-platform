@@ -161,7 +161,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const context = await getAuthenticatedContext();
+    const context = await getAuthenticatedContext(request);
 
     if ("error" in context) {
       return context.error;

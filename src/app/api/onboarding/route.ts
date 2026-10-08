@@ -60,9 +60,9 @@ function normaliseHandle(value: unknown): string {
     .slice(0, 40);
 }
 
-async function getAuthenticatedContext() {
+async function getAuthenticatedContext(request: Request) {
   const session = await auth.api.getSession({
-    headers: new Headers(),
+    headers: request.headers,
   });
 
   if (!session?.user) {
@@ -106,7 +106,7 @@ async function getAuthenticatedContext() {
 
 export async function GET(request: Request) {
   try {
-    const context = await getAuthenticatedContext();
+    const context = await getAuthenticatedContext(request);
 
     if ("error" in context) {
       return context.error;

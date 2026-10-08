@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth/auth";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -16,7 +17,7 @@ export default async function AuthRedirectPage() {
    */
 
   const session = await auth.api.getSession({
-    headers: new Headers(),
+    headers: await headers(),
   });
 
   if (!session?.user) {

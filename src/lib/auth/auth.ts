@@ -29,6 +29,14 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     maxPasswordLength: 128,
     autoSignIn: false,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your Creative Platform password",
+        text: `Reset your password by opening this link: ${url}`,
+        html: `<p>Reset your password by clicking <a href="${url}">this link</a>.</p>`,
+      });
+    },
   },
   emailVerification: {
     sendOnSignUp: true,
@@ -44,6 +52,12 @@ export const auth = betterAuth({
     },
   },
   ...(googleProvider ? { socialProviders: { google: googleProvider } } : {}),
+  account: {
+    accountLinking: {
+      trustedProviders: ["google"],
+      requireLocalEmailVerified: true,
+    },
+  },
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,

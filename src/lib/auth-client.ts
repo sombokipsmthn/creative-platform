@@ -1,8 +1,6 @@
 import { createAuthClient } from "better-auth/react";
-import { sentinelClient } from "@better-auth/infra/client";
-
-const identifyUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_IDENTIFY_URL?.trim();
+import { passkeyClient } from "@better-auth/passkey/client";
 
 export const authClient = createAuthClient({
-  plugins: identifyUrl ? [sentinelClient({ identifyUrl })] : [],
+  plugins: [passkeyClient()],
 });

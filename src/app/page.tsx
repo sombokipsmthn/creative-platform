@@ -113,6 +113,7 @@ export default function HomePage() {
                   src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"
                   alt="Creative business platform with workspace and tools"
                   fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                   className="object-cover"
                 />
               </div>

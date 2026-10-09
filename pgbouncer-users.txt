@@ -1,0 +1,2 @@
+"kipsmthn" "your_db_password_here"
+"admin" "pgbouncer_admin_password"

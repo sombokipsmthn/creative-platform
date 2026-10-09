@@ -4,6 +4,8 @@ const { mockAuth, mockDb } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockDb: {
     select: vi.fn(),
+    insert: vi.fn(),
+    query: { users: { findFirst: vi.fn() } },
   },
 }));
 
@@ -32,13 +34,27 @@ describe("POST /api/users/sync", () => {
       })),
     });
 
+    mockDb.insert.mockReturnValue({
+      values: vi.fn(() => ({
+        onConflictDoNothing: vi.fn(() => ({
+          returning: vi.fn().mockResolvedValue([{
+            id: "user_123",
+            email: "creator@example.com",
+            name: "Creator",
+            onboardingStatus: "incomplete",
+            onboardingStep: 1,
+          }]),
+        })),
+      })),
+    });
+
     const request = new Request("http://localhost/api/users/sync");
     const response = await POST(request);
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       needsOnboarding: true,
-      user: null,
+      user: expect.objectContaining({ id: "user_123" }),
       profile: null,
     });
   });

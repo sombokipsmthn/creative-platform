@@ -73,18 +73,23 @@ async function getAuthenticatedContext(request: Request) {
 
   try {
     const localUser = await db.query.users.findFirst({
-      where: eq(users.authUserId, session.user.id)
+      where: eq(users.id, session.user.id),
     });
 
     if (!localUser) {
-      return {
-        error: NextResponse.json(
-          {
-            error: "Local creator account not found. Please complete sign-up first.",
-          },
-          { status: 404 }
-        ),
-      };
+      const [created] = await db.insert(users).values({
+        id: session.user.id,
+        email: session.user.email.toLowerCase(),
+        name: session.user.name || session.user.email.split("@")[0] || "Creator",
+        emailVerified: session.user.emailVerified,
+        image: session.user.image,
+        onboardingStatus: "incomplete",
+        onboardingStep: 1,
+      }).onConflictDoNothing({ target: users.id }).returning();
+
+      const provisioned = created ?? await db.query.users.findFirst({ where: eq(users.id, session.user.id) });
+      if (provisioned) return { session, localUser: provisioned };
+      return { error: NextResponse.json({ error: "Unable to provision your creator account." }, { status: 500 }) };
     }
 
     return { session, localUser };

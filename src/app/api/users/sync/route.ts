@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     const [localUser] = await db
       .select()
       .from(users)
-      .where(eq(users.authUserId, session.user.id))
+      .where(eq(users.id, session.user.id))
       .limit(1);
 
     // If there is no local user yet, we can immediately respond that

@@ -33,8 +33,12 @@ const socialProviders = {
   ...(appleProvider ? { apple: appleProvider } : {}),
 };
 
+const baseURL = process.env.NODE_ENV === "development"
+  ? "http://localhost:3005"
+  : process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005";
+
 export const auth = betterAuth({
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005",
+  baseURL,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: { user: users, session: sessions, account: accounts, verification: verifications },
@@ -53,17 +57,12 @@ export const auth = betterAuth({
   },
   ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   session: {
-    modelName: "sessions",
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
-  account: {
-    modelName: "accounts",
-  },
-  verification: {
-    modelName: "verifications",
-  },
+  account: {},
+  verification: {},
   advanced: {
     cookiePrefix: "kipsmthn",
     crossSubDomainCookies: { enabled: true },
@@ -74,7 +73,7 @@ export const auth = betterAuth({
       path: "/",
     },
   },
-  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005"],
+  trustedOrigins: [baseURL],
   plugins: [dash()],
 });
 

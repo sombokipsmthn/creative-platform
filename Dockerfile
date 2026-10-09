@@ -13,11 +13,11 @@ RUN npm install
 COPY . .
 
 ARG DATABASE_URL=postgresql://build:[REDACTED]@localhost:5432/build
-ARG BETTER_AUTH_SECRET=build-only-secret
 ENV DATABASE_URL=${DATABASE_URL}
-ENV BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
 
-RUN npx next build --webpack
+RUN --mount=type=secret,id=better_auth_secret,required=false \
+    export BETTER_AUTH_SECRET="$(cat /run/secrets/better_auth_secret 2>/dev/null || printf '%s' build-only-secret)" && \
+    npm run build
 
 FROM node:22-alpine AS runtime
 WORKDIR /app

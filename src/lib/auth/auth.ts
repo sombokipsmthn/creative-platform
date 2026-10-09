@@ -65,7 +65,7 @@ export const auth = betterAuth({
       rpID: new URL(appUrl).hostname,
       rpName: "KIPSMTHN Creative Platform",
       origin: appUrl,
-      schema: { passkey: { modelName: "passkeys" } },
+      schema: { passkey: { modelName: "passkey" } },
     }),
   ],
 });

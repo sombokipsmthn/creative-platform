@@ -33,13 +33,12 @@ export default async function AuthRedirectPage() {
    */
 
   const localUser = await db.query.users.findFirst({
-    where: eq(users.authUserId, session.user.id),
+    where: eq(users.id, session.user.id),
   });
 
   if (!localUser) {
-    // Create local user record if it doesn't exist
     const [newUser] = await db.insert(users).values({
-      authUserId: session.user.id,
+      id: session.user.id,
       email: session.user.email,
       name: session.user.name || session.user.email.split("@")[0],
       onboardingStatus: "incomplete",
@@ -48,9 +47,7 @@ export default async function AuthRedirectPage() {
       image: session.user.image,
     }).returning();
 
-    if (newUser) {
-      redirect("/admin/onboarding");
-    }
+    if (newUser) redirect("/admin/onboarding");
   }
 
   /*

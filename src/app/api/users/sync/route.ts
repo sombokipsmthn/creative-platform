@@ -47,34 +47,42 @@ export async function POST(request: Request) {
      * 2. Brand-new Better Auth users
      */
 
-    // Fetch the local user by the Better Auth user ID. Do **not** create a new
-    // record here – creation should happen only in /auth or the onboarding flow.
     const [localUser] = await db
       .select()
       .from(users)
-      .where(eq(users.authUserId, session.user.id))
+      .where(eq(users.id, session.user.id))
       .limit(1);
 
-    // If there is no local user yet, we can immediately respond that
-    // onboarding is required. No profile lookup is necessary and we avoid
-    // accessing `localUser.id` when undefined.
     if (!localUser) {
-      console.log(
-        "Creator sync: no local user found for auth ID",
-        session.user.id
-      );
-      return NextResponse.json({
-        needsOnboarding: true,
-        user: null,
-        profile: null,
+      const [createdUser] = await db
+        .insert(users)
+        .values({
+          id: session.user.id,
+          email: session.user.email.toLowerCase(),
+          name: session.user.name || session.user.email.split("@")[0] || "Creator",
+          emailVerified: session.user.emailVerified,
+          image: session.user.image,
+          onboardingStatus: "incomplete",
+          onboardingStep: 1,
+        })
+        .onConflictDoNothing({ target: users.id })
+        .returning();
+
+      const provisionedUser = createdUser ?? await db.query.users.findFirst({
+        where: eq(users.id, session.user.id),
       });
+
+      if (!provisionedUser) {
+        return NextResponse.json({ error: "Unable to provision your creator account." }, { status: 500 });
+      }
+
+      return NextResponse.json({ needsOnboarding: true, user: provisionedUser, profile: null });
     }
 
     console.log(
       "Creator sync: local user confirmed",
       {
         id: localUser.id,
-        authUserId: localUser.authUserId,
         onboardingStatus: localUser.onboardingStatus,
         onboardingStep: localUser.onboardingStep,
       }

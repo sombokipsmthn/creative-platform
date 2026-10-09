@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3005 -H 0.0.0.0",
-    "build": "next build --webpack",
+    "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
     "lint": "eslint",
     "test": "vitest run",
@@ -14,11 +14,13 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed:equipment": "tsx src/db/seed-equipment.ts",
     "db:seed:templates": "tsx src/db/seed-templates.ts",
-    "healthcheck": "node scripts/healthcheck.mjs"
+    "healthcheck": "node scripts/healthcheck.mjs",
+    "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts"
   },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.7",
     "@better-auth/infra": "^0.4.15",
+    "@better-auth/passkey": "^1.7.7",
     "@libsql/client": "^0.18.0",
     "@neondatabase/serverless": "^1.1.0",
     "@tanstack/react-query": "^5.102.8",
@@ -42,6 +44,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "read-excel-file": "^6.0.3",
+    "resend": "^6.32.1",
     "sharp": "^0.35.5",
     "svix": "^2.3.0",
     "uuid": "11.1.1"
@@ -61,12 +64,7 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^5.0.0",
-    "webpack": "^5.110.3",
-    "webpack-cli": "^7.2.3"
-  },
-  "bin": {
-    "webpack": "src/lib/webpack-shim.js"
+    "vitest": "^5.0.0"
   },
   "allowScripts": {
     "unrs-resolver@1.12.2": true,

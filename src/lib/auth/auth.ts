@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { passkey } from "@better-auth/passkey";
+import { dash } from "@better-auth/infra";
 import { db } from "@/db";
 import { sendEmail } from "@/lib/email";
 import { users, sessions, accounts, verifications, passkeys } from "@/db/schema";
@@ -75,6 +76,7 @@ export const auth = betterAuth({
   },
   trustedOrigins: [appUrl],
   plugins: [
+    dash(),
     passkey({
       rpID: new URL(appUrl).hostname,
       rpName: "KIPSMTHN Creative Platform",

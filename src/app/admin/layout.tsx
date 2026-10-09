@@ -160,24 +160,6 @@ export default function AdminLayout({
   const splitView = useSplitView();
 
   useEffect(() => {
-<<<<<<< HEAD
-    async function checkAuth() {
-      try {
-        const { data: session } = await authClient.getSession();
-        setIsAuthenticated(!!session);
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
-=======
->>>>>>> c9a053ac0c9cc73dd4f9efc062839b7df9d54f87
     if (!isAuthenticated) return;
     let isMounted = true;
 

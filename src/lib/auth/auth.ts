@@ -76,7 +76,7 @@ export const auth = betterAuth({
   },
   trustedOrigins: [appUrl],
   plugins: [
-    dash(),
+    dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
     passkey({
       rpID: new URL(appUrl).hostname,
       rpName: "KIPSMTHN Creative Platform",

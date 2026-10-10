@@ -21,6 +21,8 @@ import { join, resolve } from "node:path";
 // Types
 // ---------------------------------------------------------------------------
 
+type TableName = typeof PURGEABLE_TABLES[number] | typeof PRESERVED_TABLES[number];
+
 interface TableReport {
   table: string;
   estimatedRows: number;
@@ -275,7 +277,7 @@ async function getAllTableCounts(pool: Pool): Promise<Map<string, number>> {
     try {
       const result = await pool.query(`SELECT COUNT(*) FROM "${table_name}"`);
       counts.set(table_name, parseInt(result.rows[0]?.count ?? "0", 10));
-    } catch (err) {
+    } catch (err: any) {
       console.warn(`Warning: Could not count rows for table ${table_name}:`, err.message);
       counts.set(table_name, -1); // Error indicator
     }
@@ -285,7 +287,7 @@ async function getAllTableCounts(pool: Pool): Promise<Map<string, number>> {
 
 async function getActualCount(pool: Pool, tableName: string): Promise<number> {
   try {
-    const result = await pool.query(`SELECT COUNT(*) FROM "${table_name}"`);
+    const result = await pool.query(`SELECT COUNT(*) FROM "${tableName}"`);
     return parseInt(result.rows[0]?.count ?? "0", 10);
   } catch {
     return 0;
@@ -393,7 +395,7 @@ async function getStorageReferences(pool: Pool): Promise<StorageFileReference[]>
           // Column might not exist - skip
         }
       }
-    } catch (tableErr) {
+    } catch (tableErr: any) {
       console.warn(`Warning: Could not query storage references for ${table}:`, tableErr.message);
     }
   }
@@ -457,11 +459,11 @@ async function runAudit(): Promise<AuditReport> {
         notes: ""
       };
 
-      if (PRESERVED_TABLES.includes(tableName as any)) {
+      if (PRESERVED_TABLES.includes(tableName as TableName)) {
         preservedTables.push(tableName);
         tableReport.notes = "Preserved (equipment/migration)";
         tables.push(tableReport);
-      } else if (PURGEABLE_TABLES.includes(tableName as any)) {
+      } else if (PURGEABLE_TABLES.includes(tableName as TableName)) {
         purgeTargets.push(tableReport);
         purgedRecordEstimate += displayCount;
         tables.push(tableReport);
@@ -532,7 +534,7 @@ async function executePurge(): Promise<ExecutionResult> {
       processedTables.add(table);
 
       // Skip preserved tables
-      if (PRESERVED_TABLES.includes(table as any)) continue;
+      if (PRESERVED_TABLES.includes(table as TableName)) continue;
 
       try {
         // Get count before deletion
@@ -630,7 +632,7 @@ function formatAuditReport(report: AuditReport): string {
 
   lines.push("\n[UNCLASSIFIED - MANUAL REVIEW]");
   const unclassified = report.tables.filter(
-    (t) => !PURGEABLE_TABLES.includes(t.table as any) && !report.preservedTables.includes(t.table as any)
+    (t) => !PURGEABLE_TABLES.includes(t.table as TableName) && !report.preservedTables.includes(t.table as TableName)
   );
   if (unclassified.length === 0) {
     lines.push("  (none)");

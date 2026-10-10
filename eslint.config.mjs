@@ -1,11 +1,17 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
+import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    plugins: {
+      "react": reactPlugin,
+      "react-hooks": reactHooksPlugin
+    },
     rules: {
       "@typescript-eslint/no-unused-vars": "off",
       "react-hooks/exhaustive-deps": "off",
@@ -33,6 +39,13 @@ const eslintConfig = defineConfig([
     "**/*.bak3",
     "**/*.before",
   ]),
+  // Allow CommonJS scripts to use require()
+  {
+    files: ["scripts/**/*.cjs", "*.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

@@ -5,6 +5,7 @@ import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
+import { Analytics } from '@vercel/analytics/next';
 
 validateEnv();
 
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <QueryProvider>
           <CreatorProvider>{children}</CreatorProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );

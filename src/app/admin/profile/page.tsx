@@ -40,6 +40,20 @@ export default function AdminProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [passkeyName, setPasskeyName] = useState("");
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+
+  async function registerPasskey() {
+    setPasskeyLoading(true);
+    setMessage(null);
+    const result = await authClient.passkey.addPasskey({ name: passkeyName.trim() || "My passkey" });
+    if (result.error) setMessage("Passkey registration failed. Use a supported device and try again.");
+    else {
+      setPasskeyName("");
+      setMessage("Passkey registered. You can use it to sign in next time.");
+    }
+    setPasskeyLoading(false);
+  }
 
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -227,6 +241,15 @@ export default function AdminProfilePage() {
             </div>
           </section>
 
+          <section className="ui-card p-5 sm:p-7">
+            <p className="ui-eyebrow">Account security</p>
+            <h2 className="ui-section-title">Passkeys</h2>
+            <p className="ui-meta mt-2">Register this device or a security key for passwordless sign-in.</p>
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} placeholder="Passkey name (optional)" className="ui-input flex-1" disabled={passkeyLoading} />
+              <button type="button" onClick={() => void registerPasskey()} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{passkeyLoading ? "Registering…" : "Register passkey"}</button>
+            </div>
+          </section>
           <section className="ui-card">
             <div className="border-b border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
               <p className="ui-eyebrow">Identity</p>

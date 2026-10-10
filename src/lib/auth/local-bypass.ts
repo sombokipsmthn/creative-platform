@@ -14,7 +14,9 @@ export function getLocalAuthBypassState(
   },
 ): LocalAuthBypassState {
   const requestUrl = new URL(request.url);
-  const hostname = requestUrl.hostname.toLowerCase();
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const hostHeader = forwardedHost || request.headers.get("host");
+  const hostname = (hostHeader ? hostHeader.split(",")[0] : requestUrl.host).split(":")[0].toLowerCase();
   const localHostname = hostname === "localhost" || hostname === "127.0.0.1";
   const flagConfigured = env.LOCAL_AUTH_BYPASS === "true";
 

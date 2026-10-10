@@ -43,20 +43,14 @@ function money(value: unknown) {
 
 async function safeGalleryStats(creator: string, periodStart: Date, periodEnd: Date) {
   try {
-    const [statuses, recent] = await Promise.all([
-      db.select({
-        status: galleries.status,
-        count: count(),
-        periodCount: sql<number>`count(*) filter (where ${gte(galleries.createdAt, periodStart)} and ${lt(galleries.createdAt, periodEnd)})`.mapWith(Number),
-      }).from(galleries).where(eq(galleries.creatorId, creator)).groupBy(galleries.status),
-      db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.createdAt }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updatedAt)).limit(5),
-    ]);
-    const lifetime = [{ value: statuses.reduce((total, row) => total + Number(row.count), 0) }];
-    const period = [{ value: statuses.reduce((total, row) => total + row.periodCount, 0) }];
+    const lifetime = await db.select({ value: count() }).from(galleries).where(eq(galleries.creatorId, creator));
+    const period = await db.select({ value: count() }).from(galleries).where(and(eq(galleries.creatorId, creator), gte(galleries.createdAt, periodStart), lt(galleries.createdAt, periodEnd)));
+    const statuses = await db.select({ status: galleries.status, count: count() }).from(galleries).where(eq(galleries.creatorId, creator)).groupBy(galleries.status);
+    const recent = await db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.createdAt }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updatedAt)).limit(5);
     return { lifetime, period, statuses, recent };
   } catch (error) {
     console.warn("Dashboard gallery metrics unavailable; returning empty gallery data.", error);
-    return { lifetime: [{ value: 0 }], period: [{ value: 0 }], statuses: [] as Array<{ status: string; count: number; periodCount: number }>, recent: [] as Array<{ id: string; title: string; status: string; createdAt: Date }> };
+    return { lifetime: [{ value: 0 }], period: [{ value: 0 }], statuses: [] as Array<{ status: string; count: number }>, recent: [] as Array<{ id: string; title: string; status: string; createdAt: Date }> };
   }
 }
 
@@ -73,10 +67,27 @@ export async function GET(request: Request) {
     const now = new Date();
     const periodStart = startOfPeriod(now, range);
     const periodEnd = addDays(startOfDay(now), 1);
+    const galleryStats = await safeGalleryStats(creator, periodStart, periodEnd);
 
     const [
-      galleryStats,
-      clientStats,
+      clientLifetime,
+      clientPeriod,
+      activeClients,
+      projectLifetime,
+      projectPeriod,
+      activeProjects,
+      completedProjects,
+      quoteLifetime,
+      quotePeriod,
+      quoteStatusRows,
+      quotePeriodValue,
+      acceptedQuoteValue,
+      invoiceLifetime,
+      invoicePeriod,
+      invoiceStatusRows,
+      invoicePeriodValue,
+      paidInvoicePeriodValue,
+      overdueInvoices,
       recentClients,
       projectStats,
       recentProjects,
@@ -85,12 +96,24 @@ export async function GET(request: Request) {
       invoiceStats,
       recentInvoices,
     ] = await Promise.all([
-      safeGalleryStats(creator, periodStart, periodEnd),
-      db.select({
-        status: clients.status,
-        count: count(),
-        periodCount: sql<number>`count(*) filter (where ${gte(clients.createdAt, periodStart)} and ${lt(clients.createdAt, periodEnd)})`.mapWith(Number),
-      }).from(clients).where(eq(clients.creatorId, creator)).groupBy(clients.status),
+      db.select({ value: count() }).from(clients).where(eq(clients.creatorId, creator)),
+      db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), gte(clients.createdAt, periodStart), lt(clients.createdAt, periodEnd))),
+      db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), eq(clients.status, "active"))),
+      db.select({ value: count() }).from(projects).where(eq(projects.creatorId, creator)),
+      db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), gte(projects.createdAt, periodStart), lt(projects.createdAt, periodEnd))),
+      db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), eq(projects.status, "active"))),
+      db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), eq(projects.status, "completed"))),
+      db.select({ value: count() }).from(quotes).where(eq(quotes.creatorId, creator)),
+      db.select({ value: count() }).from(quotes).where(and(eq(quotes.creatorId, creator), gte(quotes.createdAt, periodStart), lt(quotes.createdAt, periodEnd))),
+      db.select({ status: quotes.status, count: count() }).from(quotes).where(eq(quotes.creatorId, creator)).groupBy(quotes.status),
+      db.select({ value: sum(quotes.total) }).from(quotes).where(and(eq(quotes.creatorId, creator), gte(quotes.createdAt, periodStart), lt(quotes.createdAt, periodEnd))),
+      db.select({ value: sum(quotes.total) }).from(quotes).where(and(eq(quotes.creatorId, creator), eq(quotes.status, "accepted"))),
+      db.select({ value: count() }).from(invoices).where(eq(invoices.creatorId, creator)),
+      db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
+      db.select({ status: invoices.status, count: count() }).from(invoices).where(eq(invoices.creatorId, creator)).groupBy(invoices.status),
+      db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
+      db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updatedAt, periodStart), lt(invoices.updatedAt, periodEnd))),
+      db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.dueDate, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
       db.select({ id: clients.id, name: clients.name, createdAt: clients.createdAt }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.createdAt)).limit(5),
       db.select({
         status: projects.status,
@@ -117,27 +140,9 @@ export async function GET(request: Request) {
       db.select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber, title: invoices.title, status: invoices.status, total: invoices.total, currency: invoices.currency, createdAt: invoices.createdAt }).from(invoices).where(eq(invoices.creatorId, creator)).orderBy(desc(invoices.updatedAt)).limit(5),
     ]);
 
-    const clientStatuses = Object.fromEntries(clientStats.map((row) => [row.status, Number(row.count)]));
-    const projectStatuses = Object.fromEntries(projectStats.map((row) => [row.status, Number(row.count)]));
-    const quoteStatuses = Object.fromEntries(quoteStats.map((row) => [row.status, Number(row.count)]));
-    const invoiceStatuses = Object.fromEntries(invoiceStats.map((row) => [row.status, Number(row.count)]));
+    const quoteStatuses = Object.fromEntries(quoteStatusRows.map((row) => [row.status, Number(row.count)]));
+    const invoiceStatuses = Object.fromEntries(invoiceStatusRows.map((row) => [row.status, Number(row.count)]));
     const galleryStatuses = Object.fromEntries(galleryStats.statuses.map((row) => [row.status, Number(row.count)]));
-    const clientLifetime = clientStats.reduce((total, row) => total + Number(row.count), 0);
-    const clientPeriod = clientStats.reduce((total, row) => total + row.periodCount, 0);
-    const projectLifetime = projectStats.reduce((total, row) => total + Number(row.count), 0);
-    const projectPeriod = projectStats.reduce((total, row) => total + row.periodCount, 0);
-    const quoteLifetime = quoteStats.reduce((total, row) => total + Number(row.count), 0);
-    const quotePeriod = quoteStats.reduce((total, row) => total + row.periodCount, 0);
-    const invoiceLifetime = invoiceStats.reduce((total, row) => total + Number(row.count), 0);
-    const invoicePeriod = invoiceStats.reduce((total, row) => total + row.periodCount, 0);
-    const quotePeriodValue = quoteStats.reduce((total, row) => total + row.periodValue, 0);
-    const acceptedQuoteValue = quoteStats.find((row) => row.status === "accepted")?.statusValue ?? 0;
-    const invoicePeriodValue = invoiceStats.reduce((total, row) => total + row.periodValue, 0);
-    const paidInvoicePeriodValue = invoiceStats.reduce((total, row) => total + row.paidPeriodValue, 0);
-    const overdueInvoices = invoiceStats.reduce((total, row) => total + row.overdueCount, 0);
-    const activeClients = clientStatuses.active ?? 0;
-    const activeProjects = projectStatuses.active ?? 0;
-    const completedProjects = projectStatuses.completed ?? 0;
 
     const acceptedQuotes = quoteStatuses.accepted ?? 0;
     const decisionQuotes = (quoteStatuses.sent ?? 0) + (quoteStatuses.accepted ?? 0) + (quoteStatuses.rejected ?? 0) + (quoteStatuses.invoiced ?? 0);
@@ -155,17 +160,17 @@ export async function GET(request: Request) {
       range,
       period: { start: periodStart.toISOString(), end: periodEnd.toISOString() },
       overview: {
-        clients: clientLifetime,
-        newClients: clientPeriod,
-        activeClients,
-        projects: projectLifetime,
-        newProjects: projectPeriod,
-        activeProjects,
-        completedProjects,
-        quotes: quoteLifetime,
-        newQuotes: quotePeriod,
-        invoices: invoiceLifetime,
-        newInvoices: invoicePeriod,
+        clients: Number(clientLifetime[0]?.value ?? 0),
+        newClients: Number(clientPeriod[0]?.value ?? 0),
+        activeClients: Number(activeClients[0]?.value ?? 0),
+        projects: Number(projectLifetime[0]?.value ?? 0),
+        newProjects: Number(projectPeriod[0]?.value ?? 0),
+        activeProjects: Number(activeProjects[0]?.value ?? 0),
+        completedProjects: Number(completedProjects[0]?.value ?? 0),
+        quotes: Number(quoteLifetime[0]?.value ?? 0),
+        newQuotes: Number(quotePeriod[0]?.value ?? 0),
+        invoices: Number(invoiceLifetime[0]?.value ?? 0),
+        newInvoices: Number(invoicePeriod[0]?.value ?? 0),
         galleries: Number(galleryStats.lifetime[0]?.value ?? 0),
         newGalleries: Number(galleryStats.period[0]?.value ?? 0),
       },

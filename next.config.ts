@@ -38,6 +38,44 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't bundle Node.js modules on the client
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        'util/types': false,
+        crypto: false,
+        stream: false,
+        buffer: false,
+        path: false,
+        os: false,
+        child_process: false,
+        zlib: false,
+        http: false,
+        https: false,
+        querystring: false,
+        url: false,
+      };
+    }
+
+    // Ensure better-auth and related packages are externalized for server
+    if (isServer) {
+      config.externals = [
+        ...(config.externals || []),
+        '@better-auth/drizzle-adapter',
+        'pg',
+        'better-auth',
+        'jose',
+      ];
+    }
+
+    return config;
+  },
 };
 
 export default nextConfig;

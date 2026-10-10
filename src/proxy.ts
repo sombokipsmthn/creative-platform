@@ -1,4 +1,5 @@
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
+import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 
 function isAdminRoute(pathname: string) {
@@ -17,59 +18,14 @@ function isApiAuthRoute(pathname: string) {
   return pathname.startsWith("/api/auth");
 }
 
-function getAuthOrigin() {
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3005";
-  }
-
-  const configuredOrigin = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
-
-  if (!configuredOrigin) {
-    console.error("Cannot verify the admin session because no auth server URL is configured.");
-    return null;
-  }
-
-  try {
-    return new URL(configuredOrigin).origin;
-  } catch (error) {
-    console.error("Cannot verify the admin session because the auth server URL is invalid:", error);
-    return null;
-  }
-}
-
-async function hasAuthenticatedSession(request: Request, origin: string) {
-  try {
-    const response = await fetch(new URL("/api/auth/get-session", origin), {
-      headers: { cookie: request.headers.get("cookie") ?? "" },
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      console.error("Failed to verify the admin session; auth route returned:", response.status);
-      return false;
-    }
-
-    const session: unknown = await response.json();
-    return (
-      typeof session === "object" &&
-      session !== null &&
-      "user" in session &&
-      Boolean(session.user)
-    );
-  } catch (error) {
-    console.error("Failed to verify the admin session in proxy:", error);
-    return false;
-  }
-}
-
 export default async function customMiddleware(request: Request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const bypassState = getLocalAuthBypassState(request);
 
-  if (isAuthRoute(pathname) || isApiAuthRoute(pathname)) {
-    return NextResponse.next();
+  if (!configuredOrigin) {
+    console.error("Cannot verify the admin session because no auth server URL is configured.");
+    return null;
   }
 
   // This bypass only affects page navigation. API routes retain their own auth checks.
@@ -83,6 +39,9 @@ export default async function customMiddleware(request: Request) {
     });
     return response;
   }
+
+  if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
+    const session = await auth.api.getSession({ headers: request.headers });
 
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
     const authOrigin = getAuthOrigin();

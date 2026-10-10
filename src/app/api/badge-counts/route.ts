@@ -8,22 +8,42 @@ export async function GET(req: Request) {
   return withCreatorApi(req, async (_request, user) => {
     const creatorId = user.id;
 
-    const [galleryCount, quoteCount, invoiceCount, contractCount, clientCount, projectCount] = await Promise.all([
-      db.execute(sql`SELECT COUNT(*)::int AS count FROM galleries WHERE creator_id = ${creatorId}`),
-      db.execute(sql`SELECT COUNT(*)::int AS count FROM quotes WHERE creator_id = ${creatorId} AND status = 'draft'`),
-      db.execute(sql`SELECT COUNT(*)::int AS count FROM invoices WHERE creator_id = ${creatorId} AND status = 'draft'`),
-      db.execute(sql`SELECT COUNT(*)::int AS count FROM contracts WHERE creator_id = ${creatorId} AND status = 'draft'`),
-      db.execute(sql`SELECT COUNT(*)::int AS count FROM clients WHERE creator_id = ${creatorId} AND status = 'active'`),
-      db.execute(sql`SELECT COUNT(*)::int AS count FROM projects WHERE creator_id = ${creatorId} AND status = 'draft'`),
-    ]);
+    const result = await db.execute(sql`
+      SELECT 'galleries' AS resource, COUNT(*)::int AS count
+      FROM galleries
+      WHERE creator_id = ${creatorId}
+      UNION ALL
+      SELECT 'quotes', COUNT(*)::int
+      FROM quotes
+      WHERE creator_id = ${creatorId} AND status = 'draft'
+      UNION ALL
+      SELECT 'invoices', COUNT(*)::int
+      FROM invoices
+      WHERE creator_id = ${creatorId} AND status = 'draft'
+      UNION ALL
+      SELECT 'contracts', COUNT(*)::int
+      FROM contracts
+      WHERE creator_id = ${creatorId} AND status = 'draft'
+      UNION ALL
+      SELECT 'clients', COUNT(*)::int
+      FROM clients
+      WHERE creator_id = ${creatorId} AND status = 'active'
+      UNION ALL
+      SELECT 'projects', COUNT(*)::int
+      FROM projects
+      WHERE creator_id = ${creatorId} AND status = 'draft'
+    `);
+    const countsByResource = new Map(
+      result.rows.map((row) => [String(row.resource), Number(row.count)])
+    );
 
     const counts = {
-      '/admin/quotes': Number(quoteCount.rows[0]?.count ?? 0),
-      '/admin/invoices': Number(invoiceCount.rows[0]?.count ?? 0),
-      '/admin/galleries': Number(galleryCount.rows[0]?.count ?? 0),
-      '/admin/contracts': Number(contractCount.rows[0]?.count ?? 0),
-      '/admin/clients': Number(clientCount.rows[0]?.count ?? 0),
-      '/admin/projects': Number(projectCount.rows[0]?.count ?? 0),
+      '/admin/quotes': countsByResource.get('quotes') ?? 0,
+      '/admin/invoices': countsByResource.get('invoices') ?? 0,
+      '/admin/galleries': countsByResource.get('galleries') ?? 0,
+      '/admin/contracts': countsByResource.get('contracts') ?? 0,
+      '/admin/clients': countsByResource.get('clients') ?? 0,
+      '/admin/projects': countsByResource.get('projects') ?? 0,
       '/admin/settings': 0,
     };
 

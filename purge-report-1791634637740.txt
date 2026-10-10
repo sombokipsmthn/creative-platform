@@ -1,0 +1,56 @@
+========================================================================
+PURGE AUDIT REPORT
+Generated: 2026-10-10T12:17:17.735Z
+========================================================================
+
+DATABASE INFO
+------------------------------------------------------------------------
+  Host:     ep-super-union-ay2kbrcr-pooler.c-5.us-east-2.aws.neon.tech
+  Database: neondb
+  Dev Mode: YES
+
+SUMMARY
+------------------------------------------------------------------------
+  Total Tables:         24
+  Total Records:        545
+  Orphaned References:  0
+  Purge Target Rows:    147
+
+TABLES BY CATEGORY
+------------------------------------------------------------------------
+
+[PURGE TARGETS]
+  accounts                                 2 rows  
+  clients                                  0 rows  
+  contract_templates                       0 rows  
+  creator_business_profiles                0 rows  
+  creator_profiles                         0 rows  
+  creator_services                         0 rows  
+  invoice_items                            0 rows  
+  invoices                                 0 rows  
+  passkeys                                 0 rows  
+  projects                                 0 rows  
+  quote_items                             14 rows  
+  quotes                                   5 rows  
+  sessions                               123 rows  
+  users                                    2 rows  
+  verifications                            1 rows  
+
+[PRESERVED TABLES]
+  __drizzle_migrations                (preserved)
+  equipment                           (preserved)
+
+[UNCLASSIFIED - MANUAL REVIEW]
+  account                                  0 rows  Unclassified - manual review required
+  quote_amendments                         0 rows  Unclassified - manual review required
+  session                                  0 rows  Unclassified - manual review required
+  user                                     0 rows  Unclassified - manual review required
+  verification                             0 rows  Unclassified - manual review required
+
+ORPHANED REFERENCES
+------------------------------------------------------------------------
+  (none detected)
+
+========================================================================
+MODE: DEVELOPMENT | ORPHANS: 0
+========================================================================

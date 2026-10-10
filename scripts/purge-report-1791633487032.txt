@@ -1,0 +1,56 @@
+========================================================================
+PURGE AUDIT REPORT
+Generated: 2026-10-10T11:58:07.016Z
+========================================================================
+
+DATABASE INFO
+------------------------------------------------------------------------
+  Host:     ep-super-union-ay2kbrcr-pooler.c-5.us-east-2.aws.neon.tech
+  Database: neondb
+  Dev Mode: YES
+
+SUMMARY
+------------------------------------------------------------------------
+  Total Tables:         8
+  Total Records:        544
+  Orphaned References:  0
+  Purge Target Rows:    146
+
+TABLES BY CATEGORY
+------------------------------------------------------------------------
+
+[PURGE TARGETS]
+  accounts                                 2 rows  Purge target (creator-owned data)
+  clients                                  0 rows  Purge target (creator-owned data)
+  contract_templates                       0 rows  Purge target (creator-owned data)
+  creator_business_profiles                0 rows  Purge target (creator-owned data)
+  creator_profiles                         0 rows  Purge target (creator-owned data)
+  creator_services                         0 rows  Purge target (creator-owned data)
+  invoice_items                            0 rows  Purge target (creator-owned data)
+  invoices                                 0 rows  Purge target (creator-owned data)
+  passkeys                                 0 rows  Purge target (creator-owned data)
+  projects                                 0 rows  Purge target (creator-owned data)
+  quote_items                             14 rows  Purge target (creator-owned data)
+  quotes                                   5 rows  Purge target (creator-owned data)
+  sessions                               123 rows  Purge target (creator-owned data)
+  users                                    2 rows  Purge target (creator-owned data)
+  verifications                            0 rows  Purge target (creator-owned data)
+
+[PRESERVED TABLES]
+  equipment                           (preserved)
+
+[UNCLASSIFIED - MANUAL REVIEW]
+  __drizzle_migrations                     8 rows  Unclassified - manual review required
+  account                                  0 rows  Unclassified - manual review required
+  quote_amendments                         0 rows  Unclassified - manual review required
+  session                                  0 rows  Unclassified - manual review required
+  user                                     0 rows  Unclassified - manual review required
+  verification                             0 rows  Unclassified - manual review required
+
+ORPHANED REFERENCES
+------------------------------------------------------------------------
+  (none detected)
+
+========================================================================
+MODE: DEVELOPMENT | ORPHANS: 0
+========================================================================

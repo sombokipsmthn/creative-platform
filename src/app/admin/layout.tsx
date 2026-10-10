@@ -249,7 +249,7 @@ export default function AdminLayout({
     return null;
   }
 
-  if (!hasLocalAccount) {
+  if (!hasLocalAccount && pathname !== '/admin/onboarding') {
     return <RedirectToOnboarding />;
   }
 

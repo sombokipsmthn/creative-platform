@@ -164,16 +164,6 @@ export default function AdminLayout({
   const splitView = useSplitView();
 
   useEffect(() => {
-    if (!localAuthBypass || session?.user) return;
-
-    void fetch('/api/dev-auth/bootstrap', { method: 'POST', credentials: 'include' })
-      .then((response) => {
-        if (response.ok) window.location.reload();
-      })
-      .catch(() => undefined);
-  }, [localAuthBypass, session?.user]);
-
-  useEffect(() => {
     if (!isAuthenticated) return;
     let isMounted = true;
 

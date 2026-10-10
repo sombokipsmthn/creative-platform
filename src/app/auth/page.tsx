@@ -37,7 +37,6 @@ export default async function AuthRedirectPage() {
   });
 
   if (!localUser) {
-    // Create local user record if it doesn't exist
     const [newUser] = await db.insert(users).values({
       id: session.user.id,
       email: session.user.email,
@@ -48,9 +47,7 @@ export default async function AuthRedirectPage() {
       image: session.user.image,
     }).returning();
 
-    if (newUser) {
-      redirect("/admin/onboarding");
-    }
+    if (newUser) redirect("/admin/onboarding");
   }
 
   /*

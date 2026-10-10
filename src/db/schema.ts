@@ -75,6 +75,22 @@ export const verifications = pgTable("verifications", {
   identifierIdx: index("verifications_identifier_idx").on(table.identifier),
 }));
 
+export const passkeys = pgTable("passkeys", {
+  id: text("id").primaryKey(),
+  name: text("name"),
+  publicKey: text("public_key").notNull(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  credentialID: text("credential_id").notNull().unique(),
+  counter: integer("counter").notNull(),
+  deviceType: text("device_type").notNull(),
+  backedUp: boolean("backed_up").notNull(),
+  transports: text("transports"),
+  aaguid: text("aaguid"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index("passkeys_user_id_idx").on(table.userId),
+  credentialIdx: index("passkeys_credential_id_idx").on(table.credentialID),
+}));
 export const creatorProfiles = pgTable("creator_profiles", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
@@ -83,7 +99,8 @@ export const creatorProfiles = pgTable("creator_profiles", {
   website: text("website"),
   location: text("location"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull()});
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 export const creatorServices = pgTable("creator_services", {
   id: uuid("id").defaultRandom().primaryKey(),

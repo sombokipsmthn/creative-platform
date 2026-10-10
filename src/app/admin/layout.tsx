@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
@@ -161,7 +161,27 @@ export default function AdminLayout({
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const [hasLocalAccount, setHasLocalAccount] = useState(true);
+  const bootstrapStarted = useRef(false);
   const splitView = useSplitView();
+
+  useEffect(() => {
+    if (
+      authPending ||
+      !localAuthBypass ||
+      session?.user ||
+      bootstrapStarted.current
+    ) {
+      return;
+    }
+
+    bootstrapStarted.current = true;
+    void fetch('/api/dev-auth/bootstrap', { method: 'POST', credentials: 'include' })
+      .then((response) => {
+        if (response.ok) window.location.reload();
+        else console.error('Local auth bootstrap failed with status:', response.status);
+      })
+      .catch((error) => console.error('Local auth bootstrap request failed:', error));
+  }, [authPending, localAuthBypass, session?.user]);
 
   useEffect(() => {
     if (!isAuthenticated) return;

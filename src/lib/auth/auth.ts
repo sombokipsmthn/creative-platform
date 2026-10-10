@@ -10,6 +10,30 @@ const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL ||
 const googleProvider = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
   ? { clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET }
   : undefined;
+const appleProvider =
+  process.env.APPLE_CLIENT_ID &&
+  process.env.APPLE_CLIENT_SECRET &&
+  process.env.APPLE_TEAM_ID &&
+  process.env.APPLE_KEY_ID &&
+  process.env.APPLE_PRIVATE_KEY
+    ? {
+        clientId: process.env.APPLE_CLIENT_ID,
+        clientSecret: process.env.APPLE_CLIENT_SECRET,
+        teamId: process.env.APPLE_TEAM_ID,
+        keyId: process.env.APPLE_KEY_ID,
+        privateKey: process.env.APPLE_PRIVATE_KEY,
+        scope: ["name", "email"],
+      }
+    : undefined;
+
+const socialProviders = {
+  ...(googleProvider ? { google: googleProvider } : {}),
+  ...(appleProvider ? { apple: appleProvider } : {}),
+};
+
+const baseURL = process.env.NODE_ENV === "development"
+  ? "http://localhost:3005"
+  : appUrl;
 
 const baseURL = process.env.NODE_ENV === "development"
   ? "http://localhost:3005"
@@ -17,7 +41,7 @@ const baseURL = process.env.NODE_ENV === "development"
 
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",
-  baseURL: appUrl,
+  baseURL,
   database: drizzleAdapter(db, {
     provider: "pg",
     schema: {
@@ -56,7 +80,7 @@ export const auth = betterAuth({
       });
     },
   },
-  ...(googleProvider ? { socialProviders: { google: googleProvider } } : {}),
+  ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
   account: {
     accountLinking: {
       trustedProviders: ["google"],
@@ -78,13 +102,13 @@ export const auth = betterAuth({
       path: "/",
     },
   },
-  trustedOrigins: [appUrl],
+  trustedOrigins: [baseURL],
   plugins: [
     dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
     passkey({
-      rpID: new URL(appUrl).hostname,
+      rpID: new URL(baseURL).hostname,
       rpName: "KIPSMTHN Creative Platform",
-      origin: appUrl,
+      origin: baseURL,
       schema: { passkey: { modelName: "passkey" } },
     }),
   ],

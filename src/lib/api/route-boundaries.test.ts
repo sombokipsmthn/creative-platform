@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 const { mockAuth, mockDb } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
@@ -28,6 +28,10 @@ import { withCreatorApi, ApiError } from "@/lib/api/route-boundaries";
 describe("withCreatorApi authorization boundary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("returns 401 when the request is unauthenticated (no authenticated user)", async () => {
@@ -110,5 +114,32 @@ describe("withCreatorApi authorization boundary", () => {
     expect(body.error).toBeDefined();
     // Verify no stack trace leaked
     expect(body.stack).toBeUndefined();
+  });
+
+  it("logs safe database diagnostics without exposing database details to clients", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "auth_123" }, session: { id: "session_1" } });
+    mockDb.query.users.findFirst.mockResolvedValue({ id: "auth_123" });
+    const diagnostic = Object.assign(new Error("private connection detail"), {
+      code: "42P01",
+      table: "galleries",
+    });
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const req = new Request("https://example.com/api/badge-counts");
+
+    const response = await withCreatorApi(
+      req,
+      vi.fn().mockRejectedValue(diagnostic)
+    );
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({ error: "Internal server error" });
+    expect(log).toHaveBeenCalledWith(
+      "Unexpected API failure",
+      expect.objectContaining({
+        path: "/api/badge-counts",
+        code: "42P01",
+        table: "galleries",
+      })
+    );
   });
 });

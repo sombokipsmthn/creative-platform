@@ -1,10 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { createRateLimiter } from './rate-limiter';
 
-// Mock the auth function
-vi.mock('@/clerk/nextjs/server', () => ({
-  auth: vi.fn()
-}));
+
 
 describe('RateLimiter', () => {
   let limiter: ReturnType<typeof createRateLimiter>;

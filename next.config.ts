@@ -2,10 +2,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  // Next.js 16 defaults to Turbopack. This project's webpack config (client
-  // Node.js fallbacks + server-side externals for better-auth) is webpack-only,
-  // so we pin the build to webpack and set an empty turbopack config to silence
-  // the "Turbopack + webpack config" error. See AGENTS.md build instructions.
   turbopack: {},
 
   // Next.js 16.3 + Vercel currently conflicts with standalone output:

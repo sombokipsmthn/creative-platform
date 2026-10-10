@@ -23,8 +23,9 @@ export default async function customMiddleware(request: Request) {
   const pathname = url.pathname;
   const bypassState = getLocalAuthBypassState(request);
 
-  if (isAuthRoute(pathname) || isApiAuthRoute(pathname)) {
-    return NextResponse.next();
+  if (!configuredOrigin) {
+    console.error("Cannot verify the admin session because no auth server URL is configured.");
+    return null;
   }
 
   // This bypass only affects page navigation. API routes retain their own auth checks.
@@ -42,7 +43,9 @@ export default async function customMiddleware(request: Request) {
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
     const session = await auth.api.getSession({ headers: request.headers });
 
-    if (!session) {
+  if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
+    const authOrigin = getAuthOrigin();
+    if (!authOrigin || !(await hasAuthenticatedSession(request, authOrigin))) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);
       const response = NextResponse.redirect(signInUrl);

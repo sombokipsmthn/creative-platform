@@ -1,24 +1,44 @@
-import { auth } from "@/lib/auth/auth";
-import { headers } from "next/headers";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-export async function getLocalUser(userId: string) {
-  const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
-  if (!user) throw new Error(`Local user not found for authenticated user ${userId}.`);
-  return user;
-}
+type AuthenticatedIdentity = {
+  id: string;
+  email: string;
+  name?: string | null;
+  emailVerified?: boolean;
+  image?: string | null;
+};
 
-export async function getOrCreateLocalUser(userId?: string) {
-  const session = userId ? null : await auth.api.getSession({ headers: await headers() });
-  const authUser = session?.user;
-  const id = userId || authUser?.id;
-  if (!id) throw new Error("Unauthenticated");
-  const existing = await db.query.users.findFirst({ where: eq(users.id, id) });
+export async function getOrCreateLocalUser(authUser: AuthenticatedIdentity) {
+  const existing = await db.query.users.findFirst({
+    where: eq(users.id, authUser.id),
+  });
   if (existing) return existing;
-  if (!authUser) throw new Error("Authenticated user could not be loaded.");
-  const [created] = await db.insert(users).values({ id, email: authUser.email.toLowerCase().trim(), name: authUser.name || authUser.email.split("@")[0] || "Creator", emailVerified: authUser.emailVerified, image: authUser.image }).returning();
-  if (!created) throw new Error("Application user could not be created.");
-  return created;
+
+  const email = authUser.email.toLowerCase().trim();
+  const [created] = await db
+    .insert(users)
+    .values({
+      id: authUser.id,
+      email,
+      name: authUser.name?.trim() || email.split("@")[0] || "Creator",
+      emailVerified: authUser.emailVerified ?? false,
+      image: authUser.image ?? null,
+      onboardingStatus: "incomplete",
+      onboardingStep: 1,
+    })
+    .onConflictDoNothing()
+    .returning();
+
+  if (created) return created;
+
+  // Another request may have created this identity after the initial read.
+  const concurrentUser = await db.query.users.findFirst({
+    where: eq(users.id, authUser.id),
+  });
+  if (concurrentUser) return concurrentUser;
+
+  // A different account already owns this email; never guess an identity link.
+  throw new Error("Creator account could not be provisioned due to an identity conflict.");
 }

@@ -4,10 +4,8 @@ import { headers } from "next/headers";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import {
-  creatorProfiles,
-  users,
-} from "@/db/schema";
+import { creatorProfiles } from "@/db/schema";
+import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 
 export default async function AuthRedirectPage() {
   /*
@@ -32,40 +30,13 @@ export default async function AuthRedirectPage() {
    * Find the local creator account associated with the Better Auth user.
    */
 
-  const localUser = await db.query.users.findFirst({
-    where: eq(users.id, session.user.id),
-  });
-
-  if (!localUser) {
-    const [newUser] = await db.insert(users).values({
-      id: session.user.id,
-      email: session.user.email,
-      name: session.user.name || session.user.email.split("@")[0],
-      onboardingStatus: "incomplete",
-      onboardingStep: 1,
-      emailVerified: session.user.emailVerified || false,
-      image: session.user.image,
-    }).returning();
-
-    if (newUser) redirect("/admin/onboarding");
-  }
+  const localUser = await getOrCreateLocalUser(session.user);
 
   /*
    * -------------------------------------------------------
    * SAFETY CHECK
    * -------------------------------------------------------
    */
-
-  if (!localUser) {
-    console.error(
-      "Auth redirect: local user still missing",
-      {
-        authUserId: session.user.id,
-      }
-    );
-
-    redirect("/admin/onboarding");
-  }
 
   /*
    * -------------------------------------------------------

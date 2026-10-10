@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, count, desc, eq, gte, lt, ne, sum } from "drizzle-orm";
+import { count, desc, eq, gte, lt, ne, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { clients, galleries, invoices, projects, quotes } from "@/db/schema";
@@ -89,8 +89,11 @@ export async function GET(request: Request) {
       paidInvoicePeriodValue,
       overdueInvoices,
       recentClients,
+      projectStats,
       recentProjects,
+      quoteStats,
       recentQuotes,
+      invoiceStats,
       recentInvoices,
     ] = await Promise.all([
       db.select({ value: count() }).from(clients).where(eq(clients.creatorId, creator)),
@@ -112,8 +115,28 @@ export async function GET(request: Request) {
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updatedAt, periodStart), lt(invoices.updatedAt, periodEnd))),
       db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.dueDate, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
       db.select({ id: clients.id, name: clients.name, createdAt: clients.createdAt }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.createdAt)).limit(5),
+      db.select({
+        status: projects.status,
+        count: count(),
+        periodCount: sql<number>`count(*) filter (where ${gte(projects.createdAt, periodStart)} and ${lt(projects.createdAt, periodEnd)})`.mapWith(Number),
+      }).from(projects).where(eq(projects.creatorId, creator)).groupBy(projects.status),
       db.select({ id: projects.id, name: projects.name, status: projects.status, createdAt: projects.createdAt }).from(projects).where(eq(projects.creatorId, creator)).orderBy(desc(projects.updatedAt)).limit(5),
+      db.select({
+        status: quotes.status,
+        count: count(),
+        periodCount: sql<number>`count(*) filter (where ${gte(quotes.createdAt, periodStart)} and ${lt(quotes.createdAt, periodEnd)})`.mapWith(Number),
+        periodValue: sql<number>`coalesce(sum(${quotes.total}) filter (where ${gte(quotes.createdAt, periodStart)} and ${lt(quotes.createdAt, periodEnd)}), 0)`.mapWith(Number),
+        statusValue: sql<number>`coalesce(sum(${quotes.total}), 0)`.mapWith(Number),
+      }).from(quotes).where(eq(quotes.creatorId, creator)).groupBy(quotes.status),
       db.select({ id: quotes.id, title: quotes.title, status: quotes.status, total: quotes.total, currency: quotes.currency, createdAt: quotes.createdAt }).from(quotes).where(eq(quotes.creatorId, creator)).orderBy(desc(quotes.updatedAt)).limit(5),
+      db.select({
+        status: invoices.status,
+        count: count(),
+        periodCount: sql<number>`count(*) filter (where ${gte(invoices.createdAt, periodStart)} and ${lt(invoices.createdAt, periodEnd)})`.mapWith(Number),
+        periodValue: sql<number>`coalesce(sum(${invoices.total}) filter (where ${gte(invoices.createdAt, periodStart)} and ${lt(invoices.createdAt, periodEnd)}), 0)`.mapWith(Number),
+        paidPeriodValue: sql<number>`coalesce(sum(${invoices.total}) filter (where ${invoices.status} = 'paid' and ${gte(invoices.updatedAt, periodStart)} and ${lt(invoices.updatedAt, periodEnd)}), 0)`.mapWith(Number),
+        overdueCount: sql<number>`count(*) filter (where ${lt(invoices.dueDate, now)} and ${ne(invoices.status, "paid")} and ${ne(invoices.status, "cancelled")})`.mapWith(Number),
+      }).from(invoices).where(eq(invoices.creatorId, creator)).groupBy(invoices.status),
       db.select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber, title: invoices.title, status: invoices.status, total: invoices.total, currency: invoices.currency, createdAt: invoices.createdAt }).from(invoices).where(eq(invoices.creatorId, creator)).orderBy(desc(invoices.updatedAt)).limit(5),
     ]);
 
@@ -152,19 +175,19 @@ export async function GET(request: Request) {
         newGalleries: Number(galleryStats.period[0]?.value ?? 0),
       },
       finance: {
-        periodQuotedValue: money(quotePeriodValue[0]?.value),
-        acceptedQuoteValue: money(acceptedQuoteValue[0]?.value),
-        periodInvoicedValue: money(invoicePeriodValue[0]?.value),
-        periodPaidValue: money(paidInvoicePeriodValue[0]?.value),
-        overdueInvoices: Number(overdueInvoices[0]?.value ?? 0),
+        periodQuotedValue: money(quotePeriodValue),
+        acceptedQuoteValue: money(acceptedQuoteValue),
+        periodInvoicedValue: money(invoicePeriodValue),
+        periodPaidValue: money(paidInvoicePeriodValue),
+        overdueInvoices,
       },
       quotes: { statuses: quoteStatuses, conversionRate: quoteConversionRate },
       invoices: { statuses: invoiceStatuses },
       galleries: { statuses: galleryStatuses },
       attention: {
-        overdueInvoices: Number(overdueInvoices[0]?.value ?? 0),
+        overdueInvoices,
         pendingQuotes: (quoteStatuses.sent ?? 0) + (quoteStatuses.draft ?? 0),
-        activeProjects: Number(activeProjects[0]?.value ?? 0),
+        activeProjects,
         activeGalleries: (galleryStatuses.active ?? 0) + (galleryStatuses.published ?? 0),
       },
       activity,

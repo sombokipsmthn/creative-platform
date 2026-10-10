@@ -1,14 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextResponse } from "next/server";
 
-const { getSession } = vi.hoisted(() => ({
-  getSession: vi.fn(),
-}));
-
-vi.mock("@/lib/auth/auth", () => ({
-  auth: { api: { getSession } },
-}));
-
 import customMiddleware from "@/proxy";
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 
@@ -52,7 +44,7 @@ describe("proxy local authentication bypass", () => {
     vi.clearAllMocks();
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("LOCAL_AUTH_BYPASS", "true");
-    getSession.mockResolvedValue(null);
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json(null)));
   });
 
   it.each([
@@ -64,7 +56,7 @@ describe("proxy local authentication bypass", () => {
 
     expect(status(response)).toBe(200);
     expect(response.headers.get("set-cookie")).toContain("local-auth-bypass=1");
-    expect(getSession).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("redirects when the bypass flag is disabled", async () => {
@@ -75,7 +67,13 @@ describe("proxy local authentication bypass", () => {
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
     expect(response.headers.get("set-cookie")).toContain("local-auth-bypass");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledWith(
+      new URL("/api/auth/get-session", "http://localhost:3005"),
+      expect.objectContaining({
+        headers: { cookie: "" },
+        cache: "no-store",
+      }),
+    );
   });
 
   it("redirects remote hostnames even when the flag is enabled", async () => {
@@ -83,17 +81,18 @@ describe("proxy local authentication bypass", () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("https://creative-platform.example/sign-in?redirect=%2Fadmin");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("redirects localhost in production even when the flag is enabled", async () => {
     vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_URL", "creative-platform.example");
 
     const response = await customMiddleware(request("http://localhost:3005/admin"));
 
     expect(response.status).toBe(307);
     expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("does not bypass API routes", async () => {
@@ -102,6 +101,40 @@ describe("proxy local authentication bypass", () => {
     expect(response).toBeInstanceOf(NextResponse);
     expect(response.status).toBe(200);
     expect(response.headers.get("set-cookie")).toBeNull();
-    expect(getSession).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("allows protected navigation when the auth route returns a valid session", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_URL", "creative-platform.example");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      Response.json({ user: { id: "user-1" }, session: { id: "session-1" } }),
+    ));
+
+    const response = await customMiddleware(new Request("https://creative-platform.example/admin", {
+      headers: { cookie: "session_token=abc" },
+    }));
+
+    expect(response.status).toBe(200);
+    expect(fetch).toHaveBeenCalledWith(
+      new URL("/api/auth/get-session", "https://creative-platform.example"),
+      expect.objectContaining({
+        headers: { cookie: "session_token=abc" },
+        cache: "no-store",
+      }),
+    );
+  });
+
+  it("fails closed when the auth route cannot be reached", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL_URL", "creative-platform.example");
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("connection failed")));
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const response = await customMiddleware(new Request("https://creative-platform.example/admin"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("https://creative-platform.example/sign-in?redirect=%2Fadmin");
+    expect(consoleError).toHaveBeenCalledOnce();
   });
 });

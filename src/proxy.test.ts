@@ -1,0 +1,96 @@
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NextResponse } from "next/server";
+
+const { getSession } = vi.hoisted(() => ({
+  getSession: vi.fn(),
+}));
+
+vi.mock("@/lib/auth/auth", () => ({
+  auth: { api: { getSession } },
+}));
+
+import customMiddleware from "@/proxy";
+import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
+
+
+function request(url: string) {
+  return new Request(url);
+}
+
+function status(response: Response) {
+  return response.status;
+}
+
+describe("local authentication bypass state", () => {
+  it("exposes safe server-side diagnostics without exposing the flag value", () => {
+    expect(getLocalAuthBypassState(request("http://localhost:3005/admin"), {
+      NODE_ENV: "development",
+      LOCAL_AUTH_BYPASS: "true",
+    })).toEqual({
+      enabled: true,
+      nodeEnv: "development",
+      flagConfigured: true,
+      hostname: "localhost",
+      localHostname: true,
+    });
+  });
+});
+
+describe("proxy local authentication bypass", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("LOCAL_AUTH_BYPASS", "true");
+    getSession.mockResolvedValue(null);
+  });
+
+  it.each([
+    "http://localhost:3005/admin",
+    "http://localhost:3005/admin/projects",
+    "http://127.0.0.1:3015/admin",
+  ])("allows protected local navigation without a session: %s", async (url) => {
+    const response = await customMiddleware(request(url));
+
+    expect(status(response)).toBe(200);
+    expect(response.headers.get("set-cookie")).toContain("local-auth-bypass=1");
+    expect(getSession).not.toHaveBeenCalled();
+  });
+
+  it("redirects when the bypass flag is disabled", async () => {
+    vi.stubEnv("LOCAL_AUTH_BYPASS", "false");
+
+    const response = await customMiddleware(request("http://localhost:3005/admin"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
+    expect(response.headers.get("set-cookie")).toContain("local-auth-bypass");
+    expect(getSession).toHaveBeenCalledOnce();
+  });
+
+  it("redirects remote hostnames even when the flag is enabled", async () => {
+    const response = await customMiddleware(request("https://creative-platform.example/admin"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("https://creative-platform.example/sign-in?redirect=%2Fadmin");
+    expect(getSession).toHaveBeenCalledOnce();
+  });
+
+  it("redirects localhost in production even when the flag is enabled", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+
+    const response = await customMiddleware(request("http://localhost:3005/admin"));
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
+    expect(getSession).toHaveBeenCalledOnce();
+  });
+
+  it("does not bypass API routes", async () => {
+    const response = await customMiddleware(request("http://localhost:3005/api/dashboard/stats"));
+
+    expect(response).toBeInstanceOf(NextResponse);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("set-cookie")).toBeNull();
+    expect(getSession).not.toHaveBeenCalled();
+  });
+});

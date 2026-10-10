@@ -1,206 +1,127 @@
 # KIPSMTHN Creative Platform
 
-> A unified platform for creative professionals to manage their work, clients, projects, production workflows, and client delivery.
+> Source-of-truth project overview for the current codebase. This README reflects the active implementation in the repository and distinguishes it from historical or archival materials.
 
-## What is Creative Platform?
+## What this project is
 
-**KIPSMTHN Creative Platform** is a creative business platform built for photography, video, brand films, and visual storytelling.
+KIPSMTHN Creative Platform is a Next.js application for managing a creative business: portfolio presentation, client relationships, project workflows, quotes, invoices, equipment planning, and private client galleries.
 
-For detailed technical documentation, architecture, feature status, and implementation roadmap, see [`KIPSMTHN-IMPLEMENTATION-SPEC.md`](./KIPSMTHN-IMPLEMENTATION-SPEC.md).
+The current implementation is in active use via a shared database-backed app layer, with authentication and session handling built on Better Auth and Drizzle. The repo is still in a migration/partial-overhaul state, so historical docs may mention earlier Clerk-era assumptions; those are treated as archive context, not the live architecture.
 
-The platform brings the different parts of running a creative production business into one place — from presenting work and managing clients to creating quotes, tracking projects, invoicing, and delivering finished work through private galleries.
-
-The platform is designed around the needs of independent creatives and production studios, with a focus on simplifying the journey from **client inquiry to project delivery**.
-
----
-
-## Features
-
-### 🌐 Public Portfolio
-
-A public-facing website for:
-
-- Showcasing creative work
-- Presenting services
-- Introducing the creator/studio
-- Providing a way for potential clients to get in touch
-
-### 👥 Client Management
-
-A central place to manage client relationships and associated projects.
-
-### 📋 Quotes & Invoices
-
-Tools for creating and managing production quotations and invoices, including:
-
-- Production services
-- Equipment
-- Day rates
-- Deposits
-- Discounts
-- Taxes
-- Multiple currencies
-
-### 🎬 Project Management
-
-Projects provide a connection between clients, creative work, and the wider production workflow.
-
-### 📸 Client Galleries
-
-Private client delivery galleries designed for:
-
-- Viewing finished work
-- Favorites
-- Selections
-- Proofing
-- Comments
-- Downloads
-- PIN-protected access
-
-### 🎒 Equipment Management
-
-An equipment catalogue that supports production planning and quotation workflows, including day-rate pricing for different categories of production equipment.
-
-### 💼 Business Management
-
-Additional tools for managing:
-
-- Expenses
-- Creator profile
-- Branding
-- Watermarks
-- Templates
-- Presets
-- Business preferences
+For implementation detail and current architecture status, see:
+- [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
+- [docs/00-project/README.md](./docs/00-project/README.md)
 
 ---
 
-## Architecture
+## Active implementation snapshot
 
-Creative Platform is built around three connected experiences:
+### Core stack
 
-```text
-             CREATIVE PLATFORM
-                    │
-       ┌────────────┼────────────┐
-       │            │            │
-       ▼            ▼            ▼
-    PUBLIC        CREATOR       CLIENT
-    WEBSITE       DASHBOARD     PORTAL
-       │            │            │
-    Portfolio       CRM        Galleries
-    Services       Quotes      Proofing
-    Work           Invoices    Favorites
-    Contact        Projects    Downloads
-                   Expenses
-```
+- Next.js + React + TypeScript
+- Tailwind CSS for UI styling
+- Drizzle ORM with PostgreSQL / Neon
+- Better Auth for authentication and session management
+- Vercel-friendly app deployment model
+- App-router API routes under `src/app/api`
 
-The platform uses a shared backend and database so that clients, projects, quotes, invoices, and creative deliveries can eventually work together as one connected workflow.
+### Authentication and identity
 
-The underlying architecture also uses creator ownership relationships, allowing the platform to evolve from its current single-creator implementation toward a multi-creator platform.
+The live auth implementation is configured in `src/lib/auth/auth.ts` and uses Better Auth with a Drizzle adapter against the app schema. The active configuration includes:
 
----
+- Email/password authentication
+- Email verification required on sign-up
+- Minimum password length of 8
+- Optional social providers when configured (Google / Apple)
+- Session cookie settings and trusted origins
+- Local user resolution through `src/lib/auth/get-current-user.ts`
 
-## Technology
+This means the current app identity model is Better Auth-based, not Clerk-based. References to Clerk in legacy documentation are historical records and should not be treated as the current source of truth.
 
-Creative Platform is built with:
+### Repository documentation model
 
-- **Next.js** — application framework
-- **React** — user interface
-- **TypeScript** — application language
-- **Tailwind CSS** — styling
-- **Drizzle ORM** — database layer
-- **PostgreSQL** — database
-- **Clerk** — authentication
-- **Framer Motion** — animation
-- **Lucide React** — icons
-- **Vercel** — hosting target
+The project documentation is organized by active vs historical intent:
 
----
+- `docs/00-project` — product and project-level context
+- `docs/01-specifications` — active feature and implementation expectations
+- `docs/02-architecture` — system design and runtime structure
+- `docs/03-design-system` — design tokens and UI system usage
+- `docs/04-security-compliance` — active security/compliance guidance
+- `docs/05-development-operations` — build, deploy, and operational guidance
+- `docs/06-decisions` — architectural and product decisions
+- `docs/07-audits` — implementation and documentation audits
+- `docs/08-history` — history, migration notes, and legacy context
 
-## Project Goals
+Historical materials retained for record:
 
-The goal is to create a single operating platform for creative production businesses.
+- `docs/archive/` — older project summaries and superseded notes
+- `docs/soc2/` — compliance evidence and historical SOC 2 materials
 
-The long-term vision is to connect the entire workflow:
-
-```text
-Client
-   ↓
-Project
-   ↓
-Quote
-   ↓
-Production
-   ↓
-Gallery
-   ↓
-Proofing
-   ↓
-Approval
-   ↓
-Invoice
-   ↓
-Delivery
-```
-
-Instead of relying on disconnected tools for each stage, Creative Platform aims to provide one connected system for managing the creative business and its client relationships.
+The active repo guidance is in the code and the current docs under `docs/`; the archive folders are reference-only and should not override the live implementation.
 
 ---
 
-## Current Status
+## Product areas
 
-**Active Development**
+### Public portfolio
 
-The platform already has working foundations for:
+- Showcase work, services, and studio profile
+- website presence for inquiries and discovery
 
-- Public website
-- Authentication
-- Creator dashboard
-- Client management interface
-- Quotation workflow
-- Invoice management
-- Equipment management
-- Client gallery interface
-- Database infrastructure
+### Client and project management
 
-Several areas are still being developed, particularly the transition from prototype interfaces and demo data to fully database-backed production workflows.
+- Client records and project tracking
+- Quotation and invoice workflows
+- Production planning and equipment awareness
 
-The gallery system is also being expanded toward a complete professional client delivery and proofing experience.
+### Client delivery
 
----
+- Private galleries for final delivery
+- Proofing and selection workflows
+- Download/favorites patterns and controlled access
 
-## Vision
+### Business operations
 
-Creative Platform is being built to become the digital backbone of a modern creative studio — connecting **business management, production, and client delivery** in one platform.
-
-**From first inquiry to final delivery.**
+- Creator profile configuration
+- Invoices and related business settings
+- Production-ready data records connected to local user ownership
 
 ---
 
-## Design System
+## Project status
 
-The platform uses a centralized design system defined in `src/app/globals.css`. This system provides:
+The repository is in a migration and consolidation phase:
 
-- **Design tokens**: Colors, spacing, radius, typography scales
-- **Semantic CSS classes**: `.ui-card`, `.ui-button`, `.ui-input`, etc.
-- **Dark mode support**: Automatic theme switching
-- **Responsive utilities**: Mobile-first grid system
+- The app code reflects the Better Auth-based identity model
+- Some older documentation and historical compliance materials still describe a Clerk-era system
+- The current documentation effort is to reconcile those sources and treat the code as the primary authority
 
-### Key Classes
+This means the repo’s live state is the authoritative source for implementation decisions, while archival materials remain available for traceability and historical review.
 
-| Class | Usage |
-|-------|-------|
-| `.ui-card` | Base card container |
-| `.ui-stat-card` | Metric/KPI cards |
-| `.ui-table-container` | Table wrapper |
-| `.ui-badge` | Status badges |
-| `.ui-button` | Button variants |
-| `.ui-input` | Form inputs |
-| `.ui-page-title` | H1 headings |
-| `.ui-section-title` | H2 headings |
-| `.ui-eyebrow` | Uppercase labels |
-| `.ui-meta` | Secondary text |
+---
 
-See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for complete documentation.
+## Design system
+
+The platform’s UI system is centralized in `src/app/globals.css` and follows a semantic class pattern.
+
+Core patterns:
+
+- `.ui-card`
+- `.ui-stat-card`
+- `.ui-button-*`
+- `.ui-input`, `.ui-select`, `.ui-textarea`
+- `.ui-page-title`, `.ui-section-title`, `.ui-eyebrow`, `.ui-meta`
+
+See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the active design token and component guidance.
+
+---
+
+## Related documentation
+
+- [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
+- [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)
+- [docs/00-project/README.md](./docs/00-project/README.md)
+- [docs/01-specifications/README.md](./docs/01-specifications/README.md)
+- [docs/02-architecture/README.md](./docs/02-architecture/README.md)
+- [docs/04-security-compliance/README.md](./docs/04-security-compliance/README.md)
 

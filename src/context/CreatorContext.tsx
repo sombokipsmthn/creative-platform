@@ -5,9 +5,12 @@ import {
   useContext,
   useCallback,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+
+import { authClient } from "@/lib/auth-client";
 
 export interface CreatorProfile {
   id: string;
@@ -53,6 +56,8 @@ export function CreatorProvider({
 }: {
   children: ReactNode;
 }) {
+  const { data: session, isPending: authPending } = authClient.useSession();
+  const sessionUserId = session?.user?.id ?? null;
   const [activeUser, setActiveUser] =
     useState<CreatorData | null>(null);
 
@@ -61,37 +66,81 @@ export function CreatorProvider({
   >({});
 
   const [loading, setLoading] = useState(true);
+  const currentSessionUserId = useRef(sessionUserId);
+  const inFlightSyncs = useRef(new Map<string, Promise<void>>());
 
-  const syncCreator = useCallback(async function syncCreator() {
-    try {
-      const response = await fetch("/api/users/sync", {
-        method: "POST",
-        credentials: "include",
-        cache: "no-store",
-      });
-      const payload = await response.json();
+  useEffect(() => {
+    currentSessionUserId.current = sessionUserId;
+  }, [sessionUserId]);
 
-      if (!response.ok || !payload.user) {
-        setActiveUser(null);
-        setUsersDb({});
-        return;
-      }
-
-      const creator: CreatorData = {
-        ...payload.user,
-        profile: payload.profile ?? null,
-      };
-
-      setActiveUser(creator);
-      setUsersDb({ [creator.id]: creator });
-    } catch (error) {
-      console.error("CreatorContext sync error:", error);
+  const syncCreator = useCallback((): Promise<void> => {
+    if (!sessionUserId) {
       setActiveUser(null);
       setUsersDb({});
-    } finally {
       setLoading(false);
+      return Promise.resolve();
     }
-  }, []);
+
+    const inFlight = inFlightSyncs.current.get(sessionUserId);
+    if (inFlight) return inFlight;
+
+    const userId = sessionUserId;
+    setLoading(true);
+    const sync = (async () => {
+      try {
+        const response = await fetch("/api/users/sync", {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+        });
+        const payload = await response.json();
+
+        if (currentSessionUserId.current !== userId) return;
+
+        if (!response.ok) {
+          if (response.status !== 401) {
+            console.error("Creator sync failed with status:", response.status);
+          }
+          setActiveUser(null);
+          setUsersDb({});
+          return;
+        }
+
+        if (!payload.user) {
+          setActiveUser(null);
+          setUsersDb({});
+          return;
+        }
+
+        const creator: CreatorData = {
+          ...payload.user,
+          profile: payload.profile ?? null,
+        };
+
+        setActiveUser(creator);
+        setUsersDb({ [creator.id]: creator });
+      } catch (error) {
+        if (currentSessionUserId.current === userId) {
+          console.error("CreatorContext sync error:", error);
+          setActiveUser(null);
+          setUsersDb({});
+        }
+      } finally {
+        if (currentSessionUserId.current === userId) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    inFlightSyncs.current.set(userId, sync);
+    void sync.finally(() => {
+      if (inFlightSyncs.current.get(userId) === sync) {
+        inFlightSyncs.current.delete(userId);
+      }
+    });
+
+    return sync;
+  }, [sessionUserId]);
 
   /*
    * -------------------------------------------------------
@@ -99,10 +148,12 @@ export function CreatorProvider({
    * -------------------------------------------------------
    */
   useEffect(() => {
-    // This effect intentionally hydrates context state from the authenticated session.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    void syncCreator();
-  }, [syncCreator]);
+     if (authPending) return;
+
+     // Hydrate only after Better Auth resolves the current session.
+     // eslint-disable-next-line react-hooks/set-state-in-effect
+     void syncCreator();
+   }, [authPending, syncCreator]);
 
   /*
    * -------------------------------------------------------

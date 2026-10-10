@@ -1,12 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockAuth, mockDb } = vi.hoisted(() => ({
+const {
+  mockAuth,
+  mockGetOrCreateLocalUser,
+  mockFindProfile,
+  mockLogUnexpectedApiError,
+} = vi.hoisted(() => ({
   mockAuth: vi.fn(),
-  mockDb: {
-    select: vi.fn(),
-    insert: vi.fn(),
-    query: { users: { findFirst: vi.fn() } },
-  },
+  mockGetOrCreateLocalUser: vi.fn(),
+  mockFindProfile: vi.fn(),
+  mockLogUnexpectedApiError: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/auth", () => ({
@@ -14,93 +17,89 @@ vi.mock("@/lib/auth/auth", () => ({
 }));
 
 vi.mock("@/db", () => ({
-  db: mockDb,
+  db: {
+    query: {
+      creatorProfiles: { findFirst: mockFindProfile },
+    },
+  },
+}));
+
+vi.mock("@/lib/auth/get-or-create-local-user", () => ({
+  getOrCreateLocalUser: mockGetOrCreateLocalUser,
+}));
+
+vi.mock("@/lib/api/route-boundaries", () => ({
+  logUnexpectedApiError: mockLogUnexpectedApiError,
 }));
 
 import { POST } from "./route";
 
 describe("POST /api/users/sync", () => {
+  const authUser = {
+    id: "better-auth-user",
+    email: "creator@example.com",
+    name: "Creator",
+    emailVerified: true,
+    image: null,
+  };
+  const localUser = {
+    id: authUser.id,
+    email: authUser.email,
+    name: authUser.name,
+    onboardingStatus: "incomplete",
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAuth.mockResolvedValue({ user: { id: "user_123", email: "creator@example.com", name: "Creator", emailVerified: true, image: null }, session: { id: "session_1" } });
+    mockAuth.mockResolvedValue({ user: authUser, session: { id: "session_1" } });
+    mockGetOrCreateLocalUser.mockResolvedValue(localUser);
+    mockFindProfile.mockResolvedValue(null);
   });
 
-  it("creates a database record for a authenticated user when one does not exist", async () => {
-    mockDb.select.mockReturnValue({
-      from: vi.fn(() => ({
-        where: vi.fn(() => ({
-          limit: vi.fn().mockResolvedValue([]),
-        })),
-      })),
-    });
-
-    mockDb.insert.mockReturnValue({
-      values: vi.fn(() => ({
-        onConflictDoNothing: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue([{
-            id: "user_123",
-            email: "creator@example.com",
-            name: "Creator",
-            onboardingStatus: "incomplete",
-            onboardingStep: 1,
-          }]),
-        })),
-      })),
-    });
-
-    const request = new Request("http://localhost/api/users/sync");
-    const response = await POST(request);
+  it("synchronizes an authenticated Better Auth identity", async () => {
+    const response = await POST(new Request("http://localhost/api/users/sync"));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
       needsOnboarding: true,
-      user: expect.objectContaining({ id: "user_123" }),
+      user: localUser,
       profile: null,
     });
+    expect(mockGetOrCreateLocalUser).toHaveBeenCalledWith(authUser);
   });
 
-  it("returns the existing user and does not create a duplicate record", async () => {
-    const existingUser = {
-      id: "db_user_2",
-      userId: "user_123",
-      email: "creator@example.com",
-      name: "Creator",
-    };
-
-    mockDb.select
-      .mockReturnValueOnce({
-        from: vi.fn(() => ({
-          where: vi.fn(() => ({
-            limit: vi.fn().mockResolvedValue([existingUser]),
-          })),
-        })),
-      })
-      .mockReturnValueOnce({
-        from: vi.fn(() => ({
-          where: vi.fn(() => ({
-            limit: vi.fn().mockResolvedValue([]),
-          })),
-        })),
-      });
-
-    const request = new Request("http://localhost/api/users/sync");
-    const response = await POST(request);
-
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({
-      needsOnboarding: true,
-      user: existingUser,
-      profile: null,
-    });
-  });
-
-  it("rejects a request that lacks a Better Auth session user id", async () => {
+  it("rejects requests without an authenticated session", async () => {
     mockAuth.mockResolvedValue(null);
 
-    const request = new Request("http://localhost/api/users/sync");
-    const response = await POST(request);
+    const response = await POST(new Request("http://localhost/api/users/sync"));
 
     expect(response.status).toBe(401);
     expect(await response.json()).toEqual({ error: "Unauthorized" });
+    expect(mockGetOrCreateLocalUser).not.toHaveBeenCalled();
+  });
+
+  it("returns an existing profile without changing the response contract", async () => {
+    const profile = { id: "profile_1", userId: authUser.id, bio: "Existing" };
+    mockFindProfile.mockResolvedValue(profile);
+
+    const response = await POST(new Request("http://localhost/api/users/sync"));
+
+    expect(await response.json()).toEqual({
+      needsOnboarding: true,
+      user: localUser,
+      profile,
+    });
+  });
+
+  it("logs provisioning failures and returns a generic server error", async () => {
+    mockGetOrCreateLocalUser.mockRejectedValue(new Error("private database detail"));
+
+    const response = await POST(new Request("http://localhost/api/users/sync"));
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).toEqual({
+      error: "Unable to synchronize creator account.",
+    });
+    expect(mockLogUnexpectedApiError).toHaveBeenCalled();
   });
 });

@@ -17,9 +17,13 @@
     "healthcheck": "node scripts/healthcheck.mjs",
     "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts"
   },
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10"
+  },
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.7",
-    "@better-auth/infra": "^0.4.15",
+    "@better-auth/infra": "^0.4.16",
     "@better-auth/passkey": "^1.7.7",
     "@libsql/client": "^0.18.0",
     "@neondatabase/serverless": "^1.1.0",

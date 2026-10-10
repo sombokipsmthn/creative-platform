@@ -4,11 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { useCreator } from '@/context/CreatorContext';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { refreshCreator } = useCreator();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -30,9 +28,7 @@ export default function AdminLoginPage() {
         setIsLoading(false);
         return;
       }
-
       if (data) {
-        await refreshCreator();
         router.push('/admin');
       }
     } catch (err) {

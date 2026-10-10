@@ -1,3 +1,6 @@
+import { Resend } from "resend";
+import type { CreateEmailOptions } from "resend";
+
 export interface EmailOptions {
   to: string;
   subject: string;
@@ -18,13 +21,19 @@ export async function sendEmail(options: EmailOptions): Promise<void> {
     throw new Error("Email delivery is not configured. Set RESEND_API_KEY and EMAIL_FROM.");
   }
 
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ from, to: [options.to], subject: options.subject, text: options.text, html: options.html }),
-  });
+  const resend = new Resend(apiKey);
+  const payload = {
+    from,
+    to: [options.to],
+    subject: options.subject,
+    ...(options.text ? { text: options.text } : {}),
+    ...(options.html ? { html: options.html } : {}),
+    ...(options.attachments ? { attachments: options.attachments } : {}),
+  } as CreateEmailOptions;
 
-  if (!response.ok) {
-    throw new Error(`Email delivery failed with status ${response.status}.`);
+  const { error } = await resend.emails.send(payload);
+
+  if (error) {
+    throw new Error(`Email delivery failed: ${error.message}`);
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
@@ -153,31 +153,37 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const { data: session, isPending: authPending } = authClient.useSession();
-  const isAuthenticated = Boolean(session?.user);
+  const localAuthBypass = typeof window !== 'undefined'
+    && process.env.NODE_ENV === 'development'
+    && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+    && document.cookie.includes('local-auth-bypass=1');
+  const isAuthenticated = Boolean(session?.user) || localAuthBypass;
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const [hasLocalAccount, setHasLocalAccount] = useState(true);
+  const bootstrapStarted = useRef(false);
   const splitView = useSplitView();
 
   useEffect(() => {
-<<<<<<< HEAD
-    async function checkAuth() {
-      try {
-        const { data: session } = await authClient.getSession();
-        setIsAuthenticated(!!session);
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
+    if (
+      authPending ||
+      !localAuthBypass ||
+      session?.user ||
+      bootstrapStarted.current
+    ) {
+      return;
     }
 
-    checkAuth();
-  }, []);
+    bootstrapStarted.current = true;
+    void fetch('/api/dev-auth/bootstrap', { method: 'POST', credentials: 'include' })
+      .then((response) => {
+        if (response.ok) window.location.reload();
+        else console.error('Local auth bootstrap failed with status:', response.status);
+      })
+      .catch((error) => console.error('Local auth bootstrap request failed:', error));
+  }, [authPending, localAuthBypass, session?.user]);
 
   useEffect(() => {
-=======
->>>>>>> c9a053ac0c9cc73dd4f9efc062839b7df9d54f87
     if (!isAuthenticated) return;
     let isMounted = true;
 
@@ -200,6 +206,11 @@ export default function AdminLayout({
     }
 
     async function checkLocalAccount() {
+      if (localAuthBypass) {
+        if (isMounted) setHasLocalAccount(true);
+        return;
+      }
+
       try {
         const res = await fetch('/api/profile', { cache: 'no-store' });
         if (isMounted) {
@@ -218,7 +229,7 @@ export default function AdminLayout({
     return () => {
       isMounted = false;
     };
-  }, [isAuthenticated, pathname]);
+  }, [isAuthenticated, localAuthBypass, pathname]);
 
   if (pathname === '/admin/login') {
     return (
@@ -249,7 +260,7 @@ export default function AdminLayout({
     return null;
   }
 
-  if (!hasLocalAccount) {
+  if (!hasLocalAccount && pathname !== '/admin/onboarding') {
     return <RedirectToOnboarding />;
   }
 

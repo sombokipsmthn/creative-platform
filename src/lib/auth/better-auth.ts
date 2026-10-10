@@ -60,14 +60,11 @@ export async function getCurrentUser() {
  */
 export async function getLocalUser(authUserId: string) {
   const user = await db.query.users.findFirst({
-    where: eq(users.authUserId, authUserId),
+    where: eq(users.id, authUserId),
   });
 
   if (!user) {
-    throw new Error(
-      `Local user not found for authUserId ${authUserId}. ` +
-        "Ensure the user has been created via /auth before accessing this endpoint."
-    );
+    throw new Error(`Local user not found for Better Auth user ${authUserId}.`);
   }
 
   return user;

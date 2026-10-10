@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import getCurrentUser, { getCurrentUserFromRequest } from "@/lib/auth/get-current-user";
+import { getCurrentUserFromRequest } from "@/lib/auth/get-current-user";
 
 export class ApiError extends Error {
   statusCode: number;
@@ -22,22 +22,65 @@ export type AuthenticatedUser = {
   id: string;
 };
 
+function getDatabaseDiagnostic(error: unknown) {
+  let current = error;
+
+  for (let depth = 0; depth < 5 && current && typeof current === "object"; depth += 1) {
+    const candidate = current as {
+      code?: unknown;
+      table?: unknown;
+      column?: unknown;
+      constraint?: unknown;
+      cause?: unknown;
+    };
+
+    if (typeof candidate.code === "string") {
+      return {
+        code: candidate.code,
+        ...(typeof candidate.table === "string" ? { table: candidate.table } : {}),
+        ...(typeof candidate.column === "string" ? { column: candidate.column } : {}),
+        ...(typeof candidate.constraint === "string"
+          ? { constraint: candidate.constraint }
+          : {}),
+      };
+    }
+
+    current = candidate.cause;
+  }
+
+  return {};
+}
+
+export function logUnexpectedApiError(
+  request: Request,
+  operation: string,
+  error: unknown
+) {
+  console.error("Unexpected API failure", {
+    operation,
+    method: request.method,
+    path: new URL(request.url).pathname,
+    errorName: error instanceof Error ? error.name : typeof error,
+    ...getDatabaseDiagnostic(error),
+  });
+}
+
 export async function withCreatorApi<T>(
   req: Request,
   handler: (req: Request, user: AuthenticatedUser) => Promise<T>,
   options: { status?: number } = {}
 ): Promise<NextResponse> {
-  const user = await getCurrentUserFromRequest(req);
-
-  if (!user) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
-
   try {
-    const result = await handler(req, user as AuthenticatedUser);
+    const user = await getCurrentUserFromRequest(req);
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const result = await handler(req, user);
 
     /*
      * Allow handlers to return a NextResponse directly (e.g. for
@@ -62,13 +105,9 @@ export async function withCreatorApi<T>(
       );
     }
 
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Request failed";
-
+    logUnexpectedApiError(req, "withCreatorApi", error);
     return NextResponse.json(
-      { error: message },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

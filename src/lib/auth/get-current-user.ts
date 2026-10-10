@@ -5,17 +5,17 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function getCurrentUser() {
-  try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    return session?.user ? await db.query.users.findFirst({ where: eq(users.id, session.user.id) }) ?? null : null;
-  } catch { return null; }
+  const session = await auth.api.getSession({ headers: await headers() });
+  return session?.user
+    ? await db.query.users.findFirst({ where: eq(users.id, session.user.id) }) ?? null
+    : null;
 }
 
 export async function getCurrentUserFromRequest(request: Request) {
-  try {
-    const session = await auth.api.getSession({ headers: request.headers });
-    return session?.user ? await db.query.users.findFirst({ where: eq(users.id, session.user.id) }) ?? null : null;
-  } catch { return null; }
+  const session = await auth.api.getSession({ headers: request.headers });
+  return session?.user
+    ? await db.query.users.findFirst({ where: eq(users.id, session.user.id) }) ?? null
+    : null;
 }
 
 export async function getLocalUser(userId: string) {

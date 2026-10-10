@@ -1,263 +1,172 @@
 # KIPSMTHN Creative Platform Implementation Specification
 
-## Document Overview
-This document serves as the single authoritative implementation specification for the KIPSMTHN Creative Platform. It consolidates findings from comprehensive audits of documentation, codebase structure, database schema, security, mock data, dead code, and API routes. The specification separates CURRENT (existing implemented features), REQUIRED (must-have features for production), PLANNED (features in development), and OPTIONAL (nice-to-have enhancements) items.
+## Document purpose
+This document describes the live implementation of the KIPSMTHN Creative Platform as it exists in the repository today. It is intentionally grounded in the codebase and is treated as a working source-of-truth for active implementation details.
 
-_Last Updated: 2026-10-08_
+Historical references to older auth and architecture decisions remain in archive and compliance materials for traceability, but they do not supersede the current implementation.
 
----
-
-## 1. System Architecture
-
-### CURRENT
-- **Frontend**: Next.js 14 with React 18, TypeScript, Tailwind CSS, Framer Motion, Lucide React
-- **Backend**: Next.js API routes, Drizzle ORM with PostgreSQL (Neon), Vercel Blob for storage, Clerk for authentication
-- **Infrastructure**: Vercel for hosting, Neon for database hosting, Vercel Blob for object storage
-- **Third-party Services**: Resend for email (planned Stripe for payments)
-
-### REQUIRED
-- Maintain current architecture with improvements to scalability and observability
-- Implement proper caching layer for frequently accessed data
-- Add comprehensive error boundaries and fallback mechanisms
-
-### PLANNED
-- Migration to Vercel's new Fluid Compute platform for better cold start performance
-- Implementation of Vercel Queues for durable event streaming
-- Addition of Vercel Sandbox for secure code execution in certain features
-
-### OPTIONAL
-- Adoption of Vercel AI Gateway for multi-provider AI integration
-- Exploration of Eve framework for durable AI agents
-- Implementation of Vercel MCP server for enhanced agent interactions
+_Last Updated: 2026-10-10_
 
 ---
 
-## 2. Authentication & Authorization
+## 1. Active system architecture
 
-### CURRENT
-- **Authentication**: Clerk handles user authentication with session management
-- **Authorization**: 
-  - `withCreatorApi` wrapper for most protected routes (requires valid Clerk session + local creator record)
-  - `getCurrentUser`/`getLocalUser` helpers for user data retrieval
-  - Ownership verification via `creatorId = user.id` checks in database queries
-  - Specific helpers: `verifyGalleryOwnership`, `verifyClientOwnership`, `assertOwnership`
-- **Public Routes**: 
-  - Health check (`/api/health`) - intentionally public
-  - Public contracts (`/api/public/contracts/[token]`) - token-based access
-  - Public galleries (`/api/public/galleries/[slug]`) - intended for public sharing
-  - Clerk webhooks (`/api/webhooks/clerk`) - Svix signature verification
+### Current implementation
+- Frontend: Next.js + React + TypeScript
+- Styling: Tailwind CSS with semantic UI classes defined in `src/app/globals.css`
+- Data layer: Drizzle ORM with PostgreSQL via Neon
+- Authentication: Better Auth with Drizzle adapter
+- Runtime model: App Router, route handlers, and shared server utilities under `src/`
+- Storage: app-level media and project assets managed through the platform's database-backed app layer
 
-### REQUIRED
-- Ensure all data-modifying endpoints use `withCreatorApi` or equivalent authentication
-- Implement consistent error handling for authentication failures (401/403 responses)
-- Add MFA enforcement for privileged/admin users via Clerk
-- Implement session rotation and invalidation on password/security changes
+### Architectural pattern
+The application is organized around a shared creator-owned data model, where requests are resolved to the authenticated Better Auth session and then mapped to the local app user record. This is the canonical identity flow used by the app.
 
-### PLANNED
-- Role-Based Access Control (RBAC) system with predefined roles (admin, manager, creator, client)
-- Attribute-Based Access Control (ABAC) for fine-grained permissions
-- Regular access review automation and reporting
+Key files:
+- `src/lib/auth/auth.ts` — Better Auth configuration and providers
+- `src/lib/auth/get-current-user.ts` — active session-to-local-user resolution
+- `src/db/schema.ts` — primary Drizzle schema, including auth tables and creator domain tables
+- `src/lib/api/route-boundaries.ts` — central request auth/authorization boundary
 
-### OPTIONAL
-- Social login providers beyond email (Google, Apple, etc.)
-- Passwordless authentication options
-- Just-in-time access provisioning for temporary permissions
+### Non-authoritative materials
+Materials under `docs/archive/` and `docs/soc2/` can contain historical or compliance-era references, including older Clerk language. These are maintained for context and auditability, but the code in `src/` remains the source of truth for current behavior.
 
 ---
 
-## 3. Database Schema
+## 2. Authentication and authorization
 
-### CURRENT
-- **ORM**: Drizzle ORM with TypeScript schemas
-- **Database**: PostgreSQL hosted on Neon
-- **Schema Location**: `src/db/schema.ts`
-- **Migration System**: Drizzle Kit with SQL migrations in `drizzle/` directory
-- **Key Tables**: 
-  - `users` (Clerk ID mapping)
-  - `creatorProfiles` (user profile data)
-  - `galleries` (photo/video collections)
-  - `gallery_photos` (media assets)
-  - `clients` (customer relationships)
-  - `contracts` (legal agreements)
-  - `invoices` (billing)
-  - `quotes` (proposals)
-  - `services` (offered services)
-  - `gallery_watermarks`, `gallery_themes` (customization)
-  - `onboarding` states
+### Current auth model
+The live app uses Better Auth instead of Clerk. The active configuration is defined in `src/lib/auth/auth.ts` and includes:
 
-### REQUIRED
-- Complete migration audit to ensure all migration files are applied and no duplicates exist
-- Foreign key constraints enforcement for data integrity
-- Index optimization for frequently queried columns
-- Database connection pooling configuration
-- Automated backup and point-in-time recovery validation
+- email/password authentication
+- email verification on sign-up
+- minimum password length enforcement (`minPasswordLength: 8`)
+- session expiry and cookie configuration
+- trusted origin handling for the application base URL
+- Drizzle adapter integration against the app schema
+- social provider support when environment variables are present (`google`, `apple`)
+- passkey support via the Better Auth passkey plugin
 
-### PLANNED
-- Database performance monitoring and slow query identification
-- Read replica implementation for scaling read-heavy operations
-- Archive strategy for historical data (completed contracts, old invoices)
-- GDPR-compliant data deletion procedures
+The session helper contract is exposed through `src/lib/auth.ts` and follows the pattern:
 
-### OPTIONAL
-- Full-text search implementation using PostgreSQL extensions
-- Database-level row security policies
-- Multi-tenant database architecture for future SaaS expansion
-- Event sourcing for audit trails
+- `auth.api.getSession({ headers: await headers() })`
+- lookup the matching local user record via `db.query.users.findFirst(...)`
+- attach the resolved creator identity to the request context
+
+### Authorization pattern
+Authorization is implemented by resolving the current session to a local user and restricting access to records owned by that user.
+
+Canonical flow:
+1. Better Auth resolves the active session.
+2. `getCurrentUser()` or `getCurrentUserFromRequest()` looks up the local user record.
+3. The route handler checks ownership using `creatorId` / local user identity constraints.
+4. Protected API routes enforce the creator-bound access boundary.
+
+This means the app’s authorization model is not Clerk-based session claims, but a local creator record mapped to the Better Auth-authenticated user.
+
+### Public and protected routes
+Public routes remain intentionally open when they are meant to be shareable or health-related, such as health checks and public gallery routes. Protected creator-facing APIs use the app’s central route-boundary logic rather than direct auth assumptions from old provider-specific code.
+
+### Historical note
+Any references to `withCreatorApi` as a Clerk session wrapper, or to Clerk webhooks as the live auth system, are legacy documentation and should not be interpreted as the active implementation.
 
 ---
 
-## 4. API Routes
+## 3. Database model
 
-### CURRENT
-- **Total Routes Audited**: 52 API route files in `/src/app/api/`
-- **Authentication Pattern**: Most routes use `withCreatorApi` wrapper requiring authentication
-- **Authorization**: Ownership verification via `creatorId = user.id` in queries or helper functions
-- **Input Validation**: Variable quality - strong in client PATCH routes, moderate in gallery routes, weak in some contract routes (reliant on backend validation)
-- **Rate Limiting**: Missing on most routes; present only on gallery upload route via `getUploadRateLimiter()`
-- **Error Handling**: Generally good with try/catch blocks and appropriate status codes
-- **Data Sources**: Real DB queries via Drizzle ORM or raw SQL; no mock/static data in production routes
+### Core schema
+The application schema in `src/db/schema.ts` defines the current operational database model.
 
-### REQUIRED
-- Implement consistent rate limiting on all API routes (especially auth-sensitive and high-volume endpoints)
-- Standardize input validation approach across all routes using a shared validation library
-- Ensure all routes return consistent error response formats
-- Add API versioning strategy for backward compatibility
-- Implement request/response logging for audit trails
+Primary tables include:
+- `users` — local app users and their auth linkage
+- `sessions` — Better Auth session records
+- `accounts` — provider-linked auth accounts
+- `verifications` — auth verification records
+- `passkeys` — passkey credentials
+- `creatorProfiles` — creator profile information
+- `creatorServices` — service catalog entries
+- `creatorBusinessProfiles` — business/account metadata
+- `clients` — client relationships
+- `projects` — portfolio/project records
+- `projectMedia` — media assets tied to projects
+- other operational tables for quotes, invoices, galleries, and onboarding flows
 
-### PLANNED
-- GraphQL API endpoint alongside REST for flexible data fetching
-- WebSocket support for real-time updates (gallery approvals, contract status)
-- API documentation automation using OpenAPI/Swagger
-- API gateway implementation for rate limiting, authentication, and routing
+### Data ownership model
+Creator-owned data is keyed by `creator_id` or the resolved local user identity. This pattern ensures that user-bound resources are scoped to the authenticated creator rather than a provider session alone.
 
-### OPTIONAL
-- Webhooks API for third-party integrations
-- API key system for programmatic access
-- GraphQL subscriptions for real-time data updates
-- API analytics and usage monitoring
+### Migration approach
+Database changes are tracked via Drizzle migrations under `drizzle/` and should be treated as the schema transformation history for the active app.
 
 ---
 
-## 5. Security
+## 4. API route conventions
 
-### CURRENT
-- **Authentication Protections**: 
-  - Most routes properly check ownership via `creatorId = user.id`
-  - Reusable authorization helpers exist (`verifyGalleryOwnership`, `verifyClientOwnership`)
-  - SQL injection protection via parameterized queries
-  - No password handling (auth delegated to Clerk)
-- **Input Validation & Sanitization**:
-  - Gallery routes validate specific fields (status, slug, dates)
-  - Filename sanitization prevents path traversal
-  - MIME type validation for file uploads
-  - Size limits (100MB) on uploads
-- **Known Issues Addressed**:
-  - GAP-001: Fixed missing authentication in badge counts API (now uses `withCreatorApi`)
-  - GAP-002: Multiple API routes updated to use standard authentication wrapper
-  - GAP-003: Contract API routes missing authentication - all fixed
-  - GAP-004: Hardcoded test secret in webhook test - replaced with placeholder
-  - GAP-005: V1 portal gallery photos route missing session validation - fixed
-  - GAP-006: Secrets in database seed file - redacted to placeholders
-  - GAP-007: Admin layout allows non-creator access - added `hasLocalAccount` check
+### Current conventions
+- API routes live under `src/app/api/`
+- Protected routes are expected to resolve current user identity through Better Auth and the local DB map
+- Ownership and access checks are enforced in the route boundary or repository/query layer
+- Validation and sanitization are implemented route-by-route and should remain aligned with the local app conventions
 
-### REQUIRED
-- Implement comprehensive rate limiting on all API endpoints
-- Add request size limits to prevent DoS attacks
-- Implement CORS policies appropriate for each endpoint
-- Add security headers (Helmet.js equivalent) to all responses
-- Implement automated dependency vulnerability scanning
-- Add penetration testing schedule and procedures
+### Auth-sensitive routes
+Routes that access or mutate creator-owned records should be treated as authenticated creator endpoints unless deliberately public. They must resolve the authenticated session before running the request logic.
 
-### PLANNED
-- Web Application Firewall (WAF) implementation
-- API threat protection and bot management
-- Real-time security monitoring and alerting
-- Automated security testing in CI/CD pipeline
-- SOC 2 Type 2 compliance preparation
-
-### OPTIONAL
-- Zero-trust network architecture
-- Advanced encryption key management with rotation
-- Behavioral analytics for anomaly detection
-- Security information and event management (SIEM) integration
-- Bug bounty program implementation
+### Notable implementation detail
+The app has moved away from a provider-centric auth model. Current route behavior is based on Better Auth sessions + local user mapping, not on Clerk session assumptions or provider-side claims.
 
 ---
 
-## 6. Mock Data & Testing
+## 5. Security status
 
-### CURRENT
-- **Test Framework**: Vitest for unit and integration tests
-- **Test Coverage**: 
-  - API route testing exists but varies in completeness
-  - Rate limiter tests present and passing
-  - Authentication helper tests present
-  - Some service-level tests exist
-- **Mock Data Usage**: 
-  - Tests use mocked dependencies (Clerk auth, database connections)
-  - No apparent use of mock/static data in production routes
-  - Test fixtures for common scenarios
+### Current security posture
+The active implementation includes:
+- email verification enforcement
+- minimum password length rules
+- cookie hardening and trusted-origin enforcement
+- local user ownership checks for creator-scoped data
+- Better Auth-managed session lifecycle
 
-### REQUIRED
-- Establish minimum test coverage thresholds (80%+ for critical paths)
-- Implement end-to-end testing framework (Playwright or Cypress)
-- Create comprehensive test data factories for consistent test data
-- Add mutation testing to evaluate test effectiveness
-- Implement test data isolation strategies
+### Historical security references
+Earlier planning and compliance documents may describe Clerk-specific controls, MFA enforcement, or webhook validation patterns. Those items reflect historical project planning, not the current runtime implementation.
 
-### PLANNED
-- Visual regression testing for UI components
-- Performance testing and benchmarking suite
-- Chaos engineering experiments for resilience testing
-- Contract testing for API backwards compatibility
-- Test impact analysis to optimize test execution
-
-### OPTIONAL
-- AI-generated test cases for edge case discovery
-- Test performance profiling and optimization
-- Automated test remediation suggestions
-- Test coverage prediction models
-- Continuous test optimization in development workflow
+### Required operational principles
+- Treat code in `src/` as the source of truth for runtime behavior.
+- Keep historical docs archived and clearly labeled as non-authoritative.
+- Update active docs when implementation changes materially.
+- Separate product/project narrative from archive or compliance evidence.
 
 ---
 
-## 7. Dead Code & Code Quality
+## 6. Active documentation model
 
-### CURRENT
-- **Code Organization**: 
-  - Feature-based directory structure in `src/app/`
-  - Shared utilities in `src/lib/`
-  - Component library emerging in `src/components/`
-  - Clear separation between app router, API routes, and shared code
-- **Code Quality Indicators**:
-  - TypeScript usage throughout with strict type checking
-  - ESLint and Prettier configured (inferred from clean code)
-  - Consistent naming conventions and formatting
-  - Modular design with single-responsibility principles
-- **Build Process**: 
-  - Next.js build system with TypeScript compilation
-  - ESLint and TypeScript checking in CI pipeline
-  - No build errors in current state (after rate-limiter fixes)
+The repository should keep these categories distinct:
 
-### REQUIRED
-- Implement automated dead code detection in CI pipeline
-- Add complexity analysis thresholds and alerts
-- Establish code review requirements for all changes
-- Implement automated fixers for common code quality issues
-- Add dependency license compliance checking
+- `README.md` — project overview and active implementation summary
+- `KIPSMTHN-IMPLEMENTATION-SPEC.md` — current implementation reference
+- `docs/00-project/` — product/project context
+- `docs/01-specifications/` — active feature and system expectations
+- `docs/02-architecture/` — system architecture and design details
+- `docs/03-design-system/` — UI and styling system guidance
+- `docs/04-security-compliance/` — active security/compliance guidance
+- `docs/05-development-operations/` — operational workflows
+- `docs/06-decisions/` — design and architecture decisions
+- `docs/07-audits/` — current audit and review material
+- `docs/08-history/` — migration and historical notes
+- `docs/archive/` and `docs/soc2/` — retained historical records and archival evidence
 
-### PLANNED
-- Architecture decision records (ADR) for significant changes
-- Technical debt tracking and prioritization system
-- Code ownership mapping and maintenance responsibility
-- Automated refactoring tools for common patterns
-- Code quality gates in pull request process
+This structure preserves the repo’s memory without letting legacy materials overwrite the current implementation.
 
-### OPTIONAL
-- AI-assisted code review and suggestion system
-- Code duplication detection and remediation
-- Automated performance optimization suggestions
-- Code churn analysis for hotspot identification
+---
+
+## 7. Implementation summary
+
+The current app is a Better Auth + Drizzle + Next.js platform with creator-scoped ownership rules and a database-backed business workflow. The live implementation is authoritative; older documentation that assumes Clerk or a different auth architecture should be treated as historical context until explicitly rewritten or archived.
+
+The correct interpretation of the codebase is:
+- Better Auth is the current authentication system.
+- Drizzle is the current schema and ORM layer.
+- Local app user records are the identity source for creator ownership.
+- Legacy Clerk-era docs remain as historical material only.
+
 - Developer productivity metrics and insights
 
 ---

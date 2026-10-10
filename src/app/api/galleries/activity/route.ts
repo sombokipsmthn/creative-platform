@@ -8,9 +8,9 @@ import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
 async function getCreator() {
   try {
     const session = await getCurrentSession();
-    const userId = session?.user?.id;
-    if (!userId) return null;
-    return getOrCreateLocalUser(userId);
+    const authUser = session?.user;
+    if (!authUser) return null;
+    return getOrCreateLocalUser(authUser);
   } catch {
     return null;
   }

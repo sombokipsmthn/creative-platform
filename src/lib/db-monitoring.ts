@@ -14,7 +14,7 @@ class QueryMonitor {
    * Record a query execution
    */
   recordQuery(label: string, duration: number) {
-    const existing = this.metrics.get(label) || { count: 0, totalTime: 0, maxTime: 0 };
+    const existing: { count: number; totalTime: number; maxTime: number } = this.metrics.get(label) || { count: 0, totalTime: 0, maxTime: 0 };
     existing.count += 1;
     existing.totalTime += duration;
     existing.maxTime = Math.max(existing.maxTime, duration);
@@ -30,7 +30,7 @@ class QueryMonitor {
    * Get aggregated metrics
    */
   getMetrics() {
-    const result: Record<string, any> = {};
+    const result: Record<string, Record<string, string | number>> = {};
     this.metrics.forEach((metric, label) => {
       result[label] = {
         count: metric.count,
@@ -84,7 +84,7 @@ export async function getUserByAuthId(authUserId: string) {
     const [user] = await db
       .select()
       .from(users)
-      .where(eq(users.authUserId, authUserId))
+      .where(eq(users.id, authUserId))
       .limit(1);
     
     const duration = performance.now() - start;

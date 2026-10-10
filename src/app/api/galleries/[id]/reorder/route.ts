@@ -11,6 +11,11 @@ type Context = {
   }>;
 };
 
+type ReorderPhoto = {
+  id: string;
+  collectionId?: string | null;
+};
+
 export async function POST(
   request: Request,
   context: Context
@@ -54,28 +59,37 @@ export async function POST(
 
     const body = await request.json();
 
-    const photos =
+    const photos: ReorderPhoto[] =
       Array.isArray(body.photos)
         ? body.photos
         : [];
 
-    for (
-      let index = 0;
-      index < photos.length;
-      index++
-    ) {
-      const photo = photos[index];
+    const updatesByPhotoId = new Map<
+      string,
+      { photo: ReorderPhoto; index: number }
+    >();
+    photos.forEach((photo, index) => {
+      updatesByPhotoId.set(String(photo.id), { photo, index });
+    });
+    const updates = [...updatesByPhotoId.values()];
+
+    for (let offset = 0; offset < updates.length; offset += 1000) {
+      const values = updates
+        .slice(offset, offset + 1000)
+        .map(
+          ({ photo, index }) =>
+            sql`(${photo.id}::uuid, ${index}::integer, ${photo.collectionId || null}::uuid)`
+        );
 
       await db.execute(sql`
-        UPDATE gallery_photos
+        UPDATE gallery_photos AS photo
         SET
-          sort_order = ${index},
-          collection_id =
-            ${photo.collectionId || null},
+          sort_order = changes.sort_order,
+          collection_id = changes.collection_id,
           updated_at = now()
-
-        WHERE id = ${photo.id}
-          AND gallery_id = ${galleryId}
+        FROM (VALUES ${sql.join(values, sql`, `)}) AS changes(photo_id, sort_order, collection_id)
+        WHERE photo.id = changes.photo_id
+          AND photo.gallery_id = ${galleryId}
       `);
     }
 

@@ -34,6 +34,17 @@ describe("local authentication bypass state", () => {
       localHostname: true,
     });
   });
+
+  it("does not trust a forwarded localhost hostname for remote requests", () => {
+    const remoteRequest = new Request("https://creative-platform.example/admin", {
+      headers: { "x-forwarded-host": "localhost:3005" },
+    });
+
+    expect(getLocalAuthBypassState(remoteRequest, {
+      NODE_ENV: "development",
+      LOCAL_AUTH_BYPASS: "true",
+    }).enabled).toBe(false);
+  });
 });
 
 describe("proxy local authentication bypass", () => {

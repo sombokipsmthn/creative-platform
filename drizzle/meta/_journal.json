@@ -176,6 +176,13 @@
       "when": 1791481627499,
       "tag": "0025_reconcile_onboarding_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791621573211,
+      "tag": "0025_repair_api_schema",
+      "breakpoints": true
     }
   ]
 }

@@ -41,6 +41,19 @@ function money(value: unknown) {
   return Number(value ?? 0) || 0;
 }
 
+async function safeGalleryStats(creator: string, periodStart: Date, periodEnd: Date) {
+  try {
+    const lifetime = await db.select({ value: count() }).from(galleries).where(eq(galleries.creatorId, creator));
+    const period = await db.select({ value: count() }).from(galleries).where(and(eq(galleries.creatorId, creator), gte(galleries.createdAt, periodStart), lt(galleries.createdAt, periodEnd)));
+    const statuses = await db.select({ status: galleries.status, count: count() }).from(galleries).where(eq(galleries.creatorId, creator)).groupBy(galleries.status);
+    const recent = await db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.createdAt }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updatedAt)).limit(5);
+    return { lifetime, period, statuses, recent };
+  } catch (error) {
+    console.warn("Dashboard gallery metrics unavailable; returning empty gallery data.", error);
+    return { lifetime: [{ value: 0 }], period: [{ value: 0 }], statuses: [] as Array<{ status: string; count: number }>, recent: [] as Array<{ id: string; title: string; status: string; createdAt: Date }> };
+  }
+}
+
 export async function GET(request: Request) {
   return withCreatorApi(request, async (_request, user) => {
     const creator = user.id;
@@ -54,6 +67,7 @@ export async function GET(request: Request) {
     const now = new Date();
     const periodStart = startOfPeriod(now, range);
     const periodEnd = addDays(startOfDay(now), 1);
+    const galleryStats = await safeGalleryStats(creator, periodStart, periodEnd);
 
     const [
       clientLifetime,
@@ -74,14 +88,10 @@ export async function GET(request: Request) {
       invoicePeriodValue,
       paidInvoicePeriodValue,
       overdueInvoices,
-      galleryLifetime,
-      galleryPeriod,
-      galleryStatusRows,
       recentClients,
       recentProjects,
       recentQuotes,
       recentInvoices,
-      recentGalleries,
     ] = await Promise.all([
       db.select({ value: count() }).from(clients).where(eq(clients.creatorId, creator)),
       db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), gte(clients.createdAt, periodStart), lt(clients.createdAt, periodEnd))),
@@ -101,19 +111,15 @@ export async function GET(request: Request) {
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updatedAt, periodStart), lt(invoices.updatedAt, periodEnd))),
       db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.dueDate, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
-      db.select({ value: count() }).from(galleries).where(eq(galleries.creatorId, creator)),
-      db.select({ value: count() }).from(galleries).where(and(eq(galleries.creatorId, creator), gte(galleries.createdAt, periodStart), lt(galleries.createdAt, periodEnd))),
-      db.select({ status: galleries.status, count: count() }).from(galleries).where(eq(galleries.creatorId, creator)).groupBy(galleries.status),
       db.select({ id: clients.id, name: clients.name, createdAt: clients.createdAt }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.createdAt)).limit(5),
       db.select({ id: projects.id, name: projects.name, status: projects.status, createdAt: projects.createdAt }).from(projects).where(eq(projects.creatorId, creator)).orderBy(desc(projects.updatedAt)).limit(5),
       db.select({ id: quotes.id, title: quotes.title, status: quotes.status, total: quotes.total, currency: quotes.currency, createdAt: quotes.createdAt }).from(quotes).where(eq(quotes.creatorId, creator)).orderBy(desc(quotes.updatedAt)).limit(5),
       db.select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber, title: invoices.title, status: invoices.status, total: invoices.total, currency: invoices.currency, createdAt: invoices.createdAt }).from(invoices).where(eq(invoices.creatorId, creator)).orderBy(desc(invoices.updatedAt)).limit(5),
-      db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.createdAt }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updatedAt)).limit(5),
     ]);
 
     const quoteStatuses = Object.fromEntries(quoteStatusRows.map((row) => [row.status, Number(row.count)]));
     const invoiceStatuses = Object.fromEntries(invoiceStatusRows.map((row) => [row.status, Number(row.count)]));
-    const galleryStatuses = Object.fromEntries(galleryStatusRows.map((row) => [row.status, Number(row.count)]));
+    const galleryStatuses = Object.fromEntries(galleryStats.statuses.map((row) => [row.status, Number(row.count)]));
 
     const acceptedQuotes = quoteStatuses.accepted ?? 0;
     const decisionQuotes = (quoteStatuses.sent ?? 0) + (quoteStatuses.accepted ?? 0) + (quoteStatuses.rejected ?? 0) + (quoteStatuses.invoiced ?? 0);
@@ -124,7 +130,7 @@ export async function GET(request: Request) {
       ...recentProjects.map((item) => ({ id: `project-${item.id}`, type: "project" as const, title: `Project ${item.status}`, description: item.name, date: item.createdAt })),
       ...recentQuotes.map((item) => ({ id: `quote-${item.id}`, type: "quote" as const, title: `Quote ${item.status}`, description: item.title, date: item.createdAt })),
       ...recentInvoices.map((item) => ({ id: `invoice-${item.id}`, type: "invoice" as const, title: `Invoice ${item.invoiceNumber || item.title}`, date: item.createdAt })),
-      ...recentGalleries.map((item) => ({ id: `gallery-${item.id}`, type: "gallery" as const, title: `Gallery ${item.status}`, description: item.title, date: item.createdAt })),
+      ...galleryStats.recent.map((item) => ({ id: `gallery-${item.id}`, type: "gallery" as const, title: `Gallery ${item.status}`, description: item.title, date: item.createdAt })),
     ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 8).map((item) => ({ ...item, date: item.date.toISOString() }));
 
     return NextResponse.json({
@@ -142,8 +148,8 @@ export async function GET(request: Request) {
         newQuotes: Number(quotePeriod[0]?.value ?? 0),
         invoices: Number(invoiceLifetime[0]?.value ?? 0),
         newInvoices: Number(invoicePeriod[0]?.value ?? 0),
-        galleries: Number(galleryLifetime[0]?.value ?? 0),
-        newGalleries: Number(galleryPeriod[0]?.value ?? 0),
+        galleries: Number(galleryStats.lifetime[0]?.value ?? 0),
+        newGalleries: Number(galleryStats.period[0]?.value ?? 0),
       },
       finance: {
         periodQuotedValue: money(quotePeriodValue[0]?.value),

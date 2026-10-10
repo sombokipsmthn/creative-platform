@@ -11,6 +11,10 @@ const googleProvider = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT
   ? { clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET }
   : undefined;
 
+const baseURL = process.env.NODE_ENV === "development"
+  ? "http://localhost:3005"
+  : process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005";
+
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",
   baseURL: appUrl,

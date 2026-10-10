@@ -1,12 +1,7 @@
 // next.config.ts
 import type { NextConfig } from 'next';
-import webpack from 'webpack';
 
 const nextConfig: NextConfig = {
-  // Next.js 16 defaults to Turbopack. This project's webpack config (client
-  // Node.js fallbacks + server-side externals for better-auth) is webpack-only,
-  // so we pin the build to webpack and set an empty turbopack config to silence
-  // the "Turbopack + webpack config" error. See AGENTS.md build instructions.
   turbopack: {},
 
   // Next.js 16.3 + Vercel currently conflicts with standalone output:
@@ -42,48 +37,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
     ];
-  },
-
-  webpack: (config, { isServer }) => {
-    config.plugins.push(
-      new webpack.IgnorePlugin({ resourceRegExp: /^pg-native$/ }),
-    );
-
-    if (!isServer) {
-      // Don't bundle Node.js modules on the client
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        'util/types': false,
-        crypto: false,
-        stream: false,
-        buffer: false,
-        path: false,
-        os: false,
-        child_process: false,
-        zlib: false,
-        http: false,
-        https: false,
-        querystring: false,
-        url: false,
-      };
-    }
-
-    // Ensure better-auth and related packages are externalized for server
-    if (isServer) {
-      config.externals = [
-        ...(config.externals || []),
-        '@better-auth/drizzle-adapter',
-        'pg',
-        'better-auth',
-        'jose',
-      ];
-    }
-
-    return config;
   },
 };
 

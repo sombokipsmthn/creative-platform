@@ -18,7 +18,7 @@ export async function getOrCreateLocalUser(userId?: string) {
   const existing = await db.query.users.findFirst({ where: eq(users.id, id) });
   if (existing) return existing;
   if (!authUser) throw new Error("Authenticated user could not be loaded.");
-  const [created] = await db.insert(users).values({ id, email: authUser.email.toLowerCase().trim(), name: authUser.name || authUser.email.split("@")[0] || "Creator", emailVerified: authUser.emailVerified, image: authUser.image }).returning();
+  const [created] = await db.insert(users).values({ id, email: authUser.email.toLowerCase().trim(), name: authUser.name || authUser.email.split("@")[0] || "Creator", emailVerified: authUser.emailVerified, image: authUser.image, onboardingStatus: "incomplete", onboardingStep: 1 }).returning();
   if (!created) throw new Error("Application user could not be created.");
   return created;
 }

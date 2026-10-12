@@ -159,14 +159,22 @@ export async function PATCH(request: Request, context: Context) {
         }
       }
 
+      // Build dynamic update query
+      const projectFields: Record<string, unknown> = {};
+      for (const field of allowedFields) {
+        if (field in body) {
+          const snakeField = field.replace(/([A-Z])/g, "_$1").toLowerCase();
+          projectFields[snakeField] = body[field];
+        }
+      }
+      projectFields.updatedAt = new Date();
+
       // Build query with parameterized values
-      const query = sql`
-        UPDATE projects
-        SET ${sql.raw(updates.join(", "))}
-        WHERE id = ${id}
-          AND creator_id = ${user.id}
-        RETURNING *
-      `;
+      const result = await db
+        .update(projects)
+        .set(projectFields)
+        .where(and(eq(projects.id, id), eq(projects.creatorId, user.id)))
+        .returning();
 
       const result = await db.execute(query);
 

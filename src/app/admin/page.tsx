@@ -150,7 +150,6 @@ export default function CreativeOSDashboardPage() {
   }, [stats, tourStep]);
 
   useEffect(() => {
-    if (!stats) return;
     let cancelled = false;
     async function load() {
       setLoading(true); setError('');

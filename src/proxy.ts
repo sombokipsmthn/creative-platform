@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 
 function configuredOrigin(): string | null {
-  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || null;
+  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3005";
 }
 
 function getAuthOrigin(): string | null {

@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, asc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getLocalUser } from "@/lib/auth/get-local-user";
 import { hashPin } from "@/lib/gallery/pin";
+import { galleries, galleryCollections, galleryPhotos, galleryApprovals, galleryDownloadPresets, galleryWatermarks, clients, projects } from "@/db/schema";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -75,10 +76,9 @@ export async function GET(_request: Request, context: Context) {
       .from(galleries)
       .leftJoin(clients, eq(galleries.clientId, clients.id))
       .leftJoin(projects, eq(galleries.projectId, projects.id))
-      .leftJoin(gallery_photos as cp, eq(galleries.coverPhotoId, cp.id))
+      .leftJoin(galleryPhotos, eq(galleries.coverPhotoId, galleryPhotos.id))
       .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
       .limit(1)
-      .returning();
 
     const gallery = galleryResult;
 
@@ -107,7 +107,6 @@ export async function GET(_request: Request, context: Context) {
         asc(galleryCollections.sortOrder),
         asc(galleryCollections.createdAt)
       )
-      .returning();
 
     /*
      * --------------------------------------------------------
@@ -125,9 +124,9 @@ export async function GET(_request: Request, context: Context) {
         isHidden: galleryPhotos.isHidden,
         width: galleryPhotos.width,
         height: galleryPhotos.height,
-        altText: galleryPhotos.altText,
-        caption: galleryPhotos.caption,
-        isCover: galleryPhotos.isCover,
+        altText: galleryPhotos.altText ?? "",
+        caption: galleryPhotos.caption ?? "",
+        isCover: galleryPhotos.isCover ?? false,
         createdAt: galleryPhotos.createdAt,
         updatedAt: galleryPhotos.updatedAt,
         collectionTitle: galleryCollections.title,
@@ -139,7 +138,6 @@ export async function GET(_request: Request, context: Context) {
         asc(galleryPhotos.sortOrder),
         asc(galleryPhotos.createdAt)
       )
-      .returning();
 
     /*
      * --------------------------------------------------------
@@ -162,8 +160,7 @@ export async function GET(_request: Request, context: Context) {
         .from(galleryApprovals)
         .where(eq(galleryApprovals.galleryId, id))
         .limit(1)
-        .returning();
-
+  
       approval = approvalResult[0] ?? null;
     } catch (error) {
       console.warn(
@@ -178,8 +175,7 @@ export async function GET(_request: Request, context: Context) {
         .from(galleryDownloadPresets)
         .where(eq(galleryDownloadPresets.galleryId, id))
         .orderBy(asc(galleryDownloadPresets.createdAt))
-        .returning();
-
+  
       presets = presetsResult;
     } catch (error) {
       console.warn(
@@ -194,8 +190,7 @@ export async function GET(_request: Request, context: Context) {
         .from(galleryWatermarks)
         .where(eq(galleryWatermarks.galleryId, id))
         .limit(1)
-        .returning();
-
+  
       watermark = watermarkResult[0] ?? null;
     } catch (error) {
       console.warn(
@@ -262,7 +257,6 @@ export async function PATCH(
       .from(galleries)
       .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
       .limit(1)
-      .returning();
 
     if (!currentGalleryResult) {
       return NextResponse.json(
@@ -434,7 +428,6 @@ export async function DELETE(
     const [result] = await db
       .delete(galleries)
       .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
-      .returning();
 
     if (!result.rows[0]) {
       return NextResponse.json(

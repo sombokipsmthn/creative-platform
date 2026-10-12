@@ -283,7 +283,7 @@ async function getAllTableCounts(pool: Pool): Promise<Map<string, number>> {
   return counts;
 }
 
-async function getActualCount(pool: Pool, tableName: string): Promise<number> {
+async function getActualCount(pool: Pool, table_name: string): Promise<number> {
   try {
     const result = await pool.query(`SELECT COUNT(*) FROM "${table_name}"`);
     return parseInt(result.rows[0]?.count ?? "0", 10);

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getGallerySession } from "@/lib/gallery/session";
+import { galleries } from "@/db/schema";
 
 type Context = {
   params: Promise<{
@@ -43,7 +44,7 @@ export async function GET(
       .where(
         or(
           eq(galleries.slug, slug),
-          eq(galleries.id, sql<number>${slug}::int) // Only if slug is a number
+          eq(galleries.id, sql<number>(slug))
         )
       )
       .limit(1)

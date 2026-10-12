@@ -4,10 +4,16 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
+  ArrowUpRight,
   ChevronLeft,
   ChevronRight,
+  CheckCircle2,
+  FilePlus,
   FileText,
+  Loader2,
+  Plus,
   RefreshCw,
+  Trash2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';

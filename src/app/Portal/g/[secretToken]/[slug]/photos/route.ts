@@ -43,20 +43,16 @@ export async function PATCH(
 
     const galleryId = galleryResult.id;
 
-    if (!gallery.rows[0]) {
+    if (!galleryId) {
       return NextResponse.json(
         {
-          error:
-            "Gallery not found.",
+          error: "Gallery not found.",
         },
         {
           status: 404,
         }
       );
     }
-
-    const galleryId =
-      gallery.rows[0].id;
 
     if (body.isFavorite !== undefined) {
       await db

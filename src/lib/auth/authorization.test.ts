@@ -113,7 +113,7 @@ describe("Authorization matrix", () => {
   // ------------------------------------------------------------------
 
   it("public gallery returns 404 for unknown slug", async () => {
-    mockDb.execute.mockResolvedValue({ rows: [] });
+    mockDb.select.mockResolvedValue([]);
 
     const req = new Request("https://example.com/api/public/galleries/no-such-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "no-such-slug" }) });
@@ -122,14 +122,12 @@ describe("Authorization matrix", () => {
   });
 
   it("public gallery returns 410 when expired", async () => {
-    mockDb.execute.mockResolvedValue({
-      rows: [
-        {
-          id: "gallery_1",
-          expires_at: new Date(Date.now() - 1000).toISOString(),
-        },
-      ],
-    });
+    mockDb.select.mockResolvedValue([
+      {
+        id: "gallery_1",
+        expires_at: new Date(Date.now() - 1000).toISOString(),
+      },
+    ]);
 
     const req = new Request("https://example.com/api/public/galleries/expired-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "expired-slug" }) });

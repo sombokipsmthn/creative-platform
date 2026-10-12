@@ -15,11 +15,16 @@ export async function POST(request: Request) {
       }
 
       // Verify all projects belong to the creator
-      const projects = await db.execute(sql`
-        SELECT id FROM projects
-        WHERE id = ANY(${projectIds})
-          AND creator_id = ${user.id}
-      `);
+      const [projectsResult] = await db
+        .select({ id: projects.id })
+        .from(projects)
+        .where(
+          and(
+            eq(projects.creatorId, user.id),
+            inArray(projects.id, projectIds)
+          )
+        )
+        .returning();
 
       if (projects.rows.length !== projectIds.length) {
         return NextResponse.json({ error: "Some projects not found or unauthorized." }, { status: 404 });

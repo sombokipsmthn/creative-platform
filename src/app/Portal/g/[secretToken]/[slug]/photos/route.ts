@@ -23,14 +23,25 @@ export async function PATCH(
     const photoId =
       body.photoId;
 
-    const gallery =
-      await db.execute(sql`
-        SELECT id
-        FROM galleries
-        WHERE slug = ${slug}
-          AND status = 'published'
-        LIMIT 1
-      `);
+    const [galleryResult] = await db
+      .select({ id: galleries.id })
+      .from(galleries)
+      .where(and(eq(galleries.slug, slug), eq(galleries.status, 'published')))
+      .limit(1)
+      .returning();
+
+    if (!galleryResult) {
+      return NextResponse.json(
+        {
+          error: "Gallery not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    const galleryId = galleryResult.id;
 
     if (!gallery.rows[0]) {
       return NextResponse.json(
@@ -47,40 +58,26 @@ export async function PATCH(
     const galleryId =
       gallery.rows[0].id;
 
-    if (
-      body.isFavorite !==
-      undefined
-    ) {
-      await db.execute(sql`
-        UPDATE gallery_photos
-        SET
-          is_favorite =
-            ${Boolean(
-              body.isFavorite
-            )},
-          updated_at = now()
-        WHERE id = ${photoId}
-          AND gallery_id =
-            ${galleryId}
-      `);
+    if (body.isFavorite !== undefined) {
+      await db
+        .update(galleryPhotos)
+        .set({
+          isFavorite: Boolean(body.isFavorite),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(galleryPhotos.id, photoId), eq(galleryPhotos.galleryId, galleryId)))
+        .returning();
     }
 
-    if (
-      body.isSelected !==
-      undefined
-    ) {
-      await db.execute(sql`
-        UPDATE gallery_photos
-        SET
-          is_selected =
-            ${Boolean(
-              body.isSelected
-            )},
-          updated_at = now()
-        WHERE id = ${photoId}
-          AND gallery_id =
-            ${galleryId}
-      `);
+    if (body.isSelected !== undefined) {
+      await db
+        .update(galleryPhotos)
+        .set({
+          isSelected: Boolean(body.isSelected),
+          updatedAt: new Date(),
+        })
+        .where(and(eq(galleryPhotos.id, photoId), eq(galleryPhotos.galleryId, galleryId)))
+        .returning();
     }
 
     return NextResponse.json({

@@ -18,39 +18,36 @@ export async function GET(
     const { slug } =
       await context.params;
 
-    const galleryResult =
-      await db.execute(sql`
-        SELECT
-          g.*,
-          c.name AS client_name,
-          c.company AS client_company,
-          p.name AS project_name,
-          COALESCE(
-            cp.display_url,
-            (
-              SELECT photo.display_url
-              FROM gallery_photos photo
-              WHERE photo.gallery_id = g.id
-                AND photo.is_hidden = false
-              ORDER BY
-                photo.sort_order ASC,
-                photo.created_at ASC
-              LIMIT 1
-            )
-          ) AS cover_url
-        FROM galleries g
-        LEFT JOIN clients c
-          ON c.id = g.client_id
-        LEFT JOIN projects p
-          ON p.id = g.project_id
-        LEFT JOIN gallery_photos cp
-          ON cp.id = g.cover_photo_id
-        WHERE (
-          g.slug = ${slug}
-          OR g.id::text = ${slug}
+    const [galleryResult] = await db
+      .select({
+        id: galleries.id,
+        slug: galleries.slug,
+        title: galleries.title,
+        description: galleries.description,
+        category: galleries.category,
+        accessPin: galleries.accessPin,
+        status: galleries.status,
+        coverPhotoId: galleries.coverPhotoId,
+        publishedAt: galleries.publishedAt,
+        createdAt: galleries.createdAt,
+        updatedAt: galleries.updatedAt,
+        clientName: clients.name,
+        clientCompany: clients.company,
+        projectName: projects.name,
+        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+      })
+      .from(galleries)
+      .leftJoin(clients, eq(galleries.clientId, clients.id))
+      .leftJoin(projects, eq(galleries.projectId, projects.id))
+      .leftJoin(gallery_photos as cp, eq(galleries.coverPhotoId, cp.id))
+      .where(
+        or(
+          eq(galleries.slug, slug),
+          eq(galleries.id, sql<number>${slug}::int) // Only if slug is a number
         )
-        LIMIT 1
-      `);
+      )
+      .limit(1)
+      .returning();
 
     const gallery =
       galleryResult.rows[0];
@@ -111,61 +108,56 @@ export async function GET(
         gallery.id,
       );
 
-    const collections =
-      await db.execute(sql`
-        SELECT
-          c.*,
-          (
-            SELECT COUNT(*)::int
-            FROM gallery_photos p
-            WHERE p.collection_id = c.id
-              AND p.is_hidden = false
-          ) AS photo_count
-        FROM gallery_collections c
-        WHERE c.gallery_id = ${galleryId}
-        ORDER BY
-          c.sort_order ASC,
-          c.created_at ASC
-      `);
+    const collectionsResult = await db
+      .select({
+        id: galleryCollections.id,
+        title: galleryCollections.title,
+        description: galleryCollections.description,
+        photoCount: sql<number>`(SELECT COUNT(*)::int FROM gallery_photos p WHERE p.collection_id = ${galleryCollections.id} AND p.is_hidden = false)`,
+      })
+      .from(galleryCollections)
+      .where(eq(galleryCollections.galleryId, galleryId))
+      .orderBy(
+        asc(galleryCollections.sortOrder),
+        asc(galleryCollections.createdAt)
+      )
+      .returning();
 
-    const photos =
-      await db.execute(sql`
-        SELECT
-          p.id,
-          p.filename,
-          p.original_url,
-          p.display_url,
-          p.thumbnail_url,
-          p.sort_order,
-          p.is_hidden,
-          COALESCE(
-            a.is_favorite,
-            p.is_favorite
-          ) AS is_favorite,
-          COALESCE(
-            a.is_selected,
-            p.is_selected
-          ) AS is_selected,
-          p.collection_id,
-          p.width,
-          p.height,
-          c.title AS collection_title
-        FROM gallery_photos p
-        LEFT JOIN gallery_collections c
-          ON c.id = p.collection_id
-        LEFT JOIN gallery_photo_actions a
-          ON a.photo_id = p.id
-         AND a.session_id =
-          ${
-            session?.id ||
-            null
-          }
-        WHERE p.gallery_id = ${galleryId}
-          AND p.is_hidden = false
-        ORDER BY
-          p.sort_order ASC,
-          p.created_at ASC
-      `);
+    const photosResult = await db
+      .select({
+        id: galleryPhotos.id,
+        filename: galleryPhotos.filename,
+        originalUrl: galleryPhotos.originalUrl,
+        displayUrl: galleryPhotos.displayUrl,
+        thumbnailUrl: galleryPhotos.thumbnailUrl,
+        sortOrder: galleryPhotos.sortOrder,
+        isHidden: galleryPhotos.isHidden,
+        width: galleryPhotos.width,
+        height: galleryPhotos.height,
+        isFavorite: sql<boolean>`COALESCE(${galleryPhotoActions.isFavorite}, ${galleryPhotos.isFavorite})`,
+        isSelected: sql<boolean>`COALESCE(${galleryPhotoActions.isSelected}, ${galleryPhotos.isSelected})`,
+        collectionTitle: galleryCollections.title,
+      })
+      .from(galleryPhotos)
+      .leftJoin(galleryCollections, eq(galleryPhotos.collectionId, galleryCollections.id))
+      .leftJoin(
+        galleryPhotoActions,
+        and(
+          eq(galleryPhotoActions.photoId, galleryPhotos.id),
+          eq(galleryPhotoActions.sessionId, session?.id ?? null)
+        )
+      )
+      .where(
+        and(
+          eq(galleryPhotos.galleryId, galleryId),
+          eq(galleryPhotos.isHidden, false)
+        )
+      )
+      .orderBy(
+        asc(galleryPhotos.sortOrder),
+        asc(galleryPhotos.createdAt)
+      )
+      .returning();
 
     const approval =
       await db.execute(sql`

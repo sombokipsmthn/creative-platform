@@ -32,21 +32,15 @@ export async function createGallerySession(
       SESSION_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  const result = await db.execute(sql`
-    INSERT INTO gallery_access_sessions (
-      gallery_id,
-      client_id,
-      token_hash,
-      expires_at
-    )
-    VALUES (
-      ${galleryId},
-      ${clientId || null},
-      ${tokenHash},
-      ${expiresAt}
-    )
-    RETURNING id
-  `);
+  const [result] = await db
+    .insert(galleryAccessSessions)
+    .values({
+      galleryId: galleryId,
+      clientId: clientId ?? null,
+      tokenHash: tokenHash,
+      expiresAt: expiresAt,
+    })
+    .returning();
 
   const cookieStore = await cookies();
 
@@ -81,31 +75,33 @@ export async function getGallerySession(
   if (token) {
     const tokenHash = hashToken(token);
 
-    const result = await db.execute(sql`
-      SELECT id
-      FROM gallery_access_sessions
-      WHERE token_hash = ${tokenHash}
-        AND gallery_id = ${galleryId}
-        AND (
-          expires_at IS NULL
-          OR expires_at > now()
+    const [result] = await db
+      .select({ id: galleryAccessSessions.id })
+      .from(galleryAccessSessions)
+      .where(
+        and(
+          eq(galleryAccessSessions.tokenHash, tokenHash),
+          eq(galleryAccessSessions.galleryId, galleryId),
+          or(
+            isNull(galleryAccessSessions.expiresAt),
+            gt(galleryAccessSessions.expiresAt, new Date())
+          )
         )
-      LIMIT 1
-    `);
+      )
+      .limit(1)
+      .returning();
 
     if (result.rows[0]) {
       const sessionId = String(result.rows[0].id);
 
-      await db.execute(sql`
-        UPDATE gallery_access_sessions
-        SET
-          last_seen_at = now(),
-          client_id = COALESCE(
-            client_id,
-            ${clientId || null}
-          )
-        WHERE id = ${sessionId}
-      `);
+      await db
+        .update(galleryAccessSessions)
+        .set({
+          lastSeenAt: new Date(),
+          clientId: clientId ?? null,
+        })
+        .where(eq(galleryAccessSessions.id, sessionId))
+        .returning();
 
       return {
         id: sessionId,

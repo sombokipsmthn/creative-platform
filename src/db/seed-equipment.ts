@@ -60,13 +60,13 @@ async function seed() {
       const [existing] = await tx
         .select({ id: equipment.id })
         .from(equipment)
-        .where(sql`${equipment.name} = ${name}`)
+        .where(eq(equipment.name, name))
         .limit(1);
       const imageUrl = clean(valueAt(row, "Image Search"));
 
       if (existing) {
-        await tx.update(equipment).set({ ...data, updatedAt: new Date() }).where(sql`${equipment.id} = ${existing.id}`);
-        await tx.execute(sql`UPDATE equipment SET image_url = ${imageUrl} WHERE id = ${existing.id}`);
+        await tx.update(equipment).set({ ...data, updatedAt: new Date() }).where(eq(equipment.id, existing.id));
+        await tx.update(equipment).set({ imageUrl: imageUrl, updatedAt: new Date() }).where(eq(equipment.id, existing.id));
         updated += 1;
       } else {
         const [created] = await tx.insert(equipment).values(data).returning({ id: equipment.id });

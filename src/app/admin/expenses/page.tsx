@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
+import Loader2 from 'lucide-react';
 
 interface ExpenseReceipt {
   id: string;
@@ -62,7 +63,7 @@ export default function AdminExpensesPage() {
   const [category, setCategory] = useState<ExpenseReceipt['category']>('GEAR');
   const [amountKes, setAmountKes] = useState(0);
   const [vatAmountKes, setVatAmountKes] = useState(0);
-  const [date] = useState('2026-02-10');
+  const [date, setDate] = useState('2026-02-10');
 
   const handleSimulateScan = () => {
     setIsScanning(true);
@@ -113,184 +114,191 @@ export default function AdminExpensesPage() {
   const estimatedTaxShield = totalClaimable * 0.3;
 
   return (
-    <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
-      <div className="max-w-7xl mx-auto space-y-10">
-        
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
-          <div>
-            <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
-            <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
+            <div>
+              <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
+              <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-sans rounded-full font-semibold">
+              <span>30% KRA Income Tax Shield Active</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-sans rounded-full font-semibold">
-            <span>30% KRA Income Tax Shield Active</span>
-          </div>
-        </div>
+          {/* Metrics Summary Bar */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="ui-stat-card">
+              <p className="ui-stat-label">Total Claimable Expenses</p>
+              <p className="ui-stat-value">KES {totalClaimable.toLocaleString()}</p>
+              <p className="ui-meta">eTIMS & ETR Verified Receipts</p>
+            </div>
 
-        {/* Metrics Summary Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="ui-card p-4">
-            <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans uppercase">Total Claimable Expenses</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">KES {totalClaimable.toLocaleString()}</p>
-            <p className="text-[11px] text-purple-600 dark:text-purple-400 font-sans">eTIMS & ETR Verified Receipts</p>
-          </div>
+            <div className="ui-stat-card">
+              <p className="ui-stat-label">Est. KRA Tax Savings</p>
+              <p className="ui-stat-value">KES {estimatedTaxShield.toLocaleString()}</p>
+              <p className="ui-meta">Tax Deductible at 30% Corporate Rate</p>
+            </div>
 
-          <div className="ui-card p-4">
-            <p className="text-xs text-emerald-600 dark:text-emerald-400 font-sans uppercase">Est. KRA Tax Savings</p>
-            <p className="text-3xl font-light text-emerald-600 dark:text-emerald-400">KES {estimatedTaxShield.toLocaleString()}</p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-sans">Tax Deductible at 30% Corporate Rate</p>
-          </div>
-
-          <div className="ui-card p-4">
-            <p className="text-xs text-amber-600 dark:text-amber-400 font-sans uppercase">Pending Verification</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {expenses.filter((e) => e.status === 'PENDING_VERIFICATION').length} Receipts
-            </p>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-500 font-sans">Requires eTIMS PIN confirmation</p>
+            <div className="ui-stat-card">
+              <p className="ui-stat-label">Pending Verification</p>
+              <p className="ui-stat-value">
+                {expenses.filter((e) => e.status === 'PENDING_VERIFICATION').length} Receipts
+              </p>
+              <p className="ui-meta">Requires eTIMS PIN confirmation</p>
+            </div>
           </div>
         </div>
 
         {/* SCANNER FORM */}
-        <div className="ui-card p-6 shadow-xl max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
-            <div>
-              <p className="ui-eyebrow">OCR Receipt Processing</p>
-              <h2 className="ui-section-title">Scan & Capture KRA Expense Receipt</h2>
-            </div>
-
-            <Button
-              onClick={handleSimulateScan}
-              disabled={isScanning}
-              variant="primary"
-              className="px-5 py-2.5 text-xs font-sans uppercase tracking-widest rounded-lg flex items-center gap-2 shadow-sm cursor-pointer"
-            >
-              <svg className="w-3.5 h-3.5 fill-none stroke-current stroke-2" viewBox="0 0 24 24">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-                <circle cx="12" cy="13" r="4" />
-              </svg>
-              <span>{isScanning ? 'Scanning Receipt...' : 'Scan Receipt Photo (OCR)'}</span>
-            </Button>
+        <div className="ui-card space-y-6">
+          <div className="ui-card-header">
+            <h2 className="ui-card-title">OCR Receipt Processing</h2>
+            <p className="ui-meta">Scan & Capture KRA Expense Receipt</p>
           </div>
-
-          <form onSubmit={handleAddExpense} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="ui-label">Merchant Name *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Sony Kenya / Text Book Centre"
-                  value={merchant}
-                  onChange={(e) => setMerchant(e.target.value)}
-                  className="ui-input w-full"
-                />
+          <div className="ui-card-content space-y-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
+              <div>
+                <p className="ui-eyebrow">OCR Receipt Processing</p>
+                <h2 className="ui-section-title">Scan & Capture KRA Expense Receipt</h2>
               </div>
 
-              <div className="space-y-1">
-                <label className="ui-label">Merchant KRA PIN *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. P051123456Z"
-                  value={merchantKraPin}
-                  onChange={(e) => setMerchantKraPin(e.target.value)}
-                  className="ui-input w-full"
-                />
-              </div>
+              <Button
+                onClick={handleSimulateScan}
+                disabled={isScanning}
+                variant="primary"
+                className="w-full md:w-auto"
+              >
+                {isScanning ? <span className="flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Scanning Receipt...</span> : 'Scan Receipt Photo (OCR)'}
+              </Button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1">
-                <label className="ui-label">Category</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as typeof category)}
-                  className="ui-select w-full"
-                >
-                  <option value="GEAR">Camera & Production Gear</option>
-                  <option value="TRAVEL">Production Travel & Transport</option>
-                  <option value="SOFTWARE">Software & Cloud Subscriptions</option>
-                  <option value="CREW">Crew & Technical Assistant Fees</option>
-                  <option value="VENUE">Studio & Venue Hire</option>
-                </select>
+            <form onSubmit={handleAddExpense} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="ui-label">Merchant Name *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Sony Kenya / Text Book Centre"
+                    value={merchant}
+                    onChange={(e) => setMerchant(e.target.value)}
+                    className="ui-input"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="ui-label">Merchant KRA PIN *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. P051123456Z"
+                    value={merchantKraPin}
+                    onChange={(e) => setMerchantKraPin(e.target.value)}
+                    className="ui-input"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="ui-label">Total Amount (KES) *</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 180000"
-                  value={amountKes || ''}
-                  onChange={(e) => setAmountKes(parseFloat(e.target.value) || 0)}
-                  className="ui-input w-full"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="ui-label">Category</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value as typeof category)}
+                    className="ui-select"
+                  >
+                    <option value="GEAR">Camera & Production Gear</option>
+                    <option value="TRAVEL">Production Travel & Transport</option>
+                    <option value="SOFTWARE">Software & Cloud Subscriptions</option>
+                    <option value="CREW">Crew & Technical Assistant Fees</option>
+                    <option value="VENUE">Studio & Venue Hire</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="ui-label">Total Amount (KES) *</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 180000"
+                    value={amountKes || ''}
+                    onChange={(e) => setAmountKes(parseFloat(e.target.value) || 0)}
+                    className="ui-input"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="ui-label">VAT Portion (KES 16%)</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 24800"
+                    value={vatAmountKes || ''}
+                    onChange={(e) => setVatAmountKes(parseFloat(e.target.value) || 0)}
+                    className="ui-input"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="ui-label">VAT Portion (KES 16%)</label>
-                <input
-                  type="number"
-                  placeholder="e.g. 24800"
-                  value={vatAmountKes || ''}
-                  onChange={(e) => setVatAmountKes(parseFloat(e.target.value) || 0)}
-                  className="ui-input w-full"
-                />
-              </div>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full py-3.5"
-              variant="primary"
-            >
-              + Record Expense for KRA Tax Return
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                className="w-full py-3.5"
+                variant="primary"
+              >
+                + Record Expense for KRA Tax Return
+              </Button>
+            </form>
+          </div>
         </div>
 
         {/* EXPENSES LIST */}
-        <div className="space-y-4">
-          <h2 className="ui-section-title">Logged Receipts & Expenses ({expenses.length})</h2>
-
-          <div className="grid grid-cols-1 gap-6">
-            {expenses.map((exp) => (
-              <div
-                key={exp.id}
-                className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shrink-0 bg-slate-100 dark:bg-zinc-900">
-                    <Image src={exp.receiptImage} alt={exp.merchant} fill className="object-cover" unoptimized />
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
-                        {exp.category}
-                      </span>
-                      <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${
-                        exp.status === 'CLAIMABLE' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
-                      }`}>
-                        {exp.status === 'CLAIMABLE' ? 'Claimable ✓' : 'Pending Verification ⚠️'}
-                      </span>
+        <div className="ui-card space-y-6">
+          <div className="ui-card-header">
+            <h2 className="ui-section-title">Logged Receipts & Expenses ({expenses.length})</h2>
+          </div>
+          <div className="ui-card-content">
+            <div className="grid grid-cols-1 gap-6">
+              {expenses.map((exp) => (
+                <div
+                  key={exp.id}
+                  className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shrink-0 bg-slate-100 dark:bg-zinc-900">
+                      <Image src={exp.receiptImage} alt={exp.merchant} fill className="object-cover" unoptimized />
                     </div>
 
-                    <h3 className="text-base font-medium text-slate-900 dark:text-white">{exp.merchant}</h3>
-                    <p className="ui-meta">
-                      Merchant KRA PIN: <span className="font-bold text-slate-900 dark:text-white">{exp.merchantKraPin}</span> • Date: {exp.date}
-                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
+                          {exp.category}
+                        </span>
+                        <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${
+                          exp.status === 'CLAIMABLE' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                        }`}>
+                          {exp.status === 'CLAIMABLE' ? 'Claimable ✓' : 'Pending Verification ⚠️'}
+                        </span>
+                      </div>
+
+                      <h3 className="text-base font-medium text-slate-900 dark:text-white">{exp.merchant}</h3>
+                      <p className="ui-meta">
+                        Merchant KRA PIN: <span className="font-bold text-slate-900 dark:text-white">{exp.merchantKraPin}</span> • Date: {exp.date}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="text-right font-sans">
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">KES {exp.amountKes.toLocaleString()}</p>
+                    <p className="ui-meta">Est. Tax Shield: KES {(exp.amountKes * 0.3).toLocaleString()}</p>
                   </div>
                 </div>
-
-                <div className="text-right font-sans">
-                  <p className="text-xl font-bold text-slate-900 dark:text-white">KES {exp.amountKes.toLocaleString()}</p>
-                  <p className="ui-meta">Est. Tax Shield: KES {(exp.amountKes * 0.3).toLocaleString()}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
-
       </div>
     </div>
   );
 }
+
+// Add Loader2 import at the top if not present

@@ -276,7 +276,7 @@ async function getAllTableCounts(pool: Pool): Promise<Map<string, number>> {
       const result = await pool.query(`SELECT COUNT(*) FROM "${table_name}"`);
       counts.set(table_name, parseInt(result.rows[0]?.count ?? "0", 10));
     } catch (err) {
-      console.warn(`Warning: Could not count rows for table ${table_name}:`, err.message);
+      console.warn(`Warning: Could not count rows for table ${table_name}:`, err instanceof Error ? err.message : String(err));
       counts.set(table_name, -1); // Error indicator
     }
   }
@@ -394,7 +394,7 @@ async function getStorageReferences(pool: Pool): Promise<StorageFileReference[]>
         }
       }
     } catch (tableErr) {
-      console.warn(`Warning: Could not query storage references for ${table}:`, tableErr.message);
+      console.warn(`Warning: Could not query storage references for ${table}:`, tableErr instanceof Error ? tableErr.message : String(tableErr));
     }
   }
 
@@ -546,8 +546,8 @@ async function executePurge(): Promise<ExecutionResult> {
           console.log(`⏭️  Skipping ${table} (0 rows)`);
         }
       } catch (err) {
-        console.error(`❌ Error deleting from ${table}:`, err.message);
-        warnings.push(`Failed to delete from ${table}: ${err.message}`);
+        console.error(`❌ Error deleting from ${table}:`, err instanceof Error ? err.message : String(err));
+        warnings.push(`Failed to delete from ${table}: ${err instanceof Error ? err.message : String(err)}`);
         // Continue with other tables rather than failing completely
       }
     }

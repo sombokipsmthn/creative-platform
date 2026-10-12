@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/Button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
 type Client = {
@@ -86,26 +87,21 @@ function getStatusLabel(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }
 
-function getStatusClass(status: string) {
+function getStatusBadgeClass(status: string) {
   switch (status.toLowerCase()) {
     case 'paid':
-      return 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-300';
-
+      return 'ui-badge ui-badge-success';
     case 'sent':
-      return 'border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-300';
-
+      return 'ui-badge ui-badge-accent';
     case 'viewed':
-      return 'border-purple-200 bg-purple-50 text-purple-700 dark:border-purple-900/50 dark:bg-purple-950/40 dark:text-purple-300';
-
+      return 'ui-badge ui-badge-accent';
     case 'overdue':
-      return 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-300';
-
+      return 'ui-badge ui-badge-danger';
     case 'cancelled':
-      return 'border-slate-200 bg-slate-100 text-slate-500 dark:border-zinc-800 dark:bg-zinc-800 dark:text-zinc-400';
-
+      return 'ui-badge ui-badge-danger';
     case 'draft':
     default:
-      return 'border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300';
+      return 'ui-badge';
   }
 }
 
@@ -147,7 +143,7 @@ export default function InvoicesPage() {
   const [search, setSearch] = useState('');
 
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const loadInvoices = useCallback(async (showRefreshState = false) => {
@@ -291,76 +287,59 @@ export default function InvoicesPage() {
     clientId !== 'all';
 
   return (
-    <div className="min-h-screen px-6 py-10">
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-8">
-        {/* HEADER */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="ui-eyebrow">Billing & Payments</p>
-            <h1 className="ui-page-title">Invoices</h1>
-
-            <p className="ui-meta">
-              Manage invoices, monitor payments and keep track of client billing.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
+        <AdminPageHeader
+          title="Invoices"
+          description="Manage invoices, monitor payments and keep track of client billing."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={
             <Button
-              onClick={() => void loadInvoices(true)}
-              disabled={loading || refreshing}
-              variant="secondary"
+              variant="primary"
               className="text-xs font-sans uppercase tracking-widest"
             >
-              <RefreshCw
-                className={`h-3.5 w-3.5 ${
-                  refreshing ? 'animate-spin' : ''
-                }`}
-              />
-              Refresh
+              <Plus className="h-3.5 w-3.5" />
+              New Invoice
             </Button>
+          }
+        />
 
-            <Link
-              href="/admin/quotes/new"
-              className="Button Button--primary"
-            >
-              New Quote
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
+        {error && !loading && (
+          <div className="ui-card p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
-        </div>
+        )}
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Total Invoices</p>
-            <p className="text-3xl font-light text-slate-900 dark:text-white">
-              {summary.total}
-            </p>
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Total Invoices</p>
+            <p className="ui-stat-value">{summary.total}</p>
           </div>
 
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Draft</p>
-            <p className="mt-2 text-3xl font-light text-amber-600 dark:text-amber-400">
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Draft</p>
+            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
               {summary.draft}
             </p>
           </div>
 
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Paid</p>
-            <p className="mt-2 text-3xl font-light text-emerald-600 dark:text-emerald-400">
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Paid</p>
+            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               {summary.paid}
             </p>
           </div>
 
-          <div className="ui-card p-4">
-            <p className="ui-meta uppercase">Outstanding</p>
-            <p className="mt-2 text-2xl font-light text-slate-900 dark:text-white">
+          <div className="ui-stat-card">
+            <p className="ui-stat-label">Outstanding</p>
+            <p className="ui-stat-value text-slate-900 dark:text-white">
               {formatMoney(summary.outstanding, 'KES')}
             </p>
           </div>
         </div>
 
-        {/* FILTER BAR */}
+        {/* Table Filter Bar */}
         <TableFilterBar
           search={search}
           onSearchChange={setSearch}
@@ -372,8 +351,7 @@ export default function InvoicesPage() {
             setClientId(filters.clientId ?? 'all');
           }}
           onAddItem={() => {
-            // Navigate to new invoice page
-            // We'll need to create this route
+            // Navigate to new invoice page - we'll need to create this route
           }}
           filterOptions={ [
             {
@@ -401,7 +379,7 @@ export default function InvoicesPage() {
               ],
               type: 'pills'
             }
-          ]}
+          ] }
           itemLabel="Invoice"
         />
 
@@ -418,116 +396,157 @@ export default function InvoicesPage() {
           </div>
         )}
 
-        {/* ERROR */}
-        {error && (
-          <div className="ui-card p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          </div>
-        )}
-
         {/* TABLE */}
         <div className="ui-card">
-          <div className="overflow-x-auto">
-            <table className="ui-table w-full min-w-[700px]">
-              <thead>
-                <tr className="border-b border-slate-200 text-left dark:border-zinc-800">
-                  <th className="ui-table-header">Invoice</th>
-                  <th className="ui-table-header">Client</th>
-                  <th className="ui-table-header">Status</th>
-                  <th className="ui-table-header">Issued</th>
-                  <th className="ui-table-header">Total</th>
-                  <th className="ui-table-header" />
-                </tr>
-              </thead>
+          {loading ? (
+            <div className="ui-loading-state p-12">
+              <p className="text-xs font-sans uppercase tracking-widest">
+                Loading invoices...
+              </p>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="ui-empty-state p-12">
+              <div className="ui-empty-icon">
+                <FileText className="h-6 w-6" />
+              </div>
 
-              <tbody>
-                {loading ? (
+              <h2 className="ui-section-title">No invoices found</h2>
+
+              <p className="ui-body">
+                {hasFilters
+                  ? 'Try changing your filters or search terms.'
+                  : 'Invoices will appear here once they are created.'}
+              </p>
+
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="primary"
+                  className="mt-6"
+                >
+                  Create First Invoice
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="ui-table">
+                <thead>
                   <tr>
-                    <td colSpan={6} className="px-6 py-16 text-center">
-                      <p className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                        Loading invoices...
-                      </p>
-                    </td>
+                    <th className="ui-table-header">Invoice</th>
+                    <th className="ui-table-header">Client</th>
+                    <th className="ui-table-header">Status</th>
+                    <th className="ui-table-header">Issued</th>
+                    <th className="ui-table-header">Total</th>
+                    <th className="ui-table-header" />
                   </tr>
-                ) : filteredInvoices.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-20 text-center">
-                      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-purple-600/10 text-xl text-purple-600 dark:text-purple-400">
-                        <FileText className="h-5 w-5" />
-                      </div>
-                      <h2 className="mt-5 text-lg font-medium text-slate-900 dark:text-white">
-                        No invoices found
-                      </h2>
-                      <p className="mx-auto mt-2 max-w-md text-sm text-slate-500 dark:text-zinc-500">
-                        {hasFilters
-                          ? 'Try changing your filters or search terms.'
-                          : 'Invoices will appear here once they are created.'}
-                      </p>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredInvoices.map((invoice) => (
+                </thead>
+
+                <tbody>
+                  {filteredInvoices.map((invoice) => (
                     <tr
                       key={invoice.id}
-                      className="border-b border-slate-100 transition last:border-b-0 hover:bg-slate-50 dark:border-zinc-900 dark:hover:bg-zinc-900/50"
+                      className="ui-table-row"
                     >
-                      <td className="px-6 py-5">
+                      {/* INVOICE */}
+                      <td className="ui-table-cell">
                         <div className="space-y-1">
-                          <p className="font-medium text-slate-900 dark:text-white">
-                            {invoice.title || 'Untitled Invoice'}
-                          </p>
-                          <p className="text-[11px] font-sans text-slate-400 dark:text-zinc-600">
-                            {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
-                          </p>
-                        </div>
-                      </td>
-
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-purple-600/10 text-[9px] font-sans font-semibold text-purple-600 dark:text-purple-400">
-                            {getInitials(invoice.client)}
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                            <FileText className="h-4 w-4" />
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-700 dark:text-zinc-300 truncate">
-                              {getClientName(invoice.client)}
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {invoice.title || 'Untitled Invoice'}
+                            </p>
+                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
+                              {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
                             </p>
                           </div>
                         </div>
                       </td>
 
-                      <td className="px-6 py-5">
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-sans uppercase tracking-wider ${getStatusClass(
-                            invoice.status
-                          )}`}
-                        >
-                          {getStatusLabel(invoice.status)}
-                        </span>
+                      {/* CLIENT */}
+                      <td className="ui-table-cell">
+                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                          {getClientName(invoice.client)}
+                        </p>
                       </td>
 
-                      <td className="px-6 py-5 text-sm text-slate-500 dark:text-zinc-500">
-                        {formatDate(invoice.issueDate)}
+                      {/* STATUS */}
+                      <td className="ui-table-cell">
+                        <div className="flex flex-col items-start gap-2">
+                          <span
+                            className={`${getStatusBadgeClass(invoice.status)}`}
+                          >
+                            {getStatusLabel(invoice.status)}
+                          </span>
+                        </div>
                       </td>
 
-                      <td className="px-6 py-5 text-right font-medium text-slate-900 dark:text-white">
+                      {/* ISSUED */}
+                      <td className="ui-table-cell">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                          {formatDate(invoice.issueDate)}
+                        </p>
+                      </td>
+
+                      {/* TOTAL */}
+                      <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
                         {formatMoney(invoice.total, invoice.currency)}
                       </td>
 
-                      <td className="px-6 py-5 text-right">
-                        <Link
-                          href={`/admin/invoices/${invoice.id}`}
-                          className="Button Button--secondary"
-                        >
-                          View
-                          <ArrowRight className="h-3 w-3" />
-                        </Link>
+                      {/* ACTION */}
+                      <td className="ui-table-cell text-right">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/invoices/${invoice.id}`}
+                            className="ui-button ui-button-secondary text-sm font-sans"
+                          >
+                            View
+                            <ArrowUpRight className="h-3 w-3" />
+                          </Link>
+                          <Link
+                            href={`/admin/invoices/${invoice.id}/edit`}
+                            className="ui-button ui-button-secondary text-sm font-sans"
+                          >
+                            Edit
+                            <Plus className="h-3 w-3" />
+                          </Link>
+                          {invoice.status === 'draft' && (
+                            <>
+                              <Link
+                                href={`/admin/invoices/${invoice.id}/send`}
+                                className="ui-button ui-button-success text-sm font-sans"
+                              >
+                                Send
+                                <CheckCircle2 className="h-3 w-3" />
+                              </Link>
+                              <Link
+                                href={`/admin/invoices/${invoice.id}/duplicate`}
+                                className="ui-button ui-button-secondary text-sm font-sans"
+                              >
+                                Duplicate
+                                <FilePlus className="h-3 w-3" />
+                              </Link>
+                            </>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (!window.confirm('Delete this invoice?')) return;
+                              // Delete logic would go here - keeping inline for now
+                              window.location.reload(); // Placeholder
+                            }}
+                            className="ui-button ui-button-destructive text-sm font-sans"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         {/* PAGINATION */}
@@ -557,8 +576,7 @@ export default function InvoicesPage() {
               <Button
                 onClick={() =>
                   setPage((current) =>
-                    Math.min(pagination.totalPages, current + 1)
-                  )
+                    Math.min(pagination.totalPages, current + 1))
                 }
                 disabled={pagination.page >= pagination.totalPages}
                 variant="secondary"

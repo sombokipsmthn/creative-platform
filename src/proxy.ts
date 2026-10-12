@@ -2,6 +2,24 @@ import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 
+function configuredOrigin(): string | null {
+  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || null;
+}
+
+function getAuthOrigin(): string | null {
+  return configuredOrigin();
+}
+
+async function hasAuthenticatedSession(request: Request, authOrigin: string): Promise<boolean> {
+  try {
+    const session = await auth.api.getSession({ headers: request.headers });
+    return !!session;
+  } catch (error) {
+    console.error("Failed to verify admin session:", error);
+    return false;
+  }
+}
+
 function isAdminRoute(pathname: string) {
   return pathname.startsWith("/admin");
 }
@@ -23,7 +41,7 @@ export default async function customMiddleware(request: Request) {
   const pathname = url.pathname;
   const bypassState = getLocalAuthBypassState(request);
 
-  if (!configuredOrigin) {
+  if (!configuredOrigin()) {
     console.error("Cannot verify the admin session because no auth server URL is configured.");
     return null;
   }
@@ -39,9 +57,6 @@ export default async function customMiddleware(request: Request) {
     });
     return response;
   }
-
-  if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
-    const session = await auth.api.getSession({ headers: request.headers });
 
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
     const authOrigin = getAuthOrigin();

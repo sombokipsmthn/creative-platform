@@ -54,34 +54,33 @@ export async function GET(_request: Request, context: Context) {
      * This is the critical query. If this succeeds, the gallery
      * editor can load its main data.
      */
-    const galleryResult = await db.execute(sql`
-      SELECT
-        g.*,
-        c.name AS client_name,
-        c.email AS client_email,
-        c.company AS client_company,
-        p.name AS project_name,
-        COALESCE(
-          cp.display_url,
-          (
-            SELECT photo.display_url
-            FROM gallery_photos photo
-            WHERE photo.gallery_id = g.id
-              AND photo.is_hidden = false
-            ORDER BY photo.sort_order ASC, photo.created_at ASC
-            LIMIT 1
-          )
-        ) AS cover_url
-      FROM galleries g
-      LEFT JOIN clients c ON c.id = g.client_id
-      LEFT JOIN projects p ON p.id = g.project_id
-      LEFT JOIN gallery_photos cp ON cp.id = g.cover_photo_id
-      WHERE g.id = ${id}
-        AND g.creator_id = ${creator.id}
-      LIMIT 1
-    `);
+    const [galleryResult] = await db
+      .select({
+        id: galleries.id,
+        title: galleries.title,
+        description: galleries.description,
+        category: galleries.category,
+        accessPin: galleries.accessPin,
+        status: galleries.status,
+        coverPhotoId: galleries.coverPhotoId,
+        publishedAt: galleries.publishedAt,
+        createdAt: galleries.createdAt,
+        updatedAt: galleries.updatedAt,
+        clientName: clients.name,
+        clientEmail: clients.email,
+        clientCompany: clients.company,
+        projectName: projects.name,
+        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+      })
+      .from(galleries)
+      .leftJoin(clients, eq(galleries.clientId, clients.id))
+      .leftJoin(projects, eq(galleries.projectId, projects.id))
+      .leftJoin(gallery_photos as cp, eq(galleries.coverPhotoId, cp.id))
+      .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
+      .limit(1)
+      .returning();
 
-    const gallery = galleryResult.rows[0];
+    const gallery = galleryResult;
 
     if (!gallery) {
       return NextResponse.json(
@@ -95,34 +94,52 @@ export async function GET(_request: Request, context: Context) {
      * CORE COLLECTIONS
      * --------------------------------------------------------
      */
-    const collectionsResult = await db.execute(sql`
-      SELECT
-        c.*,
-        (
-          SELECT COUNT(*)::int
-          FROM gallery_photos p
-          WHERE p.collection_id = c.id
-        ) AS photo_count
-      FROM gallery_collections c
-      WHERE c.gallery_id = ${id}
-      ORDER BY c.sort_order ASC, c.created_at ASC
-    `);
+    const collectionsResult = await db
+      .select({
+        id: galleryCollections.id,
+        title: galleryCollections.title,
+        description: galleryCollections.description,
+        photoCount: sql<number>`(SELECT COUNT(*)::int FROM gallery_photos p WHERE p.collection_id = ${galleryCollections.id})`,
+      })
+      .from(galleryCollections)
+      .where(eq(galleryCollections.galleryId, id))
+      .orderBy(
+        asc(galleryCollections.sortOrder),
+        asc(galleryCollections.createdAt)
+      )
+      .returning();
 
     /*
      * --------------------------------------------------------
      * CORE PHOTOS
      * --------------------------------------------------------
      */
-    const photosResult = await db.execute(sql`
-      SELECT
-        p.*,
-        c.title AS collection_title
-      FROM gallery_photos p
-      LEFT JOIN gallery_collections c
-        ON c.id = p.collection_id
-      WHERE p.gallery_id = ${id}
-      ORDER BY p.sort_order ASC, p.created_at ASC
-    `);
+    const photosResult = await db
+      .select({
+        id: galleryPhotos.id,
+        filename: galleryPhotos.filename,
+        originalUrl: galleryPhotos.originalUrl,
+        displayUrl: galleryPhotos.displayUrl,
+        thumbnailUrl: galleryPhotos.thumbnailUrl,
+        sortOrder: galleryPhotos.sortOrder,
+        isHidden: galleryPhotos.isHidden,
+        width: galleryPhotos.width,
+        height: galleryPhotos.height,
+        altText: galleryPhotos.altText,
+        caption: galleryPhotos.caption,
+        isCover: galleryPhotos.isCover,
+        createdAt: galleryPhotos.createdAt,
+        updatedAt: galleryPhotos.updatedAt,
+        collectionTitle: galleryCollections.title,
+      })
+      .from(galleryPhotos)
+      .leftJoin(galleryCollections, eq(galleryPhotos.collectionId, galleryCollections.id))
+      .where(eq(galleryPhotos.galleryId, id))
+      .orderBy(
+        asc(galleryPhotos.sortOrder),
+        asc(galleryPhotos.createdAt)
+      )
+      .returning();
 
     /*
      * --------------------------------------------------------
@@ -140,14 +157,14 @@ export async function GET(_request: Request, context: Context) {
     let watermark: Record<string, unknown> | null = null;
 
     try {
-      const approvalResult = await db.execute(sql`
-        SELECT *
-        FROM gallery_approvals
-        WHERE gallery_id = ${id}
-        LIMIT 1
-      `);
+      const approvalResult = await db
+        .select()
+        .from(galleryApprovals)
+        .where(eq(galleryApprovals.galleryId, id))
+        .limit(1)
+        .returning();
 
-      approval = (approvalResult.rows[0] as Record<string, unknown>) || null;
+      approval = approvalResult[0] ?? null;
     } catch (error) {
       console.warn(
         "Gallery approval data unavailable:",
@@ -156,14 +173,14 @@ export async function GET(_request: Request, context: Context) {
     }
 
     try {
-      const presetsResult = await db.execute(sql`
-        SELECT *
-        FROM gallery_download_presets
-        WHERE gallery_id = ${id}
-        ORDER BY created_at ASC
-      `);
+      const presetsResult = await db
+        .select()
+        .from(galleryDownloadPresets)
+        .where(eq(galleryDownloadPresets.galleryId, id))
+        .orderBy(asc(galleryDownloadPresets.createdAt))
+        .returning();
 
-      presets = presetsResult.rows as Record<string, unknown>[];
+      presets = presetsResult;
     } catch (error) {
       console.warn(
         "Gallery download presets unavailable:",
@@ -172,15 +189,14 @@ export async function GET(_request: Request, context: Context) {
     }
 
     try {
-      const watermarkResult = await db.execute(sql`
-        SELECT *
-        FROM gallery_watermarks
-        WHERE gallery_id = ${id}
-        LIMIT 1
-      `);
+      const watermarkResult = await db
+        .select()
+        .from(galleryWatermarks)
+        .where(eq(galleryWatermarks.galleryId, id))
+        .limit(1)
+        .returning();
 
-      watermark =
-        (watermarkResult.rows[0] as Record<string, unknown>) || null;
+      watermark = watermarkResult[0] ?? null;
     } catch (error) {
       console.warn(
         "Gallery watermark data unavailable:",
@@ -241,15 +257,14 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const currentGallery = await db.execute(sql`
-      SELECT *
-      FROM galleries
-      WHERE id = ${id}
-        AND creator_id = ${creator.id}
-      LIMIT 1
-    `);
+    const [currentGalleryResult] = await db
+      .select()
+      .from(galleries)
+      .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
+      .limit(1)
+      .returning();
 
-    if (!currentGallery.rows[0]) {
+    if (!currentGalleryResult) {
       return NextResponse.json(
         { error: "Gallery not found." },
         { status: 404 }
@@ -352,96 +367,28 @@ export async function PATCH(
           ? sql`NULL`
           : sql`published_at`;
 
-    const result = await db.execute(sql`
-      UPDATE galleries
-      SET
-        title = COALESCE(
-          ${title ?? null},
-          title
-        ),
-
-        description = ${
-          description !== undefined
-            ? description
-            : sql`description`
-        },
-
-        category = ${
-          category !== undefined
-            ? category
-            : sql`category`
-        },
-
-        client_id = ${
-          clientId !== undefined
-            ? clientId
-            : sql`client_id`
-        },
-
-        project_id = ${
-          projectId !== undefined
-            ? projectId
-            : sql`project_id`
-        },
-
-        slug = COALESCE(
-          ${slug ?? null},
-          slug
-        ),
-
-        access_pin = ${
-          accessPin !== undefined
-            ? accessPin
-            : sql`access_pin`
-        },
-
-        status = COALESCE(
-          ${status ?? null},
-          status
-        ),
-
-        cover_photo_id = ${
-          coverPhotoId !== undefined
-            ? coverPhotoId
-            : sql`cover_photo_id`
-        },
-
-        allow_downloads = COALESCE(
-          ${allowDownloads ?? null},
-          allow_downloads
-        ),
-
-        allow_favorites = COALESCE(
-          ${allowFavorites ?? null},
-          allow_favorites
-        ),
-
-        allow_selections = COALESCE(
-          ${allowSelections ?? null},
-          allow_selections
-        ),
-
-        expires_at = ${
-          expiresAt !== undefined
-            ? expiresAt
-            : sql`expires_at`
-        },
-
-        expiry_behavior = ${
-          expiryBehavior !== undefined
-            ? expiryBehavior
-            : sql`expiry_behavior`
-        },
-
-        published_at = ${publishedAt},
-
-        updated_at = now()
-
-      WHERE id = ${id}
-        AND creator_id = ${creator.id}
-
-      RETURNING *
-    `);
+    const [result] = await db
+      .update(galleries)
+      .set({
+        title: title ?? undefined,
+        description: description ?? undefined,
+        category: category ?? undefined,
+        clientId: clientId ?? null,
+        projectId: projectId ?? null,
+        slug: slug ?? undefined,
+        accessPin: accessPin ?? undefined,
+        status: status ?? undefined,
+        coverPhotoId: coverPhotoId ?? null,
+        allowDownloads: allowDownloads ?? undefined,
+        allowFavorites: allowFavorites ?? undefined,
+        allowSelections: allowSelections ?? undefined,
+        expiresAt: expiresAt ?? undefined,
+        expiryBehavior: expiryBehavior ?? undefined,
+        publishedAt: status === "published" ? (publishedAt ?? new Date()) : null,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
+      .returning();
 
     return NextResponse.json({
       gallery: result.rows[0],
@@ -484,12 +431,10 @@ export async function DELETE(
       );
     }
 
-    const result = await db.execute(sql`
-      DELETE FROM galleries
-      WHERE id = ${id}
-        AND creator_id = ${creator.id}
-      RETURNING id
-    `);
+    const [result] = await db
+      .delete(galleries)
+      .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
+      .returning();
 
     if (!result.rows[0]) {
       return NextResponse.json(

@@ -159,21 +159,23 @@ export async function GET(
       )
       .returning();
 
-    const approval =
-      await db.execute(sql`
-        SELECT *
-        FROM gallery_approvals
-        WHERE gallery_id = ${galleryId}
-        LIMIT 1
-      `);
+    const [approvalResult] = await db
+      .select()
+      .from(galleryApprovals)
+      .where(eq(galleryApprovals.galleryId, galleryId))
+      .limit(1)
+      .returning();
 
-    const theme =
-      await db.execute(sql`
-        SELECT *
-        FROM gallery_themes
-        WHERE gallery_id = ${galleryId}
-        LIMIT 1
-      `);
+    const approval = approvalResult ?? null;
+
+    const [themeResult] = await db
+      .select()
+      .from(galleryThemes)
+      .where(eq(galleryThemes.galleryId, galleryId))
+      .limit(1)
+      .returning();
+
+    const theme = themeResult ?? null;
 
     return NextResponse.json({
       gallery,

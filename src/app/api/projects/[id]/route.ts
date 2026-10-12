@@ -187,14 +187,12 @@ export async function DELETE(_request: Request, context: Context) {
         return NextResponse.json({ error: "Project ID is required." }, { status: 400 });
       }
 
-      const result = await db.execute(sql`
-        DELETE FROM projects
-        WHERE id = ${id}
-          AND creator_id = ${user.id}
-        RETURNING id
-      `);
+      const result = await db
+        .delete(projects)
+        .where(and(eq(projects.id, id), eq(projects.creatorId, user.id)))
+        .returning();
 
-      if (!result.rows[0]) {
+      if (!result[0]) {
         return NextResponse.json({ error: "Project not found." }, { status: 404 });
       }
 

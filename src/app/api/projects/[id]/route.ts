@@ -127,23 +127,23 @@ export async function PATCH(request: Request, context: Context) {
         "clientId",
       ];
 
-      const updates: string[] = [];
-      const values: unknown[] = [];
+      const projectFields: Record<string, unknown> = {};
+      let hasUpdates = false;
 
       for (const field of allowedFields) {
         if (field in body) {
           const snakeField = field.replace(/([A-Z])/g, "_$1").toLowerCase();
-          updates.push(`${snakeField} = ${values.length + 1}`);
-          values.push(body[field]);
+          projectFields[snakeField] = body[field];
+          hasUpdates = true;
         }
       }
 
-      // Always update updatedAt
-      updates.push(`updated_at = now()`);
-
-      if (updates.length === 1) {
+      if (!hasUpdates) {
         return NextResponse.json({ error: "No valid fields to update." }, { status: 400 });
       }
+
+      // Always update updatedAt
+      projectFields.updatedAt = new Date();
 
       // Handle slug uniqueness
       if (body.slug !== undefined) {
@@ -159,30 +159,18 @@ export async function PATCH(request: Request, context: Context) {
         }
       }
 
-      // Build dynamic update query
-      const projectFields: Record<string, unknown> = {};
-      for (const field of allowedFields) {
-        if (field in body) {
-          const snakeField = field.replace(/([A-Z])/g, "_$1").toLowerCase();
-          projectFields[snakeField] = body[field];
-        }
-      }
-      projectFields.updatedAt = new Date();
-
-      // Build query with parameterized values
-      const result = await db
+      // Use Drizzle ORM to build a safe, parameterized query
+      const [updatedProject] = await db
         .update(projects)
         .set(projectFields)
         .where(and(eq(projects.id, id), eq(projects.creatorId, user.id)))
         .returning();
 
-      const result = await db.execute(query);
-
-      if (!result.rows[0]) {
+      if (!updatedProject) {
         return NextResponse.json({ error: "Project not found." }, { status: 404 });
       }
 
-      return NextResponse.json({ project: result.rows[0] });
+      return NextResponse.json({ project: updatedProject });
     } catch (error) {
       console.error("PATCH /api/projects/[id] error:", error);
       return NextResponse.json({ error: "Failed to update project." }, { status: 500 });

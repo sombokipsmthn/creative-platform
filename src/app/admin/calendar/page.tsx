@@ -314,7 +314,7 @@ function MonthView({
     <div className="gap-1">
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-500">
-        {[..Array(7)].map((_, i) => {
+        {[...Array(7)].map((_, i) => {
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
             (i + 1) % 7
           ]; // Start with Monday
@@ -325,7 +325,7 @@ function MonthView({
       {/* Days */}
       <div className="grid grid-cols-7 gap-1">
         {/* Padding for days before the 1st */}
-        {[..Array(daysToPad)].map((_, i) => (
+        {[...Array(daysToPad)].map((_, i) => (
           <div key={`pad-${i}`} className="h-24 bg-slate-50/50 dark:bg-zinc-950/50" />
         ))}
 
@@ -413,7 +413,7 @@ function WeekView({
 
       <div className="grid grid-cols-7 gap-2">
         {/* Weekday headers */}
-        {[..Array(7)].map((_, i) => {
+        {[...Array(7)].map((_, i) => {
           const day = addDays(startOfWeekDate, i);
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()];
           return (

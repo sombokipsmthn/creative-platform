@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, eq, and } from "drizzle-orm";
 
 import { db } from "@/db";
+import { galleries, galleryPhotos } from "@/db/schema";
 
 type Context = {
   params: Promise<{
@@ -27,8 +28,7 @@ export async function PATCH(
       .select({ id: galleries.id })
       .from(galleries)
       .where(and(eq(galleries.slug, slug), eq(galleries.status, 'published')))
-      .limit(1)
-      .returning();
+      .limit(1);
 
     if (!galleryResult) {
       return NextResponse.json(
@@ -61,8 +61,7 @@ export async function PATCH(
           isFavorite: Boolean(body.isFavorite),
           updatedAt: new Date(),
         })
-        .where(and(eq(galleryPhotos.id, photoId), eq(galleryPhotos.galleryId, galleryId)))
-        .returning();
+        .where(and(eq(galleryPhotos.id, photoId), eq(galleryPhotos.galleryId, galleryId)));
     }
 
     if (body.isSelected !== undefined) {
@@ -72,8 +71,7 @@ export async function PATCH(
           isSelected: Boolean(body.isSelected),
           updatedAt: new Date(),
         })
-        .where(and(eq(galleryPhotos.id, photoId), eq(galleryPhotos.galleryId, galleryId)))
-        .returning();
+        .where(and(eq(galleryPhotos.id, photoId), eq(galleryPhotos.galleryId, galleryId)));
     }
 
     return NextResponse.json({

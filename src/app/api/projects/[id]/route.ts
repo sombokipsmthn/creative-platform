@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, and, eq, asc, desc, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
+import { projects } from "@/db/schema";
 
 type Context = {
   params: Promise<{ id: string }>;

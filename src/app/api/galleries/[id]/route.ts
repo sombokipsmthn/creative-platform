@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
-import { sql, eq, and, asc } from "drizzle-orm";
+import { sql, eq, and, asc, desc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getLocalUser } from "@/lib/auth/get-local-user";
@@ -55,7 +55,7 @@ export async function GET(_request: Request, context: Context) {
      * This is the critical query. If this succeeds, the gallery
      * editor can load its main data.
      */
-    const [galleryResult] = await db
+    const galleryResult = await db
       .select({
         id: galleries.id,
         title: galleries.title,
@@ -71,7 +71,7 @@ export async function GET(_request: Request, context: Context) {
         clientEmail: clients.email,
         clientCompany: clients.company,
         projectName: projects.name,
-        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+        coverUrl: sql<string>`(SELECT p.display_url FROM galleryPhotos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
       })
       .from(galleries)
       .leftJoin(clients, eq(galleries.clientId, clients.id))
@@ -80,7 +80,7 @@ export async function GET(_request: Request, context: Context) {
       .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
       .limit(1)
 
-    const gallery = galleryResult;
+    const gallery = galleryResult[0];
 
     if (!gallery) {
       return NextResponse.json(
@@ -124,9 +124,9 @@ export async function GET(_request: Request, context: Context) {
         isHidden: galleryPhotos.isHidden,
         width: galleryPhotos.width,
         height: galleryPhotos.height,
-        altText: galleryPhotos.altText ?? "",
-        caption: galleryPhotos.caption ?? "",
-        isCover: galleryPhotos.isCover ?? false,
+        altText: galleryPhotos.altText,
+        caption: galleryPhotos.caption,
+        isCover: galleryPhotos.isCover,
         createdAt: galleryPhotos.createdAt,
         updatedAt: galleryPhotos.updatedAt,
         collectionTitle: galleryCollections.title,
@@ -206,8 +206,8 @@ export async function GET(_request: Request, context: Context) {
      */
     return NextResponse.json({
       gallery,
-      collections: collectionsResult.rows,
-      photos: photosResult.rows,
+      collections: collectionsResult,
+      photos: photosResult,
       approval,
       presets,
       watermark,
@@ -361,7 +361,7 @@ export async function PATCH(
           ? sql`NULL`
           : sql`published_at`;
 
-    const [result] = await db
+    const result = await db
       .update(galleries)
       .set({
         title: title ?? undefined,
@@ -385,7 +385,7 @@ export async function PATCH(
       .returning();
 
     return NextResponse.json({
-      gallery: result.rows[0],
+      gallery: result,
     });
   } catch (error) {
     console.error(
@@ -425,11 +425,11 @@ export async function DELETE(
       );
     }
 
-    const [result] = await db
+    const result = await db
       .delete(galleries)
       .where(and(eq(galleries.id, id), eq(galleries.creatorId, creator.id)))
 
-    if (!result.rows[0]) {
+    if (!result) {
       return NextResponse.json(
         { error: "Gallery not found." },
         { status: 404 }

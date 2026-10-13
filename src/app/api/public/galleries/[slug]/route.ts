@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, or, sql, asc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getGallerySession } from "@/lib/gallery/session";
-import { galleries } from "@/db/schema";
+import { galleries, clients, projects, galleryPhotos, galleryCollections, galleryPhotoActions, galleryApprovals, galleryThemes } from "@/db/schema";
 
 type Context = {
   params: Promise<{
@@ -19,7 +19,7 @@ export async function GET(
     const { slug } =
       await context.params;
 
-    const [galleryResult] = await db
+    const galleryResult = await db
       .select({
         id: galleries.id,
         slug: galleries.slug,
@@ -32,6 +32,8 @@ export async function GET(
         publishedAt: galleries.publishedAt,
         createdAt: galleries.createdAt,
         updatedAt: galleries.updatedAt,
+        expiresAt: galleries.expiresAt,
+        clientId: galleries.clientId,
         clientName: clients.name,
         clientCompany: clients.company,
         projectName: projects.name,
@@ -40,18 +42,14 @@ export async function GET(
       .from(galleries)
       .leftJoin(clients, eq(galleries.clientId, clients.id))
       .leftJoin(projects, eq(galleries.projectId, projects.id))
-      .leftJoin(gallery_photos as cp, eq(galleries.coverPhotoId, cp.id))
+      .leftJoin(galleryPhotos, eq(galleries.coverPhotoId, galleryPhotos.id))
       .where(
-        or(
-          eq(galleries.slug, slug),
-          eq(galleries.id, sql<number>(slug))
-        )
+        eq(galleries.slug, slug)
       )
-      .limit(1)
-      .returning();
+      .limit(1);
 
     const gallery =
-      galleryResult.rows[0];
+      galleryResult[0];
 
     if (!gallery) {
       return NextResponse.json(
@@ -66,13 +64,8 @@ export async function GET(
     }
 
     if (
-      gallery.expires_at &&
-      new Date(
-        String(
-          gallery.expires_at,
-        ),
-      ).getTime() <=
-        Date.now()
+      gallery.expiresAt &&
+      new Date(gallery.expiresAt).getTime() <= Date.now()
     ) {
       return NextResponse.json(
         {
@@ -89,10 +82,8 @@ export async function GET(
     }
 
     const clientId =
-      gallery.client_id
-        ? String(
-            gallery.client_id,
-          )
+      gallery.clientId
+        ? String(gallery.clientId)
         : null;
 
     const session =
@@ -121,8 +112,7 @@ export async function GET(
       .orderBy(
         asc(galleryCollections.sortOrder),
         asc(galleryCollections.createdAt)
-      )
-      .returning();
+      );
 
     const photosResult = await db
       .select({
@@ -145,7 +135,7 @@ export async function GET(
         galleryPhotoActions,
         and(
           eq(galleryPhotoActions.photoId, galleryPhotos.id),
-          eq(galleryPhotoActions.sessionId, session?.id ?? null)
+          eq(galleryPhotoActions.sessionId, session?.id ?? sql`null`)
         )
       )
       .where(
@@ -157,15 +147,13 @@ export async function GET(
       .orderBy(
         asc(galleryPhotos.sortOrder),
         asc(galleryPhotos.createdAt)
-      )
-      .returning();
+      );
 
     const [approvalResult] = await db
       .select()
       .from(galleryApprovals)
       .where(eq(galleryApprovals.galleryId, galleryId))
-      .limit(1)
-      .returning();
+      .limit(1);
 
     const approval = approvalResult ?? null;
 
@@ -173,26 +161,17 @@ export async function GET(
       .select()
       .from(galleryThemes)
       .where(eq(galleryThemes.galleryId, galleryId))
-      .limit(1)
-      .returning();
+      .limit(1);
 
     const theme = themeResult ?? null;
 
     return NextResponse.json({
       gallery,
-      collections:
-        collections.rows,
-      photos:
-        photos.rows,
-      approval:
-        approval.rows[0] ||
-        null,
-      theme:
-        theme.rows[0] ||
-        null,
-      sessionId:
-        session?.id ||
-        null,
+      collections: collectionsResult,
+      photos: photosResult,
+      approval,
+      theme,
+      sessionId: session?.id || null,
     });
   } catch (error) {
     console.error(

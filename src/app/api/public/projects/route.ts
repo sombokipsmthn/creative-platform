@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, isNotNull, asc, desc } from "drizzle-orm";
 
 import { db } from "@/db";
+import { projects, clients, projectMedia } from "@/db/schema";
 
 export async function GET() {
   try {
@@ -31,7 +32,7 @@ export async function GET() {
       .where(
         and(
           eq(projects.visibility, 'public'),
-          notNull(projects.publishedAt)
+          isNotNull(projects.publishedAt)
         )
       )
       .orderBy(

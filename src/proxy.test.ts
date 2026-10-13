@@ -17,7 +17,10 @@ function request(url: string) {
   return new Request(url);
 }
 
-function status(response: Response) {
+function status(response: Response | null) {
+  if (!response) {
+    throw new Error("Response is null");
+  }
   return response.status;
 }
 
@@ -41,6 +44,7 @@ describe("proxy local authentication bypass", () => {
     vi.clearAllMocks();
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("LOCAL_AUTH_BYPASS", "true");
+    vi.stubEnv("BETTER_AUTH_URL", "http://localhost:3005");
     getSession.mockResolvedValue(null);
   });
 
@@ -51,9 +55,12 @@ describe("proxy local authentication bypass", () => {
   ])("allows protected local navigation without a session: %s", async (url) => {
     const response = await customMiddleware(request(url));
 
-    expect(status(response)).toBe(200);
-    expect(response.headers.get("set-cookie")).toContain("local-auth-bypass=1");
-    expect(getSession).not.toHaveBeenCalled();
+    expect(response).not.toBeNull();
+    if (response) {
+      expect(status(response)).toBe(200);
+      expect(response.headers.get("set-cookie")).toContain("local-auth-bypass=1");
+      expect(getSession).not.toHaveBeenCalled();
+    }
   });
 
   it("redirects when the bypass flag is disabled", async () => {
@@ -61,18 +68,24 @@ describe("proxy local authentication bypass", () => {
 
     const response = await customMiddleware(request("http://localhost:3005/admin"));
 
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
-    expect(response.headers.get("set-cookie")).toContain("local-auth-bypass");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(response).not.toBeNull();
+    if (response) {
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
+      expect(response.headers.get("set-cookie")).toContain("local-auth-bypass");
+      expect(getSession).toHaveBeenCalledOnce();
+    }
   });
 
   it("redirects remote hostnames even when the flag is enabled", async () => {
     const response = await customMiddleware(request("https://creative-platform.example/admin"));
 
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("https://creative-platform.example/sign-in?redirect=%2Fadmin");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(response).not.toBeNull();
+    if (response) {
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("https://creative-platform.example/sign-in?redirect=%2Fadmin");
+      expect(getSession).toHaveBeenCalledOnce();
+    }
   });
 
   it("redirects localhost in production even when the flag is enabled", async () => {
@@ -80,17 +93,23 @@ describe("proxy local authentication bypass", () => {
 
     const response = await customMiddleware(request("http://localhost:3005/admin"));
 
-    expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
-    expect(getSession).toHaveBeenCalledOnce();
+    expect(response).not.toBeNull();
+    if (response) {
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe("http://localhost:3005/sign-in?redirect=%2Fadmin");
+      expect(getSession).toHaveBeenCalledOnce();
+    }
   });
 
   it("does not bypass API routes", async () => {
     const response = await customMiddleware(request("http://localhost:3005/api/dashboard/stats"));
 
-    expect(response).toBeInstanceOf(NextResponse);
-    expect(response.status).toBe(200);
-    expect(response.headers.get("set-cookie")).toBeNull();
-    expect(getSession).not.toHaveBeenCalled();
+    expect(response).not.toBeNull();
+    if (response) {
+      expect(response).toBeInstanceOf(NextResponse);
+      expect(response.status).toBe(200);
+      expect(response.headers.get("set-cookie")).toBeNull();
+      expect(getSession).not.toHaveBeenCalled();
+    }
   });
 });

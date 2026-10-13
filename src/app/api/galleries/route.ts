@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
-import { sql } from "drizzle-orm";
+import { sql, eq, desc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { galleries, clients, projects } from "@/db/schema";
 
 async function getCreator() {
   try {
@@ -55,22 +56,22 @@ export async function GET() {
         updatedAt: galleries.updatedAt,
         clientName: clients.name,
         clientCompany: clients.company,
-        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
-        photoCount: sql<number>`(SELECT COUNT(*) FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false)`,
-        collectionsCount: sql<number>`(SELECT COUNT(*) FROM gallery_collections col WHERE col.gallery_id = ${galleries.id})`,
-        favoritesCount: sql<number>`(SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = ${galleries.id} AND a.is_favorite = true)`,
-        selectionsCount: sql<number>`(SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = ${galleries.id} AND a.is_selected = true)`,
-        commentsCount: sql<number>`(SELECT COUNT(*) FROM gallery_comments comm WHERE comm.gallery_id = ${galleries.id})`,
-        downloadsCount: sql<number>`(SELECT COUNT(*) FROM gallery_downloads d WHERE d.gallery_id = ${galleries.id})`,
-        viewsCount: sql<number>`(SELECT COUNT(*) FROM gallery_access_sessions s WHERE s.gallery_id = ${galleries.id})`,
+        coverUrl: sql<string>`(SELECT p.display_url FROM galleryPhotos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+        photoCount: sql<number>`(SELECT COUNT(*) FROM galleryPhotos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false)`,
+        collectionsCount: sql<number>`(SELECT COUNT(*) FROM galleryCollections col WHERE col.gallery_id = ${galleries.id})`,
+        favoritesCount: sql<number>`(SELECT COUNT(*) FROM galleryPhotoActions a WHERE a.gallery_id = ${galleries.id} AND a.is_favorite = true)`,
+        selectionsCount: sql<number>`(SELECT COUNT(*) FROM galleryPhotoActions a WHERE a.gallery_id = ${galleries.id} AND a.is_selected = true)`,
+        commentsCount: sql<number>`(SELECT COUNT(*) FROM galleryComments comm WHERE comm.gallery_id = ${galleries.id})`,
+        downloadsCount: sql<number>`(SELECT COUNT(*) FROM galleryDownloads d WHERE d.gallery_id = ${galleries.id})`,
+        viewsCount: sql<number>`(SELECT COUNT(*) FROM galleryAccessSessions s WHERE s.gallery_id = ${galleries.id})`,
       })
       .from(galleries)
       .leftJoin(clients, eq(galleries.clientId, clients.id))
       .where(eq(galleries.creatorId, creator.id))
       .orderBy(desc(galleries.createdAt));
 
-    console.log('GET /api/galleries: Query returned', result.rows.length, 'galleries');
-    return NextResponse.json({ galleries: result.rows });
+    console.log('GET /api/galleries: Query returned', result.length, 'galleries');
+    return NextResponse.json({ galleries: result });
   } catch (error) {
     console.error("GET /api/galleries error:", error);
     return NextResponse.json({ error: "Unable to load galleries." }, { status: 500 });
@@ -114,7 +115,7 @@ export async function POST(request: Request) {
       })
       .returning();
 
-    const gallery = galleryResult.rows[0];
+    const gallery = galleryResult[0];
     if (!gallery) return NextResponse.json({ error: "Gallery could not be created." }, { status: 500 });
 
     await db.execute(sql`

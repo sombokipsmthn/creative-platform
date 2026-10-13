@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, or, isNull, gt } from "drizzle-orm";
 
 import { db } from "@/db";
+import { galleryAccessSessions } from "@/db/schema";
 
 const COOKIE_NAME = "gallery_session";
 const SESSION_DAYS = 90;
@@ -40,7 +41,7 @@ export async function createGallerySession(
       tokenHash: tokenHash,
       expiresAt: expiresAt,
     })
-    .returning();
+    .returning({ id: galleryAccessSessions.id });
 
   const cookieStore = await cookies();
 
@@ -57,7 +58,7 @@ export async function createGallerySession(
   );
 
   return {
-    id: String(result.rows[0].id),
+    id: String(result.id),
     token,
     isNew: true,
   };
@@ -88,11 +89,10 @@ export async function getGallerySession(
           )
         )
       )
-      .limit(1)
-      .returning();
+      .limit(1);
 
-    if (result.rows[0]) {
-      const sessionId = String(result.rows[0].id);
+    if (result) {
+      const sessionId = String(result.id);
 
       await db
         .update(galleryAccessSessions)
@@ -100,8 +100,7 @@ export async function getGallerySession(
           lastSeenAt: new Date(),
           clientId: clientId ?? null,
         })
-        .where(eq(galleryAccessSessions.id, sessionId))
-        .returning();
+        .where(eq(galleryAccessSessions.id, sessionId));
 
       return {
         id: sessionId,

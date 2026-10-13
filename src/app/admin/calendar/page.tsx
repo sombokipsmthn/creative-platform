@@ -220,14 +220,11 @@ export default function CalendarPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => handleViewChange('month')}
-                className={
-                  'rounded-lg px-3 py-2 text-sm font-medium ' +
-                  (state.view === 'month'
+                className={`rounded-lg px-3 py-2 text-sm font-medium ${
+                  state.view === 'month'
                     ? 'bg-purple-600 text-white'
                     : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                  ) +
-                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900'
-                }
+                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
               >
                 Month
               </button>
@@ -237,7 +234,7 @@ export default function CalendarPage() {
                   state.view === 'week'
                     ? 'bg-purple-600 text-white'
                     : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50`
+                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
               >
                 Week
               </button>
@@ -247,7 +244,7 @@ export default function CalendarPage() {
                   state.view === 'agenda'
                     ? 'bg-purple-600 text-white'
                     : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50`}
+                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
               >
                 Agenda
               </button>
@@ -307,6 +304,10 @@ function MonthView({
 
   const startDayOfWeek = daysInMonth[0].getDay(); // 0 = Sunday, 1 = Monday, etc.
   const daysToPad = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Adjust for Monday start
+
+  function getEventsForDay(day: Date) {
+    throw new Error('Function not implemented.');
+  }
 
   return (
     <div className="gap-1">
@@ -375,7 +376,7 @@ function MonthView({
               </div>
             </div>
           )}
-        )
+        )}
       </div>
     </div>
   );
@@ -441,7 +442,7 @@ function WeekView({
                   ? 'border-2 border-purple-600'
                   : isCurrentWeekDay
                     ? 'bg-white dark:bg-zinc-950'
-                    : 'bg-slate-50 dark:bg-zinc-950/50'
+                    : 'bg-slate-50 dark:bg-zinc-900/50'
               }`}
             >
               <div className="flex justify-between items-start p-2">
@@ -473,7 +474,7 @@ function WeekView({
                 ))}
 
                 {dayEvents.length === 0 && (
-                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2>
+                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
                     No events
                   </div>
                 )}
@@ -556,7 +557,7 @@ function AgendaView({
                 </p>
 
                 {event.description && (
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1">
                     {event.description}
                   </p>
                 )}

@@ -495,6 +495,16 @@ export const fetchContractEvents = async (contractId: string) => {
     if (!user) throw new Error("Unauthenticated");
     const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
+
+  // Verify that the contract belongs to the current user
+  const [contract] = await db.select().from(contracts).where(
+    and(eq(contracts.id, contractId), eq(contracts.creatorId, userId))
+  );
+
+  if (!contract) {
+    throw new Error('Contract not found or unauthorized');
+  }
+
   return db.select().from(contractEvents).where(eq(contractEvents.contractId, contractId));
 };
 export const saveAsTemplate = (id: string, name: string, description: string) => saveContractAsTemplate(id, { name, description });

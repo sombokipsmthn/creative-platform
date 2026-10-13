@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, eq, and } from "drizzle-orm";
 
 import { db } from "@/db";
 import { comparePin } from "@/lib/gallery/pin";
+import { galleries, galleryAccessAttempts } from "@/db/schema";
 
 type Context = {
   params: Promise<{
@@ -51,24 +52,31 @@ export async function POST(
      * LOCKOUT_MINUTES to slow brute-force attacks.
      */
 
-    const attemptRow = (
-      await db.execute(sql`
-        SELECT id, attempt_count, lockout_until
-        FROM gallery_access_attempts
-        WHERE gallery_id = (
-          SELECT id FROM galleries
-          WHERE slug = ${slug} AND status = 'published'
-          LIMIT 1
+    const [attemptRowResult] = await db
+      .select({
+        id: galleryAccessAttempts.id,
+        attemptCount: galleryAccessAttempts.attemptCount,
+        lockoutUntil: galleryAccessAttempts.lockoutUntil,
+      })
+      .from(galleryAccessAttempts)
+      .innerJoin(
+        galleries,
+        and(eq(galleryAccessAttempts.galleryId, galleries.id), eq(galleries.status, 'published'))
+      )
+      .where(
+        and(
+          eq(galleries.slug, slug),
+          eq(galleryAccessAttempts.ipAddress, ip)
         )
-          AND ip_address = ${ip}
-        LIMIT 1
-      `)
-    ).rows[0];
+      )
+      .limit(1);
+
+    const attemptRow = attemptRowResult ? { ...attemptRowResult } : null;
 
     if (
       attemptRow &&
-      attemptRow.lockout_until &&
-      new Date(String(attemptRow.lockout_until)).getTime() > Date.now()
+      attemptRow.lockoutUntil &&
+      new Date(attemptRow.lockoutUntil).getTime() > Date.now()
     ) {
       return NextResponse.json(
         { error: "Too many attempts. Try again later." },
@@ -76,15 +84,23 @@ export async function POST(
       );
     }
 
-    const result = await db.execute(sql`
-      SELECT id, access_pin
-      FROM galleries
-      WHERE slug = ${slug}
-        AND status = 'published'
-      LIMIT 1
-    `);
+    const [galleryResult] = await db
+      .select({
+        id: galleries.id,
+        accessPin: galleries.accessPin,
+      })
+      .from(galleries)
+      .where(and(eq(galleries.slug, slug), eq(galleries.status, 'published')))
+      .limit(1);
 
-    const gallery = result.rows[0];
+    if (!galleryResult) {
+      return NextResponse.json(
+        { error: "Gallery not found." },
+        { status: 404 },
+      );
+    }
+
+    const gallery = galleryResult;
 
     if (!gallery) {
       return NextResponse.json(
@@ -94,8 +110,8 @@ export async function POST(
     }
 
     const configuredPin =
-      typeof gallery.access_pin === "string"
-        ? gallery.access_pin.trim()
+      typeof gallery.accessPin === "string"
+        ? gallery.accessPin.trim()
         : "";
 
     /*
@@ -121,38 +137,31 @@ export async function POST(
     const isPinValid = await comparePin(pin, configuredPin);
 
     if (!isPinValid) {
-      const nextCount = Number(attemptRow?.attempt_count ?? 0) + 1;
+      const nextCount = Number(attemptRow?.attemptCount ?? 0) + 1;
       const lockout =
         nextCount >= MAX_ATTEMPTS
           ? new Date(Date.now() + LOCKOUT_MINUTES * 60 * 1000)
           : null;
 
       if (attemptRow) {
-        await db.execute(sql`
-          UPDATE gallery_access_attempts
-          SET
-            attempt_count = ${nextCount},
-            last_attempt_at = now(),
-            lockout_until = ${lockout}
-          WHERE id = ${attemptRow.id}
-        `);
+        await db
+          .update(galleryAccessAttempts)
+          .set({
+            attemptCount: nextCount,
+            lastAttemptAt: new Date(),
+            lockoutUntil: lockout,
+          })
+          .where(eq(galleryAccessAttempts.id, attemptRow.id));
       } else {
-        await db.execute(sql`
-          INSERT INTO gallery_access_attempts (
-            gallery_id,
-            ip_address,
-            attempt_count,
-            last_attempt_at,
-            lockout_until
-          )
-          VALUES (
-            ${String(gallery.id)},
-            ${ip},
-            ${nextCount},
-            now(),
-            ${lockout}
-          )
-        `);
+        await db
+          .insert(galleryAccessAttempts)
+          .values({
+            galleryId: gallery.id,
+            ipAddress: ip,
+            attemptCount: nextCount,
+            lastAttemptAt: new Date(),
+            lockoutUntil: lockout,
+          });
       }
 
       return NextResponse.json(
@@ -167,13 +176,13 @@ export async function POST(
      */
 
     if (attemptRow) {
-      await db.execute(sql`
-        UPDATE gallery_access_attempts
-        SET
-          attempt_count = 0,
-          lockout_until = NULL
-        WHERE id = ${attemptRow.id}
-      `);
+      await db
+        .update(galleryAccessAttempts)
+        .set({
+          attemptCount: 0,
+          lockoutUntil: null,
+        })
+        .where(eq(galleryAccessAttempts.id, attemptRow.id));
     }
 
     return NextResponse.json({

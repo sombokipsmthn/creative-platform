@@ -3,8 +3,9 @@ import { and, asc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { equipment } from "@/db/schema";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
+import crypto from "node:crypto";
 
-function normalizeEquipment(body: Record<string, unknown>) {
+function normalizeEquipment(body: Record<string, unknown>, userId: string) {
   const name = String(body.name ?? "").trim();
   const category = String(body.category ?? "").trim();
   const subcategory = String(body.subcategory ?? "").trim();
@@ -17,6 +18,8 @@ function normalizeEquipment(body: Record<string, unknown>) {
   );
 
   return {
+    id: crypto.randomUUID(),
+    creatorId: userId,
     name,
     dailyRate,
     category,
@@ -98,7 +101,7 @@ export async function POST(req: Request) {
     async (_request, user) => {
       try {
         const body = await req.json();
-        const normalized = normalizeEquipment(body);
+        const normalized = normalizeEquipment(body, user.id);
 
         if (!normalized.name) {
           return NextResponse.json(

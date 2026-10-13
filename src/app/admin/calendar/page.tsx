@@ -234,7 +234,7 @@ export default function CalendarPage() {
                   state.view === 'week'
                     ? 'bg-purple-600 text-white'
                     : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
+                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50`}
               >
                 Week
               </button>
@@ -244,7 +244,7 @@ export default function CalendarPage() {
                   state.view === 'agenda'
                     ? 'bg-purple-600 text-white'
                     : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
+                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50`}
               >
                 Agenda
               </button>
@@ -306,14 +306,15 @@ function MonthView({
   const daysToPad = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Adjust for Monday start
 
   function getEventsForDay(day: Date) {
-    throw new Error('Function not implemented.');
+    const dateKey = format(day, 'yyyy-MM-dd');
+    return eventsByDay.get(dateKey) || [];
   }
 
   return (
     <div className="gap-1">
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-500">
-        {[...Array(7)].map((_, i) => {
+        {[..Array(7)].map((_, i) => {
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
             (i + 1) % 7
           ]; // Start with Monday
@@ -324,7 +325,7 @@ function MonthView({
       {/* Days */}
       <div className="grid grid-cols-7 gap-1">
         {/* Padding for days before the 1st */}
-        {[...Array(daysToPad)].map((_, i) => (
+        {[..Array(daysToPad)].map((_, i) => (
           <div key={`pad-${i}`} className="h-24 bg-slate-50/50 dark:bg-zinc-950/50" />
         ))}
 
@@ -412,7 +413,7 @@ function WeekView({
 
       <div className="grid grid-cols-7 gap-2">
         {/* Weekday headers */}
-        {[...Array(7)].map((_, i) => {
+        {[..Array(7)].map((_, i) => {
           const day = addDays(startOfWeekDate, i);
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()];
           return (
@@ -442,7 +443,7 @@ function WeekView({
                   ? 'border-2 border-purple-600'
                   : isCurrentWeekDay
                     ? 'bg-white dark:bg-zinc-950'
-                    : 'bg-slate-50 dark:bg-zinc-900/50'
+                    : 'bg-slate-50 dark:bg-zinc-950/50'
               }`}
             >
               <div className="flex justify-between items-start p-2">
@@ -474,7 +475,7 @@ function WeekView({
                 ))}
 
                 {dayEvents.length === 0 && (
-                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
+                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2>
                     No events
                   </div>
                 )}
@@ -557,7 +558,7 @@ function AgendaView({
                 </p>
 
                 {event.description && (
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1">
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1>
                     {event.description}
                   </p>
                 )}

@@ -6,7 +6,6 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
-  Calendar,
   FileText,
   GalleryHorizontalEnd,
   LayoutDashboard,
@@ -24,6 +23,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
+import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
@@ -55,7 +55,7 @@ function NavItemWithBadge({
       }`}
     >
       {isActive && <span className="absolute left-0 h-5 w-0.5 rounded-full bg-[var(--color-accent)]" />}
-      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'`} />
+      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`} />
       <span>{item.name}</span>
       {badgeCount > 0 && (
         <span className="ui-badge ui-badge-accent ms-auto">{badgeCount}</span>
@@ -69,7 +69,6 @@ const sections = [
     label: 'Dashboard',
     items: [
       { name: 'Overview', href: '/admin', icon: LayoutDashboard },
-      { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
     ],
   },
   {
@@ -292,7 +291,7 @@ export default function AdminLayout({
                       {section.items.map((item) => {
                         const isActive =
                           pathname === item.href ||
-                          (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
+                          (item.href !== '/admin' && pathname.startsWith(item.href + '/'));
 
                         const badgeCount = loadingBadgeCounts ? 0 : (badgeCounts[item.href] ?? 0);
 

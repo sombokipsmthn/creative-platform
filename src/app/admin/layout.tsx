@@ -6,7 +6,6 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
-  Calendar,
   FileText,
   GalleryHorizontalEnd,
   LayoutDashboard,
@@ -70,7 +69,6 @@ const sections = [
     label: 'Dashboard',
     items: [
       { name: 'Overview', href: '/admin', icon: LayoutDashboard },
-      { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
     ],
   },
   {

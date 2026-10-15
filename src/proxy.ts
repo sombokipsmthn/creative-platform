@@ -1,5 +1,4 @@
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
-import { auth } from "@/lib/auth/auth";
 import { NextResponse } from "next/server";
 
 function configuredOrigin(): string | null {
@@ -12,10 +11,11 @@ function getAuthOrigin(): string | null {
 
 async function hasAuthenticatedSession(request: Request, authOrigin: string): Promise<boolean> {
   try {
-    const session = await auth.api.getSession({ headers: request.headers });
-    return !!session;
-  } catch (error) {
-    console.error("Failed to verify admin session:", error);
+    const session = await fetch(`${authOrigin}/api/auth/session`, {
+      headers: request.headers,
+    });
+    return session.ok;
+  } catch {
     return false;
   }
 }
@@ -26,14 +26,6 @@ function isAdminRoute(pathname: string) {
 
 function isOnboardingRoute(pathname: string) {
   return pathname.startsWith("/admin/onboarding");
-}
-
-function isAuthRoute(pathname: string) {
-  return pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
-}
-
-function isApiAuthRoute(pathname: string) {
-  return pathname.startsWith("/api/auth");
 }
 
 export default async function customMiddleware(request: Request) {

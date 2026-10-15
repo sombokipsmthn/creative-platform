@@ -315,9 +315,12 @@ function MonthView({
     <div className="gap-1">
       {/* Weekday headers */}
       <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-500">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((dayName) => (
-          <div key={dayName}>{dayName}</div>
-        ))}
+        {[...Array(7)].map((_, i) => {
+          const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
+            (i + 1) % 7
+          ]; // Start with Monday
+          return <div key={i}>{dayName}</div>;
+        })}
       </div>
 
       {/* Days */}
@@ -374,7 +377,7 @@ function MonthView({
                 )}
               </div>
             </div>
-          }
+          </div>
       </div>
     </div>
   );
@@ -456,11 +459,10 @@ function WeekView({
                 {dayEvents.map((event) => (
                   <div
                     key={event.id}
-                    className=`mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ${
-                      event.isTentative
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`
+                    className={'mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ' + (event.isTentative
+                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300')
+                    }
                   >
                     {event.title}
                     {event.description && (
@@ -468,12 +470,11 @@ function WeekView({
                         {event.description}
                       </div>
                     )}
-                  )
+                  </div>
                 ))
-              )
 
                 {dayEvents.length === 0 && (
-                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2>
+                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
                     No events
                   </div>
                 )}

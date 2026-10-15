@@ -9,5 +9,6 @@
       "Read(//Users/kipsmthn/creative-platform/**)",
       "Bash(npx tsc *)"
     ]
-  }
+  },
+  "skillOverrides": {}
 }

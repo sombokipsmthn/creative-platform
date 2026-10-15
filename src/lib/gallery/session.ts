@@ -1,8 +1,9 @@
 import crypto from "node:crypto";
 import { cookies } from "next/headers";
-import { sql } from "drizzle-orm";
+import { sql, eq, and, or, isNull, gt } from "drizzle-orm";
 
 import { db } from "@/db";
+import { galleryAccessSessions } from "@/db/schema";
 
 const COOKIE_NAME = "gallery_session";
 const SESSION_DAYS = 90;
@@ -32,21 +33,15 @@ export async function createGallerySession(
       SESSION_DAYS * 24 * 60 * 60 * 1000,
   );
 
-  const result = await db.execute(sql`
-    INSERT INTO gallery_access_sessions (
-      gallery_id,
-      client_id,
-      token_hash,
-      expires_at
-    )
-    VALUES (
-      ${galleryId},
-      ${clientId || null},
-      ${tokenHash},
-      ${expiresAt}
-    )
-    RETURNING id
-  `);
+  const [result] = await db
+    .insert(galleryAccessSessions)
+    .values({
+      galleryId: galleryId,
+      clientId: clientId ?? null,
+      tokenHash: tokenHash,
+      expiresAt: expiresAt,
+    })
+    .returning({ id: galleryAccessSessions.id });
 
   const cookieStore = await cookies();
 
@@ -63,7 +58,7 @@ export async function createGallerySession(
   );
 
   return {
-    id: String(result.rows[0].id),
+    id: String(result.id),
     token,
     isNew: true,
   };
@@ -81,31 +76,31 @@ export async function getGallerySession(
   if (token) {
     const tokenHash = hashToken(token);
 
-    const result = await db.execute(sql`
-      SELECT id
-      FROM gallery_access_sessions
-      WHERE token_hash = ${tokenHash}
-        AND gallery_id = ${galleryId}
-        AND (
-          expires_at IS NULL
-          OR expires_at > now()
-        )
-      LIMIT 1
-    `);
-
-    if (result.rows[0]) {
-      const sessionId = String(result.rows[0].id);
-
-      await db.execute(sql`
-        UPDATE gallery_access_sessions
-        SET
-          last_seen_at = now(),
-          client_id = COALESCE(
-            client_id,
-            ${clientId || null}
+    const [result] = await db
+      .select({ id: galleryAccessSessions.id })
+      .from(galleryAccessSessions)
+      .where(
+        and(
+          eq(galleryAccessSessions.tokenHash, tokenHash),
+          eq(galleryAccessSessions.galleryId, galleryId),
+          or(
+            isNull(galleryAccessSessions.expiresAt),
+            gt(galleryAccessSessions.expiresAt, new Date())
           )
-        WHERE id = ${sessionId}
-      `);
+        )
+      )
+      .limit(1);
+
+    if (result) {
+      const sessionId = String(result.id);
+
+      await db
+        .update(galleryAccessSessions)
+        .set({
+          lastSeenAt: new Date(),
+          clientId: clientId ?? null,
+        })
+        .where(eq(galleryAccessSessions.id, sessionId));
 
       return {
         id: sessionId,

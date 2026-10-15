@@ -42,3 +42,6 @@ yarn-error.log*
 next-env.d.ts
 
 # application configuration
+
+# agent worktrees
+.claude/worktrees/

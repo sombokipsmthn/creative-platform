@@ -1,6 +1,6 @@
 import readXlsxFile from "read-excel-file/node";
 import path from "node:path";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 import { db } from "./index";
 import { equipment } from "./schema";
 
@@ -60,12 +60,12 @@ async function seed() {
       const [existing] = await tx
         .select({ id: equipment.id })
         .from(equipment)
-        .where(sql`${equipment.name} = ${name}`)
+        .where(eq(equipment.name, name))
         .limit(1);
       const imageUrl = clean(valueAt(row, "Image Search"));
 
       if (existing) {
-        await tx.update(equipment).set({ ...data, updatedAt: new Date() }).where(sql`${equipment.id} = ${existing.id}`);
+        await tx.update(equipment).set({ ...data, updatedAt: new Date() }).where(eq(equipment.id, existing.id));
         await tx.execute(sql`UPDATE equipment SET image_url = ${imageUrl} WHERE id = ${existing.id}`);
         updated += 1;
       } else {

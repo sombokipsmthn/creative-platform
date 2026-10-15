@@ -20,6 +20,9 @@ import {
   X,
 } from 'lucide-react';
 
+import { Button } from '@/components/ui/Button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+
 type Range = '7d' | '30d' | '90d' | '12m' | 'all';
 
 type DashboardStats = {
@@ -150,7 +153,6 @@ export default function CreativeOSDashboardPage() {
   }, [stats, tourStep]);
 
   useEffect(() => {
-    if (!stats) return;
     let cancelled = false;
     async function load() {
       setLoading(true); setError('');

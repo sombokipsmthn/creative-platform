@@ -7,7 +7,12 @@
       "Bash(git log *)",
       "Bash(git worktree *)",
       "Read(//Users/kipsmthn/creative-platform/**)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npx drizzle-kit *)",
+      "Bash(npm run *)",
+      "Bash(psql *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(node -e ' *)"
     ]
   },
   "skillOverrides": {}

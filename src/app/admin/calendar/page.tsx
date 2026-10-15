@@ -84,7 +84,7 @@ export default function CalendarPage() {
         if (!cancelled) {
           setState(prev => ({
             ...prev,
-            events: data,
+            events: data as CalendarEvent[],
             loading: false,
           }));
         }
@@ -152,11 +152,7 @@ export default function CalendarPage() {
     return map;
   }, [state.events]);
 
-  // Get events for a specific day
-  const getEventsForDay = (date: Date, eventsByDay: Map<string, CalendarEvent[]>) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
-    return eventsByDay.get(dateKey) || [];
-  };
+  // Group events by day - inline lookup (no separate function needed)
 
   if (state.loading) {
     return (
@@ -332,7 +328,8 @@ function MonthView({
 
         {/* Days of the month */}
         {daysInMonth.map((day, index) => {
-          const dayEvents = getEventsForDay(day, eventsByDay);
+          const dateKey = format(day, 'yyyy-MM-dd');
+          const dayEvents = eventsByDay.get(dateKey) || [];
           const isTodayDay = isToday(day);
           const isCurrentMonthDay = isCurrentMonth(day);
 
@@ -432,7 +429,8 @@ function WeekView({
 
         {/* Days */}
         {daysOfWeek.map((day, index) => {
-          const dayEvents = getEventsForDay(day, eventsByDay);
+          const dateKey = format(day, 'yyyy-MM-dd');
+          const dayEvents = eventsByDay.get(dateKey) || [];
           const isTodayDay = isToday(day);
           const isCurrentWeekDay = isCurrentWeek(day);
 
@@ -505,10 +503,10 @@ function AgendaView({
       return eventStart >= startDate && eventStart <= endDate;
     })
     .sort((a, b) => {
-  const dateA = parseISO(a.startDate);
-  const dateB = parseISO(b.startDate);
-  return (dateA.getTime() - dateB.getTime());
-});
+      const aTime = parseISO(a.startDate)?.getTime() ?? 0;
+      const bTime = parseISO(b.startDate)?.getTime() ?? 0;
+      return aTime - bTime;
+    });
 
   if (upcomingEvents.length === 0) {
     return (
@@ -527,7 +525,7 @@ function AgendaView({
       <div className="space-y-3">
         {upcomingEvents.map((event) => {
           const eventStart = parseISO(event.startDate);
-          const eventEnd = event.endDate ? parseISO(event.endDate) : null;
+          const eventEnd = event.endDate ? parseISO(event.endDate as string) : null;
 
           return (
             <div
@@ -547,13 +545,14 @@ function AgendaView({
                     event.isTentative
                       ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
                       : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                  }`}>
+                    }`}
+                  >
                     {event.isTentative ? 'Tentative' : 'Confirmed'}
                   </span>
                 </div>
 
                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-1">
-                  {format(eventStart, 'PPP')}{event.endDate ? format(new Date(eventEnd!).toISOString().split('T')[0], 'PPP') : ''}
+                  {format(eventStart, 'PPP')}{event.endDate && eventEnd ? ` – ${format(eventEnd, 'PPP')}` : ''}
                 </p>
 
                 {event.description && (
@@ -577,10 +576,4 @@ function AgendaView({
       </div>
     </div>
   );
-}
-
-// Helper function to get events for a day (used in views)
-function getEventsForDay(date: Date, eventsByDay: Map<string, CalendarEvent[]>): CalendarEvent[] {
-  const dateKey = format(date, 'yyyy-MM-dd');
-  return eventsByDay.get(dateKey) || [];
 }

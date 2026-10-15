@@ -470,9 +470,8 @@ function WeekView({
                         {event.description}
                       </div>
                     )}
-                  )
+                  </div>
                 ))
-              )
 
                 {dayEvents.length === 0 && (
                   <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">

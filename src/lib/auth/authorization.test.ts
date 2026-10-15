@@ -9,6 +9,7 @@ const { mockAuth, mockDb } = vi.hoisted(() => {
       leftJoin: vi.fn(),
       where: vi.fn(),
       limit: vi.fn(),
+      orderBy: vi.fn(),
       returning: vi.fn(),
     },
   };

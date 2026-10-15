@@ -80,7 +80,7 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       trustedProviders: ["google"],
-      requireLocalEmailVerized: true,
+      requireLocalEmailVerified: true,
     },
   },
   session: {

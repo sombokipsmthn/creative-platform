@@ -220,31 +220,37 @@ export default function CalendarPage() {
             <div className="flex gap-2">
               <button
                 onClick={() => handleViewChange('month')}
-                className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                  state.view === 'month'
+                className={
+                  'rounded-lg px-3 py-2 text-sm font-medium ' +
+                  (state.view === 'month'
                     ? 'bg-purple-600 text-white'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
+                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50') +
+                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900'
+                }
               >
                 Month
               </button>
               <button
                 onClick={() => handleViewChange('week')}
-                className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                  state.view === 'week'
+                className={
+                  'rounded-lg px-3 py-2 text-sm font-medium ' +
+                  (state.view === 'week'
                     ? 'bg-purple-600 text-white'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50`}
+                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50') +
+                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900'
+                }
               >
                 Week
               </button>
               <button
                 onClick={() => handleViewChange('agenda')}
-                className={`rounded-lg px-3 py-2 text-sm font-medium ${
-                  state.view === 'agenda'
+                className={
+                  'rounded-lg px-3 py-2 text-sm font-medium ' +
+                  (state.view === 'agenda'
                     ? 'bg-purple-600 text-white'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
-                } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50`}
+                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50') +
+                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900'
+                }
               >
                 Agenda
               </button>
@@ -304,11 +310,6 @@ function MonthView({
 
   const startDayOfWeek = daysInMonth[0].getDay(); // 0 = Sunday, 1 = Monday, etc.
   const daysToPad = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Adjust for Monday start
-
-  function getEventsForDay(day: Date) {
-    const dateKey = format(day, 'yyyy-MM-dd');
-    return eventsByDay.get(dateKey) || [];
-  }
 
   return (
     <div className="gap-1">
@@ -376,8 +377,7 @@ function MonthView({
                 )}
               </div>
             </div>
-          )}
-        )}
+          </div>
       </div>
     </div>
   );
@@ -459,11 +459,10 @@ function WeekView({
                 {dayEvents.map((event) => (
                   <div
                     key={event.id}
-                    className=`mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ${
-                      event.isTentative
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`
+                    className={'mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ' + (event.isTentative
+                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300')
+                    }
                   >
                     {event.title}
                     {event.description && (
@@ -471,18 +470,18 @@ function WeekView({
                         {event.description}
                       </div>
                     )}
-                  </div>
-                ))}
+                  )
+                ))
+              )
 
                 {dayEvents.length === 0 && (
-                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2>
+                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
                     No events
                   </div>
                 )}
               </div>
-            </div>
-          );
-        })}
+            }
+          )}
       </div>
     </div>
   );
@@ -528,7 +527,7 @@ function AgendaView({
           return (
             <div
               key={event.id}
-              className=`flex items-start gap-4 px-4 py-3 rounded-xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors`
+              className="flex items-start gap-4 px-4 py-3 rounded-xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
             >
               <div className="flex-shrink-0 h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
                 <CalendarIcon className="h-4 w-4" />
@@ -541,14 +540,9 @@ function AgendaView({
                   </h4>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     event.isTentative
-                      ? 'bg-purple-100 text-purple-700'
-                      : 'bg-blue-100 text-blue-700'
-                  } dark:${
-                    event.isTentative
-                      ? 'bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-blue-900/30 dark:text-blue-300'
-                  }`}
-                  >
+                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                  }`}>
                     {event.isTentative ? 'Tentative' : 'Confirmed'}
                   </span>
                 </div>
@@ -572,10 +566,15 @@ function AgendaView({
                   {event.relatedGalleryId && <span>Gallery</span>}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            }
+          )}
       </div>
     </div>
   );
+}
+
+// Helper function to get events for a day (used in views)
+function getEventsForDay(date: Date, eventsByDay: Map<string, CalendarEvent[]>): CalendarEvent[] {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  return eventsByDay.get(dateKey) || [];
 }

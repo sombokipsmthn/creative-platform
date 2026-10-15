@@ -45,7 +45,7 @@
     "lucide-react": "^1.54.0",
     "next": "^16.4.0",
     "pg": "^8.23.0",
-    "playwright": "^1.63.0",
+    "playwright": "^1.64.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "read-excel-file": "^6.0.3",

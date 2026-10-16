@@ -76,14 +76,13 @@ describe("Authorization matrix", () => {
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue(mockDb);
-    mockDb.returning.mockResolvedValue({ rows: [expiredGallery] });
+    mockDb.limit.mockReturnValue([expiredGallery]);
 
     const req = new Request("https://example.com/api/public/galleries/expired-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "expired-slug" }) });
 
     expect(res.status).toBe(410);
-  });
+  };
 
   it("public gallery returns 401 when PIN required and no session", async () => {
     // Mock a gallery with PIN required
@@ -111,8 +110,7 @@ describe("Authorization matrix", () => {
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue(mockDb);
-    mockDb.returning.mockResolvedValue({ rows: [pinProtectedGallery] });
+    mockDb.limit.mockReturnValue([pinProtectedGallery]);
 
     // Mock the session creation to return null (no session)
     const { getGallerySession } = await import("@/lib/gallery/session");

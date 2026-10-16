@@ -6,6 +6,7 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
+  Calendar,
   FileText,
   GalleryHorizontalEnd,
   LayoutDashboard,
@@ -23,7 +24,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
-import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
+import { SplitViewProvider } from "@/context/SplitViewContext";
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
@@ -55,7 +56,7 @@ function NavItemWithBadge({
       }`}
     >
       {isActive && <span className="absolute left-0 h-5 w-0.5 rounded-full bg-[var(--color-accent)]" />}
-      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`} />
+      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'`} />
       <span>{item.name}</span>
       {badgeCount > 0 && (
         <span className="ui-badge ui-badge-accent ms-auto">{badgeCount}</span>
@@ -69,6 +70,7 @@ const sections = [
     label: 'Dashboard',
     items: [
       { name: 'Overview', href: '/admin', icon: LayoutDashboard },
+      { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
     ],
   },
   {
@@ -303,7 +305,7 @@ export default function AdminLayout({
                             badgeCount={badgeCount}
                           />
                         );
-                      })}
+                      {"}"}){"}"}
                     </div>
                   </div>
                 ))}
@@ -312,65 +314,61 @@ export default function AdminLayout({
           </div>
         </aside>
 
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
-          <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
-              <BarChart3 className="h-3.5 w-3.5" />
-            </span>
-            KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
-          </Link>
-          <div className="flex items-center gap-2">
-            <ThemeToggle compact />
-            <Link
-              href="/admin/settings"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
-              aria-label="Open settings"
-              title="Platform settings"
-            >
-              <Settings2 className="h-4 w-4" />
+        <><header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
+            <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
+                <BarChart3 className="h-3.5 w-3.5" />
+              </span>
+              KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
             </Link>
-            <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
-            <ProfileMenu />
-            <SignOutButton compact />
-          </div>
-        </header>
-
-        <main className="lg:pl-[248px] lg:min-h-[calc(100vh-56px)] relative">
-          <header className="hidden h-16 items-center justify-end gap-2 border-b border-[var(--color-border-subtle)] px-8 lg:flex">
-            <ThemeToggle compact />
-            <Link
-              href="/admin/settings"
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
-              aria-label="Open settings"
-              title="Platform settings"
-            >
-              <Settings2 className="h-4 w-4" />
-            </Link>
-            <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
-            <ProfileMenu showLabel />
-            <SignOutButton compact />
-          </header>
-          <div className="lg:flex lg:h-full">
-            <div
-              data-admin-content
-              className={splitView.content ? 'lg:w-[65%] lg:pr-6' : 'lg:w-full'}
-            >
-              {children}
+            <div className="flex items-center gap-2">
+              <ThemeToggle compact />
+              <Link
+                href="/admin/settings"
+                className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+                aria-label="Open settings"
+                title="Platform settings"
+              >
+                <Settings2 className="h-4 w-4" />
+              </Link>
+              <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
+              <ProfileMenu />
+              <SignOutButton compact />
             </div>
+          </header><main className="lg:pl-[248px] lg:min-h-[calc(100vh-56px)] relative">
+              <header className="hidden h-16 items-center justify-end gap-2 border-b border-[var(--color-border-subtle)] px-8 lg:flex">
+                <ThemeToggle compact />
+                <Link
+                  href="/admin/settings"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+                  aria-label="Open settings"
+                  title="Platform settings"
+                >
+                  <Settings2 className="h-4 w-4" />
+                </Link>
+                <span className="mx-1 h-6 w-px bg-[var(--color-border-subtle)]" aria-hidden="true" />
+                <ProfileMenu showLabel />
+                <SignOutButton compact />
+              </header>
+              <div className="lg:flex lg:h-full">
+                <div
+                  data-admin-content
+                  className={splitView.content ? 'lg:w-[65%] lg:pr-6' : 'lg:w-full'}
+                >
+                  {children}
+                </div>
 
-            <div
-              className={
-                splitView.content
-                  ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
-                  : 'hidden'
-              }
-            >
-              <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
-                {splitView.content}
+                <div
+                  className={splitView.content
+                    ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
+                    : 'hidden'}
+                >
+                  <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
+                    {splitView.content}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </main>
+            </main></>
       </div>
     </SplitViewProvider>
   );

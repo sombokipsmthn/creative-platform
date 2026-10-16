@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { and, eq, or, sql, asc } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getGallerySession } from "@/lib/gallery/session";
+import { getGallerySession, requireGallerySession } from "@/lib/gallery/session";
+import { comparePin } from "@/lib/gallery/pin";
 import { galleries, clients, projects, galleryPhotos, galleryCollections, galleryPhotoActions, galleryApprovals, galleryThemes } from "@/db/schema";
 
 type Context = {

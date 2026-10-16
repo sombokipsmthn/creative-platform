@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users, galleries, galleryPhotos, projectMedia, uploadAudit } from "@/db/schema";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
-import { getGalleryStorage } from "@/lib/gallery/storage";
+import { getGalleryStorage, getGalleryStorageProvider } from "@/lib/gallery/storage";
 
 /**
  * DELETE /api/account
@@ -74,11 +74,18 @@ export async function DELETE(request: Request) {
     ]);
 
     const storageObjects = new Set<string>();
+    const isR2 = getGalleryStorageProvider() === "r2";
     for (const photo of ownedPhotos) {
-      for (const value of Object.values(photo)) if (value) storageObjects.add(value);
+      const values = isR2
+        ? [photo.storagePath, photo.originalPath, photo.displayPath, photo.thumbnailPath, photo.watermarkPath]
+        : [photo.storagePath, photo.originalPath, photo.displayPath, photo.thumbnailPath, photo.watermarkPath, photo.originalUrl, photo.displayUrl, photo.thumbnailUrl];
+      for (const value of values) if (value) storageObjects.add(value);
     }
     for (const media of ownedProjectMedia) {
-      for (const value of Object.values(media)) if (value) storageObjects.add(value);
+      const values = isR2
+        ? [media.storagePath, media.originalPath, media.displayPath, media.thumbnailPath, media.watermarkPath]
+        : [media.storagePath, media.originalPath, media.displayPath, media.thumbnailPath, media.watermarkPath, media.originalUrl, media.displayUrl, media.thumbnailUrl];
+      for (const value of values) if (value) storageObjects.add(value);
     }
     for (const upload of ownedUploads) if (upload.blobPath) storageObjects.add(upload.blobPath);
 

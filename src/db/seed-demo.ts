@@ -1,7 +1,4 @@
-import "dotenv/config";
 import { and, eq } from "drizzle-orm";
-import { auth } from "@/lib/auth/auth";
-import { db } from "@/db";
 import {
   users,
   clients,
@@ -15,6 +12,19 @@ import {
   contractEvents,
 } from "@/db/schema";
 import { randomUUID } from "node:crypto";
+
+const demoDatabaseUrl = process.env.DEMO_DATABASE_URL;
+if (!demoDatabaseUrl || !demoDatabaseUrl.startsWith("postgres")) {
+  throw new Error("Set DEMO_DATABASE_URL to the dedicated demo PostgreSQL database. The seed will not use DATABASE_URL as a fallback.");
+}
+
+// Force the database module to use the explicitly named demo target, even if
+// DATABASE_URL or .env.local points to another environment.
+process.env.DATABASE_URL = demoDatabaseUrl;
+const [{ auth }, { db }] = await Promise.all([
+  import("@/lib/auth/auth"),
+  import("@/db"),
+]);
 
 const demoEmail = (process.env.DEMO_CREATOR_EMAIL || "demo.creator@kipsmthn.test").trim().toLowerCase();
 const demoPassword = process.env.DEMO_CREATOR_PASSWORD;

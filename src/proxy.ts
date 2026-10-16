@@ -40,6 +40,7 @@ export default async function customMiddleware(request: Request) {
 
   // This bypass only affects page navigation. API routes retain their own auth checks.
   if (bypassState.enabled && (isOnboardingRoute(pathname) || isAdminRoute(pathname))) {
+    // Always preserve the bypass cookie for localhost development
     const response = NextResponse.next();
     response.cookies.set("local-auth-bypass", "1", {
       httpOnly: false,
@@ -56,7 +57,10 @@ export default async function customMiddleware(request: Request) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);
       const response = NextResponse.redirect(signInUrl);
-      response.cookies.delete("local-auth-bypass");
+      // Only delete the bypass cookie in production; preserve it in development
+      if (!bypassState.enabled) {
+        response.cookies.delete("local-auth-bypass");
+      }
       return response;
     }
   }

@@ -164,7 +164,8 @@ export default function AdminLayout({
     && process.env.NODE_ENV === 'development'
     && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
     && document.cookie.includes('local-auth-bypass=1');
-  const isAuthenticated = Boolean(session?.user) || localAuthBypass;
+  // Check localAuthBypass first (for dev bypass), then fall back to session auth
+  const isAuthenticated = localAuthBypass || Boolean(session?.user);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
   const [hasLocalAccount, setHasLocalAccount] = useState(true);
@@ -246,7 +247,7 @@ export default function AdminLayout({
     );
   }
 
-  if (authPending) {
+  if (authPending && !localAuthBypass) {
     return (
       <SplitViewProvider>
         <div className="ui-page flex min-h-screen items-center justify-center">

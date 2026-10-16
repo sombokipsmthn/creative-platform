@@ -86,6 +86,24 @@ export async function GET(
         ? String(gallery.clientId)
         : null;
 
+    // Check if gallery requires PIN authentication
+    if (gallery.accessPin) {
+      const existingSession = await getGallerySession(
+        String(
+          gallery.id,
+        ),
+        false,
+        clientId,
+      );
+
+      if (!existingSession) {
+        return NextResponse.json(
+          { error: "Gallery requires PIN access." },
+          { status: 401 },
+        );
+      }
+    }
+
     const session =
       await getGallerySession(
         String(

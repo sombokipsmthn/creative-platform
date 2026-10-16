@@ -1,18 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { mockAuth, mockDb } = vi.hoisted(() => {
-  return {
-    mockAuth: vi.fn(),
-    mockDb: {
-      select: vi.fn(),
-      from: vi.fn(),
-      leftJoin: vi.fn(),
-      where: vi.fn(),
-      limit: vi.fn(),
-      returning: vi.fn(),
-    },
-  };
-});
+const { mockAuth, mockDb } = vi.hoisted(() => ({
+  mockAuth: vi.fn(),
+  mockDb: {
+    select: vi.fn(),
+    from: vi.fn(),
+    leftJoin: vi.fn(),
+    where: vi.fn(),
+    limit: vi.fn(),
+    orderBy: vi.fn(),
+    returning: vi.fn(),
+  },
+}));
 
 // Reset mocks before each test
 beforeEach(() => {
@@ -36,13 +35,13 @@ describe("Authorization matrix", () => {
   // ------------------------------------------------------------------
 
   it("public gallery returns 404 for unknown slug", async () => {
-    // Mock the query chain to return empty result (no gallery found)
+    // Mock the query chain: each call returns mockDb to allow chaining,
+    // with limit resolving to empty rows.
     mockDb.select.mockReturnValue(mockDb);
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue(mockDb);
-    mockDb.returning.mockResolvedValue({ rows: [] });
+    mockDb.limit.mockResolvedValue([]);
 
     const req = new Request("https://example.com/api/public/galleries/no-such-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "no-such-slug" }) });
@@ -76,8 +75,7 @@ describe("Authorization matrix", () => {
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue(mockDb);
-    mockDb.returning.mockResolvedValue({ rows: [expiredGallery] });
+    mockDb.limit.mockResolvedValue([expiredGallery]);
 
     const req = new Request("https://example.com/api/public/galleries/expired-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "expired-slug" }) });
@@ -111,11 +109,9 @@ describe("Authorization matrix", () => {
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue(mockDb);
-    mockDb.returning.mockResolvedValue({ rows: [pinProtectedGallery] });
+    mockDb.limit.mockResolvedValue([pinProtectedGallery]);
 
-    // Mock the session creation to return null (no session)
-    const { getGallerySession } = await import("@/lib/gallery/session");
+    // Mock getGallerySession to return null (no session)
     vi.spyOn(await import("@/lib/gallery/session"), "getGallerySession").mockResolvedValue(null);
 
     const req = new Request("https://example.com/api/public/galleries/pin-slug");

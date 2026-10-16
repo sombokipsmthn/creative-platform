@@ -469,8 +469,9 @@ function WeekView({
                         {event.description}
                       </div>
                     )}
-                  </div>
-                ))}
+                  )
+                ))
+              )
 
                 {dayEvents.length === 0 && (
                   <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
@@ -478,9 +479,8 @@ function WeekView({
                   </div>
                 )}
               </div>
-            </div>
-          );
-        })}
+            }
+          )}
       </div>
     </div>
   );
@@ -570,10 +570,15 @@ function AgendaView({
                   {event.relatedGalleryId && <span>Gallery</span>}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            }
+          )}
       </div>
     </div>
   );
+}
+
+// Helper function to get events for a day (used in views)
+function getEventsForDay(date: Date, eventsByDay: Map<string, CalendarEvent[]>): CalendarEvent[] {
+  const dateKey = format(date, 'yyyy-MM-dd');
+  return eventsByDay.get(dateKey) || [];
 }

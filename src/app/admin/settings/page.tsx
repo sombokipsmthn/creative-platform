@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import WatermarkPreview from '@/components/WatermarkPreview';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Button } from '@/components/ui/Button';
 
 type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations';
 
@@ -83,19 +84,19 @@ export default function AdminSettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen p-6 md:p-12 font-sans transition-colors duration-300">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl">
         <AdminPageHeader
           title="Platform Settings"
           description="Configure how the platform behaves for your workspace, galleries, and client communications."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
-            <button
-              type="submit"
-              className="w-full py-4 btn-primary text-xs font-sans uppercase tracking-widest rounded-xl transition-all shadow-md cursor-pointer"
+            <Button
+              variant="primary"
+              className="w-full"
             >
               Save Settings Changes
-            </button>
+            </Button>
           }
           tabs={tabs.map(tab => ({
             label: tab.label,
@@ -107,48 +108,59 @@ export default function AdminSettingsPage() {
 
         {/* TAB CONTENTS */}
         <form onSubmit={handleSaveSettings} className="space-y-8">
-          
+
           {/* TAB 1: BRANDING */}
           {activeTab === 'branding' && (
             <div className="space-y-6">
-              <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-                <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                  <h2 className="text-lg font-medium text-slate-900 dark:text-white">Domain & Custom URLs</h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Your client galleries are always available on your default site address.</p>
+              <div className="ui-card">
+                <div className="ui-card-header">
+                  <h2 className="ui-card-title">Domain & Custom URLs</h2>
+                  <p className="ui-meta">Your client galleries are always available on your default site address.</p>
                 </div>
-
-                <div className="space-y-4">
+                <div className="ui-card-content space-y-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Site Address</label>
+                    <label className="ui-label">Default Site Address</label>
                     <input
                       type="text"
                       value={domainSlug}
                       onChange={(e) => setDomainSlug(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Custom Domain</label>
+                    <label className="ui-label">Custom Domain</label>
                     <input
                       type="text"
                       value={customDomain}
                       onChange={(e) => setCustomDomain(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                      className="ui-input"
                     />
-                    <p className="text-[11px] text-slate-500 font-sans">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
+                    <p className="ui-caption">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
+                  </div>
+                </div>
+                <div className="ui-card-footer">
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={hidePlatformBranding}
+                        onChange={(e) => setHidePlatformBranding(e.target.checked)}
+                        className="w-4 h-4 accent-purple-600 rounded"
+                      />
+                      Hide default platform branding from client galleries
+                    </label>
                   </div>
                 </div>
               </div>
 
               {/* Logo & Favicon Upload Cards */}
-              <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-                <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                  <h2 className="text-lg font-medium text-slate-900 dark:text-white">Logos & Favicon</h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Upload custom brand logos for your client portal header and browser tab icon.</p>
+              <div className="ui-card space-y-4">
+                <div className="ui-card-header">
+                  <h2 className="ui-card-title">Logos & Favicon</h2>
+                  <p className="ui-meta">Upload custom brand logos for your client portal header and browser tab icon.</p>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="ui-card-content grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
                     <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600/20 dark:text-purple-400 font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
@@ -161,18 +173,6 @@ export default function AdminSettingsPage() {
                     <p className="text-[10px] text-slate-500 font-sans">32x32 PNG, ICO or SVG file</p>
                   </div>
                 </div>
-
-                <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
-                  <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hidePlatformBranding}
-                      onChange={(e) => setHidePlatformBranding(e.target.checked)}
-                      className="w-4 h-4 accent-purple-600 rounded"
-                    />
-                    Hide default platform branding from client galleries
-                  </label>
-                </div>
               </div>
             </div>
           )}
@@ -181,55 +181,61 @@ export default function AdminSettingsPage() {
           {activeTab === 'watermark' && (
             <div className="space-y-6">
               {/* Watermark Presets */}
-              <div className="inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
-                <button
-                  type="button"
-                  onClick={() => setWatermarkPreset('proof')}
-                  className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
-                    watermarkPreset === 'proof'
-                      ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  Proof
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setWatermarkPreset('brand')}
-                  className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
-                    watermarkPreset === 'brand'
-                      ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm'
-                      : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  Brand
-                </button>
+              <div className="ui-card">
+                <div className="ui-card-header">
+                  <h2 className="ui-card-title">Watermark Presets</h2>
+                </div>
+                <div className="ui-card-content inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setWatermarkPreset('proof')}
+                    className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
+                      watermarkPreset === 'proof'
+                        ? 'ui-button ui-button-primary'
+                        : 'ui-button ui-button-secondary'
+                    }`}
+                  >
+                    Proof
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setWatermarkPreset('brand')}
+                    className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
+                      watermarkPreset === 'brand'
+                        ? 'ui-button ui-button-primary'
+                        : 'ui-button ui-button-secondary'
+                    }`}
+                  >
+                    Brand
+                  </button>
+                </div>
               </div>
 
               {/* Watermark Preview Component */}
-              <WatermarkPreview
-                watermarkText={watermarkText}
-                watermarkOpacity={watermarkOpacity}
-                watermarkPosition={watermarkPosition}
-                watermarkSize={watermarkSize}
-                onWatermarkChange={handleWatermarkChange}
-              />
+              <div className="ui-card">
+                <WatermarkPreview
+                  watermarkText={watermarkText}
+                  watermarkOpacity={watermarkOpacity}
+                  watermarkPosition={watermarkPosition}
+                  watermarkSize={watermarkSize}
+                  onWatermarkChange={handleWatermarkChange}
+                />
+              </div>
 
               {/* Watermark Controls */}
-              <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-                <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                  <h2 className="text-lg font-medium text-slate-900 dark:text-white">Watermark Details</h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Adjust the watermark text and appearance.</p>
+              <div className="ui-card">
+                <div className="ui-card-header">
+                  <h2 className="ui-card-title">Watermark Details</h2>
+                  <p className="ui-meta">Adjust the watermark text and appearance.</p>
                 </div>
-
-                <div className="space-y-4">
+                <div className="ui-card-content space-y-4">
                   <div className="space-y-1">
-                    <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Watermark Text</label>
+                    <label className="ui-label">Watermark Text</label>
                     <input
                       type="text"
                       value={watermarkText}
                       onChange={(e) => setWatermarkText(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                      className="ui-input"
                     />
                   </div>
 
@@ -263,7 +269,7 @@ export default function AdminSettingsPage() {
                     />
                   </div>
 
-                  <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
+                  <div className="pt-2 border-t border-slate-200">
                     <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
                       <input
                         type="checkbox"
@@ -281,41 +287,42 @@ export default function AdminSettingsPage() {
 
           {/* TAB 3: PRESETS */}
           {activeTab === 'presets' && (
-            <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-              <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                <h2 className="text-lg font-medium text-slate-900 dark:text-white">Default Gallery Presets</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Pre-fill settings when creating new private client galleries.</p>
+            <div className="ui-card">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title">Default Gallery Presets</h2>
+                <p className="ui-meta">Pre-fill settings when creating new private client galleries.</p>
               </div>
+              <div className="ui-card-content">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-1">
+                    <label className="ui-label">Default Photo Selection Limit</label>
+                    <input
+                      type="number"
+                      value={defaultSelectionLimit}
+                      onChange={(e) => setDefaultSelectionLimit(parseInt(e.target.value, 10))}
+                      className="ui-input"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Photo Selection Limit</label>
-                  <input
-                    type="number"
-                    value={defaultSelectionLimit}
-                    onChange={(e) => setDefaultSelectionLimit(parseInt(e.target.value, 10))}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Default Expiration (Days)</label>
+                    <input
+                      type="number"
+                      value={defaultExpiryDays}
+                      onChange={(e) => setDefaultExpiryDays(parseInt(e.target.value, 10))}
+                      className="ui-input"
+                    />
+                  </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Expiration (Days)</label>
-                  <input
-                    type="number"
-                    value={defaultExpiryDays}
-                    onChange={(e) => setDefaultExpiryDays(parseInt(e.target.value, 10))}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Master PIN</label>
-                  <input
-                    type="text"
-                    value={defaultPin}
-                    onChange={(e) => setDefaultPin(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
+                  <div className="space-y-1">
+                    <label className="ui-label">Default Master PIN</label>
+                    <input
+                      type="text"
+                      value={defaultPin}
+                      onChange={(e) => setDefaultPin(e.target.value)}
+                      className="ui-input"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -323,30 +330,29 @@ export default function AdminSettingsPage() {
 
           {/* TAB 4: EMAIL TEMPLATES */}
           {activeTab === 'templates' && (
-            <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-              <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                <h2 className="text-lg font-medium text-slate-900 dark:text-white">Email Invitation Templates</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Customize automated client notification emails.</p>
+            <div className="ui-card">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title">Email Invitation Templates</h2>
+                <p className="ui-meta">Customize automated client notification emails.</p>
               </div>
-
-              <div className="space-y-4">
+              <div className="ui-card-content space-y-4">
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Email Subject</label>
+                  <label className="ui-label">Email Subject</label>
                   <input
                     type="text"
                     value={invitationSubject}
                     onChange={(e) => setInvitationSubject(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="ui-input"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Email Message Body</label>
+                  <label className="ui-label">Email Message Body</label>
                   <textarea
                     rows={6}
                     value={invitationBody}
                     onChange={(e) => setInvitationBody(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                    className="ui-input"
                   />
                 </div>
               </div>
@@ -355,47 +361,48 @@ export default function AdminSettingsPage() {
 
           {/* TAB 5: PREFERENCES */}
           {activeTab === 'preferences' && (
-            <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-              <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                <h2 className="text-lg font-medium text-slate-900 dark:text-white">Kenyan Tax & Business Preferences</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Configure KRA PIN, base currency, and WHT rules.</p>
+            <div className="ui-card">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title">Kenyan Tax & Business Preferences</h2>
+                <p className="ui-meta">Configure KRA PIN, base currency, and WHT rules.</p>
               </div>
+              <div className="ui-card-content">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-1">
+                    <label className="ui-label">Creator KRA PIN Number</label>
+                    <input
+                      type="text"
+                      value={kraPin}
+                      onChange={(e) => setKraPin(e.target.value)}
+                      className="ui-input"
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Creator KRA PIN Number</label>
-                  <input
-                    type="text"
-                    value={kraPin}
-                    onChange={(e) => setKraPin(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  />
-                </div>
+                  <div className="space-y-1">
+                    <label className="ui-label">Default Currency</label>
+                    <select
+                      value={defaultCurrency}
+                      onChange={(e) => setDefaultCurrency(e.target.value)}
+                      className="ui-select"
+                    >
+                      <option value="KES">KES — Kenyan Shilling (KSh)</option>
+                      <option value="USD">USD — US Dollar ($)</option>
+                      <option value="EUR">EUR — Euro (€)</option>
+                    </select>
+                  </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Default Currency</label>
-                  <select
-                    value={defaultCurrency}
-                    onChange={(e) => setDefaultCurrency(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  >
-                    <option value="KES">KES — Kenyan Shilling (KSh)</option>
-                    <option value="USD">USD — US Dollar ($)</option>
-                    <option value="EUR">EUR — Euro (€)</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-700 dark:text-zinc-300 font-sans font-medium">Withholding Tax (WHT) Rate</label>
-                  <select
-                    value={defaultWhtRate}
-                    onChange={(e) => setDefaultWhtRate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-100 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
-                  >
-                    <option value="5%">5% — Resident Professional Services</option>
-                    <option value="20%">20% — Non-Resident Fee</option>
-                    <option value="0%">0% — Tax Exempt</option>
-                  </select>
+                  <div className="space-y-1">
+                    <label className="ui-label">Withholding Tax (WHT) Rate</label>
+                    <select
+                      value={defaultWhtRate}
+                      onChange={(e) => setDefaultWhtRate(e.target.value)}
+                      className="ui-select"
+                    >
+                      <option value="5%">5% — Resident Professional Services</option>
+                      <option value="20%">20% — Non-Resident Fee</option>
+                      <option value="0%">0% — Tax Exempt</option>
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
@@ -403,13 +410,12 @@ export default function AdminSettingsPage() {
 
           {/* TAB 6: INTEGRATIONS */}
           {activeTab === 'integrations' && (
-            <div className="p-8 border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 rounded-2xl space-y-6 shadow-sm dark:shadow-none">
-              <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-3">
-                <h2 className="text-lg font-medium text-slate-900 dark:text-white">API Integrations & Storage</h2>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 font-sans">Manage external services connected to KIPSMTHN.</p>
+            <div className="ui-card">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title">API Integrations & Storage</h2>
+                <p className="ui-meta">Manage external services connected to KIPSMTHN.</p>
               </div>
-
-              <div className="space-y-4">
+              <div className="ui-card-content space-y-4">
                 <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">KRA eTIMS Taxpayer Portal Bridge</p>
@@ -431,7 +437,12 @@ export default function AdminSettingsPage() {
                     <p className="font-bold text-slate-900 dark:text-white">Google Drive Importer API</p>
                     <p className="text-[11px] text-slate-500 dark:text-zinc-400">OAuth 2.0 Read-Only Connector</p>
                   </div>
-                  <button type="button" className="px-3 py-1 btn-secondary text-xs rounded-full">Configure</button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Configure
+                  </Button>
                 </div>
               </div>
             </div>

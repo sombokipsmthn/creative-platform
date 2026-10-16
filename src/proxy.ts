@@ -1,6 +1,25 @@
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 import { NextResponse } from "next/server";
 
+function configuredOrigin(): string | null {
+  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3005";
+}
+
+function getAuthOrigin(): string | null {
+  return configuredOrigin();
+}
+
+async function hasAuthenticatedSession(request: Request, authOrigin: string): Promise<boolean> {
+  try {
+    const session = await fetch(`${authOrigin}/api/auth/session`, {
+      headers: request.headers,
+    });
+    return session.ok;
+  } catch {
+    return false;
+  }
+}
+
 function isAdminRoute(pathname: string) {
   return pathname.startsWith("/admin");
 }
@@ -9,71 +28,32 @@ function isOnboardingRoute(pathname: string) {
   return pathname.startsWith("/admin/onboarding");
 }
 
-function isAuthRoute(pathname: string) {
-  return pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
-}
-
-function isApiAuthRoute(pathname: string) {
-  return pathname.startsWith("/api/auth");
-}
-
-function getAuthOrigin() {
-  if (process.env.NODE_ENV === "development") {
-    return "http://localhost:3005";
-  }
-
-  const configuredOrigin = process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL;
-
-  if (!configuredOrigin) {
-    console.error("Cannot verify the admin session because no auth server URL is configured.");
-    return null;
-  }
-
-  try {
-    return new URL(configuredOrigin).origin;
-  } catch (error) {
-    console.error("Cannot verify the admin session because the auth server URL is invalid:", error);
-    return null;
-  }
-}
-
-async function hasAuthenticatedSession(request: Request, origin: string) {
-  try {
-    const response = await fetch(new URL("/api/auth/get-session", origin), {
-      headers: { cookie: request.headers.get("cookie") ?? "" },
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      console.error("Failed to verify the admin session; auth route returned:", response.status);
-      return false;
-    }
-
-    const session: unknown = await response.json();
-    return (
-      typeof session === "object" &&
-      session !== null &&
-      "user" in session &&
-      Boolean(session.user)
-    );
-  } catch (error) {
-    console.error("Failed to verify the admin session in proxy:", error);
-    return false;
-  }
-}
-
 export default async function customMiddleware(request: Request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
   const bypassState = getLocalAuthBypassState(request);
 
-  if (isAuthRoute(pathname) || isApiAuthRoute(pathname)) {
-    return NextResponse.next();
+  if (!configuredOrigin()) {
+    console.error("Cannot verify the admin session because no auth server URL is configured.");
+    return null;
+  }
+
+  // In development with local auth bypass enabled, skip auth checks for all routes
+  if (bypassState.enabled) {
+    // Preserve the bypass cookie for localhost development
+    const response = NextResponse.next();
+    response.cookies.set("local-auth-bypass", "1", {
+      httpOnly: false,
+      sameSite: "lax",
+      secure: false,
+      path: "/",
+    });
+    return response;
   }
 
   // This bypass only affects page navigation. API routes retain their own auth checks.
   if (bypassState.enabled && (isOnboardingRoute(pathname) || isAdminRoute(pathname))) {
+    // Always preserve the bypass cookie for localhost development
     const response = NextResponse.next();
     response.cookies.set("local-auth-bypass", "1", {
       httpOnly: false,
@@ -90,7 +70,10 @@ export default async function customMiddleware(request: Request) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);
       const response = NextResponse.redirect(signInUrl);
-      response.cookies.delete("local-auth-bypass");
+      // Only delete the bypass cookie in production; preserve it in development
+      if (!bypassState.enabled) {
+        response.cookies.delete("local-auth-bypass");
+      }
       return response;
     }
   }

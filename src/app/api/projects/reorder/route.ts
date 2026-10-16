@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
+import { projects } from "@/db/schema";
 
 export async function POST(request: Request) {
   return withCreatorApi(request, async (_req, user) => {
@@ -15,13 +16,17 @@ export async function POST(request: Request) {
       }
 
       // Verify all projects belong to the creator
-      const projects = await db.execute(sql`
-        SELECT id FROM projects
-        WHERE id = ANY(${projectIds})
-          AND creator_id = ${user.id}
-      `);
+      const projectsResult = await db
+        .select({ id: projects.id })
+        .from(projects)
+        .where(
+          and(
+            eq(projects.creatorId, user.id),
+            inArray(projects.id, projectIds)
+          )
+        );
 
-      if (projects.rows.length !== projectIds.length) {
+      if (projectsResult.length !== projectIds.length) {
         return NextResponse.json({ error: "Some projects not found or unauthorized." }, { status: 404 });
       }
 

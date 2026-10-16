@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentSession } from "@/lib/auth";
 import { db } from '@/db';
 import { quotes, invoices, invoiceItems, clients, quoteItems } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       .select({ quote: quotes, client: clients })
       .from(quotes)
       .leftJoin(clients, eq(quotes.clientId, clients.id))
-      .where(eq(quotes.id, id))
+      .where(and(eq(quotes.id, id), eq(quotes.creatorId, userId)))
       .limit(1);
 
     if (!quoteResult.length) {

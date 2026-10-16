@@ -183,6 +183,13 @@
       "when": 1791621573211,
       "tag": "0025_repair_api_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792106720928,
+      "tag": "0026_shiny_the_professor",
+      "breakpoints": true
     }
   ]
 }

@@ -33,7 +33,7 @@ const socialProviders = {
 
 const baseURL = process.env.NODE_ENV === "development"
   ? "http://localhost:3005"
-  : appUrl;
+  : process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005";
 
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",

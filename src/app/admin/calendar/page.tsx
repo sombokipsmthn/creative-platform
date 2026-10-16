@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, List } from 'lucide-react';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, differenceInCalendarDays, isSameDay, isSameMonth, isSameWeek, parseISO, addDays, subDays } from 'date-fns';
+import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, eachDayOfInterval, differenceInCalendarDays, isSameDay, isSameMonth, isSameWeek, parseISO, addDays, subDays } from 'date-fns';
 
 type CalendarView = 'month' | 'week' | 'agenda';
 
@@ -84,7 +84,7 @@ export default function CalendarPage() {
         if (!cancelled) {
           setState(prev => ({
             ...prev,
-            events: data,
+            events: data as CalendarEvent[],
             loading: false,
           }));
         }
@@ -152,11 +152,7 @@ export default function CalendarPage() {
     return map;
   }, [state.events]);
 
-  // Get events for a specific day
-  const getEventsForDay = (date: Date) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
-    return eventsByDay.get(dateKey) || [];
-  };
+  // Group events by day - inline lookup (no separate function needed)
 
   if (state.loading) {
     return (
@@ -332,7 +328,8 @@ function MonthView({
 
         {/* Days of the month */}
         {daysInMonth.map((day, index) => {
-          const dayEvents = getEventsForDay(day);
+          const dateKey = format(day, 'yyyy-MM-dd');
+          const dayEvents = eventsByDay.get(dateKey) || [];
           const isTodayDay = isToday(day);
           const isCurrentMonthDay = isCurrentMonth(day);
 
@@ -377,7 +374,8 @@ function MonthView({
                 )}
               </div>
             </div>
-          </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -431,7 +429,8 @@ function WeekView({
 
         {/* Days */}
         {daysOfWeek.map((day, index) => {
-          const dayEvents = getEventsForDay(day);
+          const dateKey = format(day, 'yyyy-MM-dd');
+          const dayEvents = eventsByDay.get(dateKey) || [];
           const isTodayDay = isToday(day);
           const isCurrentWeekDay = isCurrentWeek(day);
 
@@ -471,7 +470,7 @@ function WeekView({
                       </div>
                     )}
                   </div>
-                ))
+                ))}
 
                 {dayEvents.length === 0 && (
                   <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
@@ -479,8 +478,9 @@ function WeekView({
                   </div>
                 )}
               </div>
-            }
-          )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -502,7 +502,11 @@ function AgendaView({
       const eventStart = parseISO(event.startDate);
       return eventStart >= startDate && eventStart <= endDate;
     })
-    .sort((a, b) => parseISO(a.startDate) - parseISO(b.startDate));
+    .sort((a, b) => {
+      const aTime = parseISO(a.startDate)?.getTime() ?? 0;
+      const bTime = parseISO(b.startDate)?.getTime() ?? 0;
+      return aTime - bTime;
+    });
 
   if (upcomingEvents.length === 0) {
     return (
@@ -521,7 +525,7 @@ function AgendaView({
       <div className="space-y-3">
         {upcomingEvents.map((event) => {
           const eventStart = parseISO(event.startDate);
-          const eventEnd = event.endDate ? parseISO(event.endDate) : null;
+          const eventEnd = event.endDate ? parseISO(event.endDate as string) : null;
 
           return (
             <div
@@ -541,17 +545,18 @@ function AgendaView({
                     event.isTentative
                       ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
                       : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                  }`}>
+                    }`}
+                  >
                     {event.isTentative ? 'Tentative' : 'Confirmed'}
                   </span>
                 </div>
 
                 <p className="text-sm text-slate-500 dark:text-zinc-400 mb-1">
-                  {format(eventStart, 'PPP')}{event.endDate ? ` – ${format(eventEnd, 'PPP')}` : ''}
+                  {format(eventStart, 'PPP')}{event.endDate && eventEnd ? ` – ${format(eventEnd, 'PPP')}` : ''}
                 </p>
 
                 {event.description && (
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1">
                     {event.description}
                   </p>
                 )}
@@ -565,15 +570,10 @@ function AgendaView({
                   {event.relatedGalleryId && <span>Gallery</span>}
                 </div>
               </div>
-            }
-          )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
-}
-
-// Helper function to get events for a day (used in views)
-function getEventsForDay(date: Date, eventsByDay: Map<string, CalendarEvent[]>): CalendarEvent[] {
-  const dateKey = format(date, 'yyyy-MM-dd');
-  return eventsByDay.get(dateKey) || [];
 }

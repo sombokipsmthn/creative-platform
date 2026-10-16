@@ -6,7 +6,7 @@ This feature is intended for a dedicated demo/test environment on the `demo-acco
 
 Set the following in the local demo environment:
 
-- `DATABASE_URL`: the dedicated development/demo PostgreSQL database.
+- `DEMO_DATABASE_URL`: required; the dedicated development/demo PostgreSQL database. The seed refuses to fall back to `DATABASE_URL`.
 - `DEMO_CREATOR_EMAIL`: optional; defaults to `demo.creator@kipsmthn.test`.
 - `DEMO_CREATOR_PASSWORD`: required, at least 8 characters.
 - `DEMO_CREATOR_NAME`: optional; defaults to `KIPSMTHN Demo Creator`.

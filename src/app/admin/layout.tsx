@@ -160,10 +160,18 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const { data: session, isPending: authPending } = authClient.useSession();
-  const localAuthBypass = typeof window !== 'undefined'
-    && process.env.NODE_ENV === 'development'
-    && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    && document.cookie.includes('local-auth-bypass=1');
+  // During SSR, document.cookie is not available, so we check if we SHOULD have the bypass cookie
+  // based on environment and route. During client, we check the actual cookie.
+  const localAuthBypass =
+    (typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'development' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+      document.cookie.includes('local-auth-bypass=1')) ||
+    // During SSR, assume we have the bypass cookie if we're on an admin route in dev mode
+    (typeof window === 'undefined' &&
+      process.env.NODE_ENV === 'development' &&
+      pathname.startsWith('/admin') &&
+      process.env.LOCAL_AUTH_BYPASS === 'true');
   // Check localAuthBypass first (for dev bypass), then fall back to session auth
   const isAuthenticated = localAuthBypass || Boolean(session?.user);
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});

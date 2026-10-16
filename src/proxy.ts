@@ -38,6 +38,19 @@ export default async function customMiddleware(request: Request) {
     return null;
   }
 
+  // In development with local auth bypass enabled, skip auth checks for all routes
+  if (bypassState.enabled) {
+    // Preserve the bypass cookie for localhost development
+    const response = NextResponse.next();
+    response.cookies.set("local-auth-bypass", "1", {
+      httpOnly: false,
+      sameSite: "lax",
+      secure: false,
+      path: "/",
+    });
+    return response;
+  }
+
   // This bypass only affects page navigation. API routes retain their own auth checks.
   if (bypassState.enabled && (isOnboardingRoute(pathname) || isAdminRoute(pathname))) {
     // Always preserve the bypass cookie for localhost development

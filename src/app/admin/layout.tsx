@@ -167,14 +167,61 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     };
   }, [isAuthenticated]);
 
-  // Keep the navigation configuration available for the admin shell.
-  // Badge counts are fetched for authenticated sessions only.
-  void sections;
-  void badgeCounts;
-  void loadingBadgeCounts;
-
   return (
     <>
+      <aside
+        className="fixed inset-y-0 left-0 z-50 hidden w-[248px] flex-col border-r border-[var(--color-border-subtle)] bg-[var(--color-bg-page)] lg:flex"
+        aria-label="Admin sidebar"
+      >
+        <div className="flex h-16 shrink-0 items-center border-b border-[var(--color-border-subtle)] px-5">
+          <Link
+            href="/admin"
+            className="flex items-center gap-2.5 text-[12px] font-bold uppercase tracking-[0.18em]"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
+              <BarChart3 className="h-3.5 w-3.5" />
+            </span>
+            KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
+          </Link>
+        </div>
+
+        <nav
+          className="flex-1 space-y-6 overflow-y-auto px-3 py-5"
+          aria-label="Creator platform navigation"
+        >
+          {sections.map((section) => (
+            <section key={section.label}>
+              <p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-faint)]">
+                {section.label}
+              </p>
+              <ul className="space-y-1">
+                {section.items.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
+                  const badgeCount = loadingBadgeCounts ? 0 : (badgeCounts[item.href] ?? 0);
+
+                  return (
+                    <NavItemWithBadge
+                      key={item.href}
+                      item={item}
+                      isActive={isActive}
+                      badgeCount={badgeCount}
+                    />
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </nav>
+
+        <div className="border-t border-[var(--color-border-subtle)] p-3">
+          <div className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs text-[var(--color-text-muted)]">
+            <span className="h-2 w-2 rounded-full bg-[var(--color-accent)]" />
+            Creative OS
+          </div>
+        </div>
+      </aside>
       <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
         <Link
           href="/admin"

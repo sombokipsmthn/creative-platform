@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { and, eq, gte, lte, sql, desc } from "drizzle-orm";
+import { and, or, eq, gte, lte, sql, desc } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getCurrentSession } from "@/lib/auth";
@@ -7,6 +7,13 @@ import { quotes, invoices, projects, galleries, contracts, clients } from "@/db/
 
 export async function GET(req: Request) {
   try {
+    const session = await getCurrentSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    
+    const userId = session.user.id;
+    
     const { searchParams } = new URL(req.url);
 
     const startParam = searchParams.get("start");
@@ -29,7 +36,7 @@ export async function GET(req: Request) {
 
     // 1. Quotes - for proposed shoot dates, expiry dates, etc.
     const quoteConditions = [
-      eq(quotes.creatorId, (await getCurrentSession())?.user?.id ?? ""),
+      eq(quotes.creatorId, userId),
       gte(quotes.validUntil, startDate),
       lte(quotes.validUntil, endDate),
     ];
@@ -59,7 +66,7 @@ export async function GET(req: Request) {
 
     // 2. Invoices - for due dates, payment deadlines
     const invoiceConditions = [
-      eq(invoices.creatorId, (await getCurrentSession())?.user?.id ?? ""),
+      eq(invoices.creatorId, userId),
       gte(invoices.dueDate, startDate),
       lte(invoices.dueDate, endDate),
     ];
@@ -88,7 +95,7 @@ export async function GET(req: Request) {
 
     // 3. Projects - for start/end dates, production schedules
     const projectConditions = [
-      eq(projects.creatorId, (await getCurrentSession())?.user?.id ?? ""),
+      eq(projects.creatorId, userId),
       sql`${projects.startDate} <= ${endDate} AND ${projects.endDate} >= ${startDate}`,
     ];
 
@@ -116,7 +123,7 @@ export async function GET(req: Request) {
 
     // 4. Galleries - for publication/delivery dates
     const galleryConditions = [
-      eq(galleries.creatorId, (await getCurrentSession())?.user?.id ?? ""),
+      eq(galleries.creatorId, userId),
       gte(galleries.expiresAt, startDate),
       lte(galleries.expiresAt, endDate),
     ];
@@ -145,7 +152,7 @@ export async function GET(req: Request) {
 
     // 5. Contracts - for signature deadlines, expiry dates
     const contractConditions = [
-      eq(contracts.creatorId, (await getCurrentSession())?.user?.id ?? ""),
+      eq(contracts.creatorId, userId),
       gte(contracts.expiresAt, startDate),
       lte(contracts.expiresAt, endDate),
     ];

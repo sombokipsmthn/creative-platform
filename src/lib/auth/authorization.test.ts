@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-<<<<<<< HEAD
 const { mockAuth, mockDb } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockDb: {
@@ -13,22 +12,6 @@ const { mockAuth, mockDb } = vi.hoisted(() => ({
     returning: vi.fn(),
   },
 }));
-=======
-const { mockAuth, mockDb } = vi.hoisted(() => {
-  return {
-    mockAuth: vi.fn(),
-    mockDb: {
-      select: vi.fn(),
-      from: vi.fn(),
-      leftJoin: vi.fn(),
-      where: vi.fn(),
-      limit: vi.fn(),
-      orderBy: vi.fn(),
-      returning: vi.fn(),
-    },
-  };
-});
->>>>>>> worktree-ci-final
 
 // Reset mocks before each test
 beforeEach(() => {

@@ -1,36 +1,26 @@
-'use client';
-
-import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
+  Calendar,
   FileText,
   GalleryHorizontalEnd,
   LayoutDashboard,
-  LogOut,
-  Receipt,
-  Settings2,
-  SlidersHorizontal,
-  Users,
-  WalletCards,
-  FileSignature,
-  UserRound,
-  Image,
-} from 'lucide-react';
+} from "lucide-react";
+
 import type { LucideIcon } from 'lucide-react';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
-import { SplitViewProvider, useSplitView } from '@/context/SplitViewContext';
+import { SplitViewProvider } from "@/context/SplitViewContext";
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
-    const res = await fetch('/api/badge-counts', { cache: 'no-store' });
-    if (!res.ok) return {};
+    const res = await fetch('/api/badge-counts');
+    if (!res.ok) throw new Error('Failed to fetch badge counts');
     return await res.json();
-  } catch {
+  } catch (error) {
+    console.error('Error fetching badge counts:', error);
     return {};
   }
 }
@@ -40,27 +30,19 @@ function NavItemWithBadge({
   isActive,
   badgeCount = 0,
 }: {
-  item: { name: string; href: string; icon: LucideIcon };
+  item: { name: string; href: string };
   isActive: boolean;
   badgeCount?: number;
 }) {
-  const Icon = item.icon;
   return (
-    <Link
-      href={item.href}
-      className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[12px] font-medium transition ${
-        isActive
-          ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
-          : 'text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]'
-      }`}
-    >
+    <li className="flex h-10 w-full items-center gap-3 px-3 py-2 rounded-md">
       {isActive && <span className="absolute left-0 h-5 w-0.5 rounded-full bg-[var(--color-accent)]" />}
-      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`} />
+      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'`} />
       <span>{item.name}</span>
       {badgeCount > 0 && (
         <span className="ui-badge ui-badge-accent ms-auto">{badgeCount}</span>
       )}
-    </Link>
+    </li>
   );
 }
 
@@ -69,80 +51,40 @@ const sections = [
     label: 'Dashboard',
     items: [
       { name: 'Overview', href: '/admin', icon: LayoutDashboard },
+      { name: 'Calendar', href: '/admin/calendar', icon: Calendar },
     ],
   },
   {
     label: 'Content',
     items: [
-      { name: 'Clients', href: '/admin/clients', icon: Users },
-      { name: 'Portfolio', href: '/admin/projects', icon: Image },
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
-    ],
-  },
-  {
-    label: 'Sales & Billing',
-    items: [
       { name: 'Quotes', href: '/admin/quotes', icon: FileText },
-      { name: 'Contracts', href: '/admin/contracts', icon: FileSignature },
-      { name: 'Invoices', href: '/admin/invoices', icon: Receipt },
-      { name: 'Payments', href: '/admin/payments', icon: WalletCards },
+      { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+      { name: 'Projects', href: '/admin/projects', icon: FileText },
+      { name: 'Clients', href: '/admin/clients', icon: FileText },
     ],
   },
   {
-    label: 'Settings',
-    items: [
-      { name: 'Creator settings', href: '/admin/profile', icon: UserRound },
-      { name: 'Platform settings', href: '/admin/settings', icon: Settings2 },
-    ],
+    label: 'Platform settings',
+    href: '/admin/settings',
+    icon: Settings2,
   },
 ];
 
 function SignOutButton({ compact }: { compact?: boolean }) {
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    router.push('/admin/login');
-  };
-
-  if (compact) {
-    return (
-      <button
-        onClick={handleSignOut}
-        className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
-        title="Sign out"
-      >
-        <LogOut className="h-4 w-4" />
-      </button>
-    );
-  }
-
   return (
     <button
-      onClick={handleSignOut}
-      className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-[12px] font-medium text-[var(--color-text-muted)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]"
+      onClick={async () => {
+        await authClient.signOut();
+        window.location.href = '/';
+      }}
+      className={compact
+        ? 'h-8 w-8 flex items-center justify-center rounded-md bg-[var(--color-bg-muted)] px-2 hover:bg-[var(--color-bg-hover)]'
+        : 'flex h-9 w-9 items-center justify-center rounded-md bg-[var(--color-bg-muted)] px-3 hover:bg-[var(--color-bg-hover)]'
+      }
     >
       <LogOut className="h-4 w-4" />
-      <span>Sign out</span>
     </button>
-  );
-}
-
-function RedirectToOnboarding() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace("/admin/onboarding");
-  }, [router]);
-
-  return (
-    <SplitViewProvider>
-      <div className="ui-page flex min-h-screen items-center justify-center">
-        <div className="text-center">
-          <p className="ui-meta uppercase">Redirecting to onboarding...</p>
-        </div>
-      </div>
-    </SplitViewProvider>
   );
 }
 
@@ -153,165 +95,42 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const { data: session, isPending: authPending } = authClient.useSession();
-  const localAuthBypass = typeof window !== 'undefined'
-    && process.env.NODE_ENV === 'development'
-    && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-    && document.cookie.includes('local-auth-bypass=1');
-  const isAuthenticated = Boolean(session?.user) || localAuthBypass;
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
-  const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(true);
-  const [hasLocalAccount, setHasLocalAccount] = useState(true);
-  const bootstrapStarted = useRef(false);
-  const splitView = useSplitView();
+  const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(false);
+
+  // During SSR, document.cookie is not available, so we check if we SHOULD have the bypass cookie
+  // based on environment and route. During client, we check the actual cookie.
+  const localAuthBypass =
+    (typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'development' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') &&
+      document.cookie.includes('local-auth-bypass=1')) ||
+    // During SSR, assume we have the bypass cookie if we're on an admin route in dev mode
+    (typeof window === 'undefined' &&
+      process.env.NODE_ENV === 'development' &&
+      pathname.startsWith('/admin') &&
+      process.env.LOCAL_AUTH_BYPASS === 'true');
+
+  // Check localAuthBypass first (for dev bypass), then fall back to session auth
+  const isAuthenticated = localAuthBypass || Boolean(session?.user);
 
   useEffect(() => {
-    if (
-      authPending ||
-      !localAuthBypass ||
-      session?.user ||
-      bootstrapStarted.current
-    ) {
-      return;
+    if (isAuthenticated) {
+      setLoadingBadgeCounts(true);
+      fetchBadgeCounts()
+        .then(setBadgeCounts)
+        .finally(() => setLoadingBadgeCounts(false));
     }
+  }, [isAuthenticated]);
 
-    bootstrapStarted.current = true;
-    void fetch('/api/dev-auth/bootstrap', { method: 'POST', credentials: 'include' })
-      .then((response) => {
-        if (response.ok) window.location.reload();
-        else console.error('Local auth bootstrap failed with status:', response.status);
-      })
-      .catch((error) => console.error('Local auth bootstrap request failed:', error));
-  }, [authPending, localAuthBypass, session?.user]);
+  const isOnboardingRoute = (pathname: string) =>
+    pathname.startsWith('/admin/onboarding');
 
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    let isMounted = true;
-
-    async function loadBadgeCounts() {
-      try {
-        setLoadingBadgeCounts(true);
-        const counts = await fetchBadgeCounts();
-        if (isMounted) {
-          setBadgeCounts(counts);
-        }
-      } catch {
-        if (isMounted) {
-          setBadgeCounts({});
-        }
-      } finally {
-        if (isMounted) {
-          setLoadingBadgeCounts(false);
-        }
-      }
-    }
-
-    async function checkLocalAccount() {
-      if (localAuthBypass) {
-        if (isMounted) setHasLocalAccount(true);
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/profile', { cache: 'no-store' });
-        if (isMounted) {
-          setHasLocalAccount(res.ok);
-        }
-      } catch {
-        if (isMounted) {
-          setHasLocalAccount(false);
-        }
-      }
-    }
-
-    loadBadgeCounts();
-    checkLocalAccount();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [isAuthenticated, localAuthBypass, pathname]);
-
-  if (pathname === '/admin/login') {
-    return (
-      <SplitViewProvider>
-        <>{children}</>
-      </SplitViewProvider>
-    );
-  }
-
-  if (authPending) {
-    return (
-      <SplitViewProvider>
-        <div className="ui-page flex min-h-screen items-center justify-center">
-          <div className="flex items-center gap-3 os-pulse">
-            <span className="ui-icon-box h-8 w-8">
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-            </span>
-            <p className="ui-meta uppercase">
-              Loading Creative OS
-            </p>
-          </div>
-        </div>
-      </SplitViewProvider>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  if (!hasLocalAccount && pathname !== '/admin/onboarding') {
-    return <RedirectToOnboarding />;
-  }
+  const isAdminRoute = (pathname: string) => pathname.startsWith('/admin');
 
   return (
     <SplitViewProvider>
-      <div className="ui-page admin-page min-h-screen text-[var(--color-text-primary)] relative">
-        <aside className="fixed inset-y-0 left-0 z-50 hidden w-[248px] border-r border-[var(--color-border-subtle)] bg-[color-mix(in_srgb,var(--color-bg-page)_92%,transparent)] backdrop-blur-xl lg:flex lg:flex-col">
-          <div className="flex h-[calc(100%-3rem)] flex-col">
-            <div className="flex h-16 items-center border-b border-[var(--color-border-subtle)] px-5">
-              <Link href="/admin" className="group flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white shadow-lg shadow-purple-500/10">
-                  <BarChart3 className="h-3.5 w-3.5" />
-                </span>
-                <span className="text-[12px] font-bold uppercase tracking-[0.18em]">
-                  KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
-                </span>
-              </Link>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-3 py-5">
-              <nav className="space-y-6 flex-1" aria-label="Creator platform navigation">
-                {sections.map((section) => (
-                  <div key={section.label}>
-                    <p className="mb-2 px-3 ui-meta uppercase">
-                      {section.label}
-                    </p>
-                    <div className="space-y-1">
-                      {section.items.map((item) => {
-                        const isActive =
-                          pathname === item.href ||
-                          (item.href !== '/admin' && pathname.startsWith(`${item.href}/`));
-
-                        const badgeCount = loadingBadgeCounts ? 0 : (badgeCounts[item.href] ?? 0);
-
-                        return (
-                          <NavItemWithBadge
-                            key={item.href}
-                            item={item}
-                            isActive={isActive}
-                            badgeCount={badgeCount}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </nav>
-            </div>
-          </div>
-        </aside>
-
+      <>
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
           <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white">
@@ -359,11 +178,9 @@ export default function AdminLayout({
             </div>
 
             <div
-              className={
-                splitView.content
-                  ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
-                  : 'hidden'
-              }
+              className={splitView.content
+                ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
+                : 'hidden'}
             >
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
                 {splitView.content}
@@ -371,7 +188,7 @@ export default function AdminLayout({
             </div>
           </div>
         </main>
-      </div>
+      </>
     </SplitViewProvider>
   );
 }

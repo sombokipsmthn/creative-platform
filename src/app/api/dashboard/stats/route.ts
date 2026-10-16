@@ -185,7 +185,7 @@ export async function GET(request: Request) {
       invoices: { statuses: invoiceStatuses },
       galleries: { statuses: galleryStatuses },
       attention: {
-        overdueInvoices,
+        overdueInvoices: Number(overdueInvoices[0]?.value ?? 0),
         pendingQuotes: (quoteStatuses.sent ?? 0) + (quoteStatuses.draft ?? 0),
         activeProjects,
         activeGalleries: (galleryStatuses.active ?? 0) + (galleryStatuses.published ?? 0),

@@ -1,16 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mockGetGallerySession = vi.hoisted(() => vi.fn().mockResolvedValue(null));
-
 const { mockAuth, mockDb } = vi.hoisted(() => ({
   mockAuth: vi.fn(),
   mockDb: {
-    select: vi.fn().mockReturnValue(vi.fn().mockReturnValue(vi.fn().mockReturnValue(vi.fn().mockReturnValue()))),
-    from: vi.fn().mockReturnValue(vi.fn().mockReturnValue(vi.fn())),
-    leftJoin: vi.fn().mockReturnValue(vi.fn()),
-    where: vi.fn().mockReturnValue(vi.fn()),
-    limit: vi.fn().mockReturnValue(vi.fn()),
-    returning: vi.fn().mockReturnValue(vi.fn()),
+    select: vi.fn(),
+    from: vi.fn(),
+    leftJoin: vi.fn(),
+    where: vi.fn(),
+    limit: vi.fn(),
+    orderBy: vi.fn(),
+    returning: vi.fn(),
   },
 }));
 
@@ -28,21 +27,6 @@ vi.mock("@/db", () => ({
   db: mockDb,
 }));
 
-// Mock the gallery session module - mock at module level
-vi.mock("@/lib/gallery/session", async () => {
-  const actual = (await import("@/lib/gallery/session")) as any;
-  return {
-    ...actual,
-    getGallerySession: mockGetGallerySession,
-    createGallerySession: vi.fn().mockImplementation(async () => ({
-      id: "session_1",
-      token: "token_123",
-      isNew: true,
-    })),
-    requireGallerySession: vi.fn().mockImplementation(async () => null),
-  };
-});
-
 import { GET as getPublicGallery } from "@/app/api/public/galleries/[slug]/route";
 
 describe("Authorization matrix", () => {
@@ -51,13 +35,13 @@ describe("Authorization matrix", () => {
   // ------------------------------------------------------------------
 
   it("public gallery returns 404 for unknown slug", async () => {
-    // Mock the query chain to return empty result (no gallery found)
+    // Mock the query chain: each call returns mockDb to allow chaining,
+    // with limit resolving to empty rows.
     mockDb.select.mockReturnValue(mockDb);
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue(mockDb);
-    mockDb.returning.mockResolvedValue({ rows: [] });
+    mockDb.limit.mockResolvedValue([]);
 
     const req = new Request("https://example.com/api/public/galleries/no-such-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "no-such-slug" }) });
@@ -92,8 +76,7 @@ describe("Authorization matrix", () => {
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue([expiredGallery]);
-    mockDb.returning.mockResolvedValue({ rows: [expiredGallery] });
+    mockDb.limit.mockResolvedValue([expiredGallery]);
 
     const req = new Request("https://example.com/api/public/galleries/expired-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "expired-slug" }) });
@@ -128,11 +111,10 @@ describe("Authorization matrix", () => {
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
     mockDb.where.mockReturnValue(mockDb);
-    mockDb.limit.mockReturnValue([pinProtectedGallery]);
-    mockDb.returning.mockResolvedValue({ rows: [pinProtectedGallery] });
+    mockDb.limit.mockResolvedValue([pinProtectedGallery]);
 
     // Mock getGallerySession to return null (no session)
-    mockGetGallerySession.mockResolvedValue(null);
+    vi.spyOn(await import("@/lib/gallery/session"), "getGallerySession").mockResolvedValue(null);
 
     const req = new Request("https://example.com/api/public/galleries/pin-slug");
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "pin-slug" }) });

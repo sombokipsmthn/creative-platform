@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { and, eq, or, sql, asc } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getGallerySession } from "@/lib/gallery/session";
+import { getGallerySession, requireGallerySession } from "@/lib/gallery/session";
+import { comparePin } from "@/lib/gallery/pin";
 import { galleries, clients, projects, galleryPhotos, galleryCollections, galleryPhotoActions, galleryApprovals, galleryThemes } from "@/db/schema";
 
 type Context = {
@@ -85,6 +86,22 @@ export async function GET(
       gallery.clientId
         ? String(gallery.clientId)
         : null;
+
+    // Check if gallery requires PIN authentication
+    if (gallery.accessPin) {
+      const existingSession = await getGallerySession(
+        String(gallery.id),
+        false,
+        clientId,
+      );
+
+      if (!existingSession) {
+        return NextResponse.json(
+          { error: "Gallery requires PIN access." },
+          { status: 401 },
+        );
+      }
+    }
 
     const session =
       await getGallerySession(

@@ -37,6 +37,7 @@ export async function GET(req: Request) {
     // 1. Quotes - for proposed shoot dates, expiry dates, etc.
     const quoteConditions = [
       eq(quotes.creatorId, userId),
+      // Date overlap: event starts before range end AND ends after range start
       gte(quotes.validUntil, startDate),
       lte(quotes.validUntil, endDate),
     ];
@@ -67,6 +68,7 @@ export async function GET(req: Request) {
     // 2. Invoices - for due dates, payment deadlines
     const invoiceConditions = [
       eq(invoices.creatorId, userId),
+      // Date overlap: event starts before range end AND ends after range start
       gte(invoices.dueDate, startDate),
       lte(invoices.dueDate, endDate),
     ];
@@ -96,6 +98,7 @@ export async function GET(req: Request) {
     // 3. Projects - for start/end dates, production schedules
     const projectConditions = [
       eq(projects.creatorId, userId),
+      // Date overlap: event starts before range end AND ends after range start
       sql`${projects.startDate} <= ${endDate} AND ${projects.endDate} >= ${startDate}`,
     ];
 
@@ -124,6 +127,7 @@ export async function GET(req: Request) {
     // 4. Galleries - for publication/delivery dates
     const galleryConditions = [
       eq(galleries.creatorId, userId),
+      // Date overlap: event starts before range end AND ends after range start
       gte(galleries.expiresAt, startDate),
       lte(galleries.expiresAt, endDate),
     ];

@@ -39,7 +39,8 @@
       "Bash(awk NR>=82 && NR<=88 {print NR\": \"$0} *)",
       "Bash(npm ci *)",
       "Bash(npm test *)",
-      "Bash(grep *)"
+      "Bash(grep *)",
+      "Bash(npm view *)"
     ]
   },
   "skillOverrides": {}

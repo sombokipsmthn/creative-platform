@@ -55,7 +55,7 @@ function StorySection({ title, body }: { title: string; body: string | null }) {
   if (!body) return null;
   return (
     <section className="space-y-4">
-      <h2 className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+      <h2 className="ui-eyebrow text-purple-600 dark:text-purple-400">
         {title}
       </h2>
       <div className="prose prose-slate dark:prose-invert max-w-none leading-8 whitespace-pre-wrap text-slate-700 dark:text-zinc-300 font-light">
@@ -82,7 +82,7 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
       <Header />
 
       {/* Back to portfolio */}
-      <div className="max-w-7xl mx-auto px-6 pt-8">
+      <div className="ui-shell px-6 pt-8">
         <Link
           href="/work"
           className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 transition"

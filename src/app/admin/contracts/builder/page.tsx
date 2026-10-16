@@ -14,14 +14,7 @@ function ContractBuilderContent() {
 
 export default function ContractBuilderPage() {
   return (
-    <Suspense
-      fallback={
-        <div
-          className="min-h-[40vh]"
-          aria-label="Loading contract builder"
-        />
-      }
-    >
+    <Suspense fallback={<div className="min-h-[40vh]" aria-label="Loading contract builder" />}>
       <ContractBuilderContent />
     </Suspense>
   );

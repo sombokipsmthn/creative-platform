@@ -1,7 +1,4 @@
 import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/auth";
-import type { Session } from "@/lib/auth/auth";
 
 /**
  * In-memory rate limiter store.
@@ -13,16 +10,6 @@ const rateLimiters = new Map<string, {
   limit: number;
   windowMs: number;
 }>();
-
-/**
- * Extract client identifier from request, following the project's established pattern.
- * Uses x-forwarded-for and x-real-ip headers as fallbacks, matching src/lib/security-logger.ts.
- */
-function getClientIdentifier(req: NextRequest): string {
-  const forwarded = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-  const realIp = req.headers.get("x-real-ip");
-  return forwarded || realIp || "unknown";
-}
 
 /**
  * Creates a rate limiter middleware function.
@@ -50,8 +37,8 @@ export function createRateLimiter({
       const userId = req.headers.get("x-user-id") || "";
       identifier = userId || "anonymous";
     } else {
-      // Use IP address via established proxy header pattern
-      identifier = getClientIdentifier(req);
+      // Use IP address
+      identifier = req.ip || "unknown";
     }
 
     const now = Date.now();
@@ -87,19 +74,19 @@ export function createRateLimiter({
  * Rate limit check handler for withCreatorApi
  */
 export async function withRateLimit<T>(
-  req: NextRequest,
-  handler: (req: NextRequest, session: Session) => Promise<T>,
+  req: Request,
+  handler: (req: Request, session: import("@/lib/auth").Session) => Promise<T>,
   options: {
     enabled?: boolean;
     windowMs?: number;
     max?: number;
     key?: "ip" | "user";
   } = {},
-): Promise<[T | null, NextResponse?]> {
+): Promise<[T, NextResponse?]> {
   // If rate limiting is disabled, proceed directly
   if (!options.enabled) {
-    const session = await auth.api.getSession({ headers: req.headers });
-    return [await handler(req, session as Session), null];
+    const session = await import("@/lib/auth").getSession(req);
+    return [await handler(req, session), null];
   }
 
   // Apply rate limit check
@@ -127,8 +114,8 @@ export async function withRateLimit<T>(
   }
 
   // Proceed with normal handler
-  const session = await auth.api.getSession({ headers: req.headers });
-  return [await handler(req, session as Session), null];
+  const session = await import("@/lib/auth").getSession(req);
+  return [await handler(req, session), null];
 }
 
 /**

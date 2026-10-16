@@ -71,6 +71,7 @@ describe("Authorization matrix", () => {
       coverUrl: null,
     };
 
+    // Configure the mock chain to return the expired gallery
     mockDb.select.mockReturnValue(mockDb);
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);
@@ -81,7 +82,7 @@ describe("Authorization matrix", () => {
     const res = await getPublicGallery(req, { params: Promise.resolve({ slug: "expired-slug" }) });
 
     expect(res.status).toBe(410);
-  });
+  };
 
   it("public gallery returns 401 when PIN required and no session", async () => {
     // Mock a gallery with PIN required
@@ -105,6 +106,7 @@ describe("Authorization matrix", () => {
       coverUrl: null,
     };
 
+    // Configure the mock chain to return the pin-protected gallery
     mockDb.select.mockReturnValue(mockDb);
     mockDb.from.mockReturnValue(mockDb);
     mockDb.leftJoin.mockReturnValue(mockDb);

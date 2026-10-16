@@ -132,6 +132,7 @@ export default function CreativeOSDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
   const [tourStep, setTourStep] = useState<number | null>(null);
   const [showFirstClient, setShowFirstClient] = useState(false);
 
@@ -154,22 +155,97 @@ export default function CreativeOSDashboardPage() {
 
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      setLoading(true); setError('');
-      try {
-        const response = await fetch(`/api/dashboard/stats?range=${range}`, { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error || 'Failed to load dashboard data.');
-        if (!cancelled) setStats(data);
-      } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
-      } finally { if (!cancelled) setLoading(false); }
-    }
-    void load();
-    return () => { cancelled = true; };
-  }, [range]);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
 
-  if (!stats) return <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 dark:bg-[#09090b]"><p className="text-xs font-sans uppercase tracking-widest text-slate-500">Loading Creative OS...</p></main>;
+    async function load() {
+      setLoading(true);
+      setError('');
+
+      try {
+        const response = await fetch(`/api/dashboard/stats?range=${range}`, {
+          cache: 'no-store',
+          credentials: 'include',
+          signal: controller.signal,
+        });
+        const data = await response.json().catch(() => null);
+
+        if (!response.ok) {
+          const message = typeof data?.error === 'string'
+            ? data.error
+            : `Dashboard request failed (HTTP ${response.status}).`;
+          throw new Error(message);
+        }
+
+        if (!data || typeof data !== 'object' || !data.overview || !data.finance) {
+          throw new Error('The dashboard API returned an invalid response. Check the terminal for API errors.');
+        }
+
+        if (!cancelled) setStats(data as DashboardStats);
+      } catch (err) {
+        if (cancelled) return;
+
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          setError('The dashboard request timed out after 15 seconds. Check the terminal for database or authentication errors, then retry.');
+        } else {
+          setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [range, retryCount]);
+
+  if (!stats) {
+    return (
+      <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6 dark:bg-[#09090b]">
+        <section className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          {loading ? (
+            <>
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-purple-600 dark:border-zinc-700 dark:border-t-purple-400" />
+              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Loading Creative OS...</h1>
+              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Fetching your dashboard data.</p>
+            </>
+          ) : (
+            <>
+              <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300">
+                <AlertCircle className="h-5 w-5" />
+              </span>
+              <h1 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">Dashboard could not load</h1>
+              <p role="alert" className="mt-2 break-words text-sm leading-6 text-slate-600 dark:text-zinc-400">
+                {error || 'The dashboard request failed without returning an error message.'}
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRetryCount((count) => count + 1)}
+                  className="rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                >
+                  Try again
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                >
+                  Reload page
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+      </main>
+    );
+  }
 
   return <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
     <header className="border-b border-slate-200 dark:border-zinc-800"><div className="mx-auto max-w-7xl px-6 py-8 lg:py-10"><div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="mb-3 text-[10px] font-sans font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative OS Command Center</p><div className="flex items-center gap-4">{activeCreator?.profile?.avatarUrl && <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30"><Image src={activeCreator.profile.avatarUrl} alt={activeCreator.name} fill unoptimized className="object-cover" /></div>}<div><h1 className="text-3xl font-light tracking-tight md:text-4xl">Welcome back, {activeCreator?.name || 'Creator'}.</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Run your creative business from one place.{activeCreator?.email ? ` · ${activeCreator.email}` : ''}</p></div></div></div><div className="flex flex-wrap items-center gap-2">{ranges.map((option) => <button key={option.value} type="button" onClick={() => setRange(option.value)} className={`rounded-full px-3.5 py-2 text-[10px] font-sans uppercase tracking-widest transition ${range === option.value ? 'bg-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400'}`}>{option.label}</button>)}</div></div></div></header>

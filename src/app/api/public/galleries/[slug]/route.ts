@@ -90,7 +90,9 @@ export async function GET(
     // Check if gallery requires PIN authentication
     if (gallery.accessPin) {
       const existingSession = await getGallerySession(
-        String(gallery.id),
+        String(
+          gallery.id,
+        ),
         false,
         clientId,
       );

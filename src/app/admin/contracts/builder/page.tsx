@@ -1,16 +1,20 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ContractBuilder } from '@/components/contracts/ContractBuilder';
 
-export default function ContractBuilderPage() {
+function ContractBuilderContent() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('templateId') || undefined;
 
+  return <ContractBuilder mode="new" templateId={templateId} />;
+}
+
+export default function ContractBuilderPage() {
   return (
-    <ContractBuilder
-      mode="new"
-      templateId={templateId}
-    />
+    <Suspense fallback={<div className="min-h-[40vh]" aria-label="Loading contract builder" />}>
+      <ContractBuilderContent />
+    </Suspense>
   );
 }

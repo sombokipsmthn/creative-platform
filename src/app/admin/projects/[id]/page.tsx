@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowUpRight, Eye, Loader2, Save, Star, Trash2, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 const resolveImage = (source?: string | null, fallbackUrl?: string) => {

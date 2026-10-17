@@ -3,8 +3,8 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Plus, Search } from 'lucide-react';
-import { Input } from '@/components/ui/Input';
-import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 type FilterValue = string | undefined;
 

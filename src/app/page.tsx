@@ -15,15 +15,15 @@ import {
 
 import Header from "@/components/header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
   title: "KIPSMTHN — Creative Platform & Operating System",

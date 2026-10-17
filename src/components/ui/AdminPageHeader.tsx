@@ -1,7 +1,9 @@
 'use client';
 
+import * as React from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
+import { ChevronLeft } from 'lucide-react';
 
 interface AdminPageHeaderTab {
   label: string;
@@ -33,108 +35,74 @@ export function AdminPageHeader({
   tabs,
   className = '',
 }: AdminPageHeaderProps) {
-  const pathname = usePathname();
-  const router = useRouter();
-
   return (
-    <div className={`border-b border-slate-200 dark:border-zinc-800/80 pb-6 mb-8 ${className}`}>
-      <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-        {/* Left side: Breadcrumb and Title/Description */}
-        <div className="flex-1 min-w-0 mb-4 md:mb-0">
-          {breadcrumb && (
-            <Link
-              href={breadcrumb.href}
-              className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline mb-1"
-            >
-              ← {breadcrumb.label}
-            </Link>
-          )}
-          <h1 className="text-3xl font-light text-slate-900 dark:text-white">
+    <div className={cn('border-b pb-5 mb-8 space-y-4', className)}>
+      {breadcrumb && (
+        <Link
+          href={breadcrumb.href}
+          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronLeft className="h-3.5 w-3.5" />
+          {breadcrumb.label}
+        </Link>
+      )}
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {title}
           </h1>
           {description && (
-            <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-zinc-400">
+            <p className="text-sm text-muted-foreground max-w-2xl">
               {description}
             </p>
           )}
         </div>
 
-        {/* Right side: Actions and Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center md:gap-4">
-          {/* Tabs */}
-          {tabs && tabs.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto mb-4 md:mb-0">
-              {tabs.map((tab) => {
-                const isActive = tab.active ?? false;
-                const isDisabled = tab.disabled ?? false;
-                return (
-                  <div key={tab.label} className="flex-shrink-0">
-                    {tab.href ? (
-                      isDisabled ? (
-                        <span className="px-3 py-1.5 text-xs font-sans uppercase tracking-widest border-transparent text-slate-400 dark:text-zinc-500 cursor-not-allowed">
-                          {tab.label}
-                        </span>
-                      ) : (
-                        <Link
-                          href={tab.href}
-                          className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
-                            isActive
-                              ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
-                              : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                          }`}
-                        >
-                          {tab.label}
-                        </Link>
-                      )
-                    ) : tab.onClick ? (
-                      <button
-                        onClick={tab.onClick}
-                        disabled={isDisabled}
-                        className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
-                          isActive
-                            ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
-                            : isDisabled
-                              ? 'border-transparent text-slate-400 dark:text-zinc-500 cursor-not-allowed'
-                              : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ) : (
-                      <span className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest ${
-                        isActive
-                          ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold border-b-2'
-                          : isDisabled
-                            ? 'text-slate-400 dark:text-zinc-500'
-                            : 'text-slate-500 dark:text-zinc-400'
-                      }`}
-                        >
-                          {tab.label}
-                        </span>
-                    )}
-                  </div>
-                )}
-              )}
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2">
-            {primaryAction && (
-              <div className="flex-shrink-0">{primaryAction}</div>
-            )}
-            {secondaryActions && (
-              <div className="flex flex-wrap gap-2">
-                {secondaryActions.map((action, index) => (
-                  <div key={index} className="flex-shrink-0">
-                    {action}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {secondaryActions?.map((action, i) => (
+            <div key={i}>{action}</div>
+          ))}
+          {primaryAction && <div>{primaryAction}</div>}
         </div>
       </div>
+
+      {tabs && tabs.length > 0 && (
+        <div className="flex items-center gap-1 overflow-x-auto border-t pt-3">
+          {tabs.map((tab) => {
+            const isActive = tab.active;
+            const tabClasses = cn(
+              'px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap',
+              isActive
+                ? 'bg-secondary text-secondary-foreground font-semibold shadow-sm'
+                : 'text-muted-foreground hover:text-foreground hover:bg-muted/50',
+              tab.disabled && 'pointer-events-none opacity-50'
+            );
+
+            if (tab.href) {
+              return (
+                <Link key={tab.label} href={tab.href} className={tabClasses}>
+                  {tab.label}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={tab.label}
+                type="button"
+                onClick={tab.onClick}
+                disabled={tab.disabled}
+                className={tabClasses}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
+
+export default AdminPageHeader;

@@ -27,16 +27,19 @@ const [{ auth }, { db }] = await Promise.all([
 ]);
 
 const demoEmail = (process.env.DEMO_CREATOR_EMAIL || "demo.creator@kipsmthn.test").trim().toLowerCase();
-const demoPasswordEnv = process.env.DEMO_CREATOR_PASSWORD;
-const demoPassword = demoPasswordEnv ?? "";
 const demoName = process.env.DEMO_CREATOR_NAME || "KIPSMTHN Demo Creator";
 
 // The default .test address is intentionally non-deliverable; do not require an email provider for local demo setup.
 if (demoEmail.endsWith(".test")) process.env.SKIP_EMAIL_SENDING = "true";
 
+const demoPasswordEnv = process.env.DEMO_CREATOR_PASSWORD;
 if (!demoPasswordEnv || demoPasswordEnv.length < 8) {
   throw new Error("Set DEMO_CREATOR_PASSWORD to a password of at least 8 characters before running the demo seed.");
 }
+
+// Create a validated password constant after the guard and pass that constant to Better Auth.
+// This preserves the existing authentication flow and avoids weakening type safety.
+const demoPassword = demoPasswordEnv;
 
 async function ensureDemoCreator() {
   const [existing] = await db.select().from(users).where(eq(users.email, demoEmail)).limit(1);

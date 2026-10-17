@@ -13,7 +13,7 @@ import {
 
 export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  authUserId: text("auth_user_id").unique(),
+  authUserId: text("auth_user_id").unique().$defaultFn(() => crypto.randomUUID()),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   emailVerified: boolean("email_verified").default(false).notNull(),

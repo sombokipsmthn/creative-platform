@@ -4,16 +4,16 @@ type InputVariant = 'default' | 'underlined' | 'filled';
 type InputSize = 'sm' | 'md' | 'lg';
 type InputState = 'default' | 'focus' | 'disabled' | 'error';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+type InputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> & {
   className?: string;
   asChild?: boolean;
   variant?: InputVariant;
   size?: InputSize;
   state?: InputState;
   placeholder?: string;
-}
+};
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+type TextareaProps = Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'> & {
   className?: string;
   asChild?: boolean;
   variant?: InputVariant;
@@ -21,7 +21,7 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   state?: InputState;
   placeholder?: string;
   rows?: number;
-}
+};
 
 /**
  * Input component - implements the design system's input variants.
@@ -30,42 +30,50 @@ interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
 const Input = React.forwardRef<
   HTMLInputElement | HTMLSpanElement,
   InputProps
->(({ className = '', asChild = false, variant = 'default', size = 'md', state = 'default', placeholder, ...props }, ref) => {
-  const Component = asChild ? 'span' : 'input';
+>(
+  (
+    {
+      className = '',
+      asChild = false,
+      variant = 'default',
+      size = 'md',
+      state = 'default',
+      placeholder,
+      ...props
+    },
+    ref
+  ) => {
+    const Component = asChild ? 'span' : 'input';
 
-  // Build variant classes
-  const variantClass = {
-    default: 'ui-input',
-    underlined: 'ui-input ui-input-underlined',
-    filled: 'ui-input ui-input-filled'
-  }[variant];
+    const variantClass = {
+      default: 'ui-input',
+      underlined: 'ui-input ui-input-underlined',
+      filled: 'ui-input ui-input-filled',
+    }[variant];
 
-  // Build size classes
-  const sizeClass = {
-    sm: 'ui-input-sm',
-    md: '',
-    lg: 'ui-input-lg'
-  }[size];
+    const sizeClass = {
+      sm: 'ui-input-sm',
+      md: '',
+      lg: 'ui-input-lg',
+    }[size];
 
-  // Build state classes
-  const stateClass = {
-    default: '',
-    focus: 'ui-input-focus',
-    disabled: 'ui-input-disabled',
-    error: 'ui-input-error'
-  }[state];
+    const stateClass = {
+      default: '',
+      focus: 'ui-input-focus',
+      disabled: 'ui-input-disabled',
+      error: 'ui-input-error',
+    }[state];
 
-  return (
-    React.createElement(Component, {
+    return React.createElement(Component, {
       ref,
-      className: [`${variantClass}`, `${sizeClass}`, `${stateClass}`, className]
+      className: [variantClass, sizeClass, stateClass, className]
         .filter(Boolean)
         .join(' '),
       placeholder,
-      ...props
-    })
-  );
-});
+      ...props,
+    });
+  }
+);
 
 Input.displayName = 'Input';
 
@@ -75,43 +83,52 @@ Input.displayName = 'Input';
 const Textarea = React.forwardRef<
   HTMLTextAreaElement | HTMLSpanElement,
   TextareaProps
->(({ className = '', asChild = false, variant = 'default', size = 'md', state = 'default', placeholder, rows, ...props }, ref) => {
-  const Component = asChild ? 'span' : 'textarea';
+>(
+  (
+    {
+      className = '',
+      asChild = false,
+      variant = 'default',
+      size = 'md',
+      state = 'default',
+      placeholder,
+      rows,
+      ...props
+    },
+    ref
+  ) => {
+    const Component = asChild ? 'span' : 'textarea';
 
-  // Build variant classes
-  const variantClass = {
-    default: 'ui-textarea',
-    underlined: 'ui-textarea ui-textarea-underlined',
-    filled: 'ui-textarea ui-textarea-filled'
-  }[variant];
+    const variantClass = {
+      default: 'ui-textarea',
+      underlined: 'ui-textarea ui-textarea-underlined',
+      filled: 'ui-textarea ui-textarea-filled',
+    }[variant];
 
-  // Build size classes
-  const sizeClass = {
-    sm: 'ui-textarea-sm',
-    md: '',
-    lg: 'ui-textarea-lg'
-  }[size];
+    const sizeClass = {
+      sm: 'ui-textarea-sm',
+      md: '',
+      lg: 'ui-textarea-lg',
+    }[size];
 
-  // Build state classes
-  const stateClass = {
-    default: '',
-    focus: 'ui-textarea-focus',
-    disabled: 'ui-textarea-disabled',
-    error: 'ui-textarea-error'
-  }[state];
+    const stateClass = {
+      default: '',
+      focus: 'ui-textarea-focus',
+      disabled: 'ui-textarea-disabled',
+      error: 'ui-textarea-error',
+    }[state];
 
-  return (
-    React.createElement(Component, {
+    return React.createElement(Component, {
       ref,
-      className: [`${variantClass}`, `${sizeClass}`, `${stateClass}`, className]
+      className: [variantClass, sizeClass, stateClass, className]
         .filter(Boolean)
         .join(' '),
       placeholder,
       rows,
-      ...props
-    })
-  );
-});
+      ...props,
+    });
+  }
+);
 
 Textarea.displayName = 'Textarea';
 

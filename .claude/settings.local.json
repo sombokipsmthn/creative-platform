@@ -50,7 +50,9 @@
       "Bash(npx tsx *)",
       "Bash(DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit *)",
       "Bash(DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit *)",
-      "Bash(timeout 30 DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit migrate)"
+      "Bash(timeout 30 DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit migrate)",
+      "Bash(DEMO_DATABASE_URL=\"postgresql://neondb_owner:npg_oIW2xPyiG7FV@ep-patient-waterfall-ayslbsj0-pooler.c-5.us-east-2.aws.neon.tech/kipsmthn?sslmode=require&channel_binding=require\" DEMO_CREATOR_PASSWORD=\"Shenandoah09\" npx tsx *)",
+      "Bash(DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DEMO_CREATOR_PASSWORD=\"demopass123\" DEMO_CREATOR_EMAIL=\"demo.creator@kipsmthn.test\" DEMO_CREATOR_NAME=\"KIPSMTHN Demo Creator\" node *)"
     ]
   },
   "skillOverrides": {}

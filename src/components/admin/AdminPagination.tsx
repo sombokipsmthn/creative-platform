@@ -1,5 +1,9 @@
 'use client';
 
+import * as React from 'react';
+import { Button } from '@/components/ui/Button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
 interface AdminPaginationProps {
   currentPage: number;
   totalPages: number;
@@ -19,45 +23,56 @@ export default function AdminPagination({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="admin-pagination">
-      <div className="text-xs text-[var(--color-text-muted)]">
-        Showing {startItem} to {endItem} of {totalItems} items
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
+      <div className="text-xs text-muted-foreground">
+        Showing <span className="font-medium text-foreground">{totalItems > 0 ? startItem : 0}</span> to{' '}
+        <span className="font-medium text-foreground">{endItem}</span> of{' '}
+        <span className="font-medium text-foreground">{totalItems}</span> results
       </div>
 
-      <div className="admin-pagination-pages">
-        <button
+      <div className="flex items-center gap-1.5">
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onPageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="ui-button ui-button-secondary ui-button-sm"
+          disabled={currentPage <= 1}
           aria-label="Previous page"
+          className="h-8 gap-1 px-2.5 text-xs"
         >
-          ← Previous
-        </button>
+          <ChevronLeft className="h-3.5 w-3.5" />
+          <span>Previous</span>
+        </Button>
 
         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
           const page = currentPage > 3 ? currentPage - 2 + i : i + 1;
           if (page > totalPages) return null;
+          const isActive = page === currentPage;
           return (
-            <button
+            <Button
               key={page}
+              variant={isActive ? 'default' : 'outline'}
+              size="sm"
               onClick={() => onPageChange(page)}
-              className={page === currentPage ? 'admin-pagination-current' : 'ui-button ui-button-secondary ui-button-sm'}
-              aria-current={page === currentPage ? 'page' : undefined}
+              className="h-8 w-8 p-0 text-xs font-mono"
+              aria-current={isActive ? 'page' : undefined}
               aria-label={`Go to page ${page}`}
             >
               {page}
-            </button>
+            </Button>
           );
         })}
 
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => onPageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="ui-button ui-button-secondary ui-button-sm"
+          disabled={currentPage >= totalPages}
           aria-label="Next page"
+          className="h-8 gap-1 px-2.5 text-xs"
         >
-          Next →
-        </button>
+          <span>Next</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </Button>
       </div>
     </div>
   );

@@ -1,114 +1,125 @@
+import * as React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/Button";
 
 export default function Footer() {
   return (
-    <footer className="ui-footer">
-      <div className="ui-shell">
-        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-          <div className="max-w-sm">
-            <Link href="/" className="inline-block text-xl font-medium tracking-[0.2em]">
-              KIPSMTHN<span className="text-[var(--color-accent)]">.</span>
+    <footer className="border-t bg-muted/20">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-8 lg:grid-cols-4">
+          <div className="space-y-4">
+            <Link href="/" className="flex items-center gap-2 font-bold tracking-tight text-foreground">
+              <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-xs text-primary-foreground font-mono">
+                K
+              </span>
+              <span>KIPSMTHN</span>
             </Link>
-            <p className="ui-meta mt-4">
-              Creative infrastructure for photographers, filmmakers, studios, and creative teams — from first enquiry to final delivery.
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Creative operating infrastructure for photographers, filmmakers, and studios — from client enquiry to private gallery delivery.
             </p>
-            <Link
-              href="/sign-up"
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-accent)] transition hover:text-[var(--color-accent-hover)] dark:text-[var(--color-accent)] dark:hover:text-[var(--color-accent-hover)]"
-            >
-              Create your workspace<ArrowRight className="h-4 w-4" />
-            </Link>
+            <div>
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <Link href="/admin">
+                  Open Workspace <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
           </div>
+
           <div>
-            <h2 className="ui-section-title text-xs">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
               Platform
-            </h2>
-            <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
-              <Link
-                href="#platform"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Features
-              </Link>
-              <Link
-                href="#workflow"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Workflow
-              </Link>
-              <Link href="#work" className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400">
-                Work
-              </Link>
-              <Link
-                href="#pricing"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Get started
-              </Link>
-            </nav>
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              <li>
+                <Link href="/#platform" className="hover:text-foreground transition-colors">
+                  Features & Tools
+                </Link>
+              </li>
+              <li>
+                <Link href="/#workflow" className="hover:text-foreground transition-colors">
+                  Production Workflow
+                </Link>
+              </li>
+              <li>
+                <Link href="/equipment" className="hover:text-foreground transition-colors">
+                  Equipment Kit
+                </Link>
+              </li>
+              <li>
+                <Link href="/services" className="hover:text-foreground transition-colors">
+                  Services Catalog
+                </Link>
+              </li>
+            </ul>
           </div>
+
           <div>
-            <h2 className="ui-section-title text-xs">
-              Company
-            </h2>
-            <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
-              <Link
-                href="/about"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                About
-              </Link>
-              <Link
-                href="/services"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Services
-              </Link>
-              <Link href="/work" className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400">
-                Work
-              </Link>
-              <Link
-                href="/contact"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Contact
-              </Link>
-            </nav>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+              Studio
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              <li>
+                <Link href="/about" className="hover:text-foreground transition-colors">
+                  About KIPSMTHN
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-foreground transition-colors">
+                  Contact & Inquiries
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-foreground transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <span className="text-muted-foreground/70">Nairobi, Kenya</span>
+              </li>
+            </ul>
           </div>
+
           <div>
-            <h2 className="ui-section-title text-xs">
-              Account
-            </h2>
-            <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
-              <Link
-                href="/sign-in"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/sign-up"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-              >
-                Create account
-              </Link>
-            </nav>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+              Workspace
+            </h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+              <li>
+                <Link href="/admin" className="hover:text-foreground transition-colors">
+                  Admin Overview
+                </Link>
+              </li>
+              <li>
+                <Link href="/admin/quotes" className="hover:text-foreground transition-colors">
+                  Production Quotes
+                </Link>
+              </li>
+              <li>
+                <Link href="/admin/invoices" className="hover:text-foreground transition-colors">
+                  Invoices & eTIMS
+                </Link>
+              </li>
+              <li>
+                <Link href="/admin/galleries" className="hover:text-foreground transition-colors">
+                  Client Delivery Galleries
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
-        <div className="mt-14 flex flex-col gap-5 border-t border-slate-200 pt-6 text-xs text-slate-500 dark:border-zinc-800 dark:text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-          <p className="ui-meta">
-            © {new Date().getFullYear()} KIPSMTHN. All rights reserved.
-          </p>
-          <div className="flex items-center gap-5">
-            <Link
-              href="/privacy"
-              className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
-            >
+
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-xs text-muted-foreground sm:flex-row">
+          <p>© {new Date().getFullYear()} KIPSMTHN. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy
             </Link>
-            <span className="ui-meta">Creative Business Platform</span>
+            <span aria-hidden="true">·</span>
+            <span>Creative Platform</span>
+            <span aria-hidden="true">·</span>
             <ThemeToggle />
           </div>
         </div>

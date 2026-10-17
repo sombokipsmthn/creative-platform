@@ -1,12 +1,22 @@
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 import { NextResponse } from "next/server";
 
-function configuredOrigin(): string | null {
-  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3005";
+function configuredOrigin(request?: Request): string {
+  if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+  if (request) {
+    try {
+      const url = new URL(request.url);
+      return url.origin;
+    } catch {
+      // ignore
+    }
+  }
+  return "http://localhost:3000";
 }
 
-function getAuthOrigin(): string | null {
-  return configuredOrigin();
+function getAuthOrigin(request?: Request): string {
+  return configuredOrigin(request);
 }
 
 async function hasAuthenticatedSession(request: Request, authOrigin: string): Promise<boolean> {
@@ -65,7 +75,7 @@ export default async function customMiddleware(request: Request) {
   }
 
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
-    const authOrigin = getAuthOrigin();
+    const authOrigin = getAuthOrigin(request);
     if (!authOrigin || !(await hasAuthenticatedSession(request, authOrigin))) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);

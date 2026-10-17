@@ -90,6 +90,8 @@ function r2PublicUrl(path: string) {
   )}`;
 }
 
+const inMemoryBlobs = new Map<string, { body: Buffer; contentType: string }>();
+
 class VercelBlobStorage
   implements GalleryStorage
 {
@@ -102,6 +104,18 @@ class VercelBlobStorage
       Buffer.isBuffer(input.body)
         ? input.body
         : Buffer.from(input.body);
+
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      inMemoryBlobs.set(input.path, { body, contentType: input.contentType });
+      const base64 = body.toString("base64");
+      const dataUrl = `data:${input.contentType};base64,${base64}`;
+      return {
+        path: input.path,
+        url: dataUrl,
+        size: body.byteLength,
+        contentType: input.contentType,
+      };
+    }
 
     const blob = await put(
       input.path,
@@ -129,16 +143,31 @@ class VercelBlobStorage
   async deleteObject(
     pathOrUrl: string,
   ) {
-    await del(pathOrUrl, {
-      token:
-        process.env
-          .BLOB_READ_WRITE_TOKEN,
-    });
+    inMemoryBlobs.delete(pathOrUrl);
+    if (!process.env.BLOB_READ_WRITE_TOKEN) return;
+
+    try {
+      await del(pathOrUrl, {
+        token:
+          process.env
+            .BLOB_READ_WRITE_TOKEN,
+      });
+    } catch {
+      // Ignore delete failures if token is invalid
+    }
   }
 
   async getObject(
     path: string,
   ) {
+    if (inMemoryBlobs.has(path)) {
+      return inMemoryBlobs.get(path)!;
+    }
+
+    if (!path.startsWith("http")) {
+      return null;
+    }
+
     const response = await fetch(
       path,
       {

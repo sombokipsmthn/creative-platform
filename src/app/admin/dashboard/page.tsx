@@ -196,7 +196,7 @@ export default function CreativeOSDashboardPage() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isLoaded || !user) return;
+    if (!isLoaded || !user) return;
     const loadStats = async () => {
       setLoading(true);
       setError('');

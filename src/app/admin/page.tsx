@@ -300,7 +300,7 @@ export default function CreativeOSDashboardPage() {
         </div>
 
         {/* Date Range Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-muted rounded-lg border">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 pl-0 bg-muted rounded-lg border">
           {ranges.map((option) => (
             <Button
               key={option.value}

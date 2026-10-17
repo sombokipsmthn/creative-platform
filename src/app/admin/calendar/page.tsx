@@ -395,7 +395,7 @@ function WeekView({
   isToday: (date: Date) => boolean;
   isCurrentWeek: (date: Date) => boolean;
 }) {
-  const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 1 }); // Monday
+  const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 1 });
   const daysOfWeek = eachDayOfInterval({
     start: startOfWeekDate,
     end: endOfWeek(currentDate, { weekStartsOn: 1 }),
@@ -403,14 +403,13 @@ function WeekView({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
           Week of {format(startOfWeekDate, 'MMM d')} – {format(endOfWeek(currentDate, { weekStartsOn: 1 }), 'MMM d, yyyy')}
         </h3>
       </div>
 
       <div className="grid grid-cols-7 gap-2">
-        {/* Weekday headers */}
         {[...Array(7)].map((_, i) => {
           const day = addDays(startOfWeekDate, i);
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()];
@@ -418,7 +417,7 @@ function WeekView({
             <div
               key={i}
               className={`text-center text-[10px] font-sans uppercase tracking-widest ${
-                isToday(day) ? 'text-purple-600 font-bold' : 'text-slate-400'
+                isToday(day) ? 'font-bold text-purple-600' : 'text-slate-400'
               }`}
             >
               <div>{dayName}</div>
@@ -427,7 +426,6 @@ function WeekView({
           );
         })}
 
-        {/* Days */}
         {daysOfWeek.map((day, index) => {
           const dateKey = format(day, 'yyyy-MM-dd');
           const dayEvents = eventsByDay.get(dateKey) || [];
@@ -445,8 +443,10 @@ function WeekView({
                     : 'bg-slate-50 dark:bg-zinc-950/50'
               }`}
             >
-              <div className="flex justify-between items-start p-2">
-                <span className={`text-[10px] font-sans ${isTodayDay ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
+              <div className="flex items-start justify-between p-2">
+                <span className={`text-[10px] font-sans ${
+                  isTodayDay ? 'font-bold text-purple-600' : 'text-slate-400'
+                }`}>
                   {format(day, 'd')}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-zinc-400">
@@ -454,33 +454,34 @@ function WeekView({
                 </span>
               </div>
 
-              <div className="mt-1 space-y-1 h-[calc(100%-2rem)] overflow-hidden">
+              <div className="mt-1 h-[calc(100%-2rem)] space-y-1 overflow-hidden">
                 {dayEvents.map((event) => (
                   <div
                     key={event.id}
-                    className={'mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ' + (event.isTentative
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300')
-                    }
+                    className={`mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ${
+                      event.isTentative
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                    }`}
                   >
                     {event.title}
                     {event.description && (
-                      <div className="mt-0.5 text-xs text-slate-500 dark:text-zinc-400 truncate">
+                      <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-zinc-400">
                         {event.description}
                       </div>
                     )}
-                  )
-                ))
-              )
+                  </div>
+                ))}
 
                 {dayEvents.length === 0 && (
-                  <div className="text-xs text-slate-400 dark:text-zinc-500 text-center mt-2">
+                  <div className="mt-2 text-center text-xs text-slate-400 dark:text-zinc-500">
                     No events
                   </div>
                 )}
               </div>
-            }
-          )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -498,19 +499,15 @@ function AgendaView({
   const endDate = addDays(startDate, 30);
 
   const upcomingEvents = events
-    .filter(event => {
+    .filter((event) => {
       const eventStart = parseISO(event.startDate);
       return eventStart >= startDate && eventStart <= endDate;
     })
-    .sort((a, b) => {
-      const aTime = parseISO(a.startDate)?.getTime() ?? 0;
-      const bTime = parseISO(b.startDate)?.getTime() ?? 0;
-      return aTime - bTime;
-    });
+    .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
 
   if (upcomingEvents.length === 0) {
     return (
-      <div className="text-center py-12">
+      <div className="py-12 text-center">
         <p className="text-slate-500 dark:text-zinc-400">No upcoming events in the next 30 days.</p>
       </div>
     );
@@ -525,43 +522,44 @@ function AgendaView({
       <div className="space-y-3">
         {upcomingEvents.map((event) => {
           const eventStart = parseISO(event.startDate);
-          const eventEnd = event.endDate ? parseISO(event.endDate as string) : null;
+          const eventEnd = event.endDate ? parseISO(event.endDate) : null;
 
           return (
             <div
               key={event.id}
-              className="flex items-start gap-4 px-4 py-3 rounded-xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+              className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 transition-colors hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
             >
-              <div className="flex-shrink-0 h-9 w-9 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
                 <CalendarIcon className="h-4 w-4" />
               </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start mb-1">
-                  <h4 className="text-lg font-medium text-slate-900 dark:text-white truncate">
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-start justify-between">
+                  <h4 className="truncate text-lg font-medium text-slate-900 dark:text-white">
                     {event.title}
                   </h4>
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                    event.isTentative
-                      ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                      : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      event.isTentative
+                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
                     }`}
                   >
                     {event.isTentative ? 'Tentative' : 'Confirmed'}
                   </span>
                 </div>
 
-                <p className="text-sm text-slate-500 dark:text-zinc-400 mb-1">
-                  {format(eventStart, 'PPP')}{event.endDate && eventEnd ? ` – ${format(eventEnd, 'PPP')}` : ''}
+                <p className="mb-1 text-sm text-slate-500 dark:text-zinc-400">
+                  {format(eventStart, 'PPP')}{eventEnd ? ` – ${format(eventEnd, 'PPP')}` : ''}
                 </p>
 
                 {event.description && (
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mb-1">
+                  <p className="mb-1 text-xs text-slate-500 dark:text-zinc-400">
                     {event.description}
                   </p>
                 )}
 
-                <div className="text-xs text-slate-400 dark:text-zinc-500 flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 text-xs text-slate-400 dark:text-zinc-500">
                   <span>Category: {event.category}</span>
                   {event.relatedClientId && <span>Client</span>}
                   {event.relatedProjectId && <span>Project</span>}
@@ -570,8 +568,9 @@ function AgendaView({
                   {event.relatedGalleryId && <span>Gallery</span>}
                 </div>
               </div>
-            }
-          )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,33 +1,140 @@
 "use client";
 
+import * as React from "react";
 import Link from "next/link";
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, LayoutDashboard, ArrowRight, Menu } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/Button";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/Sheet";
 
 export default function Header() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const isSignedIn = Boolean(session?.user);
-
-  useEffect(() => {}, [session]);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
 
   async function handleSignOut() {
     await authClient.signOut();
     router.push("/");
   }
 
+  const navLinks = [
+    { href: "/#platform", label: "Platform" },
+    { href: "/#workflow", label: "Workflow" },
+    { href: "/services", label: "Services" },
+    { href: "/equipment", label: "Equipment" },
+    { href: "/about", label: "About" },
+    { href: "/contact", label: "Contact" },
+  ];
+
   return (
-    <header className="ui-header"><div className="ui-shell"><nav className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/80 px-6 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
-      <Link href="/" className="ui-logo text-lg font-semibold tracking-[0.35em] text-slate-900 dark:text-white">KIPSMTHN</Link>
-      <div className="hidden items-center gap-8 text-sm font-medium text-slate-500 dark:text-zinc-400 md:flex"><Link href="/#platform" className="ui-nav-link transition hover:text-purple-600">Platform</Link><Link href="/#workflow" className="ui-nav-link transition hover:text-purple-600">Workflow</Link><Link href="/#work" className="ui-nav-link transition hover:text-purple-600">Work</Link><Link href="/#pricing" className="ui-nav-link transition hover:text-purple-600">Pricing</Link></div>
-      <div className="flex items-center gap-3">
-        {!isPending && isSignedIn ? <><Link href="/admin" className="hidden rounded-full border border-slate-200 px-4 py-2 text-sm font-medium sm:inline-flex">Dashboard</Link><button type="button" onClick={handleSignOut} className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium" aria-label="Sign out"><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sign out</span></button></> : !isPending ? <><Link href="/sign-in" className="inline-flex items-center gap-2 text-sm font-medium"><LogIn className="h-3.5 w-3.5 sm:hidden" /><span>Sign in</span></Link><Link href="/sign-up"><Button variant="primary" size="sm">Get started</Button></Link></> : <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-zinc-800" />}
-        <ThemeToggle />
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center gap-4">
+          {/* Mobile Sheet Navigation */}
+          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle navigation menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-72 p-6">
+              <SheetHeader>
+                <SheetTitle className="text-left font-bold tracking-tight">
+                  KIPSMTHN
+                </SheetTitle>
+              </SheetHeader>
+              <nav className="mt-8 flex flex-col gap-3">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-1.5"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <div className="border-t pt-4 mt-2 flex flex-col gap-2">
+                  <Button asChild size="sm" onClick={() => setMobileOpen(false)}>
+                    <Link href="/admin">Open Studio Workspace</Link>
+                  </Button>
+                </div>
+              </nav>
+            </SheetContent>
+          </Sheet>
+
+          {/* Brand */}
+          <Link
+            href="/"
+            className="flex items-center gap-2 font-bold tracking-tight text-foreground transition-opacity hover:opacity-90"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs text-primary-foreground font-mono">
+              K
+            </span>
+            <span className="text-base font-semibold">KIPSMTHN</span>
+          </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="transition-colors hover:text-foreground"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
+          {!isPending && isSignedIn ? (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/admin" className="gap-1.5">
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span className="hidden sm:inline">Dashboard</span>
+                </Link>
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSignOut}
+                className="gap-1.5"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Sign out</span>
+              </Button>
+            </>
+          ) : !isPending ? (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/sign-in" className="gap-1.5">
+                  <LogIn className="h-3.5 w-3.5" />
+                  <span>Sign in</span>
+                </Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/admin">
+                  <span>Get started</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </>
+          ) : (
+            <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+          )}
+
+          <ThemeToggle />
+        </div>
       </div>
-    </nav></div></header>
+    </header>
   );
 }

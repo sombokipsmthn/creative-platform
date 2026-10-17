@@ -160,7 +160,7 @@ export default function AboutPage() {
       )}
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6 mt-16">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
           <p>
             © {new Date().getFullYear()}{" "}

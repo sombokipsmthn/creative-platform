@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { LogIn, LogOut, LayoutDashboard, ArrowRight, Menu } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/Button";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/Sheet";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function Header() {
   const router = useRouter();
@@ -132,7 +132,7 @@ export default function Header() {
             <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
           )}
 
-          <ThemeToggle />
+          <ThemeToggle showLabel={false} />
         </div>
       </div>
     </header>

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
@@ -266,7 +266,7 @@ export default function AdminClientsPage() {
           primaryAction={
             <Button
               onClick={openCreateModal}
-              variant="primary"
+              variant="default"
               className="text-xs font-sans uppercase tracking-widest"
             >
               + Register New Client
@@ -333,7 +333,7 @@ export default function AdminClientsPage() {
             <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
             <Button
               onClick={openCreateModal}
-              variant="primary"
+              variant="default"
               className="text-xs font-sans rounded-lg"
             >
               Register your first client
@@ -491,7 +491,7 @@ export default function AdminClientsPage() {
                   <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="ui-textarea" />
                 </div>
 
-                <Button type="submit" disabled={saving} variant="primary" className="w-full">
+                <Button type="submit" disabled={saving} variant="default" className="w-full">
                   {saving ? 'Saving Client…' : '+ Add Client to CRM'}
                 </Button>
               </form>

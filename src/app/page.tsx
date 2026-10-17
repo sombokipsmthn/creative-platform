@@ -8,22 +8,21 @@ import {
   Images,
   LayoutDashboard,
   ShieldCheck,
-  Sparkles,
   Users,
   Wallet,
 } from "lucide-react";
 
 import Header from "@/components/header";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
   title: "KIPSMTHN — Creative Platform & Operating System",
@@ -117,13 +116,6 @@ export default function HomePage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
               <div className="space-y-6 lg:col-span-7">
-                <div className="inline-flex items-center gap-2">
-                  <Badge variant="outline" className="gap-1.5 py-1 text-xs">
-                    <Sparkles className="h-3 w-3 text-primary" />
-                    Creative Platform v2.0 · Built with shadcn/ui
-                  </Badge>
-                </div>
-
                 <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
                   The operating system for your{" "}
                   <span className="text-primary underline decoration-muted-foreground/30 underline-offset-8">

@@ -26,10 +26,10 @@ import type { LucideIcon } from "lucide-react";
 
 import ProfileMenu from "@/components/ProfileMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/Sheet";
-import { Separator } from "@/components/ui/Separator";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import {
   SplitViewProvider,
   useSplitView,
@@ -156,7 +156,7 @@ function SidebarContent({
       </div>
 
       {/* Nav List */}
-      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <div className="flex-1 overflow-y-auto px-3 py-5 flex flex-col gap-7">
         {navSections.map((section) => (
           <div key={section.label} className="space-y-1">
             <p className="px-3 text-[11px] font-medium tracking-wider uppercase text-muted-foreground/70">
@@ -253,9 +253,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex">
+    <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col fixed inset-y-0 left-0 z-30 border-r bg-card">
+      <aside className="hidden lg:flex w-64 flex-col fixed inset-y-0 left-0 z-30 border-r border-border/70 bg-card/90 backdrop-blur-xl">
         <SidebarContent pathname={pathname} badgeCounts={badgeCounts} />
       </aside>
 

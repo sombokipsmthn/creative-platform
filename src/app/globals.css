@@ -593,7 +593,8 @@ body {
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply outline-ring/50;
+    border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
   }
   body {
     @apply bg-background text-foreground;
@@ -601,4 +602,31 @@ body {
   html {
     @apply font-sans;
   }
+}
+
+/* Keep the platform monochrome and quiet. Legacy pages may still carry old utility classes. */
+[class*="purple"],
+[class*="violet"],
+[class*="indigo"],
+[class*="fuchsia"] {
+  background-image: none !important;
+  background-color: color-mix(in srgb, var(--muted) 72%, transparent) !important;
+  border-color: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
+  color: var(--foreground) !important;
+  --tw-ring-color: var(--ring) !important;
+  --tw-shadow-color: transparent !important;
+}
+
+.border,
+.border-t,
+.border-b,
+.border-l,
+.border-r,
+.divide-y > :not([hidden]) ~ :not([hidden]),
+.divide-x > :not([hidden]) ~ :not([hidden]) {
+  border-color: color-mix(in srgb, var(--foreground) 8%, transparent) !important;
+}
+
+hr {
+  border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
 }

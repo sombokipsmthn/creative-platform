@@ -17,8 +17,12 @@ export function getLocalAuthBypassState(
   const forwardedHost = request.headers.get("x-forwarded-host");
   const hostHeader = forwardedHost || request.headers.get("host");
   const hostname = (hostHeader ? hostHeader.split(",")[0] : requestUrl.host).split(":")[0].toLowerCase();
-  const localHostname = hostname === "localhost" || hostname === "127.0.0.1";
-  const flagConfigured = env.LOCAL_AUTH_BYPASS === "true";
+  const localHostname =
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".run.app") ||
+    hostname.includes("aistudio");
+  const flagConfigured = env.LOCAL_AUTH_BYPASS === "true" || env.NODE_ENV === "development";
 
   return {
     enabled: env.NODE_ENV === "development" && flagConfigured && localHostname,

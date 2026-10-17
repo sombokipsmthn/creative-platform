@@ -19,7 +19,7 @@ function getServerSnapshot() {
   return 'dark';
 }
 
-export default function ThemeToggle({ compact = false }: { compact?: boolean }) {
+export default function ThemeToggle({ compact = false, showLabel = true }: { compact?: boolean; showLabel?: boolean }) {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const isDark = theme === 'dark';
 
@@ -61,7 +61,7 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
       className="gap-2 text-xs"
     >
       {isDark ? <Sun className="h-3.5 w-3.5" aria-hidden="true" /> : <Moon className="h-3.5 w-3.5" aria-hidden="true" />}
-      <span>{isDark ? 'Light' : 'Dark'}</span>
+      {showLabel ? <span>{isDark ? 'Light' : 'Dark'}</span> : null}
     </Button>
   );
 }

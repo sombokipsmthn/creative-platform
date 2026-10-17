@@ -132,7 +132,7 @@ export default function Header() {
             <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
           )}
 
-          <ThemeToggle />
+          <ThemeToggle showLabel={false} />
         </div>
       </div>
     </header>

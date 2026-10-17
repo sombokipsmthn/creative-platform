@@ -4,7 +4,7 @@ type InputVariant = 'default' | 'underlined' | 'filled';
 type InputSize = 'sm' | 'md' | 'lg';
 type InputState = 'default' | 'focus' | 'disabled' | 'error';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   className?: string;
   asChild?: boolean;
   variant?: InputVariant;
@@ -13,7 +13,7 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   placeholder?: string;
 }
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'size'> {
   className?: string;
   asChild?: boolean;
   variant?: InputVariant;
@@ -33,21 +33,18 @@ const Input = React.forwardRef<
 >(({ className = '', asChild = false, variant = 'default', size = 'md', state = 'default', placeholder, ...props }, ref) => {
   const Component = asChild ? 'span' : 'input';
 
-  // Build variant classes
   const variantClass = {
     default: 'ui-input',
     underlined: 'ui-input ui-input-underlined',
     filled: 'ui-input ui-input-filled'
   }[variant];
 
-  // Build size classes
   const sizeClass = {
     sm: 'ui-input-sm',
     md: '',
     lg: 'ui-input-lg'
   }[size];
 
-  // Build state classes
   const stateClass = {
     default: '',
     focus: 'ui-input-focus',
@@ -55,16 +52,14 @@ const Input = React.forwardRef<
     error: 'ui-input-error'
   }[state];
 
-  return (
-    React.createElement(Component, {
-      ref,
-      className: [`${variantClass}`, `${sizeClass}`, `${stateClass}`, className]
-        .filter(Boolean)
-        .join(' '),
-      placeholder,
-      ...props
-    })
-  );
+  return React.createElement(Component, {
+    ref,
+    className: [variantClass, sizeClass, stateClass, className]
+      .filter(Boolean)
+      .join(' '),
+    placeholder,
+    ...props
+  });
 });
 
 Input.displayName = 'Input';
@@ -78,21 +73,18 @@ const Textarea = React.forwardRef<
 >(({ className = '', asChild = false, variant = 'default', size = 'md', state = 'default', placeholder, rows, ...props }, ref) => {
   const Component = asChild ? 'span' : 'textarea';
 
-  // Build variant classes
   const variantClass = {
     default: 'ui-textarea',
     underlined: 'ui-textarea ui-textarea-underlined',
     filled: 'ui-textarea ui-textarea-filled'
   }[variant];
 
-  // Build size classes
   const sizeClass = {
     sm: 'ui-textarea-sm',
     md: '',
     lg: 'ui-textarea-lg'
   }[size];
 
-  // Build state classes
   const stateClass = {
     default: '',
     focus: 'ui-textarea-focus',
@@ -100,17 +92,15 @@ const Textarea = React.forwardRef<
     error: 'ui-textarea-error'
   }[state];
 
-  return (
-    React.createElement(Component, {
-      ref,
-      className: [`${variantClass}`, `${sizeClass}`, `${stateClass}`, className]
-        .filter(Boolean)
-        .join(' '),
-      placeholder,
-      rows,
-      ...props
-    })
-  );
+  return React.createElement(Component, {
+    ref,
+    className: [variantClass, sizeClass, stateClass, className]
+      .filter(Boolean)
+      .join(' '),
+    placeholder,
+    rows,
+    ...props
+  });
 });
 
 Textarea.displayName = 'Textarea';

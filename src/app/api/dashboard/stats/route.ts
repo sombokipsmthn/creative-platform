@@ -44,9 +44,9 @@ function money(value: unknown) {
 async function safeGalleryStats(creator: string, periodStart: Date, periodEnd: Date) {
   try {
     const lifetime = await db.select({ value: count() }).from(galleries).where(eq(galleries.creatorId, creator));
-    const period = await db.select({ value: count() }).from(galleries).where(and(eq(galleries.creatorId, creator), gte(galleries.created_at, periodStart), lt(galleries.created_at, periodEnd)));
+    const period = await db.select({ value: count() }).from(galleries).where(and(eq(galleries.creatorId, creator), gte(galleries.createdAt, periodStart), lt(galleries.createdAt, periodEnd)));
     const statuses = await db.select({ status: galleries.status, count: count() }).from(galleries).where(eq(galleries.creatorId, creator)).groupBy(galleries.status);
-    const recent = await db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.created_at }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updated_at)).limit(5);
+    const recent = await db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.createdAt }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updatedAt)).limit(5);
     return { lifetime, period, statuses, recent };
   } catch (error) {
     console.warn("Dashboard gallery metrics unavailable; returning empty gallery data.", error);
@@ -97,47 +97,47 @@ export async function GET(request: Request) {
       recentInvoices,
     ] = await Promise.all([
       db.select({ value: count() }).from(clients).where(eq(clients.creatorId, creator)),
-      db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), gte(clients.created_at, periodStart), lt(clients.created_at, periodEnd))),
+      db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), gte(clients.createdAt, periodStart), lt(clients.createdAt, periodEnd))),
       db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), eq(clients.status, "active"))),
       db.select({ value: count() }).from(projects).where(eq(projects.creatorId, creator)),
-      db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), gte(projects.created_at, periodStart), lt(projects.created_at, periodEnd))),
+      db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), gte(projects.createdAt, periodStart), lt(projects.createdAt, periodEnd))),
       db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), eq(projects.status, "active"))),
       db.select({ value: count() }).from(projects).where(and(eq(projects.creatorId, creator), eq(projects.status, "completed"))),
       db.select({ value: count() }).from(quotes).where(eq(quotes.creatorId, creator)),
-      db.select({ value: count() }).from(quotes).where(and(eq(quotes.creatorId, creator), gte(quotes.created_at, periodStart), lt(quotes.created_at, periodEnd))),
+      db.select({ value: count() }).from(quotes).where(and(eq(quotes.creatorId, creator), gte(quotes.createdAt, periodStart), lt(quotes.createdAt, periodEnd))),
       db.select({ status: quotes.status, count: count() }).from(quotes).where(eq(quotes.creatorId, creator)).groupBy(quotes.status),
-      db.select({ value: sum(quotes.total) }).from(quotes).where(and(eq(quotes.creatorId, creator), gte(quotes.created_at, periodStart), lt(quotes.created_at, periodEnd))),
+      db.select({ value: sum(quotes.total) }).from(quotes).where(and(eq(quotes.creatorId, creator), gte(quotes.createdAt, periodStart), lt(quotes.createdAt, periodEnd))),
       db.select({ value: sum(quotes.total) }).from(quotes).where(and(eq(quotes.creatorId, creator), eq(quotes.status, "accepted"))),
       db.select({ value: count() }).from(invoices).where(eq(invoices.creatorId, creator)),
-      db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.created_at, periodStart), lt(invoices.created_at, periodEnd))),
+      db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
       db.select({ status: invoices.status, count: count() }).from(invoices).where(eq(invoices.creatorId, creator)).groupBy(invoices.status),
-      db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.created_at, periodStart), lt(invoices.created_at, periodEnd))),
-      db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updated_at, periodStart), lt(invoices.updated_at, periodEnd))),
-      db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.due_date, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
-      db.select({ id: clients.id, name: clients.name, createdAt: clients.created_at }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.created_at)).limit(5),
+      db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
+      db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updatedAt, periodStart), lt(invoices.updatedAt, periodEnd))),
+      db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.dueDate, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
+      db.select({ id: clients.id, name: clients.name, createdAt: clients.createdAt }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.createdAt)).limit(5),
       db.select({
         status: projects.status,
         count: count(),
-        periodCount: sql<number>`count(*) filter (where ${gte(projects.created_at, periodStart)} and ${lt(projects.created_at, periodEnd)})`.mapWith(Number),
+        periodCount: sql<number>`count(*) filter (where ${gte(projects.createdAt, periodStart)} and ${lt(projects.createdAt, periodEnd)})`.mapWith(Number),
       }).from(projects).where(eq(projects.creatorId, creator)).groupBy(projects.status),
-      db.select({ id: projects.id, name: projects.name, status: projects.status, createdAt: projects.created_at }).from(projects).where(eq(projects.creatorId, creator)).orderBy(desc(projects.updated_at)).limit(5),
+      db.select({ id: projects.id, name: projects.name, status: projects.status, createdAt: projects.createdAt }).from(projects).where(eq(projects.creatorId, creator)).orderBy(desc(projects.updatedAt)).limit(5),
       db.select({
         status: quotes.status,
         count: count(),
-        periodCount: sql<number>`count(*) filter (where ${gte(quotes.created_at, periodStart)} and ${lt(quotes.created_at, periodEnd)})`.mapWith(Number),
-        periodValue: sql<number>`coalesce(sum(${quotes.total}) filter (where ${gte(quotes.created_at, periodStart)} and ${lt(quotes.created_at, periodEnd)}), 0)`.mapWith(Number),
+        periodCount: sql<number>`count(*) filter (where ${gte(quotes.createdAt, periodStart)} and ${lt(quotes.createdAt, periodEnd)})`.mapWith(Number),
+        periodValue: sql<number>`coalesce(sum(${quotes.total}) filter (where ${gte(quotes.createdAt, periodStart)} and ${lt(quotes.createdAt, periodEnd)}), 0)`.mapWith(Number),
         statusValue: sql<number>`coalesce(sum(${quotes.total}), 0)`.mapWith(Number),
       }).from(quotes).where(eq(quotes.creatorId, creator)).groupBy(quotes.status),
-      db.select({ id: quotes.id, title: quotes.title, status: quotes.status, total: quotes.total, currency: quotes.currency, createdAt: quotes.created_at }).from(quotes).where(eq(quotes.creatorId, creator)).orderBy(desc(quotes.updated_at)).limit(5),
+      db.select({ id: quotes.id, title: quotes.title, status: quotes.status, total: quotes.total, currency: quotes.currency, createdAt: quotes.createdAt }).from(quotes).where(eq(quotes.creatorId, creator)).orderBy(desc(quotes.updatedAt)).limit(5),
       db.select({
         status: invoices.status,
         count: count(),
-        periodCount: sql<number>`count(*) filter (where ${gte(invoices.created_at, periodStart)} and ${lt(invoices.created_at, periodEnd)})`.mapWith(Number),
-        periodValue: sql<number>`coalesce(sum(${invoices.total}) filter (where ${gte(invoices.created_at, periodStart)} and ${lt(invoices.created_at, periodEnd)}), 0)`.mapWith(Number),
-        paidPeriodValue: sql<number>`coalesce(sum(${invoices.total}) filter (where ${invoices.status} = 'paid' and ${gte(invoices.updated_at, periodStart)} and ${lt(invoices.updated_at, periodEnd)}), 0)`.mapWith(Number),
-        overdueCount: sql<number>`count(*) filter (where ${lt(invoices.due_date, now)} and ${ne(invoices.status, "paid")} and ${ne(invoices.status, "cancelled")})`.mapWith(Number),
+        periodCount: sql<number>`count(*) filter (where ${gte(invoices.createdAt, periodStart)} and ${lt(invoices.createdAt, periodEnd)})`.mapWith(Number),
+        periodValue: sql<number>`coalesce(sum(${invoices.total}) filter (where ${gte(invoices.createdAt, periodStart)} and ${lt(invoices.createdAt, periodEnd)}), 0)`.mapWith(Number),
+        paidPeriodValue: sql<number>`coalesce(sum(${invoices.total}) filter (where ${invoices.status} = 'paid' and ${gte(invoices.updatedAt, periodStart)} and ${lt(invoices.updatedAt, periodEnd)}), 0)`.mapWith(Number),
+        overdueCount: sql<number>`count(*) filter (where ${lt(invoices.dueDate, now)} and ${ne(invoices.status, "paid")} and ${ne(invoices.status, "cancelled")})`.mapWith(Number),
       }).from(invoices).where(eq(invoices.creatorId, creator)).groupBy(invoices.status),
-      db.select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber, title: invoices.title, status: invoices.status, total: invoices.total, currency: invoices.currency, createdAt: invoices.created_at }).from(invoices).where(eq(invoices.creatorId, creator)).orderBy(desc(invoices.updated_at)).limit(5),
+      db.select({ id: invoices.id, invoiceNumber: invoices.invoiceNumber, title: invoices.title, status: invoices.status, total: invoices.total, currency: invoices.currency, createdAt: invoices.createdAt }).from(invoices).where(eq(invoices.creatorId, creator)).orderBy(desc(invoices.updatedAt)).limit(5),
     ]);
 
     const quoteStatuses = Object.fromEntries(quoteStatusRows.map((row) => [row.status, Number(row.count)]));
@@ -149,11 +149,11 @@ export async function GET(request: Request) {
     const quoteConversionRate = decisionQuotes > 0 ? Math.round((acceptedQuotes / decisionQuotes) * 100) : 0;
 
     const activity = [
-      ...recentClients.map((item) => ({ id: `client-${item.id}`, type: "client" as const, title: "New client", description: item.name, date: item.created_at })),
-      ...recentProjects.map((item) => ({ id: `project-${item.id}`, type: "project" as const, title: `Project ${item.status}`, description: item.name, date: item.created_at })),
-      ...recentQuotes.map((item) => ({ id: `quote-${item.id}`, type: "quote" as const, title: `Quote ${item.status}`, description: item.title, date: item.created_at })),
-      ...recentInvoices.map((item) => ({ id: `invoice-${item.id}`, type: "invoice" as const, title: `Invoice ${item.invoiceNumber || item.title}`, date: item.created_at })),
-      ...galleryStats.recent.map((item) => ({ id: `gallery-${item.id}`, type: "gallery" as const, title: `Gallery ${item.status}`, description: item.title, date: item.created_at })),
+      ...recentClients.map((item) => ({ id: `client-${item.id}`, type: "client" as const, title: "New client", description: item.name, date: item.createdAt })),
+      ...recentProjects.map((item) => ({ id: `project-${item.id}`, type: "project" as const, title: `Project ${item.status}`, description: item.name, date: item.createdAt })),
+      ...recentQuotes.map((item) => ({ id: `quote-${item.id}`, type: "quote" as const, title: `Quote ${item.status}`, description: item.title, date: item.createdAt })),
+      ...recentInvoices.map((item) => ({ id: `invoice-${item.id}`, type: "invoice" as const, title: `Invoice ${item.invoiceNumber || item.title}`, date: item.createdAt })),
+      ...galleryStats.recent.map((item) => ({ id: `gallery-${item.id}`, type: "gallery" as const, title: `Gallery ${item.status}`, description: item.title, date: item.createdAt })),
     ].sort((a, b) => b.date.getTime() - a.date.getTime()).slice(0, 8).map((item) => ({ ...item, date: item.date.toISOString() }));
 
     return NextResponse.json({

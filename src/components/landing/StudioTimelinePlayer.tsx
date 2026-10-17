@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Play,
   Pause,
@@ -302,12 +303,12 @@ export default function StudioTimelinePlayer() {
 
           {/* Quick Action in Inspector */}
           <div className="pt-4 border-t border-white/10">
-            <a
+            <Link
               href="/admin/galleries"
               className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-xs font-semibold text-white transition-colors"
             >
               Open in Creator Workspace →
-            </a>
+            </Link>
           </div>
         </div>
       </div>

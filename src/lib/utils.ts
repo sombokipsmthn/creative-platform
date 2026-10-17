@@ -1,16 +1,19 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 /**
  * Formats a number as currency based on the provided currency code.
  * Defaults to KES if no currency is provided.
- *
- * @param value - The amount to format
- * @param currency - The ISO currency code (e.g., 'KES', 'USD')
- * @returns The formatted currency string
  */
-export function formatCurrency(value: number, currency: string = 'KES') {
-  const locale = currency === 'KES' ? 'en-KE' : 'en-US';
+export function formatCurrency(value: number, currency: string = "KES") {
+  const locale = currency === "KES" ? "en-KE" : "en-US";
 
   return new Intl.NumberFormat(locale, {
-    style: 'currency',
+    style: "currency",
     currency: currency,
     maximumFractionDigits: 0,
   }).format(value);

@@ -1,124 +1,113 @@
-import React from 'react';
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
-type CardVariant = 'default' | 'interactive' | 'stat' | 'image';
-type CardSize = 'default' | 'lg' | 'xl' | '2xl' | '3xl';
+const Card = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & {
+    variant?: "default" | "interactive" | "stat" | "image";
+    subtitle?: string;
+    footer?: React.ReactNode;
+    imageSrc?: string;
+    imageAlt?: string;
+    href?: string;
+  }
+>(({ className, variant, subtitle, footer, imageSrc, imageAlt, children, title, ...props }, ref) => {
+  // If used as an interactive card
+  const interactiveClass = variant === "interactive" ? "cursor-pointer hover:border-ring transition-all hover:shadow-md" : "";
 
-interface CardProps extends React.HTMLAttributes<HTMLElement> {
-  children?: React.ReactNode;
-  className?: string;
-  as?: React.ElementType;
-  variant?: CardVariant;
-  size?: CardSize;
-  href?: string;
-  title?: string;
-  subtitle?: string;
-  footer?: React.ReactNode;
-  imageSrc?: string;
-  imageAlt?: string;
-  imageCaption?: string;
-}
-
-/**
- * Card component - implements the design system's card variants.
- * Supports standard, interactive, stat, and image cards.
- */
-const Card = React.forwardRef<HTMLDivElement | HTMLAnchorElement, CardProps>(
-  ({
-    children,
-    className = '',
-    as: Component = 'div',
-    variant = 'default',
-    size = 'default',
-    href,
-    title,
-    subtitle,
-    footer,
-    imageSrc,
-    imageAlt,
-    imageCaption,
-    ...props
-  }, ref) => {
-    // Determine the component type based on href
-    const Comp = href ? 'a' : (Component as React.ElementType);
-
-    // Build variant classes
-    const variantClass = {
-      default: 'ui-card',
-      interactive: 'ui-card ui-card-interactive',
-      stat: 'ui-stat-card',
-      image: 'ui-card ui-card-image'
-    }[variant];
-
-    // Build size classes
-    const sizeClass = {
-      default: '',
-      lg: 'ui-card-lg',
-      xl: 'ui-card-xl',
-      '2xl': 'ui-card-2xl',
-      '3xl': 'ui-card-3xl'
-    }[size];
-
-    // Build props for the component
-    const componentProps = href
-      ? { ref, href, className: `${variantClass} ${sizeClass} ${className}`, ...props }
-      : { ref, className: `${variantClass} ${sizeClass} ${className}`, ...props };
-
-    // Handle image card variant
-    if (variant === 'image' && imageSrc) {
-      return (
-        <Comp {...componentProps}>
-          <div className="ui-card-image-cover relative">
-            <img
-              src={imageSrc}
-              alt={imageAlt || ''}
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <div className="ui-card-image-content">
-            {title && <h3 className="ui-card-title">{title}</h3>}
-            {subtitle && <p className="ui-meta">{subtitle}</p>}
-            {children}
-            {imageCaption && <p className="ui-meta">{imageCaption}</p>}
-            {footer}
-          </div>
-        </Comp>
-      );
-    }
-
-    // Handle stat card variant
-    if (variant === 'stat') {
-      return (
-        <Comp {...componentProps}>
-          {title && <p className="ui-stat-label">{title}</p>}
-          {children && <p className="ui-stat-value">{children}</p>}
-          {subtitle && <p className="ui-stat-detail">{subtitle}</p>}
-        </Comp>
-      );
-    }
-
-    // Handle standard and interactive card variants
+  // If used as legacy stat card
+  if (variant === "stat") {
     return (
-      <Comp {...componentProps}>
-        {title && (
-          <div className="ui-card-header">
-            <h3 className="ui-card-title">{title}</h3>
-            {subtitle && <p className="ui-meta">{subtitle}</p>}
-          </div>
-        )}
-        <div className="ui-card-content">
-          {children}
-        </div>
-        {footer && (
-          <div className="ui-card-footer">
-            {footer}
-          </div>
-        )}
-      </Comp>
+      <div
+        ref={ref}
+        className={cn("rounded-xl border bg-card text-card-foreground p-5 shadow-sm", className)}
+        {...props}
+      >
+        {title && <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>}
+        {children && <p className="text-2xl font-bold tracking-tight text-foreground mt-2 tabular-nums">{children}</p>}
+        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+      </div>
     );
   }
-);
 
-Card.displayName = 'Card';
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "rounded-xl border bg-card text-card-foreground shadow-sm",
+        interactiveClass,
+        className
+      )}
+      {...props}
+    >
+      {title && (
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+          {subtitle && <CardDescription>{subtitle}</CardDescription>}
+        </CardHeader>
+      )}
+      {children}
+      {footer && <CardFooter>{footer}</CardFooter>}
+    </div>
+  );
+});
+Card.displayName = "Card";
 
-export { Card };
+const CardHeader = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
+    {...props}
+  />
+));
+CardHeader.displayName = "CardHeader";
+
+const CardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn("font-semibold leading-none tracking-tight text-foreground text-lg", className)}
+    {...props}
+  />
+));
+CardTitle.displayName = "CardTitle";
+
+const CardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
+));
+CardDescription.displayName = "CardDescription";
+
+const CardContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+));
+CardContent.displayName = "CardContent";
+
+const CardFooter = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn("flex items-center p-6 pt-0", className)}
+    {...props}
+  />
+));
+CardFooter.displayName = "CardFooter";
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
 export default Card;

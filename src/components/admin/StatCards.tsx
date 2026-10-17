@@ -1,5 +1,8 @@
 'use client';
 
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+
 interface StatCardsProps {
   stats: Array<{
     label: string;
@@ -17,26 +20,24 @@ export default function StatCards({ stats, columns = 4 }: StatCardsProps) {
     4: 'lg:grid-cols-4',
   }[columns];
 
-  const colorClasses = {
-    default: 'text-[var(--color-text-muted)]',
-    success: 'text-emerald-600 dark:text-emerald-400',
-    warning: 'text-amber-600 dark:text-amber-400',
-    danger: 'text-red-600 dark:text-red-400',
-  };
-
   return (
     <div className={`grid grid-cols-2 gap-4 ${colsClass}`}>
       {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className="ui-stat-card min-h-[6.5rem]"
-        >
-          <p className={`ui-stat-label ${colorClasses[stat.color ?? 'default']}`}>
-            {stat.label}
-          </p>
-          <p className="ui-stat-value">{stat.value}</p>
-          {stat.detail && <p className="ui-stat-detail">{stat.detail}</p>}
-        </div>
+        <Card key={stat.label} className="transition-all hover:shadow-xs">
+          <CardHeader className="p-4 pb-2">
+            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              {stat.label}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            <div className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+              {stat.value}
+            </div>
+            {stat.detail && (
+              <p className="mt-1 text-xs text-muted-foreground">{stat.detail}</p>
+            )}
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

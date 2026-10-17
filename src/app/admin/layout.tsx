@@ -94,11 +94,6 @@ const sections = [
       { name: "Clients", href: "/admin/clients", icon: FileText },
     ],
   },
-  {
-    label: "Platform settings",
-    href: "/admin/settings",
-    icon: Settings2,
-  },
 ];
 
 function SignOutButton({ compact }: { compact?: boolean }) {

@@ -1,7 +1,10 @@
 'use client';
 
+import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Plus, Search } from 'lucide-react';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 
 type FilterValue = string | undefined;
 
@@ -68,121 +71,123 @@ export default function TableFilterBar({
   };
 
   return (
-    <div className="admin-filter-bar ui-fade-in">
-      <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-        <div className="admin-filter-search">
-          <div className="relative w-full md:w-96">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-faint)]" />
-            <input
-              type="search"
-              placeholder={`Search ${itemLabel.toLowerCase()} by name, client, status...`}
-              value={search}
-              onChange={handleSearchChange}
-              className="ui-input w-full pl-10"
-              aria-label={`Search ${itemLabel}`}
-            />
-          </div>
-        </div>
+    <div className="flex flex-col gap-3 rounded-lg border bg-card p-3 shadow-xs md:flex-row md:items-center md:justify-between">
+      {/* Search Input */}
+      <div className="relative flex-1 max-w-sm">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          type="search"
+          placeholder={`Search ${itemLabel.toLowerCase()}...`}
+          value={search}
+          onChange={handleSearchChange}
+          className="pl-8 h-9 text-sm"
+          aria-label={`Search ${itemLabel}`}
+        />
+      </div>
 
-        <div className="admin-filter-controls flex-1 flex flex-wrap gap-2 text-xs font-sans">
-          {filterOptions.map((option) => {
-            if (option.type === 'pills') {
-              return (
-                <div key={option.value} className="ui-tab-pills">
-                  {option.options?.map((opt) => {
-                    const active = (filters[option.value] ?? 'all') === opt.value;
-
-                    return (
-                      <button
-                        key={opt.value}
-                        type="button"
-                        className={`ui-tab-pill ${active ? 'ui-tab-pill-active' : ''}`}
-                        onClick={() => {
-                          onFiltersChange({
-                            ...filters,
-                            [option.value]: opt.value === 'all' ? undefined : opt.value,
-                          });
-                        }}
-                        aria-pressed={active}
-                      >
-                        {active && <Check className="h-3 w-3" />}
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              );
-            }
-
+      {/* Filter Options & Controls */}
+      <div className="flex flex-wrap items-center gap-2">
+        {filterOptions.map((option) => {
+          if (option.type === 'pills') {
             return (
-              <select
-                key={option.value}
-                name={option.value}
-                value={filters[option.value] ?? 'all'}
-                onChange={handleFilterChange}
-                className="ui-select min-w-[9.5rem]"
-                aria-label={option.label}
-              >
-                <option value="all">All {option.label.toLowerCase()}</option>
-                {option.options?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            );
-          })}
+              <div key={option.value} className="flex items-center gap-1 bg-muted p-1 rounded-md">
+                {option.options?.map((opt) => {
+                  const active = (filters[option.value] ?? 'all') === opt.value;
 
-          {actions.length > 0 && (
-            <div ref={actionsRef} className="relative">
-              <button
-                type="button"
-                className="ui-button ui-button-secondary"
-                onClick={() => setActionsOpen((current) => !current)}
-                aria-haspopup="menu"
-                aria-expanded={actionsOpen}
-              >
-                Actions
-                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${actionsOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {actionsOpen && (
-                <div
-                  className="absolute right-0 top-[calc(100%+0.5rem)] z-30 min-w-48 overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-1 shadow-xl"
-                  role="menu"
-                >
-                  {actions.map((action) => (
-                    <button
-                      key={action.label}
-                      type="button"
-                      role="menuitem"
-                      className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-xs font-medium transition hover:bg-[var(--color-bg-soft)] ${
-                        action.destructive ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-primary)]'
+                  return (
+                    <Button
+                      key={opt.value}
+                      variant={active ? 'secondary' : 'ghost'}
+                      size="sm"
+                      className={`h-7 px-2.5 text-xs font-medium ${
+                        active ? 'bg-background shadow-xs font-semibold' : 'text-muted-foreground'
                       }`}
                       onClick={() => {
-                        setActionsOpen(false);
-                        action.onClick();
+                        onFiltersChange({
+                          ...filters,
+                          [option.value]: opt.value === 'all' ? undefined : opt.value,
+                        });
                       }}
+                      aria-pressed={active}
                     >
-                      {action.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                      {active && <Check className="mr-1 h-3 w-3" />}
+                      {opt.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            );
+          }
 
-          {onAddItem && (
-            <button
-              type="button"
-              onClick={onAddItem}
-              className="ui-button ui-button-primary text-xs font-sans uppercase tracking-widest"
+          return (
+            <select
+              key={option.value}
+              name={option.value}
+              value={filters[option.value] ?? 'all'}
+              onChange={handleFilterChange}
+              className="flex h-9 items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              aria-label={option.label}
             >
-              <Plus className="h-3.5 w-3.5" />
-              New {itemLabel}
-            </button>
-          )}
-        </div>
+              <option value="all">All {option.label.toLowerCase()}</option>
+              {option.options?.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          );
+        })}
+
+        {actions.length > 0 && (
+          <div ref={actionsRef} className="relative">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setActionsOpen((current) => !current)}
+              aria-haspopup="menu"
+              aria-expanded={actionsOpen}
+              className="gap-1.5 h-9"
+            >
+              <span>Actions</span>
+              <ChevronDown className={`h-3.5 w-3.5 transition-transform ${actionsOpen ? 'rotate-180' : ''}`} />
+            </Button>
+
+            {actionsOpen && (
+              <div
+                className="absolute right-0 top-[calc(100%+0.25rem)] z-30 min-w-44 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                role="menu"
+              >
+                {actions.map((action) => (
+                  <button
+                    key={action.label}
+                    type="button"
+                    role="menuitem"
+                    className={`flex w-full cursor-pointer items-center rounded-sm px-2.5 py-1.5 text-left text-xs transition-colors hover:bg-accent hover:text-accent-foreground ${
+                      action.destructive ? 'text-destructive' : 'text-foreground'
+                    }`}
+                    onClick={() => {
+                      setActionsOpen(false);
+                      action.onClick();
+                    }}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {onAddItem && (
+          <Button
+            size="sm"
+            onClick={onAddItem}
+            className="gap-1.5 h-9 shadow-xs"
+          >
+            <Plus className="h-4 w-4" />
+            <span>New {itemLabel}</span>
+          </Button>
+        )}
       </div>
     </div>
   );

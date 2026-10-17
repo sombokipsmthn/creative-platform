@@ -35,7 +35,12 @@
       "Bash(awk NR>=138 && NR<=165 *)",
       "Bash(grep -oP 'Clients.{0,100}|Galleries.{0,100}|Quotes.{0,100}|Invoices.{0,100}|overview.{0,100}|periodQuoted.{0,100}|overdueInvoices.{0,100}')",
       "Bash(node *)",
-      "Bash(python3 -m json.tool)"
+      "Bash(python3 -m json.tool)",
+      "Bash(awk NR>=82 && NR<=88 {print NR\": \"$0} *)",
+      "Bash(npm ci *)",
+      "Bash(npm test *)",
+      "Bash(grep *)",
+      "Bash(npm view *)"
     ]
   },
   "skillOverrides": {}

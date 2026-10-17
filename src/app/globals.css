@@ -121,6 +121,14 @@
   --radius-3xl: 1.5rem;
   --radius-full: 9999px;
 
+  /* Animation tokens */
+  --animation-duration-fast: 100ms;
+  --animation-duration-normal: 150ms;
+  --animation-duration-slow: 200ms;
+  --animation-easing-in: cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-easing-out: cubic-bezier(0.0, 0, 0.2, 1);
+  --animation-easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
   /* Typography tokens */
   --font-size-2xs: 0.625rem;
   --font-size-xs: 0.75rem;
@@ -167,6 +175,14 @@ html.dark {
   --color-warning: #FBBF24;
   --color-danger: #F87171;
   --color-info: #60A5FA;
+
+  /* Animation tokens in dark mode (same as light mode) */
+  --animation-duration-fast: 100ms;
+  --animation-duration-normal: 150ms;
+  --animation-duration-slow: 200ms;
+  --animation-easing-in: cubic-bezier(0.4, 0, 0.2, 1);
+  --animation-easing-out: cubic-bezier(0.0, 0, 0.2, 1);
+  --animation-easing-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Header background in dark mode */
   --color-header-bg: rgba(10, 10, 10, 0.85);

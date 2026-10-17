@@ -319,3 +319,99 @@ All semantic classes automatically adapt to dark mode through CSS custom propert
 - Added `--spacing-xs` through `--spacing-3xl` tokens
 - Added `--radius-sm` through `--radius-full` tokens
 - Added `--font-size-2xs` through `--font-size-6xl` tokens
+- Added animation tokens: `--animation-duration-fast`, `--animation-duration-normal`, `--animation-duration-slow`, `--animation-easing-in`, `--animation-easing-out`, `--animation-easing-in-out`
+
+### Component Library Documentation
+
+#### Button Component (`src/components/ui/Button.tsx`)
+
+**Props:**
+- `variant`: `'primary' | 'secondary' | 'ghost' | 'destructive'` (default: 'primary')
+- `size`: `'sm' | 'md' | 'lg' | 'icon'` (default: 'md')
+- `asChild`: boolean (default: false) - renders as span instead of button when true
+- Allows all native button props (onClick, disabled, type, etc.)
+
+**Usage Examples:**
+```tsx
+<Button variant="primary" size="lg">Primary Large Button</Button>
+<Button variant="ghost" size="sm" asChild>
+  <Link href="/docs">Text Link Button</Link>
+</Button>
+<Button variant="destructive">Delete Button</Button>
+```
+
+#### Input Component (`src/components/ui/Input.tsx`)
+
+**Props:**
+- `variant`: `'default' | 'underlined' | 'filled'` (default: 'default')
+- `size`: `'sm' | 'md' | 'lg'` (default: 'md')
+- `state`: `'default' | 'focus' | 'disabled' | 'error'` (default: 'default')
+- `placeholder`: string
+- `asChild`: boolean (default: false) - renders as span instead of input when true
+- Allows native input props (value, onChange, etc.)
+
+**Textarea Component (`src/components/ui/Input.tsx`)**
+
+**Props:**
+- Same as Input component plus:
+- `rows`: number (default: 2)
+
+**Usage Examples:**
+```tsx
+<Input variant="filled" size="lg" placeholder="Enter your email" />
+<Input variant="underlined" state="error" placeholder="Required field" />
+<Textarea variant="filled" rows={4} placeholder="Message..." />
+```
+
+#### Card Component (`src/components/ui/Card.tsx`)
+
+**Props:**
+- `variant`: `'default' | 'interactive' | 'stat' | 'image'` (default: 'default')
+- `size`: `'default' | 'lg' | 'xl' | '2xl' | '3xl'` (default: 'default')
+- `as`: React element type (default: 'div')
+- `href`: string (when provided, renders as anchor tag)
+- `title`: string
+- `subtitle`: string
+- `footer`: React.ReactNode
+- `imageSrc`: string (for image variant)
+- `imageAlt`: string (for image variant)
+- `imageCaption`: string (for image variant)
+- Allows native div/anchor props (className, onClick, etc.)
+
+**Usage Examples:**
+```tsx
+// Standard card
+<Card variant="default" size="lg">
+  <h3 className="ui-card-title">Card Title</h3>
+  <p className="ui-meta">Card description</p>
+</Card>
+
+// Interactive card (hover effects)
+<Card variant="interactive" size="lg" onClick={() => handleClick()}>
+  <h3 className="ui-card-title">Clickable Card</h3>
+  <p className="ui-meta">Click for more details</p>
+</Card>
+
+// Stat card (for metrics/KPIs)
+<Card variant="stat">
+  <p className="ui-stat-label">Total Revenue</p>
+  <p className="ui-stat-value">$12,345</p>
+  <p className="ui-stat-detail">+12% from last month</p>
+</Card>
+
+// Image card
+<Card variant="image" size="2xl" 
+      imageSrc="/images/hero.jpg" 
+      imageAlt="Hero image"
+      title="Featured Project"
+      subtitle="Photography showcase">
+  <p className="ui-meta">Description of the project</p>
+</Card>
+
+// Image card with link
+<Card variant="image" href="/projects/123" 
+      imageSrc="/images/thumb.jpg" 
+      imageAlt="Project thumbnail"
+      title="Project Title">
+</Card>
+```

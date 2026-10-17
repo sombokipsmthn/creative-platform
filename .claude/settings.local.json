@@ -40,7 +40,17 @@
       "Bash(npm ci *)",
       "Bash(npm test *)",
       "Bash(grep *)",
-      "Bash(npm view *)"
+      "Bash(npm view *)",
+      "Bash(DEMO_DATABASE_URL=\"postgresql://neondb_owner:npg_oIW2xPyiG7FV@ep-patient-waterfall-ayslbsj0-pooler.c-5.us-east-2.aws.neon.tech/kipsmthn?sslmode=require&channel_binding=require\" npx drizzle-kit *)",
+      "Bash(timeout 30 DEMO_DATABASE_URL=\"postgresql://neondb_owner:npg_oIW2xPyiG7FV@ep-patient-waterfall-ayslbsj0-pooler.c-5.us-east-2.aws.neon.tech/kipsmthn?sslmode=require&channel_binding=require\" npx drizzle-kit migrate)",
+      "Bash(neon deploy *)",
+      "Bash(neon status *)",
+      "Bash(tsx *)",
+      "Bash(export DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\")",
+      "Bash(npx tsx *)",
+      "Bash(DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit *)",
+      "Bash(DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit *)",
+      "Bash(timeout 30 DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" npx drizzle-kit migrate)"
     ]
   },
   "skillOverrides": {}

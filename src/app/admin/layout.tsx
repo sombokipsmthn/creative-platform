@@ -203,6 +203,7 @@ function SidebarContent({
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { content: splitViewContent } = useSplitView();
   const { data: session } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
@@ -222,6 +223,21 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       pathname.startsWith("/admin"));
 
   const isAuthenticated = localAuthBypass || Boolean(session?.user);
+
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobileMenuOpen(false);
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [mobileMenuOpen]);
 
   useEffect(() => {
     if (!isAuthenticated) return;

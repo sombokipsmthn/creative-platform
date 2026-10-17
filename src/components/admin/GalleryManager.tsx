@@ -493,7 +493,7 @@ export default function AdminGalleryManagerPage() {
                           </div>
 
                           {/* Secondary Menu Toggle (Hidden PIN access here) */}
-                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             <button 
                               onClick={(e) => { e.preventDefault(); copyPin(gal.access_pin); }}
                               title="Copy Access PIN"

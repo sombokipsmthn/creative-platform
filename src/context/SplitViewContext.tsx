@@ -1,16 +1,23 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+
+"use client";
+
+import { createContext, useContext, useState } from "react";
+import type { ReactNode } from "react";
 
 type SplitViewContextType = {
   content: ReactNode | null;
   setContent: (content: ReactNode | null) => void;
 };
 
-const SplitViewContext = createContext<SplitViewContextType>({
-  content: null,
-  setContent: () => null,
-});
+const SplitViewContext = createContext<SplitViewContextType | undefined>(
+  undefined
+);
 
-export const SplitViewProvider = ({ children }: { children: ReactNode }) => {
+export function SplitViewProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [content, setContent] = useState<ReactNode | null>(null);
 
   return (
@@ -18,12 +25,16 @@ export const SplitViewProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </SplitViewContext.Provider>
   );
-};
+}
 
-export const useSplitView = () => {
+export function useSplitView() {
   const context = useContext(SplitViewContext);
-  if (!context) {
-    throw new Error('useSplitView must be used within a SplitViewProvider');
+
+  if (context === undefined) {
+    throw new Error(
+      "useSplitView must be used within a SplitViewProvider"
+    );
   }
+
   return context;
-};
+}

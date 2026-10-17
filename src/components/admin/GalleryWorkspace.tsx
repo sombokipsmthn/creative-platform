@@ -597,7 +597,7 @@ export default function GalleryWorkspacePage() {
                             </div>
 
                             {/* HOVER ACTIONS */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 z-10">
                               <button
                                 type="button"
                                 onClick={(e) => {

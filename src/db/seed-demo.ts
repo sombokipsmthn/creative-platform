@@ -40,35 +40,67 @@ if (!demoPasswordEnv || demoPasswordEnv.length < 8) {
 
 async function ensureDemoCreator() {
   const [existing] = await db.select().from(users).where(eq(users.email, demoEmail)).limit(1);
-  if (existing) {
-    if (existing.email !== demoEmail) throw new Error("Demo creator email mismatch.");
-    return existing;
+  let creator = existing;
+
+  if (!creator) {
+    const result = await auth.api.signUpEmail({
+      body: { name: demoName, email: demoEmail, password: demoPassword },
+    });
+    if (!result?.user?.id) {
+      throw new Error("Better Auth did not return a user. Check the auth configuration.");
+    }
+    const [created] = await db.select().from(users).where(eq(users.id, result.user.id)).limit(1);
+    creator = created;
   }
 
-  const result = await auth.api.signUpEmail({
-    body: {
-      name: demoName,
-      email: demoEmail,
-      password: demoPassword,
-    },
+  if (!creator) throw new Error("The demo platform user could not be created or loaded.");
+
+  // Use Better Auth's configured password hasher and adapter so existing
+  // platform users are repaired without changing their creator ID or business data.
+  const context = await auth.$context;
+  const passwordHash = await context.password.hash(demoPassword);
+  const credentialAccount = await context.adapter.findOne({
+    model: "account",
+    where: [
+      { field: "userId", value: creator.id },
+      { field: "providerId", value: "credential" },
+    ],
   });
 
-  const createdUser = result?.user;
-  if (!createdUser?.id) {
-    throw new Error("Better Auth did not return a user. Check the auth configuration and email delivery settings.");
+  if (credentialAccount) {
+    await context.adapter.update({
+      model: "account",
+      where: [
+        { field: "userId", value: creator.id },
+        { field: "providerId", value: "credential" },
+      ],
+      update: { accountId: creator.id, password: passwordHash, updatedAt: new Date() },
+    });
+  } else {
+    await context.adapter.create({
+      model: "account",
+      data: {
+        userId: creator.id,
+        accountId: creator.id,
+        providerId: "credential",
+        password: passwordHash,
+      },
+    });
   }
 
-  // This is a dedicated non-deliverable .test address, so the local demo account
-  // is verified for testing after Better Auth has created its normal account row.
-  const [creator] = await db.update(users)
-    .set({ emailVerified: true, onboardingStatus: "complete", updatedAt: new Date() })
-    .where(eq(users.id, createdUser.id))
-    .returning();
+  // Only the local, non-deliverable demo address is auto-verified.
+  // Production sign-up verification policy remains unchanged.
+  if (process.env.NODE_ENV !== "production" && demoEmail.endsWith(".test")) {
+    const [verified] = await db.update(users)
+      .set({ emailVerified: true, onboardingStatus: "complete", updatedAt: new Date() })
+      .where(eq(users.id, creator.id))
+      .returning();
+    if (!verified) throw new Error("The demo creator could not be marked verified for local testing.");
+    creator = verified;
+  }
 
-  if (!creator) throw new Error("Demo creator was created but could not be loaded.");
   return creator;
 }
-
 async function main() {
   const creator = await ensureDemoCreator();
 

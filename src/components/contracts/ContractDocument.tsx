@@ -106,8 +106,10 @@ export function ContractDocument({
   flushParagraph();
 
   return (
-    <div className="prose prose-sm max-w-none space-y-2 text-gray-900 dark:text-gray-50">
-      {elements.length > 0 ? elements : <p className="text-gray-500 italic">No content</p>}
+    <div className="typeset typeset-docs max-w-[37em]">
+      <div className="prose prose-sm max-w-none space-y-2 text-gray-900 dark:text-gray-50">
+        {elements.length > 0 ? elements : <p className="text-gray-500 italic">No content</p>}
+      </div>
     </div>
   );
 }

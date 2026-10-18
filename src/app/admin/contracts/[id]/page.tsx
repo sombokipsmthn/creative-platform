@@ -241,8 +241,10 @@ export default function ContractDetailPage({
       {/* Contract content */}
       <div className="ui-card mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-6">Contract Document</h2>
-        <div className="prose prose-sm dark:prose-invert max-w-none">
-          <ContractDocument content={contract.content || ''} />
+        <div className="typeset typeset-docs max-w-[37em]">
+          <div className="prose prose-sm dark:prose-invert max-w-none">
+            <ContractDocument content={contract.content || ''} />
+          </div>
         </div>
       </div>
 

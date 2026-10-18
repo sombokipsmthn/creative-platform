@@ -8,6 +8,7 @@
 
 /* ─── 1. Tailwind + Custom Variant ─────────────────── */
 @import "tailwindcss";
+@import "./typeset.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 

@@ -118,6 +118,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Initialize test database
+        run: docker exec -i ${{ job.services.postgres.id }} psql -U kipsmthn -d kipsmthn_test -v ON_ERROR_STOP=1 < drizzle/0031_local_init.sql
+
       - name: Pull image
         run: docker pull ${{ needs.build-and-push.outputs.image }}
 
@@ -128,7 +131,7 @@ jobs:
             -p 3000:3000 \
             -e NODE_ENV=test \
             -e DATABASE_URL="postgresql://kipsmthn:[REDACTED]@host.docker.internal:5432/kipsmthn_test" \
-            -e BETTER_AUTH_SECRET="test-secret" \
+            -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
             -e NEXT_TELEMETRY_DISABLED=1 \
             ${{ needs.build-and-push.outputs.image }}
 

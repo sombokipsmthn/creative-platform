@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { Copy, Eye, ExternalLink, GripVertical, Save } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { PortfolioRenderer, type PortfolioData } from "@/components/portfolio-renderer";
 
 type ApiData = PortfolioData & { projects: Array<PortfolioData["projects"][number] & { visibility: string; publishedAt: Date | string | null; coverMediaId: string | null }> };

@@ -17,7 +17,7 @@ export default async function ContractPage({ params }: { params: Promise<{ token
       <div className="ui-contract-viewer">
         <ContractDocument token={token} />
       </div>
-      <div className="ui-contract-actions mt-6">
+      <div className="ui-contract-actions">
         <button className="ui-button ui-button-outline">
           Download PDF
         </button>

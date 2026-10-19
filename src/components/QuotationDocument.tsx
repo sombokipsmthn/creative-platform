@@ -102,67 +102,67 @@ export default function QuotationDocument({
     quote.discountType === 'fixed';
 
   return (
-    <div className="bg-white text-slate-900 print:bg-white">
-      <div className="mx-auto max-w-5xl px-8 py-10 sm:px-12 sm:py-14 print:max-w-none print:px-0 print:py-0">
+    <div className="">
+      <div className="">
         {/* HEADER */}
-        <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
+        <div className="">
           <div>
-            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
+            <p className="">
               Quotation
             </p>
 
-            <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">
+            <h1 className="">
               {quote.title || 'Quotation'}
             </h1>
 
             {quote.projectName && (
-              <p className="mt-2 text-sm text-slate-500">
+              <p className="">
                 {quote.projectName}
               </p>
             )}
           </div>
 
-          <div className="text-left sm:text-right">
-            <p className="text-xs font-sans uppercase tracking-widest text-slate-400">
+          <div className="">
+            <p className="">
               Quote
             </p>
 
-            <p className="mt-1 text-lg font-medium">
+            <p className="">
               {getShortQuoteNumber(quote)}
             </p>
 
-            <div className="mt-3 inline-flex rounded-full bg-slate-100 px-3 py-1 text-[10px] font-sans uppercase tracking-wider text-slate-600">
+            <div className="">
               {formatStatus(quote.status)}
             </div>
           </div>
         </div>
 
         {/* META */}
-        <div className="grid grid-cols-1 gap-8 border-b border-slate-200 py-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="">
           <div>
-            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
+            <p className="">
               Prepared For
             </p>
 
-            <div className="mt-2 space-y-1 text-sm">
-              <p className="font-medium">
+            <div className="">
+              <p className="">
                 {quote.client?.name || 'No client selected'}
               </p>
 
               {quote.client?.company && (
-                <p className="text-slate-500">
+                <p className="">
                   {quote.client.company}
                 </p>
               )}
 
               {quote.client?.email && (
-                <p className="text-slate-500">
+                <p className="">
                   {quote.client.email}
                 </p>
               )}
 
               {quote.client?.phone && (
-                <p className="text-slate-500">
+                <p className="">
                   {quote.client.phone}
                 </p>
               )}
@@ -170,24 +170,24 @@ export default function QuotationDocument({
           </div>
 
           <div>
-            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
+            <p className="">
               Quote Details
             </p>
 
-            <div className="mt-2 space-y-1 text-sm">
-              <div className="flex justify-between gap-6">
-                <span className="text-slate-500">Created</span>
+            <div className="">
+              <div className="">
+                <span className="">Created</span>
                 <span>{formatDate(quote.createdAt)}</span>
               </div>
 
-              <div className="flex justify-between gap-6">
-                <span className="text-slate-500">Valid Until</span>
+              <div className="">
+                <span className="">Valid Until</span>
                 <span>{formatDate(quote.validUntil)}</span>
               </div>
 
               {quote.productionDays && (
-                <div className="flex justify-between gap-6">
-                  <span className="text-slate-500">Production</span>
+                <div className="">
+                  <span className="">Production</span>
                   <span>
                     {quote.productionDays}{' '}
                     {quote.productionDays === 1
@@ -200,36 +200,36 @@ export default function QuotationDocument({
           </div>
 
           <div>
-            <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
+            <p className="">
               Production
             </p>
 
-            <div className="mt-2 space-y-1 text-sm">
+            <div className="">
               {quote.location && (
-                <div className="flex justify-between gap-6">
-                  <span className="text-slate-500">
+                <div className="">
+                  <span className="">
                     Location
                   </span>
-                  <span className="text-right">
+                  <span className="">
                     {quote.location}
                   </span>
                 </div>
               )}
 
               {quote.clientContact && (
-                <div className="flex justify-between gap-6">
-                  <span className="text-slate-500">
+                <div className="">
+                  <span className="">
                     Contact
                   </span>
-                  <span className="text-right">
+                  <span className="">
                     {quote.clientContact}
                   </span>
                 </div>
               )}
 
               {quote.depositPercentage != null && (
-                <div className="flex justify-between gap-6">
-                  <span className="text-slate-500">
+                <div className="">
+                  <span className="">
                     Deposit
                   </span>
                   <span>
@@ -242,24 +242,24 @@ export default function QuotationDocument({
         </div>
 
         {/* LINE ITEMS */}
-        <div className="py-8">
-          <div className="overflow-hidden rounded-xl border border-slate-200">
-            <table className="w-full border-collapse">
+        <div className="">
+          <div className="">
+            <table className="">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left">
-                  <th className="px-4 py-3 text-[10px] font-sans uppercase tracking-widest text-slate-500">
+                <tr className="">
+                  <th className="">
                     Description
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-sans uppercase tracking-widest text-slate-500">
+                  <th className="">
                     Qty
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-sans uppercase tracking-widest text-slate-500">
+                  <th className="">
                     Rate
                   </th>
 
-                  <th className="px-4 py-3 text-right text-[10px] font-sans uppercase tracking-widest text-slate-500">
+                  <th className="">
                     Amount
                   </th>
                 </tr>
@@ -270,7 +270,7 @@ export default function QuotationDocument({
                   <tr>
                     <td
                       colSpan={4}
-                      className="px-4 py-10 text-center text-sm text-slate-400"
+                      className=""
                     >
                       No quote items.
                     </td>
@@ -279,43 +279,43 @@ export default function QuotationDocument({
                   items.map((item, index) => (
                     <tr
                       key={item.id || `${item.description}-${index}`}
-                      className="border-b border-slate-100 last:border-b-0"
+                      className=""
                     >
-                      <td className="px-4 py-4">
+                      <td className="">
                         <div>
-                          <p className="text-sm font-medium">
+                          <p className="">
                             {item.description}
                           </p>
 
                           {item.category && (
-                            <p className="mt-1 text-[10px] font-sans uppercase tracking-wider text-slate-400">
+                            <p className="">
                               {item.category}
                             </p>
                           )}
 
                           {item.notes && (
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="">
                               {item.notes}
                             </p>
                           )}
                         </div>
                       </td>
 
-                      <td className="px-4 py-4 text-right text-sm text-slate-600">
+                      <td className="">
                         {item.quantity}
                         {item.unit && item.unit !== 'unit'
                           ? ` ${item.unit}`
                           : ''}
                       </td>
 
-                      <td className="px-4 py-4 text-right text-sm text-slate-600">
+                      <td className="">
                         {formatAmount(
                           item.rate,
                           quote.currency
                         )}
                       </td>
 
-                      <td className="px-4 py-4 text-right text-sm font-medium">
+                      <td className="">
                         {formatAmount(
                           item.amount,
                           quote.currency
@@ -330,10 +330,10 @@ export default function QuotationDocument({
         </div>
 
         {/* TOTALS */}
-        <div className="flex justify-end">
-          <div className="w-full max-w-sm space-y-3">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Subtotal</span>
+        <div className="">
+          <div className="">
+            <div className="">
+              <span className="">Subtotal</span>
               <span>
                 {formatAmount(
                   quote.subtotal,
@@ -343,8 +343,8 @@ export default function QuotationDocument({
             </div>
 
             {hasDiscount && (
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500">
+              <div className="">
+                <span className="">
                   Discount
                   {quote.discountType === 'percentage' &&
                     quote.discountValue != null
@@ -352,7 +352,7 @@ export default function QuotationDocument({
                     : ''}
                 </span>
 
-                <span className="text-slate-600">
+                <span className="">
                   -{' '}
                   {formatAmount(
                     discountAmount,
@@ -362,8 +362,8 @@ export default function QuotationDocument({
               </div>
             )}
 
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Tax</span>
+            <div className="">
+              <span className="">Tax</span>
               <span>
                 {formatAmount(
                   quote.tax,
@@ -372,13 +372,13 @@ export default function QuotationDocument({
               </span>
             </div>
 
-            <div className="border-t border-slate-300 pt-4">
-              <div className="flex items-end justify-between gap-6">
-                <span className="text-sm font-medium uppercase tracking-wider">
+            <div className="">
+              <div className="">
+                <span className="">
                   Total
                 </span>
 
-                <span className="text-2xl font-medium">
+                <span className="">
                   {formatAmount(
                     quote.total,
                     quote.currency
@@ -391,14 +391,14 @@ export default function QuotationDocument({
 
         {/* TERMS */}
         {(quote.paymentTerms || quote.notes) && (
-          <div className="mt-10 grid grid-cols-1 gap-8 border-t border-slate-200 pt-8 sm:grid-cols-2">
+          <div className="">
             {quote.paymentTerms && (
               <div>
-                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
+                <p className="">
                   Payment Terms
                 </p>
 
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                <p className="">
                   {quote.paymentTerms}
                 </p>
               </div>
@@ -406,11 +406,11 @@ export default function QuotationDocument({
 
             {quote.notes && (
               <div>
-                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
+                <p className="">
                   Notes
                 </p>
 
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                <p className="">
                   {quote.notes}
                 </p>
               </div>
@@ -419,8 +419,8 @@ export default function QuotationDocument({
         )}
 
         {/* FOOTER */}
-        <div className="mt-12 border-t border-slate-200 pt-6 text-center print:hidden">
-          <p className="text-[10px] font-sans uppercase tracking-[0.25em] text-slate-400">
+        <div className="">
+          <p className="">
             Thank you for the opportunity
           </p>
         </div>

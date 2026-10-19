@@ -23,23 +23,23 @@ export default function ImageCard({
     <div className={`ui-card ui-card-image ${className}`}>
       {href ? (
         <a href={href} className="block">
-          <div className="ui-card-image-cover relative">
+          <div className="ui-card-image-cover">
             <Image
               src={src}
               alt={alt}
               fill
-              className="object-cover"
+              className=""
               priority
             />
           </div>
         </a>
       ) : (
-        <div className="ui-card-image-cover relative">
+        <div className="ui-card-image-cover">
           <Image
             src={src}
             alt={alt}
             fill
-            className="object-cover"
+            className=""
             priority
           />
         </div>

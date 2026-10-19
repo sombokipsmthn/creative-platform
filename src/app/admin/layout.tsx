@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import {
   LayoutDashboard,
@@ -79,7 +79,8 @@ const navSections: NavSection[] = [
   {
     label: "Settings",
     items: [
-      { name: "Creator Profile", href: "/admin/profile", icon: UserRound },
+      { name: "Account & Profile", href: "/admin/profile", icon: UserRound },
+      { name: "Creator Portfolio", href: "/admin/portfolio", icon: Sparkles },
       { name: "Platform Settings", href: "/admin/settings", icon: Settings2 },
     ],
   },
@@ -205,9 +206,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { content: splitViewContent } = useSplitView();
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
+  const bootstrapStarted = useRef(false);
 
   // Keep local development bypass support
   const localAuthBypass =
@@ -223,6 +225,31 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       pathname.startsWith("/admin"));
 
   const isAuthenticated = localAuthBypass || Boolean(session?.user);
+
+  useEffect(() => {
+    if (
+      authPending ||
+      !localAuthBypass ||
+      session?.user ||
+      bootstrapStarted.current
+    ) {
+      return;
+    }
+
+    bootstrapStarted.current = true;
+    void fetch("/api/dev-auth/bootstrap", {
+      method: "POST",
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          console.error("Local auth bootstrap failed with status:", response.status);
+        }
+      })
+      .catch((error) => console.error("Local auth bootstrap request failed:", error));
+  }, [authPending, localAuthBypass, session?.user]);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -299,12 +326,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           {/* Right Header Actions */}
           <div className="flex items-center gap-2">
             <ThemeToggle compact />
-            <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
-              <Link href="/admin/settings" title="Settings">
-                <Settings2 className="h-4 w-4" />
-                <span className="sr-only">Settings</span>
-              </Link>
-            </Button>
             <Separator orientation="vertical" className="h-5 mx-1" />
             <ProfileMenu showLabel />
           </div>

@@ -228,8 +228,8 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
-        <p className="text-xs font-sans uppercase tracking-widest text-slate-500">
+      <div className="">
+        <p className="">
           Loading Gallery...
         </p>
       </div>
@@ -239,25 +239,25 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   // PIN verification state
   if (!verified) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] px-6">
+      <main className="">
         <form
           onSubmit={handleVerifyPin}
-          className="max-w-md w-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center"
+          className=""
         >
-          <div className="w-14 h-14 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 mx-auto flex items-center justify-center">
-            <Lock className="w-6 h-6" />
+          <div className="">
+            <Lock className="" />
           </div>
 
           <div>
-            <h1 className="text-2xl font-light text-slate-900 dark:text-white">
+            <h1 className="">
               {title}
             </h1>
-            <p className="text-xs font-sans uppercase tracking-widest text-purple-500 mt-2">
+            <p className="">
               Private Client Gallery
             </p>
           </div>
 
-          <p className="text-xs text-slate-500 font-sans">
+          <p className="">
             Enter the PIN provided by your photographer to access this private gallery.
           </p>
 
@@ -271,18 +271,18 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             placeholder="PIN"
             type="password"
             autoFocus
-            className="w-full text-center text-3xl tracking-[0.5em] rounded-2xl bg-slate-100 dark:bg-zinc-900 p-4 font-sans outline-none border border-slate-200 dark:border-zinc-800 focus:border-purple-600"
+            className=""
           />
 
           {pinError && (
-            <p className="text-xs font-sans text-red-500">
+            <p className="">
               Incorrect PIN. Please try again.
             </p>
           )}
 
           <button
             type="submit"
-            className="w-full py-4 rounded-xl bg-purple-600 text-white text-xs font-sans uppercase tracking-widest hover:bg-purple-700 transition font-bold"
+            className=""
           >
             Unlock Gallery
           </button>
@@ -293,14 +293,14 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
 
   // Render gallery with theme
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    <div className="">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-          <Link href="/" className="font-bold tracking-widest text-sm uppercase">
-            KIPSMTHN<span className="text-purple-500">.</span>
+      <header className="">
+        <div className="">
+          <Link href="/" className="">
+            KIPSMTHN<span className="">.</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="">
             <ThemeToggle />
           </div>
         </div>

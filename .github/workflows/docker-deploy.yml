@@ -128,6 +128,7 @@ jobs:
         run: |
           docker run -d \
             --name test-container \
+            --add-host host.docker.internal:host-gateway \
             -p 3000:3000 \
             -e NODE_ENV=test \
             -e DATABASE_URL="postgresql://kipsmthn:[REDACTED]@host.docker.internal:5432/kipsmthn_test" \

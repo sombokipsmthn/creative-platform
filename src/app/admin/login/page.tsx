@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -11,114 +13,11 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const { data, error: signInError } = await authClient.signIn.email({
-        email,
-        password,
-      });
-
-      if (signInError) {
-        setError(signInError.message || 'Invalid email or password');
-        setIsLoading(false);
-        return;
-      }
-      if (data) {
-        router.push('/admin');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Invalid email or password');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <main className="">
-      <div className="">
-        <Link
-          href="/"
-          className=""
-        >
-          ← Go back
-        </Link>
-
-        <div className="">
-          <div className="">
-            K
-          </div>
-
-          <h1 className="">
-            Sign in to your workspace
-          </h1>
-
-          <p className="">
-            Welcome back to KIPSMTHN
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="">
-          <div className="">
-            <label htmlFor="email" className="block">
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              className=""
-              disabled={isLoading}
-            />
-          </div>
-
-          <div className="">
-            <label htmlFor="password" className="block">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className=""
-              disabled={isLoading}
-            />
-          </div>
-
-          {error && (
-            <div className="">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className=""
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
-
-        <div className="">
-          <p className="">
-            Don&apos;t have an account?{' '}
-            <Link href="/admin/onboarding" className="">
-              Get started
-            </Link>
-          </p>
-        </div>
-      </div>
-    </main>
-  );
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault(); setIsLoading(true); setError(null);
+    try { const { data, error: signInError } = await authClient.signIn.email({ email, password }); if (signInError) { setError(signInError.message || 'Invalid email or password'); return; } if (data) router.push('/admin'); }
+    catch (err) { setError(err instanceof Error ? err.message : 'Invalid email or password'); }
+    finally { setIsLoading(false); }
+  }
+  return <main className="ui-page ui-page-padded"><div className="ui-shell max-w-md"><div className="ui-card p-6 sm:p-8"><Link href="/" className="admin-breadcrumb">← Go back</Link><div className="mt-8"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-semibold">K</div><h1 className="admin-page-title mt-6">Sign in to your workspace</h1><p className="admin-page-description">Welcome back to KIPSMTHN</p></div><form onSubmit={handleSubmit} className="mt-8 space-y-5"><div className="space-y-2"><label htmlFor="email" className="ui-label">Email</label><Input id="email" type="email" value={email} onChange={event => setEmail(event.target.value)} placeholder="your@email.com" required disabled={isLoading} /></div><div className="space-y-2"><label htmlFor="password" className="ui-label">Password</label><Input id="password" type="password" value={password} onChange={event => setPassword(event.target.value)} placeholder="••••••••" required disabled={isLoading} /></div>{error && <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive" role="alert">{error}</div>}<Button type="submit" disabled={isLoading} className="w-full">{isLoading ? 'Signing in…' : 'Sign in'}</Button></form><p className="mt-6 text-sm text-muted-foreground">Don&apos;t have an account? <Link href="/admin/onboarding" className="font-medium text-foreground underline-offset-4 hover:underline">Get started</Link></p></div></div></main>;
 }

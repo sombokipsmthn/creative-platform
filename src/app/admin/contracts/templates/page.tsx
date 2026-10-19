@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import type { ContractTemplate } from '@/lib/types/contracts';
 
 export default function ContractTemplatesPage() {
@@ -50,48 +51,17 @@ export default function ContractTemplatesPage() {
   };
 
   if (loading) {
-    return (
-      <div className="ui-page">
-        <div className="">
-          <Loader2 className="" />
-          <p>Loading templates...</p>
-        </div>
-      </div>
-    );
+    return <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading templates…</p></div></div></div>;
   }
 
   if (error) {
-    return (
-      <div className="ui-page">
-        <div className="">
-          <p>{error}</p>
-        </div>
-      </div>
-    );
+    return <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><p>{error}</p><Button variant="outline" onClick={() => window.location.reload()}>Retry</Button></div></div></div>;
   }
 
   return (
-    <div className="ui-page">
-      <div className="">
-        {/* Header */}
-        <header className="">
-          <div className="">
-            <div className="">
-              <h1 className="">
-                Contract Templates
-              </h1>
-              <p className="">
-                Start with a contract template designed for your creative work.
-              </p>
-            </div>
-            <Link
-              href="/admin/contracts/builder"
-              className="ui-button ui-button-secondary"
-            >
-              Start from Scratch
-            </Link>
-          </div>
-        </header>
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
+        <AdminPageHeader title="Contract templates" description="Start with a contract template designed for your creative work." breadcrumb={{ label: 'Contracts', href: '/admin/contracts' }} primaryAction={<Link href="/admin/contracts/builder" className="ui-button ui-button-secondary">Start from scratch</Link>} />
 
         {/* Filters */}
         <div className="">

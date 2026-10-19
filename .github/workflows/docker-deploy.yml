@@ -118,6 +118,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Initialize test database
+        run: docker exec -e PGPASSWORD=testpass -i ${{ job.services.postgres.id }} psql -U kipsmthn -d kipsmthn_test -v ON_ERROR_STOP=1 < drizzle/0031_local_init.sql
+
       - name: Pull image
         run: docker pull ${{ needs.build-and-push.outputs.image }}
 
@@ -125,19 +128,21 @@ jobs:
         run: |
           docker run -d \
             --name test-container \
-            -p 3000:3000 \
+            --network host \
             -e NODE_ENV=test \
-            -e DATABASE_URL="postgresql://kipsmthn:[REDACTED]@host.docker.internal:5432/kipsmthn_test" \
-            -e BETTER_AUTH_SECRET="test-secret" \
+            -e DATABASE_URL="postgresql://kipsmthn:${TEST_DB_PASSWORD}@127.0.0.1:5432/kipsmthn_test" \
+            -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
             -e NEXT_TELEMETRY_DISABLED=1 \
             ${{ needs.build-and-push.outputs.image }}
+        env:
+          TEST_DB_PASSWORD: testpass
 
       - name: Wait for container health
         run: |
           max_attempts=30
           attempt=1
           while [ $attempt -le $max_attempts ]; do
-            if docker exec test-container curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+            if curl -f http://127.0.0.1:3000/api/health > /dev/null 2>&1; then
               echo "Container is healthy"
               exit 0
             fi
@@ -146,15 +151,16 @@ jobs:
             attempt=$((attempt + 1))
           done
           echo "Container failed to become healthy"
+          curl -i http://127.0.0.1:3000/api/health || true
           docker logs test-container
           exit 1
 
       - name: Run health check
-        run: docker exec test-container npm run healthcheck
+        run: curl --fail http://127.0.0.1:3000/api/health
 
       - name: Cleanup
         if: always()
-        run: docker stop test-container && docker rm test-container
+        run: docker rm -f test-container 2>/dev/null || true
 
   deploy-staging:
     runs-on: ubuntu-latest
@@ -177,11 +183,10 @@ jobs:
       - name: Run database migrations
         run: |
           echo "Running database migrations..."
-          docker run --rm \
-            -e DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} \
-            -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
-            ${{ needs.build-and-push.outputs.image }} \
-            npm run db:migrate
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f drizzle/0031_local_init.sql
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
 
       - name: Verify deployment
         run: |

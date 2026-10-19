@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
@@ -293,31 +293,31 @@ export default function InvoicesPage() {
     clientId !== 'all';
 
   return (
-    <div className="">
-      <div className="">
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl space-y-8">
         <AdminPageHeader
           title="Invoices"
           description="Manage invoices, monitor payments and keep track of client billing."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
-              variant="primary"
-              className=""
+              variant="default"
+              className="text-xs font-sans uppercase tracking-widest"
             >
-              <Plus className="" />
+              <Plus className="h-3.5 w-3.5" />
               New Invoice
             </Button>
           }
         />
 
         {error && !loading && (
-          <div className="ui-card">
-            <p className="">{error}</p>
+          <div className="ui-card p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* SUMMARY */}
-        <div className="">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
           <div className="ui-stat-card">
             <p className="ui-stat-label">Total Invoices</p>
             <p className="ui-stat-value">{summary.total}</p>
@@ -325,21 +325,21 @@ export default function InvoicesPage() {
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Draft</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
               {summary.draft}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Paid</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               {summary.paid}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Outstanding</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-slate-900 dark:text-white">
               {formatMoney(summary.outstanding, 'KES')}
             </p>
           </div>
@@ -390,12 +390,12 @@ export default function InvoicesPage() {
         />
 
         {hasFilters && (
-          <div className="">
+          <div className="flex items-center justify-between px-2">
             <p className="ui-meta">Showing filtered results</p>
             <Button
               onClick={resetFilters}
               variant="ghost"
-              className=""
+              className="text-xs font-sans uppercase tracking-widest"
             >
               Clear filters
             </Button>
@@ -405,15 +405,15 @@ export default function InvoicesPage() {
         {/* TABLE */}
         <div className="ui-card">
           {loading ? (
-            <div className="ui-loading-state">
-              <p className="">
+            <div className="ui-loading-state p-12">
+              <p className="text-xs font-sans uppercase tracking-widest">
                 Loading invoices...
               </p>
             </div>
           ) : filteredInvoices.length === 0 ? (
-            <div className="ui-empty-state">
+            <div className="ui-empty-state p-12">
               <div className="ui-empty-icon">
-                <FileText className="" />
+                <FileText className="h-6 w-6" />
               </div>
 
               <h2 className="ui-section-title">No invoices found</h2>
@@ -424,17 +424,17 @@ export default function InvoicesPage() {
                   : 'Invoices will appear here once they are created.'}
               </p>
 
-              <div className="">
+              <div className="flex justify-center mt-4">
                 <Button
-                  variant="primary"
-                  className=""
+                  variant="default"
+                  className="mt-6"
                 >
                   Create First Invoice
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="">
+            <div className="overflow-x-auto">
               <table className="ui-table">
                 <thead>
                   <tr>
@@ -455,15 +455,15 @@ export default function InvoicesPage() {
                     >
                       {/* INVOICE */}
                       <td className="ui-table-cell">
-                        <div className="">
-                          <div className="">
-                            <FileText className="" />
+                        <div className="space-y-1">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                            <FileText className="h-4 w-4" />
                           </div>
-                          <div className="">
-                            <p className="">
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <p className="font-medium text-slate-900 dark:text-white">
                               {invoice.title || 'Untitled Invoice'}
                             </p>
-                            <p className="ui-meta">
+                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
                               {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
                             </p>
                           </div>
@@ -472,14 +472,14 @@ export default function InvoicesPage() {
 
                       {/* CLIENT */}
                       <td className="ui-table-cell">
-                        <p className="">
+                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
                           {getClientName(invoice.client)}
                         </p>
                       </td>
 
                       {/* STATUS */}
                       <td className="ui-table-cell">
-                        <div className="">
+                        <div className="flex flex-col items-start gap-2">
                           <span
                             className={`${getStatusBadgeClass(invoice.status)}`}
                           >
@@ -490,48 +490,48 @@ export default function InvoicesPage() {
 
                       {/* ISSUED */}
                       <td className="ui-table-cell">
-                        <p className="">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
                           {formatDate(invoice.issueDate)}
                         </p>
                       </td>
 
                       {/* TOTAL */}
-                      <td className="ui-table-cell">
+                      <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
                         {formatMoney(invoice.total, invoice.currency)}
                       </td>
 
                       {/* ACTION */}
-                      <td className="ui-table-cell">
-                        <div className="">
+                      <td className="ui-table-cell text-right">
+                        <div className="flex gap-2">
                           <Link
                             href={`/admin/invoices/${invoice.id}`}
-                            className="ui-button ui-button-secondary"
+                            className="ui-button ui-button-secondary text-sm font-sans"
                           >
                             View
-                            <ArrowUpRight className="" />
+                            <ArrowUpRight className="h-3 w-3" />
                           </Link>
                           <Link
                             href={`/admin/invoices/${invoice.id}/edit`}
-                            className="ui-button ui-button-secondary"
+                            className="ui-button ui-button-secondary text-sm font-sans"
                           >
                             Edit
-                            <Plus className="" />
+                            <Plus className="h-3 w-3" />
                           </Link>
                           {invoice.status === 'draft' && (
                             <>
                               <Link
                                 href={`/admin/invoices/${invoice.id}/send`}
-                                className="ui-button ui-button-success"
+                                className="ui-button ui-button-success text-sm font-sans"
                               >
                                 Send
-                                <CheckCircle2 className="" />
+                                <CheckCircle2 className="h-3 w-3" />
                               </Link>
                               <Link
                                 href={`/admin/invoices/${invoice.id}/duplicate`}
-                                className="ui-button ui-button-secondary"
+                                className="ui-button ui-button-secondary text-sm font-sans"
                               >
                                 Duplicate
-                                <FilePlus className="" />
+                                <FilePlus className="h-3 w-3" />
                               </Link>
                             </>
                           )}
@@ -541,9 +541,9 @@ export default function InvoicesPage() {
                               // Delete logic would go here - keeping inline for now
                               window.location.reload(); // Placeholder
                             }}
-                            className="ui-button ui-button-destructive"
+                            className="ui-button ui-button-destructive text-sm font-sans"
                           >
-                            <Trash2 className="" />
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       </td>
@@ -557,25 +557,25 @@ export default function InvoicesPage() {
 
         {/* PAGINATION */}
         {pagination && pagination.totalPages > 0 && (
-          <div className="">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
             <p className="ui-meta">
               {pagination.total === 0
                 ? 'No invoices'
                 : `Showing page ${pagination.page} of ${pagination.totalPages}`}
             </p>
 
-            <div className="">
+            <div className="flex items-center gap-2">
               <Button
                 onClick={() => setPage((current) => Math.max(1, current - 1))}
                 disabled={pagination.page <= 1}
                 variant="secondary"
-                className=""
+                className="text-xs font-sans uppercase tracking-widest"
               >
-                <ChevronLeft className="" />
+                <ChevronLeft className="h-3.5 w-3.5" />
                 Previous
               </Button>
 
-              <div className="">
+              <div className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-slate-900 px-2 text-[10px] font-sans text-white dark:bg-zinc-800">
                 {pagination.page}
               </div>
 
@@ -586,10 +586,10 @@ export default function InvoicesPage() {
                 }
                 disabled={pagination.page >= pagination.totalPages}
                 variant="secondary"
-                className=""
+                className="text-xs font-sans uppercase tracking-widest"
               >
                 Next
-                <ChevronRight className="" />
+                <ChevronRight className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>

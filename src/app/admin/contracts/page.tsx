@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import TableFilterBar from '@/components/admin/TableFilterBar';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type Contract = {
@@ -154,31 +154,31 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="">
-      <div className="">
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl space-y-8">
         <AdminPageHeader
           title="Contracts"
           description="Create, send and manage agreements with your clients."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
-              variant="primary"
-              className=""
+              variant="default"
+              className="text-xs font-sans uppercase tracking-widest"
             >
-              <Plus className="" />
+              <Plus className="h-3.5 w-3.5" />
               New Contract
             </Button>
           }
         />
 
         {error && !loading && (
-          <div className="ui-card">
-            <p className="">{error}</p>
+          <div className="ui-card p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* SUMMARY */}
-        <div className="">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
           <div className="ui-stat-card">
             <p className="ui-stat-label">Total Contracts</p>
             <p className="ui-stat-value">{stats.total}</p>
@@ -186,56 +186,56 @@ export default function ContractsPage() {
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Drafts</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               {stats.draft}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Sent</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-blue-600 dark:text-blue-400">
               {stats.sent}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Viewed</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-yellow-600 dark:text-yellow-400">
               {stats.viewed}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Awaiting Signature</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-purple-600 dark:text-purple-400">
               {stats.awaiting_signature}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Signed</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
               {stats.signed}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Declined</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-red-600 dark:text-red-400">
               {stats.declined}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Expired</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
               {stats.expired}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Cancelled</p>
-            <p className="ui-stat-value">
+            <p className="ui-stat-value text-red-600 dark:text-red-400">
               {stats.cancelled}
             </p>
           </div>
@@ -288,15 +288,15 @@ export default function ContractsPage() {
         {/* TABLE */}
         <div className="ui-card">
           {loading ? (
-            <div className="ui-loading-state">
-              <p className="">
+            <div className="ui-loading-state p-12">
+              <p className="text-xs font-sans uppercase tracking-widest">
                 Loading contracts…
               </p>
             </div>
           ) : contracts.length === 0 ? (
-            <div className="ui-empty-state">
+            <div className="ui-empty-state p-12">
               <div className="ui-empty-icon">
-                <FilePlus className="" />
+                <FilePlus className="h-6 w-6" />
               </div>
 
               <h2 className="ui-section-title">No contracts yet</h2>
@@ -305,17 +305,17 @@ export default function ContractsPage() {
                 Create your first contract or browse templates.
               </p>
 
-              <div className="">
+              <div className="flex justify-center mt-4">
                 <Button
-                  variant="primary"
-                  className=""
+                  variant="default"
+                  className="mt-6"
                 >
                   Create First Contract
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="">
+            <div className="overflow-x-auto">
               <table className="ui-table">
                 <thead>
                   <tr>
@@ -338,15 +338,15 @@ export default function ContractsPage() {
                     >
                       {/* CONTRACT */}
                       <td className="ui-table-cell">
-                        <div className="">
-                          <div className="">
-                            <FileSignature className="" />
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                            <FileSignature className="h-4 w-4" />
                           </div>
-                          <div className="">
-                            <p className="">
+                          <div className="min-w-0 space-y-1">
+                            <p className="font-medium text-slate-900 dark:text-white">
                               {contract.title}
                             </p>
-                            <p className="ui-meta">
+                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
                               #{contract.contractNumber}
                             </p>
                           </div>
@@ -355,7 +355,7 @@ export default function ContractsPage() {
 
                       {/* CLIENT */}
                       <td className="ui-table-cell">
-                        <p className="">
+                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
                           {contract.clientName}
                         </p>
                       </td>
@@ -363,7 +363,7 @@ export default function ContractsPage() {
                       {/* PROJECT */}
                       <td className="ui-table-cell">
                         {contract.projectName ?? (
-                          <span className="ui-caption">
+                          <span className="ui-caption text-xs text-slate-500 dark:text-zinc-600 italic">
                             None
                           </span>
                         )}
@@ -371,7 +371,7 @@ export default function ContractsPage() {
 
                       {/* STATUS */}
                       <td className="ui-table-cell">
-                        <div className="">
+                        <div className="flex flex-col items-start gap-2">
                           <span
                             className={`${getStatusBadgeClass(contract.status)}`}
                           >
@@ -382,57 +382,57 @@ export default function ContractsPage() {
 
                       {/* CREATED */}
                       <td className="ui-table-cell">
-                        <p className="">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
                           {new Date(contract.createdAt).toLocaleDateString()}
                         </p>
                       </td>
 
                       {/* SENT */}
                       <td className="ui-table-cell">
-                        <p className="">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
                           {contract.sentAt ? new Date(contract.sentAt).toLocaleDateString() : '-'}
                         </p>
                       </td>
 
                       {/* SIGNED */}
                       <td className="ui-table-cell">
-                        <p className="">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
                           {contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '-'}
                         </p>
                       </td>
 
                       {/* ACTION */}
-                      <td className="ui-table-cell">
-                        <div className="">
+                      <td className="ui-table-cell text-right">
+                        <div className="flex gap-2">
                           <Link
                             href={`/admin/contracts/${contract.id}`}
-                            className="ui-button ui-button-secondary"
+                            className="ui-button ui-button-secondary text-sm font-sans"
                           >
                             View
-                            <ArrowUpRight className="" />
+                            <ArrowUpRight className="h-3 w-3" />
                           </Link>
                           <Link
                             href={`/admin/contracts/${contract.id}/edit`}
-                            className="ui-button ui-button-secondary"
+                            className="ui-button ui-button-secondary text-sm font-sans"
                           >
                             Edit
-                            <Plus className="" />
+                            <Plus className="h-3 w-3" />
                           </Link>
                           {contract.status === 'draft' && (
                             <>
                               <Link
                                 href={`/admin/contracts/${contract.id}/send`}
-                                className="ui-button ui-button-success"
+                                className="ui-button ui-button-success text-sm font-sans"
                               >
                                 Send
-                                <CheckCircle2 className="" />
+                                <CheckCircle2 className="h-3 w-3" />
                               </Link>
                               <Link
                                 href={`/admin/contracts/${contract.id}/duplicate`}
-                                className="ui-button ui-button-secondary"
+                                className="ui-button ui-button-secondary text-sm font-sans"
                               >
                                 Duplicate
-                                <FilePlus className="" />
+                                <FilePlus className="h-3 w-3" />
                               </Link>
                             </>
                           )}
@@ -443,9 +443,9 @@ export default function ContractsPage() {
                               // In a real refactor, this would be moved to a service function
                               window.location.reload(); // Placeholder - actual delete would fetch API
                             }}
-                            className="ui-button ui-button-destructive"
+                            className="ui-button ui-button-destructive text-sm font-sans"
                           >
-                            <Trash2 className="" />
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       </td>

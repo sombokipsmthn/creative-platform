@@ -26,10 +26,10 @@ import type { LucideIcon } from "lucide-react";
 
 import ProfileMenu from "@/components/ProfileMenu";
 import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/Sheet";
-import { Separator } from "@/components/ui/Separator";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 import {
   SplitViewProvider,
   useSplitView,
@@ -77,12 +77,6 @@ const navSections: NavSection[] = [
     ],
   },
   {
-    label: "Publishing",
-    items: [
-      { name: "Portfolio", href: "/admin/portfolio", icon: Sparkles },
-    ],
-  },
-  {
     label: "Settings",
     items: [
       { name: "Creator Profile", href: "/admin/profile", icon: UserRound },
@@ -114,14 +108,14 @@ function NavLink({
           : "text-muted-foreground hover:bg-muted hover:text-foreground"
       }`}
     >
-      <div className="">
+      <div className="flex items-center gap-3">
         <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"}`} />
         <span>{item.name}</span>
       </div>
       {badgeCount > 0 && (
         <Badge
           variant={isActive ? "secondary" : "outline"}
-          className=""
+          className="ml-auto text-[10px] px-1.5 py-0 h-4 font-mono"
         >
           {badgeCount}
         </Badge>
@@ -140,35 +134,35 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="">
+    <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="">
+      <div className="flex h-14 items-center border-b px-4">
         <Link
           href="/admin"
           onClick={onNavigate}
-          className=""
+          className="flex items-center gap-2.5 font-bold tracking-tight text-foreground"
         >
-          <span className="">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-mono font-bold text-primary-foreground">
             K
           </span>
-          <div className="">
-            <span className="">KIPSMTHN</span>
-            <span className="">Creative OS</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold leading-none">KIPSMTHN</span>
+            <span className="text-[10px] font-normal text-muted-foreground mt-0.5">Creative OS</span>
           </div>
-          <Badge variant="secondary" className="">
+          <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">
             v2.0
           </Badge>
         </Link>
       </div>
 
       {/* Nav List */}
-      <div className="">
+      <div className="flex-1 overflow-y-auto px-3 py-5 flex flex-col gap-7">
         {navSections.map((section) => (
-          <div key={section.label} className="">
-            <p className="">
+          <div key={section.label} className="space-y-1">
+            <p className="px-3 text-[11px] font-medium tracking-wider uppercase text-muted-foreground/70">
               {section.label}
             </p>
-            <div className="">
+            <div className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -191,13 +185,13 @@ function SidebarContent({
       </div>
 
       {/* Footer Info */}
-      <div className="">
-        <div className="">
+      <div className="border-t p-3 space-y-2">
+        <div className="flex items-center justify-between px-2 py-1">
           <Link
             href="/"
-            className=""
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            <ExternalLink className="" />
+            <ExternalLink className="h-3.5 w-3.5" />
             <span>Public Website</span>
           </Link>
           <ThemeToggle compact />
@@ -259,26 +253,26 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated]);
 
   return (
-    <div className="">
+    <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden">
+      <aside className="hidden lg:flex w-64 flex-col fixed inset-y-0 left-0 z-30 border-r border-border/70 bg-card/90 backdrop-blur-xl">
         <SidebarContent pathname={pathname} badgeCounts={badgeCounts} />
       </aside>
 
       {/* Main Workspace Area */}
-      <div className="">
+      <div className="flex-1 flex flex-col lg:pl-64 min-w-0">
         {/* Top Header */}
-        <header className="">
-          <div className="">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 sm:px-6">
+          <div className="flex items-center gap-3">
             {/* Mobile Nav Trigger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="">
-                  <Menu className="" />
+                <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
+                  <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="">
+              <SheetContent side="left" className="p-0 w-64 bg-card">
                 <SheetHeader className="sr-only">
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </SheetHeader>
@@ -291,8 +285,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             </Sheet>
 
             {/* Breadcrumb Section Indicator */}
-            <div className="hidden">
-              <span className="">Creative Platform</span>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">Creative Platform</span>
               <span>/</span>
               <span className="capitalize">
                 {pathname === "/admin"
@@ -303,21 +297,21 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Right Header Actions */}
-          <div className="">
+          <div className="flex items-center gap-2">
             <ThemeToggle compact />
-            <Button asChild variant="ghost" size="icon" className="">
+            <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
               <Link href="/admin/settings" title="Settings">
-                <Settings2 className="" />
+                <Settings2 className="h-4 w-4" />
                 <span className="sr-only">Settings</span>
               </Link>
             </Button>
-            <Separator orientation="vertical" className="" />
+            <Separator orientation="vertical" className="h-5 mx-1" />
             <ProfileMenu showLabel />
           </div>
         </header>
 
         {/* Content Body with optional SplitView */}
-        <div className="">
+        <div className="flex-1 flex">
           <main
             data-admin-content
             className={`flex-1 min-w-0 ${
@@ -328,7 +322,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </main>
 
           {splitViewContent && (
-            <aside className="hidden">
+            <aside className="hidden lg:block lg:w-[35%] border-l bg-card p-6 overflow-y-auto">
               {splitViewContent}
             </aside>
           )}

@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 function subscribe(callback: () => void) {
   window.addEventListener('storage', callback);
@@ -19,7 +19,7 @@ function getServerSnapshot() {
   return 'dark';
 }
 
-export default function ThemeToggle({ compact = false }: { compact?: boolean }) {
+export default function ThemeToggle({ compact = false, showLabel = true }: { compact?: boolean; showLabel?: boolean }) {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const isDark = theme === 'dark';
 
@@ -44,9 +44,9 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
         onClick={toggleTheme}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
         title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-        className=""
+        className="h-9 w-9 text-muted-foreground hover:text-foreground"
       >
-        {isDark ? <Sun className="" aria-hidden="true" /> : <Moon className="" aria-hidden="true" />}
+        {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
       </Button>
     );
   }
@@ -58,10 +58,10 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      className=""
+      className="gap-2 text-xs"
     >
-      {isDark ? <Sun className="" aria-hidden="true" /> : <Moon className="" aria-hidden="true" />}
-      <span>{isDark ? 'Light' : 'Dark'}</span>
+      {isDark ? <Sun className="h-3.5 w-3.5" aria-hidden="true" /> : <Moon className="h-3.5 w-3.5" aria-hidden="true" />}
+      {showLabel ? <span>{isDark ? 'Light' : 'Dark'}</span> : null}
     </Button>
   );
 }

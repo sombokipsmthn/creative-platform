@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 interface ExpenseReceipt {
@@ -114,23 +114,23 @@ export default function AdminExpensesPage() {
   const estimatedTaxShield = totalClaimable * 0.3;
 
   return (
-    <div className="">
-      <div className="">
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="">
-          <div className="">
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
             <div>
-              <Link href="/admin" className="">← Back to Dashboard</Link>
-              <h1 className="">KRA Receipt Scanner & Expense Claims</h1>
+              <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
+              <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
             </div>
 
-            <div className="">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-sans rounded-full font-semibold">
               <span>30% KRA Income Tax Shield Active</span>
             </div>
           </div>
 
           {/* Metrics Summary Bar */}
-          <div className="">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="ui-stat-card">
               <p className="ui-stat-label">Total Claimable Expenses</p>
               <p className="ui-stat-value">KES {totalClaimable.toLocaleString()}</p>
@@ -154,13 +154,13 @@ export default function AdminExpensesPage() {
         </div>
 
         {/* SCANNER FORM */}
-        <div className="ui-card">
+        <div className="ui-card space-y-6">
           <div className="ui-card-header">
             <h2 className="ui-card-title">OCR Receipt Processing</h2>
             <p className="ui-meta">Scan & Capture KRA Expense Receipt</p>
           </div>
-          <div className="ui-card-content">
-            <div className="">
+          <div className="ui-card-content space-y-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
               <div>
                 <p className="ui-eyebrow">OCR Receipt Processing</p>
                 <h2 className="ui-section-title">Scan & Capture KRA Expense Receipt</h2>
@@ -169,16 +169,16 @@ export default function AdminExpensesPage() {
               <Button
                 onClick={handleSimulateScan}
                 disabled={isScanning}
-                variant="primary"
-                className=""
+                variant="default"
+                className="w-full md:w-auto"
               >
-                {isScanning ? <span className=""><Loader2 className="" /> Scanning Receipt...</span> : 'Scan Receipt Photo (OCR)'}
+                {isScanning ? <span className="flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Scanning Receipt...</span> : 'Scan Receipt Photo (OCR)'}
               </Button>
             </div>
 
-            <form onSubmit={handleAddExpense} className="">
-              <div className="">
-                <div className="">
+            <form onSubmit={handleAddExpense} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
                   <label className="ui-label">Merchant Name *</label>
                   <input
                     type="text"
@@ -189,7 +189,7 @@ export default function AdminExpensesPage() {
                   />
                 </div>
 
-                <div className="">
+                <div className="space-y-1">
                   <label className="ui-label">Merchant KRA PIN *</label>
                   <input
                     type="text"
@@ -201,8 +201,8 @@ export default function AdminExpensesPage() {
                 </div>
               </div>
 
-              <div className="">
-                <div className="">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1">
                   <label className="ui-label">Category</label>
                   <select
                     value={category}
@@ -217,7 +217,7 @@ export default function AdminExpensesPage() {
                   </select>
                 </div>
 
-                <div className="">
+                <div className="space-y-1">
                   <label className="ui-label">Total Amount (KES) *</label>
                   <input
                     type="number"
@@ -228,7 +228,7 @@ export default function AdminExpensesPage() {
                   />
                 </div>
 
-                <div className="">
+                <div className="space-y-1">
                   <label className="ui-label">VAT Portion (KES 16%)</label>
                   <input
                     type="number"
@@ -242,8 +242,8 @@ export default function AdminExpensesPage() {
 
               <Button
                 type="submit"
-                className=""
-                variant="primary"
+                className="w-full py-3.5"
+                variant="default"
               >
                 + Record Expense for KRA Tax Return
               </Button>
@@ -252,25 +252,25 @@ export default function AdminExpensesPage() {
         </div>
 
         {/* EXPENSES LIST */}
-        <div className="ui-card">
+        <div className="ui-card space-y-6">
           <div className="ui-card-header">
             <h2 className="ui-section-title">Logged Receipts & Expenses ({expenses.length})</h2>
           </div>
           <div className="ui-card-content">
-            <div className="">
+            <div className="grid grid-cols-1 gap-6">
               {expenses.map((exp) => (
                 <div
                   key={exp.id}
-                  className="ui-card ui-card-interactive"
+                  className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
                 >
-                  <div className="">
-                    <div className="">
-                      <Image src={exp.receiptImage} alt={exp.merchant} fill className="" unoptimized />
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shrink-0 bg-slate-100 dark:bg-zinc-900">
+                      <Image src={exp.receiptImage} alt={exp.merchant} fill className="object-cover" unoptimized />
                     </div>
 
-                    <div className="">
-                      <div className="">
-                        <span className="">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
                           {exp.category}
                         </span>
                         <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${
@@ -280,15 +280,15 @@ export default function AdminExpensesPage() {
                         </span>
                       </div>
 
-                      <h3 className="">{exp.merchant}</h3>
+                      <h3 className="text-base font-medium text-slate-900 dark:text-white">{exp.merchant}</h3>
                       <p className="ui-meta">
-                        Merchant KRA PIN: <span className="">{exp.merchantKraPin}</span> • Date: {exp.date}
+                        Merchant KRA PIN: <span className="font-bold text-slate-900 dark:text-white">{exp.merchantKraPin}</span> • Date: {exp.date}
                       </p>
                     </div>
                   </div>
 
-                  <div className="">
-                    <p className="">KES {exp.amountKes.toLocaleString()}</p>
+                  <div className="text-right font-sans">
+                    <p className="text-xl font-bold text-slate-900 dark:text-white">KES {exp.amountKes.toLocaleString()}</p>
                     <p className="ui-meta">Est. Tax Shield: KES {(exp.amountKes * 0.3).toLocaleString()}</p>
                   </div>
                 </div>

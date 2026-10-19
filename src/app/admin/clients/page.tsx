@@ -433,7 +433,7 @@ export default function AdminClientsPage() {
                         <option value="+27">🇿🇦 +27 (South Africa)</option>
                         <option value="+254">Other</option>
                       </select>
-                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
+                      <input type="text" placeholder="700 000 000" value={(form.phoneCountry && form.phone?.startsWith(form.phoneCountry)) ? form.phone.slice(form.phoneCountry.length).trimStart() : (form.phone || '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
                     </div>
                     <div className="space-y-1">
                       <label className="ui-label">Location</label>

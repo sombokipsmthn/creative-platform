@@ -102,20 +102,20 @@ function NavLink({
     <Link
       href={item.href}
       onClick={onClick}
-      className={`group flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+      className={`group relative flex min-h-10 items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
         isActive
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-none before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary"
+          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
       }`}
     >
       <div className="flex items-center gap-3">
-        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"}`} />
+        <Icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground"}`} />
         <span>{item.name}</span>
       </div>
       {badgeCount > 0 && (
         <Badge
           variant={isActive ? "secondary" : "outline"}
-          className="ml-auto text-[10px] px-1.5 py-0 h-4 font-mono"
+          className="ml-auto h-5 min-w-5 rounded-md px-1.5 text-[11px] font-medium tabular-nums"
         >
           {badgeCount}
         </Badge>
@@ -134,35 +134,35 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       {/* Brand */}
-      <div className="flex h-14 items-center border-b px-4">
+      <div className="flex h-[4.25rem] items-center border-b border-sidebar-border px-4">
         <Link
           href="/admin"
           onClick={onNavigate}
-          className="flex items-center gap-2.5 font-bold tracking-tight text-foreground"
+          className="flex min-w-0 flex-1 items-center gap-3 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
         >
-          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs font-mono font-bold text-primary-foreground">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sm font-bold text-sidebar-primary-foreground shadow-sm">
             K
           </span>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold leading-none">KIPSMTHN</span>
+            <span className="text-sm font-semibold leading-none tracking-tight">KIPSMTHN</span>
             <span className="text-[10px] font-normal text-muted-foreground mt-0.5">Creative OS</span>
           </div>
-          <Badge variant="secondary" className="ml-auto text-[10px] px-1.5 py-0">
+          <Badge variant="secondary" className="ml-auto shrink-0 rounded-md border border-sidebar-border bg-background/60 px-1.5 py-0 text-[10px] font-medium text-muted-foreground">
             v2.0
           </Badge>
         </Link>
       </div>
 
       {/* Nav List */}
-      <div className="flex-1 overflow-y-auto px-3 py-5 flex flex-col gap-7">
+      <div className="flex-1 overflow-y-auto px-3 py-6 flex flex-col gap-6">
         {navSections.map((section) => (
-          <div key={section.label} className="space-y-1">
-            <p className="px-3 text-[11px] font-medium tracking-wider uppercase text-muted-foreground/70">
+          <div key={section.label} className="space-y-2">
+            <p className="px-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-sidebar-foreground/45">
               {section.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {section.items.map((item) => {
                 const isActive =
                   pathname === item.href ||
@@ -185,11 +185,11 @@ function SidebarContent({
       </div>
 
       {/* Footer Info */}
-      <div className="border-t p-3 space-y-2">
-        <div className="flex items-center justify-between px-2 py-1">
+      <div className="space-y-2 border-t border-sidebar-border p-3">
+        <div className="flex items-center justify-between rounded-lg px-2 py-2">
           <Link
             href="/"
-            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="flex min-h-9 items-center gap-2 rounded-md px-2 text-xs font-medium text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             <span>Public Website</span>
@@ -255,14 +255,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
-      <aside className="hidden lg:flex w-64 flex-col fixed inset-y-0 left-0 z-30 border-r border-border/70 bg-card/90 backdrop-blur-xl">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex">
         <SidebarContent pathname={pathname} badgeCounts={badgeCounts} />
       </aside>
 
       {/* Main Workspace Area */}
-      <div className="flex-1 flex flex-col lg:pl-64 min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
         {/* Top Header */}
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 sm:px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border/70 bg-background/90 px-4 backdrop-blur-xl sm:px-6">
           <div className="flex items-center gap-3">
             {/* Mobile Nav Trigger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -272,7 +272,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-64 bg-card">
+              <SheetContent side="left" className="w-[280px] border-r border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
                 <SheetHeader className="sr-only">
                   <SheetTitle>Navigation Menu</SheetTitle>
                 </SheetHeader>
@@ -314,7 +314,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="flex-1 flex">
           <main
             data-admin-content
-            className={`flex-1 min-w-0 ${
+            className={`min-w-0 flex-1 ${
               splitViewContent ? "lg:w-[65%]" : "w-full"
             }`}
           >

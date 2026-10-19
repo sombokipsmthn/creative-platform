@@ -18,7 +18,9 @@
     "db:seed:templates": "tsx src/db/seed-templates.ts",
     "healthcheck": "node scripts/healthcheck.mjs",
     "test:responsive-admin": "node scripts/responsive-admin-smoke.mjs",
-    "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts"
+    "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts",
+    "test:authenticated-settings": "node scripts/authenticated-settings-smoke.mjs",
+    "test:gallery-watermark": "node scripts/gallery-watermark-smoke.mjs"
   },
   "engines": {
     "node": "22.x",

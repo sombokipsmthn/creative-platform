@@ -36,7 +36,6 @@ const sections = [
 ];
 
 export default function AdminSettingsPage() {
-  const { data: session, isPending } = authClient.useSession();
   const [form, setForm] = useState<WorkspaceForm>(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -44,7 +43,6 @@ export default function AdminSettingsPage() {
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    if (isPending || !session?.user) return;
     let cancelled = false;
 
     async function load() {
@@ -74,7 +72,7 @@ export default function AdminSettingsPage() {
 
     void load();
     return () => { cancelled = true; };
-  }, [isPending, session]);
+  }, []);
 
   function update<K extends keyof WorkspaceForm>(key: K, value: WorkspaceForm[K]) {
     setForm(current => ({ ...current, [key]: value }));
@@ -103,11 +101,9 @@ export default function AdminSettingsPage() {
     }
   }
 
-  if (isPending || loading) {
+  if (loading) {
     return <main className="ui-page"><div className="ui-shell"><p className="ui-meta">Loading workspace settings…</p></div></main>;
   }
-
-  if (!session?.user) return null;
 
   return (
     <main className="ui-page ui-page-padded">

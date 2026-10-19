@@ -34,8 +34,7 @@ const emptyProfile: ProfileForm = {
 };
 
 export default function AdminProfilePage() {
-  const { data: session, isPending } = authClient.useSession();
-  const user = session?.user ?? null;
+  const [resolvedUser, setResolvedUser] = useState<{ id?: string; name?: string | null; email?: string | null; image?: string | null; handle?: string | null } | null>(null);
   const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -56,9 +55,7 @@ export default function AdminProfilePage() {
   }
 
   useEffect(() => {
-    if (isPending || !user) return;
-
-    const sessionUser = user;
+    const sessionUser = { name: '', email: '', image: null };
     let ignore = false;
 
     async function loadProfile() {
@@ -75,6 +72,7 @@ export default function AdminProfilePage() {
 
         if (ignore) return;
 
+        setResolvedUser(data?.user || sessionUser);
         setProfile({
           name: data?.user?.name || sessionUser.name || '',
           handle: data?.user?.handle || '',
@@ -102,12 +100,12 @@ export default function AdminProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isPending, user]);
+  }, []);
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!user) return;
+    if (!resolvedUser) return;
 
     setIsSaving(true);
     setMessage(null);
@@ -150,7 +148,7 @@ export default function AdminProfilePage() {
     }
   };
 
-  if (isPending || isLoading) {
+  if (isLoading) {
     return (
       <main className="ui-page">
         <div className="os-pulse">
@@ -163,12 +161,12 @@ export default function AdminProfilePage() {
     );
   }
 
-  if (!user) {
-    return null;
+  if (!resolvedUser) {
+    return <main className="ui-page"><div className="os-pulse"><p className="ui-meta" role="alert">Unable to resolve the authenticated creator.</p></div></main>;
   }
 
-  const displayName = profile.name || user.name || 'Creator';
-  const avatar = profile.avatarUrl || user.image;
+  const displayName = profile.name || resolvedUser.name || 'Creator';
+  const avatar = profile.avatarUrl || resolvedUser.image;
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -216,7 +214,7 @@ export default function AdminProfilePage() {
                   {displayName}
                 </h2>
                 <p className="ui-meta">
-                  {profile.email || user.email || 'No email available'}
+                  {profile.email || resolvedUser.email || 'No email available'}
                 </p>
                 {profile.handle && (
                   <p className="ui-eyebrow">

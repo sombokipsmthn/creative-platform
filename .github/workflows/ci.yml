@@ -101,6 +101,76 @@ jobs:
           args: --severity-threshold=high --all-projects
         continue-on-error: true
 
+  responsive-admin:
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: creative_platform
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d creative_platform"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22.x"
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Apply database migrations
+        run: npm run db:migrate
+        env:
+          NODE_ENV: development
+          DATABASE_URL: postgresql://postgres:[REDACTED]@localhost:5432/creative_platform
+          BETTER_AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+          BETTER_AUTH_URL: http://127.0.0.1:3010
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3010
+      - name: Start development server
+        run: npx next dev -p 3010 -H 127.0.0.1 > /tmp/creative-platform-next.log 2>&1 &
+        env:
+          NODE_ENV: development
+          DATABASE_URL: postgresql://postgres:[REDACTED]@localhost:5432/creative_platform
+          BETTER_AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+          BETTER_AUTH_URL: http://127.0.0.1:3010
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3010
+          LOCAL_AUTH_BYPASS: "true"
+      - name: Wait for development server
+        run: |
+          for attempt in $(seq 1 30); do
+            curl --fail --silent http://127.0.0.1:3010/admin > /dev/null && exit 0
+            sleep 2
+          done
+          cat /tmp/creative-platform-next.log
+          exit 1
+      - name: Run authenticated responsive admin smoke
+        run: npm run test:responsive-admin
+        env:
+          PLAYWRIGHT_BASE_URL: http://127.0.0.1:3010
+          NODE_ENV: development
+          LOCAL_AUTH_BYPASS: "true"
+          DATABASE_URL: postgresql://postgres:[REDACTED]@localhost:5432/creative_platform
+          BETTER_AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+          BETTER_AUTH_URL: http://127.0.0.1:3010
+          NEXT_PUBLIC_APP_URL: http://127.0.0.1:3010
+      - name: Upload server log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-admin-next-log
+          path: /tmp/creative-platform-next.log
+
   build:
     runs-on: ubuntu-latest
     needs: [ lint, test, typecheck, security-audit ]

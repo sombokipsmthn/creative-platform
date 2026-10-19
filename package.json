@@ -16,6 +16,7 @@
     "db:seed:equipment": "tsx src/db/seed-equipment.ts",
     "db:seed:templates": "tsx src/db/seed-templates.ts",
     "healthcheck": "node scripts/healthcheck.mjs",
+    "test:responsive-admin": "node scripts/responsive-admin-smoke.mjs",
     "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts"
   },
   "engines": {

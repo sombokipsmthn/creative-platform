@@ -162,7 +162,7 @@ export function ContractBuilder({
       newValues.effective_date = new Date().toISOString().slice(0, 10);
     }
 
-      setValues(newValues);
+      return newValues;
     });
   }, [template, selectedClient, selectedProject]);
 

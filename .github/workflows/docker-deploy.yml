@@ -149,6 +149,7 @@ jobs:
             attempt=$((attempt + 1))
           done
           echo "Container failed to become healthy"
+          curl -i http://127.0.0.1:3000/api/health || true
           docker logs test-container
           exit 1
 

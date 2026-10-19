@@ -40,26 +40,26 @@ export function AdminPageHeader({
       {breadcrumb && (
         <Link
           href={breadcrumb.href}
-          className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className=""
         >
-          <ChevronLeft className="h-3.5 w-3.5" />
+          <ChevronLeft className="" />
           {breadcrumb.label}
         </Link>
       )}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+      <div className="">
+        <div className="">
+          <h1 className="">
             {title}
           </h1>
           {description && (
-            <p className="text-sm text-muted-foreground max-w-2xl">
+            <p className="">
               {description}
             </p>
           )}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="">
           {secondaryActions?.map((action, i) => (
             <div key={i}>{action}</div>
           ))}
@@ -68,7 +68,7 @@ export function AdminPageHeader({
       </div>
 
       {tabs && tabs.length > 0 && (
-        <div className="flex items-center gap-1 overflow-x-auto border-t pt-3">
+        <div className="">
           {tabs.map((tab) => {
             const isActive = tab.active;
             const tabClasses = cn(

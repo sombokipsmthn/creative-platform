@@ -51,43 +51,43 @@ export function ProductionCalendar() {
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden">
-      <div className="flex items-center justify-between  border-slate-100 px-5 py-4 dark:border-zinc-900">
-        <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-          <h2 className="text-base font-semibold text-slate-900 dark:text-white">
+    <section className="">
+      <div className="">
+        <div className="">
+          <CalendarIcon className="" />
+          <h2 className="">
             {format(currentDate, 'MMMM yyyy')}
           </h2>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="">
           <button
             onClick={prevMonth}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+            className=""
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="" />
           </button>
           <button
             onClick={nextMonth}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+            className=""
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="" />
           </button>
         </div>
       </div>
 
-      <div className="p-5">
+      <div className="">
         {loading ? (
-          <div className="flex h-64 items-center justify-center text-sm text-slate-500">Loading calendar...</div>
+          <div className="">Loading calendar...</div>
         ) : (
-          <div className="grid grid-cols-7 gap-px bg-slate-100 dark:bg-zinc-900">
+          <div className="">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day: string) => (
-              <div key={day} className="bg-white py-2 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:bg-zinc-950 dark:text-zinc-500">
+              <div key={day} className="">
                 {day}
               </div>
             ))}
             {/* Padding for first day of month */}
             {Array.from({ length: daysInMonth[0].getDay() }).map((_, i: number) => (
-              <div key={`pad-${i}`} className="h-24 bg-slate-50/50 dark:bg-zinc-950/50" />
+              <div key={`pad-${i}`} className="" />
             ))}
             {daysInMonth.map((day: Day, i: number) => {
               const dayProjects = projects.filter(p => {
@@ -98,18 +98,18 @@ export function ProductionCalendar() {
               });
 
               return (
-                <div key={i} className="group relative h-24 bg-white p-2 transition hover:bg-slate-50 dark:bg-zinc-950 dark:hover:bg-zinc-900">
+                <div key={i} className="">
                   <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
                     {format(day, 'd')}
                   </span>
-                  <div className="mt-1 space-y-1">
+                  <div className="">
                     {dayProjects.slice(0, 3).map(p => (
-                      <div key={p.id} className="truncate rounded-sm bg-purple-100 px-1 py-0.5 text-[9px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+                      <div key={p.id} className="">
                         {p.name}
                       </div>
                     ))}
                     {dayProjects.length > 3 && (
-                      <div className="text-[9px] text-slate-400">+{dayProjects.length - 3} more</div>
+                      <div className="">+{dayProjects.length - 3} more</div>
                     )}
                   </div>
                 </div>

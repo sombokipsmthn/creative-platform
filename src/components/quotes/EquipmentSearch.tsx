@@ -92,8 +92,8 @@ export default function EquipmentSearch({
   }, [query, isOpen]);
 
   return (
-    <div ref={containerRef} className="relative w-full">
-      <div className="relative">
+    <div ref={containerRef} className="">
+      <div className="">
         <input
           type="text"
           value={isOpen ? query : selectedName}
@@ -104,27 +104,27 @@ export default function EquipmentSearch({
           onFocus={() => setIsOpen(true)}
           placeholder={placeholder}
           disabled={disabled}
-          className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+          className=""
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-          {isLoading && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
+        <div className="">
+          {isLoading && <Loader2 className="" />}
           {isOpen && query && (
             <button
               type="button"
               onClick={() => { setQuery(''); setIsOpen(false); }}
-              className="p-1 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full transition"
+              className=""
             >
-              <X className="h-3 w-3 text-slate-400" />
+              <X className="" />
             </button>
           )}
-          <Search className="h-4 w-4 text-slate-400" />
+          <Search className="" />
         </div>
       </div>
 
       {isOpen && (
-        <div className="absolute z-50 mt-2 w-full rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-lg max-h-60 overflow-y-auto">
+        <div className="">
           {results.length === 0 && !isLoading && (
-            <div className="px-4 py-3 text-xs text-slate-500 text-center">
+            <div className="">
               No equipment found matching &quot;{query}&quot;
             </div>
           )}
@@ -137,13 +137,13 @@ export default function EquipmentSearch({
                 setIsOpen(false);
                 setQuery('');
               }}
-              className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-zinc-900 transition  border-slate-100 dark:border-zinc-900 "
+              className=""
             >
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-slate-900 dark:text-white">{item.name}</span>
-                <span className="text-xs font-sans text-slate-500">{item.dailyRate} KES/day</span>
+              <div className="">
+                <span className="">{item.name}</span>
+                <span className="">{item.dailyRate} KES/day</span>
               </div>
-              <div className="text-[10px] text-slate-400 uppercase tracking-wider">
+              <div className="">
                 {item.category} {item.subcategory ? `· ${item.subcategory}` : ''}
               </div>
             </button>

@@ -379,35 +379,35 @@ export function ContractBuilder({
 
   if (isLoading) {
     return (
-      <div className="ui-page min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-          <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
+      <div className="ui-page">
+        <div className="">
+          <Loader2 className="" />
+          <p className="">Loading contract builder...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="ui-page py-8">
-      <div className="mx-auto max-w-5xl px-6">
+    <div className="ui-page">
+      <div className="">
         {step === 1 ? (
           <>
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="">
               <button onClick={() => router.back()} className="ui-button ui-button-ghost">
-                <ArrowLeft className="h-4 w-4" /> Back
+                <ArrowLeft className="" /> Back
               </button>
-              <div className="flex items-center gap-4">
+              <div className="">
                 {saveStatus === 'saving' && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <div className="">
+                    <Loader2 className="" />
                     Saving…
                   </div>
                 )}
                 {saveStatus === 'saved' && (
-                  <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                    <Check className="h-4 w-4" />
+                  <div className="">
+                    <Check className="" />
                     Saved
                   </div>
                 )}
@@ -416,19 +416,19 @@ export function ContractBuilder({
 
             {/* Errors */}
             {error && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+              <div className="">
                 {error}
               </div>
             )}
 
             {/* Validation */}
             {validationErrors.length > 0 && (
-              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
-                <div className="flex items-start gap-2">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <div className="">
+                <div className="">
+                  <AlertCircle className="" />
                   <div>
-                    <p className="font-medium">{validationErrors.length} items need your attention</p>
-                    <ul className="mt-2 space-y-1">
+                    <p className="">{validationErrors.length} items need your attention</p>
+                    <ul className="">
                       {validationErrors.map((field) => (
                         <li key={field}>
                           • {getFieldMetadata(field).label}
@@ -441,11 +441,11 @@ export function ContractBuilder({
             )}
 
             {/* Document Toolbar */}
-            <div className="mb-6 rounded-lg bg-white dark:bg-gray-800 px-6 py-4 border border-gray-200 dark:border-gray-700 space-y-4">
+            <div className="">
               {/* Contract Info */}
-              <div className="grid gap-4 md:grid-cols-3">
+              <div className="">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  <label className="block">
                     Contract Title
                   </label>
                   <input
@@ -453,12 +453,12 @@ export function ContractBuilder({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Brand Photography Agreement"
-                    className="ui-input w-full text-sm"
+                    className="ui-input"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  <label className="block">
                     Client
                   </label>
                   <select
@@ -467,7 +467,7 @@ export function ContractBuilder({
                       const client = clientsQuery.data?.find((c) => c.id === e.target.value) ?? null;
                       setSelectedClient(client);
                     }}
-                    className="ui-input w-full text-sm"
+                    className="ui-input"
                     disabled={mode === 'edit'}
                   >
                     <option value="">Select a client...</option>
@@ -481,22 +481,22 @@ export function ContractBuilder({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  <label className="block">
                     Project (optional)
                   </label>
                   {isCreatingProject ? (
-                    <div className="space-y-2">
+                    <div className="">
                       <input
                         type="text"
                         value={newProject.name}
                         onChange={(e) => setNewProject({...newProject, name: e.target.value})}
                         placeholder="Project name"
-                        className="ui-input w-full text-sm"
+                        className="ui-input"
                       />
                       <select
                         value={newProject.status}
                         onChange={(e) => setNewProject({...newProject, status: e.target.value})}
-                        className="ui-input w-full text-sm"
+                        className="ui-input"
                       >
                         <option value="active">Active</option>
                         <option value="draft">Draft</option>
@@ -504,18 +504,18 @@ export function ContractBuilder({
                         <option value="on hold">On Hold</option>
                         <option value="cancelled">Cancelled</option>
                       </select>
-                      <div className="grid gap-2 grid-cols-2">
+                      <div className="">
                         <input
                           type="date"
                           value={newProject.startDate}
                           onChange={(e) => setNewProject({...newProject, startDate: e.target.value})}
-                          className="ui-input w-full text-sm"
+                          className="ui-input"
                         />
                         <input
                           type="date"
                           value={newProject.endDate}
                           onChange={(e) => setNewProject({...newProject, endDate: e.target.value})}
-                          className="ui-input w-full text-sm"
+                          className="ui-input"
                         />
                       </div>
                       <textarea
@@ -523,9 +523,9 @@ export function ContractBuilder({
                         onChange={(e) => setNewProject({...newProject, description: e.target.value})}
                         placeholder="Description"
                         rows={2}
-                        className="ui-input w-full text-sm"
+                        className="ui-input"
                       />
-                      <div className="flex justify-end mt-2">
+                      <div className="">
                         <button
                           onClick={() => setIsCreatingProject(false)}
                           className="ui-button ui-button-ghost"
@@ -548,7 +548,7 @@ export function ContractBuilder({
                           const project = projectsQuery.data?.find((p) => p.id === e.target.value) ?? null;
                           setSelectedProject(project);
                         }}
-                        className="ui-input w-full text-sm"
+                        className="ui-input"
                       >
                         <option value="">No project</option>
                         {selectedClient ? (
@@ -564,7 +564,7 @@ export function ContractBuilder({
                       {selectedClient && !projectsQuery.data?.some(p => p.clientId === selectedClient.id) && (
                         <button
                           onClick={() => setIsCreatingProject(true)}
-                          className="mt-2 ui-button ui-button-secondary w-full"
+                          className="ui-button ui-button-secondary"
                         >
                           Create New Project
                         </button>
@@ -575,32 +575,32 @@ export function ContractBuilder({
               </div>
 
               {/* Completion */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+              <div className="">
+                <div className="">
+                  <p className="">
                     Contract completion
                   </p>
-                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                  <p className="">
                     {completionStats.percentage}%
                   </p>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div className="">
                   <div
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                    className="to-purple-600"
                     style={{ width: `${completionStats.percentage}%` }}
                   />
                 </div>
-                <p className="text-xs text-gray-500 dark:text-gray-500">
+                <p className="">
                   {completionStats.completed} / {completionStats.total} required fields complete
                 </p>
               </div>
             </div>
 
             {/* Document */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 shadow-sm mb-6">
-              <div className="max-w-3xl mx-auto space-y-6">
+            <div className="">
+              <div className="">
                 {title && (
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{title}</h1>
+                  <h1 className="">{title}</h1>
                 )}
 
                 {template && (
@@ -619,11 +619,11 @@ export function ContractBuilder({
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 justify-between items-center">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+            <div className="">
+              <p className="">
                 Editing {mode === 'new' ? 'new contract' : 'draft'}
               </p>
-              <div className="flex gap-3">
+              <div className="">
                 <button
                   onClick={handleSaveDraft}
                   disabled={saveMutation.isPending || saveStatus === 'saving'}
@@ -631,11 +631,11 @@ export function ContractBuilder({
                 >
                   {saveStatus === 'saving' ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+                      <Loader2 className="" /> Saving…
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4" /> Save Draft
+                      <Save className="" /> Save Draft
                     </>
                   )}
                 </button>
@@ -646,7 +646,7 @@ export function ContractBuilder({
                     className="ui-button ui-button-primary"
                     disabled={saveMutation.isPending}
                   >
-                    <Send className="h-4 w-4" /> Send Contract
+                    <Send className="" /> Send Contract
                   </button>
                 ) : (
                   <button
@@ -654,7 +654,7 @@ export function ContractBuilder({
                     className="ui-button ui-button-primary"
                     disabled={saveMutation.isPending}
                   >
-                    <Send className="h-4 w-4" /> Next
+                    <Send className="" /> Next
                   </button>
                 )}
               </div>
@@ -663,20 +663,20 @@ export function ContractBuilder({
         ) : (
           <>
             {/* Header */}
-            <div className="mb-6 flex items-center justify-between">
+            <div className="">
               <button onClick={() => setStep(1)} className="ui-button ui-button-ghost">
-                <ArrowLeft className="h-4 w-4" /> Back to Edit
+                <ArrowLeft className="" /> Back to Edit
               </button>
-              <div className="flex items-center gap-4">
+              <div className="">
                 {saveStatus === 'saving' && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                  <div className="">
+                    <Loader2 className="" />
                     Saving…
                   </div>
                 )}
                 {saveStatus === 'saved' && (
-                  <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
-                    <Check className="h-4 w-4" />
+                  <div className="">
+                    <Check className="" />
                     Saved
                   </div>
                 )}
@@ -685,35 +685,35 @@ export function ContractBuilder({
 
             {/* Errors */}
             {error && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+              <div className="">
                 {error}
               </div>
             )}
 
             {/* Contract Summary */}
-            <div className="mb-6 rounded-lg bg-white dark:bg-gray-800 px-6 py-4 border border-gray-200 dark:border-gray-700">
-              <div className="grid gap-4 md:grid-cols-3">
+            <div className="">
+              <div className="">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  <label className="block">
                     Contract Title
                   </label>
-                  <p className="ui-input w-full text-sm text-gray-900 dark:text-gray-50">{title}</p>
+                  <p className="ui-input">{title}</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  <label className="block">
                     Client
                   </label>
-                  <p className="ui-input w-full text-sm text-gray-900 dark:text-gray-50">
+                  <p className="ui-input">
                     {selectedClient ? `${selectedClient.name} ${selectedClient.company ? `(${selectedClient.company})` : ''}` : 'No client selected'}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                  <label className="block">
                     Project
                   </label>
-                  <p className="ui-input w-full text-sm text-gray-900 dark:text-gray-50">
+                  <p className="ui-input">
                     {selectedProject ? selectedProject.name : 'No project'}
                   </p>
                 </div>
@@ -721,12 +721,12 @@ export function ContractBuilder({
             </div>
 
             {/* Contract Content (Read-only) */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 shadow-sm mb-6">
-              <div className="prose prose-sm max-w-none text-gray-900 dark:text-gray-50">
+            <div className="">
+              <div className="">
                 {!!resolvedContent ? (
                   <>
                     {resolvedContent.split('\n\n').map((paragraph, index) => (
-                      <p key={index} className="mb-6 leading-7">
+                      <p key={index} className="">
                         {paragraph.split('\n').map((line, lineIndex) => (
                           <>
                             {line}
@@ -737,17 +737,17 @@ export function ContractBuilder({
                     ))}
                   </>
                 ) : (
-                  <p className="text-gray-500 italic">No content</p>
+                  <p className="">No content</p>
                 )}
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 justify-between items-center">
-              <p className="text-xs text-gray-600 dark:text-gray-400">
+            <div className="">
+              <p className="">
                 Review contract details
               </p>
-              <div className="flex gap-3">
+              <div className="">
                 {selectedProject ? null : (
                   <button
                     onClick={() => {
@@ -766,11 +766,11 @@ export function ContractBuilder({
                 >
                   {saveStatus === 'saving' ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Saving…
+                      <Loader2 className="" /> Saving…
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4" /> Save & Continue
+                      <Save className="" /> Save & Continue
                     </>
                   )}
                 </button>

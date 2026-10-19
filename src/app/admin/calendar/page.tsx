@@ -156,16 +156,16 @@ export default function CalendarPage() {
 
   if (state.loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
-        <p className="text-xs font-sans uppercase tracking-widest text-slate-500">Loading calendar...</p>
+      <div className="">
+        <p className="">Loading calendar...</p>
       </div>
     );
   }
 
   if (state.error) {
     return (
-      <div className="p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+      <div className="">
+        <div className="">
           {state.error}
         </div>
       </div>
@@ -173,47 +173,47 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
-      <header className=" border-slate-200 dark:border-zinc-800">
-        <div className="flex items-center justify-between gap-4 px-6 py-4 lg:px-8">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+    <div className="">
+      <header className="">
+        <div className="">
+          <div className="">
+            <CalendarIcon className="" />
+            <h2 className="">
               Creator Command Centre Calendar
             </h2>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="">
             <button
               onClick={handlePrev}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50 transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              className=""
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="" />
             </button>
 
-            <div className="flex-1 flex justify-center">
-              <span className="text-center text-slate-900 dark:text-white font-medium">
+            <div className="">
+              <span className="">
                 {format(state.currentDate, state.view === 'month' ? 'MMMM yyyy' : state.view === 'week' ? "PPP '–' PPP" : 'MMMM d, yyyy')}
               </span>
             </div>
 
             <button
               onClick={handleNext}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50 transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              className=""
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="" />
             </button>
 
             <button
               onClick={handleToday}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50 transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
+              className=""
             >
               Today
             </button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="flex gap-2">
+          <div className="">
+            <div className="">
               <button
                 onClick={() => handleViewChange('month')}
                 className={
@@ -255,7 +255,7 @@ export default function CalendarPage() {
         </div>
       </header>
 
-      <main className="p-6">
+      <main className="">
         {state.view === 'month' && (
           <MonthView
             currentDate={state.currentDate}
@@ -308,9 +308,9 @@ function MonthView({
   const daysToPad = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Adjust for Monday start
 
   return (
-    <div className="gap-1">
+    <div className="">
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-500">
+      <div className="">
         {[...Array(7)].map((_, i) => {
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
             (i + 1) % 7
@@ -320,10 +320,10 @@ function MonthView({
       </div>
 
       {/* Days */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="">
         {/* Padding for days before the 1st */}
         {[...Array(daysToPad)].map((_, i) => (
-          <div key={`pad-${i}`} className="h-24 bg-slate-50/50 dark:bg-zinc-950/50" />
+          <div key={`pad-${i}`} className="" />
         ))}
 
         {/* Days of the month */}
@@ -344,16 +344,16 @@ function MonthView({
                     : 'bg-slate-50 dark:bg-zinc-900/50'
               }`}
             >
-              <div className="flex justify-between items-start p-2">
+              <div className="">
                 <span className={`text-[10px] font-sans ${isTodayDay ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
                   {format(day, 'd')}
                 </span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">
+                <span className="">
                   {dayEvents.length}
                 </span>
               </div>
 
-              <div className="mt-1 space-y-1 h-[calc(100%-2rem)] overflow-hidden">
+              <div className="">
                 {dayEvents.slice(0, 3).map((event) => (
                   <div
                     key={event.id}
@@ -368,7 +368,7 @@ function MonthView({
                 ))}
 
                 {dayEvents.length > 3 && (
-                  <div className="text-[9px] text-slate-400 dark:text-zinc-500">
+                  <div className="">
                     +{dayEvents.length - 3} more
                   </div>
                 )}
@@ -402,14 +402,14 @@ function WeekView({
   });
 
   return (
-    <div className="space-y-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+    <div className="">
+      <div className="">
+        <h3 className="">
           Week of {format(startOfWeekDate, 'MMM d')} – {format(endOfWeek(currentDate, { weekStartsOn: 1 }), 'MMM d, yyyy')}
         </h3>
       </div>
 
-      <div className="grid grid-cols-7 gap-2">
+      <div className="">
         {[...Array(7)].map((_, i) => {
           const day = addDays(startOfWeekDate, i);
           const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()];
@@ -421,7 +421,7 @@ function WeekView({
               }`}
             >
               <div>{dayName}</div>
-              <div className="text-xs">{format(day, 'MMM d')}</div>
+              <div className="">{format(day, 'MMM d')}</div>
             </div>
           );
         })}
@@ -443,18 +443,18 @@ function WeekView({
                     : 'bg-slate-50 dark:bg-zinc-950/50'
               }`}
             >
-              <div className="flex items-start justify-between p-2">
+              <div className="">
                 <span className={`text-[10px] font-sans ${
                   isTodayDay ? 'font-bold text-purple-600' : 'text-slate-400'
                 }`}>
                   {format(day, 'd')}
                 </span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">
+                <span className="">
                   {dayEvents.length}
                 </span>
               </div>
 
-              <div className="mt-1 h-[calc(100%-2rem)] space-y-1 overflow-hidden">
+              <div className="">
                 {dayEvents.map((event) => (
                   <div
                     key={event.id}
@@ -466,7 +466,7 @@ function WeekView({
                   >
                     {event.title}
                     {event.description && (
-                      <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-zinc-400">
+                      <div className="">
                         {event.description}
                       </div>
                     )}
@@ -474,7 +474,7 @@ function WeekView({
                 ))}
 
                 {dayEvents.length === 0 && (
-                  <div className="mt-2 text-center text-xs text-slate-400 dark:text-zinc-500">
+                  <div className="">
                     No events
                   </div>
                 )}
@@ -507,19 +507,19 @@ function AgendaView({
 
   if (upcomingEvents.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-slate-500 dark:text-zinc-400">No upcoming events in the next 30 days.</p>
+      <div className="">
+        <p className="">No upcoming events in the next 30 days.</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+    <div className="">
+      <h3 className="">
         Upcoming events ({format(startDate, 'MMM d, yyyy')} – {format(endDate, 'MMM d, yyyy')})
       </h3>
 
-      <div className="space-y-3">
+      <div className="">
         {upcomingEvents.map((event) => {
           const eventStart = parseISO(event.startDate);
           const eventEnd = event.endDate ? parseISO(event.endDate) : null;
@@ -527,15 +527,15 @@ function AgendaView({
           return (
             <div
               key={event.id}
-              className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 transition-colors hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
+              className=""
             >
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
-                <CalendarIcon className="h-4 w-4" />
+              <div className="">
+                <CalendarIcon className="" />
               </div>
 
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex items-start justify-between">
-                  <h4 className="truncate text-lg font-medium text-slate-900 dark:text-white">
+              <div className="">
+                <div className="">
+                  <h4 className="">
                     {event.title}
                   </h4>
                   <span
@@ -549,17 +549,17 @@ function AgendaView({
                   </span>
                 </div>
 
-                <p className="mb-1 text-sm text-slate-500 dark:text-zinc-400">
+                <p className="">
                   {format(eventStart, 'PPP')}{eventEnd ? ` – ${format(eventEnd, 'PPP')}` : ''}
                 </p>
 
                 {event.description && (
-                  <p className="mb-1 text-xs text-slate-500 dark:text-zinc-400">
+                  <p className="">
                     {event.description}
                   </p>
                 )}
 
-                <div className="flex flex-wrap gap-1 text-xs text-slate-400 dark:text-zinc-500">
+                <div className="">
                   <span>Category: {event.category}</span>
                   {event.relatedClientId && <span>Client</span>}
                   {event.relatedProjectId && <span>Project</span>}

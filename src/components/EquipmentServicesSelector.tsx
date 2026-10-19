@@ -163,7 +163,7 @@ export default function EquipmentServicesSelector({
 
   const filteredCatalog = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-    
+
     return catalog.filter((item) => {
       const matchesSearch =
         !query ||
@@ -270,14 +270,14 @@ export default function EquipmentServicesSelector({
   }
 
   return (
-    <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-col justify-between gap-3  border-slate-100 pb-4 sm:flex-row sm:items-center dark:border-zinc-800">
+    <div className="">
+      <div className="">
         <div>
-          <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-purple-600" />
+          <h3 className="">
+            <span className="inline-block" />
             Equipment & Services Catalog
           </h3>
-          <p className="font-sans text-xs text-slate-500 dark:text-zinc-400">
+          <p className="">
             Equipment rates come from the database. Crew, logistics, data, and post services use the service catalog.
           </p>
         </div>
@@ -285,14 +285,14 @@ export default function EquipmentServicesSelector({
         <button
           type="button"
           onClick={() => setShowCustomForm((previous) => !previous)}
-          className="rounded-full border border-purple-500/50 bg-purple-50 px-3 py-1.5 font-sans text-xs font-semibold uppercase text-purple-700 transition hover:bg-purple-600 hover:text-white dark:bg-purple-950/40 dark:text-purple-300"
+          className=""
         >
           {showCustomForm ? '✕ Close Custom' : '+ Add Custom Gear/Service'}
         </button>
       </div>
 
       {equipmentError && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-300">
+        <div className="">
           {equipmentError}
         </div>
       )}
@@ -300,15 +300,15 @@ export default function EquipmentServicesSelector({
       {showCustomForm && (
         <form
           onSubmit={handleAddCustomItem}
-          className="space-y-4 rounded-xl border border-purple-200 bg-slate-50 p-4 dark:border-purple-900/50 dark:bg-zinc-950"
+          className=""
         >
-          <div className="font-sans text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
+          <div className="">
             Create Custom Line Item
           </div>
 
-          <div className="grid grid-cols-1 gap-3 text-xs sm:grid-cols-2 lg:grid-cols-4">
-            <div className="sm:col-span-2">
-              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
+          <div className="">
+            <div className="">
+              <label className="block">
                 Item Name / Description *
               </label>
               <input
@@ -316,19 +316,19 @@ export default function EquipmentServicesSelector({
                 value={customName}
                 onChange={(event) => setCustomName(event.target.value)}
                 placeholder="e.g. Teleprompter Kit + Operator"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className=""
                 required
               />
             </div>
 
             <div>
-              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
+              <label className="block">
                 Target Section *
               </label>
               <select
                 value={customSection}
                 onChange={(event) => handleSectionChange(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className=""
               >
                 <option value="A. Professional Fees (Core)">A. Professional Fees (Core)</option>
                 <option value="Camera Package">Camera Package</option>
@@ -344,7 +344,7 @@ export default function EquipmentServicesSelector({
             </div>
 
             <div>
-              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
+              <label className="block">
                 Rate ({currency}) *
               </label>
               <input
@@ -352,74 +352,74 @@ export default function EquipmentServicesSelector({
                 min="0"
                 value={customRate}
                 onChange={(event) => setCustomRate(event.target.value === '' ? '' : Number(event.target.value))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className=""
                 required
               />
             </div>
 
             <div>
-              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">Quantity</label>
+              <label className="block">Quantity</label>
               <input
                 type="number"
                 min="1"
                 value={customQty}
                 onChange={(event) => setCustomQty(Math.max(1, Number(event.target.value) || 1))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className=""
               />
             </div>
 
             <div>
-              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">Days / Units</label>
+              <label className="block">Days / Units</label>
               <input
                 type="number"
                 min="1"
                 value={customDays}
                 onChange={(event) => setCustomDays(Math.max(1, Number(event.target.value) || 1))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 dark:border-zinc-700 dark:text-zinc-100"
+                className=""
               />
             </div>
 
-            <div className="sm:col-span-2">
-              <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">Notes / Specs</label>
+            <div className="">
+              <label className="block">Notes / Specs</label>
               <input
                 type="text"
                 value={customNotes}
                 onChange={(event) => setCustomNotes(event.target.value)}
                 placeholder="e.g. Dual wireless audio & field monitor included"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className=""
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={() => setShowCustomForm(false)} className="px-3 py-1 text-xs font-sans text-slate-500 hover:text-slate-700 dark:text-zinc-400">
+          <div className="">
+            <button type="button" onClick={() => setShowCustomForm(false)} className="">
               Cancel
             </button>
-            <button type="submit" className="rounded-full bg-purple-600 px-4 py-1.5 font-sans text-xs font-semibold uppercase text-white transition hover:bg-purple-700">
+            <button type="submit" className="">
               Insert Line Item →
             </button>
           </div>
         </form>
       )}
 
-      <div className="space-y-3">
-        <div className="relative">
+      <div className="">
+        <div className="">
           <input
             type="text"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search equipment or service..."
-            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 pl-10 text-xs text-slate-900 outline-none transition focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className=""
           />
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
+          <span className="">🔍</span>
           {searchTerm && (
-            <button type="button" onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 font-sans text-xs text-slate-400 hover:text-slate-600">
+            <button type="button" onClick={() => setSearchTerm('')} className="">
               Clear
             </button>
           )}
         </div>
 
-        <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+        <div className="no-scrollbar">
           {categories.map((category) => (
             <button
               key={category.key}
@@ -437,9 +437,9 @@ export default function EquipmentServicesSelector({
         </div>
       </div>
 
-      <div className="grid max-h-105 grid-cols-1 gap-3 overflow-y-auto pr-1 md:grid-cols-2 lg:grid-cols-3">
+      <div className="">
         {loadingEquipment && (
-          <div className="col-span-full py-10 text-center text-sm text-slate-500 dark:text-zinc-500">
+          <div className="">
             Loading equipment catalog…
           </div>
         )}
@@ -450,47 +450,47 @@ export default function EquipmentServicesSelector({
           return (
             <div
               key={item.id}
-              className="flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition hover:border-purple-400 dark:border-zinc-800/80 dark:bg-zinc-950/40 dark:hover:border-purple-600/60"
+              className=""
             >
               <div>
-                <div className="flex items-start justify-between gap-2">
-                  <span className="line-clamp-2 text-xs font-semibold text-slate-900 dark:text-zinc-200">{item.name}</span>
+                <div className="">
+                  <span className="">{item.name}</span>
                 </div>
-                <div className="mt-0.5 flex items-center gap-2">
-                  <span className="font-sans text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                <div className="">
+                  <span className="">
                     {currency} {Number(item.defaultRate).toLocaleString()}
                   </span>
-                  <span className="font-sans text-[10px] text-slate-400">/{item.defaultUnit}</span>
+                  <span className="">/{item.defaultUnit}</span>
                 </div>
                 {item.defaultNotes && (
-                  <p className="mt-1 line-clamp-2 text-[11px] text-slate-500 dark:text-zinc-500">{item.defaultNotes}</p>
+                  <p className="">{item.defaultNotes}</p>
                 )}
               </div>
 
-              <div className="flex items-center justify-between gap-2 border-t border-slate-200/60 pt-2 text-xs font-sans dark:border-zinc-800">
-                <div className="flex items-center gap-1">
-                  <label className="text-[10px] uppercase text-slate-400">Qty:</label>
+              <div className="">
+                <div className="">
+                  <label className="">Qty:</label>
                   <input
                     type="number"
                     min="1"
                     value={state.qty}
                     onChange={(event) => updateItemState(item.id, { qty: Math.max(1, parseInt(event.target.value, 10) || 1) })}
-                    className="w-10 rounded border border-slate-300 bg-white px-1 py-0.5 text-center text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                    className=""
                   />
-                  <label className="ml-1 text-[10px] uppercase text-slate-400">Days:</label>
+                  <label className="">Days:</label>
                   <input
                     type="number"
                     min="1"
                     value={state.days}
                     onChange={(event) => updateItemState(item.id, { days: Math.max(1, parseInt(event.target.value, 10) || 1) })}
-                    className="w-10 rounded border border-slate-300 bg-white px-1 py-0.5 text-center text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                    className=""
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={() => handleAddCatalogItem(item)}
-                  className="rounded-lg bg-purple-600 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition hover:bg-purple-700"
+                  className=""
                 >
                   + Add
                 </button>
@@ -500,8 +500,8 @@ export default function EquipmentServicesSelector({
         })}
 
         {!loadingEquipment && filteredCatalog.length === 0 && (
-          <div className="col-span-full py-10 text-center">
-            <p className="text-sm text-slate-500 dark:text-zinc-500">No catalog items match your search.</p>
+          <div className="">
+            <p className="">No catalog items match your search.</p>
           </div>
         )}
       </div>

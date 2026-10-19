@@ -85,9 +85,9 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
 
   if (loading) {
     return (
-      <div className="ui-card p-6">
-        <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
-          <Loader2 className="w-4 h-4 animate-spin" />
+      <div className="ui-card">
+        <div className="">
+          <Loader2 className="" />
           <span>Loading...</span>
         </div>
       </div>
@@ -95,26 +95,26 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
   }
 
   return (
-    <div className="space-y-6">
+    <div className="">
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="">
+          <AlertCircle className="" />
+          <p className="">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-sm text-green-700 font-medium">Saved successfully</p>
+        <div className="">
+          <p className="">Saved successfully</p>
         </div>
       )}
 
       {/* GENERAL SECTION */}
-      <div className="ui-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold">General</h2>
+      <div className="ui-card">
+        <h2 className="">General</h2>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Gallery Name</label>
+          <label className="block">Gallery Name</label>
           <input
             type="text"
             value={title}
@@ -125,18 +125,18 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-2">Description</label>
+          <label className="block">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="gallery-input min-h-24"
+            className="gallery-input"
             placeholder="Gallery description"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="">
           <div>
-            <label className="block text-sm font-medium mb-2">Category</label>
+            <label className="block">Category</label>
             <input
               type="text"
               value={category}
@@ -147,7 +147,7 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Slug</label>
+            <label className="block">Slug</label>
             <input
               type="text"
               value={slug}
@@ -155,56 +155,56 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
               className="gallery-input"
               placeholder="gallery-slug"
             />
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">Used in the gallery URL</p>
+            <p className="">Used in the gallery URL</p>
           </div>
         </div>
       </div>
 
       {/* CLIENT PERMISSIONS SECTION */}
-      <div className="ui-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Client Permissions</h2>
+      <div className="ui-card">
+        <h2 className="">Client Permissions</h2>
 
-        <div className="space-y-3">
-          <label className="flex items-start gap-3 cursor-pointer">
+        <div className="">
+          <label className="">
             <input
               type="checkbox"
               checked={allowDownloads}
               onChange={(e) => setAllowDownloads(e.target.checked)}
-              className="w-5 h-5 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] mt-0.5"
+              className=""
             />
             <div>
-              <p className="font-medium">Allow Downloads</p>
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="">Allow Downloads</p>
+              <p className="">
                 Clients can download photos from the gallery
               </p>
             </div>
           </label>
 
-          <label className="flex items-start gap-3 cursor-pointer">
+          <label className="">
             <input
               type="checkbox"
               checked={allowFavorites}
               onChange={(e) => setAllowFavorites(e.target.checked)}
-              className="w-5 h-5 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] mt-0.5"
+              className=""
             />
             <div>
-              <p className="font-medium">Allow Favorites</p>
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="">Allow Favorites</p>
+              <p className="">
                 Clients can mark photos as favorites
               </p>
             </div>
           </label>
 
-          <label className="flex items-start gap-3 cursor-pointer">
+          <label className="">
             <input
               type="checkbox"
               checked={allowSelections}
               onChange={(e) => setAllowSelections(e.target.checked)}
-              className="w-5 h-5 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] mt-0.5"
+              className=""
             />
             <div>
-              <p className="font-medium">Allow Selections</p>
-              <p className="text-sm text-[var(--color-text-muted)]">
+              <p className="">Allow Selections</p>
+              <p className="">
                 Clients can select/cart multiple photos
               </p>
             </div>
@@ -220,7 +220,7 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
       >
         {saving ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="" />
             Saving...
           </>
         ) : (

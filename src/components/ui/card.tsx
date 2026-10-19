@@ -23,9 +23,9 @@ const Card = React.forwardRef<
         className={cn("rounded-xl border bg-card text-card-foreground p-5 shadow-sm", className)}
         {...props}
       >
-        {title && <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>}
-        {children && <p className="text-2xl font-bold tracking-tight text-foreground mt-2 tabular-nums">{children}</p>}
-        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
+        {title && <p className="">{title}</p>}
+        {children && <p className="tabular-nums">{children}</p>}
+        {subtitle && <p className="">{subtitle}</p>}
       </div>
     );
   }

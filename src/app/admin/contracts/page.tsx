@@ -154,8 +154,8 @@ export default function ContractsPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="">
+      <div className="">
         <AdminPageHeader
           title="Contracts"
           description="Create, send and manage agreements with your clients."
@@ -163,22 +163,22 @@ export default function ContractsPage() {
           primaryAction={
             <Button
               variant="primary"
-              className="text-xs font-sans uppercase tracking-widest"
+              className=""
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="" />
               New Contract
             </Button>
           }
         />
 
         {error && !loading && (
-          <div className="ui-card p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="ui-card">
+            <p className="">{error}</p>
           </div>
         )}
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <div className="">
           <div className="ui-stat-card">
             <p className="ui-stat-label">Total Contracts</p>
             <p className="ui-stat-value">{stats.total}</p>
@@ -186,56 +186,56 @@ export default function ContractsPage() {
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Drafts</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+            <p className="ui-stat-value">
               {stats.draft}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Sent</p>
-            <p className="ui-stat-value text-blue-600 dark:text-blue-400">
+            <p className="ui-stat-value">
               {stats.sent}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Viewed</p>
-            <p className="ui-stat-value text-yellow-600 dark:text-yellow-400">
+            <p className="ui-stat-value">
               {stats.viewed}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Awaiting Signature</p>
-            <p className="ui-stat-value text-purple-600 dark:text-purple-400">
+            <p className="ui-stat-value">
               {stats.awaiting_signature}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Signed</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+            <p className="ui-stat-value">
               {stats.signed}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Declined</p>
-            <p className="ui-stat-value text-red-600 dark:text-red-400">
+            <p className="ui-stat-value">
               {stats.declined}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Expired</p>
-            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
+            <p className="ui-stat-value">
               {stats.expired}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Cancelled</p>
-            <p className="ui-stat-value text-red-600 dark:text-red-400">
+            <p className="ui-stat-value">
               {stats.cancelled}
             </p>
           </div>
@@ -288,15 +288,15 @@ export default function ContractsPage() {
         {/* TABLE */}
         <div className="ui-card">
           {loading ? (
-            <div className="ui-loading-state p-12">
-              <p className="text-xs font-sans uppercase tracking-widest">
+            <div className="ui-loading-state">
+              <p className="">
                 Loading contracts…
               </p>
             </div>
           ) : contracts.length === 0 ? (
-            <div className="ui-empty-state p-12">
+            <div className="ui-empty-state">
               <div className="ui-empty-icon">
-                <FilePlus className="h-6 w-6" />
+                <FilePlus className="" />
               </div>
 
               <h2 className="ui-section-title">No contracts yet</h2>
@@ -305,17 +305,17 @@ export default function ContractsPage() {
                 Create your first contract or browse templates.
               </p>
 
-              <div className="flex justify-center mt-4">
+              <div className="">
                 <Button
                   variant="primary"
-                  className="mt-6"
+                  className=""
                 >
                   Create First Contract
                 </Button>
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="">
               <table className="ui-table">
                 <thead>
                   <tr>
@@ -338,15 +338,15 @@ export default function ContractsPage() {
                     >
                       {/* CONTRACT */}
                       <td className="ui-table-cell">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
-                            <FileSignature className="h-4 w-4" />
+                        <div className="">
+                          <div className="">
+                            <FileSignature className="" />
                           </div>
-                          <div className="min-w-0 space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
+                          <div className="">
+                            <p className="">
                               {contract.title}
                             </p>
-                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
+                            <p className="ui-meta">
                               #{contract.contractNumber}
                             </p>
                           </div>
@@ -355,7 +355,7 @@ export default function ContractsPage() {
 
                       {/* CLIENT */}
                       <td className="ui-table-cell">
-                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                        <p className="">
                           {contract.clientName}
                         </p>
                       </td>
@@ -363,7 +363,7 @@ export default function ContractsPage() {
                       {/* PROJECT */}
                       <td className="ui-table-cell">
                         {contract.projectName ?? (
-                          <span className="ui-caption text-xs text-slate-500 dark:text-zinc-600 italic">
+                          <span className="ui-caption">
                             None
                           </span>
                         )}
@@ -371,7 +371,7 @@ export default function ContractsPage() {
 
                       {/* STATUS */}
                       <td className="ui-table-cell">
-                        <div className="flex flex-col items-start gap-2">
+                        <div className="">
                           <span
                             className={`${getStatusBadgeClass(contract.status)}`}
                           >
@@ -382,57 +382,57 @@ export default function ContractsPage() {
 
                       {/* CREATED */}
                       <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                        <p className="">
                           {new Date(contract.createdAt).toLocaleDateString()}
                         </p>
                       </td>
 
                       {/* SENT */}
                       <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                        <p className="">
                           {contract.sentAt ? new Date(contract.sentAt).toLocaleDateString() : '-'}
                         </p>
                       </td>
 
                       {/* SIGNED */}
                       <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                        <p className="">
                           {contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '-'}
                         </p>
                       </td>
 
                       {/* ACTION */}
-                      <td className="ui-table-cell text-right">
-                        <div className="flex gap-2">
+                      <td className="ui-table-cell">
+                        <div className="">
                           <Link
                             href={`/admin/contracts/${contract.id}`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
+                            className="ui-button ui-button-secondary"
                           >
                             View
-                            <ArrowUpRight className="h-3 w-3" />
+                            <ArrowUpRight className="" />
                           </Link>
                           <Link
                             href={`/admin/contracts/${contract.id}/edit`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
+                            className="ui-button ui-button-secondary"
                           >
                             Edit
-                            <Plus className="h-3 w-3" />
+                            <Plus className="" />
                           </Link>
                           {contract.status === 'draft' && (
                             <>
                               <Link
                                 href={`/admin/contracts/${contract.id}/send`}
-                                className="ui-button ui-button-success text-sm font-sans"
+                                className="ui-button ui-button-success"
                               >
                                 Send
-                                <CheckCircle2 className="h-3 w-3" />
+                                <CheckCircle2 className="" />
                               </Link>
                               <Link
                                 href={`/admin/contracts/${contract.id}/duplicate`}
-                                className="ui-button ui-button-secondary text-sm font-sans"
+                                className="ui-button ui-button-secondary"
                               >
                                 Duplicate
-                                <FilePlus className="h-3 w-3" />
+                                <FilePlus className="" />
                               </Link>
                             </>
                           )}
@@ -443,9 +443,9 @@ export default function ContractsPage() {
                               // In a real refactor, this would be moved to a service function
                               window.location.reload(); // Placeholder - actual delete would fetch API
                             }}
-                            className="ui-button ui-button-destructive text-sm font-sans"
+                            className="ui-button ui-button-destructive"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="" />
                           </button>
                         </div>
                       </td>

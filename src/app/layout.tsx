@@ -7,6 +7,11 @@ import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { Outfit } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
+
 
 validateEnv();
 
@@ -37,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" suppressHydrationWarning className={cn("font-sans", outfit.variable)}>
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (
@@ -51,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         )}
       </head>
-      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+      <body className="antialiased">
         <QueryProvider>
           <CreatorProvider>{children}</CreatorProvider>
         </QueryProvider>

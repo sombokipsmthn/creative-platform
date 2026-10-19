@@ -26,35 +26,35 @@ export default function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full  bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-4">
+    <header className="">
+      <div className="">
+        <div className="">
           {/* Mobile Sheet Navigation */}
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9">
-                <Menu className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="">
+                <Menu className="" />
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-6">
+            <SheetContent side="left" className="">
               <SheetHeader>
-                <SheetTitle className="text-left font-bold tracking-tight">
+                <SheetTitle className="">
                   KIPSMTHN
                 </SheetTitle>
               </SheetHeader>
-              <nav className="mt-8 flex flex-col gap-3">
+              <nav className="">
                 {navLinks.map((link) => (
                   <Link
                     key={link.href}
                     href={link.href}
                     onClick={() => setMobileOpen(false)}
-                    className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors py-1.5"
+                    className=""
                   >
                     {link.label}
                   </Link>
                 ))}
-                <div className="border-t pt-4 mt-2 flex flex-col gap-2">
+                <div className="">
                   <Button asChild size="sm" onClick={() => setMobileOpen(false)}>
                     <Link href="/admin">Open Studio Workspace</Link>
                   </Button>
@@ -66,22 +66,22 @@ export default function Header() {
           {/* Brand */}
           <Link
             href="/"
-            className="flex items-center gap-2 font-bold tracking-tight text-foreground transition-opacity hover:opacity-90"
+            className=""
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary text-xs text-primary-foreground font-mono">
+            <span className="">
               K
             </span>
-            <span className="text-base font-semibold">KIPSMTHN</span>
+            <span className="">KIPSMTHN</span>
           </Link>
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden items-center gap-6 text-sm font-medium text-muted-foreground md:flex">
+        <nav className="hidden">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="transition-colors hover:text-foreground"
+              className=""
             >
               {link.label}
             </Link>
@@ -89,13 +89,13 @@ export default function Header() {
         </nav>
 
         {/* Actions */}
-        <div className="flex items-center gap-2">
+        <div className="">
           {!isPending && isSignedIn ? (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/admin" className="gap-1.5">
-                  <LayoutDashboard className="h-4 w-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
+                <Link href="/admin" className="">
+                  <LayoutDashboard className="" />
+                  <span className="hidden">Dashboard</span>
                 </Link>
               </Button>
               <Button
@@ -103,29 +103,29 @@ export default function Header() {
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
-                className="gap-1.5"
+                className=""
               >
-                <LogOut className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Sign out</span>
+                <LogOut className="" />
+                <span className="hidden">Sign out</span>
               </Button>
             </>
           ) : !isPending ? (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/sign-in" className="gap-1.5">
-                  <LogIn className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Sign in</span>
+                <Link href="/sign-in" className="">
+                  <LogIn className="" />
+                  <span className="hidden">Sign in</span>
                 </Link>
               </Button>
               <Button asChild size="sm">
                 <Link href="/admin">
-                  <span className="hidden sm:inline">Get started</span>
-                  <span className="sm:hidden" aria-hidden="true"><ArrowRight className="h-3.5 w-3.5" /></span>
+                  <span className="hidden">Get started</span>
+                  <span className="" aria-hidden="true"><ArrowRight className="" /></span>
                 </Link>
               </Button>
             </>
           ) : (
-            <div className="h-8 w-20 animate-pulse rounded-md bg-muted" />
+            <div className="" />
           )}
 
           <ThemeToggle />

@@ -30,7 +30,7 @@ export default function StatusBadge({
   variant,
 }: StatusBadgeProps) {
   const displayLabel = status.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
-  
+
   let badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' = 'secondary';
   if (variant === 'danger') badgeVariant = 'destructive';
   else if (variant === 'success' || variant === 'warning' || variant === 'outline' || variant === 'secondary' || variant === 'default') {
@@ -40,7 +40,7 @@ export default function StatusBadge({
   }
 
   return (
-    <Badge variant={badgeVariant} className="capitalize text-xs font-medium">
+    <Badge variant={badgeVariant} className="capitalize">
       {displayLabel}
     </Badge>
   );

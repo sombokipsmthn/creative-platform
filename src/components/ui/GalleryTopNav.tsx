@@ -18,8 +18,8 @@ export default function GalleryTopNav({
   onTabChange,
 }: GalleryTopNavProps) {
   return (
-    <div className=" border-[var(--color-border-subtle)]">
-      <div className="flex gap-6 overflow-x-auto">
+    <div className="">
+      <div className="">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (

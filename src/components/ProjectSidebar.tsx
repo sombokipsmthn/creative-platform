@@ -12,32 +12,32 @@ const tabs: SidebarTab[] = [
   {
     type: 'photos',
     label: 'Photos & Collections',
-    icon: <Layers className="h-4 w-4" />,
+    icon: <Layers className="" />,
   },
   {
     type: 'details',
     label: 'Gallery Details',
-    icon: <Sliders className="h-4 w-4" />,
+    icon: <Sliders className="" />,
   },
   {
     type: 'themes',
     label: 'Theme & Design',
-    icon: <Palette className="h-4 w-4" />,
+    icon: <Palette className="" />,
   },
   {
     type: 'cover',
     label: 'Cover Image',
-    icon: <Star className="h-4 w-4" />,
+    icon: <Star className="" />,
   },
   {
     type: 'settings',
     label: 'Settings & Access',
-    icon: <Settings className="h-4 w-4" />,
+    icon: <Settings className="" />,
   },
   {
     type: 'activity',
     label: 'Client Activity',
-    icon: <Heart className="h-4 w-4" />,
+    icon: <Heart className="" />,
   },
 ]
 
@@ -49,19 +49,19 @@ export default function ProjectSidebar({
   onTabChange: (tab: string) => void
 }) {
   return (
-    <aside className="w-full shrink-0  border-[var(--border-subtle)] bg-[var(--bg-card)] md:w-60  md:border-r">
-      <div className="flex h-full flex-col px-3 py-4 md:px-4 md:py-5">
-        <div className="mb-5 px-2">
+    <aside className="">
+      <div className="">
+        <div className="">
           <p className="os-eyebrow">Gallery</p>
-          <h2 className="mt-2 text-base font-semibold tracking-[-0.02em] text-[var(--text-primary)]">
+          <h2 className="">
             Gallery tools
           </h2>
-          <p className="mt-1 text-xs leading-5 text-[var(--text-muted)]">
+          <p className="">
             Build and deliver this client gallery
           </p>
         </div>
 
-        <nav className="grid grid-cols-2 gap-1 md:block md:space-y-1" aria-label="Project tools">
+        <nav className="" aria-label="Project tools">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.type
 
@@ -86,7 +86,7 @@ export default function ProjectSidebar({
                 >
                   {tab.icon}
                 </span>
-                <span className="min-w-0 truncate">{tab.label}</span>
+                <span className="">{tab.label}</span>
               </button>
             )
           })}

@@ -13,10 +13,10 @@ export default function NewContractPage() {
   }, [router]);
 
   return (
-    <div className="ui-page min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-3">
-        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
-        <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
+    <div className="ui-page">
+      <div className="">
+        <Loader2 className="" />
+        <p className="">Loading contract builder...</p>
       </div>
     </div>
   );

@@ -23,23 +23,23 @@ export default function AdminPagination({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
-      <div className="text-xs text-muted-foreground">
-        Showing <span className="font-medium text-foreground">{totalItems > 0 ? startItem : 0}</span> to{' '}
-        <span className="font-medium text-foreground">{endItem}</span> of{' '}
-        <span className="font-medium text-foreground">{totalItems}</span> results
+    <div className="">
+      <div className="">
+        Showing <span className="">{totalItems > 0 ? startItem : 0}</span> to{' '}
+        <span className="">{endItem}</span> of{' '}
+        <span className="">{totalItems}</span> results
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="">
         <Button
           variant="outline"
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage <= 1}
           aria-label="Previous page"
-          className="h-8 gap-1 px-2.5 text-xs"
+          className=""
         >
-          <ChevronLeft className="h-3.5 w-3.5" />
+          <ChevronLeft className="" />
           <span>Previous</span>
         </Button>
 
@@ -53,7 +53,7 @@ export default function AdminPagination({
               variant={isActive ? 'default' : 'outline'}
               size="sm"
               onClick={() => onPageChange(page)}
-              className="h-8 w-8 p-0 text-xs font-mono"
+              className=""
               aria-current={isActive ? 'page' : undefined}
               aria-label={`Go to page ${page}`}
             >
@@ -68,10 +68,10 @@ export default function AdminPagination({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages}
           aria-label="Next page"
-          className="h-8 gap-1 px-2.5 text-xs"
+          className=""
         >
           <span>Next</span>
-          <ChevronRight className="h-3.5 w-3.5" />
+          <ChevronRight className="" />
         </Button>
       </div>
     </div>

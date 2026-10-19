@@ -165,10 +165,10 @@ export default function QuotesPage() {
   );
 
   return (
-    <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="">
+      <div className="">
         {/* HEADER */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="">
           <div>
             <p className="ui-eyebrow">Sales & Production</p>
             <h1 className="ui-page-title">Quotes</h1>
@@ -181,15 +181,15 @@ export default function QuotesPage() {
           <Button
             onClick={() => router.push('/admin/quotes/new')}
             variant="primary"
-            className="text-xs font-sans uppercase tracking-widest"
+            className=""
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="" />
             New Quote
           </Button>
         </div>
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+        <div className="">
           <div className="ui-stat-card">
             <p className="ui-stat-label">Total Quotes</p>
             <p className="ui-stat-value">{quotes.length}</p>
@@ -197,14 +197,14 @@ export default function QuotesPage() {
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Accepted</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+            <p className="ui-stat-value">
               {acceptedQuotes}
             </p>
           </div>
 
           <div className="ui-stat-card">
             <p className="ui-stat-label">Invoiced</p>
-            <p className="ui-stat-value text-cyan-600 dark:text-cyan-400">
+            <p className="ui-stat-value">
               {invoicedQuotes}
             </p>
           </div>
@@ -250,23 +250,23 @@ export default function QuotesPage() {
 
         {/* ERROR */}
         {error && (
-          <div className="ui-card p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="ui-card">
+            <p className="">{error}</p>
           </div>
         )}
 
         {/* TABLE */}
         <div className="ui-card">
           {loading ? (
-            <div className="px-6 py-16 text-center">
-              <p className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+            <div className="">
+              <p className="">
                 Loading quotes...
               </p>
             </div>
           ) : filteredQuotes.length === 0 ? (
             <div className="ui-empty-state">
               <div className="ui-empty-icon">
-                <Plus className="h-6 w-6" />
+                <Plus className="" />
               </div>
 
               <h2 className="ui-section-title">
@@ -285,14 +285,14 @@ export default function QuotesPage() {
                 <Button
                   onClick={() => router.push('/admin/quotes/new')}
                   variant="primary"
-                  className="mt-6"
+                  className=""
                 >
                   Create First Quote
                 </Button>
               )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="">
               <table className="ui-table">
                 <thead>
                   <tr>
@@ -320,8 +320,8 @@ export default function QuotesPage() {
                       >
                         {/* QUOTE */}
                         <td className="ui-table-cell">
-                          <div className="space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
+                          <div className="">
+                            <p className="">
                               {quote.title || 'Untitled Quote'}
                             </p>
 
@@ -334,8 +334,8 @@ export default function QuotesPage() {
                         {/* CLIENT */}
                         <td className="ui-table-cell">
                           {quote.client ? (
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                            <div className="">
+                              <p className="">
                                 {quote.client.name}
                               </p>
 
@@ -359,7 +359,7 @@ export default function QuotesPage() {
 
                         {/* STATUS */}
                         <td className="ui-table-cell">
-                          <div className="flex flex-col items-start gap-2">
+                          <div className="">
                             <span
                               className={`ui-badge ${status === 'accepted' ? 'ui-badge-success' :
                                 status === 'declined' ? 'ui-badge-danger' :
@@ -375,7 +375,7 @@ export default function QuotesPage() {
                                 onClick={() => router.push(`/admin/invoices/${quote.invoiceId}`)}
                                 variant="ghost"
                                 size="sm"
-                                className="h-auto p-0 normal-case tracking-normal"
+                                className="normal-case"
                               >
                                 View Invoice →
                               </Button>
@@ -389,7 +389,7 @@ export default function QuotesPage() {
                         </td>
 
                         {/* TOTAL */}
-                        <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
+                        <td className="ui-table-cell">
                           {formatAmount(
                             quote.total,
                             quote.currency
@@ -397,14 +397,14 @@ export default function QuotesPage() {
                         </td>
 
                         {/* ACTION */}
-                        <td className="ui-table-cell text-right">
+                        <td className="ui-table-cell">
                           <Button
                             onClick={() => router.push(`/admin/quotes/${quote.id}`)}
                             variant="secondary"
                             size="sm"
                           >
                             View
-                            <ArrowRight className="h-3 w-3" />
+                            <ArrowRight className="" />
                           </Button>
                         </td>
                       </tr>

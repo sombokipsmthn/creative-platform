@@ -44,9 +44,9 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
         onClick={toggleTheme}
         aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
         title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-        className="h-9 w-9 text-muted-foreground hover:text-foreground"
+        className=""
       >
-        {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+        {isDark ? <Sun className="" aria-hidden="true" /> : <Moon className="" aria-hidden="true" />}
       </Button>
     );
   }
@@ -58,9 +58,9 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
       onClick={toggleTheme}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      className="gap-2 text-xs"
+      className=""
     >
-      {isDark ? <Sun className="h-3.5 w-3.5" aria-hidden="true" /> : <Moon className="h-3.5 w-3.5" aria-hidden="true" />}
+      {isDark ? <Sun className="" aria-hidden="true" /> : <Moon className="" aria-hidden="true" />}
       <span>{isDark ? 'Light' : 'Dark'}</span>
     </Button>
   );

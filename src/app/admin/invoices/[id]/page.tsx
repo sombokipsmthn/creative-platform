@@ -151,13 +151,13 @@ export default function InvoiceDetailPage() {
   /* ---- Loading ---- */
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
+      <div className="">
+        <div className="">
           <div
-            className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200"
-            style={{ borderTopColor: PURPLE }}
+            className=""
+
           />
-          <p className="text-xs font-sans uppercase tracking-widest text-slate-400">Loading invoice…</p>
+          <p className="">Loading invoice…</p>
         </div>
       </div>
     );
@@ -166,14 +166,14 @@ export default function InvoiceDetailPage() {
   /* ---- Not found ---- */
   if (!invoice) {
     return (
-      <div className="min-h-screen bg-slate-50 px-6 py-10">
-        <div className="mx-auto max-w-4xl">
-          <Link href="/admin/invoices" className="text-xs font-sans uppercase tracking-widest text-purple-600">
+      <div className="">
+        <div className="">
+          <Link href="/admin/invoices" className="">
             ← Back to Invoices
           </Link>
-          <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 px-6 py-12 text-center">
-            <h1 className="text-xl font-semibold text-red-700">Invoice not found</h1>
-            <p className="mt-2 text-sm text-red-600">{error || 'The requested invoice could not be loaded.'}</p>
+          <div className="">
+            <h1 className="">Invoice not found</h1>
+            <p className="">{error || 'The requested invoice could not be loaded.'}</p>
           </div>
         </div>
       </div>
@@ -186,28 +186,28 @@ export default function InvoiceDetailPage() {
   const items = invoice.items ?? [];
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8 print:bg-white print:p-0">
+    <div className="">
 
       {/* TOOLBAR */}
-      <div className="mx-auto mb-6 max-w-5xl print:hidden">
-        <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex items-center gap-4">
+      <div className="">
+        <div className="">
+          <div className="">
             <Link
               href="/admin/invoices"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600"
+              className=""
               aria-label="Back to invoices"
             >
               ←
             </Link>
             <div>
-              <p className="text-[10px] font-sans uppercase tracking-widest text-purple-500">Invoice</p>
-              <p className="mt-0.5 text-sm font-semibold text-slate-900">
+              <p className="">Invoice</p>
+              <p className="">
                 {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
               </p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="">
             <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-sans uppercase tracking-widest ${statusBadgeClass(status)}`}>
               {status}
             </span>
@@ -215,7 +215,7 @@ export default function InvoiceDetailPage() {
             <button
               type="button"
               onClick={() => window.print()}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-sans uppercase tracking-widest text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+              className=""
             >
               Print / PDF
             </button>
@@ -223,7 +223,7 @@ export default function InvoiceDetailPage() {
             {invoice.quoteId && (
               <Link
                 href={`/admin/quotes/${invoice.quoteId}`}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-sans uppercase tracking-widest text-slate-600 transition hover:border-purple-300 hover:bg-purple-50 hover:text-purple-600"
+                className=""
               >
                 View Quote
               </Link>
@@ -243,39 +243,39 @@ export default function InvoiceDetailPage() {
         </div>
 
         {error && (
-          <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-700">{error}</div>
+          <div className="">{error}</div>
         )}
         {success && (
-          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-700">{success}</div>
+          <div className="">{success}</div>
         )}
       </div>
 
       {/* INVOICE DOCUMENT */}
-      <div className="mx-auto max-w-5xl print:max-w-none">
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
+      <div className="">
+        <div className="">
 
           {/* HEADER */}
-          <div className=" border-slate-100 px-8 py-8 sm:px-10 print:px-0 print:py-0 print:pb-7">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+          <div className="">
+            <div className="">
               <div>
-                <div className="mb-3 h-1 w-10 print:hidden" style={{ backgroundColor: PURPLE }} />
-                <h1 className="text-3xl font-light tracking-tight text-slate-900">{invoice.title}</h1>
-                <p className="mt-1 font-sans text-xs uppercase tracking-widest text-slate-400">
+                <div className="" />
+                <h1 className="">{invoice.title}</h1>
+                <p className="">
                   {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 8).toUpperCase()}`}
                 </p>
               </div>
-              <div className="text-right space-y-1">
-                <p className="text-xs text-slate-500">
-                  <span className="font-sans uppercase tracking-widest text-slate-400">Issued: </span>
+              <div className="">
+                <p className="">
+                  <span className="">Issued: </span>
                   {fmtDate(invoice.issueDate)}
                 </p>
                 {invoice.dueDate && (
-                  <p className="text-xs text-slate-500">
-                    <span className="font-sans uppercase tracking-widest text-slate-400">Due: </span>
+                  <p className="">
+                    <span className="">Due: </span>
                     {fmtDate(invoice.dueDate)}
                   </p>
                 )}
-                <div className="pt-1">
+                <div className="">
                   <span className={`inline-flex rounded-full border px-3 py-1 text-[10px] font-sans uppercase tracking-widest print:border-0 print:px-0 ${statusBadgeClass(status)}`}>
                     {status}
                   </span>
@@ -285,52 +285,52 @@ export default function InvoiceDetailPage() {
           </div>
 
           {/* CLIENT */}
-          <div className=" border-slate-100 px-8 py-6 sm:px-10 print:px-0">
-            <p className="mb-3 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">Billed To</p>
+          <div className="">
+            <p className="">Billed To</p>
             {invoice.client ? (
-              <div className="space-y-0.5">
+              <div className="">
                 {invoice.client.company && (
-                  <p className="font-semibold text-slate-900">{invoice.client.company}</p>
+                  <p className="">{invoice.client.company}</p>
                 )}
                 <p className={invoice.client.company ? 'text-sm text-slate-600' : 'font-semibold text-slate-900'}>
                   {invoice.client.name}
                 </p>
-                {invoice.client.email && <p className="text-sm text-slate-500">{invoice.client.email}</p>}
-                {invoice.client.phone && <p className="text-sm text-slate-500">{invoice.client.phone}</p>}
+                {invoice.client.email && <p className="">{invoice.client.email}</p>}
+                {invoice.client.phone && <p className="">{invoice.client.phone}</p>}
                 {invoice.client.kraPin && (
-                  <p className="pt-1 text-xs font-sans text-slate-400">KRA PIN: {invoice.client.kraPin}</p>
+                  <p className="">KRA PIN: {invoice.client.kraPin}</p>
                 )}
               </div>
             ) : (
-              <p className="italic text-sm text-slate-400">No client attached</p>
+              <p className="">No client attached</p>
             )}
           </div>
 
           {/* LINE ITEMS */}
-          <div className="px-8 py-6 sm:px-10 print:px-0">
-            <p className="mb-4 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">Line Items</p>
+          <div className="">
+            <p className="">Line Items</p>
             {items.length === 0 ? (
-              <p className="py-8 text-center italic text-sm text-slate-400">No line items on this invoice.</p>
+              <p className="">No line items on this invoice.</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+              <div className="">
+                <table className="">
                   <thead>
-                    <tr className=" border-slate-100">
-                      <th className="py-2 pr-4 text-left text-[10px] font-sans uppercase tracking-widest text-slate-400">Description</th>
-                      <th className="py-2 pr-4 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Qty</th>
-                      <th className="py-2 pr-4 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Unit Price</th>
-                      <th className="py-2 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Amount</th>
+                    <tr className="">
+                      <th className="">Description</th>
+                      <th className="">Qty</th>
+                      <th className="">Unit Price</th>
+                      <th className="">Amount</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="">
                     {items.map((item) => (
                       <tr key={item.id}>
-                        <td className="py-3 pr-4">
-                          <p className="font-medium text-slate-900">{item.description || '—'}</p>
+                        <td className="">
+                          <p className="">{item.description || '—'}</p>
                         </td>
-                        <td className="py-3 pr-4 text-right font-sans text-slate-700">{item.quantity}</td>
-                        <td className="py-3 pr-4 text-right font-sans text-slate-700">{fmt(item.unitPrice, currency)}</td>
-                        <td className="py-3 text-right font-sans font-medium text-slate-900">{fmt(item.amount, currency)}</td>
+                        <td className="">{item.quantity}</td>
+                        <td className="">{fmt(item.unitPrice, currency)}</td>
+                        <td className="">{fmt(item.amount, currency)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -340,38 +340,38 @@ export default function InvoiceDetailPage() {
           </div>
 
           {/* TOTALS */}
-          <div className="border-t border-slate-100 px-8 py-6 sm:px-10 print:px-0">
-            <div className="ml-auto max-w-xs space-y-2">
-              <div className="flex justify-between text-sm text-slate-600">
+          <div className="">
+            <div className="">
+              <div className="">
                 <span>Subtotal</span>
-                <span className="font-sans">{fmt(invoice.subtotal ?? 0, currency)}</span>
+                <span className="">{fmt(invoice.subtotal ?? 0, currency)}</span>
               </div>
-              <div className="flex justify-between text-sm text-slate-600">
+              <div className="">
                 <span>Tax</span>
-                <span className="font-sans">{fmt(invoice.tax ?? 0, currency)}</span>
+                <span className="">{fmt(invoice.tax ?? 0, currency)}</span>
               </div>
-              <div className="flex justify-between border-t border-slate-200 pt-3 text-base font-semibold text-slate-900">
+              <div className="">
                 <span>Total</span>
-                <span className="font-sans" style={{ color: PURPLE }}>{fmt(invoice.total ?? 0, currency)}</span>
+                <span className="">{fmt(invoice.total ?? 0, currency)}</span>
               </div>
             </div>
           </div>
 
           {/* NOTES */}
           {invoice.notes && (
-            <div className="border-t border-slate-100 px-8 py-6 sm:px-10 print:px-0">
-              <p className="mb-2 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">Notes</p>
-              <p className="whitespace-pre-wrap text-sm text-slate-600">{invoice.notes}</p>
+            <div className="">
+              <p className="">Notes</p>
+              <p className="">{invoice.notes}</p>
             </div>
           )}
 
           {/* FOOTER */}
-          <div className="border-t border-slate-100 px-8 py-5 sm:px-10 print:hidden">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-[10px] font-sans text-slate-300">
+          <div className="">
+            <div className="">
+              <p className="">
                 Created {fmtDate(invoice.createdAt)} · Updated {fmtDate(invoice.updatedAt)}
               </p>
-              <p className="text-[10px] font-sans text-slate-300">ID: {invoice.id}</p>
+              <p className="">ID: {invoice.id}</p>
             </div>
           </div>
 

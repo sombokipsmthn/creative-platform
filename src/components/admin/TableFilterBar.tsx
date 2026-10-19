@@ -71,26 +71,26 @@ export default function TableFilterBar({
   };
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-3 shadow-xs md:flex-row md:items-center md:justify-between">
+    <div className="">
       {/* Search Input */}
-      <div className="relative flex-1 max-w-sm">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="">
+        <Search className="" />
         <Input
           type="search"
           placeholder={`Search ${itemLabel.toLowerCase()}...`}
           value={search}
           onChange={handleSearchChange}
-          className="pl-8 h-9 text-sm"
+          className=""
           aria-label={`Search ${itemLabel}`}
         />
       </div>
 
       {/* Filter Options & Controls */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="">
         {filterOptions.map((option) => {
           if (option.type === 'pills') {
             return (
-              <div key={option.value} className="flex items-center gap-1 bg-muted p-1 rounded-md">
+              <div key={option.value} className="">
                 {option.options?.map((opt) => {
                   const active = (filters[option.value] ?? 'all') === opt.value;
 
@@ -110,7 +110,7 @@ export default function TableFilterBar({
                       }}
                       aria-pressed={active}
                     >
-                      {active && <Check className="mr-1 h-3 w-3" />}
+                      {active && <Check className="" />}
                       {opt.label}
                     </Button>
                   );
@@ -125,7 +125,7 @@ export default function TableFilterBar({
               name={option.value}
               value={filters[option.value] ?? 'all'}
               onChange={handleFilterChange}
-              className="flex h-9 items-center justify-between rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className=""
               aria-label={option.label}
             >
               <option value="all">All {option.label.toLowerCase()}</option>
@@ -139,14 +139,14 @@ export default function TableFilterBar({
         })}
 
         {actions.length > 0 && (
-          <div ref={actionsRef} className="relative">
+          <div ref={actionsRef} className="">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setActionsOpen((current) => !current)}
               aria-haspopup="menu"
               aria-expanded={actionsOpen}
-              className="gap-1.5 h-9"
+              className=""
             >
               <span>Actions</span>
               <ChevronDown className={`h-3.5 w-3.5 transition-transform ${actionsOpen ? 'rotate-180' : ''}`} />
@@ -154,7 +154,7 @@ export default function TableFilterBar({
 
             {actionsOpen && (
               <div
-                className="absolute right-0 top-[calc(100%+0.25rem)] z-30 min-w-44 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+                className=""
                 role="menu"
               >
                 {actions.map((action) => (
@@ -182,9 +182,9 @@ export default function TableFilterBar({
           <Button
             size="sm"
             onClick={onAddItem}
-            className="gap-1.5 h-9 shadow-xs"
+            className=""
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="" />
             <span>New {itemLabel}</span>
           </Button>
         )}

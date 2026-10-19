@@ -368,8 +368,8 @@ export default function AdminProjectsPage() {
   */
 
   return (
-    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="">
+      <div className="">
         <AdminPageHeader
           title="Projects"
           description="Track all client engagements and creative projects."
@@ -378,7 +378,7 @@ export default function AdminProjectsPage() {
             <Button
               onClick={() => openCreateModal()}
               variant="primary"
-              className="text-xs font-sans uppercase tracking-widest"
+              className=""
             >
               + New Project
             </Button>
@@ -386,12 +386,12 @@ export default function AdminProjectsPage() {
         />
 
         {error && !isAddProjectOpen && !selectedProject && (
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
+          <div className="">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+        <div className="">
           {[
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
@@ -400,27 +400,27 @@ export default function AdminProjectsPage() {
             ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
             ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
+            <div key={String(label)} className="ui-stat-card">
               <p className={`ui-stat-label ${color}`}>{label}</p>
               <p className="ui-stat-value">{count}</p>
             </div>
           ))}
         </div>
 
-        <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2 items-center">
+        <div className="">
+          <div className="">
             <input
               type="text"
               placeholder="Search projects by name, description, client..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="ui-input w-full md:w-64"
+              className="ui-input"
             />
 
             <select
               value={filterClient ?? ''}
               onChange={(e) => setFilterClient(e.target.value || null)}
-              className="ui-input w-full md:w-64"
+              className="ui-input"
             >
               <option value="">All Clients</option>
               {clients.map((client) => (
@@ -431,7 +431,7 @@ export default function AdminProjectsPage() {
             </select>
           </div>
 
-          <div className="flex w-full min-w-0 flex-wrap gap-2 text-xs font-sans">
+          <div className="">
             {(
               [
                 ['ALL', projects.length],
@@ -446,34 +446,34 @@ export default function AdminProjectsPage() {
                 key={status}
                 variant={filterStatus === status ? 'primary' : 'secondary'}
                 onClick={() => setFilterStatus(status)}
-                className="text-xs font-sans uppercase tracking-widest"
+                className=""
               >
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
               </Button>
             ))}
 
-            <div className="flex min-w-0 flex-wrap items-center gap-1">
-              <span className="whitespace-nowrap text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Visibility:</span>
+            <div className="">
+              <span className="">Visibility:</span>
               {(['ALL', 'public', 'private', 'draft'] as const).map((vis) => (
                 <Button
                   key={vis}
                   variant={filterVisibility === vis ? 'primary' : 'secondary'}
                   onClick={() => setFilterVisibility(vis)}
-                  className="text-xs font-sans uppercase tracking-widest"
+                  className=""
                 >
                   {vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}
                 </Button>
               ))}
             </div>
 
-            <div className="flex items-center gap-1">
-              <span className="whitespace-nowrap text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Featured:</span>
+            <div className="">
+              <span className="">Featured:</span>
               {(['ALL', 'true', 'false'] as const).map((feat) => (
                 <Button
                   key={feat}
                   variant={filterFeatured === feat ? 'primary' : 'secondary'}
                   onClick={() => setFilterFeatured(feat)}
-                  className="text-xs font-sans uppercase tracking-widest"
+                  className=""
                 >
                   {feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}
                 </Button>
@@ -483,113 +483,113 @@ export default function AdminProjectsPage() {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading projects…</p>
+          <div className="">
+            <p className="">Loading projects…</p>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-            <p className="text-sm text-slate-600 dark:text-zinc-400">No projects found.</p>
-            <div className="flex justify-center mt-4">
+          <div className="">
+            <p className="">No projects found.</p>
+            <div className="">
               <Button
                 onClick={() => openCreateModal()}
                 variant="primary"
-                className="text-xs font-sans rounded-lg"
+                className=""
               >
                 Create your first project
               </Button>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="ui-card ui-card-interactive"
               >
-                <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+                <div className="">
+                  <div className="">
                     {getInitials(project)}
                   </div>
 
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
+                  <div className="">
+                    <div className="">
+                      <h3 className="">
                         {project.name}
                       </h3>
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(project.status)}`}>
                         {statusLabel(project.status)}
                       </span>
                       {project.featured && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                          <Star className="h-3 w-3" />
+                        <span className="">
+                          <Star className="" />
                           Featured
                         </span>
                       )}
                       {project.visibility === 'public' && project.publishedAt && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                          <Eye className="h-3 w-3" />
+                        <span className="">
+                          <Eye className="" />
                           Published
                         </span>
                       )}
                       {project.visibility === 'private' && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
-                          <EyeOff className="h-3 w-3" />
+                        <span className="">
+                          <EyeOff className="" />
                           Private
                         </span>
                       )}
                       {project.visibility === 'draft' && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                        <span className="">
                           Draft
                         </span>
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-500 dark:text-zinc-400">
+                    <p className="">
                       {project.client?.name || 'No client'}
                     </p>
 
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-zinc-400">
+                    <div className="">
                       {project.client?.email && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Mail className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="">
+                          <Mail className="" />
                           {project.client?.email}
                         </span>
                       )}
                       {project.client?.phone && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Phone className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="">
+                          <Phone className="" />
                           {project.client?.phone}
                         </span>
                       )}
                       {project.client?.location && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="">
+                          <MapPin className="" />
                           {project.client?.location}
                         </span>
                       )}
                     </div>
 
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-600">
+                    <p className="">
                       Added {formatDate(project.createdAt)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 w-full lg:w-auto lg:justify-end">
+                <div className="">
                   <Button
                     onClick={() => {
                       setError('');
                       setSelectedProject(project);
                     }}
                     variant="secondary"
-                    className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
+                    className=""
                   >
                     View project
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    <ArrowUpRight className="" />
                   </Button>
                   <Link
                     href={`/admin/projects/${project.id}`}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-2 text-xs font-sans text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900 transition"
+                    className=""
                   >
                     Edit
                   </Link>
@@ -598,16 +598,16 @@ export default function AdminProjectsPage() {
                       href={`/work/${project.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-sans text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"
+                      className=""
                     >
-                      <Eye className="h-3.5 w-3.5" />
+                      <Eye className="" />
                       Preview
                     </a>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                    className=""
                     onClick={async () => {
                       if (!confirm('Delete this project? This cannot be undone.')) return;
                       try {
@@ -627,7 +627,7 @@ export default function AdminProjectsPage() {
                     }}
                     aria-label="Delete project"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="" />
                   </Button>
                 </div>
               </div>
@@ -636,36 +636,36 @@ export default function AdminProjectsPage() {
         )}
 
         {isAddProjectOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="">
+            <div className="">
               <Button
                 onClick={closeCreateModal}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
+                className=""
               >
                 ✕
               </Button>
 
-              <div className="space-y-1">
+              <div className="">
                 <p className="ui-eyebrow">PROJECTS</p>
                 <h2 className="ui-section-title">New Project</h2>
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="">{error}</div>}
 
-              <form onSubmit={handleCreateProject} className="space-y-4">
-                <div className="space-y-1">
+              <form onSubmit={handleCreateProject} className="">
+                <div className="">
                   <label className="ui-label">Project Name *</label>
                   <input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
                 </div>
 
-                <div className="space-y-1">
+                <div className="">
                   <label className="ui-label">Client</label>
                   <select
                     value={form.clientId}
                     onChange={(e) => setForm({ ...form, clientId: e.target.value })}
-                    className="ui-input w-full"
+                    className="ui-input"
                   >
                     <option value="">Select a client (optional)</option>
                     {clients.map((client) => (
@@ -676,8 +676,8 @@ export default function AdminProjectsPage() {
                   </select>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Description</label>
                     <textarea
                       rows={2}
@@ -687,7 +687,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Short Description</label>
                     <input
                       type="text"
@@ -699,8 +699,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Category</label>
                     <select
                       value={form.category}
@@ -716,7 +716,7 @@ export default function AdminProjectsPage() {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Year</label>
                     <input
                       type="text"
@@ -728,8 +728,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Location</label>
                     <input
                       type="text"
@@ -739,7 +739,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Slug</label>
                     <input
                       type="text"
@@ -751,8 +751,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Status</label>
                     <select
                       value={form.status}
@@ -766,7 +766,7 @@ export default function AdminProjectsPage() {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Visibility</label>
                     <select
                       value={form.visibility}
@@ -780,8 +780,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Start Date</label>
                     <input
                       type="date"
@@ -790,7 +790,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">End Date</label>
                     <input
                       type="date"
@@ -801,8 +801,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Total Amount</label>
                     <input
                       type="number"
@@ -812,7 +812,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Currency</label>
                     <select
                       value={form.currency}
@@ -829,8 +829,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Payment Terms</label>
                     <input
                       type="text"
@@ -840,7 +840,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Revisions Policy</label>
                     <input
                       type="text"
@@ -852,8 +852,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
+                <div className="">
+                  <div className="">
                     <label className="ui-label">Licensing Terms</label>
                     <input
                       type="text"
@@ -863,7 +863,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="space-y-1">
+                  <div className="">
                     <label className="ui-label">Featured</label>
                     <select
                       value={form.featured ? 'true' : 'false'}
@@ -876,7 +876,7 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="space-y-1">
+                <div className="">
                   <label className="ui-label">Notice Period</label>
                   <input
                     type="text"
@@ -887,7 +887,7 @@ export default function AdminProjectsPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={saving} variant="primary" className="w-full">
+                <Button type="submit" disabled={saving} variant="primary" className="">
                   {saving ? 'Saving Project…' : '+ Create Project'}
                 </Button>
               </form>
@@ -896,47 +896,47 @@ export default function AdminProjectsPage() {
         )}
 
         {selectedProject && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="">
+            <div className="">
               <Button
                 onClick={() => setSelectedProject(null)}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white"
+                className=""
               >
                 ✕
               </Button>
 
-              <div className="space-y-2  border-slate-200 dark:border-zinc-800 pb-5">
+              <div className="">
                 {selectedProject.client && (
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+                  <div className="">
+                    <span className="">
                       {selectedProject.client.company}
                     </span>
-                    <h2 className="text-2xl font-light">{selectedProject.client.name}</h2>
+                    <h2 className="">{selectedProject.client.name}</h2>
                   </div>
                 )}
-                <h2 className="text-2xl font-light">{selectedProject.name}</h2>
-                <p className="text-xs font-sans text-slate-600 dark:text-zinc-400">
+                <h2 className="">{selectedProject.name}</h2>
+                <p className="">
                   {statusLabel(selectedProject.status)} • {formatDate(selectedProject.createdAt)}
                 </p>
                 {selectedProject.description && (
-                  <p className="text-sm text-slate-500 dark:text-zinc-500 mt-2">
+                  <p className="">
                     {selectedProject.description}
                   </p>
                 )}
 
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="">{error}</div>}
 
-              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
+              <div className="">
                 <div>
                   <p className="ui-label">Project Status</p>
                   <p className="ui-meta">Changes are saved directly to the database.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                <div className="">
                   {([
                     'active',
                     'completed',
@@ -949,7 +949,7 @@ export default function AdminProjectsPage() {
                       variant={selectedProject.status === status ? 'primary' : 'secondary'}
                       disabled={updating || selectedProject.status === status}
                       onClick={() => updateProjectStatus(status as ProjectStatus)}
-                      className="text-[10px] font-sans uppercase transition-all disabled:opacity-50"
+                      className=""
                     >
                       {statusLabel(status)}
                     </Button>
@@ -957,16 +957,16 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="">
                 <p className="ui-label">Description</p>
-                <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">
+                <p className="">
                   {selectedProject.description || 'No description.'}
                 </p>
               </div>
 
-              <div className="space-y-2">
+              <div className="">
                 <p className="ui-label">Details</p>
-                <div className="grid gap-4 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
+                <div className="">
                   <div>Client: {selectedProject.client?.name || 'None'}</div>
                   <div>
                     {selectedProject.totalAmount !== null ? (
@@ -986,9 +986,9 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
+              <div className="">
                 <div>Created {formatDate(selectedProject.createdAt)}</div>
-                <div className="text-right">Updated {formatDate(selectedProject.updatedAt)}</div>
+                <div className="">Updated {formatDate(selectedProject.updatedAt)}</div>
               </div>
             </div>
           </div>

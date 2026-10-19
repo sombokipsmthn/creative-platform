@@ -6,40 +6,40 @@ import { Button } from "@/components/ui/Button";
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-muted/20">
-      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-4">
-          <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2 font-bold tracking-tight text-foreground">
-              <span className="flex h-6 w-6 items-center justify-center rounded bg-primary text-xs text-primary-foreground font-mono">
+    <footer className="">
+      <div className="">
+        <div className="">
+          <div className="">
+            <Link href="/" className="">
+              <span className="">
                 K
               </span>
               <span>KIPSMTHN</span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed">
+            <p className="">
               Creative operating infrastructure for photographers, filmmakers, and studios — from client enquiry to private gallery delivery.
             </p>
             <div>
-              <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <Button asChild variant="outline" size="sm" className="">
                 <Link href="/admin">
-                  Open Workspace <ArrowRight className="h-3.5 w-3.5" />
+                  Open Workspace <ArrowRight className="" />
                 </Link>
               </Button>
             </div>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            <h3 className="">
               Platform
             </h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+            <ul className="">
               <li>
-                <Link href="/#platform" className="hover:text-foreground transition-colors">
+                <Link href="/#platform" className="">
                   Features & Tools
                 </Link>
               </li>
               <li>
-                <Link href="/workflow" className="hover:text-foreground transition-colors">
+                <Link href="/workflow" className="">
                   Production Workflow
                 </Link>
               </li>
@@ -47,53 +47,53 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            <h3 className="">
               Studio
             </h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+            <ul className="">
               <li>
-                <Link href="/about" className="hover:text-foreground transition-colors">
+                <Link href="/about" className="">
                   About KIPSMTHN
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-foreground transition-colors">
+                <Link href="/contact" className="">
                   Contact & Inquiries
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-foreground transition-colors">
+                <Link href="/privacy" className="">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <span className="text-muted-foreground/70">Nairobi, Kenya</span>
+                <span className="">Nairobi, Kenya</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            <h3 className="">
               Workspace
             </h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+            <ul className="">
               <li>
-                <Link href="/admin" className="hover:text-foreground transition-colors">
+                <Link href="/admin" className="">
                   Admin Overview
                 </Link>
               </li>
               <li>
-                <Link href="/admin/quotes" className="hover:text-foreground transition-colors">
+                <Link href="/admin/quotes" className="">
                   Production Quotes
                 </Link>
               </li>
               <li>
-                <Link href="/admin/invoices" className="hover:text-foreground transition-colors">
+                <Link href="/admin/invoices" className="">
                   Invoices & eTIMS
                 </Link>
               </li>
               <li>
-                <Link href="/admin/galleries" className="hover:text-foreground transition-colors">
+                <Link href="/admin/galleries" className="">
                   Client Delivery Galleries
                 </Link>
               </li>
@@ -101,10 +101,10 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-xs text-muted-foreground sm:flex-row">
+        <div className="">
           <p>© {new Date().getFullYear()} KIPSMTHN. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">
+          <div className="">
+            <Link href="/privacy" className="">
               Privacy
             </Link>
             <span aria-hidden="true">·</span>

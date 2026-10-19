@@ -13,7 +13,7 @@ function ContractBuilderPageContent() {
 
 export default function ContractBuilderPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen" aria-busy="true" />}>
+    <Suspense fallback={<div className="" aria-busy="true" />}>
       <ContractBuilderPageContent />
     </Suspense>
   );

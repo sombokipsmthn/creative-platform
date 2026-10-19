@@ -134,16 +134,16 @@ export default function ClientLightbox({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between text-white">
-      <div className="h-16 px-6  border-zinc-800/80 flex justify-between items-center bg-zinc-950/80">
-        <div className="flex items-center gap-4">
-          <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors">
+    <div className="">
+      <div className="">
+        <div className="">
+          <button onClick={onClose} className="">
             ✕ Close
           </button>
-          <span className="text-xs font-sans text-zinc-400 border-l border-zinc-800 pl-4">{item.title}</span>
+          <span className="">{item.title}</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="">
           <button
             onClick={() => onToggleFavorite(item.id)}
             className={`px-4 py-1.5 text-xs font-sans uppercase rounded-full transition-all ${
@@ -173,73 +173,73 @@ export default function ClientLightbox({
         </div>
       </div>
 
-      <div className="relative flex-1 flex items-center justify-center p-6 overflow-hidden">
+      <div className="">
         <button
           onClick={onPrev}
-          className="absolute left-6 z-10 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-xl text-zinc-300 hover:text-white hover:bg-purple-600 transition-all"
+          className=""
         >
           ‹
         </button>
 
-        <div className="relative w-full h-full max-w-6xl max-h-[80vh]">
-          <Image src={item.url} alt={item.title} fill className="object-contain" unoptimized />
+        <div className="">
+          <Image src={item.url} alt={item.title} fill className="" unoptimized />
         </div>
 
         <button
           onClick={onNext}
-          className="absolute right-6 z-10 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-xl text-zinc-300 hover:text-white hover:bg-purple-600 transition-all"
+          className=""
         >
           ›
         </button>
 
         {showExif && (
-          <div className="absolute top-8 right-8 bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl text-xs font-sans space-y-2 max-w-xs shadow-2xl backdrop-blur-md">
-            <p className="text-purple-400 font-bold  border-zinc-800 pb-1">Camera Details</p>
-            <p><span className="text-zinc-500">Camera:</span> {item.exif?.camera || 'Unknown'}</p>
-            <p><span className="text-zinc-500">Aperture:</span> {item.exif?.aperture || '—'}</p>
-            <p><span className="text-zinc-500">Shutter:</span> {item.exif?.shutter || '—'}</p>
-            <p><span className="text-zinc-500">ISO:</span> {item.exif?.iso || '—'}</p>
+          <div className="">
+            <p className="">Camera Details</p>
+            <p><span className="">Camera:</span> {item.exif?.camera || 'Unknown'}</p>
+            <p><span className="">Aperture:</span> {item.exif?.aperture || '—'}</p>
+            <p><span className="">Shutter:</span> {item.exif?.shutter || '—'}</p>
+            <p><span className="">ISO:</span> {item.exif?.iso || '—'}</p>
           </div>
         )}
 
         {showComments && (
-          <div className="absolute top-0 right-0 bottom-0 w-80 bg-zinc-900/95 border-l border-zinc-800 p-6 flex flex-col justify-between shadow-2xl backdrop-blur-md">
-            <div className="space-y-4 overflow-hidden">
-              <div className="flex justify-between items-center  border-zinc-800 pb-3">
-                <h4 className="text-sm font-medium">Comments & Notes</h4>
-                <button onClick={() => setShowComments(false)} className="text-xs text-zinc-500 hover:text-white">✕</button>
+          <div className="">
+            <div className="">
+              <div className="">
+                <h4 className="">Comments & Notes</h4>
+                <button onClick={() => setShowComments(false)} className="">✕</button>
               </div>
 
-              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
+              <div className="">
                 {comments.length === 0 ? (
-                  <p className="text-xs text-zinc-500 font-sans">No comments yet.</p>
+                  <p className="">No comments yet.</p>
                 ) : (
                   comments.map((comment) => (
-                    <div key={comment.id} className="p-3 bg-zinc-950 border border-zinc-800/80 rounded-lg space-y-1">
-                      <div className="flex justify-between items-center text-[10px] text-zinc-500 gap-3">
-                        <span className="font-semibold text-purple-400">{comment.name}</span>
+                    <div key={comment.id} className="">
+                      <div className="">
+                        <span className="">{comment.name}</span>
                         <span>{comment.time}</span>
                       </div>
-                      <p className="text-xs text-zinc-300 font-light">{comment.text}</p>
+                      <p className="">{comment.text}</p>
                     </div>
                   ))
                 )}
               </div>
             </div>
 
-            <form onSubmit={handleAddComment} className="pt-4 border-t border-zinc-800 space-y-2">
+            <form onSubmit={handleAddComment} className="">
               <input
                 type="text"
                 placeholder="Leave feedback for retoucher..."
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 maxLength={2000}
-                className="w-full text-xs px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-white focus:border-purple-600 focus:outline-none"
+                className=""
               />
               <button
                 type="submit"
                 disabled={commentLoading || !newComment.trim()}
-                className="w-full py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-xs font-sans uppercase tracking-widest rounded-md transition-colors"
+                className=""
               >
                 {commentLoading ? 'Sending...' : 'Send Comment'}
               </button>

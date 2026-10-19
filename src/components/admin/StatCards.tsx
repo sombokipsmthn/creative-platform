@@ -23,18 +23,18 @@ export default function StatCards({ stats, columns = 4 }: StatCardsProps) {
   return (
     <div className={`grid grid-cols-2 gap-4 ${colsClass}`}>
       {stats.map((stat) => (
-        <Card key={stat.label} className="transition-all hover:shadow-xs">
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <Card key={stat.label} className="">
+          <CardHeader className="">
+            <CardTitle className="">
               {stat.label}
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-4 pt-0">
-            <div className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
+          <CardContent className="">
+            <div className="tabular-nums">
               {stat.value}
             </div>
             {stat.detail && (
-              <p className="mt-1 text-xs text-muted-foreground">{stat.detail}</p>
+              <p className="">{stat.detail}</p>
             )}
           </CardContent>
         </Card>

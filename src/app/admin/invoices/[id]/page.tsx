@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Button } from '@/components/ui/button';
 
 /* =========================================================
    TYPES
@@ -150,34 +152,12 @@ export default function InvoiceDetailPage() {
 
   /* ---- Loading ---- */
   if (loading) {
-    return (
-      <div className="">
-        <div className="">
-          <div
-            className=""
-
-          />
-          <p className="">Loading invoice…</p>
-        </div>
-      </div>
-    );
+    return <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><p>Loading invoice…</p></div></div></div>;
   }
 
   /* ---- Not found ---- */
   if (!invoice) {
-    return (
-      <div className="">
-        <div className="">
-          <Link href="/admin/invoices" className="">
-            ← Back to Invoices
-          </Link>
-          <div className="">
-            <h1 className="">Invoice not found</h1>
-            <p className="">{error || 'The requested invoice could not be loaded.'}</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><h1>Invoice not found</h1><p>{error || 'The requested invoice could not be loaded.'}</p><Button asChild variant="outline"><Link href="/admin/invoices">Back to invoices</Link></Button></div></div></div>;
   }
 
   const status = invoice.status?.toLowerCase() || 'draft';
@@ -186,61 +166,8 @@ export default function InvoiceDetailPage() {
   const items = invoice.items ?? [];
 
   return (
-    <div className="">
-
-      {/* TOOLBAR */}
-      <div className="">
-        <div className="">
-          <div className="">
-            <Link
-              href="/admin/invoices"
-              className=""
-              aria-label="Back to invoices"
-            >
-              ←
-            </Link>
-            <div>
-              <p className="">Invoice</p>
-              <p className="">
-                {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
-              </p>
-            </div>
-          </div>
-
-          <div className="">
-            <span className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-sans uppercase tracking-widest ${statusBadgeClass(status)}`}>
-              {status}
-            </span>
-
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className=""
-            >
-              Print / PDF
-            </button>
-
-            {invoice.quoteId && (
-              <Link
-                href={`/admin/quotes/${invoice.quoteId}`}
-                className=""
-              >
-                View Quote
-              </Link>
-            )}
-
-            {nextAction && (
-              <button
-                type="button"
-                disabled={updating}
-                onClick={() => updateStatus(nextAction.value)}
-                className={`rounded-xl px-5 py-2.5 text-xs font-sans font-semibold uppercase tracking-widest text-white transition disabled:opacity-50 ${nextAction.color}`}
-              >
-                {updating ? 'Updating…' : nextAction.label}
-              </button>
-            )}
-          </div>
-        </div>
+    <div className="ui-page ui-page-padded"><div className="ui-shell">
+      <AdminPageHeader title={invoice.title || 'Invoice'} description={invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()} breadcrumb={{ label: 'Invoices', href: '/admin/invoices' }} />
 
         {error && (
           <div className="">{error}</div>

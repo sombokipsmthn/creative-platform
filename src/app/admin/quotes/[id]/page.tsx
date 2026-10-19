@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Button } from '@/components/ui/button';
 import {
   ArrowLeft,
   ArrowRight,
@@ -664,63 +666,21 @@ export default function QuoteDetailPage() {
 
   if (loading) {
     return (
-      <main className="">
-        <div className="">
-          <Loader2 className="" />
-          <p className="">Loading quote</p>
-        </div>
-      </main>
+      <main className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading quote…</p></div></div></main>
     );
   }
 
   if (!quote) {
     return (
-      <main className="">
-        <div className="">
-          <FileText className="" />
-          <h1 className="">Quote not found</h1>
-          <p className="">{error || 'This quote could not be loaded.'}</p>
-          <Link href="/admin/quotes" className="">
-            <ArrowLeft className="" /> Back to quotes
-          </Link>
-        </div>
-      </main>
+      <main className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><FileText aria-hidden="true" /><h1>Quote not found</h1><p>{error || 'This quote could not be loaded.'}</p><Button asChild variant="outline"><Link href="/admin/quotes">Back to quotes</Link></Button></div></div></main>
     );
   }
 
   return (
     <>
-      <main className="">
-        <div className="">
-          <header className="">
-            <div>
-              <Link href="/admin/quotes" className="">
-                <ArrowLeft className="" /> Quotes
-              </Link>
-              <div className="">
-                <p className="">Quote</p>
-                <span className={`inline-flex rounded-full border px-3 py-1 text-[9px] font-sans uppercase tracking-widest ${getStatusClass(quote.status)}`}>
-                  {formatStatus(quote.status)}
-                </span>
-              </div>
-              <h1 className="">{quote.title || 'Untitled quote'}</h1>
-              <p className="">{quote.quoteNumber || `Quote ${quote.id.slice(0, 8).toUpperCase()}`}</p>
-            </div>
-
-            <div className="">
-              <button type="button" onClick={printQuote} className="">
-                <Printer className="" /> Print
-              </button>
-              <button type="button" onClick={saveQuote} disabled={saving} className="">
-                {saving ? <Loader2 className="" /> : <Save className="" />} Save
-              </button>
-              {quote.status === 'accepted' && (
-                <button type="button" onClick={() => void createInvoice()} disabled={actionLoading === 'invoice'} className="">
-                  {actionLoading === 'invoice' ? <Loader2 className="" /> : <FileText className="" />} Generate Invoice
-                </button>
-              )}
-            </div>
-          </header>
+      <main className="ui-page ui-page-padded">
+        <div className="ui-shell">
+          <AdminPageHeader title={quote.title || 'Untitled quote'} description={quote.quoteNumber || `Quote ${quote.id.slice(0, 8).toUpperCase()}`} breadcrumb={{ label: 'Quotes', href: '/admin/quotes' }} />
 
           {(error || success) && (
             <div className="">

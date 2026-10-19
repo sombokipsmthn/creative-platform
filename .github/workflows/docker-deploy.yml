@@ -184,9 +184,10 @@ jobs:
         run: |
           echo "Running database migrations..."
           npm install
-          DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} \
-          BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
           npm run db:migrate
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
 
       - name: Verify deployment
         run: |

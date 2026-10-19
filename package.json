@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/check-dev-port.mjs",
     "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",

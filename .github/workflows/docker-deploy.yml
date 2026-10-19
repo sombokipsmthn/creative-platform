@@ -183,8 +183,7 @@ jobs:
       - name: Run database migrations
         run: |
           echo "Running database migrations..."
-          npm install
-          npm run db:migrate
+          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f drizzle/0031_local_init.sql
         env:
           DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
           BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}

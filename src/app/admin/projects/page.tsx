@@ -148,11 +148,13 @@ export default function AdminProjectsPage() {
         setError('');
 
         // Load clients for the client filter dropdown
-        const clientsResponse = await fetch('/api/clients', { cache: 'no-store' });
-        if (!clientsResponse.ok) {
-          throw new Error('Failed to load clients');
-        }
-        const clientsData = await clientsResponse.json();
+        const clientsResponse = await fetch('/api/clients', {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        });
+        const clientsData = clientsResponse.ok
+          ? await clientsResponse.json()
+          : [];
 
         // Load projects
         const params = new URLSearchParams();

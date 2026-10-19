@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server";
-import { getCurrentSession } from "@/lib/auth";
 import { sql, eq, desc } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
-import { galleries, clients, projects } from "@/db/schema";
-
-async function getCreator() {
-  try {
-    const session = await getCurrentSession();
-    const authUser = session?.user;
-    if (!authUser) return null;
-    return getOrCreateLocalUser(authUser);
-  } catch (error) {
-    console.error("getCreator error:", error);
-    return null;
-  }
-}
+import { withCreatorApi } from "@/lib/api/route-boundaries";
+import { galleries, clients } from "@/db/schema";
 
 function createSlug(title: string) {
   const base = title
@@ -28,14 +15,8 @@ function createSlug(title: string) {
   return `${base || "gallery"}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export async function GET() {
-  try {
-    const creator = await getCreator();
-    if (!creator) {
-      console.warn('GET /api/galleries: No creator found');
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
+export async function GET(request: Request) {
+  return withCreatorApi(request, async (_request, creator) => {
     console.log('GET /api/galleries: Fetching galleries for creator:', creator.id);
 
     const result = await db
@@ -71,18 +52,12 @@ export async function GET() {
       .orderBy(desc(galleries.createdAt));
 
     console.log('GET /api/galleries: Query returned', result.length, 'galleries');
-    return NextResponse.json({ galleries: result });
-  } catch (error) {
-    console.error("GET /api/galleries error:", error);
-    return NextResponse.json({ error: "Unable to load galleries." }, { status: 500 });
-  }
+    return { galleries: result };
+  });
 }
 
 export async function POST(request: Request) {
-  try {
-    const creator = await getCreator();
-    if (!creator) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
+  return withCreatorApi(request, async (request, creator) => {
     const body = await request.json();
     const title = typeof body?.title === "string" ? body.title.trim() : "";
     if (!title) return NextResponse.json({ error: "Gallery title is required." }, { status: 400 });
@@ -143,11 +118,5 @@ export async function POST(request: Request) {
     `);
 
     return NextResponse.json({ gallery }, { status: 201 });
-  } catch (error) {
-    console.error("POST /api/galleries error:", error);
-    return NextResponse.json(
-      { error: "Unable to create gallery." },
-      { status: 500 },
-    );
-  }
+  });
 }

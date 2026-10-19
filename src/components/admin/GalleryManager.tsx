@@ -120,9 +120,9 @@ export default function AdminGalleryManagerPage() {
       else setIsRefreshing(true);
 
       const [galRes, clientRes, activityRes] = await Promise.all([
-        fetch('/api/galleries', { cache: 'no-store' }),
-        fetch('/api/clients', { cache: 'no-store' }),
-        fetch('/api/galleries/activity', { cache: 'no-store' }),
+        fetch('/api/galleries', { cache: 'no-store', credentials: 'same-origin' }),
+        fetch('/api/clients', { cache: 'no-store', credentials: 'same-origin' }),
+        fetch('/api/galleries/activity', { cache: 'no-store', credentials: 'same-origin' }),
       ]);
 
       if (galRes.ok) {

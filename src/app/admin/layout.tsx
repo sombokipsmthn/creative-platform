@@ -77,6 +77,12 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    label: "Publishing",
+    items: [
+      { name: "Portfolio", href: "/admin/portfolio", icon: Sparkles },
+    ],
+  },
+  {
     label: "Settings",
     items: [
       { name: "Creator Profile", href: "/admin/profile", icon: UserRound },

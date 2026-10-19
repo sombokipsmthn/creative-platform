@@ -21,12 +21,8 @@ export default function Header() {
   }
 
   const navLinks = [
-    { href: "/#platform", label: "Platform" },
-    { href: "/#workflow", label: "Workflow" },
-    { href: "/services", label: "Services" },
-    { href: "/equipment", label: "Equipment" },
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
+    { href: "/", label: "Home" },
+    { href: "/workflow", label: "Workflow" },
   ];
 
   return (

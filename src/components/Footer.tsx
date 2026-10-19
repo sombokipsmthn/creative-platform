@@ -39,18 +39,8 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/#workflow" className="hover:text-foreground transition-colors">
+                <Link href="/workflow" className="hover:text-foreground transition-colors">
                   Production Workflow
-                </Link>
-              </li>
-              <li>
-                <Link href="/equipment" className="hover:text-foreground transition-colors">
-                  Equipment Kit
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className="hover:text-foreground transition-colors">
-                  Services Catalog
                 </Link>
               </li>
             </ul>

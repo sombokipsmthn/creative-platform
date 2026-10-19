@@ -102,6 +102,20 @@ export const creatorProfiles = pgTable("creator_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const creatorPortfolios = pgTable("creator_portfolios", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  headline: text("headline"),
+  contactEmail: text("contact_email"),
+  socialLinks: jsonb("social_links").default({}).notNull(),
+  selectedProjectIds: jsonb("selected_project_ids").default([]).notNull(),
+  layout: text("layout").default("editorial").notNull(),
+  isPublished: boolean("is_published").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const creatorServices = pgTable("creator_services", {
   id: uuid("id").defaultRandom().primaryKey(),
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),

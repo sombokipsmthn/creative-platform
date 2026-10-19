@@ -431,7 +431,7 @@ export default function AdminProjectsPage() {
             </select>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs font-sans">
+          <div className="flex w-full min-w-0 flex-wrap gap-2 text-xs font-sans">
             {(
               [
                 ['ALL', projects.length],
@@ -452,8 +452,8 @@ export default function AdminProjectsPage() {
               </Button>
             ))}
 
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Visibility:</span>
+            <div className="flex min-w-0 flex-wrap items-center gap-1">
+              <span className="whitespace-nowrap text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Visibility:</span>
               {(['ALL', 'public', 'private', 'draft'] as const).map((vis) => (
                 <Button
                   key={vis}
@@ -467,7 +467,7 @@ export default function AdminProjectsPage() {
             </div>
 
             <div className="flex items-center gap-1">
-              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Featured:</span>
+              <span className="whitespace-nowrap text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Featured:</span>
               {(['ALL', 'true', 'false'] as const).map((feat) => (
                 <Button
                   key={feat}

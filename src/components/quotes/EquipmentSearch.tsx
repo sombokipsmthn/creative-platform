@@ -137,7 +137,7 @@ export default function EquipmentSearch({
                 setIsOpen(false);
                 setQuery('');
               }}
-              className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-zinc-900 transition border-b border-slate-100 dark:border-zinc-900 last:border-b-0"
+              className="w-full text-left px-4 py-3 text-sm hover:bg-slate-50 dark:hover:bg-zinc-900 transition  border-slate-100 dark:border-zinc-900 "
             >
               <div className="flex justify-between items-center">
                 <span className="font-medium text-slate-900 dark:text-white">{item.name}</span>

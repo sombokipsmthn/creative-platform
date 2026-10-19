@@ -177,7 +177,7 @@ function getStatusClass(value?: string | null) {
     case 'accepted':
       return 'border-emerald-200 bg-emerald-50 text-emerald-700';
     case 'sent':
-      return 'border-blue-200 bg-blue-50 text-blue-700';
+      return 'lue-200 bg-blue-50 text-blue-700';
     case 'invoiced':
       return 'border-violet-200 bg-violet-50 text-violet-700';
     default:
@@ -747,7 +747,7 @@ export default function QuoteDetailPage() {
           )}
 
           <section className="rounded-2xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
-            <div className="border-b border-slate-200 p-6 sm:p-8 print:px-12 print:py-10">
+            <div className=" border-slate-200 p-6 sm:p-8 print:px-12 print:py-10">
               <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>QUOTE</p>
@@ -762,7 +762,7 @@ export default function QuoteDetailPage() {
               </div>
             </div>
 
-            <div className="grid gap-6 border-b border-slate-200 p-6 sm:grid-cols-2 lg:grid-cols-4 sm:p-8 print:px-12 print:py-8">
+            <div className="grid gap-6  border-slate-200 p-6 sm:grid-cols-2 lg:grid-cols-4 sm:p-8 print:px-12 print:py-8">
               <div><p className="text-[9px] font-sans uppercase tracking-[0.2em] text-slate-400">Client</p><p className="mt-2 text-sm font-medium text-slate-900">{quote.client?.company || quote.client?.name || 'No client'}</p>{quote.client?.company && quote.client?.name && <p className="mt-1 text-xs text-slate-500">{quote.client.name}</p>}</div>
               <div><p className="text-[9px] font-sans uppercase tracking-[0.2em] text-slate-400">Contact</p><p className="mt-2 text-sm text-slate-700">{quote.clientContact || quote.client?.email || '—'}</p>{quote.client?.phone && <p className="mt-1 text-xs text-slate-400">{quote.client.phone}</p>}</div>
               <div><p className="text-[9px] font-sans uppercase tracking-[0.2em] text-slate-400">Location</p><p className="mt-2 text-sm text-slate-700">{quote.location || '—'}</p></div>
@@ -776,7 +776,7 @@ export default function QuoteDetailPage() {
               </div>
 
               <div className="hidden overflow-visible md:block">
-                <div className="grid grid-cols-[1.2fr_2.5fr_0.7fr_0.9fr_1.2fr_32px] gap-3 border-b border-slate-200 px-3 pb-3">
+                <div className="grid grid-cols-[1.2fr_2.5fr_0.7fr_0.9fr_1.2fr_32px] gap-3  border-slate-200 px-3 pb-3">
                   <p className="text-[9px] font-sans uppercase tracking-widest text-slate-400">Category</p><p className="text-[9px] font-sans uppercase tracking-widest text-slate-400">Description</p><p className="text-[9px] font-sans uppercase tracking-widest text-slate-400">Qty</p><p className="text-[9px] font-sans uppercase tracking-widest text-slate-400">Unit</p><p className="text-right text-[9px] font-sans uppercase tracking-widest text-slate-400">Amount</p><span />
                 </div>
 

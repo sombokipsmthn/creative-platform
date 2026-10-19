@@ -118,7 +118,7 @@ export default function AdminExpensesPage() {
       <div className="mx-auto max-w-7xl">
         {/* Header */}
         <div className="space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4  border-slate-200 dark:border-zinc-800/80 pb-6">
             <div>
               <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
               <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
@@ -160,7 +160,7 @@ export default function AdminExpensesPage() {
             <p className="ui-meta">Scan & Capture KRA Expense Receipt</p>
           </div>
           <div className="ui-card-content space-y-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800 pb-4">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4  border-slate-200 dark:border-zinc-800 pb-4">
               <div>
                 <p className="ui-eyebrow">OCR Receipt Processing</p>
                 <h2 className="ui-section-title">Scan & Capture KRA Expense Receipt</h2>

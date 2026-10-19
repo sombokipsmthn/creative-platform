@@ -136,7 +136,7 @@ function SidebarContent({
   return (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex h-14 items-center border-b px-4">
+      <div className="flex h-14 items-center  px-4">
         <Link
           href="/admin"
           onClick={onNavigate}
@@ -262,7 +262,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       {/* Main Workspace Area */}
       <div className="flex-1 flex flex-col lg:pl-64 min-w-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background/95 backdrop-blur px-4 sm:px-6">
+        <header className="sticky top-0 z-20 flex h-14 items-center justify-between  bg-background/95 backdrop-blur px-4 sm:px-6">
           <div className="flex items-center gap-3">
             {/* Mobile Nav Trigger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>

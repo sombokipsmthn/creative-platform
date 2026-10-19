@@ -52,7 +52,7 @@ export function ProductionCalendar() {
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden">
-      <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-zinc-900">
+      <div className="flex items-center justify-between  border-slate-100 px-5 py-4 dark:border-zinc-900">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           <h2 className="text-base font-semibold text-slate-900 dark:text-white">

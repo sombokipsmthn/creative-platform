@@ -184,7 +184,7 @@ export default function AdminProfilePage() {
   return (
     <main className="ui-page min-h-screen">
       <div className="ui-shell py-8 sm:py-10">
-        <div className="mb-8 flex flex-col gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4  border-slate-200 dark:border-zinc-800/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
               href="/admin"
@@ -251,7 +251,7 @@ export default function AdminProfilePage() {
             </div>
           </section>
           <section className="ui-card">
-            <div className="border-b border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
+            <div className=" border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
               <p className="ui-eyebrow">Identity</p>
               <h2 className="ui-section-title">Creator details</h2>
             </div>

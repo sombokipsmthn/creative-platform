@@ -112,7 +112,7 @@ export default function ServicesPage() {
 
       {/* 1. HERO SECTION */}
       <section className="relative pt-36 pb-16 px-6 max-w-7xl mx-auto text-center space-y-6">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(600px,100vw)] h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
         <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           KIPSMTHN CAPABILITIES

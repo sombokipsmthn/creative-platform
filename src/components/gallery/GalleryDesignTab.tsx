@@ -221,7 +221,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
       )}
 
       {/* Section Navigation */}
-      <div className="border-b border-[var(--color-border-subtle)] flex gap-6 overflow-x-auto">
+      <div className=" border-[var(--color-border-subtle)] flex gap-6 overflow-x-auto">
         {[
           { id: 'theme' as const, label: 'Theme' },
           { id: 'cover' as const, label: 'Cover' },
@@ -233,7 +233,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
           <button
             key={section.id}
             onClick={() => setActiveSection(section.id)}
-            className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all border-b-2 whitespace-nowrap ${
+            className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all  whitespace-nowrap ${
               activeSection === section.id
                 ? 'border-[var(--color-accent)] text-[var(--color-accent)] font-bold'
                 : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
@@ -303,7 +303,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    <div className="absolute inset-0 rounded-full border border-black/30" />
+                    <div className="absolute inset-0 rounded-full border lack/30" />
                   </div>
                 </div>
               </div>

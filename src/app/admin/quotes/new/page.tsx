@@ -1772,7 +1772,7 @@ export default function NewQuotePage() {
           <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-visible">
             {/* HEADER */}
 
-            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
+            <div className="p-6  border-slate-200 dark:border-zinc-800">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 className="text-lg font-medium text-slate-900 dark:text-white">
@@ -2019,7 +2019,7 @@ export default function NewQuotePage() {
                               {isOpen &&
                                 item.category && (
                                   <div className="absolute z-[100] mt-2 left-0 right-0 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden">
-                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
+                                    <div className="px-4 py-3  border-slate-100 dark:border-zinc-900 flex items-center justify-between">
                                       <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                                         {
                                           item.category
@@ -2065,7 +2065,7 @@ export default function NewQuotePage() {
                                                   option
                                                 )
                                               }
-                                              className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900 border-b border-slate-100 dark:border-zinc-900 last:border-b-0 transition"
+                                              className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900  border-slate-100 dark:border-zinc-900  transition"
                                             >
                                               <div className="flex items-start justify-between gap-3">
                                                 <div className="min-w-0">

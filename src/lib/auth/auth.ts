@@ -6,8 +6,9 @@ import { db } from "@/db";
 import { sendEmail } from "@/lib/email";
 import { users, sessions, accounts, verifications, passkeys } from "@/db/schema";
 
-if (!process.env.BETTER_AUTH_SECRET) {
-  process.env.BETTER_AUTH_SECRET = "creative-platform-dev-secret-key-at-least-32-chars-long";
+const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
+if (!betterAuthSecret || betterAuthSecret.length < 32) {
+  throw new Error("BETTER_AUTH_SECRET must be set and contain at least 32 characters.");
 }
 
 const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -36,6 +37,16 @@ const socialProviders = {
 };
 
 const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const trustedOrigins = Array.from(
+  new Set([
+    baseURL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    "http://localhost:3000",
+    "http://localhost:3010",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3010",
+  ].filter((origin): origin is string => Boolean(origin))),
+);
 
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",
@@ -91,16 +102,17 @@ export const auth = betterAuth({
     cookieCache: { enabled: true, maxAge: 60 * 5 },
   },
   advanced: {
+    useSecureCookies: baseURL.startsWith("https://"),
     cookiePrefix: "kipsmthn",
     crossSubDomainCookies: { enabled: true },
     defaultCookieAttributes: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production" && baseURL.startsWith("https://"),
       sameSite: "lax",
       path: "/",
     },
   },
-  trustedOrigins: [baseURL],
+  trustedOrigins,
   plugins: [
     dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
     passkey({

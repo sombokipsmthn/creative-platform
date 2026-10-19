@@ -11,6 +11,7 @@
     "test": "vitest run",
     "audit:production": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level=high",
     "audit:development": "env -u npm_config_allow_scripts npm audit --audit-level=high || true",
+    "db:init:local": "node scripts/init-local-db.mjs",
     "db:migrate": "drizzle-kit migrate",
     "db:seed:equipment": "tsx src/db/seed-equipment.ts",
     "db:seed:templates": "tsx src/db/seed-templates.ts",

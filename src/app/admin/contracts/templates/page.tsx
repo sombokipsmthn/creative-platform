@@ -136,7 +136,7 @@ export default function ContractTemplatesPage() {
               aria-labelledby="template-preview-title"
               onClick={(event) => event.stopPropagation()}
             >
-              <header className="flex items-start justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-5">
+              <header className="flex items-start justify-between  border-gray-200 dark:border-gray-700 px-6 py-5">
                 <div>
                   <p className="ui-meta">{previewTemplate.category}</p>
                   <h2 id="template-preview-title" className="mt-1 text-xl font-semibold">

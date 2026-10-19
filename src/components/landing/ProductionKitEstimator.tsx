@@ -215,7 +215,7 @@ export default function ProductionKitEstimator() {
             <span className="text-[11px] font-mono uppercase tracking-wider text-purple-600 dark:text-purple-400 font-semibold">
               Live Quotation Breakdown
             </span>
-            <div className="mt-2 flex items-baseline justify-between border-b border-slate-200 dark:border-zinc-800 pb-4">
+            <div className="mt-2 flex items-baseline justify-between  border-slate-200 dark:border-zinc-800 pb-4">
               <span className="text-sm text-slate-500 dark:text-zinc-400">Total Investment</span>
               <div className="text-right">
                 <span className="text-3xl font-light tracking-tight font-sans text-slate-900 dark:text-white">

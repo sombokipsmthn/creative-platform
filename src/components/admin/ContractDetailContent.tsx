@@ -206,7 +206,7 @@ export default function ContractDetailContent({
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div className="px-6 py-4  border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900">Contract Content</h2>
         </div>
         <div className="p-6 space-y-4">

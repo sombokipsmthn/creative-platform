@@ -295,7 +295,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40  border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <Link href="/" className="font-bold tracking-widest text-sm uppercase">
             KIPSMTHN<span className="text-purple-500">.</span>

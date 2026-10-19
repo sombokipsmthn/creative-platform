@@ -230,7 +230,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [params]);
 
   const handleChange = (field: keyof FormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -422,7 +422,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-zinc-800">
+        <div className="flex gap-2 overflow-x-auto pb-2  border-slate-200 dark:border-zinc-800">
           {tabs.map((tab) => (
             <button
               key={tab.id}

@@ -135,7 +135,7 @@ export default function ClientLightbox({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex flex-col justify-between text-white">
-      <div className="h-16 px-6 border-b border-zinc-800/80 flex justify-between items-center bg-zinc-950/80">
+      <div className="h-16 px-6  border-zinc-800/80 flex justify-between items-center bg-zinc-950/80">
         <div className="flex items-center gap-4">
           <button onClick={onClose} className="p-2 text-zinc-400 hover:text-white transition-colors">
             ✕ Close
@@ -194,7 +194,7 @@ export default function ClientLightbox({
 
         {showExif && (
           <div className="absolute top-8 right-8 bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl text-xs font-sans space-y-2 max-w-xs shadow-2xl backdrop-blur-md">
-            <p className="text-purple-400 font-bold border-b border-zinc-800 pb-1">Camera Details</p>
+            <p className="text-purple-400 font-bold  border-zinc-800 pb-1">Camera Details</p>
             <p><span className="text-zinc-500">Camera:</span> {item.exif?.camera || 'Unknown'}</p>
             <p><span className="text-zinc-500">Aperture:</span> {item.exif?.aperture || '—'}</p>
             <p><span className="text-zinc-500">Shutter:</span> {item.exif?.shutter || '—'}</p>
@@ -205,7 +205,7 @@ export default function ClientLightbox({
         {showComments && (
           <div className="absolute top-0 right-0 bottom-0 w-80 bg-zinc-900/95 border-l border-zinc-800 p-6 flex flex-col justify-between shadow-2xl backdrop-blur-md">
             <div className="space-y-4 overflow-hidden">
-              <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+              <div className="flex justify-between items-center  border-zinc-800 pb-3">
                 <h4 className="text-sm font-medium">Comments & Notes</h4>
                 <button onClick={() => setShowComments(false)} className="text-xs text-zinc-500 hover:text-white">✕</button>
               </div>

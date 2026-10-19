@@ -271,7 +271,7 @@ export default function EquipmentServicesSelector({
 
   return (
     <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="flex flex-col justify-between gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center dark:border-zinc-800">
+      <div className="flex flex-col justify-between gap-3  border-slate-100 pb-4 sm:flex-row sm:items-center dark:border-zinc-800">
         <div>
           <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
             <span className="inline-block h-2.5 w-2.5 rounded-full bg-purple-600" />

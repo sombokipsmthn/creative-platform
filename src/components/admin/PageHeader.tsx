@@ -23,7 +23,7 @@ export default function PageHeader({
   secondaryActions,
 }: PageHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 border-b pb-6 mb-6">
+    <div className="flex flex-col gap-4  pb-6 mb-6">
       {backLink && (
         <div>
           <Link

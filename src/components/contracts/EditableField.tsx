@@ -41,8 +41,6 @@ export function EditableField({
 
   // Synchronize the local editor buffer when the parent value changes.
   useEffect(() => {
-    // The editor buffer intentionally mirrors a changing parent value.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTempValue(value);
   }, [value]);
 

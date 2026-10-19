@@ -314,7 +314,7 @@ export default function ClientGalleryPage({
 
   return (
     <main className="min-h-screen bg-[#080808] text-white" data-gallery-theme={gallery.theme || 'reference-pending'}>
-      <header className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/10">
+      <header className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl  border-white/10">
         <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-5">
           <div className="flex items-center justify-between gap-4">
             <div>

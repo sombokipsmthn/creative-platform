@@ -113,7 +113,7 @@ export default function HomePage() {
 
       <main className="flex-1">
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden border-b py-20 md:py-28 lg:py-32">
+        <section className="relative overflow-hidden  py-20 md:py-28 lg:py-32">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
               <div className="space-y-6 lg:col-span-7">
@@ -214,7 +214,7 @@ export default function HomePage() {
         </section>
 
         {/* WORKSPACE MODULES QUICK STRIP */}
-        <section className="border-b bg-muted/30 py-12">
+        <section className=" bg-muted/30 py-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
               <div>

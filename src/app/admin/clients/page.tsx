@@ -511,7 +511,7 @@ export default function AdminClientsPage() {
                 ✕
               </Button>
 
-              <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
+              <div className="space-y-2  border-slate-200 dark:border-zinc-800 pb-5">
                 {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">{selectedClient.company}</span>}
                 <h2 className="text-2xl font-light">{selectedClient.name}</h2>
                 <p className="text-xs font-sans text-slate-600 dark:text-zinc-400 break-words">

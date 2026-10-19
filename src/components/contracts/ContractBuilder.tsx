@@ -84,7 +84,6 @@ export function ContractBuilder({
   useEffect(() => {
     if (templateId && templatesQuery.data && !template) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (found) setTemplate(found);
     }
   }, [templateId, templatesQuery.data, template]);
@@ -93,11 +92,12 @@ export function ContractBuilder({
   useEffect(() => {
     if (!template) return;
 
-    const newValues: Record<string, string> = { ...values };
-    const clientFieldKeys = getClientFields();
-    const projectFieldKeys = getProjectFields();
+    setValues((currentValues) => {
+      const newValues: Record<string, string> = { ...currentValues };
+      const clientFieldKeys = getClientFields();
+      const projectFieldKeys = getProjectFields();
 
-    // Populate client fields
+      // Populate client fields
     if (selectedClient) {
       if (clientFieldKeys.includes('client_name') && !newValues.client_name) {
         newValues.client_name = selectedClient.name || '';
@@ -116,7 +116,7 @@ export function ContractBuilder({
       }
     }
 
-    // Populate project fields
+      // Populate project fields
     if (selectedProject) {
       if (projectFieldKeys.includes('project_name') && !newValues.project_name) {
         newValues.project_name = selectedProject.name || '';
@@ -157,13 +157,13 @@ export function ContractBuilder({
       }
     }
 
-    // Set default effective date
+      // Set default effective date
     if (!newValues.effective_date && template.variables?.includes('effective_date')) {
       newValues.effective_date = new Date().toISOString().slice(0, 10);
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setValues(newValues);
+      setValues(newValues);
+    });
   }, [template, selectedClient, selectedProject]);
 
   // Get required fields for this template

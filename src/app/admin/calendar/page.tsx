@@ -174,7 +174,7 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
-      <header className="border-b border-slate-200 dark:border-zinc-800">
+      <header className=" border-slate-200 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-4 px-6 py-4 lg:px-8">
           <div className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />

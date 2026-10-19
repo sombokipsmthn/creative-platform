@@ -105,7 +105,7 @@ export default function QuotationDocument({
     <div className="bg-white text-slate-900 print:bg-white">
       <div className="mx-auto max-w-5xl px-8 py-10 sm:px-12 sm:py-14 print:max-w-none print:px-0 print:py-0">
         {/* HEADER */}
-        <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-8  border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
               Quotation
@@ -138,7 +138,7 @@ export default function QuotationDocument({
         </div>
 
         {/* META */}
-        <div className="grid grid-cols-1 gap-8 border-b border-slate-200 py-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8  border-slate-200 py-8 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Prepared For
@@ -246,7 +246,7 @@ export default function QuotationDocument({
           <div className="overflow-hidden rounded-xl border border-slate-200">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-left">
+                <tr className=" border-slate-200 bg-slate-50 text-left">
                   <th className="px-4 py-3 text-[10px] font-sans uppercase tracking-widest text-slate-500">
                     Description
                   </th>
@@ -279,7 +279,7 @@ export default function QuotationDocument({
                   items.map((item, index) => (
                     <tr
                       key={item.id || `${item.description}-${index}`}
-                      className="border-b border-slate-100 last:border-b-0"
+                      className=" border-slate-100 "
                     >
                       <td className="px-4 py-4">
                         <div>

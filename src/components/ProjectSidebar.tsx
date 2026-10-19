@@ -49,7 +49,7 @@ export default function ProjectSidebar({
   onTabChange: (tab: string) => void
 }) {
   return (
-    <aside className="w-full shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-card)] md:w-60 md:border-b-0 md:border-r">
+    <aside className="w-full shrink-0  border-[var(--border-subtle)] bg-[var(--bg-card)] md:w-60  md:border-r">
       <div className="flex h-full flex-col px-3 py-4 md:px-4 md:py-5">
         <div className="mb-5 px-2">
           <p className="os-eyebrow">Gallery</p>

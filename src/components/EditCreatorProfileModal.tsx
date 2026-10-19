@@ -52,7 +52,7 @@ export default function EditCreatorProfileModal({
           ✕
         </button>
 
-        <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-4">
+        <div className="space-y-1  border-slate-200 dark:border-zinc-800 pb-4">
           <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-sans rounded-full uppercase">
             Multi-Creator Account
           </span>

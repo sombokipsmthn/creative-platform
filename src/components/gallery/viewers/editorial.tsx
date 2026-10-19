@@ -62,7 +62,7 @@ export function GalleryViewerEditorial({
       }}
     >
       {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
+      <div className=" border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
         <h1 className="text-3xl font-serif tracking-tight sm:text-4xl md:text-5xl">{title}</h1>
         {description && (
           <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600">{description}</p>

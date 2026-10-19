@@ -396,7 +396,7 @@ export default function CreatorOnboardingPage() {
   return (
     <main className="min-h-screen bg-[#FAFAFA] text-gray-900">
       <div className="mx-auto min-h-screen w-full max-w-7xl">
-        <header className="border-b border-gray-100 bg-white">
+        <header className=" border-gray-100 bg-white">
           <div className="flex items-center justify-between px-6 py-5 sm:px-10 lg:px-12">
             <div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#6D28D9] text-sm font-bold text-white">K</div><span className="text-sm font-semibold">KIPSMTHN</span></div>
             <span className="hidden text-sm text-gray-400 sm:block">Creator setup</span>
@@ -404,7 +404,7 @@ export default function CreatorOnboardingPage() {
         </header>
 
         <div className="grid lg:grid-cols-[300px_1fr]">
-          <aside className="border-b border-gray-100 bg-white px-6 py-8 lg:min-h-[calc(100vh-81px)] lg:border-b-0 lg:border-r lg:px-8 lg:py-12">
+          <aside className=" border-gray-100 bg-white px-6 py-8 lg:min-h-[calc(100vh-81px)]  lg:border-r lg:px-8 lg:py-12">
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-[#6D28D9]">Setup</p>
             <h1 className="mt-3 text-2xl font-semibold tracking-tight">Build your workspace.</h1>
             <p className="mt-3 text-sm leading-6 text-gray-500">Complete the essentials first, then add the business details when you&apos;re ready.</p>

@@ -39,7 +39,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
           aria-label="Open profile menu"
           className="flex items-center gap-2 rounded-lg p-1 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
         >
-          <Avatar className="h-8 w-8 border border-border">
+          <Avatar className="h-8 w-8 border order">
             {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName} />}
             <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
               {initials}

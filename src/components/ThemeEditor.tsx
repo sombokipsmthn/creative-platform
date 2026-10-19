@@ -135,7 +135,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
   return (
     <div className="space-y-6">
       {/* Section Navigation */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-zinc-800">
+      <div className="flex flex-wrap gap-2  border-slate-200 dark:border-zinc-800">
         {[
           { id: 'themes' as const, label: 'Themes', icon: '🎨' },
           { id: 'cover' as const, label: 'Cover', icon: '🖼️' },
@@ -147,7 +147,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
           <button
             key={section.id}
             onClick={() => setActiveSection(section.id)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium  transition ${
               activeSection === section.id
                 ? 'border-purple-600 text-purple-600'
                 : 'border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'

@@ -78,7 +78,7 @@ function statusBadgeClass(status: string) {
     case 'paid':
       return 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700';
     case 'sent':
-      return 'bg-blue-500/15 border-blue-500/30 text-blue-700';
+      return 'bg-blue-500/15 lue-500/30 text-blue-700';
     case 'overdue':
       return 'bg-red-500/15 border-red-500/30 text-red-700';
     case 'cancelled':
@@ -255,7 +255,7 @@ export default function InvoiceDetailPage() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm print:rounded-none print:border-0 print:shadow-none">
 
           {/* HEADER */}
-          <div className="border-b border-slate-100 px-8 py-8 sm:px-10 print:px-0 print:py-0 print:pb-7">
+          <div className=" border-slate-100 px-8 py-8 sm:px-10 print:px-0 print:py-0 print:pb-7">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="mb-3 h-1 w-10 print:hidden" style={{ backgroundColor: PURPLE }} />
@@ -285,7 +285,7 @@ export default function InvoiceDetailPage() {
           </div>
 
           {/* CLIENT */}
-          <div className="border-b border-slate-100 px-8 py-6 sm:px-10 print:px-0">
+          <div className=" border-slate-100 px-8 py-6 sm:px-10 print:px-0">
             <p className="mb-3 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">Billed To</p>
             {invoice.client ? (
               <div className="space-y-0.5">
@@ -315,7 +315,7 @@ export default function InvoiceDetailPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-100">
+                    <tr className=" border-slate-100">
                       <th className="py-2 pr-4 text-left text-[10px] font-sans uppercase tracking-widest text-slate-400">Description</th>
                       <th className="py-2 pr-4 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Qty</th>
                       <th className="py-2 pr-4 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Unit Price</th>

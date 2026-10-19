@@ -109,7 +109,7 @@ function statusClass(status: string) {
   }
 
   if (status === 'completed') {
-    return 'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300';
+    return 'bg-blue-500/20 lue-500/30 text-blue-700 dark:text-blue-300';
   }
 
   if (status === 'on hold') {
@@ -214,7 +214,7 @@ export default function AdminProjectsPage() {
     return () => {
       cancelled = true;
     };
-  }, [filterClient, filterStatus]);
+  }, [filterClient, filterStatus, filterVisibility, filterFeatured]);
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -907,7 +907,7 @@ export default function AdminProjectsPage() {
                 ✕
               </Button>
 
-              <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
+              <div className="space-y-2  border-slate-200 dark:border-zinc-800 pb-5">
                 {selectedProject.client && (
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">

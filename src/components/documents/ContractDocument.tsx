@@ -23,7 +23,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
     <div className="bg-white text-slate-900 print:bg-white">
       <div className="mx-auto max-w-5xl px-8 py-10 sm:px-12 sm:py-14">
         {/* HEADER */}
-        <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col gap-8  border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
               Contract
@@ -44,7 +44,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
         </div>
 
         {/* META */}
-        <div className="grid grid-cols-1 gap-8 border-b border-slate-200 py-8 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8  border-slate-200 py-8 sm:grid-cols-2">
           <div>
             <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
               Client

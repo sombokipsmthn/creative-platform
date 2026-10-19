@@ -36,7 +36,7 @@ export function AdminPageHeader({
   className = '',
 }: AdminPageHeaderProps) {
   return (
-    <div className={cn('border-b pb-5 mb-8 space-y-4', className)}>
+    <div className={cn(' pb-5 mb-8 space-y-4', className)}>
       {breadcrumb && (
         <Link
           href={breadcrumb.href}

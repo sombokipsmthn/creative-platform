@@ -47,7 +47,7 @@ export default async function EquipmentPage() {
       <Header />
 
       <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-36 text-center">
-        <div className="pointer-events-none absolute top-1/4 left-1/2 h-100 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600/15 blur-3xl" />
+        <div className="pointer-events-none absolute top-1/4 left-1/2 h-100 w-[min(600px,100vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600/15 blur-3xl" />
 
         <p className="text-xs font-sans font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">
           Production kit

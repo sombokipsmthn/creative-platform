@@ -265,7 +265,7 @@ export default function CreativeOSDashboardPage() {
       <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
         <div className="space-y-2">
           <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-96" />
+          <Skeleton className="h-4 w-96 max-w-full" />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Skeleton className="h-32 rounded-xl" />
@@ -284,7 +284,7 @@ export default function CreativeOSDashboardPage() {
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
       {/* Top Welcome Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between  pb-6">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">

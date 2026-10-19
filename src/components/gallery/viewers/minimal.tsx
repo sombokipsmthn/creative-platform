@@ -74,7 +74,7 @@ export function GalleryViewerMinimal({
       }}
     >
       {/* Header */}
-      <div className="border-b border-gray-200 px-6 py-6 sm:px-10 lg:px-16">
+      <div className=" border-gray-200 px-6 py-6 sm:px-10 lg:px-16">
         <h1 className="text-2xl font-light tracking-tight sm:text-3xl">{title}</h1>
         {description && <p className="mt-2 text-sm text-gray-500">{description}</p>}
       </div>

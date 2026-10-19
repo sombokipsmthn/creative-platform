@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import {
   Play,
@@ -136,7 +137,7 @@ export default function StudioTimelinePlayer() {
   return (
     <div className="relative mx-auto w-full max-w-6xl rounded-2xl border border-slate-200/80 bg-slate-900/90 text-white shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-black/85 overflow-hidden">
       {/* Top Application Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-xs bg-slate-950/70">
+      <div className="flex flex-wrap items-center justify-between gap-3  border-white/10 px-4 py-3 text-xs bg-slate-950/70">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5">
             <span className="h-3 w-3 rounded-full bg-rose-500/80" />
@@ -193,7 +194,7 @@ export default function StudioTimelinePlayer() {
       </div>
 
       {/* Main Preview Monitor & Inspector Split */}
-      <div className="grid lg:grid-cols-[1fr_300px] border-b border-white/10 bg-black/60">
+      <div className="grid lg:grid-cols-[1fr_300px]  border-white/10 bg-black/60">
         {/* Monitor Viewport */}
         <div className="relative flex flex-col justify-center items-center p-4 sm:p-6 bg-slate-950/40 min-h-[340px] sm:min-h-[440px]">
           {/* Active Canvas Aspect Box */}
@@ -248,7 +249,7 @@ export default function StudioTimelinePlayer() {
         {/* Right Inspector & Take Selector */}
         <div className="flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-white/10 bg-slate-900/60 p-4 sm:p-5">
           <div className="space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+            <div className="flex items-center justify-between pb-3  border-white/10">
               <span className="text-xs font-semibold uppercase tracking-wider text-purple-400">
                 Shot Sequences
               </span>
@@ -302,12 +303,12 @@ export default function StudioTimelinePlayer() {
 
           {/* Quick Action in Inspector */}
           <div className="pt-4 border-t border-white/10">
-            <a
+            <Link
               href="/admin/galleries"
               className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-xs font-semibold text-white transition-colors"
             >
               Open in Creator Workspace →
-            </a>
+            </Link>
           </div>
         </div>
       </div>

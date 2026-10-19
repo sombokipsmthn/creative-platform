@@ -103,7 +103,7 @@ export default function QuotePreview({
         className="mx-auto w-full max-w-198.5 min-h-280.75 bg-white text-slate-900 shadow-xl print:shadow-none"
       >
         {/* HEADER */}
-        <div className="px-10 md:px-14 pt-10 pb-8 border-b border-slate-200">
+        <div className="px-10 md:px-14 pt-10 pb-8  border-slate-200">
           <div className="flex items-start justify-between gap-8">
             <div>
               <p className="text-xl font-bold tracking-[0.2em] uppercase">
@@ -207,7 +207,7 @@ export default function QuotePreview({
         {/* ITEMS */}
         <div className="px-10 md:px-14">
           <div className="border-t border-slate-200">
-            <div className="grid grid-cols-[1fr_70px_110px_110px] gap-4 py-3 border-b border-slate-200">
+            <div className="grid grid-cols-[1fr_70px_110px_110px] gap-4 py-3  border-slate-200">
               <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
                 Description
               </p>
@@ -228,7 +228,7 @@ export default function QuotePreview({
             {Array.from(groupedItems.entries()).map(
               ([category, items]) => (
                 <div key={category}>
-                  <div className="py-3 bg-slate-50 border-b border-slate-100">
+                  <div className="py-3 bg-slate-50  border-slate-100">
                     <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
                       {category}
                     </p>
@@ -237,7 +237,7 @@ export default function QuotePreview({
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-[1fr_70px_110px_110px] gap-4 py-4 border-b border-slate-100"
+                      className="grid grid-cols-[1fr_70px_110px_110px] gap-4 py-4  border-slate-100"
                     >
                       <div>
                         <p className="text-xs font-medium">

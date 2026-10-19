@@ -4,6 +4,8 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, List } from 'lucide-react';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, eachDayOfInterval, differenceInCalendarDays, isSameDay, isSameMonth, isSameWeek, parseISO, addDays, subDays } from 'date-fns';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Button } from '@/components/ui/button';
 
 type CalendarView = 'month' | 'week' | 'agenda';
 
@@ -155,26 +157,18 @@ export default function CalendarPage() {
   // Group events by day - inline lookup (no separate function needed)
 
   if (state.loading) {
-    return (
-      <div className="">
-        <p className="">Loading calendar...</p>
-      </div>
-    );
+    return <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><p>Loading calendar…</p></div></div></div>;
   }
 
   if (state.error) {
-    return (
-      <div className="">
-        <div className="">
-          {state.error}
-        </div>
-      </div>
-    );
+    return <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><h1>Calendar unavailable</h1><p>{state.error}</p><Button type="button" onClick={() => setState(prev => ({ ...prev, currentDate: new Date(), loading: true, error: null }))}>Retry</Button></div></div></div>;
   }
 
   return (
-    <div className="">
-      <header className="">
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
+        <AdminPageHeader title="Calendar" description="Plan shoots, deadlines, and production activity in one workspace." breadcrumb={{ label: 'Dashboard', href: '/admin' }} />
+        <section className="ui-card admin-calendar-workspace" aria-label="Creator Command Centre Calendar">
         <div className="">
           <div className="">
             <CalendarIcon className="" />
@@ -253,7 +247,6 @@ export default function CalendarPage() {
             </div>
           </div>
         </div>
-      </header>
 
       <main className="">
         {state.view === 'month' && (
@@ -281,6 +274,8 @@ export default function CalendarPage() {
           />
         )}
       </main>
+        </section>
+      </div>
     </div>
   );
 }

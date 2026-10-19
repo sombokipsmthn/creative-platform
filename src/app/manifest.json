@@ -1,0 +1,44 @@
+{
+  "name": "KIPSMTHN Creative Platform",
+  "short_name": "Creative Platform",
+  "description": "A unified platform for creative professionals to manage their work, clients, projects, production workflows, and client delivery - from first inquiry to final delivery.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#09090b",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "photo-video", "utilities"],
+  "icons": [
+    {
+      "src": "/site-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/og-image.svg",
+      "sizes": "1200x630",
+      "type": "image/svg+xml",
+      "form_factor": "wide",
+      "label": "KIPSMTHN Creative Platform Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "Access your creator dashboard",
+      "url": "/admin",
+      "icons": [{ "src": "/site-icon.svg", "sizes": "192x192" }]
+    },
+    {
+      "name": "Galleries",
+      "short_name": "Galleries",
+      "description": "View and manage client galleries",
+      "url": "/admin/galleries",
+      "icons": [{ "src": "/site-icon.svg", "sizes": "192x192" }]
+    }
+  ]
+}

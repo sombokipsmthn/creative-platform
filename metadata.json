@@ -1,0 +1,6 @@
+{
+  "name": "Kipsmthn Creative Platform",
+  "description": "A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

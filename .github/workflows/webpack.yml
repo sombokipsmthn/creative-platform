@@ -1,0 +1,31 @@
+name: Node.js build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+    - uses: actions/checkout@v7
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v7
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Verify Node.js version
+      run: node --version && node -e "if (!/^v22\\./.test(process.version)) process.exit(1)"
+
+    - name: Build
+      run: |
+        npm ci
+        npm run build

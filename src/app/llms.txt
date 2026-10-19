@@ -1,0 +1,41 @@
+# KIPSMTHN Creative Platform
+
+KIPSMTHN is a creative business platform for photographers, filmmakers, studios, and creative teams. It provides a connected workspace for managing clients, projects, quotes, invoices, and private gallery delivery.
+
+## Major Public Sections
+
+- **Home** (`/`): Platform overview, features, workflow, and workspace modules
+- **About** (`/about`): Platform information and creator profiles
+- **Services** (`/services`): Production and creative storytelling services including:
+  - Startup Ecosystem Storytelling (Accelerator & Donor Program Media)
+  - Brand Films & Documentary Production
+  - Commercial & E-Commerce Photography
+  - Visual Identity, Motion & UI/UX Systems
+- **Work** (`/work`): Portfolio archive across four creative pillars:
+  - Photography
+  - Videography
+  - Branding & Graphic Design
+  - UI/UX
+- **Contact** (`/contact`): Direct inquiries and social channels
+
+## Services Offered
+
+KIPSMTHN provides commercial photography, brand films, motion graphics, and creative production services for African startup ecosystem programs, venture studios, and corporate clients. Based in Nairobi, Kenya with KRA eTIMS compliance.
+
+## Note on Private Areas
+
+The following areas are NOT public content and should not be indexed:
+- `/admin/**` - Administrative interfaces
+- `/api/**` - API endpoints
+- Authentication routes (sign-in, sign-up, onboarding)
+- Private client portal routes (`/portal/**`)
+- Tokenized gallery URLs
+- Internal/private routes
+
+## Canonical Links
+
+- Home: https://creative-platform.vercel.app/
+- About: https://creative-platform.vercel.app/about
+- Services: https://creative-platform.vercel.app/services
+- Work: https://creative-platform.vercel.app/work
+- Contact: https://creative-platform.vercel.app/contact

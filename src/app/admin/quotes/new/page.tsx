@@ -1,0 +1,2665 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+
+/* =========================================================
+   TYPES
+========================================================= */
+
+type Equipment = {
+  id: string;
+  name: string;
+  dailyRate: number;
+  category: string;
+  subcategory?: string | null;
+  brand?: string | null;
+  specs?: string | null;
+};
+
+type DescriptionOption = {
+  id: string;
+  label: string;
+  type: "equipment" | "service";
+  equipmentId?: string;
+  category: string;
+  subcategory?: string | null;
+  brand?: string | null;
+  rate: number;
+  unit: string;
+};
+
+type QuoteItem = {
+  id: string;
+  type: "equipment" | "custom";
+  equipmentId?: string;
+  category: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  rate: number;
+  amount: number;
+  notes: string;
+};
+
+type Client = {
+  id: string;
+  name: string;
+  company?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  kraPin?: string | null;
+};
+
+/* =========================================================
+   QUOTE CATEGORIES
+
+   These are quote-builder categories.
+
+   IMPORTANT:
+   These do NOT have to match the raw equipment DB categories.
+   getDescriptionOptions() maps them to the correct catalogue
+   records.
+========================================================= */
+
+const QUOTE_CATEGORIES = [
+  "Equipment",
+  "Camera",
+  "Audio",
+  "Lighting",
+  "Grip",
+  "Crew",
+  "Production",
+  "Post Production",
+  "Transport",
+  "Other",
+] as const;
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function normalize(value: unknown) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase();
+}
+
+function createItem(
+  type: "equipment" | "custom" = "custom"
+): QuoteItem {
+  return {
+    id: crypto.randomUUID(),
+    type,
+    equipmentId: "",
+    category: "Equipment",
+    description: "",
+    quantity: 1,
+    unit: type === "equipment" ? "day" : "unit",
+    rate: 0,
+    amount: 0,
+    notes: "",
+  };
+}
+
+function formatAmount(
+  amount: number,
+  currency = "KES"
+) {
+  return `${currency} ${Number(
+    amount || 0
+  ).toLocaleString("en-KE")}`;
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+export default function NewQuotePage() {
+  const router = useRouter();
+
+  /* =======================================================
+     DATA
+  ======================================================= */
+
+  const [equipment, setEquipment] =
+    useState<Equipment[]>([]);
+
+  const [services, setServices] =
+    useState<Array<{ id: string; label: string; category: string; unit: string; rate: number }>>([]);
+
+  const [clients, setClients] =
+    useState<Client[]>([]);
+
+  const [loadingEquipment, setLoadingEquipment] =
+    useState(true);
+
+  const [loadingClients, setLoadingClients] =
+    useState(true);
+
+  /* =======================================================
+     QUOTE DETAILS
+  ======================================================= */
+
+  const [title, setTitle] =
+    useState("");
+
+  const [projectName, setProjectName] =
+    useState("");
+
+  const [clientId, setClientId] =
+    useState("");
+
+  const [currency, setCurrency] =
+    useState("KES");
+
+  const [paymentTerms, setPaymentTerms] =
+    useState("");
+
+  const [validUntil, setValidUntil] =
+    useState("");
+
+  const [productionDays, setProductionDays] =
+    useState(1);
+
+  const [location, setLocation] =
+    useState("");
+
+  const [clientContact, setClientContact] =
+    useState("");
+
+  const [depositPercentage, setDepositPercentage] =
+    useState(50);
+
+  const [notes, setNotes] =
+    useState("");
+
+  /* =======================================================
+     PRICING
+  ======================================================= */
+
+  const [discountType, setDiscountType] =
+    useState<
+      "none" | "percentage" | "fixed"
+    >("none");
+
+  const [discountValue, setDiscountValue] =
+    useState(0);
+
+  const [tax, setTax] =
+    useState(0);
+
+  /* =======================================================
+     LINE ITEMS
+  ======================================================= */
+
+  const [items, setItems] =
+    useState<QuoteItem[]>([
+      createItem(),
+    ]);
+
+  /*
+   * Search text is kept independently for every
+   * description field.
+   */
+  const [descriptionSearch, setDescriptionSearch] =
+    useState<Record<string, string>>({});
+
+  /*
+   * Only one description dropdown is open at a time.
+   */
+  const [openDescriptionSearch, setOpenDescriptionSearch] =
+    useState<string | null>(null);
+
+  /* =======================================================
+     UI
+  ======================================================= */
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  /* =======================================================
+     LOAD EQUIPMENT
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadEquipment() {
+      try {
+        setLoadingEquipment(true);
+
+        const response = await fetch(
+          "/api/equipment",
+          {
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load equipment"
+          );
+        }
+
+        const data =
+          await response.json();
+
+        const equipmentData: Equipment[] =
+          Array.isArray(data)
+            ? data
+            : Array.isArray(
+              data.equipment
+            )
+              ? data.equipment
+              : [];
+
+        if (!cancelled) {
+          setEquipment(
+            equipmentData
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to load equipment:",
+          err
+        );
+
+        if (!cancelled) {
+          setError(
+            "Unable to load equipment. Custom line items are still available."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingEquipment(false);
+        }
+      }
+    }
+
+    async function loadServices() {
+      try {
+        // Load all service categories
+        const categories = ["crew", "production", "post production", "transport", "other"];
+        const allServices: typeof services = [];
+
+        for (const category of categories) {
+          const response = await fetch(
+            `/api/services?category=${encodeURIComponent(category)}`,
+            { cache: "no-store" }
+          );
+
+          if (response.ok) {
+            const categoryServices = await response.json();
+            allServices.push(...categoryServices);
+          }
+        }
+
+        if (!cancelled) {
+          setServices(allServices);
+        }
+      } catch (err) {
+        console.error("Failed to load services:", err);
+        // Services are optional, fall back to empty
+        if (!cancelled) {
+          setServices([]);
+        }
+      }
+    }
+
+    loadEquipment();
+    loadServices();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* =======================================================
+     LOAD CLIENTS
+  ======================================================= */
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadClients() {
+      try {
+        setLoadingClients(true);
+
+        const response =
+          await fetch(
+            "/api/clients",
+            {
+              cache: "no-store",
+            }
+          );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load clients"
+          );
+        }
+
+        const data =
+          await response.json();
+
+        const clientData: Client[] =
+          Array.isArray(data)
+            ? data
+            : Array.isArray(
+              data.clients
+            )
+              ? data.clients
+              : [];
+
+        if (!cancelled) {
+          setClients(
+            clientData
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Failed to load clients:",
+          err
+        );
+
+        if (!cancelled) {
+          setError(
+            "Unable to load clients."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingClients(false);
+        }
+      }
+    }
+
+    loadClients();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* =======================================================
+     CATEGORY-AWARE EQUIPMENT MATCHING
+
+     THIS IS THE IMPORTANT PART.
+
+     The selected quote category controls the catalogue.
+
+     Description selection NEVER changes category.
+  ======================================================= */
+
+  function equipmentMatchesQuoteCategory(
+    item: Equipment,
+    category: string
+  ) {
+    const dbCategory = normalize(item.category ?? "");
+    const subcategory = normalize(item.subcategory ?? "");
+    const searchable = [
+      item.name,
+      item.category,
+      item.subcategory,
+      item.specs,
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    const selected = normalize(category);
+
+    if (!selected) {
+      return false;
+    }
+
+    /*
+     * Equipment and Camera intentionally both point
+     * to camera equipment.
+     */
+    if (
+      selected === "equipment" ||
+      selected === "camera"
+    ) {
+      return (
+        dbCategory === "cameras" ||
+        dbCategory === "camera" ||
+        subcategory.includes("camera") ||
+        searchable.includes("camera")
+      );
+    }
+
+    /*
+     * Audio -> Sound catalogue.
+     */
+    if (selected === "audio") {
+      return (
+        dbCategory === "sound" ||
+        dbCategory.includes("audio") ||
+        subcategory.includes("audio") ||
+        subcategory.includes("sound") ||
+        searchable.includes("microphone") ||
+        searchable.includes("recorder") ||
+        searchable.includes("boom mic") ||
+        searchable.includes("lapel") ||
+        searchable.includes("wireless audio")
+      );
+    }
+
+    /*
+     * Lighting -> Lights + Modifiers.
+     */
+    if (selected === "lighting") {
+      return (
+        dbCategory === "lights" ||
+        dbCategory === "light" ||
+        dbCategory === "lighting" ||
+        dbCategory === "modifiers" ||
+        subcategory.includes("light") ||
+        subcategory.includes("lighting") ||
+        subcategory.includes("modifier") ||
+        searchable.includes("led") ||
+        searchable.includes("light")
+      );
+    }
+
+    /*
+     * Grip -> physical grip/motion/support gear.
+     */
+    if (selected === "grip") {
+      return (
+        dbCategory === "stands" ||
+        dbCategory === "stabilizers" ||
+        dbCategory === "motion" ||
+        dbCategory === "grip" ||
+        dbCategory === "modifiers" ||
+        subcategory.includes("stand") ||
+        subcategory.includes("support") ||
+        subcategory.includes("stabilizer") ||
+        subcategory.includes("gimbal") ||
+        subcategory.includes("dolly") ||
+        subcategory.includes("slider") ||
+        searchable.includes("tripod") ||
+        searchable.includes("gimbal") ||
+        searchable.includes("dolly") ||
+        searchable.includes("slider")
+      );
+    }
+
+    return false;
+  }
+
+  /* =======================================================
+     DESCRIPTION OPTIONS
+
+     Returns ONLY options belonging to item.category.
+  ======================================================= */
+
+  function getDescriptionOptions(
+    item: QuoteItem
+  ): DescriptionOption[] {
+    const category =
+      item.category;
+
+    const selectedCategory =
+      normalize(category);
+
+    const search =
+      normalize(
+        descriptionSearch[item.id]
+      );
+
+    const options: DescriptionOption[] =
+      [];
+
+    /*
+     * -------------------------------------------------------
+     * EQUIPMENT CATEGORIES
+     * -------------------------------------------------------
+     */
+
+    const equipmentCategories =
+      new Set([
+        "equipment",
+        "camera",
+        "audio",
+        "lighting",
+        "grip",
+      ]);
+
+    if (
+      equipmentCategories.has(
+        selectedCategory
+      )
+    ) {
+      equipment.forEach(
+        (equipmentItem) => {
+          if (
+            !equipmentMatchesQuoteCategory(
+              equipmentItem,
+              category
+            )
+          ) {
+            return;
+          }
+
+          const searchable =
+            normalize(
+              [
+                equipmentItem.name,
+                equipmentItem.brand,
+                equipmentItem.category,
+                equipmentItem.subcategory,
+                equipmentItem.specs,
+              ]
+                .filter(Boolean)
+                .join(" ")
+            );
+
+          if (
+            search &&
+            !searchable.includes(
+              search
+            )
+          ) {
+            return;
+          }
+
+          options.push({
+            id: `equipment-${equipmentItem.id}`,
+            label:
+              equipmentItem.name,
+            type: "equipment",
+            equipmentId:
+              equipmentItem.id,
+            category:
+              equipmentItem.category,
+            subcategory:
+              equipmentItem.subcategory,
+            brand:
+              equipmentItem.brand,
+            rate:
+              Number(
+                equipmentItem.dailyRate
+              ) || 0,
+            unit: "day",
+          });
+        }
+      );
+
+      return options
+        .sort((a, b) =>
+          a.label.localeCompare(
+            b.label
+          )
+        )
+        .slice(0, 50);
+    }
+
+    /*
+     * -------------------------------------------------------
+     * SERVICES (Crew, Production, Post-Production, etc)
+     * -------------------------------------------------------
+     */
+
+    const serviceCategories = new Set([
+      "crew",
+      "production",
+      "post production",
+      "transport",
+      "other",
+    ]);
+
+    if (serviceCategories.has(selectedCategory)) {
+      services.forEach((service) => {
+        if (
+          normalize(service.category) !==
+          selectedCategory
+        ) {
+          return;
+        }
+
+        if (
+          search &&
+          !(
+            normalize(service.label).includes(
+              search
+            ) ||
+            normalize(
+              service.category
+            ).includes(search)
+          )
+        ) {
+          return;
+        }
+
+        options.push({
+          id: service.id,
+          label: service.label,
+          type: "service",
+          category: service.category,
+          subcategory:
+            service.category,
+          rate: service.rate,
+          unit: service.unit,
+        });
+      });
+
+      return options
+        .sort((a, b) =>
+          a.label.localeCompare(
+            b.label
+          )
+        );
+    }
+
+    return options;
+  }
+
+  /* =======================================================
+     TOTALS
+
+     IMPORTANT:
+     Amount is the authoritative line-item value.
+
+     We do NOT calculate subtotal from rate anymore.
+     This allows Amount to be manually edited.
+  ======================================================= */
+
+  const subtotal = useMemo(
+    () =>
+      items.reduce(
+        (sum, item) =>
+          sum +
+          Math.max(
+            0,
+            Number(item.amount) ||
+            0
+          ),
+        0
+      ),
+    [items]
+  );
+
+  const discountAmount =
+    useMemo(() => {
+      const value =
+        Math.max(
+          0,
+          Number(
+            discountValue
+          ) || 0
+        );
+
+      if (
+        discountType ===
+        "percentage"
+      ) {
+        return Math.round(
+          subtotal *
+          (Math.min(
+            value,
+            100
+          ) /
+            100)
+        );
+      }
+
+      if (
+        discountType ===
+        "fixed"
+      ) {
+        return Math.min(
+          value,
+          subtotal
+        );
+      }
+
+      return 0;
+    }, [
+      subtotal,
+      discountType,
+      discountValue,
+    ]);
+
+  const taxableSubtotal =
+    subtotal -
+    discountAmount;
+
+  const total =
+    taxableSubtotal +
+    Math.max(
+      0,
+      Number(tax) || 0
+    );
+
+  /* =======================================================
+     CATEGORY CHANGE
+
+     Category is authoritative.
+
+     Changing it clears the previous description because
+     the old description may not belong to the new category.
+  ======================================================= */
+
+  function handleCategoryChange(
+    itemId: string,
+    category: string
+  ) {
+    const normalized =
+      normalize(category);
+
+    let defaultUnit =
+      "unit";
+
+    if (
+      normalized ===
+      "crew" ||
+      normalized ===
+      "camera" ||
+      normalized ===
+      "equipment" ||
+      normalized ===
+      "audio" ||
+      normalized ===
+      "lighting" ||
+      normalized ===
+      "grip"
+    ) {
+      defaultUnit = "day";
+    }
+
+    if (
+      normalized ===
+      "post production"
+    ) {
+      defaultUnit =
+        "project";
+    }
+
+    if (
+      normalized ===
+      "production"
+    ) {
+      defaultUnit =
+        "project";
+    }
+
+    if (
+      normalized ===
+      "transport"
+    ) {
+      defaultUnit =
+        "day";
+    }
+
+    setItems(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id === itemId
+              ? {
+                ...item,
+
+                /*
+                 * Category is ONLY changed here.
+                 */
+                category,
+
+                type: "custom",
+
+                equipmentId:
+                  "",
+
+                description:
+                  "",
+
+                quantity:
+                  Math.max(
+                    1,
+                    Number(
+                      item.quantity
+                    ) || 1
+                  ),
+
+                unit:
+                  defaultUnit,
+
+                rate: 0,
+
+                amount: 0,
+              }
+              : item
+        )
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [itemId]: "",
+      })
+    );
+
+    setOpenDescriptionSearch(
+      itemId
+    );
+  }
+
+  /* =======================================================
+     DESCRIPTION SELECTION
+
+     IMPORTANT:
+     item.category is NEVER changed here.
+  ======================================================= */
+
+  function handleDescriptionChange(
+    itemId: string,
+    option: DescriptionOption
+  ) {
+    setItems(
+      (current) =>
+        current.map(
+          (item) => {
+            if (
+              item.id !==
+              itemId
+            ) {
+              return item;
+            }
+
+            const quantity =
+              Math.max(
+                1,
+                Number(
+                  item.quantity
+                ) || 1
+              );
+
+            const rate =
+              Math.max(
+                0,
+                Number(
+                  option.rate
+                ) || 0
+              );
+
+            return {
+              ...item,
+
+              /*
+               * DO NOT CHANGE category.
+               */
+              category:
+                item.category,
+
+              type:
+                option.type ===
+                  "equipment"
+                  ? "equipment"
+                  : "custom",
+
+              equipmentId:
+                option.type ===
+                  "equipment"
+                  ? option.equipmentId ||
+                  ""
+                  : "",
+
+              description:
+                option.label,
+
+              unit:
+                option.unit,
+
+              rate,
+
+              /*
+               * Populate the single editable
+               * Amount field.
+               */
+              amount:
+                quantity * rate,
+            };
+          }
+        )
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [itemId]:
+          option.label,
+      })
+    );
+
+    setOpenDescriptionSearch(
+      null
+    );
+  }
+
+  /* =======================================================
+     AMOUNT
+
+     This is the only amount editor displayed to the user.
+  ======================================================= */
+
+  function updateAmount(
+    itemId: string,
+    value: number
+  ) {
+    const amount =
+      Math.max(
+        0,
+        Number(value) || 0
+      );
+
+    setItems(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id === itemId
+              ? {
+                ...item,
+                amount,
+              }
+              : item
+        )
+    );
+  }
+
+  /* =======================================================
+     QUANTITY
+  ======================================================= */
+
+  function updateQuantity(
+    itemId: string,
+    value: number
+  ) {
+    const quantity =
+      Math.max(
+        1,
+        Number(value) || 1
+      );
+
+    setItems(
+      (current) =>
+        current.map(
+          (item) => {
+            if (
+              item.id !==
+              itemId
+            ) {
+              return item;
+            }
+
+            /*
+             * When quantity changes, use the catalogue rate
+             * to rebuild the amount.
+             *
+             * The user can then manually override Amount.
+             */
+            const rate =
+              Math.max(
+                0,
+                Number(
+                  item.rate
+                ) || 0
+              );
+
+            return {
+              ...item,
+              quantity,
+              amount:
+                quantity *
+                rate,
+            };
+          }
+        )
+    );
+  }
+
+  /* =======================================================
+     GENERIC ITEM UPDATE
+
+     Used for Unit and Notes and manual description text.
+  ======================================================= */
+
+  function updateItem(
+    itemId: string,
+    field: keyof QuoteItem,
+    value: string
+  ) {
+    setItems(
+      (current) =>
+        current.map(
+          (item) =>
+            item.id === itemId
+              ? {
+                ...item,
+                [field]:
+                  value,
+              }
+              : item
+        )
+    );
+  }
+
+  /* =======================================================
+     ADD ITEM
+  ======================================================= */
+
+  function addEquipmentItem() {
+    const item =
+      createItem(
+        "equipment"
+      );
+
+    setItems(
+      (current) => [
+        ...current,
+        item,
+      ]
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [item.id]: "",
+      })
+    );
+
+    setOpenDescriptionSearch(
+      item.id
+    );
+  }
+
+  function addCustomItem() {
+    const item =
+      createItem(
+        "custom"
+      );
+
+    setItems(
+      (current) => [
+        ...current,
+        item,
+      ]
+    );
+
+    setDescriptionSearch(
+      (current) => ({
+        ...current,
+        [item.id]: "",
+      })
+    );
+  }
+
+  /* =======================================================
+     REMOVE ITEM
+  ======================================================= */
+
+  function removeItem(
+    itemId: string
+  ) {
+    setItems(
+      (current) => {
+        if (
+          current.length ===
+          1
+        ) {
+          return [
+            createItem(),
+          ];
+        }
+
+        return current.filter(
+          (item) =>
+            item.id !==
+            itemId
+        );
+      }
+    );
+
+    setDescriptionSearch(
+      (current) => {
+        const next = {
+          ...current,
+        };
+
+        delete next[itemId];
+
+        return next;
+      }
+    );
+
+    if (
+      openDescriptionSearch ===
+      itemId
+    ) {
+      setOpenDescriptionSearch(
+        null
+      );
+    }
+  }
+
+  /* =======================================================
+     SAVE
+  ======================================================= */
+
+  async function handleSubmit(
+    event: React.FormEvent
+  ) {
+    event.preventDefault();
+
+    setError("");
+
+    if (
+      !title.trim()
+    ) {
+      setError(
+        "Quote title is required."
+      );
+
+      return;
+    }
+
+    if (
+      items.length ===
+      0
+    ) {
+      setError(
+        "Add at least one line item."
+      );
+
+      return;
+    }
+
+    const invalidItem =
+      items.find(
+        (item) =>
+          !item.description.trim()
+      );
+
+    if (invalidItem) {
+      setError(
+        "Every line item needs a description."
+      );
+
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const response =
+        await fetch(
+          "/api/quotes",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify(
+              {
+                clientId:
+                  clientId ||
+                  null,
+
+                title:
+                  title.trim(),
+
+                projectName:
+                  projectName.trim() ||
+                  null,
+
+                currency,
+
+                paymentTerms:
+                  paymentTerms.trim() ||
+                  null,
+
+                validUntil:
+                  validUntil ||
+                  null,
+
+                productionDays,
+
+                location:
+                  location.trim() ||
+                  null,
+
+                clientContact:
+                  clientContact.trim() ||
+                  null,
+
+                depositPercentage,
+
+                notes:
+                  notes.trim() ||
+                  null,
+
+                status:
+                  "draft",
+
+                discountType,
+
+                discountValue,
+
+                tax,
+
+                items:
+                  items.map(
+                    (item) => ({
+                      category:
+                        item.category,
+
+                      description:
+                        item.description.trim(),
+
+                      quantity:
+                        item.quantity,
+
+                      unit:
+                        item.unit,
+
+                      rate:
+                        item.rate,
+
+                      /*
+                       * IMPORTANT:
+                       * Save the editable Amount,
+                       * not quantity * rate.
+                       */
+                      amount:
+                        Math.max(
+                          0,
+                          Number(
+                            item.amount
+                          ) || 0
+                        ),
+
+                      notes:
+                        item.notes.trim() ||
+                        null,
+
+                      ...(item.equipmentId
+                        ? {
+                          equipmentId:
+                            item.equipmentId,
+                        }
+                        : {}),
+                    })
+                  ),
+              }
+            ),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error ||
+          "Failed to create quote"
+        );
+      }
+
+      router.push(
+        `/admin/quotes/${data.id}`
+      );
+    } catch (err) {
+      console.error(
+        "Failed to create quote:",
+        err
+      );
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Failed to create quote."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /* =======================================================
+     INPUT CLASSES
+  ======================================================= */
+
+  const inputClass =
+    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500";
+
+  const labelClass =
+    "text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600";
+
+  /* =======================================================
+     PAGE
+  ======================================================= */
+
+  return (
+    <div className="">
+      <div className="">
+        <form
+          onSubmit={
+            handleSubmit
+          }
+          className=""
+        >
+          {/* =================================================
+              HEADER
+          ================================================= */}
+
+          <div className="">
+            <div>
+              <Link
+                href="/admin/quotes"
+                className=""
+              >
+                ← Quotes
+              </Link>
+
+              <p className="">
+                Sales & Production
+              </p>
+
+              <h1 className="">
+                New Quote
+              </h1>
+
+              <p className="">
+                Build a production
+                estimate from
+                equipment, crew
+                and production
+                services.
+              </p>
+            </div>
+
+            <div className="">
+              <Link
+                href="/admin/quotes"
+                className=""
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                disabled={saving}
+                className=""
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save Draft"}
+              </button>
+            </div>
+          </div>
+
+          {/* =================================================
+              ERROR
+          ================================================= */}
+
+          {error && (
+            <div className="">
+              <p className="">
+                {error}
+              </p>
+            </div>
+          )}
+
+          {/* =================================================
+              QUOTE DETAILS
+          ================================================= */}
+
+          <section className="">
+            <div className="">
+              <h2 className="">
+                Quote Details
+              </h2>
+
+              <p className="">
+                Client and project
+                information.
+              </p>
+            </div>
+
+            <div className="">
+              {/* TITLE */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Quote Title *
+                </span>
+
+                <input
+                  value={title}
+                  onChange={(
+                    event
+                  ) =>
+                    setTitle(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="Production Quote"
+                  className={
+                    inputClass
+                  }
+                />
+              </label>
+
+              {/* CLIENT */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Client
+                </span>
+
+                <select
+                  value={
+                    clientId
+                  }
+                  onChange={(
+                    event
+                  ) => {
+                    const id =
+                      event.target
+                        .value;
+
+                    setClientId(
+                      id
+                    );
+
+                    if (id) {
+                      const client =
+                        clients.find(
+                          (
+                            item
+                          ) =>
+                            item.id ===
+                            id
+                        );
+
+                      if (client) {
+                        const contactParts =
+                          [
+                            client.name,
+                            client.phone,
+                            client.email,
+                          ].filter(
+                            Boolean
+                          );
+
+                        setClientContact(
+                          contactParts.join(
+                            " • "
+                          )
+                        );
+
+                        if (
+                          !paymentTerms
+                        ) {
+                          setPaymentTerms(
+                            "50% deposit, balance on completion"
+                          );
+                        }
+                      }
+                    } else {
+                      setClientContact(
+                        ""
+                      );
+                    }
+                  }}
+                  disabled={
+                    loadingClients
+                  }
+                  className={
+                    inputClass
+                  }
+                >
+                  <option value="">
+                    {loadingClients
+                      ? "Loading clients..."
+                      : "Select client"}
+                  </option>
+
+                  {clients.map(
+                    (
+                      client
+                    ) => (
+                      <option
+                        key={
+                          client.id
+                        }
+                        value={
+                          client.id
+                        }
+                      >
+                        {client.company
+                          ? `${client.company} — ${client.name}`
+                          : client.name}
+                      </option>
+                    )
+                  )}
+                </select>
+              </label>
+
+              {/* PROJECT */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Project
+                </span>
+
+                <input
+                  value={
+                    projectName
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setProjectName(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="Project name"
+                  className={
+                    inputClass
+                  }
+                />
+              </label>
+
+              {/* CURRENCY */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Currency
+                </span>
+
+                <select
+                  value={
+                    currency
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setCurrency(
+                      event.target
+                        .value
+                    )
+                  }
+                  className={
+                    inputClass
+                  }
+                >
+                  <option value="KES">
+                    KES
+                  </option>
+
+                  <option value="USD">
+                    USD
+                  </option>
+
+                  <option value="EUR">
+                    EUR
+                  </option>
+
+                  <option value="GBP">
+                    GBP
+                  </option>
+                </select>
+              </label>
+
+              {/* VALID UNTIL */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Valid Until
+                </span>
+
+                <input
+                  type="date"
+                  value={
+                    validUntil
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setValidUntil(
+                      event.target
+                        .value
+                    )
+                  }
+                  className={
+                    inputClass
+                  }
+                />
+              </label>
+
+              {/* PRODUCTION DAYS */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Production Days
+                </span>
+
+                <input
+                  type="number"
+                  min="1"
+                  value={
+                    productionDays
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setProductionDays(
+                      Math.max(
+                        1,
+                        Number(
+                          event
+                            .target
+                            .value
+                        ) || 1
+                      )
+                    )
+                  }
+                  className={
+                    inputClass
+                  }
+                />
+              </label>
+
+              {/* LOCATION */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Location
+                </span>
+
+                <input
+                  value={
+                    location
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setLocation(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="Nairobi, Kenya"
+                  className={
+                    inputClass
+                  }
+                />
+              </label>
+
+              {/* CLIENT CONTACT */}
+
+              <label className="block">
+                <span
+                  className={
+                    labelClass
+                  }
+                >
+                  Client Contact
+                </span>
+
+                <input
+                  value={
+                    clientContact
+                  }
+                  onChange={(
+                    event
+                  ) =>
+                    setClientContact(
+                      event.target
+                        .value
+                    )
+                  }
+                  placeholder="Primary client contact"
+                  className={
+                    inputClass
+                  }
+                />
+              </label>
+            </div>
+          </section>
+
+          {/* =================================================
+              LINE ITEMS
+          ================================================= */}
+
+          <section className="">
+            {/* HEADER */}
+
+            <div className="">
+              <div className="">
+                <div>
+                  <h2 className="">
+                    Line Items
+                  </h2>
+
+                  <p className="">
+                    Select a category
+                    first. The
+                    description
+                    search will only
+                    show items from
+                    that category.
+                  </p>
+                </div>
+
+                <div className="">
+                  <button
+                    type="button"
+                    onClick={
+                      addEquipmentItem
+                    }
+                    className=""
+                  >
+                    + Equipment
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={
+                      addCustomItem
+                    }
+                    className=""
+                  >
+                    + Custom Item
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* LINE ITEM ROWS */}
+
+            <div className="">
+              {items.map(
+                (
+                  item,
+                  index
+                ) => {
+                  const options =
+                    getDescriptionOptions(
+                      item
+                    );
+
+                  const isOpen =
+                    openDescriptionSearch ===
+                    item.id;
+
+                  const searchValue =
+                    descriptionSearch[
+                    item.id
+                    ] ??
+                    "";
+
+                  return (
+                    <div
+                      key={
+                        item.id
+                      }
+                      className=""
+                    >
+                      {/* ITEM HEADER */}
+
+                      <div className="">
+                        <div className="">
+                          <span className="">
+                            {index +
+                              1}
+                          </span>
+
+                          <span className="">
+                            {item.category ||
+                              "Line Item"}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            removeItem(
+                              item.id
+                            )
+                          }
+                          className=""
+                        >
+                          Remove
+                        </button>
+                      </div>
+
+                      {/* GRID */}
+
+                      <div className="">
+                        {/* =================================================
+                            CATEGORY
+                        ================================================= */}
+
+                        <div className="">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Category
+                            </span>
+
+                            <select
+                              value={
+                                item.category ||
+                                ""
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                handleCategoryChange(
+                                  item.id,
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              disabled={
+                                loadingEquipment
+                              }
+                              className={
+                                inputClass
+                              }
+                            >
+                              <option value="">
+                                {loadingEquipment
+                                  ? "Loading..."
+                                  : "Select category"}
+                              </option>
+
+                              {QUOTE_CATEGORIES.map(
+                                (
+                                  category
+                                ) => (
+                                  <option
+                                    key={
+                                      category
+                                    }
+                                    value={
+                                      category
+                                    }
+                                  >
+                                    {
+                                      category
+                                    }
+                                  </option>
+                                )
+                              )}
+                            </select>
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            DESCRIPTION
+
+                            Category controls this list.
+                        ================================================= */}
+
+                        <div className="">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Description
+                            </span>
+
+                            <div className="">
+                              <input
+                                type="text"
+                                value={
+                                  isOpen
+                                    ? searchValue
+                                    : item.description
+                                }
+                                onFocus={() => {
+                                  if (
+                                    item.category
+                                  ) {
+                                    setDescriptionSearch(
+                                      (
+                                        current
+                                      ) => ({
+                                        ...current,
+                                        [item.id]:
+                                          "",
+                                      })
+                                    );
+
+                                    setOpenDescriptionSearch(
+                                      item.id
+                                    );
+                                  }
+                                }}
+                                onChange={(
+                                  event
+                                ) => {
+                                  setDescriptionSearch(
+                                    (
+                                      current
+                                    ) => ({
+                                      ...current,
+                                      [item.id]:
+                                        event
+                                          .target
+                                          .value,
+                                    })
+                                  );
+
+                                  setOpenDescriptionSearch(
+                                    item.id
+                                  );
+                                }}
+                                disabled={
+                                  !item.category
+                                }
+                                placeholder={
+                                  !item.category
+                                    ? "Select a category first"
+                                    : `Search ${item.category.toLowerCase()}...`
+                                }
+                                className={`w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none ${!item.category
+                                  ? "opacity-60 cursor-not-allowed"
+                                  : "focus:border-purple-500"
+                                  }`}
+                              />
+
+                              {/* DROPDOWN */}
+
+                              {isOpen &&
+                                item.category && (
+                                  <div className="">
+                                    <div className="">
+                                      <p className="">
+                                        {
+                                          item.category
+                                        }{" "}
+                                        options
+                                      </p>
+
+                                      <span className="">
+                                        {
+                                          options.length
+                                        }{" "}
+                                        found
+                                      </span>
+                                    </div>
+
+                                    <div className="">
+                                      {options.length ===
+                                        0 ? (
+                                        <div className="">
+                                          <p className="">
+                                            No matching{" "}
+                                            {item.category.toLowerCase()}{" "}
+                                            items found.
+                                          </p>
+
+                                          <p className="">
+                                            Try another search term.
+                                          </p>
+                                        </div>
+                                      ) : (
+                                        options.map(
+                                          (
+                                            option
+                                          ) => (
+                                            <button
+                                              key={
+                                                option.id
+                                              }
+                                              type="button"
+                                              onClick={() =>
+                                                handleDescriptionChange(
+                                                  item.id,
+                                                  option
+                                                )
+                                              }
+                                              className=""
+                                            >
+                                              <div className="">
+                                                <div className="">
+                                                  <p className="">
+                                                    {
+                                                      option.label
+                                                    }
+                                                  </p>
+
+                                                  <p className="">
+                                                    {option.type ===
+                                                      "equipment"
+                                                      ? `${option.category}${option.subcategory
+                                                        ? ` · ${option.subcategory}`
+                                                        : ""
+                                                      }${option.brand
+                                                        ? ` · ${option.brand}`
+                                                        : ""
+                                                      }`
+                                                      : option.category}
+                                                  </p>
+                                                </div>
+
+                                                {option.rate >
+                                                  0 && (
+                                                    <span className="">
+                                                      {formatAmount(
+                                                        option.rate,
+                                                        currency
+                                                      )}
+                                                      /
+                                                      {
+                                                        option.unit
+                                                      }
+                                                    </span>
+                                                  )}
+                                              </div>
+                                            </button>
+                                          )
+                                        )
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            QUANTITY
+                        ================================================= */}
+
+                        <div className="">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Qty
+                            </span>
+
+                            <input
+                              type="number"
+                              min="1"
+                              value={
+                                item.quantity
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateQuantity(
+                                  item.id,
+                                  Number(
+                                    event
+                                      .target
+                                      .value
+                                  )
+                                )
+                              }
+                              className=""
+                            />
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            UNIT
+                        ================================================= */}
+
+                        <div className="">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Unit
+                            </span>
+
+                            <input
+                              value={
+                                item.unit
+                              }
+                              onChange={(
+                                event
+                              ) =>
+                                updateItem(
+                                  item.id,
+                                  "unit",
+                                  event
+                                    .target
+                                    .value
+                                )
+                              }
+                              className=""
+                            />
+                          </label>
+                        </div>
+
+                        {/* =================================================
+                            AMOUNT
+
+                            THIS IS THE ONLY AMOUNT FIELD.
+                        ================================================= */}
+
+                        <div className="">
+                          <label className="block">
+                            <span
+                              className={
+                                labelClass
+                              }
+                            >
+                              Amount
+                            </span>
+
+                            <div className="">
+                              <span className="">
+                                {
+                                  currency
+                                }
+                              </span>
+
+                              <input
+                                type="number"
+                                min="0"
+                                value={
+                                  item.amount ===
+                                    0
+                                    ? ""
+                                    : item.amount
+                                }
+                                onChange={(
+                                  event
+                                ) =>
+                                  updateAmount(
+                                    item.id,
+                                    Number(
+                                      event
+                                        .target
+                                        .value
+                                    ) || 0
+                                  )
+                                }
+                                placeholder="0"
+                                className=""
+                              />
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* NOTES */}
+
+                      <div className="">
+                        <label className="block">
+                          <span
+                            className={
+                              labelClass
+                            }
+                          >
+                            Notes
+                          </span>
+
+                          <input
+                            value={
+                              item.notes
+                            }
+                            onChange={(
+                              event
+                            ) =>
+                              updateItem(
+                                item.id,
+                                "notes",
+                                event
+                                  .target
+                                  .value
+                              )
+                            }
+                            placeholder="Optional notes"
+                            className=""
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  );
+                }
+              )}
+            </div>
+
+            {/* ADD BUTTONS */}
+
+            <div className="">
+              <button
+                type="button"
+                onClick={
+                  addEquipmentItem
+                }
+                className=""
+              >
+                + Add Equipment
+              </button>
+
+              <button
+                type="button"
+                onClick={
+                  addCustomItem
+                }
+                className=""
+              >
+                + Add Custom Line
+              </button>
+            </div>
+          </section>
+
+          {/* =================================================
+              TERMS + PRICING
+          ================================================= */}
+
+          <section className="">
+            {/* TERMS */}
+
+            <div className="">
+              <h2 className="">
+                Terms
+              </h2>
+
+              <div className="">
+                {/* PAYMENT TERMS */}
+
+                <label className="block">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
+                    Payment Terms
+                  </span>
+
+                  <div className="">
+                    <input
+                      value={
+                        paymentTerms
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setPaymentTerms(
+                          event
+                            .target
+                            .value
+                        )
+                      }
+                      placeholder="e.g. 50% deposit, balance on completion"
+                      className=""
+                    />
+
+                    <div className="">
+                      <select
+                        className=""
+                        onChange={(
+                          event
+                        ) => {
+                          if (
+                            event
+                              .target
+                              .value
+                          ) {
+                            setPaymentTerms(
+                              event
+                                .target
+                                .value
+                            );
+                          }
+
+                          event.target.value =
+                            "";
+                        }}
+                      >
+                        <option value="">
+                          Templates...
+                        </option>
+
+                        <option value="50% upfront, 50% on completion">
+                          50% upfront,
+                          50% on
+                          completion
+                        </option>
+
+                        <option value="100% upfront">
+                          100% upfront
+                        </option>
+
+                        <option value="Net 30">
+                          Net 30
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </label>
+
+                {/* DEPOSIT */}
+
+                <label className="block">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
+                    Deposit %
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={
+                      depositPercentage
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setDepositPercentage(
+                        Math.min(
+                          100,
+                          Math.max(
+                            0,
+                            Number(
+                              event
+                                .target
+                                .value
+                            ) || 0
+                          )
+                        )
+                      )
+                    }
+                    className={
+                      inputClass
+                    }
+                  />
+                </label>
+
+                {/* NOTES */}
+
+                <label className="block">
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
+                    Notes
+                  </span>
+
+                  <textarea
+                    value={
+                      notes
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setNotes(
+                        event.target
+                          .value
+                      )
+                    }
+                    rows={5}
+                    placeholder="Additional quote notes..."
+                    className=""
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* PRICING */}
+
+            <div className="">
+              <h2 className="">
+                Pricing
+              </h2>
+
+              <div className="">
+                {/* SUBTOTAL */}
+
+                <div className="">
+                  <span className="">
+                    Subtotal
+                  </span>
+
+                  <span className="">
+                    {formatAmount(
+                      subtotal,
+                      currency
+                    )}
+                  </span>
+                </div>
+
+                {/* DISCOUNT */}
+
+                <div>
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
+                    Discount
+                  </span>
+
+                  <div className="">
+                    <select
+                      value={
+                        discountType
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setDiscountType(
+                          event
+                            .target
+                            .value as
+                          | "none"
+                          | "percentage"
+                          | "fixed"
+                        )
+                      }
+                      className=""
+                    >
+                      <option value="none">
+                        None
+                      </option>
+
+                      <option value="percentage">
+                        %
+                      </option>
+
+                      <option value="fixed">
+                        Fixed
+                      </option>
+                    </select>
+
+                    <input
+                      type="number"
+                      min="0"
+                      value={
+                        discountValue
+                      }
+                      onChange={(
+                        event
+                      ) =>
+                        setDiscountValue(
+                          Math.max(
+                            0,
+                            Number(
+                              event
+                                .target
+                                .value
+                            ) || 0
+                          )
+                        )
+                      }
+                      disabled={
+                        discountType ===
+                        "none"
+                      }
+                      className=""
+                    />
+                  </div>
+                </div>
+
+                {/* DISCOUNT AMOUNT */}
+
+                <div className="">
+                  <span className="">
+                    Discount amount
+                  </span>
+
+                  <span className="">
+                    -{" "}
+                    {formatAmount(
+                      discountAmount,
+                      currency
+                    )}
+                  </span>
+                </div>
+
+                {/* TAX */}
+
+                <div>
+                  <span
+                    className={
+                      labelClass
+                    }
+                  >
+                    Tax
+                  </span>
+
+                  <input
+                    type="number"
+                    min="0"
+                    value={
+                      tax
+                    }
+                    onChange={(
+                      event
+                    ) =>
+                      setTax(
+                        Math.max(
+                          0,
+                          Number(
+                            event
+                              .target
+                              .value
+                          ) || 0
+                        )
+                      )
+                    }
+                    className={
+                      inputClass
+                    }
+                  />
+                </div>
+
+                {/* TOTAL */}
+
+                <div className="">
+                  <span className="">
+                    Total
+                  </span>
+
+                  <span className="">
+                    {formatAmount(
+                      total,
+                      currency
+                    )}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* =================================================
+              BOTTOM SAVE
+          ================================================= */}
+
+          <div className="">
+            <button
+              type="submit"
+              disabled={
+                saving
+              }
+              className=""
+            >
+              {saving
+                ? "Saving..."
+                : "Save Quote Draft"}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* =====================================================
+          CLOSE DESCRIPTION DROPDOWN WHEN CLICKING OUTSIDE
+      ===================================================== */}
+
+      {openDescriptionSearch && (
+        <button
+          type="button"
+          aria-label="Close description search"
+          onClick={() =>
+            setOpenDescriptionSearch(
+              null
+            )
+          }
+          className=""
+        />
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,4 @@
+'use client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+interface Props { stats: Array<{ label: string; value: string | number; detail?: string; color?: 'default' | 'success' | 'warning' | 'danger' }>; columns?: 2 | 3 | 4 }
+export default function StatCards({ stats, columns = 4 }: Props) { const cols = { 2: 'lg:grid-cols-2', 3: 'lg:grid-cols-3', 4: 'lg:grid-cols-4' }[columns]; return <div className={`grid grid-cols-1 gap-4 sm:grid-cols-2 ${cols}`}>{stats.map(stat => <Card key={stat.label} className="admin-stat-card"><CardHeader><CardTitle className="admin-stat-label">{stat.label}</CardTitle></CardHeader><CardContent><p className="admin-stat-value">{stat.value}</p>{stat.detail && <p className="admin-stat-detail">{stat.detail}</p>}</CardContent></Card>)}</div>; }

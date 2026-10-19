@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: creative-platform-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kipsmthn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.local}
+      POSTGRES_DB: ${POSTGRES_DB:-kipsmthn}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./drizzle/0031_local_init.sql:/docker-entrypoint-initdb.d/0031_local_init.sql:ro
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: creative-platform
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: 1
+      DATABASE_URL: postgresql://${POSTGRES_USER:-kipsmthn}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.local}@postgres:5432/${POSTGRES_DB:-kipsmthn}?sslmode=disable
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Set BETTER_AUTH_SECRET in .env.local}
+      DEMO_CREATOR_EMAIL: ${DEMO_CREATOR_EMAIL:-demo.creator@kipsmthn.test}
+      DEMO_CREATOR_PASSWORD: ${DEMO_CREATOR_PASSWORD:?Set DEMO_CREATOR_PASSWORD in .env.local}
+      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-}
+      SVIX_AUTH_TOKEN: ${SVIX_AUTH_TOKEN:-}
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) process.exit(1)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app:
+    driver: bridge

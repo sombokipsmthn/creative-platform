@@ -1,31 +1,4 @@
 'use client';
-
-import * as React from 'react';
 import { ReactNode } from 'react';
-
-interface EmptyStateProps {
-  icon: ReactNode;
-  title: string;
-  description: string;
-  action?: ReactNode;
-}
-
-export default function EmptyState({
-  icon,
-  title,
-  description,
-  action,
-}: EmptyStateProps) {
-  return (
-    <div className="order fade-in-50">
-      <div className="">
-        {icon}
-      </div>
-      <h3 className="">{title}</h3>
-      <p className="">
-        {description}
-      </p>
-      {action && <div className="">{action}</div>}
-    </div>
-  );
-}
+interface Props { icon?: ReactNode; title: string; description: string; action?: ReactNode; filtered?: boolean }
+export default function EmptyState({ icon, title, description, action, filtered }: Props) { return <div className="admin-empty-state" role="status">{icon && <div className="admin-empty-state__icon" aria-hidden="true">{icon}</div>}<h2>{title}</h2><p>{description}</p>{filtered && <p className="admin-empty-state__hint">Try changing your search or filters.</p>}{action && <div>{action}</div>}</div>; }

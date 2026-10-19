@@ -16,7 +16,7 @@ export default function ContractEvents({ contractId }: ContractEventsProps) {
   });
 
   if (isLoading) {
-    return <Loader2Icon className="h-4 w-4 animate-spin" />;
+    return <Loader2Icon className="" />;
   }
 
   return (

@@ -218,6 +218,20 @@
       "when": 1792400000000,
       "tag": "0030_repair_gallery_themes_again",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792450000000,
+      "tag": "0035_studio_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1792500000000,
+      "tag": "0036_add_client_kra_pin",
+      "breakpoints": true
     }
   ]
 }

@@ -29,7 +29,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, poster, className }) => 
         poster={poster}
         onClick={togglePlay}
         controls
-        className="w-full h-auto rounded-lg shadow-lg cursor-pointer"
+        className=""
       >
         Your browser does not support the video tag.
       </video>

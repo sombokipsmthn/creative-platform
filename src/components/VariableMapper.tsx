@@ -11,7 +11,7 @@ type VariableMapperProps = {
 
 export default function VariableMapper({ template, client, project, onMap }: VariableMapperProps) {
   const variables = template.variables ?? [];
-  
+
   const defaults: Record<string, string> = {
     client_name: client?.name || '',
     client_email: client?.email || '',

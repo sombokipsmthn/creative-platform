@@ -22,7 +22,7 @@ export default function Footer() {
             <div>
               <Button asChild variant="outline" size="sm" className="h-9 gap-2 rounded-lg">
                 <Link href="/admin">
-                  Open Workspace <ArrowRight className="h-3.5 w-3.5" />
+                  Open Workspace <ArrowRight className="" />
                 </Link>
               </Button>
             </div>
@@ -32,78 +32,68 @@ export default function Footer() {
             <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground">
               Platform
             </h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+            <ul className="">
               <li>
                 <Link href="/#platform" className="rounded-sm transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   Features & Tools
                 </Link>
               </li>
               <li>
-                <Link href="/#workflow" className="hover:text-foreground transition-colors">
+                <Link href="/workflow" className="">
                   Production Workflow
-                </Link>
-              </li>
-              <li>
-                <Link href="/equipment" className="hover:text-foreground transition-colors">
-                  Equipment Kit
-                </Link>
-              </li>
-              <li>
-                <Link href="/services" className="hover:text-foreground transition-colors">
-                  Services Catalog
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            <h3 className="">
               Studio
             </h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+            <ul className="">
               <li>
-                <Link href="/about" className="hover:text-foreground transition-colors">
+                <Link href="/about" className="">
                   About KIPSMTHN
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-foreground transition-colors">
+                <Link href="/contact" className="">
                   Contact & Inquiries
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-foreground transition-colors">
+                <Link href="/privacy" className="">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <span className="text-muted-foreground/70">Nairobi, Kenya</span>
+                <span className="">Nairobi, Kenya</span>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+            <h3 className="">
               Workspace
             </h3>
-            <ul className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+            <ul className="">
               <li>
-                <Link href="/admin" className="hover:text-foreground transition-colors">
+                <Link href="/admin" className="">
                   Admin Overview
                 </Link>
               </li>
               <li>
-                <Link href="/admin/quotes" className="hover:text-foreground transition-colors">
+                <Link href="/admin/quotes" className="">
                   Production Quotes
                 </Link>
               </li>
               <li>
-                <Link href="/admin/invoices" className="hover:text-foreground transition-colors">
+                <Link href="/admin/invoices" className="">
                   Invoices & eTIMS
                 </Link>
               </li>
               <li>
-                <Link href="/admin/galleries" className="hover:text-foreground transition-colors">
+                <Link href="/admin/galleries" className="">
                   Client Delivery Galleries
                 </Link>
               </li>

@@ -13,7 +13,7 @@ import {
 
 export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  authUserId: text("auth_user_id").unique(),
+  authUserId: text("auth_user_id").unique().$defaultFn(() => crypto.randomUUID()),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -102,6 +102,20 @@ export const creatorProfiles = pgTable("creator_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const creatorPortfolios = pgTable("creator_portfolios", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  headline: text("headline"),
+  contactEmail: text("contact_email"),
+  socialLinks: jsonb("social_links").default({}).notNull(),
+  selectedProjectIds: jsonb("selected_project_ids").default([]).notNull(),
+  layout: text("layout").default("editorial").notNull(),
+  isPublished: boolean("is_published").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const creatorServices = pgTable("creator_services", {
   id: uuid("id").defaultRandom().primaryKey(),
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -135,6 +149,7 @@ export const clients = pgTable("clients", {
   company: text("company"),
   email: text("email"),
   phone: text("phone"),
+  kraPin: text("kra_pin"),
   website: text("website"),
   location: text("location"),
   notes: text("notes"),
@@ -278,6 +293,28 @@ export const invoiceItems = pgTable("invoice_items", {
   unitPrice: integer("unit_price").default(0).notNull(),
   amount: integer("amount").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull()});
+
+export const studioEvents = pgTable("studio_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: text("client_id").references(() => clients.id, { onDelete: "set null" }),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  eventType: text("event_type").default("client_event").notNull(),
+  status: text("status").default("planned").notNull(),
+  startsAt: timestamp("starts_at").notNull(),
+  endsAt: timestamp("ends_at"),
+  allDay: boolean("all_day").default(false).notNull(),
+  location: text("location"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdx: index("studio_events_creator_id_idx").on(table.creatorId),
+  clientIdx: index("studio_events_client_id_idx").on(table.clientId),
+  projectIdx: index("studio_events_project_id_idx").on(table.projectId),
+  startsAtIdx: index("studio_events_starts_at_idx").on(table.startsAt),
+}));
 
 export const equipment = pgTable("equipment", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -490,6 +527,21 @@ export const galleryWatermarks = pgTable("gallery_watermarks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
+export const galleryWatermarkPresets = pgTable("gallery_watermark_presets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  text: text("text").default("KIPSMTHN").notNull(),
+  position: text("position").default("bottom-right").notNull(),
+  opacity: integer("opacity").default(55).notNull(),
+  fontSize: integer("font_size").default(42).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("gallery_watermark_presets_creator_idx").using("btree", table.creatorId.asc().nullsLast().op("text_ops")),
+  unique("gallery_watermark_presets_creator_name_key").on(table.creatorId, table.name),
+]);
 export const galleryDownloadPresets = pgTable("gallery_download_presets", {
   id: uuid("id").defaultRandom().primaryKey(),
   galleryId: uuid("gallery_id").notNull().references(() => galleries.id, { onDelete: "cascade" }),

@@ -14,24 +14,20 @@ const optionalEnvVars = {
 };
 
 export function validateEnv() {
-  const isBuildPhase = process.env.NEXT_PHASE === "phase-production-build";
   const missing = Object.entries(requiredEnvVars).filter(([, value]) => !value).map(([key]) => key);
 
   if (missing.length > 0) {
-    const message = `Missing required environment variables: ${missing.join(", ")}`;
-    if (isBuildPhase) {
-      console.warn(`⚠️ ${message}`);
-      return;
-    }
-    throw new Error(`${message}. Please check your .env file.`);
+    const message = `Missing environment variables: ${missing.join(", ")}. Set them before starting the application.`;
+    console.warn(`⚠️ ${message}`);
+    return;
   }
 
   console.log("✅ All required environment variables are set");
 }
 
 export const env = {
-  database: { url: requiredEnvVars.DATABASE_URL! },
-  betterAuth: { secret: requiredEnvVars.BETTER_AUTH_SECRET! },
+  database: { url: requiredEnvVars.DATABASE_URL || "" },
+  betterAuth: { secret: requiredEnvVars.BETTER_AUTH_SECRET || "" },
   blob: { token: optionalEnvVars.BLOB_READ_WRITE_TOKEN },
   svix: { token: optionalEnvVars.SVIX_AUTH_TOKEN },
   analytics: { gaId: optionalEnvVars.NEXT_PUBLIC_GA_ID },

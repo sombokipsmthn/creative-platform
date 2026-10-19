@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export const metadata = {
@@ -8,13 +8,13 @@ export const metadata = {
 
 export default function ThanksPage() {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100">
-      <div className="p-8 text-center">
-        <h1 className="text-3xl font-semibold">Thanks — we got your inquiry</h1>
-        <p className="mt-3 text-sm text-slate-600 dark:text-zinc-400">
+    <main className="">
+      <div className="">
+        <h1 className="">Thanks — we got your inquiry</h1>
+        <p className="">
           We will respond within 24 hours. Check your inbox for a confirmation.
         </p>
-        <div className="mt-6">
+        <div className="">
           <Button asChild>
             <Link href="/" className="Button--primary">
               Return to homepage

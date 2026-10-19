@@ -151,7 +151,6 @@ export function CreatorProvider({
      if (authPending) return;
 
      // Hydrate only after Better Auth resolves the current session.
-     // eslint-disable-next-line react-hooks/set-state-in-effect
      void syncCreator();
    }, [authPending, syncCreator]);
 

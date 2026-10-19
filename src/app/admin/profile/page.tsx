@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 interface ProfileForm {
@@ -34,8 +34,7 @@ const emptyProfile: ProfileForm = {
 };
 
 export default function AdminProfilePage() {
-  const { data: session, isPending: isLoaded } = authClient.useSession();
-  const user = session?.user ?? null;
+  const [resolvedUser, setResolvedUser] = useState<{ id?: string; name?: string | null; email?: string | null; image?: string | null; handle?: string | null } | null>(null);
   const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -56,9 +55,7 @@ export default function AdminProfilePage() {
   }
 
   useEffect(() => {
-    if (!isLoaded || !user) return;
-
-    const sessionUser = user;
+    const sessionUser = { name: '', email: '', image: null };
     let ignore = false;
 
     async function loadProfile() {
@@ -75,6 +72,7 @@ export default function AdminProfilePage() {
 
         if (ignore) return;
 
+        setResolvedUser(data?.user || sessionUser);
         setProfile({
           name: data?.user?.name || sessionUser.name || '',
           handle: data?.user?.handle || '',
@@ -102,12 +100,12 @@ export default function AdminProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isLoaded, user]);
+  }, []);
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!user) return;
+    if (!resolvedUser) return;
 
     setIsSaving(true);
     setMessage(null);
@@ -150,12 +148,12 @@ export default function AdminProfilePage() {
     }
   };
 
-  if (!isLoaded || isLoading) {
+  if (isLoading) {
     return (
-      <main className="ui-page flex min-h-[70vh] items-center justify-center">
-        <div className="os-pulse flex items-center gap-3">
-          <span className="os-icon-box h-9 w-9" />
-          <p className="ui-meta uppercase">
+      <main className="ui-page">
+        <div className="os-pulse">
+          <span className="os-icon-box" />
+          <p className="ui-meta">
             Loading creator profile
           </p>
         </div>
@@ -163,12 +161,12 @@ export default function AdminProfilePage() {
     );
   }
 
-  if (!user) {
-    return null;
+  if (!resolvedUser) {
+    return <main className="ui-page"><div className="os-pulse"><p className="ui-meta" role="alert">Unable to resolve the authenticated creator.</p></div></main>;
   }
 
-  const displayName = profile.name || user.name || 'Creator';
-  const avatar = profile.avatarUrl || user.image;
+  const displayName = profile.name || resolvedUser.name || 'Creator';
+  const avatar = profile.avatarUrl || resolvedUser.image;
   const initials = displayName
     .split(' ')
     .filter(Boolean)
@@ -182,58 +180,44 @@ export default function AdminProfilePage() {
   };
 
   return (
-    <main className="ui-page min-h-screen">
-      <div className="ui-shell py-8 sm:py-10">
-        <div className="mb-8 flex flex-col gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Link
-              href="/admin"
-              className="ui-eyebrow hover:underline"
-            >
-              ← Back to Dashboard
-            </Link>
-            <p className="ui-eyebrow mt-3">Account</p>
-            <h1 className="ui-page-title">Creator Settings</h1>
-            <p className="ui-meta">
-              Manage your identity, public profile, and business details.
-            </p>
-          </div>
+    <main className="ui-page">
+      <div className="ui-shell">
+        <AdminPageHeader
+          title="Account & profile"
+          description="Manage your personal account, public creator profile, and account security."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={<span className="ui-badge"><span className="ui-badge-dot" />Authenticated creator</span>}
+        />
 
-          <span className="ui-badge">
-            <span className="ui-badge-dot bg-emerald-500" />
-            Authenticated creator
-          </span>
-        </div>
-
-        <form onSubmit={handleSave} className="space-y-6">
-          <section className="ui-card p-5 sm:p-7">
-            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-900">
+        <form onSubmit={handleSave} className="">
+          <section className="ui-card">
+            <div className="">
+              <div className="">
                 {avatar ? (
                   <Image
                     src={avatar}
                     alt={displayName}
                     fill
-                    className="object-cover"
+                    className=""
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-slate-400 dark:text-zinc-500">
+                  <div className="">
                     {initials}
                   </div>
                 )}
               </div>
 
-              <div className="min-w-0 flex-1">
+              <div className="">
                 <p className="ui-eyebrow">Current account</p>
-                <h2 className="mt-1 truncate ui-section-title">
+                <h2 className="ui-section-title">
                   {displayName}
                 </h2>
                 <p className="ui-meta">
-                  {profile.email || user.email || 'No email available'}
+                  {profile.email || resolvedUser.email || 'No email available'}
                 </p>
                 {profile.handle && (
-                  <p className="ui-eyebrow mt-1">
+                  <p className="ui-eyebrow">
                     @{profile.handle}
                   </p>
                 )}
@@ -241,23 +225,23 @@ export default function AdminProfilePage() {
             </div>
           </section>
 
-          <section className="ui-card p-5 sm:p-7">
+          <section className="ui-card">
             <p className="ui-eyebrow">Account security</p>
             <h2 className="ui-section-title">Passkeys</h2>
-            <p className="ui-meta mt-2">Register this device or a security key for passwordless sign-in.</p>
-            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} placeholder="Passkey name (optional)" className="ui-input flex-1" disabled={passkeyLoading} />
-              <button type="button" onClick={() => void registerPasskey()} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{passkeyLoading ? "Registering…" : "Register passkey"}</button>
+            <p className="ui-meta">Register this device or a security key for passwordless sign-in.</p>
+            <div className="">
+              <input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} placeholder="Passkey name (optional)" className="ui-input" disabled={passkeyLoading} />
+              <button type="button" onClick={() => void registerPasskey()} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} className="">{passkeyLoading ? "Registering…" : "Register passkey"}</button>
             </div>
           </section>
           <section className="ui-card">
-            <div className="border-b border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
-              <p className="ui-eyebrow">Identity</p>
-              <h2 className="ui-section-title">Creator details</h2>
+            <div className="">
+              <p className="ui-eyebrow">Public profile</p>
+              <h2 className="ui-section-title">Creator presentation</h2>
             </div>
 
-            <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7">
-              <label className="space-y-1.5">
+            <div className="">
+              <label className="">
                 <span className="ui-label">Full name</span>
                 <input
                   type="text"
@@ -268,7 +252,7 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5">
+              <label className="">
                 <span className="ui-label">Creator handle</span>
                 <input
                   type="text"
@@ -279,20 +263,20 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5">
+              <label className="">
                 <span className="ui-label">Email address</span>
                 <input
                   type="email"
                   value={profile.email}
                   readOnly
-                  className="ui-input cursor-not-allowed opacity-70"
+                  className="ui-input"
                 />
                 <span className="ui-meta">
                   Managed by Better Auth.
                 </span>
               </label>
 
-              <label className="space-y-1.5">
+              <label className="">
                 <span className="ui-label">Phone number</span>
                 <input
                   type="text"
@@ -303,7 +287,7 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5">
+              <label className="">
                 <span className="ui-label">Business name</span>
                 <input
                   type="text"
@@ -314,7 +298,7 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5">
+              <label className="">
                 <span className="ui-label">KRA PIN</span>
                 <input
                   type="text"
@@ -325,7 +309,7 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5 sm:col-span-2">
+              <label className="">
                 <span className="ui-label">Location</span>
                 <input
                   type="text"
@@ -336,7 +320,7 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5 sm:col-span-2">
+              <label className="">
                 <span className="ui-label">Profile avatar URL</span>
                 <input
                   type="url"
@@ -347,7 +331,7 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5 sm:col-span-2">
+              <label className="">
                 <span className="ui-label">Website</span>
                 <input
                   type="url"
@@ -358,20 +342,20 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5 sm:col-span-2">
+              <label className="">
                 <span className="ui-label">Public bio</span>
                 <textarea
                   rows={5}
                   value={profile.bio}
                   onChange={(event) => update('bio', event.target.value)}
                   placeholder="Tell clients about your creative work..."
-                  className="ui-textarea min-h-32 resize-y"
+                  className="ui-textarea"
                 />
               </label>
             </div>
           </section>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="">
             {message ? (
               <p className="ui-meta">{message}</p>
             ) : (
@@ -384,7 +368,7 @@ export default function AdminProfilePage() {
               type="submit"
               disabled={isSaving}
               variant="primary"
-              className="px-6 py-3 text-xs font-sans uppercase tracking-widest"
+              className=""
             >
               {isSaving ? 'Saving...' : 'Save Profile Changes'}
             </Button>

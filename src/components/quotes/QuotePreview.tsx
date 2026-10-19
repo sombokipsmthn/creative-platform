@@ -97,35 +97,35 @@ export default function QuotePreview({
     100;
 
   return (
-    <div className="w-full bg-slate-100 dark:bg-zinc-900 py-8 px-4 md:px-8">
+    <div className="">
       <div
         id="quote-preview"
-        className="mx-auto w-full max-w-198.5 min-h-280.75 bg-white text-slate-900 shadow-xl print:shadow-none"
+        className=""
       >
         {/* HEADER */}
-        <div className="px-10 md:px-14 pt-10 pb-8 border-b border-slate-200">
-          <div className="flex items-start justify-between gap-8">
+        <div className="">
+          <div className="">
             <div>
-              <p className="text-xl font-bold tracking-[0.2em] uppercase">
+              <p className="">
                 KIPSMTHN
-                <span className="text-purple-600">.</span>
+                <span className="">.</span>
               </p>
 
-              <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-slate-400">
+              <p className="">
                 Creative Production
               </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-slate-400">
+            <div className="">
+              <p className="">
                 Quote
               </p>
 
-              <p className="mt-1 text-lg font-medium">
+              <p className="">
                 {quote.quoteNumber || quote.id}
               </p>
 
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="">
                 Valid until {formatDate(quote.validUntil)}
               </p>
             </div>
@@ -133,31 +133,31 @@ export default function QuotePreview({
         </div>
 
         {/* PROJECT / CLIENT */}
-        <div className="px-10 md:px-14 py-8 grid grid-cols-2 gap-10">
+        <div className="">
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+            <p className="">
               Prepared For
             </p>
 
-            <div className="mt-3">
-              <p className="text-base font-medium">
+            <div className="">
+              <p className="">
                 {quote.client?.name || 'Client'}
               </p>
 
               {quote.client?.company && (
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="">
                   {quote.client.company}
                 </p>
               )}
 
               {quote.client?.email && (
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="">
                   {quote.client.email}
                 </p>
               )}
 
               {quote.client?.phone && (
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="">
                   {quote.client.phone}
                 </p>
               )}
@@ -165,23 +165,23 @@ export default function QuotePreview({
           </div>
 
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+            <p className="">
               Project
             </p>
 
-            <div className="mt-3">
-              <p className="text-base font-medium">
+            <div className="">
+              <p className="">
                 {quote.projectName || quote.title}
               </p>
 
               {quote.location && (
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="">
                   Location: {quote.location}
                 </p>
               )}
 
               {quote.productionDays && (
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="">
                   Production:{' '}
                   {quote.productionDays} day
                   {quote.productionDays === 1
@@ -194,33 +194,33 @@ export default function QuotePreview({
         </div>
 
         {/* TITLE */}
-        <div className="px-10 md:px-14 pb-8">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-600">
+        <div className="">
+          <p className="">
             Proposal
           </p>
 
-          <h1 className="mt-2 text-3xl font-light tracking-tight">
+          <h1 className="">
             {quote.title}
           </h1>
         </div>
 
         {/* ITEMS */}
-        <div className="px-10 md:px-14">
-          <div className="border-t border-slate-200">
-            <div className="grid grid-cols-[1fr_70px_110px_110px] gap-4 py-3 border-b border-slate-200">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="">
+          <div className="">
+            <div className="">
+              <p className="">
                 Description
               </p>
 
-              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 text-right">
+              <p className="">
                 Qty
               </p>
 
-              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 text-right">
+              <p className="">
                 Rate
               </p>
 
-              <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 text-right">
+              <p className="">
                 Amount
               </p>
             </div>
@@ -228,8 +228,8 @@ export default function QuotePreview({
             {Array.from(groupedItems.entries()).map(
               ([category, items]) => (
                 <div key={category}>
-                  <div className="py-3 bg-slate-50 border-b border-slate-100">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-500">
+                  <div className="">
+                    <p className="">
                       {category}
                     </p>
                   </div>
@@ -237,32 +237,32 @@ export default function QuotePreview({
                   {items.map((item) => (
                     <div
                       key={item.id}
-                      className="grid grid-cols-[1fr_70px_110px_110px] gap-4 py-4 border-b border-slate-100"
+                      className=""
                     >
                       <div>
-                        <p className="text-xs font-medium">
+                        <p className="">
                           {item.description}
                         </p>
 
                         {item.notes && (
-                          <p className="mt-1 text-[10px] leading-4 text-slate-400">
+                          <p className="">
                             {item.notes}
                           </p>
                         )}
                       </div>
 
-                      <p className="text-xs text-slate-600 text-right">
+                      <p className="">
                         {item.quantity}
                       </p>
 
-                      <p className="text-xs text-slate-600 text-right">
+                      <p className="">
                         {formatAmount(
                           item.rate,
                           quote.currency
                         )}
                       </p>
 
-                      <p className="text-xs font-medium text-right">
+                      <p className="">
                         {formatAmount(
                           item.amount,
                           quote.currency
@@ -277,14 +277,14 @@ export default function QuotePreview({
         </div>
 
         {/* TOTALS */}
-        <div className="px-10 md:px-14 py-8 flex justify-end">
-          <div className="w-full max-w-sm space-y-3">
-            <div className="flex justify-between gap-6">
-              <span className="text-xs text-slate-500">
+        <div className="">
+          <div className="">
+            <div className="">
+              <span className="">
                 Subtotal
               </span>
 
-              <span className="text-xs">
+              <span className="">
                 {formatAmount(
                   quote.subtotal,
                   quote.currency
@@ -293,8 +293,8 @@ export default function QuotePreview({
             </div>
 
             {Number(quote.discountAmount || 0) > 0 && (
-              <div className="flex justify-between gap-6">
-                <span className="text-xs text-slate-500">
+              <div className="">
+                <span className="">
                   Discount
                   {quote.discountType ===
                   'percentage'
@@ -302,7 +302,7 @@ export default function QuotePreview({
                     : ''}
                 </span>
 
-                <span className="text-xs text-red-600">
+                <span className="">
                   -
                   {formatAmount(
                     quote.discountAmount,
@@ -313,12 +313,12 @@ export default function QuotePreview({
             )}
 
             {Number(quote.tax || 0) > 0 && (
-              <div className="flex justify-between gap-6">
-                <span className="text-xs text-slate-500">
+              <div className="">
+                <span className="">
                   Tax
                 </span>
 
-                <span className="text-xs">
+                <span className="">
                   {formatAmount(
                     quote.tax,
                     quote.currency
@@ -327,12 +327,12 @@ export default function QuotePreview({
               </div>
             )}
 
-            <div className="pt-4 border-t border-slate-300 flex justify-between gap-6">
-              <span className="text-sm font-medium">
+            <div className="">
+              <span className="">
                 Total
               </span>
 
-              <span className="text-xl font-medium">
+              <span className="">
                 {formatAmount(
                   quote.total,
                   quote.currency
@@ -343,13 +343,13 @@ export default function QuotePreview({
             {Number(
               quote.depositPercentage || 0
             ) > 0 && (
-              <div className="pt-3 border-t border-slate-100 flex justify-between gap-6">
-                <span className="text-[10px] text-slate-500">
+              <div className="">
+                <span className="">
                   Deposit (
                   {quote.depositPercentage}%)
                 </span>
 
-                <span className="text-xs font-medium">
+                <span className="">
                   {formatAmount(
                     Math.round(depositAmount),
                     quote.currency
@@ -364,14 +364,14 @@ export default function QuotePreview({
         {(quote.paymentTerms ||
           quote.clientContact ||
           quote.notes) && (
-          <div className="px-10 md:px-14 py-8 border-t border-slate-200 grid grid-cols-2 gap-8">
+          <div className="">
             {quote.paymentTerms && (
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <p className="">
                   Payment Terms
                 </p>
 
-                <p className="mt-3 text-xs leading-5 text-slate-600 whitespace-pre-wrap">
+                <p className="">
                   {quote.paymentTerms}
                 </p>
               </div>
@@ -379,23 +379,23 @@ export default function QuotePreview({
 
             {quote.clientContact && (
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                <p className="">
                   Client Contact
                 </p>
 
-                <p className="mt-3 text-xs leading-5 text-slate-600 whitespace-pre-wrap">
+                <p className="">
                   {quote.clientContact}
                 </p>
               </div>
             )}
 
             {quote.notes && (
-              <div className="col-span-2">
-                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+              <div className="">
+                <p className="">
                   Notes
                 </p>
 
-                <p className="mt-3 text-xs leading-5 text-slate-600 whitespace-pre-wrap">
+                <p className="">
                   {quote.notes}
                 </p>
               </div>
@@ -404,28 +404,28 @@ export default function QuotePreview({
         )}
 
         {/* FOOTER */}
-        <div className="px-10 md:px-14 py-8 mt-4 border-t border-slate-200">
-          <div className="flex items-end justify-between gap-8">
+        <div className="">
+          <div className="">
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">
+              <p className="">
                 Quote prepared by
               </p>
 
-              <p className="mt-2 text-sm font-medium">
+              <p className="">
                 KIPSMTHN
               </p>
 
-              <p className="mt-1 text-[10px] text-slate-400">
+              <p className="">
                 Creative Production
               </p>
             </div>
 
-            <div className="text-right">
-              <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400">
+            <div className="">
+              <p className="">
                 Created
               </p>
 
-              <p className="mt-1 text-xs text-slate-600">
+              <p className="">
                 {formatDate(quote.createdAt)}
               </p>
             </div>

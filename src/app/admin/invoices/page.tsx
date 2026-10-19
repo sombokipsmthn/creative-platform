@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
@@ -301,7 +301,7 @@ export default function InvoicesPage() {
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
-              variant="primary"
+              variant="default"
               className="text-xs font-sans uppercase tracking-widest"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -426,7 +426,7 @@ export default function InvoicesPage() {
 
               <div className="flex justify-center mt-4">
                 <Button
-                  variant="primary"
+                  variant="default"
                   className="mt-6"
                 >
                   Create First Invoice

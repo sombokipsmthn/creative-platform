@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
@@ -63,6 +63,11 @@ function getInitials(client: Pick<Client, 'name' | 'company'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
+function removePhoneCountryPrefix(phone: string | null | undefined, country: string) {
+  const value = (phone || '').trim();
+  if (!value || !country || !value.startsWith(country)) return value;
+  return value.slice(country.length).trimStart();
+}
 function statusClass(status: string) {
   if (status === 'active') {
     return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
@@ -81,10 +86,12 @@ export default function AdminClientsPage() {
   const [filterStatus, setFilterStatus] = useState<'ALL' | ClientStatus>('ALL');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -164,46 +171,111 @@ export default function AdminClientsPage() {
 
   function handlePhoneCountryChange(code: string) {
     setForm((prev) => {
-      const current = prev.phone || '';
-      // Remove any existing leading +<digits> and optional spacing/dashes
-      const stripped = current.replace(/^\+?[\d\s-]*/, '').trim();
-      const newPhone = code + (stripped ? ' ' + stripped : ' ');
-      return { ...prev, phoneCountry: code, phone: newPhone };
+      const localNumber = removePhoneCountryPrefix(prev.phone, prev.phoneCountry);
+      return {
+        ...prev,
+        phoneCountry: code,
+        phone: localNumber ? `${code} ${localNumber}` : '',
+      };
     });
   }
 
-  async function handleCreateClient(event: React.FormEvent<HTMLFormElement>) {
+  function openEditModal(client: Client) {
+    const phoneCountry = client.phone?.match(/^\+\d+/)?.[0] || '+254';
+    setForm({
+      ...emptyForm,
+      name: client.name || '',
+      email: client.email || '',
+      phoneCountry,
+      phone: client.phone || '',
+      company: client.company || '',
+      kraPin: client.kraPin || '',
+      website: client.website || '',
+      location: client.location || '',
+      notes: client.notes || '',
+      status: (client.status as ClientStatus) || 'active',
+    });
+    setError('');
+    setIsEditClientOpen(true);
+  }
+
+  function closeEditModal() {
+    if (!saving) {
+      setIsEditClientOpen(false);
+      setForm(emptyForm);
+    }
+  }
+
+  async function handleSaveClient(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (saving) return;
 
     if (!form.name.trim()) {
       setError('Client name is required.');
       return;
     }
 
+    const phoneNumber = removePhoneCountryPrefix(form.phone, form.phoneCountry);
+    const payload = {
+      ...form,
+      phone: phoneNumber ? `${form.phoneCountry} ${phoneNumber}` : null,
+    };
+    const isEditing = isEditClientOpen && selectedClient;
+
     try {
       setSaving(true);
       setError('');
 
-      const response = await fetch('/api/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-
+      const response = await fetch(
+        isEditing ? `/api/clients/${selectedClient.id}` : '/api/clients',
+        {
+          method: isEditing ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        }
+      );
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data?.error || 'Failed to create client');
+        throw new Error(data?.error || `Failed to ${isEditing ? 'update' : 'create'} client`);
       }
 
-      setClients((current) => [data, ...current]);
+      setClients((current) =>
+        isEditing
+          ? current.map((client) => (client.id === data.id ? data : client))
+          : [data, ...current]
+      );
+      setSelectedClient(isEditing ? data : null);
       setIsAddClientOpen(false);
+      setIsEditClientOpen(false);
       setForm(emptyForm);
     } catch (err) {
-      console.error('Failed to create client:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create client.');
+      console.error(`Failed to ${isEditing ? 'update' : 'create'} client:`, err);
+      setError(err instanceof Error ? err.message : `Failed to ${isEditing ? 'update' : 'create'} client.`);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function deleteClient() {
+    if (!selectedClient || deleting) return;
+    if (!window.confirm(`Delete ${selectedClient.name} and all associated data? This cannot be undone.`)) return;
+
+    try {
+      setDeleting(true);
+      setError('');
+      const response = await fetch(`/api/clients/${selectedClient.id}`, { method: 'DELETE' });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || 'Failed to delete client');
+
+      setClients((current) => current.filter((client) => client.id !== selectedClient.id));
+      setSelectedClient(null);
+    } catch (err) {
+      console.error('Failed to delete client:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete client.');
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -266,7 +338,7 @@ export default function AdminClientsPage() {
           primaryAction={
             <Button
               onClick={openCreateModal}
-              variant="primary"
+              variant="default"
               className="text-xs font-sans uppercase tracking-widest"
             >
               + Register New Client
@@ -333,7 +405,7 @@ export default function AdminClientsPage() {
             <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
             <Button
               onClick={openCreateModal}
-              variant="primary"
+              variant="default"
               className="text-xs font-sans rounded-lg"
             >
               Register your first client
@@ -393,11 +465,11 @@ export default function AdminClientsPage() {
           </div>
         )}
 
-        {isAddClientOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
+        {(isAddClientOpen || isEditClientOpen) && (
+          <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
             <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
               <Button
-                onClick={closeCreateModal}
+                onClick={isEditClientOpen ? closeEditModal : closeCreateModal}
                 variant="ghost"
                 size="icon"
                 className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
@@ -407,12 +479,12 @@ export default function AdminClientsPage() {
 
               <div className="space-y-1">
                 <p className="ui-eyebrow">CRM</p>
-                <h2 className="ui-section-title">Register New Client</h2>
+                <h2 className="ui-section-title">{isEditClientOpen ? 'Edit Client' : 'Register New Client'}</h2>
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+                {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
-              <form onSubmit={handleCreateClient} className="space-y-4">
+              <form onSubmit={handleSaveClient} className="space-y-4">
                 <div className="space-y-1">
                   <label className="ui-label">Contact Name *</label>
                   <input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
@@ -425,21 +497,22 @@ export default function AdminClientsPage() {
                   </div>
                   <div className="space-y-1">
                     <label className="ui-label">Phone</label>
-                    <div className="flex items-center gap-2">
-                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="ui-select">
+                    <div className="flex min-w-0 flex-1 items-center gap-2">
+                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="ui-select w-auto max-w-[9rem] shrink-0">
                         <option value="+254">🇰🇪 +254 (Kenya)</option>
                         <option value="+1">🇺🇸 +1 (USA)</option>
                         <option value="+44">🇬🇧 +44 (UK)</option>
                         <option value="+27">🇿🇦 +27 (South Africa)</option>
                         <option value="+254">Other</option>
                       </select>
-                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="ui-label">Location</label>
-                      <input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="ui-input" />
+                      <input type="text" placeholder="700 000 000" value={removePhoneCountryPrefix(form.phone, form.phoneCountry)} onChange={(event) => setForm({ ...form, phone: event.target.value ? `${form.phoneCountry} ${event.target.value}` : '' })} className="ui-input min-w-0 flex-1" />
                     </div>
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="ui-label">Location</label>
+                  <input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="ui-input" />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -491,8 +564,8 @@ export default function AdminClientsPage() {
                   <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="ui-textarea" />
                 </div>
 
-                <Button type="submit" disabled={saving} variant="primary" className="w-full">
-                  {saving ? 'Saving Client…' : '+ Add Client to CRM'}
+                <Button type="submit" disabled={saving} variant="default" className="w-full">
+                  {saving ? 'Saving Client…' : isEditClientOpen ? 'Save Client Changes' : '+ Add Client to CRM'}
                 </Button>
               </form>
             </div>
@@ -545,6 +618,23 @@ export default function AdminClientsPage() {
                       {statusLabel(status)}
                     </Button>
                   ))}
+                </div>
+                <div className="flex flex-col gap-2 border-t border-slate-200 pt-4 dark:border-zinc-800 sm:flex-row">
+                  <Button
+                    onClick={() => openEditModal(selectedClient)}
+                    variant="secondary"
+                    className="flex-1 text-xs uppercase tracking-widest"
+                  >
+                    Edit client
+                  </Button>
+                  <Button
+                    onClick={deleteClient}
+                    disabled={deleting || updating}
+                    variant="destructive"
+                    className="flex-1 text-xs uppercase tracking-widest"
+                  >
+                    {deleting ? 'Deleting…' : 'Delete client'}
+                  </Button>
                 </div>
               </div>
 

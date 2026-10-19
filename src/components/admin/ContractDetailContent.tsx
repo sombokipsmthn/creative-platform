@@ -46,9 +46,9 @@ export default function ContractDetailContent({
 
   if (loading) {
     return (
-      <div className="min-h-screen p-6">
-        <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+      <div className="">
+        <div className="">
+          <Loader2 className="" />
           <p>Loading contract...</p>
         </div>
       </div>
@@ -57,8 +57,8 @@ export default function ContractDetailContent({
 
   if (error) {
     return (
-      <div className="p-6">
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+      <div className="">
+        <div className="">
           <p>{error}</p>
         </div>
       </div>
@@ -67,7 +67,7 @@ export default function ContractDetailContent({
 
   if (!contract) {
     return (
-      <div className="p-6">
+      <div className="">
         <p>Contract not found.</p>
         <Link href="/admin/contracts" className="Button Button--secondary">
           Back to Contracts
@@ -108,14 +108,14 @@ export default function ContractDetailContent({
   };
 
   return (
-    <div className="min-h-screen p-6">
-      <header className="mb-8">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900">{contract.title}</h1>
-            <p className="text-sm text-gray-500">Contract #{contract.contractNumber}</p>
+    <div className="">
+      <header className="">
+        <div className="">
+          <div className="">
+            <h1 className="">{contract.title}</h1>
+            <p className="">Contract #{contract.contractNumber}</p>
           </div>
-          <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
+          <div className="">
             <Link
               href={`/admin/contracts/${contractId}/edit`}
               className="Button Button--secondary"
@@ -145,10 +145,10 @@ export default function ContractDetailContent({
         </div>
       </header>
 
-      <div className="grid gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Status</h2>
-          <p className="mt-2">
+      <div className="">
+        <div className="">
+          <h2 className="">Status</h2>
+          <p className="">
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${
               getStatusColor(contract.status)
             }`}>
@@ -156,78 +156,78 @@ export default function ContractDetailContent({
             </span>
           </p>
           {contract.sentAt && (
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="">
               Sent: {new Date(contract.sentAt).toLocaleDateString()}
             </p>
           )}
           {contract.signedAt && (
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="">
               Signed: {new Date(contract.signedAt).toLocaleDateString()}
             </p>
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Client</h2>
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-900">
+        <div className="">
+          <h2 className="">Client</h2>
+          <div className="">
+            <p className="">
               {contract.client?.name || 'Unknown'}
             </p>
             {contract.client?.company && (
-              <p className="text-xs text-gray-500">{contract.client.company}</p>
+              <p className="">{contract.client.company}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="">
               {contract.client?.email || 'No email'}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="">
               {contract.client?.phone || 'No phone'}
             </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Project</h2>
-          <p className="mt-2 text-sm text-gray-500">
+        <div className="">
+          <h2 className="">Project</h2>
+          <p className="">
             {contract.project ? contract.project.name : 'None'}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Financials</h2>
-          <div className="space-y-2">
-            <p className="text-sm text-gray-500">
+        <div className="">
+          <h2 className="">Financials</h2>
+          <div className="">
+            <p className="">
               Currency: {contract.currency}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="">
               Total Amount: {contract.totalAmount != null ? formatCurrency(contract.totalAmount) : '-'}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900">Contract Content</h2>
+      <div className="">
+        <div className="">
+          <h2 className="">Contract Content</h2>
         </div>
-        <div className="p-6 space-y-4">
-          <div className="whitespace-pre-wrap text-sm text-gray-900">
+        <div className="">
+          <div className="">
             {contract.content}
           </div>
         </div>
       </div>
 
       {events.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Activity History</h2>
-          <div className="space-y-3">
+        <div className="">
+          <h2 className="">Activity History</h2>
+          <div className="">
             {events.map((event) => (
-              <div key={event.id} className="flex items-center space-x-3 text-sm">
-                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-purple-100 text-purple-600">
-                  <FilePlus className="h-3 w-3" />
+              <div key={event.id} className="">
+                <div className="">
+                  <FilePlus className="" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{formatEventType(event.eventType)}</p>
-                  <p className="text-xs text-gray-500">
+                <div className="">
+                  <p className="">{formatEventType(event.eventType)}</p>
+                  <p className="">
                     {new Date(event.createdAt).toLocaleString()}
                   </p>
                 </div>

@@ -69,71 +69,71 @@ export default function AboutPage() {
     profile?.location || "Nairobi, Kenya";
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="">
       <Header />
 
       {/* HERO */}
-      <section className="relative pt-36 pb-16 px-6 max-w-7xl mx-auto text-center space-y-6">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
+      <section className="">
+        <div className="" />
 
-        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+        <p className="">
           {activeUser
             ? `ABOUT ${activeUser.name}`
             : "ABOUT KIPSMTHN PLATFORM"}
         </p>
 
-        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
+        <h1 className="">
           {activeUser
             ? activeUser.name
             : "Multi-Creator Portfolio & Client Delivery Engine"}
         </h1>
 
-        <p className="text-sm md:text-base text-slate-600 dark:text-zinc-400 font-light max-w-2xl mx-auto leading-relaxed">
+        <p className="">
           {bio}
         </p>
       </section>
 
       {/* CREATOR PROFILE */}
       {!activeUser ? (
-        <section className="py-12 px-6 max-w-4xl mx-auto">
-          <div className="border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950/40 rounded-xl p-6 space-y-4">
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        <section className="">
+          <div className="">
+            <h2 className="">
               No Creator Logged In
             </h2>
 
-            <p className="text-sm text-slate-500 dark:text-zinc-500">
+            <p className="">
               Log in to your creator account to view your
               profile and portfolio information.
             </p>
 
             <Link
               href="/admin/login"
-              className="Button Button--primary mt-4 w-full"
+              className="Button Button--primary"
             >
               Creator Login →
             </Link>
           </div>
         </section>
       ) : (
-        <section className="py-12 px-6 max-w-7xl mx-auto">
-          <div className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+        <section className="">
+          <div className="">
+            <div className="">
+              <div className="">
+                <span className="">
                   {activeUser.name} — {location}
                 </span>
               </div>
 
-              <h2 className="text-3xl font-light text-slate-900 dark:text-white">
+              <h2 className="">
                 About {activeUser.name}
               </h2>
 
-              <p className="text-sm text-slate-600 dark:text-zinc-400 leading-relaxed">
+              <p className="">
                 {bio}
               </p>
 
               {profile?.website && (
-                <div className="mt-4">
+                <div className="">
                   <Link
                     href={profile.website}
                     target="_blank"
@@ -146,12 +146,12 @@ export default function AboutPage() {
               )}
             </div>
 
-            <div className="relative aspect-square w-full max-w-md mx-auto rounded-xl border border-slate-200 dark:border-zinc-800 overflow-hidden">
+            <div className="">
               <Image
                 src={resolveImage(profile?.avatarUrl)}
                 alt={activeUser.name}
                 fill
-                className="object-cover"
+                className=""
                 unoptimized
               />
             </div>
@@ -160,14 +160,14 @@ export default function AboutPage() {
       )}
 
       {/* FOOTER */}
-      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
+      <footer className="">
+        <div className="">
           <p>
             © {new Date().getFullYear()}{" "}
             {activeUser?.handle || "KIPSMTHN"}. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6">
+          <div className="">
             <ThemeToggle />
             <span>{location}</span>
           </div>

@@ -6,7 +6,12 @@ import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
-import { Analytics } from '@vercel/analytics/next';
+import { Outfit } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
+
+const Analytics = () => null;
 
 validateEnv();
 
@@ -19,17 +24,17 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: 'Kipsmthn | Creative Platform',
-  description: 'Commercial Photography, Brand Films, Motion Graphics & Startup Ecosystem Storytelling.',
+  title: 'Kipsmthn Creative Platform',
+  description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
   openGraph: {
-    title: 'Kipsmthn | Creative Platform',
-    description: 'Creative infrastructure for photographers, filmmakers and studios in Nairobi.',
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'KIPSMTHN — Creative Platform' }],
+    title: 'Kipsmthn Creative Platform',
+    description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
+    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'Kipsmthn Creative Platform' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Kipsmthn | Creative Platform',
-    description: 'Creative infrastructure for photographers, filmmakers and studios in Nairobi.',
+    title: 'Kipsmthn Creative Platform',
+    description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
     images: ['/og-image.svg'],
   },
   icons: { icon: '/site-icon.svg', shortcut: '/site-icon.svg', apple: '/site-icon.svg' },
@@ -37,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} dark`} suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={cn("dark", "font-sans", outfit.variable)} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (
@@ -52,8 +57,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         )}
       </head>
       <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+        <a
+          href="#main-content"
+          className="absolute left-4 top-2 z-50 -translate-y-24 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"
+        >
+          Skip to main content
+        </a>
         <QueryProvider>
-          <CreatorProvider>{children}</CreatorProvider>
+          <CreatorProvider><div id="main-content">{children}</div></CreatorProvider>
         </QueryProvider>
         <Analytics />
       </body>

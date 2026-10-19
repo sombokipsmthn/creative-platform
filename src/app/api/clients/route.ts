@@ -68,6 +68,7 @@ export async function POST(request: Request) {
         company: cleanString(body?.company),
         email: cleanString(body?.email),
         phone: cleanString(body?.phone),
+        kraPin: cleanString(body?.kraPin),
         website: cleanString(body?.website),
         location: cleanString(body?.location),
         notes: cleanString(body?.notes),

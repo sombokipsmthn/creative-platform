@@ -34,7 +34,7 @@ const emptyProfile: ProfileForm = {
 };
 
 export default function AdminProfilePage() {
-  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user ?? null;
   const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +56,7 @@ export default function AdminProfilePage() {
   }
 
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (isPending || !user) return;
 
     const sessionUser = user;
     let ignore = false;
@@ -102,7 +102,7 @@ export default function AdminProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isLoaded, user]);
+  }, [isPending, user]);
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -150,7 +150,7 @@ export default function AdminProfilePage() {
     }
   };
 
-  if (!isLoaded || isLoading) {
+  if (isPending || isLoading) {
     return (
       <main className="ui-page">
         <div className="os-pulse">

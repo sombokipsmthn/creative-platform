@@ -124,8 +124,8 @@ export async function GET(req: Request) {
     // 4. Galleries - for publication/delivery dates
     const galleryConditions = [
       eq(galleries.creatorId, userId),
-      gte(galleries.expiresAt, startDate),
-      lte(galleries.expiresAt, endDate),
+      gte(galleries.publishedAt, startDate),
+      lte(galleries.publishedAt, endDate),
     ];
 
     if (clientId) {
@@ -141,14 +141,14 @@ export async function GET(req: Request) {
         id: galleries.id,
         title: galleries.title,
         description: galleries.description,
-        expiresAt: galleries.expiresAt,
+        publishedAt: galleries.publishedAt,
         clientId: galleries.clientId,
         projectId: galleries.projectId,
         status: galleries.status,
       })
       .from(galleries)
       .where(and(...galleryConditions))
-      .orderBy(desc(galleries.expiresAt));
+      .orderBy(desc(galleries.publishedAt));
 
     // 5. Contracts - for signature deadlines, expiry dates
     const contractConditions = [
@@ -254,8 +254,8 @@ export async function GET(req: Request) {
         id: row.id,
         title: row.title,
         description: row.description,
-        startDate: row.expiresAt,
-        endDate: row.expiresAt,
+        startDate: row.publishedAt,
+        endDate: row.publishedAt,
         allDay: true,
         category: "Gallery",
         status: row.status,

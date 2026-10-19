@@ -104,7 +104,7 @@ export const auth = betterAuth({
   advanced: {
     useSecureCookies: baseURL.startsWith("https://"),
     cookiePrefix: "kipsmthn",
-    crossSubDomainCookies: { enabled: true },
+    crossSubDomainCookies: { enabled: process.env.NODE_ENV === "production" },
     defaultCookieAttributes: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production" && baseURL.startsWith("https://"),

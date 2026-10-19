@@ -6,21 +6,21 @@ import { Button } from "@/components/ui/button";
 
 export default function Footer() {
   return (
-    <footer className="">
-      <div className="">
-        <div className="">
-          <div className="">
-            <Link href="/" className="">
-              <span className="">
+    <footer className="mt-auto border-t border-border/70 bg-muted/20 text-foreground">
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
+        <div className="grid gap-x-10 gap-y-9 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_repeat(3,minmax(0,1fr))] lg:gap-12">
+          <div className="max-w-sm space-y-4">
+            <Link href="/" className="inline-flex items-center gap-3 rounded-md font-semibold tracking-tight text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-sm">
                 K
               </span>
-              <span>KIPSMTHN</span>
+              <span className="text-sm">KIPSMTHN <span className="font-normal text-muted-foreground">Creative OS</span></span>
             </Link>
-            <p className="">
+            <p className="text-sm leading-6 text-muted-foreground">
               Creative operating infrastructure for photographers, filmmakers, and studios — from client enquiry to private gallery delivery.
             </p>
             <div>
-              <Button asChild variant="outline" size="sm" className="">
+              <Button asChild variant="outline" size="sm" className="h-9 gap-2 rounded-lg">
                 <Link href="/admin">
                   Open Workspace <ArrowRight className="" />
                 </Link>
@@ -29,12 +29,12 @@ export default function Footer() {
           </div>
 
           <div>
-            <h3 className="">
+            <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-foreground">
               Platform
             </h3>
             <ul className="">
               <li>
-                <Link href="/#platform" className="">
+                <Link href="/#platform" className="rounded-sm transition-colors duration-150 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                   Features & Tools
                 </Link>
               </li>
@@ -101,10 +101,10 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="">
+        <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-border/70 pt-6 text-xs text-muted-foreground sm:mt-12 sm:flex-row sm:items-center sm:pt-7">
           <p>© {new Date().getFullYear()} KIPSMTHN. All rights reserved.</p>
-          <div className="">
-            <Link href="/privacy" className="">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
               Privacy
             </Link>
             <span aria-hidden="true">·</span>

@@ -185,8 +185,8 @@ export default function AdminProfilePage() {
     <main className="ui-page">
       <div className="ui-shell">
         <AdminPageHeader
-          title="Creator Settings"
-          description="Manage your identity, public profile, and business details."
+          title="Account & profile"
+          description="Manage your personal account, public creator profile, and account security."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={<span className="ui-badge"><span className="ui-badge-dot" />Authenticated creator</span>}
         />
@@ -238,8 +238,8 @@ export default function AdminProfilePage() {
           </section>
           <section className="ui-card">
             <div className="">
-              <p className="ui-eyebrow">Identity</p>
-              <h2 className="ui-section-title">Creator details</h2>
+              <p className="ui-eyebrow">Public profile</p>
+              <h2 className="ui-section-title">Creator presentation</h2>
             </div>
 
             <div className="">

@@ -124,14 +124,14 @@ export async function PATCH(request: Request) {
       if (typeof businessProfile.vatNumber === "string") {
         allowedBusinessUpdates.vatNumber = businessProfile.vatNumber;
       }
-      if (typeof businessProfile.currency === "string") {
+      if (typeof businessProfile.currency === "string" && ["KES", "USD", "EUR"].includes(businessProfile.currency)) {
         allowedBusinessUpdates.currency = businessProfile.currency;
       }
-      if (typeof businessProfile.depositPercentage === "number") {
-        allowedBusinessUpdates.depositPercentage = businessProfile.depositPercentage;
+      if (typeof businessProfile.depositPercentage === "number" && Number.isFinite(businessProfile.depositPercentage) && businessProfile.depositPercentage >= 0 && businessProfile.depositPercentage <= 100) {
+        allowedBusinessUpdates.depositPercentage = Math.round(businessProfile.depositPercentage);
       }
-      if (typeof businessProfile.whtRate === "number") {
-        allowedBusinessUpdates.whtRate = businessProfile.whtRate;
+      if (typeof businessProfile.whtRate === "number" && Number.isFinite(businessProfile.whtRate) && businessProfile.whtRate >= 0 && businessProfile.whtRate <= 100) {
+        allowedBusinessUpdates.whtRate = Math.round(businessProfile.whtRate);
       }
       if (typeof businessProfile.vatRegistered === "boolean") {
         allowedBusinessUpdates.vatRegistered = businessProfile.vatRegistered;

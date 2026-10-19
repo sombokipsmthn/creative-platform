@@ -143,7 +143,7 @@ const tabs: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: 'Basic Info' },
   { id: 'story', label: 'Story' },
   { id: 'media', label: 'Media' },
-  { id: 'settings', label: 'Portfolio Settings' },
+  { id: 'settings', label: 'Public presentation' },
 ];
 
 export default function ProjectEditPage({ params }: { params: Promise<{ id: string }> }) {

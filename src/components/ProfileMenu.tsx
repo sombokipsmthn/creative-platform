@@ -77,7 +77,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
         <DropdownMenuItem asChild>
           <Link href="/admin/profile" className="">
             <User className="" />
-            <span>Creator Profile</span>
+            <span>Account & Profile</span>
           </Link>
         </DropdownMenuItem>
 

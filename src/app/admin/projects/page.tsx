@@ -5,6 +5,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import StatusBadge from '@/components/admin/StatusBadge';
+import EmptyState from '@/components/admin/EmptyState';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -109,7 +111,7 @@ function statusClass(status: string) {
   }
 
   if (status === 'completed') {
-    return 'bg-blue-500/20 lue-500/30 text-blue-700 dark:text-blue-300';
+    return 'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300';
   }
 
   if (status === 'on hold') {
@@ -368,8 +370,8 @@ export default function AdminProjectsPage() {
   */
 
   return (
-    <div className="">
-      <div className="">
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
         <AdminPageHeader
           title="Projects"
           description="Track all client engagements and creative projects."
@@ -378,7 +380,7 @@ export default function AdminProjectsPage() {
             <Button
               onClick={() => openCreateModal()}
               variant="primary"
-              className=""
+              className="admin-content-block"
             >
               + New Project
             </Button>
@@ -386,12 +388,12 @@ export default function AdminProjectsPage() {
         />
 
         {error && !isAddProjectOpen && !selectedProject && (
-          <div className="">
+          <div className="admin-content-block">
             {error}
           </div>
         )}
 
-        <div className="">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {[
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
@@ -407,8 +409,8 @@ export default function AdminProjectsPage() {
           ))}
         </div>
 
-        <div className="">
-          <div className="">
+        <section className="ui-card space-y-3 p-4" aria-label="Project search and filters">
+          <div className="flex flex-wrap gap-3">
             <input
               type="text"
               placeholder="Search projects by name, description, client..."
@@ -431,7 +433,7 @@ export default function AdminProjectsPage() {
             </select>
           </div>
 
-          <div className="">
+          <div className="flex flex-wrap items-center gap-2">
             {(
               [
                 ['ALL', projects.length],
@@ -442,154 +444,108 @@ export default function AdminProjectsPage() {
                 ['draft', draftCount],
               ] as const
             ).map(([status, count]) => (
-              <Button
-                key={status}
-                variant={filterStatus === status ? 'primary' : 'secondary'}
-                onClick={() => setFilterStatus(status)}
-                className=""
-              >
+              <Button key={status} variant={filterStatus === status ? 'primary' : 'secondary'} onClick={() => setFilterStatus(status)}>
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
               </Button>
             ))}
-
-            <div className="">
-              <span className="">Visibility:</span>
-              {(['ALL', 'public', 'private', 'draft'] as const).map((vis) => (
-                <Button
-                  key={vis}
-                  variant={filterVisibility === vis ? 'primary' : 'secondary'}
-                  onClick={() => setFilterVisibility(vis)}
-                  className=""
-                >
-                  {vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}
-                </Button>
-              ))}
-            </div>
-
-            <div className="">
-              <span className="">Featured:</span>
-              {(['ALL', 'true', 'false'] as const).map((feat) => (
-                <Button
-                  key={feat}
-                  variant={filterFeatured === feat ? 'primary' : 'secondary'}
-                  onClick={() => setFilterFeatured(feat)}
-                  className=""
-                >
-                  {feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}
-                </Button>
-              ))}
-            </div>
+            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Visibility:</span>{(['ALL', 'public', 'private', 'draft'] as const).map(vis => <Button key={vis} variant={filterVisibility === vis ? 'primary' : 'secondary'} onClick={() => setFilterVisibility(vis)}>{vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}</Button>)}</div>
+            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Featured:</span>{(['ALL', 'true', 'false'] as const).map(feat => <Button key={feat} variant={filterFeatured === feat ? 'primary' : 'secondary'} onClick={() => setFilterFeatured(feat)}>{feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}</Button>)}</div>
           </div>
-        </div>
+        </section>
 
         {loading ? (
-          <div className="">
-            <p className="">Loading projects…</p>
-          </div>
+          <div className="admin-empty-state" role="status"><p>Loading projects…</p></div>
         ) : filteredProjects.length === 0 ? (
-          <div className="">
-            <p className="">No projects found.</p>
-            <div className="">
-              <Button
-                onClick={() => openCreateModal()}
-                variant="primary"
-                className=""
-              >
-                Create your first project
-              </Button>
-            </div>
-          </div>
+          <EmptyState title="No projects found" description="Create a project or adjust your current search and filters." filtered={Boolean(searchQuery || filterClient || filterStatus !== 'ALL' || filterVisibility !== 'ALL' || filterFeatured !== 'ALL')} action={<Button onClick={() => openCreateModal()}>Create project</Button>} />
         ) : (
-          <div className="">
+          <div className="admin-content-block">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 className="ui-card ui-card-interactive"
               >
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     {getInitials(project)}
                   </div>
 
-                  <div className="">
-                    <div className="">
-                      <h3 className="">
+                  <div className="admin-content-block">
+                    <div className="admin-content-block">
+                      <h3 className="admin-content-block">
                         {project.name}
                       </h3>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(project.status)}`}>
-                        {statusLabel(project.status)}
-                      </span>
+                      <StatusBadge status={project.status} />
                       {project.featured && (
-                        <span className="">
-                          <Star className="" />
+                        <span className="admin-content-block">
+                          <Star className="admin-content-block" />
                           Featured
                         </span>
                       )}
                       {project.visibility === 'public' && project.publishedAt && (
-                        <span className="">
-                          <Eye className="" />
+                        <span className="admin-content-block">
+                          <Eye className="admin-content-block" />
                           Published
                         </span>
                       )}
                       {project.visibility === 'private' && (
-                        <span className="">
-                          <EyeOff className="" />
+                        <span className="admin-content-block">
+                          <EyeOff className="admin-content-block" />
                           Private
                         </span>
                       )}
                       {project.visibility === 'draft' && (
-                        <span className="">
+                        <span className="admin-content-block">
                           Draft
                         </span>
                       )}
                     </div>
 
-                    <p className="">
+                    <p className="admin-content-block">
                       {project.client?.name || 'No client'}
                     </p>
 
-                    <div className="">
+                    <div className="admin-content-block">
                       {project.client?.email && (
-                        <span className="">
-                          <Mail className="" />
+                        <span className="admin-content-block">
+                          <Mail className="admin-content-block" />
                           {project.client?.email}
                         </span>
                       )}
                       {project.client?.phone && (
-                        <span className="">
-                          <Phone className="" />
+                        <span className="admin-content-block">
+                          <Phone className="admin-content-block" />
                           {project.client?.phone}
                         </span>
                       )}
                       {project.client?.location && (
-                        <span className="">
-                          <MapPin className="" />
+                        <span className="admin-content-block">
+                          <MapPin className="admin-content-block" />
                           {project.client?.location}
                         </span>
                       )}
                     </div>
 
-                    <p className="">
+                    <p className="admin-content-block">
                       Added {formatDate(project.createdAt)}
                     </p>
                   </div>
                 </div>
 
-                <div className="">
+                <div className="admin-content-block">
                   <Button
                     onClick={() => {
                       setError('');
                       setSelectedProject(project);
                     }}
                     variant="secondary"
-                    className=""
+                    className="admin-content-block"
                   >
                     View project
-                    <ArrowUpRight className="" />
+                    <ArrowUpRight className="admin-content-block" />
                   </Button>
                   <Link
                     href={`/admin/projects/${project.id}`}
-                    className=""
+                    className="admin-content-block"
                   >
                     Edit
                   </Link>
@@ -598,16 +554,16 @@ export default function AdminProjectsPage() {
                       href={`/work/${project.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className=""
+                      className="admin-content-block"
                     >
-                      <Eye className="" />
+                      <Eye className="admin-content-block" />
                       Preview
                     </a>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className=""
+                    className="admin-content-block"
                     onClick={async () => {
                       if (!confirm('Delete this project? This cannot be undone.')) return;
                       try {
@@ -627,7 +583,7 @@ export default function AdminProjectsPage() {
                     }}
                     aria-label="Delete project"
                   >
-                    <Trash2 className="" />
+                    <Trash2 className="admin-content-block" />
                   </Button>
                 </div>
               </div>
@@ -636,31 +592,31 @@ export default function AdminProjectsPage() {
         )}
 
         {isAddProjectOpen && (
-          <div className="">
-            <div className="">
+          <div className="admin-content-block">
+            <div className="admin-content-block">
               <Button
                 onClick={closeCreateModal}
                 variant="ghost"
                 size="icon"
-                className=""
+                className="admin-content-block"
               >
                 ✕
               </Button>
 
-              <div className="">
+              <div className="admin-content-block">
                 <p className="ui-eyebrow">PROJECTS</p>
                 <h2 className="ui-section-title">New Project</h2>
               </div>
 
-              {error && <div className="">{error}</div>}
+              {error && <div className="admin-content-block">{error}</div>}
 
-              <form onSubmit={handleCreateProject} className="">
-                <div className="">
+              <form onSubmit={handleCreateProject} className="admin-content-block">
+                <div className="admin-content-block">
                   <label className="ui-label">Project Name *</label>
                   <input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
                 </div>
 
-                <div className="">
+                <div className="admin-content-block">
                   <label className="ui-label">Client</label>
                   <select
                     value={form.clientId}
@@ -676,8 +632,8 @@ export default function AdminProjectsPage() {
                   </select>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Description</label>
                     <textarea
                       rows={2}
@@ -687,7 +643,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Short Description</label>
                     <input
                       type="text"
@@ -699,8 +655,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Category</label>
                     <select
                       value={form.category}
@@ -716,7 +672,7 @@ export default function AdminProjectsPage() {
                       <option value="Other">Other</option>
                     </select>
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Year</label>
                     <input
                       type="text"
@@ -728,8 +684,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Location</label>
                     <input
                       type="text"
@@ -739,7 +695,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Slug</label>
                     <input
                       type="text"
@@ -751,8 +707,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Status</label>
                     <select
                       value={form.status}
@@ -766,7 +722,7 @@ export default function AdminProjectsPage() {
                       <option value="cancelled">Cancelled</option>
                     </select>
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Visibility</label>
                     <select
                       value={form.visibility}
@@ -780,8 +736,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Start Date</label>
                     <input
                       type="date"
@@ -790,7 +746,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">End Date</label>
                     <input
                       type="date"
@@ -801,8 +757,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Total Amount</label>
                     <input
                       type="number"
@@ -812,7 +768,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Currency</label>
                     <select
                       value={form.currency}
@@ -829,8 +785,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Payment Terms</label>
                     <input
                       type="text"
@@ -840,7 +796,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Revisions Policy</label>
                     <input
                       type="text"
@@ -852,8 +808,8 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
-                  <div className="">
+                <div className="admin-content-block">
+                  <div className="admin-content-block">
                     <label className="ui-label">Licensing Terms</label>
                     <input
                       type="text"
@@ -863,7 +819,7 @@ export default function AdminProjectsPage() {
                       className="ui-input"
                     />
                   </div>
-                  <div className="">
+                  <div className="admin-content-block">
                     <label className="ui-label">Featured</label>
                     <select
                       value={form.featured ? 'true' : 'false'}
@@ -876,7 +832,7 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
-                <div className="">
+                <div className="admin-content-block">
                   <label className="ui-label">Notice Period</label>
                   <input
                     type="text"
@@ -887,7 +843,7 @@ export default function AdminProjectsPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={saving} variant="primary" className="">
+                <Button type="submit" disabled={saving} variant="primary" className="admin-content-block">
                   {saving ? 'Saving Project…' : '+ Create Project'}
                 </Button>
               </form>
@@ -896,47 +852,47 @@ export default function AdminProjectsPage() {
         )}
 
         {selectedProject && (
-          <div className="">
-            <div className="">
+          <div className="admin-content-block">
+            <div className="admin-content-block">
               <Button
                 onClick={() => setSelectedProject(null)}
                 variant="ghost"
                 size="icon"
-                className=""
+                className="admin-content-block"
               >
                 ✕
               </Button>
 
-              <div className="">
+              <div className="admin-content-block">
                 {selectedProject.client && (
-                  <div className="">
-                    <span className="">
+                  <div className="admin-content-block">
+                    <span className="admin-content-block">
                       {selectedProject.client.company}
                     </span>
-                    <h2 className="">{selectedProject.client.name}</h2>
+                    <h2 className="admin-content-block">{selectedProject.client.name}</h2>
                   </div>
                 )}
-                <h2 className="">{selectedProject.name}</h2>
-                <p className="">
+                <h2 className="admin-content-block">{selectedProject.name}</h2>
+                <p className="admin-content-block">
                   {statusLabel(selectedProject.status)} • {formatDate(selectedProject.createdAt)}
                 </p>
                 {selectedProject.description && (
-                  <p className="">
+                  <p className="admin-content-block">
                     {selectedProject.description}
                   </p>
                 )}
 
               </div>
 
-              {error && <div className="">{error}</div>}
+              {error && <div className="admin-content-block">{error}</div>}
 
-              <div className="">
+              <div className="admin-content-block">
                 <div>
                   <p className="ui-label">Project Status</p>
                   <p className="ui-meta">Changes are saved directly to the database.</p>
                 </div>
 
-                <div className="">
+                <div className="admin-content-block">
                   {([
                     'active',
                     'completed',
@@ -949,7 +905,7 @@ export default function AdminProjectsPage() {
                       variant={selectedProject.status === status ? 'primary' : 'secondary'}
                       disabled={updating || selectedProject.status === status}
                       onClick={() => updateProjectStatus(status as ProjectStatus)}
-                      className=""
+                      className="admin-content-block"
                     >
                       {statusLabel(status)}
                     </Button>
@@ -957,16 +913,16 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div className="">
+              <div className="admin-content-block">
                 <p className="ui-label">Description</p>
-                <p className="">
+                <p className="admin-content-block">
                   {selectedProject.description || 'No description.'}
                 </p>
               </div>
 
-              <div className="">
+              <div className="admin-content-block">
                 <p className="ui-label">Details</p>
-                <div className="">
+                <div className="admin-content-block">
                   <div>Client: {selectedProject.client?.name || 'None'}</div>
                   <div>
                     {selectedProject.totalAmount !== null ? (
@@ -986,9 +942,9 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div className="">
+              <div className="admin-content-block">
                 <div>Created {formatDate(selectedProject.createdAt)}</div>
-                <div className="">Updated {formatDate(selectedProject.updatedAt)}</div>
+                <div className="admin-content-block">Updated {formatDate(selectedProject.updatedAt)}</div>
               </div>
             </div>
           </div>

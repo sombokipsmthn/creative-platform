@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Plus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import EmptyState from '@/components/admin/EmptyState';
+import StatusBadge from '@/components/admin/StatusBadge';
 
 type QuoteClient = {
   id: string;
@@ -165,31 +168,18 @@ export default function QuotesPage() {
   );
 
   return (
-    <div className="">
-      <div className="">
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
         {/* HEADER */}
-        <div className="">
-          <div>
-            <p className="ui-eyebrow">Sales & Production</p>
-            <h1 className="ui-page-title">Quotes</h1>
-
-            <p className="ui-meta">
-              Production estimates and client proposals.
-            </p>
-          </div>
-
-          <Button
-            onClick={() => router.push('/admin/quotes/new')}
-            variant="primary"
-            className=""
-          >
-            <Plus className="" />
-            New Quote
-          </Button>
-        </div>
+        <AdminPageHeader
+          title="Quotes"
+          description="Production estimates and client proposals."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={<Button onClick={() => router.push('/admin/quotes/new')}><Plus aria-hidden="true" />New quote</Button>}
+        />
 
         {/* SUMMARY */}
-        <div className="">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="ui-stat-card">
             <p className="ui-stat-label">Total Quotes</p>
             <p className="ui-stat-value">{quotes.length}</p>
@@ -249,50 +239,14 @@ export default function QuotesPage() {
         />
 
         {/* ERROR */}
-        {error && (
-          <div className="ui-card">
-            <p className="">{error}</p>
-          </div>
-        )}
-
-        {/* TABLE */}
+        {error && <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive" role="alert">{error}</div>}
         <div className="ui-card">
           {loading ? (
-            <div className="">
-              <p className="">
-                Loading quotes...
-              </p>
-            </div>
+            <div className="admin-empty-state" role="status"><p>Loading quotes…</p></div>
           ) : filteredQuotes.length === 0 ? (
-            <div className="ui-empty-state">
-              <div className="ui-empty-icon">
-                <Plus className="" />
-              </div>
-
-              <h2 className="ui-section-title">
-                {quotes.length === 0
-                  ? 'No quotes yet'
-                  : 'No matching quotes'}
-              </h2>
-
-              <p className="ui-body">
-                {quotes.length === 0
-                  ? 'Create your first production quote to start building your sales pipeline.'
-                  : 'Try changing your search or status filter.'}
-              </p>
-
-              {quotes.length === 0 && (
-                <Button
-                  onClick={() => router.push('/admin/quotes/new')}
-                  variant="primary"
-                  className=""
-                >
-                  Create First Quote
-                </Button>
-              )}
-            </div>
+            <EmptyState icon={<Plus />} title={quotes.length === 0 ? 'No quotes yet' : 'No matching quotes'} description={quotes.length === 0 ? 'Create your first production quote to start building your sales pipeline.' : 'Try changing your search or status filter.'} filtered={quotes.length > 0} action={quotes.length === 0 ? <Button onClick={() => router.push('/admin/quotes/new')}>Create first quote</Button> : undefined} />
           ) : (
-            <div className="">
+            <div className="admin-content-block">
               <table className="ui-table">
                 <thead>
                   <tr>
@@ -320,8 +274,8 @@ export default function QuotesPage() {
                       >
                         {/* QUOTE */}
                         <td className="ui-table-cell">
-                          <div className="">
-                            <p className="">
+                          <div className="admin-content-block">
+                            <p className="admin-content-block">
                               {quote.title || 'Untitled Quote'}
                             </p>
 
@@ -334,8 +288,8 @@ export default function QuotesPage() {
                         {/* CLIENT */}
                         <td className="ui-table-cell">
                           {quote.client ? (
-                            <div className="">
-                              <p className="">
+                            <div className="admin-content-block">
+                              <p className="admin-content-block">
                                 {quote.client.name}
                               </p>
 
@@ -359,16 +313,8 @@ export default function QuotesPage() {
 
                         {/* STATUS */}
                         <td className="ui-table-cell">
-                          <div className="">
-                            <span
-                              className={`ui-badge ${status === 'accepted' ? 'ui-badge-success' :
-                                status === 'declined' ? 'ui-badge-danger' :
-                                  status === 'sent' || status === 'viewed' ? 'ui-badge-accent' :
-                                    'ui-badge'
-                                }`}
-                            >
-                              {formatStatus(status)}
-                            </span>
+                          <div className="admin-content-block">
+                          <StatusBadge status={status} />
 
                             {hasInvoice && (
                               <Button
@@ -404,7 +350,7 @@ export default function QuotesPage() {
                             size="sm"
                           >
                             View
-                            <ArrowRight className="" />
+                            <ArrowRight className="admin-content-block" />
                           </Button>
                         </td>
                       </tr>

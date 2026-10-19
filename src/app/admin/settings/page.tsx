@@ -6,10 +6,13 @@ import WatermarkPreview from '@/components/WatermarkPreview';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 
-type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations';
+type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations' | 'account';
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('branding');
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleteAccountError, setDeleteAccountError] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
   // 1. Branding State
   const [domainSlug, setDomainSlug] = useState('kipsmthn.platform.com');
@@ -81,6 +84,7 @@ export default function AdminSettingsPage() {
     { id: 'templates', label: 'Email Templates' },
     { id: 'preferences', label: 'Preferences' },
     { id: 'integrations', label: 'Integrations' },
+    { id: 'account', label: 'Account & Data' },
   ];
 
   return (
@@ -446,6 +450,63 @@ export default function AdminSettingsPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* ACCOUNT DATA / PERMANENT DELETION */}
+          {activeTab === 'account' && (
+            <section className="ui-card border border-red-300 dark:border-red-900">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title text-red-700 dark:text-red-300">Delete creator account</h2>
+                <p className="ui-meta">Permanently remove your creator account and its associated workspace data.</p>
+              </div>
+              <div className="ui-card-content space-y-4">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200">
+                  <p className="font-semibold">This action cannot be undone.</p>
+                  <p className="mt-2">Your clients, projects, galleries, uploaded gallery/project media, quotes, invoices, contracts, calendar-derived records, profile, and account credentials will be deleted. The shared equipment catalogue will be preserved.</p>
+                  <p className="mt-2">Download anything you need first. If storage cleanup fails, the deletion is stopped so the account records remain available for retry.</p>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="delete-account-confirmation" className="ui-label">Type DELETE MY CREATOR ACCOUNT to confirm</label>
+                  <input
+                    id="delete-account-confirmation"
+                    value={deleteConfirmation}
+                    onChange={(event) => setDeleteConfirmation(event.target.value)}
+                    autoComplete="off"
+                    className="ui-input"
+                    placeholder="DELETE MY CREATOR ACCOUNT"
+                  />
+                </div>
+                {deleteAccountError && (
+                  <p role="alert" className="text-sm text-red-700 dark:text-red-300">{deleteAccountError}</p>
+                )}
+                <button
+                  type="button"
+                  disabled={isDeletingAccount || deleteConfirmation !== 'DELETE MY CREATOR ACCOUNT'}
+                  onClick={async () => {
+                    setIsDeletingAccount(true);
+                    setDeleteAccountError('');
+                    try {
+                      const response = await fetch('/api/account', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirmation: deleteConfirmation }),
+                      });
+                      const payload = await response.json().catch(() => ({}));
+                      if (!response.ok) {
+                        throw new Error(typeof payload.error === 'string' ? payload.error : 'Account deletion failed.');
+                      }
+                      window.location.assign('/sign-in?accountDeleted=1');
+                    } catch (error) {
+                      setDeleteAccountError(error instanceof Error ? error.message : 'Account deletion failed. Please retry.');
+                      setIsDeletingAccount(false);
+                    }
+                  }}
+                  className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isDeletingAccount ? 'Deleting account and associated data…' : 'Permanently delete creator account'}
+                </button>
+              </div>
+            </section>
           )}
         </form>
       </div>

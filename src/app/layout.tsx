@@ -5,6 +5,11 @@ import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
+import { Outfit } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
+
 const Analytics = () => null;
 
 validateEnv();
@@ -36,7 +41,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={cn("dark", "font-sans", outfit.variable)} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (
@@ -51,8 +56,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         )}
       </head>
       <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+        <a
+          href="#main-content"
+          className="absolute left-4 top-2 z-50 -translate-y-24 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"
+        >
+          Skip to main content
+        </a>
         <QueryProvider>
-          <CreatorProvider>{children}</CreatorProvider>
+          <CreatorProvider><div id="main-content">{children}</div></CreatorProvider>
         </QueryProvider>
         <Analytics />
       </body>

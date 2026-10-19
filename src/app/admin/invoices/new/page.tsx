@@ -1,15 +1,5 @@
-export default function NewInvoicePage() {
-  return (
-    <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-light">
-          Create Invoice
-        </h1>
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
-        <p className="mt-3 text-sm text-slate-500">
-          Invoice creation flow coming soon.
-        </p>
-      </div>
-    </div>
-  );
+export default function NewInvoicePage() {
+  return <div className="ui-page ui-page-padded"><div className="ui-shell"><AdminPageHeader title="Create invoice" description="Prepare a bill for a client and project." breadcrumb={{ label: 'Invoices', href: '/admin/invoices' }} /><section className="ui-card admin-empty-state"><h2>Invoice creation flow coming soon</h2><p>Invoices can still be reviewed and managed from the invoice collection.</p></section></div></div>;
 }

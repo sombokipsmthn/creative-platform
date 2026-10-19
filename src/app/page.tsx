@@ -1,8 +1,54 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowDownRight, ArrowRight, Menu, Plus } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  FileText,
+  FolderKanban,
+  Images,
+  LayoutDashboard,
+  ShieldCheck,
+  Users,
+  Wallet,
+} from "lucide-react";
 
-const projects = [
+import Header from "@/components/header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+export const metadata = {
+  title: "KIPSMTHN — Creative Platform & Operating System",
+  description:
+    "The operating system for commercial photographers, filmmakers, and creative studios. Manage clients, contracts, quotes, equipment, invoices, and private delivery galleries in one unified workspace.",
+};
+
+const platformFeatures = [
+  {
+    icon: Users,
+    title: "Client & CRM Hub",
+    description:
+      "Maintain verified contact records, company profiles, KRA PIN compliance, and engagement histories in one structured view.",
+  },
+  {
+    icon: FileText,
+    title: "Production Quotations",
+    description:
+      "Generate itemized estimates mapped directly to your local camera kits, lighting gear, crew day rates, and post-production deliverables.",
+  },
+  {
+    icon: Wallet,
+    title: "Invoices & eTIMS Readiness",
+    description:
+      "Convert accepted quotes into structured invoices with automated VAT/WHT calculations, payment tracking, and audit-ready records.",
+  },
   {
     title: "House of Light",
     type: "Residential · Karen",
@@ -36,27 +82,101 @@ export const metadata = {
 
 export default function HomePage() {
   return (
-    <div className="hously-page min-h-screen overflow-hidden">
-      <header className="hously-nav">
-        <Link href="/" className="hously-brand" aria-label="Hously home">HOUSLY<span>®</span></Link>
-        <nav className="hidden items-center gap-8 md:flex" aria-label="Main navigation">
-          <Link href="#studio">Studio</Link>
-          <Link href="#work">Selected work</Link>
-          <Link href="#approach">Approach</Link>
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link className="hidden text-[11px] font-medium uppercase tracking-[0.18em] md:block" href="/contact">Start a conversation <ArrowRight className="ml-1 inline size-3" /></Link>
-          <button className="hously-menu-button md:hidden" aria-label="Open menu"><Menu className="size-4" /></button>
-        </div>
-      </header>
+    <div className="flex min-h-screen flex-col bg-background text-foreground">
+      <Header />
 
-      <main>
-        <section className="hously-hero">
-          <div className="hously-hero-copy">
-            <p className="hously-kicker">Architecture / Interiors / Landscape</p>
-            <h1>Spaces with<br /><em>quiet presence.</em></h1>
-            <p className="hously-hero-intro">Hously is a Nairobi-based architecture studio shaping thoughtful places for living, gathering, and working.</p>
-            <Link href="#work" className="hously-circle-link" aria-label="Explore selected work"><ArrowDownRight className="size-5" /></Link>
+      <main className="flex-1">
+        {/* HERO SECTION */}
+        <section className="relative overflow-hidden border-b py-20 md:py-28 lg:py-32">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+              <div className="space-y-6 lg:col-span-7">
+                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+                  The operating system for your{" "}
+                  <span className="text-primary underline decoration-muted-foreground/30 underline-offset-8">
+                    creative studio
+                  </span>
+                  .
+                </h1>
+
+                <p className="max-w-2xl text-base text-muted-foreground sm:text-lg md:text-xl leading-relaxed">
+                  Bring your portfolio showcase, client CRM, production quotes,
+                  eTIMS invoices, and private delivery galleries into one
+                  seamless, unified workspace.
+                </p>
+
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <Button asChild size="lg" className="gap-2">
+                    <Link href="/admin">
+                      <span>Launch Studio Workspace</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+
+                  <Button asChild variant="outline" size="lg">
+                    <Link href="/equipment">Browse Production Kit</Link>
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-6 pt-4 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Nairobi & East Africa Production Hub</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>KRA eTIMS & 5% WHT Compliant</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span>Private Client Portals</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5">
+                <Card className="overflow-hidden border-2 shadow-xl">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+                    <Image
+                      src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"
+                      alt="Production studio workspace overview"
+                      fill
+                      priority
+                      referrerPolicy="no-referrer"
+                      className="object-cover transition-transform duration-500 hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, 500px"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                    <div className="absolute bottom-4 left-4 right-4 text-white">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+                        Live Client Production
+                      </p>
+                      <h2 className="text-lg font-bold">
+                        Clean Energy Impact & Ecosystem Media
+                      </h2>
+                      <p className="text-xs text-white/70">
+                        Nairobi, Kenya · Sony FX Cinema Package
+                      </p>
+                    </div>
+                  </div>
+
+                  <CardContent className="grid grid-cols-3 divide-x p-4 text-center">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Equipment</p>
+                      <p className="text-lg font-bold text-foreground">12+ Units</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Deliverables</p>
+                      <p className="text-lg font-bold text-foreground">4K + RAW</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Gallery</p>
+                      <p className="text-lg font-bold text-foreground">Active PIN</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </div>
           <div className="hously-hero-image">
             <Image src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90" alt="Warm modern living room with sculptural furniture" fill priority sizes="(max-width: 768px) 100vw, 58vw" className="object-cover" />

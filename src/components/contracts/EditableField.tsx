@@ -41,8 +41,6 @@ export function EditableField({
 
   // Synchronize the local editor buffer when the parent value changes.
   useEffect(() => {
-    // The editor buffer intentionally mirrors a changing parent value.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTempValue(value);
   }, [value]);
 
@@ -136,8 +134,8 @@ export function EditableField({
 
       case 'currency':
         return (
-          <div className="inline-flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{currency}</span>
+          <div className="">
+            <span className="">{currency}</span>
             <input
               ref={inputRef as React.Ref<HTMLInputElement>}
               type="number"
@@ -153,7 +151,7 @@ export function EditableField({
 
       case 'percentage':
         return (
-          <div className="inline-flex items-center gap-2">
+          <div className="">
             <input
               ref={inputRef as React.Ref<HTMLInputElement>}
               type="number"
@@ -165,7 +163,7 @@ export function EditableField({
               max="100"
               className={`${baseInputClasses} w-20`}
             />
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">%</span>
+            <span className="">%</span>
           </div>
         );
 
@@ -281,23 +279,23 @@ export function EditableField({
   })();
 
   return (
-    <div className="inline-flex items-center gap-2 align-top">
+    <div className="">
       {inputContent}
-      <div className="flex gap-1">
+      <div className="">
         <button
           onClick={handleSave}
           disabled={isRequired && !tempValue.trim()}
-          className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          className=""
           title="Save"
         >
-          <Check className="h-4 w-4" />
+          <Check className="" />
         </button>
         <button
           onClick={onCancel}
-          className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
+          className=""
           title="Cancel"
         >
-          <X className="h-4 w-4" />
+          <X className="" />
         </button>
       </div>
     </div>

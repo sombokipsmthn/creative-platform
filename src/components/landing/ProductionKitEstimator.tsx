@@ -117,32 +117,32 @@ export default function ProductionKitEstimator() {
   }, [days, selectedIds]);
 
   return (
-    <div className="rounded-3xl border border-slate-200/90 bg-white/90 p-6 sm:p-10 shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/80">
-      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-8 lg:gap-12 items-start">
+    <div className="">
+      <div className="">
         {/* Left: Configuration Controls */}
-        <div className="space-y-6">
+        <div className="">
           <div>
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400">
-              <Sliders className="h-3.5 w-3.5" />
+            <div className="">
+              <Sliders className="" />
               Live Production Estimator
             </div>
-            <h3 className="mt-2 text-2xl sm:text-3xl font-light tracking-tight text-slate-900 dark:text-white">
+            <h3 className="">
               Configure your cinema shoot & calculate instant rates.
             </h3>
-            <p className="mt-2 text-sm text-slate-600 dark:text-zinc-400">
+            <p className="">
               Standardized Nairobi commercial production rates with transparent equipment and crew lines.
             </p>
           </div>
 
           {/* Shoot Duration Selector */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400 flex items-center justify-between">
+          <div className="">
+            <label className="">
               <span>Shoot Duration (Production Days)</span>
-              <span className="font-mono text-purple-600 dark:text-purple-400 text-sm font-bold">
+              <span className="">
                 {days} {days === 1 ? "Day" : "Days"}
               </span>
             </label>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="">
               {[1, 2, 3, 5].map((d) => (
                 <button
                   key={d}
@@ -160,11 +160,11 @@ export default function ProductionKitEstimator() {
           </div>
 
           {/* Service & Kit Selection List */}
-          <div className="space-y-2.5">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-zinc-400">
+          <div className="">
+            <label className="">
               Include Crew Roles & Cinema Gear Kits
             </label>
-            <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+            <div className="">
               {PRODUCTION_SERVICES.map((service) => {
                 const isSelected = selectedIds.includes(service.id);
                 return (
@@ -177,7 +177,7 @@ export default function ProductionKitEstimator() {
                         : "bg-slate-50/60 dark:bg-zinc-900/40 border-slate-200/80 dark:border-zinc-800/80 text-slate-600 dark:text-zinc-400 hover:bg-slate-100/50 dark:hover:bg-zinc-900/80"
                     }`}
                   >
-                    <div className="flex items-start gap-3 min-w-0">
+                    <div className="">
                       <div
                         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
                           isSelected
@@ -185,20 +185,20 @@ export default function ProductionKitEstimator() {
                             : "border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                         }`}
                       >
-                        {isSelected && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                        {isSelected && <Check className="" />}
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium leading-snug">{service.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-0.5">
+                      <div className="">
+                        <p className="">{service.name}</p>
+                        <p className="">
                           {service.desc}
                         </p>
                       </div>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <span className="font-mono text-xs font-semibold text-slate-900 dark:text-zinc-100">
+                    <div className="">
+                      <span className="">
                         KES {service.dailyRate.toLocaleString()}
                       </span>
-                      <span className="block text-[10px] text-slate-400">
+                      <span className="block">
                         {service.isDaily ? `/ day` : `flat fee`}
                       </span>
                     </div>
@@ -210,67 +210,67 @@ export default function ProductionKitEstimator() {
         </div>
 
         {/* Right: Live Quote Summary & Tax Shield Breakdown */}
-        <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/60 p-6 space-y-6">
+        <div className="">
           <div>
-            <span className="text-[11px] font-mono uppercase tracking-wider text-purple-600 dark:text-purple-400 font-semibold">
+            <span className="">
               Live Quotation Breakdown
             </span>
-            <div className="mt-2 flex items-baseline justify-between border-b border-slate-200 dark:border-zinc-800 pb-4">
-              <span className="text-sm text-slate-500 dark:text-zinc-400">Total Investment</span>
-              <div className="text-right">
-                <span className="text-3xl font-light tracking-tight font-sans text-slate-900 dark:text-white">
+            <div className="items-baseline">
+              <span className="">Total Investment</span>
+              <div className="">
+                <span className="">
                   KES {total.toLocaleString()}
                 </span>
-                <span className="block text-[10px] text-slate-400">VAT Included (16%)</span>
+                <span className="block">VAT Included (16%)</span>
               </div>
             </div>
           </div>
 
           {/* Breakdown Items */}
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between text-slate-600 dark:text-zinc-400">
+          <div className="">
+            <div className="">
               <span>Production Subtotal</span>
-              <span className="font-mono font-medium text-slate-900 dark:text-zinc-200">
+              <span className="">
                 KES {subtotal.toLocaleString()}
               </span>
             </div>
-            <div className="flex justify-between text-slate-600 dark:text-zinc-400">
+            <div className="">
               <span>VAT (16% eTIMS Compliant)</span>
-              <span className="font-mono font-medium text-slate-900 dark:text-zinc-200">
+              <span className="">
                 KES {vat.toLocaleString()}
               </span>
             </div>
-            <div className="flex justify-between text-purple-600 dark:text-purple-400 font-medium pt-2 border-t border-slate-200 dark:border-zinc-800">
+            <div className="">
               <span>50% Mobilization Deposit</span>
-              <span className="font-mono font-bold">
+              <span className="">
                 KES {deposit.toLocaleString()}
               </span>
             </div>
           </div>
 
           {/* KRA Tax Shield Box */}
-          <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3.5 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-              <ShieldCheck className="h-4 w-4" />
+          <div className="">
+            <div className="">
+              <ShieldCheck className="" />
               <span>30% KRA Corporate Tax Shield</span>
             </div>
-            <p className="text-[11px] text-emerald-800/90 dark:text-emerald-200/90 leading-relaxed">
+            <p className="">
               Every production invoice generated is fully deductible against corporate income tax with verified KRA PIN:{" "}
-              <strong className="font-mono">KES {taxShield.toLocaleString()}</strong> in estimated corporate tax savings.
+              <strong className="">KES {taxShield.toLocaleString()}</strong> in estimated corporate tax savings.
             </p>
           </div>
 
           {/* Action CTAs */}
-          <div className="space-y-2 pt-2">
+          <div className="">
             <Link
               href="/admin/quotes/new"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-600/25 transition hover:bg-purple-700 hover:scale-[1.01]"
+              className=""
             >
-              Generate Official Quotation <ArrowRight className="h-4 w-4" />
+              Generate Official Quotation <ArrowRight className="" />
             </Link>
             <Link
               href="/contact"
-              className="w-full inline-flex items-center justify-center py-2.5 text-xs font-medium text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+              className=""
             >
               Need custom terms or multi-city logistics? Contact Somboriot →
             </Link>

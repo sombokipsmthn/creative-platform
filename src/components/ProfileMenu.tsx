@@ -10,12 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/DropdownMenu';
+} from '@/components/ui/dropdown-menu';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/Avatar';
+} from '@/components/ui/avatar';
 import { User, Settings, ExternalLink, LogOut, ChevronDown } from 'lucide-react';
 
 export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {
@@ -37,36 +37,36 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
         <button
           type="button"
           aria-label="Open profile menu"
-          className="flex items-center gap-2 rounded-lg p-1 text-left outline-none transition-colors hover:bg-accent focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+          className=""
         >
-          <Avatar className="h-8 w-8 border border-border">
+          <Avatar className="order">
             {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName} />}
-            <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+            <AvatarFallback className="">
               {initials}
             </AvatarFallback>
           </Avatar>
 
           {showLabel && (
-            <div className="hidden text-left lg:block">
-              <span className="block max-w-28 truncate text-xs font-medium text-foreground">
+            <div className="hidden">
+              <span className="block">
                 {fullName}
               </span>
-              <span className="block text-[11px] text-muted-foreground">
+              <span className="block">
                 Creator
               </span>
             </div>
           )}
 
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground opacity-60" />
+          <ChevronDown className="" />
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none text-foreground">{fullName}</p>
+      <DropdownMenuContent align="end" className="">
+        <DropdownMenuLabel className="">
+          <div className="">
+            <p className="">{fullName}</p>
             {email && (
-              <p className="text-xs leading-none text-muted-foreground truncate">
+              <p className="">
                 {email}
               </p>
             )}
@@ -75,22 +75,22 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/admin/profile" className="flex items-center gap-2 cursor-pointer">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <span>Creator Profile</span>
+          <Link href="/admin/profile" className="">
+            <User className="" />
+            <span>Account & Profile</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/admin/settings" className="flex items-center gap-2 cursor-pointer">
-            <Settings className="h-4 w-4 text-muted-foreground" />
+          <Link href="/admin/settings" className="">
+            <Settings className="" />
             <span>Platform Settings</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <ExternalLink className="h-4 w-4 text-muted-foreground" />
+          <Link href="/" className="">
+            <ExternalLink className="" />
             <span>Public Site</span>
           </Link>
         </DropdownMenuItem>
@@ -99,9 +99,9 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
 
         <DropdownMenuItem
           onClick={handleSignOut}
-          className="text-destructive focus:bg-destructive/10 focus:text-destructive cursor-pointer"
+          className=""
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="" />
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

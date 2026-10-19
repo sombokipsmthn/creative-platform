@@ -22,17 +22,17 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Skeleton } from '@/components/ui/Skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/Alert';
+} from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type Range = '7d' | '30d' | '90d' | '12m' | 'all';
 
@@ -265,7 +265,7 @@ export default function CreativeOSDashboardPage() {
       <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
         <div className="space-y-2">
           <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-96" />
+          <Skeleton className="h-4 w-full max-w-96" />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Skeleton className="h-32 rounded-xl" />
@@ -282,7 +282,7 @@ export default function CreativeOSDashboardPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="min-w-0 overflow-x-hidden p-4 md:p-8 max-w-7xl mx-auto space-y-8">
       {/* Top Welcome Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
         <div>
@@ -300,7 +300,7 @@ export default function CreativeOSDashboardPage() {
         </div>
 
         {/* Date Range Selector */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-muted rounded-lg border">
+        <div className="flex min-w-0 flex-wrap items-center gap-1.5 p-1 pl-0 bg-muted rounded-lg border">
           {ranges.map((option) => (
             <Button
               key={option.value}

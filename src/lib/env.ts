@@ -2,7 +2,7 @@
 
 const requiredEnvVars = {
   DATABASE_URL: process.env.DATABASE_URL,
-  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET || "creative-platform-dev-secret-key-at-least-32-chars-long",
+  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
 };
 
 const optionalEnvVars = {
@@ -17,7 +17,7 @@ export function validateEnv() {
   const missing = Object.entries(requiredEnvVars).filter(([, value]) => !value).map(([key]) => key);
 
   if (missing.length > 0) {
-    const message = `Missing environment variables: ${missing.join(", ")}. In development, the app will run with local fallback/mock storage.`;
+    const message = `Missing environment variables: ${missing.join(", ")}. Set them before starting the application.`;
     console.warn(`⚠️ ${message}`);
     return;
   }
@@ -27,7 +27,7 @@ export function validateEnv() {
 
 export const env = {
   database: { url: requiredEnvVars.DATABASE_URL || "" },
-  betterAuth: { secret: requiredEnvVars.BETTER_AUTH_SECRET },
+  betterAuth: { secret: requiredEnvVars.BETTER_AUTH_SECRET || "" },
   blob: { token: optionalEnvVars.BLOB_READ_WRITE_TOKEN },
   svix: { token: optionalEnvVars.SVIX_AUTH_TOKEN },
   analytics: { gaId: optionalEnvVars.NEXT_PUBLIC_GA_ID },

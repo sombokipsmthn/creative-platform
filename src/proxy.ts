@@ -19,10 +19,16 @@ function getAuthOrigin(request?: Request): string {
   return configuredOrigin(request);
 }
 
-async function hasAuthenticatedSession(request: Request, authOrigin: string): Promise<boolean> {
+async function hasAuthenticatedSession(request: Request): Promise<boolean> {
   try {
-    const session = await fetch(`${authOrigin}/api/auth/session`, {
-      headers: request.headers,
+    // Probe Better Auth through the same origin that received the request so
+    // the browser's session cookie is evaluated by the same app instance.
+    const sessionUrl = new URL("/api/auth/get-session", request.url);
+    const session = await fetch(sessionUrl, {
+      headers: {
+        cookie: request.headers.get("cookie") ?? "",
+      },
+      cache: "no-store",
     });
     return session.ok;
   } catch {
@@ -75,8 +81,7 @@ export default async function customMiddleware(request: Request) {
   }
 
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
-    const authOrigin = getAuthOrigin(request);
-    if (!authOrigin || !(await hasAuthenticatedSession(request, authOrigin))) {
+    if (!(await hasAuthenticatedSession(request))) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);
       const response = NextResponse.redirect(signInUrl);

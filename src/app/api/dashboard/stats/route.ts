@@ -46,9 +46,11 @@ async function safeGalleryStats(creator: string, periodStart: Date, periodEnd: D
     const lifetime = await db.select({ value: count() }).from(galleries).where(eq(galleries.creatorId, creator));
     const period = await db.select({ value: count() })
       .from(galleries)
-      .where(eq(galleries.creatorId, creator))
-      .where(gte(galleries.createdAt, periodStart))
-      .where(lt(galleries.createdAt, periodEnd));
+      .where(and(
+        eq(galleries.creatorId, creator),
+        gte(galleries.createdAt, periodStart),
+        lt(galleries.createdAt, periodEnd),
+      ));
     const statuses = await db.select({ status: galleries.status, count: count() }).from(galleries).where(eq(galleries.creatorId, creator)).groupBy(galleries.status);
     const recent = await db.select({ id: galleries.id, title: galleries.title, status: galleries.status, createdAt: galleries.createdAt }).from(galleries).where(eq(galleries.creatorId, creator)).orderBy(desc(galleries.updatedAt)).limit(5);
     return { lifetime, period, statuses, recent };

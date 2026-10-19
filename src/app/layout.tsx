@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
+import { Geist, Geist_Mono } from 'next/font/google';
 import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';

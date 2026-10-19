@@ -157,7 +157,7 @@ jobs:
 
       - name: Cleanup
         if: always()
-        run: docker stop test-container && docker rm test-container
+        run: docker rm -f test-container 2>/dev/null || true
 
   deploy-staging:
     runs-on: ubuntu-latest

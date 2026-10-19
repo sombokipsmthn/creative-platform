@@ -15,7 +15,7 @@ import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/Avatar';
+} from '@/components/ui/avatar';
 import { User, Settings, ExternalLink, LogOut, ChevronDown } from 'lucide-react';
 
 export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {

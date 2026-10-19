@@ -1,11 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
+import { Geist, Geist_Mono } from 'next/font/google';
 import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
-const Analytics = () => null;
+import { Analytics } from '@vercel/analytics/next';
 
 validateEnv();
 
@@ -18,17 +19,17 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: 'Kipsmthn Creative Platform',
-  description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
+  title: 'Kipsmthn | Creative Platform',
+  description: 'Commercial Photography, Brand Films, Motion Graphics & Startup Ecosystem Storytelling.',
   openGraph: {
-    title: 'Kipsmthn Creative Platform',
-    description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'Kipsmthn Creative Platform' }],
+    title: 'Kipsmthn | Creative Platform',
+    description: 'Creative infrastructure for photographers, filmmakers and studios in Nairobi.',
+    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'KIPSMTHN — Creative Platform' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Kipsmthn Creative Platform',
-    description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
+    title: 'Kipsmthn | Creative Platform',
+    description: 'Creative infrastructure for photographers, filmmakers and studios in Nairobi.',
     images: ['/og-image.svg'],
   },
   icons: { icon: '/site-icon.svg', shortcut: '/site-icon.svg', apple: '/site-icon.svg' },
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={`${geist.variable} ${geistMono.variable} dark`} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (

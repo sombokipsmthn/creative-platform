@@ -16,7 +16,7 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 

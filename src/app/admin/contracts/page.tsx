@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 import TableFilterBar from '@/components/admin/TableFilterBar';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type Contract = {

@@ -68,8 +68,10 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
 
         {/* CONTENT */}
         <div className="py-8">
-          <div className="prose lg:prose-xl">
-            <p className="whitespace-pre-wrap">{contract.content || 'No content'}</p>
+          <div className="typeset typeset-docs max-w-[37em]">
+            <div className="prose lg:prose-xl">
+              <p className="whitespace-pre-wrap">{contract.content || 'No content'}</p>
+            </div>
           </div>
         </div>
 

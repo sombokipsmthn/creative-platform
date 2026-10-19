@@ -2,7 +2,7 @@ import Header from '@/components/header';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 
 export const metadata: Metadata = {
   title: "Contact KIPSMTHN | Start a Project",

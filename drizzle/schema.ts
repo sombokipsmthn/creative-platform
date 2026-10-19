@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm"
 
 export const galleries = pgTable("galleries", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
-	creatorId: text("creator_id").notNull(),
+	creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
 	clientId: text("client_id"),
 	projectId: uuid("project_id"),
 	title: text().notNull(),
@@ -555,6 +555,21 @@ export const galleryWatermarks = pgTable("gallery_watermarks", {
 	unique("gallery_watermarks_gallery_id_key").on(table.galleryId),
 ]);
 
+export const galleryWatermarkPresets = pgTable("gallery_watermark_presets", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	creatorId: text("creator_id").notNull(),
+	name: text().notNull(),
+	enabled: boolean().default(true).notNull(),
+	text: text().default('KIPSMTHN').notNull(),
+	position: text().default('bottom-right').notNull(),
+	opacity: integer().default(55).notNull(),
+	fontSize: integer("font_size").default(42).notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+}, (table) => [
+	index("gallery_watermark_presets_creator_idx").using("btree", table.creatorId.asc().nullsLast().op("text_ops")),
+	unique("gallery_watermark_presets_creator_name_key").on(table.creatorId, table.name),
+]);
 export const galleryDownloadPresets = pgTable("gallery_download_presets", {
 	id: uuid().defaultRandom().primaryKey().notNull(),
 	galleryId: uuid("gallery_id").notNull(),
@@ -574,6 +589,7 @@ export const galleryDownloadPresets = pgTable("gallery_download_presets", {
 			name: "gallery_download_presets_gallery_id_fkey"
 		}).onDelete("cascade"),
 ]);
+
 
 export const galleryDownloads = pgTable("gallery_downloads", {
 	id: uuid().defaultRandom().primaryKey().notNull(),

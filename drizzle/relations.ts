@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { users, galleries, clients, projects, creatorBusinessProfiles, creatorServices, galleryCollections, galleryPhotos, creatorProfiles, invoices, quotes, quoteItems, invoiceItems, contractTemplates, contracts, contractEvents, galleryAccessSessions, galleryPhotoActions, galleryComments, galleryApprovals, galleryWatermarks, galleryDownloadPresets, galleryDownloads } from "./schema";
+import { users, galleries, clients, projects, creatorBusinessProfiles, creatorServices, galleryCollections, galleryPhotos, creatorProfiles, invoices, quotes, quoteItems, invoiceItems, contractTemplates, contracts, contractEvents, galleryAccessSessions, galleryPhotoActions, galleryComments, galleryApprovals, galleryWatermarks, galleryWatermarkPresets, galleryDownloadPresets, galleryDownloads } from "./schema";
 
 export const galleriesRelations = relations(galleries, ({one, many}) => ({
 	user: one(users, {
@@ -29,6 +29,7 @@ export const usersRelations = relations(users, ({many}) => ({
 	galleries: many(galleries),
 	creatorBusinessProfiles: many(creatorBusinessProfiles),
 	creatorServices: many(creatorServices),
+	galleryWatermarkPresets: many(galleryWatermarkPresets),
 	clients: many(clients),
 	creatorProfiles: many(creatorProfiles),
 	invoices: many(invoices),
@@ -250,6 +251,13 @@ export const galleryWatermarksRelations = relations(galleryWatermarks, ({one}) =
 	gallery: one(galleries, {
 		fields: [galleryWatermarks.galleryId],
 		references: [galleries.id]
+	}),
+}));
+
+export const galleryWatermarkPresetsRelations = relations(galleryWatermarkPresets, ({one}) => ({
+	user: one(users, {
+		fields: [galleryWatermarkPresets.creatorId],
+		references: [users.id]
 	}),
 }));
 

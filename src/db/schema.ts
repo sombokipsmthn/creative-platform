@@ -504,6 +504,21 @@ export const galleryWatermarks = pgTable("gallery_watermarks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
+export const galleryWatermarkPresets = pgTable("gallery_watermark_presets", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  text: text("text").default("KIPSMTHN").notNull(),
+  position: text("position").default("bottom-right").notNull(),
+  opacity: integer("opacity").default(55).notNull(),
+  fontSize: integer("font_size").default(42).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("gallery_watermark_presets_creator_idx").using("btree", table.creatorId.asc().nullsLast().op("text_ops")),
+  unique("gallery_watermark_presets_creator_name_key").on(table.creatorId, table.name),
+]);
 export const galleryDownloadPresets = pgTable("gallery_download_presets", {
   id: uuid("id").defaultRandom().primaryKey(),
   galleryId: uuid("gallery_id").notNull().references(() => galleries.id, { onDelete: "cascade" }),

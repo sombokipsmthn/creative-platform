@@ -83,7 +83,7 @@ jobs:
         run: npm audit --json > npm-audit-development.json || true
 
       - name: Upload development audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-audit-development
           path: npm-audit-development.json
@@ -127,7 +127,7 @@ jobs:
           DOCKER_BUILDKIT: 1
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: next-build
           path: .next/

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
 interface ExpenseReceipt {
@@ -169,7 +169,7 @@ export default function AdminExpensesPage() {
               <Button
                 onClick={handleSimulateScan}
                 disabled={isScanning}
-                variant="primary"
+                variant="default"
                 className="w-full md:w-auto"
               >
                 {isScanning ? <span className="flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Scanning Receipt...</span> : 'Scan Receipt Photo (OCR)'}
@@ -243,7 +243,7 @@ export default function AdminExpensesPage() {
               <Button
                 type="submit"
                 className="w-full py-3.5"
-                variant="primary"
+                variant="default"
               >
                 + Record Expense for KRA Tax Return
               </Button>

@@ -1,47 +1,47 @@
 'use client';
 
+import * as React from 'react';
+import { Badge } from '@/components/ui/badge';
+
 interface StatusBadgeProps {
   status: string;
-  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent' | 'secondary' | 'outline';
 }
 
-const variantMap = {
-  default: 'ui-badge',
-  success: 'ui-badge ui-badge-success',
-  warning: 'ui-badge ui-badge-warning',
-  danger: 'ui-badge ui-badge-danger',
-  info: 'ui-badge ui-badge-info',
-  accent: 'ui-badge ui-badge-accent',
-};
-
-const statusVariantMap: Record<string, StatusBadgeProps['variant']> = {
+const statusVariantMap: Record<string, 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'> = {
   active: 'success',
-  inactive: 'warning',
-  archived: 'default',
-  draft: 'default',
-  sent: 'info',
-  viewed: 'info',
+  inactive: 'outline',
+  archived: 'secondary',
+  draft: 'secondary',
+  sent: 'outline',
+  viewed: 'outline',
   accepted: 'success',
-  declined: 'danger',
+  declined: 'destructive',
   paid: 'success',
   pending: 'warning',
-  overdue: 'danger',
+  overdue: 'destructive',
   completed: 'success',
   published: 'success',
-  unpublished: 'default',
+  unpublished: 'secondary',
 };
 
 export default function StatusBadge({
   status,
   variant,
 }: StatusBadgeProps) {
-  const displayVariant = variant || statusVariantMap[status.toLowerCase()] || 'default';
   const displayLabel = status.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+  
+  let badgeVariant: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' = 'secondary';
+  if (variant === 'danger') badgeVariant = 'destructive';
+  else if (variant === 'success' || variant === 'warning' || variant === 'outline' || variant === 'secondary' || variant === 'default') {
+    badgeVariant = variant;
+  } else {
+    badgeVariant = statusVariantMap[status.toLowerCase()] || 'secondary';
+  }
 
   return (
-    <span className={variantMap[displayVariant]}>
-      <span className="ui-badge-dot" />
+    <Badge variant={badgeVariant} className="capitalize text-xs font-medium">
       {displayLabel}
-    </span>
+    </Badge>
   );
 }

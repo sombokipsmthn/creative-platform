@@ -304,6 +304,18 @@ export const equipment = pgTable("equipment", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
+export const expenses = pgTable("expenses", {
+  id: uuid("id").defaultRandom().primaryKey(), creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }), projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }), description: text("description").notNull(), supplier: text("supplier"), category: text("category").notNull(), amount: integer("amount").notNull(), currency: text("currency").default("KES").notNull(), expenseDate: timestamp("expense_date").notNull(), paymentMethod: text("payment_method"), taxAmount: integer("tax_amount").default(0).notNull(), notes: text("notes"), createdAt: timestamp("created_at").defaultNow().notNull(), updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({ creatorIdx: index("expenses_creator_id_idx").on(table.creatorId), projectIdx: index("expenses_project_id_idx").on(table.projectId), dateIdx: index("expenses_expense_date_idx").on(table.expenseDate) }));
+
+export const payments = pgTable("payments", {
+  id: uuid("id").defaultRandom().primaryKey(), creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }), invoiceId: uuid("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }), amount: integer("amount").notNull(), currency: text("currency").notNull(), paymentDate: timestamp("payment_date").notNull(), paymentMethod: text("payment_method").notNull(), transactionReference: text("transaction_reference"), notes: text("notes"), createdAt: timestamp("created_at").defaultNow().notNull(), updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({ creatorIdx: index("payments_creator_id_idx").on(table.creatorId), invoiceIdx: index("payments_invoice_id_idx").on(table.invoiceId), dateIdx: index("payments_payment_date_idx").on(table.paymentDate) }));
+
+export const calendarEvents = pgTable("calendar_events", {
+  id: uuid("id").defaultRandom().primaryKey(), creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }), clientId: text("client_id").references(() => clients.id, { onDelete: "set null" }), projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }), title: text("title").notNull(), description: text("description"), startDate: timestamp("start_date").notNull(), endDate: timestamp("end_date").notNull(), location: text("location"), eventType: text("event_type").default("appointment").notNull(), createdAt: timestamp("created_at").defaultNow().notNull(), updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({ creatorIdx: index("calendar_events_creator_id_idx").on(table.creatorId), startIdx: index("calendar_events_start_date_idx").on(table.startDate) }));
+
 export const quoteItems = pgTable("quote_items", {
   id: uuid("id").defaultRandom().primaryKey(),
   quoteId: uuid("quote_id").notNull().references(() => quotes.id, { onDelete: "cascade" }),

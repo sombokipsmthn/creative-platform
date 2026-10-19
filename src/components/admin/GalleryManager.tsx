@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 interface GalleryItem {
   id: string;
@@ -204,7 +205,7 @@ export default function AdminGalleryManagerPage() {
           title: title.trim(),
           clientId: clientId || null,
           category,
-          accessPin: pin.trim() || '4821',
+          accessPin: pin.trim() || null,
           allowDownloads,
           allowFavorites,
           allowSelections,
@@ -704,8 +705,13 @@ export default function AdminGalleryManagerPage() {
 
         {/* TAB 3: CREATE GALLERY FORM */}
         {activeTab === 'create' && (
-          <div className="max-w-2xl mx-auto">
-            <div className="ui-card rounded-[40px] p-8 md:p-12 shadow-2xl space-y-10">
+          <StandardCreationDialog
+            open
+            onOpenChange={(open) => { if (!open) setActiveTab('all'); }}
+            title="Create a new gallery"
+            description="Create a private draft gallery, then continue in the gallery manager to upload and configure delivery."
+            className="max-w-3xl"
+          >
               <div className="space-y-3 text-center">
                 <div className="ui-icon-box ui-icon-box-lg mx-auto">
                   <Plus className="w-6 h-6" />
@@ -721,10 +727,11 @@ export default function AdminGalleryManagerPage() {
               <form onSubmit={handleCreateGallery} className="space-y-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="ui-label ui-meta uppercase tracking-widest pl-1">
+                    <label htmlFor="gallery-title" className="ui-label ui-meta uppercase tracking-widest pl-1">
                       Gallery Title
                     </label>
                     <input
+                      id="gallery-title"
                       type="text"
                       required
                       placeholder="e.g. Safaricom Spark Accelerator 2026"
@@ -836,8 +843,7 @@ export default function AdminGalleryManagerPage() {
                   )}
                 </button>
               </form>
-            </div>
-          </div>
+          </StandardCreationDialog>
         )}
       </div>
     </div>

@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import { Plus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
-import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import EmptyState from '@/components/admin/EmptyState';
 import StatusBadge from '@/components/admin/StatusBadge';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type QuoteClient = {
   id: string;
@@ -65,6 +66,7 @@ export default function QuotesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -175,10 +177,21 @@ export default function QuotesPage() {
           title="Quotes"
           description="Production estimates and client proposals."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          primaryAction={<Button onClick={() => router.push('/admin/quotes/new')}><Plus aria-hidden="true" />New quote</Button>}
+          primaryAction={<Button onClick={() => setIsCreateOpen(true)}><Plus aria-hidden="true" />New quote</Button>}
         />
 
-        {/* SUMMARY */}
+        <StandardCreationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} title="Start a new quote" description="Quotes require at least one line item, so continue to the full quote editor to create a valid draft.">
+          <div className="space-y-4 pr-8">
+            <p className="ui-eyebrow">SALES & PRODUCTION</p>
+            <h2 className="ui-section-title">Start a new quote</h2>
+            <p className="text-sm text-muted-foreground">The full editor is required for a valid quote because it captures services, equipment, quantities, rates, taxes, and totals.</p>
+          </div>
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+            <Button type="button" onClick={() => router.push('/admin/quotes/new')}>Continue to quote editor <ArrowRight aria-hidden="true" /></Button>
+          </div>
+        </StandardCreationDialog>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="ui-stat-card">
             <p className="ui-stat-label">Total Quotes</p>

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -394,21 +395,17 @@ export default function AdminClientsPage() {
         )}
 
         {isAddClientOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
-              <Button
-                onClick={closeCreateModal}
-                variant="ghost"
-                size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
-              >
-                ✕
-              </Button>
-
-              <div className="space-y-1">
-                <p className="ui-eyebrow">CRM</p>
-                <h2 className="ui-section-title">Register New Client</h2>
-              </div>
+          <StandardCreationDialog
+            open={isAddClientOpen}
+            onOpenChange={(open) => { if (!open) closeCreateModal(); }}
+            title="Register new client"
+            description="Add the minimum client details now. You can complete the CRM profile later."
+          >
+            <div className="space-y-1 pr-8">
+              <p className="ui-eyebrow">CRM</p>
+              <h2 className="ui-section-title">Register New Client</h2>
+              <p className="text-sm text-muted-foreground">Add the minimum client details now. Extended CRM information can be added later.</p>
+            </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
@@ -495,8 +492,7 @@ export default function AdminClientsPage() {
                   {saving ? 'Saving Client…' : '+ Add Client to CRM'}
                 </Button>
               </form>
-            </div>
-          </div>
+          </StandardCreationDialog>
         )}
 
         {selectedClient && (

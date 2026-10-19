@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, List } from
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, eachDayOfInterval, differenceInCalendarDays, isSameDay, isSameMonth, isSameWeek, parseISO, addDays, subDays } from 'date-fns';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type CalendarView = 'month' | 'week' | 'agenda';
 
@@ -39,6 +40,10 @@ type CalendarState = {
 export default function CalendarPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createError, setCreateError] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [createForm, setCreateForm] = useState({ title: '', startDate: '', endDate: '', description: '', location: '' });
   const [state, setState] = useState<CalendarState>({
     currentDate: new Date(),
     view: 'month',
@@ -167,7 +172,18 @@ export default function CalendarPage() {
   return (
     <div className="ui-page ui-page-padded">
       <div className="ui-shell">
-        <AdminPageHeader title="Calendar" description="Plan shoots, deadlines, and production activity in one workspace." breadcrumb={{ label: 'Dashboard', href: '/admin' }} />
+        <AdminPageHeader title="Calendar" description="Plan shoots, deadlines, and production activity in one workspace." breadcrumb={{ label: 'Dashboard', href: '/admin' }} primaryAction={<Button type="button" onClick={() => { setCreateError(''); setCreateOpen(true); }}>Create event</Button>} />
+        <StandardCreationDialog open={createOpen} onOpenChange={(open) => { if (!creating) setCreateOpen(open); }} title="Create calendar event" description="Add a scheduled appointment to your creator calendar.">
+          <div className="space-y-1 pr-8"><p className="ui-eyebrow">CALENDAR</p><h2 className="ui-section-title">Create event</h2></div>
+          {createError && <div role="alert" className="mt-5 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700">{createError}</div>}
+          <form className="mt-6 space-y-5" onSubmit={async (event) => { event.preventDefault(); try { setCreating(true); setCreateError(''); const response = await fetch('/api/calendar-events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(createForm) }); const data = await response.json(); if (!response.ok) throw new Error(data?.error || 'Unable to create event.'); setCreateOpen(false); setCreateForm({ title: '', startDate: '', endDate: '', description: '', location: '' }); setState((prev) => ({ ...prev, loading: true })); } catch (cause) { setCreateError(cause instanceof Error ? cause.message : 'Unable to create event.'); } finally { setCreating(false); } }}>
+            <label className="ui-label" htmlFor="calendar-title">Event title *<input id="calendar-title" required className="ui-input mt-2" value={createForm.title} onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })} /></label>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2"><label className="ui-label" htmlFor="calendar-start">Start *<input id="calendar-start" required type="datetime-local" className="ui-input mt-2" value={createForm.startDate} onChange={(e) => setCreateForm({ ...createForm, startDate: e.target.value })} /></label><label className="ui-label" htmlFor="calendar-end">End *<input id="calendar-end" required type="datetime-local" className="ui-input mt-2" value={createForm.endDate} onChange={(e) => setCreateForm({ ...createForm, endDate: e.target.value })} /></label></div>
+            <label className="ui-label" htmlFor="calendar-location">Location (optional)<input id="calendar-location" className="ui-input mt-2" value={createForm.location} onChange={(e) => setCreateForm({ ...createForm, location: e.target.value })} /></label>
+            <label className="ui-label" htmlFor="calendar-description">Description (optional)<textarea id="calendar-description" rows={3} className="ui-textarea mt-2" value={createForm.description} onChange={(e) => setCreateForm({ ...createForm, description: e.target.value })} /></label>
+            <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end"><Button type="button" variant="secondary" onClick={() => setCreateOpen(false)} disabled={creating}>Cancel</Button><Button type="submit" disabled={creating}>{creating ? 'Creating event…' : 'Create event'}</Button></div>
+          </form>
+        </StandardCreationDialog>
         <section className="ui-card admin-calendar-workspace" aria-label="Creator Command Centre Calendar">
         <div className="">
           <div className="">

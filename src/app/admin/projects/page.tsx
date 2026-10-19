@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import StatusBadge from '@/components/admin/StatusBadge';
 import EmptyState from '@/components/admin/EmptyState';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -592,263 +593,56 @@ export default function AdminProjectsPage() {
         )}
 
         {isAddProjectOpen && (
-          <div className="admin-content-block">
-            <div className="admin-content-block">
-              <Button
-                onClick={closeCreateModal}
-                variant="ghost"
-                size="icon"
-                className="admin-content-block"
-              >
-                ✕
-              </Button>
+          <StandardCreationDialog
+            open={isAddProjectOpen}
+            onOpenChange={(open) => { if (!open) closeCreateModal(); }}
+            title="Create new project"
+            description="Start a project with the essentials. Add production and portfolio details from the project editor."
+          >
+            <div className="space-y-1 pr-8">
+              <p className="ui-eyebrow">PROJECTS</p>
+              <h2 className="ui-section-title">New Project</h2>
+              <p className="text-sm text-muted-foreground">Create a draft project, then add detailed production information from its editor.</p>
+            </div>
 
-              <div className="admin-content-block">
-                <p className="ui-eyebrow">PROJECTS</p>
-                <h2 className="ui-section-title">New Project</h2>
+            {error && <div role="alert" className="mt-5 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">{error}</div>}
+
+            <form onSubmit={handleCreateProject} className="mt-6 space-y-5">
+              <div className="space-y-2">
+                <label htmlFor="project-name" className="ui-label">Project name <span aria-hidden="true" className="text-red-600">*</span><span className="sr-only">required</span></label>
+                <input id="project-name" required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
               </div>
 
-              {error && <div className="admin-content-block">{error}</div>}
+              <div className="space-y-2">
+                <label htmlFor="project-client" className="ui-label">Client <span className="text-muted-foreground font-normal">(optional)</span></label>
+                <select id="project-client" value={form.clientId} onChange={(e) => setForm({ ...form, clientId: e.target.value })} className="ui-select w-full">
+                  <option value="">No assigned client</option>
+                  {clients.map((client) => <option key={client.id} value={client.id}>{client.name} {client.company ? `(${client.company})` : ''}</option>)}
+                </select>
+              </div>
 
-              <form onSubmit={handleCreateProject} className="admin-content-block">
-                <div className="admin-content-block">
-                  <label className="ui-label">Project Name *</label>
-                  <input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
+              <div className="space-y-2">
+                <label htmlFor="project-description" className="ui-label">Description <span className="text-muted-foreground font-normal">(optional)</span></label>
+                <textarea id="project-description" rows={3} placeholder="Brief project description" value={form.description} onChange={(event) => setForm({ ...form, description: event.target.value })} className="ui-textarea" />
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label htmlFor="project-start" className="ui-label">Start date <span className="text-muted-foreground font-normal">(optional)</span></label>
+                  <input id="project-start" type="date" value={form.startDate} onChange={(event) => setForm({ ...form, startDate: event.target.value })} className="ui-input" />
                 </div>
-
-                <div className="admin-content-block">
-                  <label className="ui-label">Client</label>
-                  <select
-                    value={form.clientId}
-                    onChange={(e) => setForm({ ...form, clientId: e.target.value })}
-                    className="ui-input"
-                  >
-                    <option value="">Select a client (optional)</option>
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name} {client.company ? `(${client.company})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                <div className="space-y-2">
+                  <label htmlFor="project-end" className="ui-label">End date <span className="text-muted-foreground font-normal">(optional)</span></label>
+                  <input id="project-end" type="date" min={form.startDate || undefined} value={form.endDate} onChange={(event) => setForm({ ...form, endDate: event.target.value })} className="ui-input" />
                 </div>
+              </div>
 
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Description</label>
-                    <textarea
-                      rows={2}
-                      placeholder="Brief project description..."
-                      value={form.description}
-                      onChange={(event) => setForm({ ...form, description: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Short Description</label>
-                    <input
-                      type="text"
-                      placeholder="One-line summary for portfolio cards"
-                      value={form.shortDescription}
-                      onChange={(event) => setForm({ ...form, shortDescription: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Category</label>
-                    <select
-                      value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="ui-input"
-                    >
-                      <option value="">Select category</option>
-                      <option value="Photography">Photography</option>
-                      <option value="Videography">Videography</option>
-                      <option value="Branding">Branding</option>
-                      <option value="UI/UX">UI/UX</option>
-                      <option value="Motion">Motion Graphics</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Year</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2026"
-                      value={form.year}
-                      onChange={(event) => setForm({ ...form, year: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Location</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Nairobi, Kenya"
-                      value={form.location}
-                      onChange={(event) => setForm({ ...form, location: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Slug</label>
-                    <input
-                      type="text"
-                      placeholder="auto-generated from name"
-                      value={form.slug}
-                      onChange={(event) => setForm({ ...form, slug: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Status</label>
-                    <select
-                      value={form.status}
-                      onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
-                      className="ui-input"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                      <option value="on hold">On Hold</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Visibility</label>
-                    <select
-                      value={form.visibility}
-                      onChange={(e) => setForm({ ...form, visibility: e.target.value as 'public' | 'private' | 'draft' })}
-                      className="ui-input"
-                    >
-                      <option value="private">Private</option>
-                      <option value="public">Public</option>
-                      <option value="draft">Draft</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Start Date</label>
-                    <input
-                      type="date"
-                      value={form.startDate}
-                      onChange={(event) => setForm({ ...form, startDate: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">End Date</label>
-                    <input
-                      type="date"
-                      value={form.endDate}
-                      onChange={(event) => setForm({ ...form, endDate: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Total Amount</label>
-                    <input
-                      type="number"
-                      placeholder="0"
-                      value={form.totalAmount}
-                      onChange={(event) => setForm({ ...form, totalAmount: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Currency</label>
-                    <select
-                      value={form.currency}
-                      onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                      className="ui-input"
-                    >
-                      <option value="KES">KES</option>
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
-                      <option value="ZAR">ZAR</option>
-                      <option value="NGN">NGN</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Payment Terms</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 50% deposit, 50% on delivery"
-                      value={form.paymentTerms}
-                      onChange={(event) => setForm({ ...form, paymentTerms: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Revisions Policy</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 2 rounds of revisions included"
-                      value={form.revisionsPolicy}
-                      onChange={(event) => setForm({ ...form, revisionsPolicy: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <div className="admin-content-block">
-                    <label className="ui-label">Licensing Terms</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Commercial use rights"
-                      value={form.licensingTerms}
-                      onChange={(event) => setForm({ ...form, licensingTerms: event.target.value })}
-                      className="ui-input"
-                    />
-                  </div>
-                  <div className="admin-content-block">
-                    <label className="ui-label">Featured</label>
-                    <select
-                      value={form.featured ? 'true' : 'false'}
-                      onChange={(e) => setForm({ ...form, featured: e.target.value === 'true' })}
-                      className="ui-input"
-                    >
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="admin-content-block">
-                  <label className="ui-label">Notice Period</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. 14 days"
-                    value={form.noticePeriod}
-                    onChange={(event) => setForm({ ...form, noticePeriod: event.target.value })}
-                    className="ui-input"
-                  />
-                </div>
-
-                <Button type="submit" disabled={saving} variant="primary" className="admin-content-block">
-                  {saving ? 'Saving Project…' : '+ Create Project'}
-                </Button>
-              </form>
-            </div>
-          </div>
+              <div className="flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+                <Button type="button" variant="secondary" onClick={closeCreateModal} disabled={saving}>Cancel</Button>
+                <Button type="submit" disabled={saving}>{saving ? 'Creating project…' : 'Create project'}</Button>
+              </div>
+            </form>
+          </StandardCreationDialog>
         )}
 
         {selectedProject && (

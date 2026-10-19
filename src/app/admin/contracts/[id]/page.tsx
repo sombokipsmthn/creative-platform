@@ -13,6 +13,8 @@ import { formatCurrency } from '@/lib/utils';
 import type { Contract, ContractEvent } from '@/lib/types/contracts';
 import { ContractDocument } from '@/components/contracts/ContractDocument';
 import { ContractBuilder } from '@/components/contracts/ContractBuilder';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Button } from '@/components/ui/button';
 
 export default function ContractDetailPage({
   params,
@@ -55,33 +57,19 @@ export default function ContractDetailPage({
 
   if (loading) {
     return (
-      <div className="ui-page">
-        <div className="">
-          <Loader2 className="" />
-          <p>Loading contract...</p>
-        </div>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading contract…</p></div></div></div>
     );
   }
 
   if (error) {
     return (
-      <div className="ui-page">
-        <div className="">
-          <p>{error}</p>
-        </div>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><AlertCircle aria-hidden="true" /><p>{error}</p><Button asChild variant="outline"><Link href="/admin/contracts">Back to contracts</Link></Button></div></div></div>
     );
   }
 
   if (!contract) {
     return (
-      <div className="ui-page">
-        <p>Contract not found.</p>
-        <Link href="/admin/contracts" className="ui-button ui-button-secondary">
-          Back to Contracts
-        </Link>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state"><p>Contract not found.</p><Button asChild variant="outline"><Link href="/admin/contracts">Back to contracts</Link></Button></div></div></div>
     );
   }
 
@@ -141,39 +129,9 @@ export default function ContractDetailPage({
   };
 
   return (
-    <div className="ui-page">
-      <header className="">
-        <div className="">
-          <div className="">
-            <h1 className="">{contract.title}</h1>
-            <p className="">Contract #{contract.contractNumber}</p>
-          </div>
-          <div className="">
-            <button
-              onClick={handleSend}
-              className="ui-button ui-button-primary"
-              disabled={contract.status !== 'draft' || isSending}
-            >
-              {isSending ? <Loader2 className="" /> : 'Send Contract'}
-            </button>
-            <button onClick={handleCopyLink} className="ui-button ui-button-secondary">
-              Copy Signing Link
-            </button>
-            <button
-              onClick={handleSaveAsTemplate}
-              className="ui-button ui-button-secondary"
-            >
-              Save as Template
-            </button>
-            <Link
-              href="/admin/contracts"
-              className="ui-button ui-button-ghost"
-            >
-              Back to Contracts
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
+        <AdminPageHeader title={contract.title} description={`Contract #${contract.contractNumber}`} breadcrumb={{ label: 'Contracts', href: '/admin/contracts' }} primaryAction={<div className="admin-page-actions"><Button type="button" onClick={handleSend} disabled={contract.status !== 'draft' || isSending}>{isSending ? <Loader2 aria-hidden="true" /> : 'Send contract'}</Button><Button type="button" variant="outline" onClick={handleCopyLink}>Copy signing link</Button><Button type="button" variant="outline" onClick={handleSaveAsTemplate}>Save as template</Button></div>} />
 
       {/* Status cards */}
       <div className="">
@@ -268,6 +226,7 @@ export default function ContractDetailPage({
         </div>
       )}
     </div>
+  </div>
   );
 }
 

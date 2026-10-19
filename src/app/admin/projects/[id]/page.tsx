@@ -363,36 +363,21 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
   if (loading) {
     return (
-      <div className="">
-        <div className="">
-          <Loader2 className="" />
-          <span className="">Loading project…</span>
-        </div>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><span>Loading project…</span></div></div></div>
     );
   }
 
   if (error && !project) {
     return (
-      <div className="">
-        <div className="">
-          <AdminPageHeader title="Projects" breadcrumb={{ label: 'Dashboard', href: '/admin' }} />
-          <div className="">
-            {error}
-          </div>
-          <Link href="/admin/projects" className="">
-            ← Back to projects
-          </Link>
-        </div>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><AdminPageHeader title="Projects" breadcrumb={{ label: 'Dashboard', href: '/admin' }} /><div className="ui-card admin-empty-state" role="alert"><p>{error}</p><Link href="/admin/projects" className="ui-button ui-button-secondary">Back to projects</Link></div></div></div>
     );
   }
 
   return (
-    <div className="">
-      <div className="">
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
         <AdminPageHeader
-          title="Edit Project"
+          title={project?.name || 'Edit Project'}
           breadcrumb={{ label: 'Projects', href: '/admin/projects' }}
           primaryAction={
             <div className="">

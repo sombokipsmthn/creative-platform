@@ -183,11 +183,10 @@ jobs:
       - name: Run database migrations
         run: |
           echo "Running database migrations..."
-          docker run --rm \
-            -e DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} \
-            -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
-            ${{ needs.build-and-push.outputs.image }} \
-            npm run db:migrate
+          npm ci
+          DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }} \
+          BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
+          npm run db:migrate
 
       - name: Verify deployment
         run: |

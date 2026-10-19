@@ -128,10 +128,9 @@ jobs:
         run: |
           docker run -d \
             --name test-container \
-            --add-host host.docker.internal:host-gateway \
-            -p 3000:3000 \
+            --network host \
             -e NODE_ENV=test \
-            -e DATABASE_URL="postgresql://kipsmthn:[REDACTED]@host.docker.internal:5432/kipsmthn_test" \
+            -e DATABASE_URL="postgresql://kipsmthn:[REDACTED]@127.0.0.1:5432/kipsmthn_test" \
             -e BETTER_AUTH_SECRET=${{ secrets.BETTER_AUTH_SECRET }} \
             -e NEXT_TELEMETRY_DISABLED=1 \
             ${{ needs.build-and-push.outputs.image }}

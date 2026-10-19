@@ -274,42 +274,19 @@ export default function GalleryWorkspacePage() {
 
   if (loading) {
     return (
-      <div className="">
-        <main className="">
-          <div className="ui-card">
-            <div className="" />
-            <div className="" />
-            <div className="" />
-          </div>
-        </main>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading gallery…</p></div></div></div>
     )
   }
 
   if (error && !gallery) {
     return (
-      <div className="">
-        <main className="">
-          <div className="ui-card">
-            <div className="ui-alert ui-alert-error">
-              <p>{error}</p>
-            </div>
-          </div>
-        </main>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><p>{error}</p></div></div></div>
     )
   }
 
   if (!gallery) {
     return (
-      <div className="">
-        <main className="">
-          <div className="ui-card">
-            <p className="ui-eyebrow">Gallery Tools</p>
-            <h1 className="ui-page-title">No gallery data available</h1>
-          </div>
-        </main>
-      </div>
+      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state"><p className="ui-eyebrow">Gallery Tools</p><h1 className="ui-page-title">No gallery data available</h1></div></div></div>
     )
   }
 

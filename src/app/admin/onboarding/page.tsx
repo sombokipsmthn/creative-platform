@@ -386,16 +386,16 @@ export default function CreatorOnboardingPage() {
     finally { setSaving(false); }
   }
 
-  if (!isLoaded || loading) return <main className=""><Loader2 className="" /></main>;
+  if (!isLoaded || loading) return <main className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading onboarding…</p></div></div></main>;
 
-  if (!user) return <main className=""><div className=""><h1 className="">Sign in required</h1><p className="">Please sign in to continue setting up your creator workspace.</p><button type="button" onClick={() => router.push("/sign-in")} className="">Go to sign in</button></div></main>;
+  if (!user) return <main className="ui-page ui-page-padded"><div className="ui-shell max-w-lg"><div className="ui-card admin-empty-state" role="alert"><h1>Sign in required</h1><p>Please sign in to continue setting up your creator workspace.</p><button type="button" onClick={() => router.push("/sign-in")} className="ui-button ui-button-primary">Go to sign in</button></div></div></main>;
 
   const activeStep = STEPS[currentStep - 1];
   const validServiceCount = services.filter((service) => service.name.trim()).length;
 
   return (
-    <main className="">
-      <div className="">
+    <main className="ui-page ui-page-padded">
+      <div className="ui-shell">
         <header className="">
           <div className="">
             <div className=""><div className="">K</div><span className="">KIPSMTHN</span></div>

@@ -298,7 +298,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-2">
-            <ThemeToggle compact />
             <Button asChild variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-foreground">
               <Link href="/admin/settings" title="Settings">
                 <Settings2 className="h-4 w-4" />

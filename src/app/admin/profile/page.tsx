@@ -184,26 +184,12 @@ export default function AdminProfilePage() {
   return (
     <main className="ui-page">
       <div className="ui-shell">
-        <div className="">
-          <div>
-            <Link
-              href="/admin"
-              className="ui-eyebrow"
-            >
-              ← Back to Dashboard
-            </Link>
-            <p className="ui-eyebrow">Account</p>
-            <h1 className="ui-page-title">Creator Settings</h1>
-            <p className="ui-meta">
-              Manage your identity, public profile, and business details.
-            </p>
-          </div>
-
-          <span className="ui-badge">
-            <span className="ui-badge-dot" />
-            Authenticated creator
-          </span>
-        </div>
+        <AdminPageHeader
+          title="Creator Settings"
+          description="Manage your identity, public profile, and business details."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={<span className="ui-badge"><span className="ui-badge-dot" />Authenticated creator</span>}
+        />
 
         <form onSubmit={handleSave} className="">
           <section className="ui-card">

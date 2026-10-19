@@ -84,8 +84,8 @@ export default function AdminSettingsPage() {
   ];
 
   return (
-    <div className="">
-      <div className="">
+    <div className="ui-page ui-page-padded">
+      <div className="ui-shell">
         <AdminPageHeader
           title="Platform Settings"
           description="Configure how the platform behaves for your workspace, galleries, and client communications."

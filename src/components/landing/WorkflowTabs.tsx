@@ -122,10 +122,10 @@ export default function WorkflowTabs() {
   const current = STEPS[activeTab];
 
   return (
-    <div className="space-y-8">
+    <div className="">
       {/* Supercut-Style Segmented Navigation Tabs */}
-      <div className="flex items-center justify-start sm:justify-center overflow-x-auto pb-2 scrollbar-none">
-        <div className="inline-flex rounded-2xl bg-slate-100 p-1.5 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800">
+      <div className="scrollbar-none">
+        <div className="">
           {STEPS.map((step, idx) => (
             <button
               key={step.id}
@@ -150,40 +150,40 @@ export default function WorkflowTabs() {
       </div>
 
       {/* Main Tab Display Card */}
-      <div className="rounded-3xl border border-slate-200/80 bg-white/90 p-6 sm:p-10 shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-950/80 transition-all">
-        <div className="grid lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-14 items-center">
+      <div className="">
+        <div className="">
           {/* Left Text & Capabilities */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+          <div className="">
+            <div className="">
+              <span className="">
                 {current.stepNumber} · {current.badge}
               </span>
             </div>
 
-            <h3 className="text-2xl sm:text-4xl font-light tracking-tight text-slate-900 dark:text-white leading-tight">
+            <h3 className="">
               {current.headline}
             </h3>
 
-            <p className="text-sm sm:text-base leading-relaxed text-slate-600 dark:text-zinc-400">
+            <p className="">
               {current.description}
             </p>
 
             {/* Feature Checklist */}
-            <div className="space-y-3 pt-2">
+            <div className="">
               {current.capabilities.map((cap, i) => (
-                <div key={i} className="flex items-start gap-3 text-sm text-slate-700 dark:text-zinc-300">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-purple-600 dark:text-purple-400 mt-0.5" />
+                <div key={i} className="">
+                  <CheckCircle2 className="" />
                   <span>{cap}</span>
                 </div>
               ))}
             </div>
 
             {/* Metrics Row */}
-            <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-100 dark:border-zinc-900">
+            <div className="">
               {current.metrics.map((m, i) => (
-                <div key={i} className="space-y-1">
-                  <p className="text-[11px] text-slate-400 uppercase tracking-wider">{m.label}</p>
-                  <p className="text-xl sm:text-2xl font-light text-slate-900 dark:text-white font-mono">
+                <div key={i} className="">
+                  <p className="">{m.label}</p>
+                  <p className="">
                     {m.value}
                   </p>
                 </div>
@@ -192,21 +192,21 @@ export default function WorkflowTabs() {
           </div>
 
           {/* Right Visual Image */}
-          <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-xl group">
+          <div className="">
             <Image
               src={current.image}
               alt={current.title}
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className=""
               sizes="(max-width: 1024px) 100vw, 550px"
               referrerPolicy="no-referrer"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
-              <span className="font-semibold bg-black/60 backdrop-blur px-2.5 py-1 rounded border border-white/10">
+            <div className="to-transparent" />
+            <div className="">
+              <span className="">
                 {current.title}
               </span>
-              <span className="font-mono text-[10px] text-purple-300 bg-black/60 backdrop-blur px-2 py-1 rounded">
+              <span className="">
                 Verified Pipeline
               </span>
             </div>

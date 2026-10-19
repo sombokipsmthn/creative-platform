@@ -71,7 +71,7 @@ export async function GET(_request: Request, context: Context) {
         clientEmail: clients.email,
         clientCompany: clients.company,
         projectName: projects.name,
-        coverUrl: sql<string>`(SELECT p.display_url FROM galleryPhotos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
       })
       .from(galleries)
       .leftJoin(clients, eq(galleries.clientId, clients.id))

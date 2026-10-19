@@ -103,24 +103,24 @@ export default function ClientGalleryPortal({
 
   if (!verified) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-6">
-        <div className="max-w-md w-full bg-white dark:bg-zinc-900 rounded-xl p-6 text-center space-y-4 border border-slate-200 dark:border-zinc-800">
-          <p className="text-xs font-sans uppercase text-purple-600 dark:text-purple-400">
+      <div className="">
+        <div className="">
+          <p className="">
             Private Client Gallery
           </p>
 
-          <h1 className="text-2xl font-light text-slate-900 dark:text-white">
+          <h1 className="">
             {gallery.title}
           </h1>
 
-          <p className="text-sm text-slate-500 dark:text-zinc-400">
+          <p className="">
             PIN: {gallery.pin}
           </p>
 
           <input
             value={pin}
             onChange={(e) => setPin(e.target.value)}
-            className="w-full text-center text-3xl tracking-widest p-3 rounded-lg bg-slate-100 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className=""
             maxLength={4}
           />
 
@@ -130,7 +130,7 @@ export default function ClientGalleryPortal({
                 setVerified(true);
               }
             }}
-            className="w-full mt-4"
+            className=""
           >
             Access Gallery
           </Button>
@@ -141,10 +141,10 @@ export default function ClientGalleryPortal({
 
   return (
     <div className="ui-page">
-      <Header />
+      <Header variant="client" />
       <div className="ui-page-padded">
-        <section className="ui-shell flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-2">
+        <section className="ui-shell">
+          <div className="">
             <h1 className="ui-page-title-lg">{gallery.title}</h1>
             <p className="ui-meta">{gallery.client} • {gallery.date}</p>
           </div>
@@ -156,20 +156,20 @@ export default function ClientGalleryPortal({
             Download
           </Button>
         </section>
-        <main className="ui-shell grid md:grid-cols-3 gap-6 mt-6">
+        <main className="ui-shell">
           {gallery.items.map((item, index) => (
             <div key={item.id} className="ui-card">
-              <div className="relative aspect-square cursor-pointer" onClick={() => setLightbox(index)}>
+              <div className="" onClick={() => setLightbox(index)}>
                 <Image
                   src={item.url}
                   alt={item.title}
                   fill
-                  className="object-cover"
+                  className=""
                 />
               </div>
 
-              <div className="p-4 flex justify-between items-center">
-                <span className="text-xs text-slate-900 dark:text-white">
+              <div className="">
+                <span className="">
                   {item.title}
                 </span>
 

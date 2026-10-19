@@ -34,43 +34,43 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="ui-page selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="ui-page">
       <Header />
 
-      <section className="ui-shell relative pt-36 pb-20 text-center space-y-8">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
+      <section className="ui-shell">
+        <div className="" />
 
         <p className="ui-eyebrow">
           INITIATE COLLABORATION
         </p>
 
-        <h1 className="ui-page-title text-4xl max-w-4xl mx-auto">
-          Start a Project with <span className="font-normal text-[var(--color-accent)]">Kip-Smthn</span>
+        <h1 className="ui-page-title">
+          Start a Project with <span className="">Kip-Smthn</span>
         </h1>
 
-        <p className="ui-body max-w-2xl mx-auto leading-relaxed">
+        <p className="ui-body">
           Based in Nairobi, Kenya. Available for African startup ecosystem programs, venture studios, commercial photography, and brand media.
         </p>
       </section>
 
       {/* Direct Contact Cards */}
-      <main className="ui-shell py-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl">
+      <main className="ui-shell">
         {/* Direct Inquiries Card */}
-        <div className="ui-card p-6 space-y-4">
+        <div className="ui-card">
           <span className="ui-badge ui-badge-accent">
             Direct Inquiries
           </span>
-          <h2 className="ui-section-title text-2xl">
+          <h2 className="ui-section-title">
             Somboriot Kipchilat
           </h2>
-          <div className="ui-meta space-y-2">
+          <div className="ui-meta">
             <p>
-              📧 Email: <a href="mailto:somboriot@gmail.com" className="text-[var(--color-accent)] font-medium hover:underline">
+              📧 Email: <a href="mailto:somboriot@gmail.com" className="">
                 somboriot@gmail.com
               </a>
             </p>
             <p>
-              📱 Phone: <a href="tel:+254722145776" className="text-[var(--color-accent)] font-medium hover:underline">
+              📱 Phone: <a href="tel:+254722145776" className="">
                 +254 722 145 776
               </a>
             </p>
@@ -80,18 +80,18 @@ export default function ContactPage() {
         </div>
 
         {/* Social & Digital Media Card */}
-        <div className="ui-card p-6 space-y-4">
+        <div className="ui-card">
           <span className="ui-badge ui-badge-accent">
             Social & Digital Media
           </span>
-          <h2 className="ui-section-title text-2xl">
+          <h2 className="ui-section-title">
             Channels & Archives
           </h2>
-          <div className="flex flex-col gap-2 pt-2">
+          <div className="">
             <Button
               variant="secondary"
               size="sm"
-              className="w-full justify-start"
+              className=""
               asChild
             >
               <Link href="https://www.linkedin.com/in/sombo09/" target="_blank" rel="noopener noreferrer">
@@ -101,7 +101,7 @@ export default function ContactPage() {
             <Button
               variant="secondary"
               size="sm"
-              className="w-full justify-start"
+              className=""
               asChild
             >
               <Link href="https://www.youtube.com/@kraftdigital7749" target="_blank" rel="noopener noreferrer">
@@ -111,7 +111,7 @@ export default function ContactPage() {
             <Button
               variant="secondary"
               size="sm"
-              className="w-full justify-start"
+              className=""
               asChild
             >
               <Link href="https://linktr.ee/kipsmthn" target="_blank" rel="noopener noreferrer">

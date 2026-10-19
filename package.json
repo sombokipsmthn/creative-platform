@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "node scripts/check-dev-port.mjs",
     "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
@@ -11,10 +12,14 @@
     "test": "vitest run",
     "audit:production": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level=high",
     "audit:development": "env -u npm_config_allow_scripts npm audit --audit-level=high || true",
+    "db:init:local": "node scripts/init-local-db.mjs",
     "db:migrate": "drizzle-kit migrate",
     "db:seed:equipment": "tsx src/db/seed-equipment.ts",
     "db:seed:templates": "tsx src/db/seed-templates.ts",
     "healthcheck": "node scripts/healthcheck.mjs",
+    "test:responsive-admin": "node scripts/responsive-admin-smoke.mjs",
+    "test:authenticated-settings": "node scripts/authenticated-settings-smoke.mjs",
+    "test:gallery-watermark": "node scripts/gallery-watermark-smoke.mjs",
     "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts"
   },
   "engines": {
@@ -43,6 +48,7 @@
     "@types/ffmpeg-static": "^5.1.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/blob": "^2.8.1",
+    "@vercel/speed-insights": "^2.0.0",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.7.7",
     "class-variance-authority": "^0.7.1",
@@ -80,19 +86,11 @@
     "@types/react-dom": "^19.3.0",
     "@types/uuid": "^10.0.0",
     "drizzle-kit": "^0.31.4",
-    "eslint": "^10.12.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "^16.4.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "typescript": "^5.8.2",
     "vitest": "^5.0.3"
-  },
-  "allowScripts": {
-    "unrs-resolver@1.12.2": true,
-    "fsevents@2.3.3": true,
-    "ffmpeg-static@5.3.0": true,
-    "esbuild@0.18.20": true,
-    "esbuild@0.25.12": true,
-    "esbuild@0.28.2": true
   }
 }

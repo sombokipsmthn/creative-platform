@@ -17,20 +17,20 @@ const MediaCard: React.FC<MediaCardProps> = ({ src, type, alt, caption, href, cl
   return (
     <div className={`ui-card ui-card-media ${className}`}>
       {isVideo ? (
-        <VideoPlayer src={src} className="w-full h-auto rounded-lg shadow-lg" />
+        <VideoPlayer src={src} className="" />
       ) : (
-        <div className="ui-card-image-cover relative">
+        <div className="ui-card-image-cover">
           <Image
             src={src}
             alt={alt ?? ''}
             fill
-            className="object-cover"
+            className=""
             priority
           />
         </div>
       )}
       {caption && (
-        <div className="ui-card-media-content mt-2">
+        <div className="ui-card-media-content">
           <p className="ui-meta">{caption}</p>
         </div>
       )}

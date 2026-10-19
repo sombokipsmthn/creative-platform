@@ -9,6 +9,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       const contract = await fetchContract(id);
       return Response.json(contract);
     } catch (error) {
+      if (error instanceof Error && error.message === 'Contract not found') return NextResponse.json({ error: error.message }, { status: 404 });
       console.error('GET /api/contracts/[id] error:', error);
       return NextResponse.json({ error: 'Failed to fetch contract' }, { status: 500 });
     }
@@ -23,6 +24,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       const contract = await updateContract(id, data);
       return Response.json(contract);
     } catch (error) {
+      if (error instanceof Error && /required|invalid|cannot|not found/i.test(error.message)) return NextResponse.json({ error: error.message }, { status: 400 });
       console.error('PATCH /api/contracts/[id] error:', error);
       return NextResponse.json({ error: 'Failed to update contract' }, { status: 500 });
     }

@@ -46,7 +46,8 @@ export async function fetchContract(id: string): Promise<Contract | null> {
 export async function fetchContractTemplates(): Promise<ContractTemplate[]> {
   const res = await fetch('/api/contracts/templates', { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to fetch contract templates');
-  return res.json();
+  const data = await res.json();
+  return Array.isArray(data) ? data : Array.isArray(data?.templates) ? data.templates : [];
 }
 
 export async function createContract(data: NewContract): Promise<Contract> {

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -139,6 +140,7 @@ function getInitials(client?: Client | null) {
 }
 
 export default function InvoicesPage() {
+  const router = useRouter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
@@ -301,8 +303,7 @@ export default function InvoicesPage() {
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
-              variant="default"
-              className="text-xs font-sans uppercase tracking-widest"
+              onClick={() => router.push('/admin/invoices/new')}
             >
               <Plus className="h-3.5 w-3.5" />
               New Invoice
@@ -356,10 +357,8 @@ export default function InvoicesPage() {
             setCurrency(filters.currency ?? 'all');
             setClientId(filters.clientId ?? 'all');
           }}
-          onAddItem={() => {
-            // Navigate to new invoice page - we'll need to create this route
-          }}
-          filterOptions={ [
+          filterOptions={[
+
             {
               label: 'Status',
               value: 'status',
@@ -385,7 +384,7 @@ export default function InvoicesPage() {
               ],
               type: 'pills'
             }
-          ] }
+          ]}
           itemLabel="Invoice"
         />
 
@@ -428,6 +427,7 @@ export default function InvoicesPage() {
                 <Button
                   variant="default"
                   className="mt-6"
+                  onClick={() => router.push('/admin/invoices/new')}
                 >
                   Create First Invoice
                 </Button>

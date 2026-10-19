@@ -246,8 +246,8 @@ export default function QuotesPage() {
           ) : filteredQuotes.length === 0 ? (
             <EmptyState icon={<Plus />} title={quotes.length === 0 ? 'No quotes yet' : 'No matching quotes'} description={quotes.length === 0 ? 'Create your first production quote to start building your sales pipeline.' : 'Try changing your search or status filter.'} filtered={quotes.length > 0} action={quotes.length === 0 ? <Button onClick={() => router.push('/admin/quotes/new')}>Create first quote</Button> : undefined} />
           ) : (
-            <div className="admin-content-block">
-              <table className="ui-table">
+            <div className="admin-content-block overflow-x-auto">
+              <table className="ui-table min-w-[48rem]">
                 <thead>
                   <tr>
                     <th className="ui-table-header">Quote</th>

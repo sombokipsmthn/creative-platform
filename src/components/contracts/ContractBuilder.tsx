@@ -52,6 +52,8 @@ export function ContractBuilder({
   );
   const [template, setTemplate] = useState<ContractTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
+  const [draftId, setDraftId] = useState<string | undefined>(contractId);
+
   const [currency, setCurrency] = useState(initialContract?.currency ?? 'KES');
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -75,7 +77,9 @@ export function ContractBuilder({
     queryFn: async () => {
       const res = await fetch('/api/contracts/templates');
       if (!res.ok) throw new Error('Failed to fetch templates');
-      return res.json();
+      const data = await res.json();
+      const templates = Array.isArray(data) ? data : Array.isArray(data?.templates) ? data.templates : [];
+      return templates;
     },
     enabled: !!templateId,
   });
@@ -201,23 +205,24 @@ export function ContractBuilder({
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (mode === 'edit' && contractId) {
-        return updateContract(contractId, {
+      if (draftId) {
+        return updateContract(draftId, {
           title: title.trim(),
-          content: resolvedContent,
-          currency,
-        });
-      } else {
-        if (!selectedClient) throw new Error('Please select a client');
-        return createContract({
-          title: title.trim(),
-          clientId: selectedClient.id,
-          projectId: selectedProject?.id || null,
-          templateId: template?.id,
           content: resolvedContent,
           currency,
         });
       }
+      if (!selectedClient) throw new Error('Please select a client');
+      const created = await createContract({
+        title: title.trim(),
+        clientId: selectedClient.id,
+        projectId: selectedProject?.id || null,
+        templateId: template?.id,
+        content: resolvedContent,
+        currency,
+      });
+      setDraftId(created.id);
+      return created;
     },
     onSuccess: (contract) => {
       setSaveStatus('saved');

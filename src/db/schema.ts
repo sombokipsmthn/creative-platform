@@ -125,6 +125,9 @@ export const creatorServices = pgTable("creator_services", {
   defaultRate: integer("default_rate").default(0).notNull(),
   currency: text("currency").default("KES").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  version: integer("version").default(1).notNull(),
+  reviewStatus: text("review_status").default("unreviewed").notNull(),
+  reviewedAt: timestamp("reviewed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
@@ -562,6 +565,9 @@ export const contractTemplates = pgTable("contract_templates", {
   variables: jsonb("variables").default([]).notNull(),
   isSystemTemplate: boolean("is_system_template").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  version: integer("version").default(1).notNull(),
+  reviewStatus: text("review_status").default("unreviewed").notNull(),
+  reviewedAt: timestamp("reviewed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()},
   (table) => ({
@@ -576,6 +582,17 @@ export const contracts = pgTable("contracts", {
   projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
   quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "set null" }),
   templateId: uuid("template_id").references(() => contractTemplates.id, { onDelete: "set null" }),
+  templateVersion: integer("template_version"),
+  templateSnapshot: text("template_snapshot"),
+  contractType: text("contract_type"),
+  effectiveAt: timestamp("effective_at"),
+  termStartAt: timestamp("term_start_at"),
+  termEndAt: timestamp("term_end_at"),
+  renewalAt: timestamp("renewal_at"),
+  noticeDeadline: timestamp("notice_deadline"),
+  terminationAt: timestamp("termination_at"),
+  signatories: jsonb("signatories").default([]).notNull(),
+
   title: text("title").notNull(),
   contractNumber: text("contract_number").notNull().unique(),
   status: text("status").default("draft").notNull(),
@@ -610,6 +627,8 @@ export const contractEvents = pgTable("contract_events", {
   contractId: uuid("contract_id").notNull().references(() => contracts.id, { onDelete: "cascade" }),
   eventType: text("event_type").notNull(),
   metadata: jsonb("metadata").default({}).notNull(),
+  actorId: text("actor_id").references(() => users.id, { onDelete: "set null" }),
+  outcome: text("outcome"),
   createdAt: timestamp("created_at").defaultNow().notNull()},
   (table) => ({
     contractIdx: index("contract_events_contract_id_idx").on(table.contractId),

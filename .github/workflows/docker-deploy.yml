@@ -142,7 +142,7 @@ jobs:
           max_attempts=30
           attempt=1
           while [ $attempt -le $max_attempts ]; do
-            if docker exec test-container curl -f http://localhost:3000/api/health > /dev/null 2>&1; then
+            if curl -f http://127.0.0.1:3000/api/health > /dev/null 2>&1; then
               echo "Container is healthy"
               exit 0
             fi

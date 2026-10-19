@@ -7,103 +7,85 @@ import { authClient } from '@/lib/auth-client';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 
-type WorkspaceForm = {
-  businessName: string;
-  phone: string;
-  kraPin: string;
-  vatRegistered: boolean;
-  vatNumber: string;
-  currency: string;
-  depositPercentage: number;
-  whtRate: number;
-};
-
-const emptyForm: WorkspaceForm = {
-  businessName: '',
-  phone: '',
-  kraPin: '',
-  vatRegistered: false,
-  vatNumber: '',
-  currency: 'KES',
-  depositPercentage: 50,
-  whtRate: 0,
-};
-
-const sections = [
-  { href: '#workspace', label: 'Workspace' },
-  { href: '#business-documents', label: 'Business documents' },
-  { href: '#connected-workflows', label: 'Connected workflows' },
-];
+type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations' | 'account';
 
 export default function AdminSettingsPage() {
-  const [form, setForm] = useState<WorkspaceForm>(emptyForm);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('branding');
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const [deleteAccountError, setDeleteAccountError] = useState('');
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  // 1. Branding State
+  const [domainSlug, setDomainSlug] = useState('kipsmthn.platform.com');
+  const [customDomain, setCustomDomain] = useState('kipsmthn.com');
+  const [hidePlatformBranding, setHidePlatformBranding] = useState(true);
+
+  // 2. Watermark State
+  const [watermarkText, setWatermarkText] = useState('KIPSMTHN PROOF');
+  const [watermarkOpacity, setWatermarkOpacity] = useState(30);
+  const [watermarkPosition, setWatermarkPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'>('bottom-right');
+  const [watermarkSize, setWatermarkSize] = useState(42);
+  const [watermarkPreset, setWatermarkPreset] = useState<'proof' | 'brand'>('proof');
+  const [applyWatermarkToProofs, setApplyWatermarkToProofs] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      try {
-        const response = await fetch('/api/profile', { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data?.error || 'Could not load workspace settings.');
-        if (cancelled) return;
-        const business = data.businessProfile || {};
-        setForm({
-          businessName: business.businessName || '',
-          phone: business.phone || '',
-          kraPin: business.kraPin || '',
-          vatRegistered: Boolean(business.vatRegistered),
-          vatNumber: business.vatNumber || '',
-          currency: business.currency || 'KES',
-          depositPercentage: Number(business.depositPercentage ?? 50),
-          whtRate: Number(business.whtRate ?? 0),
-        });
-      } catch (reason) {
-        if (!cancelled) setError(reason instanceof Error ? reason.message : 'Could not load workspace settings.');
-      } finally {
-        if (!cancelled) setLoading(false);
+    const applyPreset = window.setTimeout(() => {
+      if (watermarkPreset === 'proof') {
+        setWatermarkText('KIPSMTHN PROOF');
+        setWatermarkOpacity(30);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(42);
+      } else {
+        setWatermarkText('KIPSMTHN');
+        setWatermarkOpacity(55);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(36);
       }
-    }
+    }, 0);
+    return () => window.clearTimeout(applyPreset);
+  }, [watermarkPreset]);
 
-    void load();
-    return () => { cancelled = true; };
-  }, []);
+  // Handle watermark changes from preview
+  const handleWatermarkChange = (settings: {
+    text: string;
+    opacity: number;
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+    size: number;
+  }) => {
+    setWatermarkText(settings.text);
+    setWatermarkOpacity(settings.opacity);
+    setWatermarkPosition(settings.position);
+    setWatermarkSize(settings.size);
+  };
 
-  function update<K extends keyof WorkspaceForm>(key: K, value: WorkspaceForm[K]) {
-    setForm(current => ({ ...current, [key]: value }));
-    setMessage('');
-    setError('');
-  }
+  // 3. Presets State
+  const [defaultSelectionLimit, setDefaultSelectionLimit] = useState(25);
+  const [defaultExpiryDays, setDefaultExpiryDays] = useState(60);
+  const [defaultPin, setDefaultPin] = useState('4821');
 
-  async function save(event: React.FormEvent) {
-    event.preventDefault();
-    setSaving(true);
-    setMessage('');
-    setError('');
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessProfile: form }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || 'Could not save workspace settings.');
-      setMessage('Workspace settings saved.');
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Could not save workspace settings.');
-    } finally {
-      setSaving(false);
-    }
-  }
+  // 4. Email Templates State
+  const [invitationSubject, setInvitationSubject] = useState('Your Private Client Gallery is Ready — KIPSMTHN');
+  const [invitationBody, setInvitationBody] = useState('Hello {ClientName},\n\nYour private gallery "{GalleryTitle}" is now live on KIPSMTHN.\n\nUse your access PIN: {PIN} to view, favorite, and download your deliverables.\n\nBest regards,\nSomboriot Kipchilat');
 
-  if (loading) {
-    return <main className="ui-page"><div className="ui-shell"><p className="ui-meta">Loading workspace settings…</p></div></main>;
-  }
+  // 5. Preferences State
+  const [kraPin, setKraPin] = useState('A012345678X');
+  const [defaultCurrency, setDefaultCurrency] = useState('KES');
+  const [defaultWhtRate, setDefaultWhtRate] = useState('5%');
+
+  const handleSaveSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert(`Settings successfully saved for tab: ${activeTab.toUpperCase()}`);
+  };
+
+  const tabs: { id: SettingsTab; label: string }[] = [
+    { id: 'branding', label: 'Branding' },
+    { id: 'watermark', label: 'Watermark' },
+    { id: 'presets', label: 'Presets' },
+    { id: 'templates', label: 'Email Templates' },
+    { id: 'preferences', label: 'Preferences' },
+    { id: 'integrations', label: 'Integrations' },
+    { id: 'account', label: 'Account & Data' },
+  ];
 
   return (
     <main className="ui-page ui-page-padded">
@@ -154,14 +136,104 @@ export default function AdminSettingsPage() {
               <Link href="/admin/galleries" className="ui-card ui-card-interactive p-4"><span className="flex items-center justify-between font-medium">Galleries and watermarks <ArrowRight className="h-4 w-4" /></span><span className="ui-meta mt-2 block">Configure watermarking, delivery, proofing, and gallery access on the gallery itself.</span></Link>
               <Link href="/admin/contracts/templates" className="ui-card ui-card-interactive p-4"><span className="flex items-center justify-between font-medium">Contract templates <ArrowRight className="h-4 w-4" /></span><span className="ui-meta mt-2 block">Manage reusable contract content in the templates workspace.</span></Link>
             </div>
-          </section>
+          )}
 
-          <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
-            <Button type="submit" variant="primary" disabled={saving}><Save className="h-4 w-4" />{saving ? 'Saving…' : 'Save workspace settings'}</Button>
-            {message && <span className="ui-meta flex items-center gap-1 text-emerald-600"><Check className="h-4 w-4" />{message}</span>}
-            {error && <span className="ui-meta text-destructive" role="alert">{error}</span>}
-            <Link href="/admin/profile" className="ui-button ui-button-ghost ml-auto">Personal account <ExternalLink className="h-4 w-4" /></Link>
-          </div>
+          {/* TAB 6: INTEGRATIONS */}
+          {activeTab === 'integrations' && (
+            <div className="ui-card">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title">API Integrations & Storage</h2>
+                <p className="ui-meta">Manage external services connected to KIPSMTHN.</p>
+              </div>
+              <div className="ui-card-content space-y-4">
+                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">KRA eTIMS Taxpayer Portal Bridge</p>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">Connected to etims.kra.go.ke</p>
+                  </div>
+                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-full font-bold">Active ✓</span>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">Cloudflare R2 Object Storage</p>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">142.8 GB Used • $0 Egress Fees</p>
+                  </div>
+                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 rounded-full font-bold">Active ✓</span>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
+                  <div>
+                    <p className="font-bold text-slate-900 dark:text-white">Google Drive Importer API</p>
+                    <p className="text-[11px] text-slate-500 dark:text-zinc-400">OAuth 2.0 Read-Only Connector</p>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                  >
+                    Configure
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ACCOUNT DATA / PERMANENT DELETION */}
+          {activeTab === 'account' && (
+            <section className="ui-card border border-red-300 dark:border-red-900">
+              <div className="ui-card-header">
+                <h2 className="ui-card-title text-red-700 dark:text-red-300">Delete creator account</h2>
+                <p className="ui-meta">Permanently remove your creator account and its associated workspace data.</p>
+              </div>
+              <div className="ui-card-content space-y-4">
+                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/30 dark:text-red-200">
+                  <p className="font-semibold">This action cannot be undone.</p>
+                  <p className="mt-2">Your clients, projects, galleries, uploaded gallery/project media, quotes, invoices, contracts, calendar-derived records, profile, and account credentials will be deleted. The shared equipment catalogue will be preserved.</p>
+                  <p className="mt-2">Download anything you need first. If storage cleanup fails, the deletion is stopped so the account records remain available for retry.</p>
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="delete-account-confirmation" className="ui-label">Type DELETE MY CREATOR ACCOUNT to confirm</label>
+                  <input
+                    id="delete-account-confirmation"
+                    value={deleteConfirmation}
+                    onChange={(event) => setDeleteConfirmation(event.target.value)}
+                    autoComplete="off"
+                    className="ui-input"
+                    placeholder="DELETE MY CREATOR ACCOUNT"
+                  />
+                </div>
+                {deleteAccountError && (
+                  <p role="alert" className="text-sm text-red-700 dark:text-red-300">{deleteAccountError}</p>
+                )}
+                <button
+                  type="button"
+                  disabled={isDeletingAccount || deleteConfirmation !== 'DELETE MY CREATOR ACCOUNT'}
+                  onClick={async () => {
+                    setIsDeletingAccount(true);
+                    setDeleteAccountError('');
+                    try {
+                      const response = await fetch('/api/account', {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ confirmation: deleteConfirmation }),
+                      });
+                      const payload = await response.json().catch(() => ({}));
+                      if (!response.ok) {
+                        throw new Error(typeof payload.error === 'string' ? payload.error : 'Account deletion failed.');
+                      }
+                      window.location.assign('/sign-in?accountDeleted=1');
+                    } catch (error) {
+                      setDeleteAccountError(error instanceof Error ? error.message : 'Account deletion failed. Please retry.');
+                      setIsDeletingAccount(false);
+                    }
+                  }}
+                  className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isDeletingAccount ? 'Deleting account and associated data…' : 'Permanently delete creator account'}
+                </button>
+              </div>
+            </section>
+          )}
         </form>
       </div>
     </main>

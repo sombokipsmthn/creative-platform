@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import StatusBadge from '@/components/admin/StatusBadge';
 import EmptyState from '@/components/admin/EmptyState';
+import { useSearchParams, usePathname } from 'next/navigation';
+import { useState as useReactState } from 'react';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -54,30 +56,9 @@ type Project = {
   } | null;
 };
 
-const emptyForm = {
-  name: '',
-  description: '',
-  shortDescription: '',
-  slug: '',
-  category: '',
-  year: '',
-  location: '',
-  scopeOfWork: '',
-  deliverables: '',
-  totalAmount: '',
-  currency: 'KES',
-  paymentTerms: '',
-  revisionsPolicy: '',
-  licensingTerms: '',
-  noticePeriod: '',
-  status: 'draft' as ProjectStatus,
-  visibility: 'private' as 'public' | 'private' | 'draft',
-  featured: false,
-  startDate: '',
-  endDate: '',
-  clientId: '',
-};
-
+/**
+ * Format a date string to a locale date.
+ */
 function formatDate(value?: string | null) {
   if (!value) return '—';
   const date = new Date(value);
@@ -90,21 +71,16 @@ function formatDate(value?: string | null) {
   });
 }
 
+/**
+ * Convert a status string to a labeled format.
+ */
 function statusLabel(status: string) {
   return status.replace(/_/g, ' ');
 }
 
-function getInitials(project: Pick<Project, 'name'>) {
-  const value = project.name;
-  const parts = value.split(/\s+/).filter(Boolean);
-
-  if (parts.length === 1) {
-    return parts[0].slice(0, 2).toUpperCase();
-  }
-
-  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-}
-
+/**
+ * Get the CSS class for a project status.
+ */
 function statusClass(status: string) {
   if (status === 'active') {
     return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
@@ -125,7 +101,24 @@ function statusClass(status: string) {
   return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
 }
 
+/**
+ * Get initials from a project name.
+ */
+function getInitials(project: Pick<Project, 'name'>) {
+  const value = project.name;
+  const parts = value.split(/\s+/).filter(Boolean);
+
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+}
+
 export default function AdminProjectsPage() {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [projects, setProjects] = useState<Project[]>([]);
   const [clients, setClients] = useState<Array<{ id: string; name: string; company?: string | null }>>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,18 +128,57 @@ export default function AdminProjectsPage() {
   const [filterFeatured, setFilterFeatured] = useState<'ALL' | 'true' | 'false'>('ALL');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
-  const [form, setForm] = useState(emptyForm);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [updating, setUpdating] = useState(false);
-  const [error, setError] = useState('');
+  const [form, setForm] = useState<{
+    name: string;
+    description: string;
+    shortDescription: string;
+    slug: string;
+    category: string;
+    year: string;
+    location: string;
+    scopeOfWork: string;
+    deliverables: string;
+    totalAmount: string;
+    currency: string;
+    paymentTerms: string;
+    revisionsPolicy: string;
+    licensingTerms: string;
+    noticePeriod: string;
+    status: ProjectStatus;
+    visibility: 'public' | 'private' | 'draft';
+    featured: boolean;
+    clientId: string;
+    startDate: string;
+    endDate: string;
+  }>(() => ({
+    name: '',
+    description: '',
+    shortDescription: '',
+    slug: '',
+    category: '',
+    year: '',
+    location: '',
+    scopeOfWork: '',
+    deliverables: '',
+    totalAmount: '',
+    currency: 'KES',
+    paymentTerms: '',
+    revisionsPolicy: '',
+    licensingTerms: '',
+    noticePeriod: '',
+    status: 'draft' as ProjectStatus,
+    visibility: 'private' as 'public' | 'private' | 'draft',
+    featured: false,
+    clientId: '',
+    startDate: '',
+    endDate: '',
+  }));
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadData() {
       try {
-        setLoading(true);
         setError('');
 
         // Load clients for the client filter dropdown
@@ -156,19 +188,31 @@ export default function AdminProjectsPage() {
         }
         const clientsData = await clientsResponse.json();
 
-        // Load projects
+        // Load projects with filters from URL/search params
         const params = new URLSearchParams();
-        if (filterClient) {
-          params.append('clientId', filterClient);
+
+        // Preserve existing filter state from search params or state
+        const preservedClientId = searchParams.get('clientId') || filterClient;
+        const preservedStatus = searchParams.get('status') || filterStatus;
+        const preservedVisibility = searchParams.get('visibility') || filterVisibility;
+        const preservedFeatured = searchParams.get('featured') || filterFeatured;
+
+        if (preservedClientId) {
+          params.append('clientId', preservedClientId);
         }
-        if (filterStatus && filterStatus !== 'ALL') {
-          params.append('status', filterStatus);
+        if (preservedStatus && preservedStatus !== 'ALL') {
+          params.append('status', preservedStatus);
         }
-        if (filterVisibility && filterVisibility !== 'ALL') {
-          params.append('visibility', filterVisibility);
+        if (preservedVisibility && preservedVisibility !== 'ALL') {
+          params.append('visibility', preservedVisibility);
         }
-        if (filterFeatured && filterFeatured !== 'ALL') {
-          params.append('featured', filterFeatured);
+        if (preservedFeatured && preservedFeatured !== 'ALL') {
+          params.append('featured', preservedFeatured);
+        }
+
+        // Also incorporate local searchQuery and filter states
+        if (searchQuery.trim()) {
+          params.append('search', searchQuery.trim());
         }
 
         const projectsResponse = await fetch(`/api/projects?${params.toString()}`, {
@@ -184,7 +228,7 @@ export default function AdminProjectsPage() {
         if (!cancelled) {
           setClients(Array.isArray(clientsData) ? clientsData : []);
           setProjects(
-            projectsData.map((proj: Project) => ({
+            projectsData.map((proj: any) => ({
               ...proj,
               client: proj.client
                 ? {
@@ -211,13 +255,19 @@ export default function AdminProjectsPage() {
       }
     }
 
+    let loading = true;
+    // Initialize loading state
+    const [setLoading, setLoadingInternal] = useReactState(true);
+    // We'll handle loading differently
+
     loadData();
 
     return () => {
       cancelled = true;
     };
-  }, [filterClient, filterStatus, filterVisibility, filterFeatured]);
+  }, [filterClient, filterStatus, filterVisibility, filterFeatured, searchQuery]);
 
+  // Compute filtered projects
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
@@ -251,18 +301,43 @@ export default function AdminProjectsPage() {
     });
   }, [projects, filterClient, filterStatus, filterVisibility, filterFeatured, searchQuery]);
 
-  const activeCount = projects.filter((p) => p.status === 'active').length;
-  const completedCount = projects.filter((p) => p.status === 'completed').length;
-  const onHoldCount = projects.filter((p) => p.status === 'on hold').length;
-  const cancelledCount = projects.filter((p) => p.status === 'cancelled').length;
-  const draftCount = projects.filter((p) => p.status === 'draft').length;
-  const publishedCount = projects.filter((p) => p.visibility === 'public').length;
-  const featuredCount = projects.filter((p) => p.featured).length;
+  // Compute counts from ALL projects (not just filtered)
+  const allProjectCounts = useMemo(() => {
+    return {
+      total: projects.length,
+      draft: projects.filter((p) => p.status === 'draft').length,
+      active: projects.filter((p) => p.status === 'active').length,
+      completed: projects.filter((p) => p.status === 'completed').length,
+      onHold: projects.filter((p) => p.status === 'on hold').length,
+      cancelled: projects.filter((p) => p.status === 'cancelled').length,
+      published: projects.filter((p) => p.visibility === 'public').length,
+      featured: projects.filter((p) => p.featured).length,
+    };
+  }, [projects]);
 
   function openCreateModal(clientId?: string) {
     setForm({
-      ...emptyForm,
-      clientId: clientId || '',
+      ...(clientId ? { clientId } : {}),
+      name: '',
+      description: '',
+      shortDescription: '',
+      slug: '',
+      category: '',
+      year: '',
+      location: '',
+      scopeOfWork: '',
+      deliverables: '',
+      totalAmount: '',
+      currency: 'KES',
+      paymentTerms: '',
+      revisionsPolicy: '',
+      licensingTerms: '',
+      noticePeriod: '',
+      status: 'draft' as ProjectStatus,
+      visibility: 'private' as 'public' | 'private' | 'draft',
+      featured: false,
+      startDate: '',
+      endDate: '',
     });
     setError('');
     setIsAddProjectOpen(true);
@@ -271,7 +346,29 @@ export default function AdminProjectsPage() {
   function closeCreateModal() {
     if (!saving) {
       setIsAddProjectOpen(false);
-      setForm(emptyForm);
+      setForm({
+        name: '',
+        description: '',
+        shortDescription: '',
+        slug: '',
+        category: '',
+        year: '',
+        location: '',
+        scopeOfWork: '',
+        deliverables: '',
+        totalAmount: '',
+        currency: 'KES',
+        paymentTerms: '',
+        revisionsPolicy: '',
+        licensingTerms: '',
+        noticePeriod: '',
+        status: 'draft' as ProjectStatus,
+        visibility: 'private' as 'public' | 'private' | 'draft',
+        featured: false,
+        clientId: '',
+        startDate: '',
+        endDate: '',
+      });
     }
   }
 
@@ -323,7 +420,29 @@ export default function AdminProjectsPage() {
 
       setProjects((current) => [data, ...current]);
       setIsAddProjectOpen(false);
-      setForm(emptyForm);
+      setForm({
+        name: '',
+        description: '',
+        shortDescription: '',
+        slug: '',
+        category: '',
+        year: '',
+        location: '',
+        scopeOfWork: '',
+        deliverables: '',
+        totalAmount: '',
+        currency: 'KES',
+        paymentTerms: '',
+        revisionsPolicy: '',
+        licensingTerms: '',
+        noticePeriod: '',
+        status: 'draft' as ProjectStatus,
+        visibility: 'private' as 'public' | 'private' | 'draft',
+        featured: false,
+        clientId: '',
+        startDate: '',
+        endDate: '',
+      });
     } catch (err) {
       console.error('Failed to create project:', err);
       setError(err instanceof Error ? err.message : 'Failed to create project.');
@@ -363,11 +482,14 @@ export default function AdminProjectsPage() {
     }
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | UI
-  |--------------------------------------------------------------------------
-  */
+  // Error state
+  const [error, setError] = useState('');
+
+  // Loading state
+  const [loading, setLoading] = useState(true);
+
+  // Update project (for status chip clicks)
+  const [updating, setUpdating] = useState(false);
 
   return (
     <div className="ui-page ui-page-padded">
@@ -393,14 +515,16 @@ export default function AdminProjectsPage() {
           </div>
         )}
 
+        {/* KPI Summary */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {[
-            ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
-            ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
-            ['Published', publishedCount, 'text-emerald-600 dark:text-emerald-400'],
-            ['Featured', featuredCount, 'text-purple-600 dark:text-purple-400'],
-            ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
-            ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
+
+            ['Total Projects', allProjectCounts.total, 'text-slate-500 dark:text-zinc-400'],
+            ['Draft', allProjectCounts.draft, 'text-amber-600 dark:text-amber-400'],
+            ['Published', allProjectCounts.published, 'text-emerald-600 dark:text-emerald-400'],
+            ['Featured', allProjectCounts.featured, 'text-purple-600 dark:text-purple-400'],
+            ['Active', allProjectCounts.active, 'text-blue-600 dark:text-blue-400'],
+            ['Completed', allProjectCounts.completed, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
             <div key={String(label)} className="ui-stat-card">
               <p className={`ui-stat-label ${color}`}>{label}</p>
@@ -409,6 +533,7 @@ export default function AdminProjectsPage() {
           ))}
         </div>
 
+        {/* Search and Filters Toolbar */}
         <section className="ui-card space-y-3 p-4" aria-label="Project search and filters">
           <div className="flex flex-wrap gap-3">
             <input
@@ -436,40 +561,72 @@ export default function AdminProjectsPage() {
           <div className="flex flex-wrap items-center gap-2">
             {(
               [
-                ['ALL', projects.length],
-                ['active', activeCount],
-                ['completed', completedCount],
-                ['on hold', onHoldCount],
-                ['cancelled', cancelledCount],
-                ['draft', draftCount],
+                ['ALL', allProjectCounts.total],
+                ['active', allProjectCounts.active],
+                ['completed', allProjectCounts.completed],
+                ['on hold', allProjectCounts.onHold],
+                ['cancelled', allProjectCounts.cancelled],
+                ['draft', allProjectCounts.draft],
               ] as const
             ).map(([status, count]) => (
-              <Button key={status} variant={filterStatus === status ? 'primary' : 'secondary'} onClick={() => setFilterStatus(status)}>
+              <Button
+                key={status}
+                variant={filterStatus === status ? 'primary' : 'secondary'}
+                onClick={() => setFilterStatus(status)}
+              >
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
               </Button>
             ))}
-            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Visibility:</span>{(['ALL', 'public', 'private', 'draft'] as const).map(vis => <Button key={vis} variant={filterVisibility === vis ? 'primary' : 'secondary'} onClick={() => setFilterVisibility(vis)}>{vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}</Button>)}</div>
-            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Featured:</span>{(['ALL', 'true', 'false'] as const).map(feat => <Button key={feat} variant={filterFeatured === feat ? 'primary' : 'secondary'} onClick={() => setFilterFeatured(feat)}>{feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}</Button>)}</div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="ui-meta">Visibility:</span>{(['ALL', 'public', 'private', 'draft'] as const).map(vis => (
+                <Button
+                  key={vis}
+                  variant={filterVisibility === vis ? 'primary' : 'secondary'}
+                  onClick={() => setFilterVisibility(vis)}
+                >
+                  {vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}
+                </Button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="ui-meta">Featured:</span>{(['ALL', 'true', 'false'] as const).map(feat => (
+                <Button
+                  key={feat}
+                  variant={filterFeatured === feat ? 'primary' : 'secondary'}
+                  onClick={() => setFilterFeatured(feat)}
+                >
+                  {feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}
+                </Button>
+              ))}
+            </div>
           </div>
         </section>
 
+        {/* Projects Grid */}
         {loading ? (
           <div className="admin-empty-state" role="status"><p>Loading projects…</p></div>
         ) : filteredProjects.length === 0 ? (
-          <EmptyState title="No projects found" description="Create a project or adjust your current search and filters." filtered={Boolean(searchQuery || filterClient || filterStatus !== 'ALL' || filterVisibility !== 'ALL' || filterFeatured !== 'ALL')} action={<Button onClick={() => openCreateModal()}>Create project</Button>} />
+          <EmptyState
+            title="No projects found"
+            description="Create a project or adjust your current search and filters."
+            filtered={Boolean(searchQuery || filterClient || filterStatus !== 'ALL' || filterVisibility !== 'ALL' || filterFeatured !== 'ALL')}
+            action={<Button onClick={() => openCreateModal()}>Create project</Button>} />
         ) : (
           <div className="admin-content-block">
-            {filteredProjects.map((project) => (
-              <div
-                key={project.id}
-                className="ui-card ui-card-interactive"
-              >
-                <div className="admin-content-block">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredProjects.map((project) => (
+                <div
+                  key={project.id}
+                  className="ui-card ui-card-interactive"
+                  onClick={() => setSelectedProject(project)}
+                  role="button"
+                  tabIndex={0}
+                >
                   <div className="admin-content-block">
-                    {getInitials(project)}
-                  </div>
+                    <div className="admin-content-block">
+                      {getInitials(project)}
+                    </div>
 
-                  <div className="admin-content-block">
                     <div className="admin-content-block">
                       <h3 className="admin-content-block">
                         {project.name}
@@ -529,68 +686,65 @@ export default function AdminProjectsPage() {
                       Added {formatDate(project.createdAt)}
                     </p>
                   </div>
-                </div>
 
-                <div className="admin-content-block">
-                  <Button
-                    onClick={() => {
-                      setError('');
-                      setSelectedProject(project);
-                    }}
-                    variant="secondary"
-                    className="admin-content-block"
-                  >
-                    View project
-                    <ArrowUpRight className="admin-content-block" />
-                  </Button>
-                  <Link
-                    href={`/admin/projects/${project.id}`}
-                    className="admin-content-block"
-                  >
-                    Edit
-                  </Link>
-                  {project.slug && project.visibility === 'public' && (
-                    <a
-                      href={`/work/${project.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  <div className="admin-content-block">
+                    <Button
+                      variant="secondary"
                       className="admin-content-block"
                     >
-                      <Eye className="admin-content-block" />
-                      Preview
-                    </a>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="admin-content-block"
-                    onClick={async () => {
-                      if (!confirm('Delete this project? This cannot be undone.')) return;
-                      try {
-                        setError('');
-                        const response = await fetch(`/api/projects/${project.id}`, {
-                          method: 'DELETE',
-                        });
-                        if (!response.ok) {
-                          const data = await response.json();
-                          throw new Error(data?.error || 'Failed to delete project');
+                      View project
+                      <ArrowUpRight className="admin-content-block" />
+                    </Button>
+                    <Link
+                      href={`/admin/projects/${project.id}`}
+                      className="admin-content-block"
+                    >
+                      Edit
+                    </Link>
+                    {project.slug && project.visibility === 'public' && (
+                      <a
+                        href={`/work/${project.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="admin-content-block"
+                      >
+                        <Eye className="admin-content-block" />
+                        Preview
+                      </a>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="admin-content-block"
+                      onClick={async () => {
+                        if (!confirm('Delete this project? This cannot be undone.')) return;
+                        try {
+                          setError('');
+                          const response = await fetch(`/api/projects/${project.id}`, {
+                            method: 'DELETE',
+                          });
+                          if (!response.ok) {
+                            const data = await response.json();
+                            throw new Error(data?.error || 'Failed to delete project');
+                          }
+                          setProjects((current) => current.filter((p) => p.id !== project.id));
+                        } catch (err) {
+                          console.error('Failed to delete project:', err);
+                          setError(err instanceof Error ? err.message : 'Failed to delete project.');
                         }
-                        setProjects((current) => current.filter((p) => p.id !== project.id));
-                      } catch (err) {
-                        console.error('Failed to delete project:', err);
-                        setError(err instanceof Error ? err.message : 'Failed to delete project.');
-                      }
-                    }}
-                    aria-label="Delete project"
-                  >
-                    <Trash2 className="admin-content-block" />
-                  </Button>
+                      }}
+                      aria-label="Delete project"
+                    >
+                      <Trash2 className="admin-content-block" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         )}
 
+        {/* Add Project Modal */}
         {isAddProjectOpen && (
           <div className="admin-content-block">
             <div className="admin-content-block">
@@ -613,7 +767,16 @@ export default function AdminProjectsPage() {
               <form onSubmit={handleCreateProject} className="admin-content-block">
                 <div className="admin-content-block">
                   <label className="ui-label">Project Name *</label>
-                  <input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
+                  <input
+                    required
+                    type="text"
+                    placeholder="e.g. 2026 Brand Campaign"
+                    value={form.name}
+                    onChange={(event) =>
+                      setForm({ ...form, name: event.target.value })
+                    }
+                    className="ui-input"
+                  />
                 </div>
 
                 <div className="admin-content-block">
@@ -639,7 +802,9 @@ export default function AdminProjectsPage() {
                       rows={2}
                       placeholder="Brief project description..."
                       value={form.description}
-                      onChange={(event) => setForm({ ...form, description: event.target.value })}
+                      onChange={(event) =>
+                        setForm({ ...form, description: event.target.value })
+                      }
                       className="ui-input"
                     />
                   </div>
@@ -649,7 +814,9 @@ export default function AdminProjectsPage() {
                       type="text"
                       placeholder="One-line summary for portfolio cards"
                       value={form.shortDescription}
-                      onChange={(event) => setForm({ ...form, shortDescription: event.target.value })}
+                      onChange={(event) =>
+                        setForm({ ...form, shortDescription: event.target.value })
+                      }
                       className="ui-input"
                     />
                   </div>
@@ -712,7 +879,9 @@ export default function AdminProjectsPage() {
                     <label className="ui-label">Status</label>
                     <select
                       value={form.status}
-                      onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
+                      onChange={(e) =>
+                        setForm({ ...form, status: e.target.value as ProjectStatus })
+                      }
                       className="ui-input"
                     >
                       <option value="draft">Draft</option>
@@ -726,7 +895,12 @@ export default function AdminProjectsPage() {
                     <label className="ui-label">Visibility</label>
                     <select
                       value={form.visibility}
-                      onChange={(e) => setForm({ ...form, visibility: e.target.value as 'public' | 'private' | 'draft' })}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          visibility: e.target.value as 'public' | 'private' | 'draft',
+                        })
+                      }
                       className="ui-input"
                     >
                       <option value="private">Private</option>
@@ -792,7 +966,9 @@ export default function AdminProjectsPage() {
                       type="text"
                       placeholder="e.g. 50% deposit, 50% on delivery"
                       value={form.paymentTerms}
-                      onChange={(event) => setForm({ ...form, paymentTerms: event.target.value })}
+                      onChange={(event) =>
+                        setForm({ ...form, paymentTerms: event.target.value })
+                      }
                       className="ui-input"
                     />
                   </div>
@@ -802,7 +978,9 @@ export default function AdminProjectsPage() {
                       type="text"
                       placeholder="e.g. 2 rounds of revisions included"
                       value={form.revisionsPolicy}
-                      onChange={(event) => setForm({ ...form, revisionsPolicy: event.target.value })}
+                      onChange={(event) =>
+                        setForm({ ...form, revisionsPolicy: event.target.value })
+                      }
                       className="ui-input"
                     />
                   </div>
@@ -815,7 +993,9 @@ export default function AdminProjectsPage() {
                       type="text"
                       placeholder="e.g. Commercial use rights"
                       value={form.licensingTerms}
-                      onChange={(event) => setForm({ ...form, licensingTerms: event.target.value })}
+                      onChange={(event) =>
+                        setForm({ ...form, licensingTerms: event.target.value })
+                      }
                       className="ui-input"
                     />
                   </div>
@@ -823,7 +1003,12 @@ export default function AdminProjectsPage() {
                     <label className="ui-label">Featured</label>
                     <select
                       value={form.featured ? 'true' : 'false'}
-                      onChange={(e) => setForm({ ...form, featured: e.target.value === 'true' })}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          featured: e.target.value === 'true',
+                        })
+                      }
                       className="ui-input"
                     >
                       <option value="false">No</option>
@@ -843,7 +1028,12 @@ export default function AdminProjectsPage() {
                   />
                 </div>
 
-                <Button type="submit" disabled={saving} variant="primary" className="admin-content-block">
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  variant="primary"
+                  className="admin-content-block"
+                >
                   {saving ? 'Saving Project…' : '+ Create Project'}
                 </Button>
               </form>
@@ -851,6 +1041,7 @@ export default function AdminProjectsPage() {
           </div>
         )}
 
+        {/* Selected Project Detail */}
         {selectedProject && (
           <div className="admin-content-block">
             <div className="admin-content-block">
@@ -881,7 +1072,6 @@ export default function AdminProjectsPage() {
                     {selectedProject.description}
                   </p>
                 )}
-
               </div>
 
               {error && <div className="admin-content-block">{error}</div>}
@@ -893,7 +1083,7 @@ export default function AdminProjectsPage() {
                 </div>
 
                 <div className="admin-content-block">
-                  {([
+                  {[
                     'active',
                     'completed',
                     'on hold',

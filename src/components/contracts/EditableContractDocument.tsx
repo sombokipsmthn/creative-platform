@@ -189,8 +189,10 @@ export function EditableContractDocument({
   flushParagraph();
 
   return (
-    <div className="">
-      {elements.length > 0 ? elements : <p className="">No content</p>}
+    <div className="typeset typeset-docs max-w-[37em]">
+      <div className="prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-50">
+        {elements.length > 0 ? elements : <p className="text-gray-500 italic">No content</p>}
+      </div>
     </div>
   );
 }

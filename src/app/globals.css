@@ -8,6 +8,7 @@
 
 /* ─── 1. Tailwind + Custom Variant ─────────────────── */
 @import "tailwindcss";
+@import "./typeset.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -1654,4 +1655,13 @@ html.dark {
   justify-content: flex-end;
   gap: 0.75rem;
   margin-top: 1.5rem;
+}
+
+.typeset-docs {
+  --typeset-font-body: var(--font-geist);
+  --typeset-font-heading: var(--font-geist);
+  --typeset-font-mono: var(--font-geist-mono);
+  --typeset-size: 15px;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.25em;
 }

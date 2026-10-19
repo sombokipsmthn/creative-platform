@@ -58,8 +58,10 @@ function StorySection({ title, body }: { title: string; body: string | null }) {
       <h2 className="ui-eyebrow text-purple-600 dark:text-purple-400">
         {title}
       </h2>
-      <div className="prose prose-slate dark:prose-invert max-w-none leading-8 whitespace-pre-wrap text-slate-700 dark:text-zinc-300 font-light">
-        {body}
+      <div className="typeset typeset-docs max-w-[37em]">
+        <div className="prose prose-slate dark:prose-invert max-w-none leading-8 text-slate-700 dark:text-zinc-300 font-light">
+          {body}
+        </div>
       </div>
     </section>
   );

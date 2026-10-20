@@ -1,5 +1,7 @@
 # Better Auth Identity Standardization & Development Data Reset — Audit Findings
 
+> **Historical audit warning (2026-10-21):** This is a snapshot of a prior audit, not authorization to execute a purge and not proof that database targets or row counts remain current. Re-verify the exact development database, live schema, storage ownership, backups, and deletion manifest immediately before any destructive action. Production is out of scope; preserve the equipment catalogue and valid migration history. See [Project Handbook](../../PROJECT-HANDBOOK.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Perform a comprehensive audit and prepare a safe, complete reset of development data in the `creative-platform` repository, migrating from Clerk to Better Auth while ensuring data integrity and ownership consistency.

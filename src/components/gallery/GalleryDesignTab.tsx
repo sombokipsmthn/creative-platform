@@ -5,6 +5,9 @@ import { Loader2, AlertCircle, Check } from 'lucide-react'
 import Image from 'next/image'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'
+import { SelectCompat } from '@/components/ui/select-compat';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface GalleryPhoto {
   id: string
@@ -195,9 +198,9 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   if (loading || !savedTheme) {
     return (
-      <div className="ui-card">
-        <div className="">
-          <Loader2 className="" />
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
+        <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading design settings...</span>
         </div>
       </div>
@@ -211,17 +214,17 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   const currentCover = photos.find(p => p.id === coverPhotoId)
 
   return (
-    <div className="">
+    <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="">
-          <AlertCircle className="" />
-          <p className="">{error}</p>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {/* Section Navigation */}
-      <div className="">
+      <div className="border-b border-[var(--color-border-subtle)] flex gap-6 overflow-x-auto">
         {[
           { id: 'theme' as const, label: 'Theme' },
           { id: 'cover' as const, label: 'Cover' },
@@ -233,7 +236,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
           <button
             key={section.id}
             onClick={() => setActiveSection(section.id)}
-            className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all  whitespace-nowrap ${
+            className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all border-b-2 whitespace-nowrap ${
               activeSection === section.id
                 ? 'border-[var(--color-accent)] text-[var(--color-accent)] font-bold'
                 : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
@@ -246,27 +249,20 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
       {/* THEME SECTION */}
       {activeSection === 'theme' && (
-        <div className="">
+        <div className="space-y-4">
           <GalleryThemeSelector
             galleryId={galleryId}
             onThemeChange={applyThemePreset}
             currentThemeId={currentThemeId}
             isSaving={isSaving}
           />
-          <div className="">
-            <label className="block">
+          <div className="border-t border-[var(--color-border-subtle)] pt-4">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Custom Theme Name (Optional)
             </label>
-            <input
-              type="text"
-              value={customThemeName}
-              onChange={(e) => setCustomThemeName(e.target.value)}
-              placeholder="My Custom Theme"
-              className={`w-full gallery-input ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSaving}
-            />
+            <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
             {customThemeName && (
-              <p className="">
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
                 Will be saved as a custom theme when you select a theme above.
               </p>
             )}
@@ -276,40 +272,40 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
       {/* COVER SECTION */}
       {activeSection === 'cover' && (
-        <div className="">
-          <h3 className="">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-[var(--color-text-primary)]">
             Cover Settings
           </h3>
 
           {currentCover && (
-            <div className="">
+            <div className="space-y-3">
               <div>
-                <label className="block">
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
                   Current Cover
                 </label>
-                <div className="">
+                <div className="relative aspect-video rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
                   <Image
                     src={currentCover.displayUrl || currentCover.thumbnailUrl}
                     alt="Cover"
                     fill
                     unoptimized
-                    className=""
+                    className="object-cover"
                   />
                   <div
-                    className=""
+                    className="absolute w-6 h-6 border-2 border-white rounded-full shadow-lg"
                     style={{
                       left: `${focalPoint.x * 100}%`,
                       top: `${focalPoint.y * 100}%`,
                       transform: 'translate(-50%, -50%)',
                     }}
                   >
-                    <div className="lack/30" />
+                    <div className="absolute inset-0 rounded-full border border-black/30" />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block">
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
                   Focal Point X: {Math.round(focalPoint.x * 100)}%
                 </label>
                 <input
@@ -319,12 +315,12 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   step="1"
                   value={focalPoint.x * 100}
                   onChange={(e) => setFocalPoint({ ...focalPoint, x: Number(e.target.value) / 100 })}
-                  className=""
+                  className="w-full"
                 />
               </div>
 
               <div>
-                <label className="block">
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
                   Focal Point Y: {Math.round(focalPoint.y * 100)}%
                 </label>
                 <input
@@ -334,35 +330,31 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   step="1"
                   value={focalPoint.y * 100}
                   onChange={(e) => setFocalPoint({ ...focalPoint, y: Number(e.target.value) / 100 })}
-                  className=""
+                  className="w-full"
                 />
               </div>
 
-              <button
-                onClick={() => void handleSaveFocalPoint()}
-                disabled={isSaving}
-                className="gallery-btn gallery-btn-primary"
-              >
+              <Button type="button" onClick={() => void handleSaveFocalPoint()} disabled={isSaving} variant="primary">
                 {isSaving ? (
                   <>
-                    <Loader2 className="" />
+                    <Loader2 className="w-4 h-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
                   'Save Focal Point'
                 )}
-              </button>
+              </Button>
             </div>
           )}
 
-          <div className="">
-            <label className="block">
+          <div className="border-t border-[var(--color-border-subtle)] pt-4">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Cover Style
             </label>
-            <select
+            <SelectCompat
               value={savedTheme.coverStyle}
               onChange={(e) => void updateTheme({ coverStyle: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="image">Image (Full Cover)</option>
               <option value="split">Split (Image + Text)</option>
@@ -370,12 +362,12 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="minimal">Minimal (Text Only)</option>
               <option value="immersive">Immersive (Full Bleed)</option>
               <option value="none">None</option>
-            </select>
+            </SelectCompat>
           </div>
 
           {['image', 'split', 'centered', 'immersive'].includes(savedTheme.coverStyle) && (
             <div>
-              <label className="block">
+              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
                 Overlay Opacity: {savedTheme.coverOverlayOpacity}%
               </label>
               <input
@@ -384,49 +376,49 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 max="100"
                 value={savedTheme.coverOverlayOpacity}
                 onChange={(e) => void updateTheme({ coverOverlayOpacity: parseInt(e.target.value) })}
-                className=""
+                className="w-full"
               />
             </div>
           )}
 
-          <div className="">
-            <label className="">
+          <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showTitle}
                 onChange={(e) => void updateTheme({ showTitle: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
               />
-              <span className="">Show Gallery Title</span>
+              <span className="text-sm text-[var(--color-text-primary)]">Show Gallery Title</span>
             </label>
 
-            <label className="">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showDescription}
                 onChange={(e) => void updateTheme({ showDescription: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
               />
-              <span className="">Show Description</span>
+              <span className="text-sm text-[var(--color-text-primary)]">Show Description</span>
             </label>
 
-            <label className="">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showLogo}
                 onChange={(e) => void updateTheme({ showLogo: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
               />
-              <span className="">Show Logo</span>
+              <span className="text-sm text-[var(--color-text-primary)]">Show Logo</span>
             </label>
           </div>
 
-          <div className="">
-            <h4 className="">
+          <div className="border-t border-[var(--color-border-subtle)] pt-4">
+            <h4 className="text-xs font-medium text-[var(--color-text-muted)] mb-3 uppercase tracking-widest">
               Choose Cover Photo
             </h4>
             {/* Optimized cover selection - only load visible thumbnails */}
-            <div className="">
+            <div className="overflow-x-auto space-x-2">
               {photos.map((photo) => (
                 <button
                   key={photo.id}
@@ -442,19 +434,19 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                     alt={photo.filename}
                     fill
                     unoptimized
-                    className=""
+                    className="object-cover"
                     priority={coverPhotoId === photo.id}
                   />
                   {coverPhotoId === photo.id && (
-                    <div className="">
-                      <Check className="" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
                     </div>
                   )}
                 </button>
               ))}
             </div>
             {photos.length === 0 && (
-              <p className="">No photos uploaded yet.</p>
+              <p className="text-xs text-[var(--color-text-muted)]">No photos uploaded yet.</p>
             )}
           </div>
         </div>
@@ -462,26 +454,26 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
       {/* TYPOGRAPHY SECTION */}
       {activeSection === 'typography' && (
-        <div className="">
-          <h3 className="">Typography</h3>
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Typography</h3>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Font Family
             </label>
-            <select
+            <SelectCompat
               value={savedTheme.fontFamily}
               onChange={(e) => void updateTheme({ fontFamily: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="sans">Sans Serif (Modern)</option>
               <option value="serif">Serif (Editorial)</option>
               <option value="modern">Modern (Geometric)</option>
               <option value="editorial">Editorial (Story)</option>
-            </select>
+            </SelectCompat>
           </div>
 
-          <p className="">
+          <p className="text-xs text-[var(--color-text-muted)]">
             Font family changes how your gallery title, descriptions, and labels appear.
           </p>
         </div>
@@ -489,65 +481,65 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
       {/* COLORS SECTION */}
       {activeSection === 'colors' && (
-        <div className="">
-          <h3 className="">Color Scheme</h3>
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Color Scheme</h3>
 
           <div>
-            <label className="block">Accent Color</label>
-            <div className="">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Accent Color</label>
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={savedTheme.accentColor}
                 onChange={(e) => void updateTheme({ accentColor: e.target.value })}
-                className=""
+                className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
               />
               <input
                 type="text"
                 value={savedTheme.accentColor}
                 onChange={(e) => void updateTheme({ accentColor: e.target.value })}
-                className="gallery-input"
+                className="flex-1 gallery-input text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block">Background Color</label>
-            <div className="">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Background Color</label>
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={savedTheme.backgroundColor}
                 onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
-                className=""
+                className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
               />
               <input
                 type="text"
                 value={savedTheme.backgroundColor}
                 onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
-                className="gallery-input"
+                className="flex-1 gallery-input text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block">Text Color</label>
-            <div className="">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Text Color</label>
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={savedTheme.textColor}
                 onChange={(e) => void updateTheme({ textColor: e.target.value })}
-                className=""
+                className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
               />
               <input
                 type="text"
                 value={savedTheme.textColor}
                 onChange={(e) => void updateTheme({ textColor: e.target.value })}
-                className="gallery-input"
+                className="flex-1 gallery-input text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Border Radius: {savedTheme.borderRadius}px
             </label>
             <input
@@ -556,7 +548,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               max="24"
               value={savedTheme.borderRadius}
               onChange={(e) => void updateTheme({ borderRadius: parseInt(e.target.value) })}
-              className=""
+              className="w-full"
             />
           </div>
         </div>
@@ -564,67 +556,67 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
       {/* GRID SECTION */}
       {activeSection === 'grid' && (
-        <div className="">
-          <h3 className="">Grid & Layout</h3>
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Grid & Layout</h3>
 
           <div>
-            <label className="block">Grid Style</label>
-            <select
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Style</label>
+            <SelectCompat
               value={savedTheme.gridStyle}
               onChange={(e) => void updateTheme({ gridStyle: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="masonry">Masonry (Varied Heights)</option>
               <option value="vertical">Vertical (Column Stack)</option>
               <option value="horizontal">Horizontal (Row Stack)</option>
               <option value="uniform">Uniform (Equal Sizes)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div>
-            <label className="block">Thumbnail Size</label>
-            <select
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Thumbnail Size</label>
+            <SelectCompat
               value={savedTheme.thumbnailSize}
               onChange={(e) => void updateTheme({ thumbnailSize: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="small">Small (Compact View)</option>
               <option value="regular">Regular (Balanced)</option>
               <option value="large">Large (Spacious)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div>
-            <label className="block">Grid Spacing</label>
-            <select
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Spacing</label>
+            <SelectCompat
               value={savedTheme.gridSpacing}
               onChange={(e) => void updateTheme({ gridSpacing: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="tight">Tight (Minimal Gap)</option>
               <option value="regular">Regular (Balanced Gap)</option>
               <option value="wide">Wide (Spacious Gap)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div>
-            <label className="block">Aspect Ratio</label>
-            <select
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Aspect Ratio</label>
+            <SelectCompat
               value={savedTheme.aspectRatio}
               onChange={(e) => void updateTheme({ aspectRatio: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="auto">Auto (Original Proportions)</option>
               <option value="1:1">Square (1:1)</option>
               <option value="16:9">Widescreen (16:9)</option>
               <option value="4:3">Standard (4:3)</option>
               <option value="3:2">Classic (3:2)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           {savedTheme.gridStyle === 'masonry' && (
             <div>
-              <label className="block">
+              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
                 Masonry Columns: {savedTheme.masonryColumns}
               </label>
               <input
@@ -633,7 +625,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 max="6"
                 value={savedTheme.masonryColumns}
                 onChange={(e) => void updateTheme({ masonryColumns: parseInt(e.target.value) })}
-                className=""
+                className="w-full"
               />
             </div>
           )}
@@ -642,49 +634,49 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
       {/* GENERAL SECTION */}
       {activeSection === 'general' && (
-        <div className="">
-          <h3 className="">General Settings</h3>
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-[var(--color-text-primary)]">General Settings</h3>
 
           <div>
-            <label className="block">Navigation Style</label>
-            <select
+            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Navigation Style</label>
+            <SelectCompat
               value={savedTheme.navigationStyle}
               onChange={(e) => void updateTheme({ navigationStyle: e.target.value })}
-              className="gallery-input"
+              className="w-full gallery-input"
             >
               <option value="icons-and-text">Icons with Text</option>
               <option value="icons-only">Icons Only</option>
-            </select>
+            </SelectCompat>
           </div>
 
-          <div className="">
-            <h4 className="">
+          <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">
+            <h4 className="text-xs font-medium text-[var(--color-text-primary)] uppercase tracking-widest">
               Visibility Options
             </h4>
 
-            <label className="">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showCollections}
                 onChange={(e) => void updateTheme({ showCollections: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
               />
-              <span className="">Show Collections</span>
+              <span className="text-sm text-[var(--color-text-primary)]">Show Collections</span>
             </label>
           </div>
 
-          <div className="">
-            <p className="">
-              Current theme: <span className="">{savedTheme.name}</span>
+          <div className="bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+            <p className="text-xs text-[var(--color-text-muted)]">
+              Current theme: <span className="font-semibold text-[var(--color-text-primary)]">{savedTheme.name}</span>
             </p>
-            <p className="">Type: {savedTheme.type}</p>
+            <p className="text-xs text-[var(--color-text-muted)] mt-1">Type: {savedTheme.type}</p>
           </div>
         </div>
       )}
 
       {isSaving && (
-        <div className="">
-          <Loader2 className="" />
+        <div className="fixed bottom-4 right-4 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">
+          <Loader2 className="w-3 h-3 animate-spin" />
           Saving...
         </div>
       )}

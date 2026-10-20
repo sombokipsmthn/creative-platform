@@ -54,11 +54,11 @@ const resolveImage = (source?: string | null, fallbackUrl?: string) => {
 function StorySection({ title, body }: { title: string; body: string | null }) {
   if (!body) return null;
   return (
-    <section className="">
-      <h2 className="ui-eyebrow">
+    <section className="space-y-4">
+      <h2 className="ui-eyebrow text-purple-600 dark:text-purple-400">
         {title}
       </h2>
-      <div className="">
+      <div className="prose prose-slate dark:prose-invert max-w-none leading-8 whitespace-pre-wrap text-slate-700 dark:text-zinc-300 font-light">
         {body}
       </div>
     </section>
@@ -78,71 +78,71 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
   ].filter((s) => s.body);
 
   return (
-    <div className="">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
 
       {/* Back to portfolio */}
-      <div className="ui-shell">
+      <div className="ui-shell px-6 pt-8">
         <Link
           href="/work"
-          className=""
+          className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 transition"
         >
-          <ArrowLeft className="" />
+          <ArrowLeft className="h-3.5 w-3.5" />
           All Work
         </Link>
       </div>
 
       {/* Hero */}
-      <section className="">
-        <div className="">
-          <div className="">
-            <div className="">
+      <section className="relative pt-10 pb-8 px-6 max-w-7xl mx-auto">
+        <div className="space-y-6">
+          <div className="space-y-4 max-w-4xl">
+            <div className="flex flex-wrap items-center gap-3 text-xs font-sans uppercase tracking-widest">
               {project.category && (
-                <span className="">
+                <span className="px-2.5 py-1 bg-purple-600/15 border border-purple-400/40 text-purple-600 dark:text-purple-300 rounded-sm font-semibold">
                   {project.category}
                 </span>
               )}
-              {project.year && <span className="">{project.year}</span>}
+              {project.year && <span className="text-slate-500 dark:text-zinc-500">{project.year}</span>}
             </div>
 
-            <h1 className="">
+            <h1 className="text-4xl md:text-6xl font-light tracking-tight text-slate-900 dark:text-white leading-[1.05]">
               {project.name}
             </h1>
 
             {(project.short_description || project.description) && (
-              <p className="">
+              <p className="text-base md:text-lg text-slate-600 dark:text-zinc-400 font-light leading-relaxed max-w-2xl">
                 {project.short_description || project.description}
               </p>
             )}
           </div>
 
           {/* Metadata strip */}
-          <div className="">
+          <div className="grid grid-cols-2 gap-6 md:grid-cols-4 border-t border-slate-200 dark:border-zinc-800 pt-6">
             {clientName !== 'Confidential Client' && (
               <div>
-                <p className="">Client</p>
-                <p className="">{clientName}</p>
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">Client</p>
+                <p className="mt-1 text-sm font-medium text-slate-800 dark:text-zinc-200">{clientName}</p>
               </div>
             )}
             {project.location && (
               <div>
-                <p className="">Location</p>
-                <p className="">
-                  <MapPin className="" />
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">Location</p>
+                <p className="mt-1 text-sm font-medium text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                  <MapPin className="h-3.5 w-3.5 text-slate-400" />
                   {project.location}
                 </p>
               </div>
             )}
             {project.role && (
               <div>
-                <p className="">Role</p>
-                <p className="">{project.role}</p>
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">Role</p>
+                <p className="mt-1 text-sm font-medium text-slate-800 dark:text-zinc-200">{project.role}</p>
               </div>
             )}
             {project.year && (
               <div>
-                <p className="">Year</p>
-                <p className="">{project.year}</p>
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">Year</p>
+                <p className="mt-1 text-sm font-medium text-slate-800 dark:text-zinc-200">{project.year}</p>
               </div>
             )}
           </div>
@@ -151,26 +151,26 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
 
       {/* Primary visual */}
       {coverImage && (
-        <section className="">
-          <div className="">
+        <section className="px-6 max-w-7xl mx-auto">
+          <div className="relative w-full aspect-16/9 md:aspect-21/9 overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800">
             <Image
               src={resolveImage(coverImage.display_url)}
               alt={coverImage.alt_text || project.name}
               fill
               priority
-              className=""
+              className="object-cover"
               unoptimized
             />
           </div>
           {coverImage.caption && (
-            <p className="">{coverImage.caption}</p>
+            <p className="mt-3 text-xs text-slate-500 dark:text-zinc-500 text-center font-sans">{coverImage.caption}</p>
           )}
         </section>
       )}
 
       {/* Story */}
       {storySections.length > 0 && (
-        <section className="">
+        <section className="py-16 px-6 max-w-3xl mx-auto space-y-14">
           {storySections.map((section) => (
             <StorySection key={section.title} title={section.title} body={section.body} />
           ))}
@@ -179,34 +179,34 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
 
       {/* Services & disciplines */}
       {(project.services?.length || project.disciplines?.length || project.collaborators?.length) && (
-        <section className="">
-          <div className="">
+        <section className="py-12 px-6 max-w-7xl mx-auto border-t border-slate-200 dark:border-zinc-800">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {project.services && project.services.length > 0 && (
               <div>
-                <p className="">Services</p>
-                <ul className="">
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600 mb-3">Services</p>
+                <ul className="space-y-2">
                   {project.services.map((service) => (
-                    <li key={service} className="">{service}</li>
+                    <li key={service} className="text-sm text-slate-700 dark:text-zinc-300">{service}</li>
                   ))}
                 </ul>
               </div>
             )}
             {project.disciplines && project.disciplines.length > 0 && (
               <div>
-                <p className="">Disciplines</p>
-                <ul className="">
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600 mb-3">Disciplines</p>
+                <ul className="space-y-2">
                   {project.disciplines.map((discipline) => (
-                    <li key={discipline} className="">{discipline}</li>
+                    <li key={discipline} className="text-sm text-slate-700 dark:text-zinc-300">{discipline}</li>
                   ))}
                 </ul>
               </div>
             )}
             {project.collaborators && project.collaborators.length > 0 && (
               <div>
-                <p className="">Collaborators</p>
-                <ul className="">
+                <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600 mb-3">Collaborators</p>
+                <ul className="space-y-2">
                   {project.collaborators.map((collaborator) => (
-                    <li key={collaborator} className="">{collaborator}</li>
+                    <li key={collaborator} className="text-sm text-slate-700 dark:text-zinc-300">{collaborator}</li>
                   ))}
                 </ul>
               </div>
@@ -217,23 +217,23 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
 
       {/* Supporting media */}
       {project.media.length > 1 && (
-        <section className="">
-          <div className="">
+        <section className="py-12 px-6 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {project.media.map((media) => {
               if (media.is_cover || media === coverImage) return null;
               return (
-                <figure key={media.id} className="">
-                  <div className="">
+                <figure key={media.id} className="space-y-2">
+                  <div className="relative w-full aspect-4/3 overflow-hidden rounded-xl border border-slate-200 dark:border-zinc-800">
                     <Image
                       src={resolveImage(media.display_url)}
                       alt={media.alt_text || project.name}
                       fill
-                      className=""
+                      className="object-cover"
                       unoptimized
                     />
                   </div>
                   {media.caption && (
-                    <figcaption className="">{media.caption}</figcaption>
+                    <figcaption className="text-xs text-slate-500 dark:text-zinc-500 text-center font-sans">{media.caption}</figcaption>
                   )}
                 </figure>
               );
@@ -243,23 +243,23 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
       )}
 
       {/* Contact CTA */}
-      <section className="">
-        <div className="">
-          <div className="">
+      <section className="py-20 px-6 max-w-7xl mx-auto">
+        <div className="rounded-[2rem] bg-purple-600 p-8 md:p-14 text-white">
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
             <div>
-              <p className="">Let&apos;s work together</p>
-              <h2 className="">Have a project in mind?</h2>
-              <p className="">
+              <p className="text-xs font-sans uppercase tracking-[0.25em] text-purple-200">Let&apos;s work together</p>
+              <h2 className="mt-5 text-3xl md:text-5xl font-light tracking-tight">Have a project in mind?</h2>
+              <p className="mt-5 max-w-xl text-sm md:text-base leading-7 text-purple-100">
                 Tell us about your brief, timeline, and vision. We&apos;ll help you bring it to life.
               </p>
             </div>
-            <div className="">
+            <div className="flex flex-wrap gap-3">
               <Link
                 href="/contact"
-                className=""
+                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-semibold text-purple-700 transition hover:bg-purple-50"
               >
                 Start a conversation
-                <ArrowRight className="" />
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -267,17 +267,17 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
       </section>
 
       {/* Next work / footer */}
-      <footer className="">
-        <div className="">
-          <div className="">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h2 className="">
-                KIPSMTHN<span className="">.</span>
+              <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
+                KIPSMTHN<span className="text-purple-500">.</span>
               </h2>
-              <p className="">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-sans">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
-            <div className="">
+            <div className="flex flex-wrap gap-2">
               <Link
                 href="/work"
                 className="Button Button--primary"
@@ -303,12 +303,12 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
             </div>
           </div>
 
-          <div className="">
+          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
 
-            <div className="">
+            <div className="flex items-center gap-6">
               <ThemeToggle />
-              <span className="">Nairobi, Kenya</span>
+              <span className="text-slate-500 dark:text-zinc-500">Nairobi, Kenya</span>
             </div>
           </div>
         </div>

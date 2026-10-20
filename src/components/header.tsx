@@ -1,136 +1,33 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { LogIn, LogOut, LayoutDashboard, ArrowRight, Menu } from "lucide-react";
+import { LogIn, LogOut } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function Header() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const isSignedIn = Boolean(session?.user);
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  useEffect(() => {}, [session]);
 
   async function handleSignOut() {
     await authClient.signOut();
     router.push("/");
   }
 
-  const navLinks = [
-    { href: "/", label: "Home" },
-    { href: "/workflow", label: "Workflow" },
-  ];
-
   return (
-    <header className="">
-      <div className="">
-        <div className="">
-          {/* Mobile Sheet Navigation */}
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="">
-                <Menu className="" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="">
-              <SheetHeader>
-                <SheetTitle className="">
-                  KIPSMTHN
-                </SheetTitle>
-              </SheetHeader>
-              <nav className="">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className=""
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <div className="">
-                  <Button asChild size="sm" onClick={() => setMobileOpen(false)}>
-                    <Link href="/admin">Open Studio Workspace</Link>
-                  </Button>
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
-
-          {/* Brand */}
-          <Link
-            href="/"
-            className=""
-          >
-            <span className="">
-              K
-            </span>
-            <span className="">KIPSMTHN</span>
-          </Link>
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className=""
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        {/* Actions */}
-        <div className="">
-          {!isPending && isSignedIn ? (
-            <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/admin" className="">
-                  <LayoutDashboard className="" />
-                  <span className="hidden">Dashboard</span>
-                </Link>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className=""
-              >
-                <LogOut className="" />
-                <span className="hidden">Sign out</span>
-              </Button>
-            </>
-          ) : !isPending ? (
-            <>
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/sign-in" className="">
-                  <LogIn className="" />
-                  <span className="hidden">Sign in</span>
-                </Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href="/admin">
-                  <span className="hidden">Get started</span>
-                  <span className="" aria-hidden="true"><ArrowRight className="" /></span>
-                </Link>
-              </Button>
-            </>
-          ) : (
-            <div className="" />
-          )}
-
-          <ThemeToggle showLabel={false} />
-        </div>
+    <header className="ui-header"><div className="ui-shell"><nav className="flex items-center justify-between rounded-2xl border border-slate-200/70 bg-white/80 px-6 py-3 shadow-sm backdrop-blur-xl dark:border-white/10 dark:bg-zinc-950/70">
+      <Link href="/" className="ui-logo text-lg font-semibold tracking-[0.35em] text-slate-900 dark:text-white">KIPSMTHN</Link>
+      <div className="hidden items-center gap-8 text-sm font-medium text-slate-500 dark:text-zinc-400 md:flex"><Link href="/#platform" className="ui-nav-link transition hover:text-purple-600">Platform</Link><Link href="/#workflow" className="ui-nav-link transition hover:text-purple-600">Workflow</Link><Link href="/#work" className="ui-nav-link transition hover:text-purple-600">Work</Link><Link href="/#pricing" className="ui-nav-link transition hover:text-purple-600">Get started</Link></div>
+      <div className="flex items-center gap-3">
+        {!isPending && isSignedIn ? <><Link href="/admin" className="hidden rounded-full border border-slate-200 px-4 py-2 text-sm font-medium sm:inline-flex">Dashboard</Link><button type="button" onClick={handleSignOut} className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium" aria-label="Sign out"><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sign out</span></button></> : !isPending ? <><Link href="/sign-in" className="inline-flex items-center gap-2 text-sm font-medium"><LogIn className="h-3.5 w-3.5 sm:hidden" /><span>Sign in</span></Link><Link href="/sign-up"><Button variant="primary" size="sm">Get started</Button></Link></> : <div className="h-9 w-24 animate-pulse rounded-full bg-slate-200 dark:bg-zinc-800" />}
+        <ThemeToggle />
       </div>
-    </header>
+    </nav></div></header>
   );
 }

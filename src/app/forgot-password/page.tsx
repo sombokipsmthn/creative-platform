@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -30,17 +32,17 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="">
-      <div className="">
-        <Link href="/sign-in" className="">← Back to sign in</Link>
-        <div className="">
-          <h1 className="">Forgot password?</h1>
-          <p className="">Enter your email and we’ll send a secure reset link.</p>
-          <form onSubmit={handleSubmit} className="">
-            <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isLoading} placeholder="you@example.com" className="" />
-            {message && <p className="">{message}</p>}
-            {error && <p className="">{error}</p>}
-            <button type="submit" disabled={isLoading} className="">{isLoading ? "Sending..." : "Send reset link"}</button>
+    <main className="min-h-screen bg-slate-50 dark:bg-[#09090b] flex items-center justify-center px-6">
+      <div className="w-full max-w-md">
+        <Link href="/sign-in" className="mb-6 inline-flex text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">← Back to sign in</Link>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Forgot password?</h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Enter your email and we’ll send a secure reset link.</p>
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+            <Input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isLoading} placeholder="you@example.com" />
+            {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{message}</p>}
+            {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
+            <Button type="submit" disabled={isLoading} variant="primary" className="w-full">{isLoading ? "Sending..." : "Send reset link"}</Button>
           </form>
         </div>
       </div>

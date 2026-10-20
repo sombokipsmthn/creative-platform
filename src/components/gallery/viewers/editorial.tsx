@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Download, Heart } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { Button } from '@/components/ui/button';
 
 interface EditorialViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -12,7 +13,7 @@ interface EditorialViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
 
 /**
  * Editorial Theme Viewer
- *
+ * 
  * Magazine-style layout with mixed image sizes.
  * Featured images with supporting photos.
  * Editorial typography and story-driven presentation.
@@ -31,9 +32,9 @@ export function GalleryViewerEditorial({
 
   if (photos.length === 0) {
     return (
-      <div className="">
-        <div className="">
-          <p className="">No photos in gallery</p>
+      <div className="flex min-h-screen items-center justify-center bg-white p-6">
+        <div className="text-center">
+          <p className="text-lg font-light text-gray-400">No photos in gallery</p>
         </div>
       </div>
     );
@@ -55,43 +56,43 @@ export function GalleryViewerEditorial({
 
   return (
     <div
-      className=""
+      className="min-h-screen"
       style={{
         backgroundColor: theme.preset.backgroundColor,
         color: theme.preset.textColor,
       }}
     >
       {/* Header */}
-      <div className="">
-        <h1 className="">{title}</h1>
+      <div className="border-b border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
+        <h1 className="text-3xl font-serif tracking-tight sm:text-4xl md:text-5xl">{title}</h1>
         {description && (
-          <p className="">{description}</p>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600">{description}</p>
         )}
       </div>
 
       {/* Featured Image */}
-      <div className="">
-        <div className="">
-          <div className="">
+      <div className="px-6 py-8 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="relative aspect-video overflow-hidden bg-gray-100">
             <Image
               src={featured.displayUrl}
               alt={featured.filename}
               fill
-              className=""
+              className="object-cover"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 70vw"
               priority
             />
           </div>
           {/* Featured Caption */}
-          <div className="">
-            <div className="">
-              <p className="">{featured.filename}</p>
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-light text-gray-500">{featured.filename}</p>
             </div>
-            <div className="">
+            <div className="flex gap-2">
               {allowFavorites && (
-                <button
+                <Button
                   onClick={() => handleFavorite(featured.id)}
-                  className=""
+                  className="p-2 transition hover:bg-gray-100 rounded"
                 >
                   <Heart
                     className={`h-4 w-4 ${
@@ -100,15 +101,15 @@ export function GalleryViewerEditorial({
                         : 'text-gray-400'
                     }`}
                   />
-                </button>
+                </Button>
               )}
               {allowDownloads && (
-                <button
+                <Button
                   onClick={() => onPhotoDownload?.(featured.id)}
-                  className=""
+                  className="p-2 transition hover:bg-gray-100 rounded"
                 >
-                  <Download className="" />
-                </button>
+                  <Download className="h-4 w-4 text-gray-400" />
+                </Button>
               )}
             </div>
           </div>
@@ -117,52 +118,52 @@ export function GalleryViewerEditorial({
 
       {/* Supporting Grid */}
       {remaining.length > 0 && (
-        <div className="">
-          <div className="">
-            <p className="">
+        <div className="border-t border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
+          <div className="mx-auto max-w-5xl">
+            <p className="mb-6 text-xs font-semibold uppercase tracking-widest text-gray-500">
               Gallery
             </p>
 
-            <div className="">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {remaining.map((photo) => {
                 const isFavorite = favorites.has(photo.id) || photo.isFavorite;
 
                 return (
-                  <div key={photo.id} className="">
+                  <div key={photo.id} className="group relative overflow-hidden bg-gray-100">
                     {/* Image */}
-                    <div className="">
+                    <div className="relative aspect-square">
                       <Image
                         src={photo.displayUrl}
                         alt={photo.filename}
                         fill
-                        className=""
+                        className="object-cover transition group-hover:scale-105"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     </div>
 
                     {/* Overlay on Hover */}
-                    <div className="to-transparent">
-                      <p className="">{photo.filename}</p>
-                      <div className="">
+                    <div className="absolute inset-0 flex items-end justify-between bg-gradient-to-t from-black/50 to-transparent p-3 opacity-0 transition group-hover:opacity-100">
+                      <p className="text-xs font-light text-white">{photo.filename}</p>
+                      <div className="flex gap-2">
                         {allowFavorites && (
-                          <button
+                          <Button
                             onClick={() => handleFavorite(photo.id)}
-                            className=""
+                            className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
                             <Heart
                               className={`h-4 w-4 ${
                                 isFavorite ? 'fill-red-500 text-red-500' : 'text-white'
                               }`}
                             />
-                          </button>
+                          </Button>
                         )}
                         {allowDownloads && (
-                          <button
+                          <Button
                             onClick={() => onPhotoDownload?.(photo.id)}
-                            className=""
+                            className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
-                            <Download className="" />
-                          </button>
+                            <Download className="h-4 w-4 text-white" />
+                          </Button>
                         )}
                       </div>
                     </div>

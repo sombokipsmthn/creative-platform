@@ -202,29 +202,29 @@ export default function WorkIndexPage() {
     : allProjects.filter((p) => p.category === selectedPillar);
 
   return (
-    <div className="">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
 
       {/* 1. HERO SECTION */}
-      <section className="">
-        <div className="" />
+      <section className="relative pt-36 pb-12 px-6 max-w-7xl mx-auto text-center space-y-6">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="">
+        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           KIPSMTHN PORTFOLIO ARCHIVE
         </p>
 
-        <h1 className="">
-          Selected Works Across <span className="">Four Creative Pillars</span>
+        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
+          Selected Works Across <span className="font-normal text-purple-600 dark:text-purple-400">Four Creative Pillars</span>
         </h1>
 
-        <p className="">
+        <p className="text-sm text-slate-600 dark:text-zinc-400 font-light max-w-xl mx-auto leading-relaxed">
           Specialized production and visual direction in Photography, Videography, Branding, and UI/UX.
         </p>
       </section>
 
       {/* 2. CREATIVE PILLARS CARDS OVERVIEW */}
-      <section className="">
-        <div className="">
+      <section className="py-8 px-6 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {creativePillars.map((p) => {
             const isActive = selectedPillar === p.id;
             return (
@@ -237,18 +237,18 @@ export default function WorkIndexPage() {
                     : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-purple-500/50'
                 }`}
               >
-                <div className="">
-                  <div className="">
-                    <span className="">{p.num}</span>
-                    <span className="">{p.count}</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center font-sans text-xs">
+                    <span className="text-purple-600 dark:text-purple-400 font-bold">{p.num}</span>
+                    <span className="text-slate-500 dark:text-zinc-500">{p.count}</span>
                   </div>
-                  <h3 className="">{p.title}</h3>
-                  <p className="">{p.desc}</p>
+                  <h3 className="text-xl font-medium text-slate-900 dark:text-white">{p.title}</h3>
+                  <p className="text-xs text-slate-600 dark:text-zinc-400 font-light leading-relaxed">{p.desc}</p>
                 </div>
 
-                <div className="">
+                <div className="flex flex-wrap gap-1 pt-2">
                   {p.tags.slice(0, 3).map((tag) => (
-                    <span key={tag} className="">
+                    <span key={tag} className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] text-slate-700 dark:text-zinc-400 font-sans rounded-sm">
                       {tag}
                     </span>
                   ))}
@@ -260,12 +260,12 @@ export default function WorkIndexPage() {
       </section>
 
       {/* 3. INTERACTIVE PILLAR SWITCHER BAR */}
-      <section className="">
-        <div className="">
+      <section className="py-6 px-6 max-w-7xl mx-auto border-y border-slate-200 dark:border-zinc-900">
+        <div className="flex gap-3 overflow-x-auto justify-start md:justify-center py-2">
           <Button
             variant={selectedPillar === 'All' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('All')}
-            className=""
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             All Works ({allProjects.length})
           </Button>
@@ -273,7 +273,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'Photography' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Photography')}
-            className=""
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             01. Photography ({allProjects.filter((p) => p.category === 'Photography').length})
           </Button>
@@ -281,7 +281,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'Videography' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Videography')}
-            className=""
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             02. Videography ({allProjects.filter((p) => p.category === 'Videography').length})
           </Button>
@@ -289,7 +289,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'Branding' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('Branding')}
-            className=""
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             03. Branding ({allProjects.filter((p) => p.category === 'Branding').length})
           </Button>
@@ -297,7 +297,7 @@ export default function WorkIndexPage() {
           <Button
             variant={selectedPillar === 'UI/UX' ? 'primary' : 'secondary'}
             onClick={() => setSelectedPillar('UI/UX')}
-            className=""
+            className="text-xs font-sans uppercase tracking-widest whitespace-nowrap"
           >
             04. UI / UX ({allProjects.filter((p) => p.category === 'UI/UX').length})
           </Button>
@@ -305,8 +305,8 @@ export default function WorkIndexPage() {
       </section>
 
       {/* 4. SHOWCASE GRID */}
-      <main className="">
-        <div className="">
+      <main className="py-20 px-6 max-w-7xl mx-auto space-y-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {filteredProjects.map((project) => (
             <div
               key={project.id}
@@ -317,29 +317,29 @@ export default function WorkIndexPage() {
                   src={resolveImage(project.image)}
                   alt={project.title}
                   fill
-                  className="ease-out"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   unoptimized
                 />
-                <div className="to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/60 to-transparent" />
               </div>
 
               {/* OVERLAY TEXT */}
-              <div className="to-transparent">
-                <div className="">
-                  <div className="">
-                    <span className="">
+              <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end bg-linear-to-t from-black/95 via-black/70 to-transparent pt-12">
+                <div className="space-y-2 max-w-xl">
+                  <div className="flex items-center gap-3">
+                    <span className="px-2.5 py-1 bg-purple-600/30 border border-purple-400/50 text-purple-200 text-[10px] font-sans uppercase tracking-widest rounded-sm font-semibold">
                       {project.category}
                     </span>
-                    <span className="">{project.year}</span>
+                    <span className="text-xs text-zinc-300 font-sans">{project.year}</span>
                   </div>
-                  <h2 className="">
+                  <h2 className="text-xl md:text-2xl font-medium text-white group-hover:text-purple-300 transition-colors">
                     {project.title}
                   </h2>
-                  <p className="">{project.desc}</p>
-                  <p className="">Client: {project.client}</p>
+                  <p className="text-xs text-zinc-200 font-light leading-relaxed">{project.desc}</p>
+                  <p className="text-[11px] text-purple-300 font-sans font-semibold">Client: {project.client}</p>
                 </div>
 
-                <div className="">
+                <div className="w-10 h-10 rounded-full border border-white/30 bg-black/70 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all shrink-0">
                   ↗
                 </div>
               </div>
@@ -349,17 +349,17 @@ export default function WorkIndexPage() {
       </main>
 
       {/* 5. FOOTER */}
-      <footer className="">
-        <div className="">
-          <div className="">
+      <footer className="border-t border-slate-200 bg-slate-100 dark:bg-zinc-950 rounded-t-xl pt-16 pb-12 px-6">
+        <div className="max-w-7xl mx-auto space-y-12">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
-              <h2 className="">
-                KIPSMTHN<span className="">.</span>
+              <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
+                KIPSMTHN<span className="text-purple-500">.</span>
               </h2>
-              <p className="">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-purple-600 dark:text-purple-400 font-sans">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
-            <div className="">
+            <div className="flex flex-wrap gap-2">
               <Link
                 href="https://www.linkedin.com/in/sombo09/"
                 target="_blank"
@@ -401,12 +401,12 @@ export default function WorkIndexPage() {
             </div>
           </div>
 
-          <div className="">
+          <div className="border-t border-slate-200 dark:border-zinc-900 pt-6 flex flex-col sm:flex-row justify-between items-center text-[11px] text-slate-500 dark:text-zinc-600 font-sans gap-4">
             <p>© {new Date().getFullYear()} KIPSMTHN Platform. All rights reserved.</p>
 
-            <div className="">
+            <div className="flex items-center gap-6">
               <ThemeToggle />
-              <span className="">Nairobi, Kenya</span>
+              <span className="text-slate-500 dark:text-zinc-500">Nairobi, Kenya</span>
             </div>
           </div>
         </div>

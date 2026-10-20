@@ -222,22 +222,36 @@
     {
       "idx": 31,
       "version": "7",
-      "when": 1792500000000,
-      "tag": "0034_expenses",
+      "when": 1792450000000,
+      "tag": "0035_studio_events",
       "breakpoints": true
     },
     {
       "idx": 32,
       "version": "7",
-      "when": 1792501000000,
-      "tag": "0035_payments",
+      "when": 1792500000000,
+      "tag": "0036_add_client_kra_pin",
       "breakpoints": true
     },
     {
       "idx": 33,
       "version": "7",
-      "when": 1792502000000,
-      "tag": "0036_calendar_events",
+      "when": 1792600000000,
+      "tag": "0037_reconcile_studio_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1792700000000,
+      "tag": "0038_payment_ledger",
+      "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792800000000,
+      "tag": "0039_payment_standalone",
       "breakpoints": true
     }
   ]

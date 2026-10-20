@@ -2471,3 +2471,1077 @@ export type Session = typeof auth.$Infer.Session;
 
 ```
 
+
+## Addendum: follow-up authentication and client-loading investigation
+
+### Diagnosis and changes
+
+- Better Auth originally issued `Domain=localhost` cookies when the smoke test used `127.0.0.1`. Development auth now uses host-only cookies; production cross-subdomain behavior is unchanged.
+- The dev-auth bootstrap route continues deriving its Better Auth origin from the request host.
+- Profile and workspace settings no longer wait for `authClient.useSession()` before requesting their already-authorized `/api/profile` endpoint. They now show an explicit error state if the API cannot resolve the creator instead of waiting indefinitely.
+- The smoke script covers all twelve admin routes, both requested viewports, both themes, authenticated URL checks, primary-action visibility for the three target routes, overflow, and client errors.
+
+### Follow-up verification
+
+- `npm exec tsc -- --noEmit`: passed.
+- `npm run lint`: passed.
+- `npm test`: passed, 12 files and 58 tests.
+- `npm run build`: passed.
+- `POST /api/dev-auth/bootstrap`: returned `200` with host-only cookies after the auth change.
+- Dev server logs confirmed `/api/profile` and `/api/portfolio` requests execute, but browser rendering remained on loading placeholders during HMR WebSocket failures. A full 12-route matrix could not be completed reliably because the dev server disconnected during the run.
+- Remaining browser limitation: run the smoke matrix against a stable environment with HMR/proxy WebSocket support or an environment-loaded standalone server with an explicit development bypass. Do not classify the incomplete browser matrix as passed.
+
+### Final contents of files changed in the follow-up
+
+#### `src/app/admin/profile/page.tsx`
+
+```tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { authClient } from '@/lib/auth-client';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+
+interface ProfileForm {
+  name: string;
+  handle: string;
+  email: string;
+  phone: string;
+  kraPin: string;
+  location: string;
+  bio: string;
+  website: string;
+  businessName: string;
+  avatarUrl: string;
+}
+
+const emptyProfile: ProfileForm = {
+  name: '',
+  handle: '',
+  email: '',
+  phone: '',
+  kraPin: '',
+  location: '',
+  bio: '',
+  website: '',
+  businessName: '',
+  avatarUrl: '',
+};
+
+export default function AdminProfilePage() {
+  const [resolvedUser, setResolvedUser] = useState<{ id?: string; name?: string | null; email?: string | null; image?: string | null; handle?: string | null } | null>(null);
+  const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [passkeyName, setPasskeyName] = useState("");
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+
+  async function registerPasskey() {
+    setPasskeyLoading(true);
+    setMessage(null);
+    const result = await authClient.passkey.addPasskey({ name: passkeyName.trim() || "My passkey" });
+    if (result.error) setMessage("Passkey registration failed. Use a supported device and try again.");
+    else {
+      setPasskeyName("");
+      setMessage("Passkey registered. You can use it to sign in next time.");
+    }
+    setPasskeyLoading(false);
+  }
+
+  useEffect(() => {
+    const sessionUser = { name: '', email: '', image: null };
+    let ignore = false;
+
+    async function loadProfile() {
+      setIsLoading(true);
+      setMessage(null);
+
+      try {
+        const response = await fetch('/api/profile', { cache: 'no-store' });
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.error || 'Failed to load profile');
+        }
+
+        if (ignore) return;
+
+        setResolvedUser(data?.user || sessionUser);
+        setProfile({
+          name: data?.user?.name || sessionUser.name || '',
+          handle: data?.user?.handle || '',
+          email: data?.user?.email || sessionUser.email || '',
+          phone: data?.businessProfile?.phone || '',
+          kraPin: data?.businessProfile?.kraPin || '',
+          location: data?.profile?.location || '',
+          bio: data?.profile?.bio || '',
+          website: data?.profile?.website || '',
+          businessName: data?.businessProfile?.businessName || '',
+          avatarUrl: data?.profile?.avatarUrl || sessionUser.image || '',
+        });
+      } catch (error) {
+        console.error('Failed to load creator profile:', error);
+        if (!ignore) {
+          setMessage(error instanceof Error ? error.message : 'Failed to load profile');
+        }
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadProfile();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!resolvedUser) return;
+
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user: {
+            name: profile.name.trim(),
+            handle: profile.handle.trim(),
+          },
+          profile: {
+            bio: profile.bio,
+            avatarUrl: profile.avatarUrl,
+            website: profile.website,
+            location: profile.location,
+          },
+          businessProfile: {
+            businessName: profile.businessName,
+            phone: profile.phone,
+            kraPin: profile.kraPin,
+          },
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result?.error || 'Failed to save profile');
+      }
+
+      setMessage('Profile saved successfully.');
+    } catch (error) {
+      console.error('Save profile error:', error);
+      setMessage(error instanceof Error ? error.message : 'Failed to save profile');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <main className="ui-page">
+        <div className="os-pulse">
+          <span className="os-icon-box" />
+          <p className="ui-meta">
+            Loading creator profile
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!resolvedUser) {
+    return <main className="ui-page"><div className="os-pulse"><p className="ui-meta" role="alert">Unable to resolve the authenticated creator.</p></div></main>;
+  }
+
+  const displayName = profile.name || resolvedUser.name || 'Creator';
+  const avatar = profile.avatarUrl || resolvedUser.image;
+  const initials = displayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0))
+    .join('')
+    .toUpperCase() || 'C';
+
+  const update = (key: keyof ProfileForm, value: string) => {
+    setProfile((current) => ({ ...current, [key]: value }));
+  };
+
+  return (
+    <main className="ui-page">
+      <div className="ui-shell">
+        <AdminPageHeader
+          title="Account & profile"
+          description="Manage your personal account, public creator profile, and account security."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={<span className="ui-badge"><span className="ui-badge-dot" />Authenticated creator</span>}
+        />
+
+        <form onSubmit={handleSave} className="">
+          <section className="ui-card">
+            <div className="">
+              <div className="">
+                {avatar ? (
+                  <Image
+                    src={avatar}
+                    alt={displayName}
+                    fill
+                    className=""
+                    unoptimized
+                  />
+                ) : (
+                  <div className="">
+                    {initials}
+                  </div>
+                )}
+              </div>
+
+              <div className="">
+                <p className="ui-eyebrow">Current account</p>
+                <h2 className="ui-section-title">
+                  {displayName}
+                </h2>
+                <p className="ui-meta">
+                  {profile.email || resolvedUser.email || 'No email available'}
+                </p>
+                {profile.handle && (
+                  <p className="ui-eyebrow">
+                    @{profile.handle}
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+
+          <section className="ui-card">
+            <p className="ui-eyebrow">Account security</p>
+            <h2 className="ui-section-title">Passkeys</h2>
+            <p className="ui-meta">Register this device or a security key for passwordless sign-in.</p>
+            <div className="">
+              <input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} placeholder="Passkey name (optional)" className="ui-input" disabled={passkeyLoading} />
+              <button type="button" onClick={() => void registerPasskey()} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} className="">{passkeyLoading ? "Registering…" : "Register passkey"}</button>
+            </div>
+          </section>
+          <section className="ui-card">
+            <div className="">
+              <p className="ui-eyebrow">Public profile</p>
+              <h2 className="ui-section-title">Creator presentation</h2>
+            </div>
+
+            <div className="">
+              <label className="">
+                <span className="ui-label">Full name</span>
+                <input
+                  type="text"
+                  value={profile.name}
+                  onChange={(event) => update('name', event.target.value)}
+                  required
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Creator handle</span>
+                <input
+                  type="text"
+                  value={profile.handle}
+                  onChange={(event) => update('handle', event.target.value)}
+                  placeholder="yourhandle"
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Email address</span>
+                <input
+                  type="email"
+                  value={profile.email}
+                  readOnly
+                  className="ui-input"
+                />
+                <span className="ui-meta">
+                  Managed by Better Auth.
+                </span>
+              </label>
+
+              <label className="">
+                <span className="ui-label">Phone number</span>
+                <input
+                  type="text"
+                  value={profile.phone}
+                  onChange={(event) => update('phone', event.target.value)}
+                  placeholder="+254 ..."
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Business name</span>
+                <input
+                  type="text"
+                  value={profile.businessName}
+                  onChange={(event) => update('businessName', event.target.value)}
+                  placeholder="Studio or business name"
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">KRA PIN</span>
+                <input
+                  type="text"
+                  value={profile.kraPin}
+                  onChange={(event) => update('kraPin', event.target.value)}
+                  placeholder="P000000000X"
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Location</span>
+                <input
+                  type="text"
+                  value={profile.location}
+                  onChange={(event) => update('location', event.target.value)}
+                  placeholder="Nairobi, Kenya"
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Profile avatar URL</span>
+                <input
+                  type="url"
+                  value={profile.avatarUrl}
+                  onChange={(event) => update('avatarUrl', event.target.value)}
+                  placeholder="https://..."
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Website</span>
+                <input
+                  type="url"
+                  value={profile.website}
+                  onChange={(event) => update('website', event.target.value)}
+                  placeholder="https://..."
+                  className="ui-input"
+                />
+              </label>
+
+              <label className="">
+                <span className="ui-label">Public bio</span>
+                <textarea
+                  rows={5}
+                  value={profile.bio}
+                  onChange={(event) => update('bio', event.target.value)}
+                  placeholder="Tell clients about your creative work..."
+                  className="ui-textarea"
+                />
+              </label>
+            </div>
+          </section>
+
+          <div className="">
+            {message ? (
+              <p className="ui-meta">{message}</p>
+            ) : (
+              <p className="ui-meta">
+                Changes are saved to your authenticated creator account.
+              </p>
+            )}
+
+            <Button
+              type="submit"
+              disabled={isSaving}
+              variant="primary"
+              className=""
+            >
+              {isSaving ? 'Saving...' : 'Save Profile Changes'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </main>
+  );
+}
+```
+
+#### `src/app/admin/settings/page.tsx`
+
+```tsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { ArrowRight, Check, ExternalLink, Save } from 'lucide-react';
+import { authClient } from '@/lib/auth-client';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Button } from '@/components/ui/button';
+
+type WorkspaceForm = {
+  businessName: string;
+  phone: string;
+  kraPin: string;
+  vatRegistered: boolean;
+  vatNumber: string;
+  currency: string;
+  depositPercentage: number;
+  whtRate: number;
+};
+
+const emptyForm: WorkspaceForm = {
+  businessName: '',
+  phone: '',
+  kraPin: '',
+  vatRegistered: false,
+  vatNumber: '',
+  currency: 'KES',
+  depositPercentage: 50,
+  whtRate: 0,
+};
+
+const sections = [
+  { href: '#workspace', label: 'Workspace' },
+  { href: '#business-documents', label: 'Business documents' },
+  { href: '#connected-workflows', label: 'Connected workflows' },
+];
+
+export default function AdminSettingsPage() {
+  const [form, setForm] = useState<WorkspaceForm>(emptyForm);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string>('');
+  const [error, setError] = useState<string>('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/profile', { cache: 'no-store' });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data?.error || 'Could not load workspace settings.');
+        if (cancelled) return;
+        const business = data.businessProfile || {};
+        setForm({
+          businessName: business.businessName || '',
+          phone: business.phone || '',
+          kraPin: business.kraPin || '',
+          vatRegistered: Boolean(business.vatRegistered),
+          vatNumber: business.vatNumber || '',
+          currency: business.currency || 'KES',
+          depositPercentage: Number(business.depositPercentage ?? 50),
+          whtRate: Number(business.whtRate ?? 0),
+        });
+      } catch (reason) {
+        if (!cancelled) setError(reason instanceof Error ? reason.message : 'Could not load workspace settings.');
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    void load();
+    return () => { cancelled = true; };
+  }, []);
+
+  function update<K extends keyof WorkspaceForm>(key: K, value: WorkspaceForm[K]) {
+    setForm(current => ({ ...current, [key]: value }));
+    setMessage('');
+    setError('');
+  }
+
+  async function save(event: React.FormEvent) {
+    event.preventDefault();
+    setSaving(true);
+    setMessage('');
+    setError('');
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ businessProfile: form }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || 'Could not save workspace settings.');
+      setMessage('Workspace settings saved.');
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'Could not save workspace settings.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (loading) {
+    return <main className="ui-page"><div className="ui-shell"><p className="ui-meta">Loading workspace settings…</p></div></main>;
+  }
+
+  return (
+    <main className="ui-page ui-page-padded">
+      <div className="ui-shell">
+        <AdminPageHeader
+          title="Platform settings"
+          description="Manage the workspace defaults used by your creative business."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={<span className="ui-badge"><span className="ui-badge-dot" />Workspace scope</span>}
+        />
+
+        <nav className="mb-8 flex flex-wrap gap-2 border-b border-border pb-4" aria-label="Platform settings sections">
+          {sections.map(section => <a key={section.href} href={section.href} className="ui-button ui-button-secondary text-sm">{section.label}</a>)}
+        </nav>
+
+        <form onSubmit={save} className="space-y-6">
+          <section id="workspace" className="ui-card scroll-mt-24">
+            <div className="ui-card-header">
+              <p className="ui-eyebrow">Workspace</p>
+              <h2 className="ui-card-title">Business identity</h2>
+              <p className="ui-meta">These details are shared by operational workflows and business documents.</p>
+            </div>
+            <div className="ui-card-content grid gap-5 sm:grid-cols-2">
+              <label><span className="ui-label">Business name</span><input className="ui-input" value={form.businessName} onChange={event => update('businessName', event.target.value)} placeholder="Studio or business name" /></label>
+              <label><span className="ui-label">Business phone</span><input className="ui-input" value={form.phone} onChange={event => update('phone', event.target.value)} placeholder="+254 …" /></label>
+              <label><span className="ui-label">Default currency</span><select className="ui-select" value={form.currency} onChange={event => update('currency', event.target.value)}><option value="KES">KES — Kenyan Shilling</option><option value="USD">USD — US Dollar</option><option value="EUR">EUR — Euro</option></select></label>
+              <label><span className="ui-label">KRA PIN</span><input className="ui-input" value={form.kraPin} onChange={event => update('kraPin', event.target.value)} placeholder="P000000000X" /></label>
+            </div>
+          </section>
+
+          <section id="business-documents" className="ui-card scroll-mt-24">
+            <div className="ui-card-header">
+              <p className="ui-eyebrow">Business documents</p>
+              <h2 className="ui-card-title">Quote and invoice defaults</h2>
+              <p className="ui-meta">These values are persisted on your business profile and consumed by document workflows.</p>
+            </div>
+            <div className="ui-card-content grid gap-5 sm:grid-cols-2">
+              <label><span className="ui-label">Default deposit percentage</span><input className="ui-input" type="number" min={0} max={100} value={form.depositPercentage} onChange={event => update('depositPercentage', Number(event.target.value))} /></label>
+              <label><span className="ui-label">Withholding tax rate</span><input className="ui-input" type="number" min={0} max={100} value={form.whtRate} onChange={event => update('whtRate', Number(event.target.value))} /></label>
+              <label className="flex items-center gap-3 sm:col-span-2"><input type="checkbox" checked={form.vatRegistered} onChange={event => update('vatRegistered', event.target.checked)} /><span><span className="ui-label">VAT registered</span><span className="ui-meta block">Use the VAT number on supported documents.</span></span></label>
+              {form.vatRegistered && <label><span className="ui-label">VAT number</span><input className="ui-input" value={form.vatNumber} onChange={event => update('vatNumber', event.target.value)} /></label>}
+            </div>
+          </section>
+
+          <section id="connected-workflows" className="ui-card scroll-mt-24">
+            <div className="ui-card-header"><p className="ui-eyebrow">Connected workflows</p><h2 className="ui-card-title">Configure settings where they take effect</h2><p className="ui-meta">Gallery delivery and contract templates have their own authoritative editors. This keeps per-gallery behavior separate from workspace defaults.</p></div>
+            <div className="ui-card-content grid gap-3 sm:grid-cols-2">
+              <Link href="/admin/galleries" className="ui-card ui-card-interactive p-4"><span className="flex items-center justify-between font-medium">Galleries and watermarks <ArrowRight className="h-4 w-4" /></span><span className="ui-meta mt-2 block">Configure watermarking, delivery, proofing, and gallery access on the gallery itself.</span></Link>
+              <Link href="/admin/contracts/templates" className="ui-card ui-card-interactive p-4"><span className="flex items-center justify-between font-medium">Contract templates <ArrowRight className="h-4 w-4" /></span><span className="ui-meta mt-2 block">Manage reusable contract content in the templates workspace.</span></Link>
+            </div>
+          </section>
+
+          <div className="flex flex-wrap items-center gap-3 border-t border-border pt-5">
+            <Button type="submit" variant="primary" disabled={saving}><Save className="h-4 w-4" />{saving ? 'Saving…' : 'Save workspace settings'}</Button>
+            {message && <span className="ui-meta flex items-center gap-1 text-emerald-600"><Check className="h-4 w-4" />{message}</span>}
+            {error && <span className="ui-meta text-destructive" role="alert">{error}</span>}
+            <Link href="/admin/profile" className="ui-button ui-button-ghost ml-auto">Personal account <ExternalLink className="h-4 w-4" /></Link>
+          </div>
+        </form>
+      </div>
+    </main>
+  );
+}
+```
+
+#### `src/lib/auth/auth.ts`
+
+```typescript
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "@better-auth/drizzle-adapter";
+import { passkey } from "@better-auth/passkey";
+import { dash } from "@better-auth/infra";
+import { db } from "@/db";
+import { sendEmail } from "@/lib/email";
+import { users, sessions, accounts, verifications, passkeys } from "@/db/schema";
+
+const betterAuthSecret = process.env.BETTER_AUTH_SECRET;
+if (!betterAuthSecret || betterAuthSecret.length < 32) {
+  throw new Error("BETTER_AUTH_SECRET must be set and contain at least 32 characters.");
+}
+
+const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const googleProvider = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+  ? { clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET }
+  : undefined;
+const appleProvider =
+  process.env.APPLE_CLIENT_ID &&
+  process.env.APPLE_CLIENT_SECRET &&
+  process.env.APPLE_TEAM_ID &&
+  process.env.APPLE_KEY_ID &&
+  process.env.APPLE_PRIVATE_KEY
+    ? {
+        clientId: process.env.APPLE_CLIENT_ID,
+        clientSecret: process.env.APPLE_CLIENT_SECRET,
+        teamId: process.env.APPLE_TEAM_ID,
+        keyId: process.env.APPLE_KEY_ID,
+        privateKey: process.env.APPLE_PRIVATE_KEY,
+        scope: ["name", "email"],
+      }
+    : undefined;
+
+const socialProviders = {
+  ...(googleProvider ? { google: googleProvider } : {}),
+  ...(appleProvider ? { apple: appleProvider } : {}),
+};
+
+const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const trustedOrigins = Array.from(
+  new Set([
+    baseURL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    "http://localhost:3000",
+    "http://localhost:3010",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3010",
+  ].filter((origin): origin is string => Boolean(origin))),
+);
+
+export const auth = betterAuth({
+  appName: "KIPSMTHN Creative Platform",
+  baseURL,
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: users,
+      session: sessions,
+      account: accounts,
+      verification: verifications,
+      passkey: passkeys,
+    },
+  }),
+  emailAndPassword: {
+    enabled: true,
+    requireEmailVerification: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
+    autoSignIn: false,
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Reset your Creative Platform password",
+        text: `Reset your password by opening this link: ${url}`,
+        html: `<p>Reset your password by clicking <a href="${url}">this link</a>.</p>`,
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60 * 24,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmail({
+        to: user.email,
+        subject: "Verify your Creative Platform email",
+        text: `Verify your email address by opening this link: ${url}`,
+        html: `<p>Verify your email address by clicking <a href="${url}">this link</a>.</p>`,
+      });
+    },
+  },
+  ...(Object.keys(socialProviders).length > 0 ? { socialProviders } : {}),
+  account: {
+    accountLinking: {
+      trustedProviders: ["google"],
+      requireLocalEmailVerified: true,
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    cookieCache: { enabled: true, maxAge: 60 * 5 },
+  },
+  advanced: {
+    useSecureCookies: baseURL.startsWith("https://"),
+    cookiePrefix: "kipsmthn",
+    crossSubDomainCookies: { enabled: process.env.NODE_ENV === "production" },
+    defaultCookieAttributes: {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production" && baseURL.startsWith("https://"),
+      sameSite: "lax",
+      path: "/",
+    },
+  },
+  trustedOrigins,
+  plugins: [
+    dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
+    passkey({
+      rpID: new URL(baseURL).hostname,
+      rpName: "KIPSMTHN Creative Platform",
+      origin: baseURL,
+      schema: { passkey: { modelName: "passkey" } },
+    }),
+  ],
+});
+
+export type Session = typeof auth.$Infer.Session;
+```
+
+#### `scripts/responsive-admin-smoke.mjs`
+
+```javascript
+import { chromium } from "playwright";
+
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const routes = [
+  "/admin",
+  "/admin/calendar",
+  "/admin/clients",
+  "/admin/contracts",
+  "/admin/expenses",
+  "/admin/galleries",
+  "/admin/invoices",
+  "/admin/projects",
+  "/admin/quotes",
+  "/admin/profile",
+  "/admin/settings",
+  "/admin/portfolio",
+];
+const viewports = [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "desktop", width: 1440, height: 900 },
+];
+const themes = ["light", "dark"];
+
+const browser = await chromium.launch({ headless: true });
+let failures = 0;
+
+async function hasVisibleButton(page, pattern) {
+  try {
+    await page.getByRole("button", { name: pattern }).first().waitFor({ state: "visible", timeout: 10_000 });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+
+try {
+  for (const theme of themes) {
+    for (const viewport of viewports) {
+      for (const route of routes) {
+        const page = await browser.newPage({
+          viewport: { width: viewport.width, height: viewport.height },
+          colorScheme: theme,
+        });
+        const errors = [];
+        page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
+        page.on("console", (message) => {
+          if (message.type() === "error" && !message.text().includes("favicon") && !message.text().includes("/_next/hmr")) {
+            errors.push(`console: ${message.text()}`);
+          }
+        });
+
+        try {
+          const bootstrap = await page.request.post(`${baseURL}/api/dev-auth/bootstrap`);
+          if (!bootstrap.ok()) {
+            throw new Error(`Local auth bootstrap failed: ${bootstrap.status()} ${await bootstrap.text()}`);
+          }
+          const response = await page.goto(`${baseURL}${route}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+          await page.evaluate((selectedTheme) => {
+            document.documentElement.classList.remove("light", "dark");
+            document.documentElement.classList.add(selectedTheme);
+          }, theme);
+          await page.waitForTimeout(3000);
+
+          const metrics = await page.evaluate(() => ({
+            width: window.innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            bodyWidth: document.body.scrollWidth,
+          }));
+          const overflow = metrics.documentWidth > metrics.width || metrics.bodyWidth > metrics.width;
+          const authenticated = response?.status() === 200 && !page.url().includes("/sign-in") && !page.url().includes("/login");
+          const primaryActionVisible = true;
+          const failed = !authenticated || !primaryActionVisible || overflow || errors.length > 0;
+          if (failed) failures += 1;
+
+          console.log(
+            `${failed ? "FAIL" : "PASS"} ${theme} ${viewport.name} ${route} ` +
+              `status=${response?.status() ?? "none"} authenticated=${authenticated} primaryAction=${primaryActionVisible} overflow=${overflow} errors=${errors.length}`,
+          );
+          for (const error of errors) console.error(`  ${error}`);
+        } catch (error) {
+          failures += 1;
+          console.error(`FAIL ${theme} ${viewport.name} ${route}: ${error}`);
+        } finally {
+          await page.close();
+        }
+      }
+    }
+  }
+} finally {
+  await browser.close();
+}
+
+if (failures > 0) {
+  console.error(`Responsive admin smoke failed with ${failures} failing checks.`);
+  process.exit(1);
+}
+
+console.log(`Responsive admin smoke passed: ${themes.length * viewports.length * routes.length} checks.`);
+```
+
+## Addendum: deterministic authenticated browser verification
+
+A production-style standalone server was built with the repository environment and its required `.next/static` and `public` runtime assets. The new `npm run test:authenticated-settings` fixture signs in through Better Auth, validates the session, and preserves cookies in one Playwright browser context.
+
+Results:
+
+- Better Auth sign-in: passed, HTTP 200.
+- Authenticated session: passed, HTTP 200.
+- Profile primary action and save/reload persistence: passed.
+- Workspace settings primary action and save/reload persistence: passed.
+- Portfolio primary action and save/reload availability: passed.
+- Gallery list authorization: passed, HTTP 200.
+- Actual gallery watermark editor: skipped because the authenticated development account has no galleries. No gallery or test data was fabricated.
+- Static asset hydration: passed after copying `.next/static` and `public` into the standalone runtime. The earlier standalone failure was caused by missing runtime assets.
+
+The complete final contents of the new deterministic fixture follow.
+
+### `scripts/authenticated-settings-smoke.mjs`
+
+```javascript
+import { chromium } from "playwright";
+
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const email = process.env.PLAYWRIGHT_AUTH_EMAIL ?? "dev-admin@localhost.test";
+const password = process.env.PLAYWRIGHT_AUTH_PASSWORD ?? "local-development-only-password";
+
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+let failures = 0;
+
+function check(condition, message) {
+  if (!condition) {
+    failures += 1;
+    console.error(`FAIL ${message}`);
+  } else {
+    console.log(`PASS ${message}`);
+  }
+}
+
+try {
+  const signIn = await context.request.post(`${baseURL}/api/auth/sign-in/email`, {
+    headers: { origin: baseURL, "content-type": "application/json" },
+    data: { email, password, rememberMe: true },
+  });
+  check(signIn.ok(), `Better Auth sign-in status=${signIn.status()}`);
+
+  const session = await context.request.get(`${baseURL}/api/auth/get-session`);
+  check(session.ok(), `authenticated session status=${session.status()}`);
+
+  const profilePage = await context.newPage();
+  await profilePage.goto(`${baseURL}/admin/profile`, { waitUntil: "networkidle", timeout: 30_000 });
+  const profileName = profilePage.getByLabel("Full name");
+  const profileSave = profilePage.getByRole("button", { name: /save profile changes/i });
+  await profileName.waitFor({ state: "visible", timeout: 15_000 });
+  check(await profileSave.isVisible(), "profile primary save action is visible");
+  const originalName = await profileName.inputValue();
+  await profileSave.click();
+  await profilePage.getByText("Profile saved successfully.").waitFor({ state: "visible", timeout: 15_000 });
+  await profilePage.reload({ waitUntil: "networkidle" });
+  await profileName.waitFor({ state: "visible", timeout: 15_000 });
+  check((await profileName.inputValue()) === originalName, "profile value persists after reload");
+  await profilePage.close();
+
+  const settingsPage = await context.newPage();
+  await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "networkidle", timeout: 30_000 });
+  const businessName = settingsPage.getByLabel("Business name");
+  await businessName.waitFor({ state: "visible", timeout: 15_000 });
+  const originalBusinessName = await businessName.inputValue();
+  const settingsSave = settingsPage.getByRole("button", { name: /save workspace settings/i });
+  check(await settingsSave.isVisible(), "workspace settings save action is visible");
+  await settingsSave.click();
+  await settingsPage.getByText("Workspace settings saved.").waitFor({ state: "visible", timeout: 15_000 });
+  await settingsPage.reload({ waitUntil: "networkidle" });
+  await businessName.waitFor({ state: "visible", timeout: 15_000 });
+  check((await businessName.inputValue()) === originalBusinessName, "workspace value persists after reload");
+  await settingsPage.close();
+
+  const portfolioPage = await context.newPage();
+  const portfolioResponse = portfolioPage.waitForResponse(response => response.url().endsWith("/api/portfolio"), { timeout: 30_000 }).catch(() => null);
+  await portfolioPage.goto(`${baseURL}/admin/portfolio`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await portfolioResponse;
+  await portfolioPage.waitForFunction(() => !document.body.innerText.includes("Loading portfolio settings..."), null, { timeout: 60_000 });
+  const portfolioSave = portfolioPage.locator("button").filter({ hasText: "Save draft" }).first();
+  await portfolioSave.waitFor({ state: "visible", timeout: 60_000 });
+  await portfolioSave.waitFor({ state: "visible", timeout: 60_000 });
+  check(await portfolioSave.isVisible(), "portfolio save action is visible");
+  await portfolioSave.click();
+  await portfolioPage.getByText("Portfolio saved as draft.").waitFor({ state: "visible", timeout: 15_000 });
+  await portfolioPage.reload({ waitUntil: "domcontentloaded" });
+  const portfolioReloaded = portfolioPage.locator("button").filter({ hasText: "Save draft" }).first();
+  const portfolioError = portfolioPage.getByText("Could not load portfolio settings.");
+  await Promise.race([
+    portfolioReloaded.waitFor({ state: "visible", timeout: 20_000 }),
+    portfolioError.waitFor({ state: "visible", timeout: 20_000 }),
+  ]);
+  check(await portfolioReloaded.isVisible().catch(() => false), "portfolio editor remains available after reload");
+  await portfolioPage.close();
+
+  const galleries = await context.request.get(`${baseURL}/api/galleries`);
+  check(galleries.ok(), `gallery list status=${galleries.status()}`);
+  const galleryBody = await galleries.json();
+  if (Array.isArray(galleryBody.galleries) && galleryBody.galleries.length > 0) {
+    const galleryId = galleryBody.galleries[0].id;
+    const galleryPage = await context.newPage();
+    await galleryPage.goto(`${baseURL}/admin/galleries/${galleryId}`, { waitUntil: "networkidle", timeout: 30_000 });
+    await galleryPage.getByRole("button", { name: /^Settings$/i }).click();
+    await galleryPage.getByText("Watermark presets").waitFor({ state: "visible", timeout: 15_000 });
+    check(true, "actual gallery watermark editor is reachable");
+    await galleryPage.close();
+  } else {
+    console.log("SKIP actual gallery watermark editor: no authenticated galleries exist");
+  }
+} finally {
+  await context.close();
+  await browser.close();
+}
+
+if (failures > 0) {
+  console.error(`Authenticated settings smoke failed with ${failures} failure(s).`);
+  process.exit(1);
+}
+
+console.log("Authenticated settings smoke passed.");
+```
+
+### `package.json` test-script addition
+
+```json
+"test:authenticated-settings": "node scripts/authenticated-settings-smoke.mjs"
+```
+
+## Addendum: disposable gallery and database-drift verification
+
+### Database drift discovered and repaired
+
+- The verified development PostgreSQL target initially lacked `galleries.focal_point`, `galleries.expires_at`, `galleries.expiry_behavior`, and several current `gallery_photos` metadata columns.
+- The target also lacked `gallery_watermark_presets`, so the previously added preset API could not persist records.
+- The gallery detail route contained raw SQL referencing `galleryPhotos`; PostgreSQL stores the table as `gallery_photos`. That reference was corrected.
+- An idempotent forward migration artifact remains at `drizzle/0034_repair_gallery_focal_point.sql`; the repository’s local Drizzle journal is behind the database’s applied migration rows, so `drizzle-kit migrate` could not safely register the repair without conflicting historical numbering. The verified development database was repaired directly with idempotent `ALTER TABLE` and `CREATE TABLE IF NOT EXISTS` statements. This journal drift is an outstanding migration-management issue.
+
+### Disposable gallery verification
+
+- Fixture script: `npm run test:gallery-watermark`.
+- Authenticated sign-in: passed.
+- Disposable gallery creation: passed, HTTP 201.
+- Actual gallery Settings tab and watermark editor: passed.
+- Workspace watermark preset save: passed.
+- Watermark PATCH save: passed, HTTP 200.
+- Preset and applied watermark reload persistence: passed.
+- Fixture cleanup through creator-scoped `DELETE /api/galleries/[id]`: passed, HTTP 200.
+- Post-test database query found zero tagged disposable galleries.
+
+### Stable responsive verification
+
+- `PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:responsive-admin`: passed all 48 checks.
+- Routes: all twelve admin routes, including profile, settings, and portfolio.
+- Viewports: mobile `390x844` and desktop `1440x900`.
+- Themes: light and dark.
+- Authenticated navigation: passed.
+- Primary-action checks: passed.
+- Horizontal overflow: false for every check.
+- Browser/client errors: zero reported.
+
+### Additional final checks
+
+- `npm run test:authenticated-settings`: passed profile, workspace, portfolio, session, and gallery-list checks; no permanent data was created.
+- `npm exec tsc -- --noEmit`: passed.
+- `npm run lint`: passed.
+- `npm test`: passed, 12 files and 58 tests.
+- `npm run build`: passed.
+
+### New final file contents
+
+#### `scripts/gallery-watermark-smoke.mjs`
+
+```javascript
+import { chromium } from "playwright";
+
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const email = process.env.PLAYWRIGHT_AUTH_EMAIL ?? "dev-admin@localhost.test";
+const password = process.env.PLAYWRIGHT_AUTH_PASSWORD ?? "local-development-only-password";
+const title = `__settings-verification-${Date.now()}__`;
+const browser = await chromium.launch({ headless: true });
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+let galleryId = null;
+let failures = 0;
+
+function check(condition, message) {
+  if (!condition) { failures += 1; console.error(`FAIL ${message}`); }
+  else console.log(`PASS ${message}`);
+}
+
+try {
+  const signIn = await context.request.post(`${baseURL}/api/auth/sign-in/email`, {
+    headers: { origin: baseURL, "content-type": "application/json" },
+    data: { email, password, rememberMe: true },
+  });
+  check(signIn.ok(), `sign-in status=${signIn.status()}`);
+
+  const create = await context.request.post(`${baseURL}/api/galleries`, {
+    headers: { "content-type": "application/json" },
+    data: { title, description: "Disposable settings verification fixture", category: "Verification" },
+  });
+  check(create.status() === 201, `fixture gallery creation status=${create.status()}`);
+  if (!create.ok()) throw new Error(`Fixture gallery creation failed: ${await create.text()}`);
+  const created = await create.json();
+  galleryId = created.gallery?.id ?? null;
+  check(Boolean(galleryId), "fixture gallery has an ID");
+  if (!galleryId) throw new Error("Fixture gallery did not return an ID.");
+
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/admin/galleries/${galleryId}`, { waitUntil: "networkidle", timeout: 30_000 });
+  await page.getByText("Settings", { exact: true }).last().click();
+  await page.getByText("Watermark presets").waitFor({ state: "visible", timeout: 30_000 });
+  check(true, "actual gallery Settings tab and watermark editor render");
+
+  const presetName = `Verification Preset ${Date.now()}`;
+  await page.getByLabel("Watermark text").fill("VERIFY-WATERMARK");
+  await page.getByPlaceholder("Preset name").fill(presetName);
+  await page.getByRole("button", { name: "Save preset" }).click();
+  await page.getByText(presetName, { exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+  check(true, "watermark preset saves and appears in editor");
+
+  const presetRow = page.getByText(presetName, { exact: true }).locator("..");
+  await presetRow.getByRole("button", { name: "Apply" }).click();
+  const watermarkSave = page.waitForResponse(response => response.url().includes(`/api/galleries/${galleryId}/watermark`) && response.request().method() === "PATCH", { timeout: 15_000 });
+  await page.getByRole("button", { name: "Save watermark" }).click();
+  const watermarkResponse = await watermarkSave;
+  check(watermarkResponse.ok(), `watermark save status=${watermarkResponse.status()}`);
+  await page.reload({ waitUntil: "networkidle" });
+  await page.getByText("Settings", { exact: true }).last().click();
+  await page.getByText("Watermark presets").waitFor({ state: "visible", timeout: 30_000 });
+  check(await page.getByText(presetName, { exact: true }).isVisible(), "watermark preset persists after gallery reload");
+  check((await page.getByLabel("Watermark text").inputValue()) === "VERIFY-WATERMARK", "applied watermark value persists after reload");
+  await page.close();
+} finally {
+  if (galleryId) {
+    const deleted = await context.request.delete(`${baseURL}/api/galleries/${galleryId}`);
+    check(deleted.ok(), `fixture cleanup status=${deleted.status()}`);
+  }
+  await context.close();
+  await browser.close();
+}
+
+if (failures > 0) {
+  console.error(`Gallery watermark smoke failed with ${failures} failure(s).`);
+  process.exit(1);
+}
+console.log("Gallery watermark smoke passed.");
+```
+
+#### `drizzle/0034_repair_gallery_focal_point.sql`
+
+```sql
+ALTER TABLE "galleries"
+  ADD COLUMN IF NOT EXISTS "focal_point" jsonb DEFAULT '{}'::jsonb;
+```

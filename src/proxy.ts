@@ -1,34 +1,18 @@
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 import { NextResponse } from "next/server";
 
-function configuredOrigin(request?: Request): string {
-  if (process.env.BETTER_AUTH_URL) return process.env.BETTER_AUTH_URL;
-  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
-  if (request) {
-    try {
-      const url = new URL(request.url);
-      return url.origin;
-    } catch {
-      // ignore
-    }
-  }
-  return "http://localhost:3000";
+function configuredOrigin(): string | null {
+  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
 }
 
-function getAuthOrigin(request?: Request): string {
-  return configuredOrigin(request);
+function getAuthOrigin(): string | null {
+  return configuredOrigin();
 }
 
-async function hasAuthenticatedSession(request: Request): Promise<boolean> {
+async function hasAuthenticatedSession(request: Request, authOrigin: string): Promise<boolean> {
   try {
-    // Probe Better Auth through the same origin that received the request so
-    // the browser's session cookie is evaluated by the same app instance.
-    const sessionUrl = new URL("/api/auth/get-session", request.url);
-    const session = await fetch(sessionUrl, {
-      headers: {
-        cookie: request.headers.get("cookie") ?? "",
-      },
-      cache: "no-store",
+    const session = await fetch(`${authOrigin}/api/auth/session`, {
+      headers: request.headers,
     });
     return session.ok;
   } catch {
@@ -81,7 +65,8 @@ export default async function customMiddleware(request: Request) {
   }
 
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
-    if (!(await hasAuthenticatedSession(request))) {
+    const authOrigin = getAuthOrigin();
+    if (!authOrigin || !(await hasAuthenticatedSession(request, authOrigin))) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);
       const response = NextResponse.redirect(signInUrl);

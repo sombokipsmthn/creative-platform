@@ -520,7 +520,7 @@ function AdminProjectsPageContent() {
             ['Total Projects', allProjectCounts.total, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', allProjectCounts.draft, 'text-amber-600 dark:text-amber-400'],
             ['Published', allProjectCounts.published, 'text-emerald-600 dark:text-emerald-400'],
-            ['Featured', allProjectCounts.featured, 'text-purple-600 dark:text-purple-400'],
+            ['Featured', allProjectCounts.featured, 'text-primary dark:text-primary'],
             ['Active', allProjectCounts.active, 'text-blue-600 dark:text-blue-400'],
             ['Completed', allProjectCounts.completed, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (

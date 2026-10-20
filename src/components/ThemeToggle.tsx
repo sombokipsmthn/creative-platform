@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { Moon, Sun } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 function subscribe(callback: () => void) {
   window.addEventListener('storage', callback);

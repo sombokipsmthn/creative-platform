@@ -10,7 +10,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import type { ContractTemplate } from '@/lib/types/contracts';
 
 export default function ContractTemplatesPage() {

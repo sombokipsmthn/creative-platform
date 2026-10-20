@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Upload, X, Check, Loader2, Trash2, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { upload } from '@vercel/blob/client';
 
 interface UploadItem {

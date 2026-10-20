@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 export const metadata: Metadata = {
   title: "Work | KIPSMTHN",

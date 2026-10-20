@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import WatermarkPreview from '@/components/WatermarkPreview';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 
 type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations';
 

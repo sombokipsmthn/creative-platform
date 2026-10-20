@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 interface ProfileForm {

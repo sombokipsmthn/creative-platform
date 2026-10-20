@@ -7,7 +7,7 @@ import Image from 'next/image';
 import ClientLightbox from '@/components/ClientLightbox';
 import DownloadModal from '@/components/DownloadModal';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import Header from '@/components/header';
 import Footer from '@/components/Footer';
 

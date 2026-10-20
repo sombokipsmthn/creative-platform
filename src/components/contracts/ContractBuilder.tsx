@@ -591,7 +591,7 @@ export function ContractBuilder({
                 </div>
                 <div className="">
                   <div
-                    className="to-purple-600"
+                    className="to-primary"
                     style={{ width: `${completionStats.percentage}%` }}
                   />
                 </div>

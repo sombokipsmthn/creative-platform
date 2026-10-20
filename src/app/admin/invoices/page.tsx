@@ -16,10 +16,22 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/Table';
+import { Alert, AlertDescription } from '@/components/ui/Alert';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 type Client = {
   id: string;
@@ -94,21 +106,19 @@ function getStatusLabel(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }
 
-function getStatusBadgeClass(status: string) {
+function getStatusBadgeVariant(status: string): 'success' | 'secondary' | 'destructive' | 'default' {
   switch (status.toLowerCase()) {
     case 'paid':
-      return 'ui-badge ui-badge-success';
+      return 'success';
     case 'sent':
-      return 'ui-badge ui-badge-accent';
     case 'viewed':
-      return 'ui-badge ui-badge-accent';
+      return 'secondary';
     case 'overdue':
-      return 'ui-badge ui-badge-danger';
     case 'cancelled':
-      return 'ui-badge ui-badge-danger';
+      return 'destructive';
     case 'draft':
     default:
-      return 'ui-badge';
+      return 'default';
   }
 }
 
@@ -341,15 +351,15 @@ export default function InvoicesPage() {
             <p className="text-sm font-medium text-muted-foreground">Draft</p>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {summary.draft}
-            </p>
-          </div>
+            </span>
+          </Card>
 
           <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
             <p className="text-sm font-medium text-muted-foreground">Paid</p>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {summary.paid}
-            </p>
-          </div>
+            </span>
+          </Card>
 
           <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
             <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
@@ -446,7 +456,7 @@ export default function InvoicesPage() {
                   Create First Invoice
                 </Button>
               </div>
-            </div>
+            </CardContent>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full caption-bottom text-sm">
@@ -555,7 +565,7 @@ export default function InvoicesPage() {
               </table>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* PAGINATION */}
         {pagination && pagination.totalPages > 0 && (

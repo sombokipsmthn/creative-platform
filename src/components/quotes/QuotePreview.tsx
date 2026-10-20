@@ -108,7 +108,7 @@ export default function QuotePreview({
             <div>
               <p className="text-xl font-bold tracking-[0.2em] uppercase">
                 KIPSMTHN
-                <span className="text-purple-600">.</span>
+                <span className="text-primary">.</span>
               </p>
 
               <p className="mt-2 text-[10px] uppercase tracking-[0.25em] text-slate-400">
@@ -195,7 +195,7 @@ export default function QuotePreview({
 
         {/* TITLE */}
         <div className="px-10 md:px-14 pb-8">
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-purple-600">
+          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary">
             Proposal
           </p>
 

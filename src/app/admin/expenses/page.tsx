@@ -122,11 +122,11 @@ export default function AdminExpensesPage() {
         <div className="space-y-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
             <div>
-              <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
+              <Link href="/admin" className="text-xs font-sans text-primary dark:text-primary hover:underline">← Back to Dashboard</Link>
               <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
             </div>
 
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-sans rounded-full font-semibold">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/30 text-primary dark:text-primary text-xs font-sans rounded-full font-semibold">
               <span>30% KRA Income Tax Shield Active</span>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function AdminExpensesPage() {
               {expenses.map((exp) => (
                 <div
                   key={exp.id}
-                  className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
+                  className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-primary/50 transition-all group shadow-sm dark:shadow-none"
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shrink-0 bg-slate-100 dark:bg-zinc-900">
@@ -261,7 +261,7 @@ export default function AdminExpensesPage() {
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
+                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full uppercase font-semibold">
                           {exp.category}
                         </span>
                         <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${

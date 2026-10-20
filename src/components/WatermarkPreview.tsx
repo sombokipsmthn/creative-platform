@@ -77,7 +77,7 @@ export default function WatermarkPreview({
 
         <button
           onClick={handleSave}
-          className="px-4 py-2 text-xs font-sans uppercase tracking-widest bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors shadow-md shadow-purple-600/20"
+          className="px-4 py-2 text-xs font-sans uppercase tracking-widest bg-primary text-white rounded-xl hover:bg-primary transition-colors shadow-md shadow-primary/20"
         >
           Save Watermark Settings
         </button>
@@ -142,8 +142,8 @@ export default function WatermarkPreview({
             onClick={() => handlePositionSelect(position)}
             className={`h-12 rounded-lg border-2 transition-colors ${
               watermarkPosition === position
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20'
-                : 'border-slate-200 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-800'
+                ? 'border-primary bg-primary/10 dark:bg-primary/10'
+                : 'border-slate-200 dark:border-zinc-800 hover:border-primary dark:hover:border-primary'
             }`}
           >
             <span className="text-[10px] font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-400">

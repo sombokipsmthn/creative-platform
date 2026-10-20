@@ -18,7 +18,7 @@ while i < len(lines):
             new_classname = [
                 '                  className={\n',
                 '                    \'rounded-lg px-3 py-2 text-sm font-medium \' +\n',
-                '                    (state.view === \'week\' ? \'bg-purple-600 text-white\' : \'border border-slate-200 text-slate-500 hover:bg-slate-50\') +\n',
+                '                    (state.view === \'week\' ? \'bg-primary text-white\' : \'border border-slate-200 text-slate-500 hover:bg-slate-50\') +\n',
                 '                    \' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50\'\n',
                 '                  }\n'
             ]
@@ -36,7 +36,7 @@ while i < len(lines):
             new_classname = [
                 '                  className={\n',
                 '                    \'rounded-lg px-3 py-2 text-sm font-medium \' +\n',
-                '                    (state.view === \'agenda\' ? \'bg-purple-600 text-white\' : \'border border-slate-200 text-slate-500 hover:bg-slate-50\') +\n',
+                '                    (state.view === \'agenda\' ? \'bg-primary text-white\' : \'border border-slate-200 text-slate-500 hover:bg-slate-50\') +\n',
                 '                    \' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900/50\'\n',
                 '                  }\n'
             ]

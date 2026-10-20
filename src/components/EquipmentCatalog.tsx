@@ -158,13 +158,13 @@ export default function EquipmentCatalog({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search cameras, lighting, audio…"
             autoComplete="off"
-            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-purple-600 focus:ring-4 focus:ring-purple-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-purple-950/60"
+            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-ring dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-ring"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 dark:hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring dark:hover:text-white"
               aria-label="Clear search"
             >
               <X className="h-4 w-4" />
@@ -198,9 +198,9 @@ export default function EquipmentCatalog({
               role="tab"
               aria-selected={selected}
               onClick={() => setActiveCategory(category)}
-              className={`shrink-0 rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 ${
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
                 selected
-                  ? "bg-purple-600 text-white"
+                  ? "bg-primary text-white"
                   : "btn-secondary"
               }`}
             >
@@ -243,13 +243,13 @@ export default function EquipmentCatalog({
                 <article
                   className={`flex h-full flex-col justify-between rounded-3xl border bg-white p-6 shadow-sm transition dark:bg-zinc-950 ${
                     selected
-                      ? "border-purple-500 ring-4 ring-purple-100 dark:ring-purple-950/50"
-                      : "border-slate-200 dark:border-zinc-800 hover:border-purple-500/40"
+                      ? "border-primary ring-4 ring-ring dark:ring-ring"
+                      : "border-slate-200 dark:border-zinc-800 hover:border-primary/40"
                   }`}
                 >
                   <div className="space-y-4">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
                         <Icon aria-hidden="true" className="h-5 w-5" />
                       </div>
                       <div className="flex flex-wrap justify-end gap-2">
@@ -257,7 +257,7 @@ export default function EquipmentCatalog({
                           {displayCategory(item.category)}
                         </span>
                         {item.isPopular && (
-                          <span className="rounded-full bg-purple-600/15 px-2.5 py-1 text-[10px] font-sans uppercase tracking-widest text-purple-700 dark:text-purple-300">
+                          <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-sans uppercase tracking-widest text-primary dark:text-primary">
                             Popular
                           </span>
                         )}
@@ -268,7 +268,7 @@ export default function EquipmentCatalog({
                       <h2 className="text-lg font-medium leading-snug text-slate-900 dark:text-white">
                         {item.name}
                       </h2>
-                      <p className="mt-1 text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">
+                      <p className="mt-1 text-xs font-sans uppercase tracking-widest text-primary dark:text-primary">
                         {item.brand}
                       </p>
                     </div>
@@ -307,10 +307,10 @@ export default function EquipmentCatalog({
       )}
 
       {selectedItems.length > 0 && (
-        <aside className="sticky bottom-4 z-20 rounded-3xl border border-purple-200 bg-white/95 p-5 shadow-xl backdrop-blur dark:border-purple-900/50 dark:bg-zinc-950/95">
+        <aside className="sticky bottom-4 z-20 rounded-3xl border border-primary bg-white/95 p-5 shadow-xl backdrop-blur dark:border-primary/50 dark:bg-zinc-950/95">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">
+              <p className="text-xs font-sans uppercase tracking-widest text-primary dark:text-primary">
                 Selected kit
               </p>
               <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">

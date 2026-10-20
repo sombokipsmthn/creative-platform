@@ -106,7 +106,7 @@ export default function ClientGalleryPortal({
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-6">
         <Card className="max-w-md w-full p-6 text-center space-y-4">
-          <p className="text-xs font-sans uppercase text-purple-600 dark:text-purple-400">
+          <p className="text-xs font-sans uppercase text-primary dark:text-primary">
             Private Client Gallery
           </p>
 
@@ -121,7 +121,7 @@ export default function ClientGalleryPortal({
           <input
             value={pin}
             onChange={(e) => setPin(e.target.value)}
-            className="w-full text-center text-3xl tracking-widest p-3 rounded-lg bg-slate-100 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full text-center text-3xl tracking-widest p-3 rounded-lg bg-slate-100 dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-ring"
             maxLength={4}
           />
 
@@ -141,7 +141,7 @@ export default function ClientGalleryPortal({
   }
 
   return (
-    <div className="selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="selection:bg-primary selection:text-white transition-colors duration-300">
       <Header />
       <div className="px-6 py-12 max-w-7xl mx-auto">
         <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

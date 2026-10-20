@@ -202,19 +202,19 @@ export default function WorkIndexPage() {
     : allProjects.filter((p) => p.category === selectedPillar);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-primary selection:text-white transition-colors duration-300">
       <Header />
 
       {/* 1. HERO SECTION */}
       <section className="relative pt-36 pb-12 px-6 max-w-7xl mx-auto text-center space-y-6">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-primary/10 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
+        <p className="text-xs font-sans uppercase tracking-widest text-primary dark:text-primary font-bold">
           KIPSMTHN PORTFOLIO ARCHIVE
         </p>
 
         <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
-          Selected Works Across <span className="font-normal text-purple-600 dark:text-purple-400">Four Creative Pillars</span>
+          Selected Works Across <span className="font-normal text-primary dark:text-primary">Four Creative Pillars</span>
         </h1>
 
         <p className="text-sm text-slate-600 dark:text-zinc-400 font-light max-w-xl mx-auto leading-relaxed">
@@ -233,13 +233,13 @@ export default function WorkIndexPage() {
                 onClick={() => setSelectedPillar(p.id)}
                 className={`p-6 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
                   isActive
-                    ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40 shadow-lg'
-                    : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-purple-500/50'
+                    ? 'border-primary bg-primary/10 dark:bg-primary/15 shadow-lg'
+                    : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-primary/50'
                 }`}
               >
                 <div className="space-y-2">
                   <div className="flex justify-between items-center font-sans text-xs">
-                    <span className="text-purple-600 dark:text-purple-400 font-bold">{p.num}</span>
+                    <span className="text-primary dark:text-primary font-bold">{p.num}</span>
                     <span className="text-slate-500 dark:text-zinc-500">{p.count}</span>
                   </div>
                   <h3 className="text-xl font-medium text-slate-900 dark:text-white">{p.title}</h3>
@@ -310,7 +310,7 @@ export default function WorkIndexPage() {
           {filteredProjects.map((project) => (
             <div
               key={project.id}
-              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 shadow-md dark:shadow-none ${project.featured ? 'md:col-span-2' : ''}`}
+              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-xl overflow-hidden hover:border-primary/60 transition-all duration-500 shadow-md dark:shadow-none ${project.featured ? 'md:col-span-2' : ''}`}
             >
               <div className={`relative w-full ${project.featured ? 'aspect-21/9' : 'aspect-4/3'} overflow-hidden`}>
                 <Image
@@ -327,19 +327,19 @@ export default function WorkIndexPage() {
               <div className="absolute bottom-0 inset-x-0 p-6 md:p-8 flex justify-between items-end bg-linear-to-t from-black/95 via-black/70 to-transparent pt-12">
                 <div className="space-y-2 max-w-xl">
                   <div className="flex items-center gap-3">
-                    <span className="px-2.5 py-1 bg-purple-600/30 border border-purple-400/50 text-purple-200 text-[10px] font-sans uppercase tracking-widest rounded-sm font-semibold">
+                    <span className="px-2.5 py-1 bg-primary/15 border border-primary/50 text-primary text-[10px] font-sans uppercase tracking-widest rounded-sm font-semibold">
                       {project.category}
                     </span>
                     <span className="text-xs text-zinc-300 font-sans">{project.year}</span>
                   </div>
-                  <h2 className="text-xl md:text-2xl font-medium text-white group-hover:text-purple-300 transition-colors">
+                  <h2 className="text-xl md:text-2xl font-medium text-white group-hover:text-primary transition-colors">
                     {project.title}
                   </h2>
                   <p className="text-xs text-zinc-200 font-light leading-relaxed">{project.desc}</p>
-                  <p className="text-[11px] text-purple-300 font-sans font-semibold">Client: {project.client}</p>
+                  <p className="text-[11px] text-primary font-sans font-semibold">Client: {project.client}</p>
                 </div>
 
-                <div className="w-10 h-10 rounded-full border border-white/30 bg-black/70 flex items-center justify-center text-white group-hover:bg-purple-600 group-hover:border-purple-600 transition-all shrink-0">
+                <div className="w-10 h-10 rounded-full border border-white/30 bg-black/70 flex items-center justify-center text-white group-hover:bg-primary group-hover:border-primary transition-all shrink-0">
                   ↗
                 </div>
               </div>
@@ -354,9 +354,9 @@ export default function WorkIndexPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
-                KIPSMTHN<span className="text-purple-500">.</span>
+                KIPSMTHN<span className="text-primary">.</span>
               </h2>
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-sans">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-primary dark:text-primary font-sans">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
             <div className="flex flex-wrap gap-2">

@@ -271,7 +271,7 @@ export default function AdminLayout({
           <div className="flex h-[calc(100%-3rem)] flex-col">
             <div className="flex h-16 items-center border-b border-[var(--color-border-subtle)] px-5">
               <Link href="/admin" className="group flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white shadow-lg shadow-purple-500/10">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--color-accent)] text-white shadow-lg shadow-primary/10">
                   <BarChart3 className="h-3.5 w-3.5" />
                 </span>
                 <span className="text-[12px] font-bold uppercase tracking-[0.18em]">

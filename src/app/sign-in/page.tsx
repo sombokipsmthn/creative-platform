@@ -73,21 +73,21 @@ function SignInContent() {
       <div className="w-full max-w-md">
         <Link href="/" className="mb-6 inline-flex text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">← Go back</Link>
         <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/40 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none sm:p-9">
-          <div className="mb-8 text-center"><div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600 font-bold text-white">K</div><h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Welcome back</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Sign in to your creator workspace.</p></div>
+          <div className="mb-8 text-center"><div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary font-bold text-white">K</div><h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Welcome back</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Sign in to your creator workspace.</p></div>
           <div className="space-y-3">
             <Button type="button" onClick={handleGoogleSignIn} disabled={isLoading} variant="outline" className="w-full"><span className="text-base font-bold">G</span>Continue with Google</Button>
-            <Button type="button" onClick={handlePasskeySignIn} disabled={isLoading || (typeof window !== "undefined" && !window.PublicKeyCredential)} variant="outline" className="w-full border-purple-200 text-purple-700 dark:border-purple-900 dark:text-purple-300">Sign in with a passkey</Button>
+            <Button type="button" onClick={handlePasskeySignIn} disabled={isLoading || (typeof window !== "undefined" && !window.PublicKeyCredential)} variant="outline" className="w-full border-primary text-primary dark:border-primary dark:text-primary">Sign in with a passkey</Button>
           </div>
           <div className="my-6 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" />or continue with email<span className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" /></div>
           <form onSubmit={handleEmailSignIn} className="space-y-4">
             <label className="block space-y-2"><span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Email</span><Input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required disabled={isLoading} /></label>
             <label className="block space-y-2"><span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Password</span><Input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required disabled={isLoading} /></label>
-            <div className="text-right"><Link href="/forgot-password" className="text-xs font-medium text-purple-600 hover:text-purple-700">Forgot password?</Link></div>
+            <div className="text-right"><Link href="/forgot-password" className="text-xs font-medium text-primary hover:text-primary">Forgot password?</Link></div>
             {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">{error}</div>}
             {message && <div role="status" className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div>}
             <Button type="submit" disabled={isLoading} variant="primary" className="w-full">{isLoading ? "Signing in…" : "Sign in"}</Button>
           </form>
-          <p className="mt-7 text-center text-xs text-slate-500 dark:text-zinc-400">New to KIPSMTHN? <Link href="/sign-up" className="font-medium text-purple-600">Create your workspace</Link></p>
+          <p className="mt-7 text-center text-xs text-slate-500 dark:text-zinc-400">New to KIPSMTHN? <Link href="/sign-up" className="font-medium text-primary">Create your workspace</Link></p>
         </div>
       </div>
     </main>

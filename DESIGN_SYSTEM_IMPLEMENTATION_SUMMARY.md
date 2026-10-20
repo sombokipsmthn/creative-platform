@@ -126,8 +126,8 @@ The implementation leverages the existing design tokens defined in `src/app/glob
 - `--color-text-primary`: Primary text (#212529 light, #f8f9fa dark)
 - `--color-text-secondary`: Secondary text (#495057 light, #dee2e6 dark)
 - `--color-text-muted`: Muted text (#6c757d light, #adb5bd dark)
-- `--color-accent`: Primary accent (#7c3aed light, #8b5cf6 dark)
-- `--color-accent-hover`: Accent hover (#6d28d9 light, #7c3aed dark)
+- `--color-accent`: Primary accent (`--primary` light, `--primary` dark)
+- `--color-accent-hover`: Accent hover (`--primary` light, `--primary` dark)
 - `--color-success`: Success state (#10b981)
 - `--color-warning`: Warning state (#f59e0b)
 - `--color-danger`: Error/danger state (#ef4444)
@@ -169,7 +169,7 @@ The implementation leverages the existing design tokens defined in `src/app/glob
 
 ```html
 <div className="min-h-screen bg-white font-sans text-slate-900 transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-100">
-  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative Business Platform</p>
+  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary dark:text-primary">Creative Business Platform</p>
   <h1 className="mt-7 max-w-5xl text-5xl font-light leading-[0.94] tracking-tight text-slate-950 dark:text-white md:text-7xl lg:text-[6.5rem]">
     The operating system for your creative business.
   </h1>
@@ -181,8 +181,8 @@ The implementation leverages the existing design tokens defined in `src/app/glob
 ### After (Design System Classes)
 
 ```html
-<div className="ui-page selection:bg-purple-600 selection:text-white transition-colors duration-300">
-  <p className="ui-eyebrow text-purple-600 dark:text-purple-400">
+<div className="ui-page selection:bg-primary selection:text-white transition-colors duration-300">
+  <p className="ui-eyebrow text-primary dark:text-primary">
     Creative Business Platform
   </p>
   <h1 className="mt-7 max-w-5xl text-5xl font-light leading-[0.94] tracking-tight text-slate-950 dark:text-white md:text-7xl lg:text-[6.5rem]">

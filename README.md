@@ -43,15 +43,7 @@ This means the current app identity model is Better Auth-based, not Clerk-based.
 
 The project documentation is organized by active vs historical intent:
 
-- `docs/00-project` — product and project-level context
-- `docs/01-specifications` — active feature and implementation expectations
-- `docs/02-architecture` — system design and runtime structure
-- `docs/03-design-system` — design tokens and UI system usage
-- `docs/04-security-compliance` — active security/compliance guidance
-- `docs/05-development-operations` — build, deploy, and operational guidance
-- `docs/06-decisions` — architectural and product decisions
-- `docs/07-audits` — implementation and documentation audits
-- `docs/08-history` — history, migration notes, and legacy context
+- `docs/` — active specialist docs, audits, reports, and historical material; see [Documentation Index](./docs/DOCUMENTATION-INDEX.md) for the verified map
 
 Historical materials retained for record:
 

@@ -193,7 +193,8 @@ export async function POST(request: Request) {
               text,
               position,
               opacity,
-              font_size
+              font_size,
+              image_path
             FROM gallery_watermarks
             WHERE gallery_id = ${galleryId}
             LIMIT 1
@@ -210,7 +211,12 @@ export async function POST(request: Request) {
               | "center",
             opacity: Number(watermarkResult.rows[0]?.opacity ?? 55),
             fontSize: Number(watermarkResult.rows[0]?.font_size ?? 42),
+            imageBuffer: null,
           };
+          if (watermarkResult.rows[0]?.image_path) {
+            const storedImage = await getGalleryStorage().getObject(String(watermarkResult.rows[0].image_path));
+            watermarkOptions.imageBuffer = storedImage?.body ?? null;
+          }
 
           let processed;
           let mimeType = "image/jpeg"; // default

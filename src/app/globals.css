@@ -1,12 +1,4 @@
-/**
- * Creative Platform — Global Design System
- * Single source of truth for the platform's visual language.
- */
-
-/* ─── 0. Font Imports ──────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-
-/* ─── 1. Tailwind + Custom Variant ─────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -64,6 +56,27 @@
   /* Luxury editorial presentation tokens */
   --color-bg-page: #F8F9FA;
   --color-bg-card: #FFFFFF;
+
+  /* shadcn semantic tokens */
+  --background: var(--color-bg-page);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-bg-card);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-bg-elevated);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-accent);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--color-btn-secondary-bg);
+  --secondary-foreground: var(--color-btn-secondary-text);
+  --muted: var(--color-bg-soft);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-accent-soft);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-danger);
+  --border: var(--color-border-subtle);
+  --input: var(--color-border-strong);
+  --ring: var(--color-accent);
+  --radius: var(--radius-md);
   --color-bg-elevated: #FFFFFF;
   --color-bg-soft: #F8F9FA;
   --color-bg-overlay: rgba(0, 0, 0, 0.4);

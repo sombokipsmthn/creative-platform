@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface InlineFieldEditorProps {
   value: string;
@@ -77,20 +79,10 @@ export function InlineFieldEditor({
           className={`${inputClasses} block resize-none`}
         />
       ) : type === 'select' ? (
-        <select
-          ref={inputRef as React.Ref<HTMLSelectElement>}
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className={`${inputClasses} block`}
-        >
-          <option value="">Select...</option>
-          {selectOptions?.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <Select value={tempValue || 'none'} onValueChange={(value) => setTempValue(value === 'none' ? '' : value)}>
+          <SelectTrigger className={`${inputClasses} block`}><SelectValue placeholder="Select..." /></SelectTrigger>
+          <SelectContent><SelectItem value="none">Select...</SelectItem>{selectOptions?.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+        </Select>
       ) : (
         <input
           ref={inputRef as React.Ref<HTMLInputElement>}
@@ -104,20 +96,8 @@ export function InlineFieldEditor({
       )}
 
       <div className="flex gap-1">
-        <button
-          onClick={handleSave}
-          className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
-          title="Save"
-        >
-          <Check className="h-4 w-4" />
-        </button>
-        <button
-          onClick={onCancel}
-          className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
-          title="Cancel"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <Button variant="ghost" size="icon-sm" onClick={handleSave} className="text-green-600" title="Save"><Check className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon-sm" onClick={onCancel} className="text-red-600" title="Cancel"><X className="h-4 w-4" /></Button>
       </div>
     </div>
   );

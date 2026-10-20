@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 interface AdminPageHeaderTab {
   label: string;
@@ -87,19 +88,7 @@ export function AdminPageHeader({
                         </Link>
                       )
                     ) : tab.onClick ? (
-                      <button
-                        onClick={tab.onClick}
-                        disabled={isDisabled}
-                        className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
-                          isActive
-                            ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
-                            : isDisabled
-                              ? 'border-transparent text-slate-400 dark:text-zinc-500 cursor-not-allowed'
-                              : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
+                      <Button type="button" onClick={tab.onClick} disabled={isDisabled} variant={isActive ? 'primary' : 'ghost'} size="sm" className="rounded-none border-b-2 text-xs uppercase tracking-widest">{tab.label}</Button>
                     ) : (
                       <span className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest ${
                         isActive

@@ -56,14 +56,14 @@ export async function GET() {
         updatedAt: galleries.updatedAt,
         clientName: clients.name,
         clientCompany: clients.company,
-        coverUrl: sql<string>`(SELECT p.display_url FROM galleryPhotos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
-        photoCount: sql<number>`(SELECT COUNT(*) FROM galleryPhotos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false)`,
-        collectionsCount: sql<number>`(SELECT COUNT(*) FROM galleryCollections col WHERE col.gallery_id = ${galleries.id})`,
-        favoritesCount: sql<number>`(SELECT COUNT(*) FROM galleryPhotoActions a WHERE a.gallery_id = ${galleries.id} AND a.is_favorite = true)`,
-        selectionsCount: sql<number>`(SELECT COUNT(*) FROM galleryPhotoActions a WHERE a.gallery_id = ${galleries.id} AND a.is_selected = true)`,
-        commentsCount: sql<number>`(SELECT COUNT(*) FROM galleryComments comm WHERE comm.gallery_id = ${galleries.id})`,
-        downloadsCount: sql<number>`(SELECT COUNT(*) FROM galleryDownloads d WHERE d.gallery_id = ${galleries.id})`,
-        viewsCount: sql<number>`(SELECT COUNT(*) FROM galleryAccessSessions s WHERE s.gallery_id = ${galleries.id})`,
+        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+        photoCount: sql<number>`(SELECT COUNT(*) FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false)`,
+        collectionsCount: sql<number>`(SELECT COUNT(*) FROM gallery_collections col WHERE col.gallery_id = ${galleries.id})`,
+        favoritesCount: sql<number>`(SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = ${galleries.id} AND a.is_favorite = true)`,
+        selectionsCount: sql<number>`(SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = ${galleries.id} AND a.is_selected = true)`,
+        commentsCount: sql<number>`(SELECT COUNT(*) FROM gallery_comments comm WHERE comm.gallery_id = ${galleries.id})`,
+        downloadsCount: sql<number>`(SELECT COUNT(*) FROM gallery_downloads d WHERE d.gallery_id = ${galleries.id})`,
+        viewsCount: sql<number>`(SELECT COUNT(*) FROM gallery_access_sessions s WHERE s.gallery_id = ${galleries.id})`,
       })
       .from(galleries)
       .leftJoin(clients, eq(galleries.clientId, clients.id))
@@ -123,9 +123,17 @@ export async function POST(request: Request) {
       VALUES (${gallery.id}, 'All Photos', 0)
     `);
 
+    const defaultPreset = await db.execute(sql`
+      SELECT enabled, type, text, position, opacity, font_size, image_url, image_path, image_filename, image_mime_type
+      FROM gallery_watermark_presets
+      WHERE creator_id = ${creator.id}
+      ORDER BY updated_at DESC, created_at ASC
+      LIMIT 1
+    `);
+    const watermark = defaultPreset.rows[0];
     await db.execute(sql`
-      INSERT INTO gallery_watermarks (gallery_id)
-      VALUES (${gallery.id})
+      INSERT INTO gallery_watermarks (gallery_id, enabled, type, text, position, opacity, font_size, image_url, image_path, image_filename, image_mime_type)
+      VALUES (${gallery.id}, ${watermark?.enabled !== false}, ${watermark?.type === "image" ? "image" : "text"}, ${String(watermark?.text || "KIPSMTHN")}, ${String(watermark?.position || "bottom-right")}, ${Number(watermark?.opacity ?? 55)}, ${Number(watermark?.font_size ?? 42)}, ${watermark?.image_url ? String(watermark.image_url) : null}, ${watermark?.image_path ? String(watermark.image_path) : null}, ${watermark?.image_filename ? String(watermark.image_filename) : null}, ${watermark?.image_mime_type === "image/png" ? "image/png" : null})
       ON CONFLICT (gallery_id) DO NOTHING
     `);
 

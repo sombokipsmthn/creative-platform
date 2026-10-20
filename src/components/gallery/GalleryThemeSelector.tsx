@@ -2,6 +2,9 @@
 
 import { useState, useCallback } from 'react'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
 
 interface GalleryThemeSelectorProps {
   galleryId: string
@@ -45,15 +48,7 @@ export default function GalleryThemeSelector({
 
           return (
             <div key={theme.id} className="relative group">
-              <button
-                onClick={() => handleThemeSelect(theme.id)}
-                className={`p-4 rounded-lg border transition-all text-left ${
-                  isCurrent
-                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
-                    : 'border-[var(--color-border-subtle)] hover:border-[var(--color-border-emphasis)]'
-                }`}
-                disabled={isSaving}
-              >
+              <Button type="button" onClick={() => handleThemeSelect(theme.id)} disabled={isSaving} variant={isCurrent ? 'primary' : 'outline'} className="h-auto w-full justify-start p-4 text-left">
                 <div className="flex items-start justify-between mb-2">
                   <h4 className="font-semibold text-[var(--color-text-primary)]">
                     {theme.label}
@@ -81,7 +76,7 @@ export default function GalleryThemeSelector({
                     style={{ backgroundColor: theme.preset.textColor }}
                   />
                 </div>
-              </button>
+              </Button>
 
               {/* Theme preview on hover */}
               {isHovered && (
@@ -101,16 +96,7 @@ export default function GalleryThemeSelector({
         <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
           Save as Custom Theme (Optional)
         </label>
-        <input
-          type="text"
-          value={customThemeName}
-          onChange={(e) => setCustomThemeName(e.target.value)}
-          placeholder="My Custom Theme"
-          className={`w-full gallery-input ${
-            isSaving ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          disabled={isSaving}
-        />
+        <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
         {customThemeName && (
           <p className="text-xs text-[var(--color-text-muted)] mt-1">
             Will be saved as a custom theme when you select a theme above.

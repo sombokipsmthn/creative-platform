@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function safeDestination(value: string | null) {
   return value && value.startsWith("/") && !value.startsWith("//") ? value : "/auth";
@@ -73,17 +75,17 @@ function SignInContent() {
         <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/40 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none sm:p-9">
           <div className="mb-8 text-center"><div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600 font-bold text-white">K</div><h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Welcome back</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Sign in to your creator workspace.</p></div>
           <div className="space-y-3">
-            <button type="button" onClick={handleGoogleSignIn} disabled={isLoading} className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-800 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-900"><span className="text-base font-bold">G</span>Continue with Google</button>
-            <button type="button" onClick={handlePasskeySignIn} disabled={isLoading || (typeof window !== "undefined" && !window.PublicKeyCredential)} className="w-full rounded-xl border border-purple-200 px-4 py-3 text-sm font-medium text-purple-700 transition hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:cursor-not-allowed disabled:opacity-50 dark:border-purple-900 dark:text-purple-300 dark:hover:bg-purple-950/30">Sign in with a passkey</button>
+            <Button type="button" onClick={handleGoogleSignIn} disabled={isLoading} variant="outline" className="w-full"><span className="text-base font-bold">G</span>Continue with Google</Button>
+            <Button type="button" onClick={handlePasskeySignIn} disabled={isLoading || (typeof window !== "undefined" && !window.PublicKeyCredential)} variant="outline" className="w-full border-purple-200 text-purple-700 dark:border-purple-900 dark:text-purple-300">Sign in with a passkey</Button>
           </div>
           <div className="my-6 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" />or continue with email<span className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" /></div>
           <form onSubmit={handleEmailSignIn} className="space-y-4">
-            <label className="block space-y-2"><span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Email</span><input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required disabled={isLoading} className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-zinc-800 dark:bg-zinc-950" /></label>
-            <label className="block space-y-2"><span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Password</span><input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required disabled={isLoading} className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 dark:border-zinc-800 dark:bg-zinc-950" /></label>
+            <label className="block space-y-2"><span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Email</span><Input type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required disabled={isLoading} /></label>
+            <label className="block space-y-2"><span className="text-xs font-medium text-slate-700 dark:text-zinc-300">Password</span><Input type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required disabled={isLoading} /></label>
             <div className="text-right"><Link href="/forgot-password" className="text-xs font-medium text-purple-600 hover:text-purple-700">Forgot password?</Link></div>
             {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">{error}</div>}
             {message && <div role="status" className="rounded-xl border border-green-200 bg-green-50 p-3 text-sm text-green-700">{message}</div>}
-            <button type="submit" disabled={isLoading} className="w-full rounded-xl bg-purple-600 px-4 py-3 text-sm font-medium text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50">{isLoading ? "Signing in…" : "Sign in"}</button>
+            <Button type="submit" disabled={isLoading} variant="primary" className="w-full">{isLoading ? "Signing in…" : "Sign in"}</Button>
           </form>
           <p className="mt-7 text-center text-xs text-slate-500 dark:text-zinc-400">New to KIPSMTHN? <Link href="/sign-up" className="font-medium text-purple-600">Create your workspace</Link></p>
         </div>

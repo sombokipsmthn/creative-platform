@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Download, Heart, ChevronDown } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { Button } from '@/components/ui/button';
 
 interface CinematicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -125,7 +126,7 @@ export function GalleryViewerCinematic({
         }`}
       >
         {/* Previous Button */}
-        <button
+        <Button type="button"
           onClick={handlePrev}
           className="rounded-full bg-white/10 p-4 backdrop-blur transition hover:bg-white/20"
           aria-label="Previous photo"
@@ -133,10 +134,10 @@ export function GalleryViewerCinematic({
           <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-        </button>
+        </Button>
 
         {/* Next Button */}
-        <button
+        <Button type="button"
           onClick={handleNext}
           className="rounded-full bg-white/10 p-4 backdrop-blur transition hover:bg-white/20"
           aria-label="Next photo"
@@ -144,7 +145,7 @@ export function GalleryViewerCinematic({
           <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-        </button>
+        </Button>
       </div>
 
       {/* Bottom - Controls */}
@@ -163,7 +164,7 @@ export function GalleryViewerCinematic({
               {/* Progress dots */}
               <div className="flex gap-1">
                 {photos.map((_, idx) => (
-                  <button
+                  <Button
                     key={idx}
                     onClick={() => {
                       setCurrentIndex(idx);
@@ -182,27 +183,27 @@ export function GalleryViewerCinematic({
           {/* Actions */}
           <div className="flex gap-3">
             {allowFavorites && (
-              <button
+              <Button type="button"
                 onClick={handleFavorite}
                 className="rounded-full bg-white/10 p-3 backdrop-blur transition hover:bg-white/20"
               >
                 <Heart
                   className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`}
                 />
-              </button>
+              </Button>
             )}
 
             {allowDownloads && (
-              <button
+              <Button type="button"
                 onClick={() => onPhotoDownload?.(currentPhoto.id)}
                 className="rounded-full bg-white/10 p-3 backdrop-blur transition hover:bg-white/20"
               >
                 <Download className="h-5 w-5 text-white" />
-              </button>
+              </Button>
             )}
 
             {/* Autoplay Toggle */}
-            <button
+            <Button type="button"
               onClick={() => setAutoplay(!autoplay)}
               className="rounded-full bg-white/10 p-3 backdrop-blur transition hover:bg-white/20"
             >
@@ -215,7 +216,7 @@ export function GalleryViewerCinematic({
                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                 </svg>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

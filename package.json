@@ -4,18 +4,22 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev -p 3005 -H 0.0.0.0",
+    "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
     "lint": "eslint",
     "test": "vitest run",
+    "test:responsive-admin": "node scripts/responsive-admin-smoke.mjs",
+    "test:authenticated-settings": "node scripts/authenticated-settings-smoke.mjs",
+    "test:gallery-watermark": "node scripts/gallery-watermark-smoke.mjs",
     "audit:production": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level=high",
     "audit:development": "env -u npm_config_allow_scripts npm audit --audit-level=high || true",
     "db:migrate": "drizzle-kit migrate",
     "db:seed:equipment": "tsx src/db/seed-equipment.ts",
     "db:seed:templates": "tsx src/db/seed-templates.ts",
     "healthcheck": "node scripts/healthcheck.mjs",
-    "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts"
+    "auth:check": "npm exec --yes auth@latest -- check --config ./src/lib/auth/auth.ts",
+    "design-system:check": "node scripts/check-design-system.mjs"
   },
   "engines": {
     "node": "22.x",
@@ -27,6 +31,7 @@
     "@better-auth/passkey": "^1.7.7",
     "@libsql/client": "^0.18.0",
     "@neondatabase/serverless": "^1.1.0",
+    "@radix-ui/react-slot": "^1.5.0",
     "@tanstack/react-query": "^5.104.1",
     "@tiptap/pm": "3.31.4",
     "@tiptap/react": "3.31.4",
@@ -36,6 +41,8 @@
     "@vercel/blob": "^2.8.1",
     "bcryptjs": "^3.0.3",
     "better-auth": "^1.7.7",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.4",
@@ -52,6 +59,7 @@
     "resend": "^6.32.1",
     "sharp": "^0.35.5",
     "svix": "^2.3.0",
+    "tailwind-merge": "^3.7.0",
     "uuid": "11.1.1"
   },
   "devDependencies": {

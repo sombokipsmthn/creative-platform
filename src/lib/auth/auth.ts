@@ -6,7 +6,7 @@ import { db } from "@/db";
 import { sendEmail } from "@/lib/email";
 import { users, sessions, accounts, verifications, passkeys } from "@/db/schema";
 
-const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005";
+const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const googleProvider = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
   ? { clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET }
   : undefined;
@@ -31,9 +31,7 @@ const socialProviders = {
   ...(appleProvider ? { apple: appleProvider } : {}),
 };
 
-const baseURL = process.env.NODE_ENV === "development"
-  ? "http://localhost:3005"
-  : process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3005";
+const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",

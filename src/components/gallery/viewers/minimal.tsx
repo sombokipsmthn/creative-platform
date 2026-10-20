@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Download, Heart } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { Button } from '@/components/ui/button';
 
 interface MinimalViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -100,14 +101,14 @@ export function GalleryViewerMinimal({
         {/* Photo Counter & Navigation */}
         <div className="flex items-center justify-between gap-4">
           {/* Left Navigation */}
-          <button
+          <Button
             onClick={handlePrev}
             disabled={!hasPrev}
             className="rounded-full p-3 transition disabled:opacity-30 hover:bg-gray-100"
             aria-label="Previous photo"
           >
             <ChevronLeft className="h-5 w-5" />
-          </button>
+          </Button>
 
           {/* Counter */}
           <div className="flex-1 text-center">
@@ -117,21 +118,21 @@ export function GalleryViewerMinimal({
           </div>
 
           {/* Right Navigation */}
-          <button
+          <Button
             onClick={handleNext}
             disabled={!hasNext}
             className="rounded-full p-3 transition disabled:opacity-30 hover:bg-gray-100"
             aria-label="Next photo"
           >
             <ChevronRight className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Actions */}
         {(allowDownloads || allowFavorites) && (
           <div className="mt-6 flex gap-3 border-t border-gray-200 pt-6">
             {allowFavorites && (
-              <button
+              <Button type="button"
                 onClick={handleFavorite}
                 className="flex items-center gap-2 rounded-lg px-4 py-2 transition hover:bg-gray-100"
               >
@@ -139,17 +140,17 @@ export function GalleryViewerMinimal({
                   className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
                 />
                 <span className="text-sm">{isFavorite ? 'Favorited' : 'Favorite'}</span>
-              </button>
+              </Button>
             )}
 
             {allowDownloads && (
-              <button
+              <Button type="button"
                 onClick={() => onPhotoDownload?.(currentPhoto.id)}
                 className="flex items-center gap-2 rounded-lg px-4 py-2 transition hover:bg-gray-100"
               >
                 <Download className="h-5 w-5 text-gray-400" />
                 <span className="text-sm">Download</span>
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -160,7 +161,7 @@ export function GalleryViewerMinimal({
         <div className="mx-auto max-w-5xl">
           <div className="flex gap-2 overflow-x-auto pb-2">
             {photos.map((photo, idx) => (
-              <button
+              <Button
                 key={photo.id}
                 onClick={() => setCurrentIndex(idx)}
                 className={`relative h-16 w-16 shrink-0 overflow-hidden rounded transition ${
@@ -174,7 +175,7 @@ export function GalleryViewerMinimal({
                   className="object-cover"
                   sizes="64px"
                 />
-              </button>
+              </Button>
             ))}
           </div>
         </div>

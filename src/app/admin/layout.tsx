@@ -1,17 +1,25 @@
+'use client';
+
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
   FileText,
+  Wallet,
   GalleryHorizontalEnd,
   LayoutDashboard,
+  Settings2,
+  LogOut,
 } from "lucide-react";
 
 import type { LucideIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 import ProfileMenu from '@/components/ProfileMenu';
 import ThemeToggle from '@/components/ThemeToggle';
-import { SplitViewProvider } from "@/context/SplitViewContext";
+import { SplitViewProvider, useSplitView } from "@/context/SplitViewContext";
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
@@ -29,17 +37,17 @@ function NavItemWithBadge({
   isActive,
   badgeCount = 0,
 }: {
-  item: { name: string; href: string };
+  item: { name: string; href: string; icon: LucideIcon };
   isActive: boolean;
   badgeCount?: number;
 }) {
   return (
     <li className="flex h-10 w-full items-center gap-3 px-3 py-2 rounded-md">
       {isActive && <span className="absolute left-0 h-5 w-0.5 rounded-full bg-[var(--color-accent)]" />}
-      <Icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`} />
+      <item.icon className={`h-4 w-4 shrink-0 ${isActive ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-faint)] group-hover:text-[var(--color-text-secondary)]'}`} />
       <span>{item.name}</span>
       {badgeCount > 0 && (
-        <span className="ui-badge ui-badge-accent ms-auto">{badgeCount}</span>
+        <Badge variant="default" className="ms-auto">{badgeCount}</Badge>
       )}
     </li>
   );
@@ -58,6 +66,7 @@ const sections = [
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
       { name: 'Quotes', href: '/admin/quotes', icon: FileText },
       { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+      { name: 'Payments', href: '/admin/payments', icon: Wallet },
       { name: 'Projects', href: '/admin/projects', icon: FileText },
       { name: 'Clients', href: '/admin/clients', icon: FileText },
     ],
@@ -86,12 +95,13 @@ function SignOutButton({ compact }: { compact?: boolean }) {
   );
 }
 
-export default function AdminLayout({
+function AdminLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const splitView = useSplitView();
   const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(false);
@@ -127,7 +137,6 @@ export default function AdminLayout({
   const isAdminRoute = (pathname: string) => pathname.startsWith('/admin');
 
   return (
-    <SplitViewProvider>
       <>
         <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-[var(--color-border-subtle)] bg-[var(--color-header-bg)] px-4 backdrop-blur-xl lg:hidden">
           <Link href="/admin" className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em]">
@@ -177,7 +186,7 @@ export default function AdminLayout({
 
             <div
               className={splitView.content
-                ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] ui-fade-in'
+                ? 'lg:flex lg:w-[35%] lg:border-l lg:border-[var(--color-border-subtle)] lg:bg-[var(--color-bg-page)] animate-fade-in'
                 : 'hidden'}
             >
               <div className="lg:h-full lg:p-6 lg:overflow-y-auto">
@@ -187,6 +196,17 @@ export default function AdminLayout({
           </div>
         </main>
       </>
+  );
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <SplitViewProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
     </SplitViewProvider>
   );
 }

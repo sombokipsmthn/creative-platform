@@ -25,6 +25,10 @@ type InvoiceItem = {
   amount: number;
 };
 
+type Schedule = { id: string; label: string; amount: number; currency: string; dueDate: string; milestone?: string | null; status: string; notes?: string | null };
+type TermAmendment = { id: string; previousTerms?: string | null; newTerms: string; agreementDate: string; evidenceReference?: string | null; notes?: string | null };
+type AuditItem = { audit: { eventType: string; metadata: Record<string, unknown>; createdAt: string }; payment: { id: string; reference: string; amount: number; currency: string } };
+
 type PaymentSummary = {
   confirmedAmount: number;
   pendingAmount: number;
@@ -70,6 +74,9 @@ const NEXT_STATUS: Record<string, { label: string; value: string; color: string 
    HELPERS
 ========================================================= */
 
+function ScheduleForm({ invoiceId, currency }: { invoiceId: string; currency: string }) { return <form className="mt-4 grid gap-2" onSubmit={async event => { event.preventDefault(); const response = await fetch(`/api/invoices/${invoiceId}/payments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'schedule', invoiceId, currency, ...Object.fromEntries(new FormData(event.currentTarget).entries()) }) }); if (response.ok) window.location.reload(); }}><input name="label" required placeholder="Deposit or milestone" className="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input name="amount" type="number" min="1" required placeholder="Amount in minor units" className="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input name="dueDate" type="date" required className="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><button className="rounded-xl bg-slate-900 px-3 py-2 text-xs uppercase tracking-widest text-white">Add schedule</button></form>; }
+function TermForm({ invoiceId }: { invoiceId: string }) { return <form className="mt-4 grid gap-2" onSubmit={async event => { event.preventDefault(); const response = await fetch(`/api/invoices/${invoiceId}/payments`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'term_amendment', invoiceId, ...Object.fromEntries(new FormData(event.currentTarget).entries()) }) }); if (response.ok) window.location.reload(); }}><textarea name="newTerms" required placeholder="Agreed payment terms" className="min-h-20 rounded-xl border border-slate-200 px-3 py-2 text-xs" /><input name="agreementDate" type="date" required className="rounded-xl border border-slate-200 px-3 py-2 text-xs" /><button className="rounded-xl bg-slate-900 px-3 py-2 text-xs uppercase tracking-widest text-white">Add amendment</button></form>; }
+
 function fmt(amount: number, currency = 'KES') {
   return `${currency} ${Number(amount || 0).toLocaleString('en-KE')}`;
 }
@@ -112,6 +119,9 @@ export default function InvoiceDetailPage() {
   const [paymentSummary, setPaymentSummary] = useState<PaymentSummary | null>(null);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [paymentSaving, setPaymentSaving] = useState(false);
+  const [schedules, setSchedules] = useState<Schedule[]>([]);
+  const [amendments, setAmendments] = useState<TermAmendment[]>([]);
+  const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
 
   useEffect(() => {
     if (!invoiceId) return;
@@ -128,6 +138,14 @@ export default function InvoiceDetailPage() {
           setInvoice(data);
           const paymentResponse = await fetch(`/api/invoices/${invoiceId}/payments`, { cache: 'no-store' });
           if (paymentResponse.ok) setPaymentSummary(await paymentResponse.json());
+          const [scheduleResponse, termResponse, auditResponse] = await Promise.all([
+            fetch(`/api/invoices/${invoiceId}/payments?view=schedules`, { cache: 'no-store' }),
+            fetch(`/api/invoices/${invoiceId}/payments?view=terms`, { cache: 'no-store' }),
+            fetch(`/api/invoices/${invoiceId}/payments?view=audit`, { cache: 'no-store' }),
+          ]);
+          if (scheduleResponse.ok) setSchedules(await scheduleResponse.json());
+          if (termResponse.ok) setAmendments(await termResponse.json());
+          if (auditResponse.ok) setAuditItems(await auditResponse.json());
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : 'Unable to load invoice.');
@@ -295,6 +313,8 @@ export default function InvoiceDetailPage() {
       )}
 
       {paymentSummary && <div className="mx-auto mb-6 max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-sm font-semibold text-slate-900">Payment ledger</p><p className="text-xs text-slate-500">Confirmed: {fmt(paymentSummary.confirmedAmount, currency)} · Outstanding: {fmt(paymentSummary.outstanding, currency)}</p></div><button type="button" onClick={() => setPaymentOpen((value) => !value)} className="rounded-xl bg-purple-600 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white">Record payment</button></div>{paymentOpen && <form onSubmit={recordPayment} className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2"><input type="hidden" name="invoiceId" value={invoice.id} /><input type="hidden" name="currency" value={currency} /><label className="grid gap-1 text-xs"><span>Amount in minor units</span><input name="amount" type="number" min="1" defaultValue={paymentSummary.outstanding} required className="rounded-xl border border-slate-200 px-3 py-2" /></label><label className="grid gap-1 text-xs"><span>Method</span><select name="method" defaultValue="bank_transfer" className="rounded-xl border border-slate-200 px-3 py-2"><option value="mpesa">M-Pesa</option><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="card">Card</option><option value="cheque">Cheque</option><option value="other">Other</option></select></label><label className="grid gap-1 text-xs"><span>Paid date</span><input name="paidAt" type="date" required className="rounded-xl border border-slate-200 px-3 py-2" /></label><label className="grid gap-1 text-xs"><span>Verification</span><select name="status" defaultValue="pending_verification" className="rounded-xl border border-slate-200 px-3 py-2"><option value="pending_verification">Pending verification</option><option value="confirmed">Confirmed received</option></select></label><label className="grid gap-1 text-xs sm:col-span-2"><span>Transaction reference</span><input name="transactionReference" className="rounded-xl border border-slate-200 px-3 py-2" /></label><div className="flex gap-2 sm:col-span-2"><button type="submit" disabled={paymentSaving} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white">{paymentSaving ? 'Saving…' : 'Save payment'}</button><button type="button" onClick={() => setPaymentOpen(false)} className="rounded-xl border border-slate-200 px-4 py-2 text-xs uppercase tracking-widest">Cancel</button></div></form>}</div>}
+
+      <div className="mx-auto mb-6 grid max-w-5xl gap-6 lg:grid-cols-2 print:hidden"><section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="text-sm font-semibold text-slate-900">Payment schedule</h2>{schedules.length ? <div className="mt-3 space-y-2">{schedules.map(schedule => <div key={schedule.id} className="flex justify-between border-b border-slate-100 pb-2 text-xs"><span>{schedule.label}<br /><span className="text-slate-400">Due {fmtDate(schedule.dueDate)}</span></span><span className="font-medium">{fmt(schedule.amount, schedule.currency)}</span></div>)}</div> : <p className="mt-3 text-xs text-slate-500">No scheduled instalments recorded.</p>}<ScheduleForm invoiceId={invoice.id} currency={currency} /></section><section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><h2 className="text-sm font-semibold text-slate-900">Payment terms history</h2>{amendments.length ? <div className="mt-3 space-y-3">{amendments.map(item => <div key={item.id} className="border-b border-slate-100 pb-2 text-xs"><p className="font-medium">{item.newTerms}</p><p className="text-slate-400">Agreed {fmtDate(item.agreementDate)}</p></div>)}</div> : <p className="mt-3 text-xs text-slate-500">No term amendments recorded.</p>}<TermForm invoiceId={invoice.id} /></section></div><section className="mx-auto mb-6 max-w-5xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm print:hidden"><h2 className="text-sm font-semibold text-slate-900">Payment audit history</h2>{auditItems.length ? <div className="mt-3 space-y-2">{auditItems.map(item => <div key={`${item.audit.createdAt}-${item.payment.id}`} className="flex justify-between border-b border-slate-100 pb-2 text-xs"><span>{item.audit.eventType} · {item.payment.reference}</span><span className="text-slate-400">{fmtDate(item.audit.createdAt)}</span></div>)}</div> : <p className="mt-3 text-xs text-slate-500">No audit events recorded.</p>}</section>
 
       {/* INVOICE DOCUMENT */}
       <div className="mx-auto max-w-5xl print:max-w-none">

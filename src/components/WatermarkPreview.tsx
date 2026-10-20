@@ -142,8 +142,8 @@ export default function WatermarkPreview({
             onClick={() => handlePositionSelect(position)}
             className={`h-12 rounded-lg border-2 transition-colors ${
               watermarkPosition === position
-                ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20'
-                : 'border-slate-200 dark:border-zinc-800 hover:border-purple-200 dark:hover:border-purple-800'
+                ? 'border-primary bg-primary/10 dark:bg-primary/10'
+                : 'border-slate-200 dark:border-zinc-800 hover:border-primary dark:hover:border-primary'
             }`}
           >
             <span className="">

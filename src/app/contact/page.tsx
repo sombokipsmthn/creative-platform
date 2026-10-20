@@ -3,6 +3,17 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/Button';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/Label';
 
 export const metadata: Metadata = {
   title: "Contact KIPSMTHN | Start a Project",
@@ -34,36 +45,36 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="ui-page selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-background text-foreground selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
 
-      <section className="ui-shell relative pt-36 pb-20 text-center space-y-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative pt-36 pb-20 text-center space-y-8">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="ui-eyebrow">
+        <p className="text-[0.625rem] font-semibold text-[var(--color-accent)] uppercase tracking-wider">
           INITIATE COLLABORATION
         </p>
 
-        <h1 className="ui-page-title text-4xl max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tight text-foreground max-w-4xl mx-auto">
           Start a Project with <span className="font-normal text-[var(--color-accent)]">Kip-Smthn</span>
         </h1>
 
-        <p className="ui-body max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
           Based in Nairobi, Kenya. Available for African startup ecosystem programs, venture studios, commercial photography, and brand media.
         </p>
       </section>
 
       {/* Direct Contact Cards */}
-      <main className="ui-shell py-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl">
         {/* Direct Inquiries Card */}
-        <div className="ui-card p-6 space-y-4">
-          <span className="ui-badge ui-badge-accent">
-            Direct Inquiries
-          </span>
-          <h2 className="ui-section-title text-2xl">
-            Somboriot Kipchilat
-          </h2>
-          <div className="ui-meta space-y-2">
+        <Card className="p-6 space-y-4">
+          <CardHeader>
+            <Badge variant="default">Direct Inquiries</Badge>
+            <CardTitle className="text-2xl font-semibold text-foreground">
+              Somboriot Kipchilat
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 pt-0">
             <p>
               📧 Email: <a href="mailto:somboriot@gmail.com" className="text-[var(--color-accent)] font-medium hover:underline">
                 somboriot@gmail.com
@@ -74,20 +85,20 @@ export default function ContactPage() {
                 +254 722 145 776
               </a>
             </p>
-            <p>📍 Location: Nairobi, Kenya</p>
-            <p>🧾 KRA eTIMS & WHT Compliant</p>
-          </div>
-        </div>
+            <p className="text-sm text-muted-foreground">📍 Location: Nairobi, Kenya</p>
+            <p className="text-sm text-muted-foreground">🧾 KRA eTIMS & WHT Compliant</p>
+          </CardContent>
+        </Card>
 
         {/* Social & Digital Media Card */}
-        <div className="ui-card p-6 space-y-4">
-          <span className="ui-badge ui-badge-accent">
-            Social & Digital Media
-          </span>
-          <h2 className="ui-section-title text-2xl">
-            Channels & Archives
-          </h2>
-          <div className="flex flex-col gap-2 pt-2">
+        <Card className="p-6 space-y-4">
+          <CardHeader>
+            <Badge variant="default">Social & Digital Media</Badge>
+            <CardTitle className="text-2xl font-semibold text-foreground">
+              Channels & Archives
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2 pt-0">
             <Button
               variant="secondary"
               size="sm"
@@ -118,8 +129,8 @@ export default function ContactPage() {
                 Linktree Directory
               </Link>
             </Button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </main>
 
       <Footer />

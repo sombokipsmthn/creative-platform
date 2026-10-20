@@ -56,7 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         )}
       </head>
-      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+      <body className="font-sans antialiased selection:bg-primary selection:text-white">
         <a
           href="#main-content"
           className="absolute left-4 top-2 z-50 -translate-y-24 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"

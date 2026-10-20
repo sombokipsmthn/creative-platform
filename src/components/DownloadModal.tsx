@@ -77,7 +77,7 @@ export default function DownloadModal({
                 type="button"
                 onClick={() => setDownloadType('favorites')}
                 className={`p-3 text-xs font-sans rounded-lg border text-left space-y-1 transition-all ${
-                  downloadType === 'favorites' ? 'border-purple-500 bg-purple-950/30 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
+                  downloadType === 'favorites' ? 'border-primary bg-primary/15 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
                 }`}
               >
                 <p className="">My Selects ({favoritesCount})</p>
@@ -88,7 +88,7 @@ export default function DownloadModal({
                 type="button"
                 onClick={() => setDownloadType('all')}
                 className={`p-3 text-xs font-sans rounded-lg border text-left space-y-1 transition-all ${
-                  downloadType === 'all' ? 'border-purple-500 bg-purple-950/30 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
+                  downloadType === 'all' ? 'border-primary bg-primary/15 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
                 }`}
               >
                 <p className="">Full Gallery ({totalItemsCount})</p>
@@ -105,7 +105,7 @@ export default function DownloadModal({
                 type="button"
                 onClick={() => setResolution('high')}
                 className={`p-3 text-xs font-sans rounded-lg border text-left space-y-1 transition-all ${
-                  resolution === 'high' ? 'border-purple-500 bg-purple-950/30 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
+                  resolution === 'high' ? 'border-primary bg-primary/15 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
                 }`}
               >
                 <p className="">High-Res Original</p>
@@ -116,7 +116,7 @@ export default function DownloadModal({
                 type="button"
                 onClick={() => setResolution('web')}
                 className={`p-3 text-xs font-sans rounded-lg border text-left space-y-1 transition-all ${
-                  resolution === 'web' ? 'border-purple-500 bg-purple-950/30 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
+                  resolution === 'web' ? 'border-primary bg-primary/15 text-white' : 'border-zinc-800 bg-zinc-900/50 text-zinc-400'
                 }`}
               >
                 <p className="">Web-Optimized</p>

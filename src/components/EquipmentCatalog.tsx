@@ -198,9 +198,9 @@ export default function EquipmentCatalog({
               role="tab"
               aria-selected={selected}
               onClick={() => setActiveCategory(category)}
-              className={`shrink-0 rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 ${
+              className={`shrink-0 rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
                 selected
-                  ? "bg-purple-600 text-white"
+                  ? "bg-primary text-white"
                   : "btn-secondary"
               }`}
             >
@@ -243,8 +243,8 @@ export default function EquipmentCatalog({
                 <article
                   className={`flex h-full flex-col justify-between rounded-3xl border bg-white p-6 shadow-sm transition dark:bg-zinc-950 ${
                     selected
-                      ? "border-purple-500 ring-4 ring-purple-100 dark:ring-purple-950/50"
-                      : "border-slate-200 dark:border-zinc-800 hover:border-purple-500/40"
+                      ? "border-primary ring-4 ring-ring dark:ring-ring"
+                      : "border-slate-200 dark:border-zinc-800 hover:border-primary/40"
                   }`}
                 >
                   <div className="">

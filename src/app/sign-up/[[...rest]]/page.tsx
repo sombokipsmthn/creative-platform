@@ -40,7 +40,7 @@ export default function SignUpPage() {
       <div className="w-full max-w-md">
         <Link href="/" className="mb-6 inline-flex text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200">← Go back</Link>
         <div className="rounded-3xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/40 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-none sm:p-9">
-          <div className="mb-8 text-center"><div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600 font-bold text-white">K</div><h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Create your workspace</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Set up your creative business on KIPSMTHN.</p></div>
+          <div className="mb-8 text-center"><div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary font-bold text-white">K</div><h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">Create your workspace</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Set up your creative business on KIPSMTHN.</p></div>
           <Button type="button" onClick={handleGoogleSignUp} disabled={isLoading} variant="outline" className="w-full"><span className="text-base font-bold">G</span>Continue with Google</Button>
           <div className="my-6 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" />or use email<span className="h-px flex-1 bg-slate-200 dark:bg-zinc-800" /></div>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -50,7 +50,7 @@ export default function SignUpPage() {
             {error && <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">{error}</div>}
             <Button type="submit" disabled={isLoading} variant="primary" className="w-full">{isLoading ? "Creating account…" : "Create account"}</Button>
           </form>
-          <p className="mt-7 text-center text-xs text-slate-500 dark:text-zinc-400">Already have an account? <Link href="/sign-in" className="font-medium text-purple-600">Sign in</Link></p>
+          <p className="mt-7 text-center text-xs text-slate-500 dark:text-zinc-400">Already have an account? <Link href="/sign-in" className="font-medium text-primary">Sign in</Link></p>
         </div>
       </div>
     </main>

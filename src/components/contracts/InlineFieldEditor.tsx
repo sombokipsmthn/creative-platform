@@ -64,7 +64,7 @@ export function InlineFieldEditor({
   }
 
   const inputClasses =
-    'w-full px-2 py-1 bg-white dark:bg-gray-800 border border-purple-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500';
+    'w-full px-2 py-1 bg-white dark:bg-gray-800 border border-primary rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring';
 
   return (
     <div className="inline-flex items-center gap-2 align-top">

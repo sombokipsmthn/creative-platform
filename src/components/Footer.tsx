@@ -28,22 +28,22 @@ export default function Footer() {
             <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
               <Link
                 href="#platform"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Features
               </Link>
               <Link
                 href="#workflow"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Workflow
               </Link>
-              <Link href="#work" className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400">
+              <Link href="#work" className="ui-nav-link transition hover:text-primary dark:hover:text-primary">
                 Work
               </Link>
               <Link
                 href="#pricing"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Get started
               </Link>
@@ -56,22 +56,22 @@ export default function Footer() {
             <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
               <Link
                 href="/about"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 About
               </Link>
               <Link
                 href="/services"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Services
               </Link>
-              <Link href="/work" className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400">
+              <Link href="/work" className="ui-nav-link transition hover:text-primary dark:hover:text-primary">
                 Work
               </Link>
               <Link
                 href="/contact"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Contact
               </Link>
@@ -84,13 +84,13 @@ export default function Footer() {
             <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
               <Link
                 href="/sign-in"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Sign in
               </Link>
               <Link
                 href="/sign-up"
-                className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+                className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
               >
                 Create account
               </Link>
@@ -104,7 +104,7 @@ export default function Footer() {
           <div className="flex items-center gap-5">
             <Link
               href="/privacy"
-              className="ui-nav-link transition hover:text-purple-600 dark:hover:text-purple-400"
+              className="ui-nav-link transition hover:text-primary dark:hover:text-primary"
             >
               Privacy
             </Link>

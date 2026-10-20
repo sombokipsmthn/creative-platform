@@ -86,7 +86,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
             className="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-zinc-700"
           />
         ) : (
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-600 text-xs font-bold uppercase text-white">
+          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-xs font-bold uppercase text-white">
             {initials.toUpperCase()}
           </span>
         )}
@@ -136,7 +136,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
                   className="h-11 w-11 rounded-full object-cover border border-slate-200 dark:border-zinc-700"
                 />
               ) : (
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-purple-600 text-sm font-bold uppercase text-white">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold uppercase text-white">
                   {initials.toUpperCase()}
                 </span>
               )}
@@ -160,7 +160,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
               href="/admin/profile"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-purple-600 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-purple-400"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-primary dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-primary"
             >
               <svg
                 width="17"
@@ -188,7 +188,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
               href="/admin/settings"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-purple-600 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-purple-400"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-primary dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-primary"
             >
               <svg
                 width="17"
@@ -216,7 +216,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
               href="/"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-purple-600 dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-purple-400"
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-slate-700 transition hover:bg-slate-100 hover:text-primary dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-primary"
             >
               <svg
                 width="17"

@@ -57,7 +57,7 @@ export default function ContractTemplatesPage() {
     return (
       <div className="min-h-screen min-h-screen p-6">
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
           <p>Loading templates...</p>
         </div>
       </div>
@@ -160,7 +160,7 @@ export default function ContractTemplatesPage() {
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
-                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary">
                       <FilePlus className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">

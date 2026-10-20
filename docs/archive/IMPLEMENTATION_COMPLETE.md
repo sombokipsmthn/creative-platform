@@ -224,7 +224,7 @@ The existing Client CRM page (`/admin/clients`) serves as the visual reference a
    - Pill-shaped (9999px radius)
 
 6. **Buttons:**
-   - Primary (purple) for main action
+   - Primary (primary) for main action
    - Secondary (soft) for alternatives
    - Consistent height (2.625rem default)
    - Modest rounded (0.75rem)
@@ -445,7 +445,7 @@ All colors use CSS variables from `globals.css`:
 
 **Accents:**
 
-- `--color-accent` - Purple (#7c3aed light, #8b5cf6 dark)
+- `--color-accent` - primary (`--primary` light, `--primary` dark)
 - `--color-success` - Green (#10b981)
 - `--color-warning` - Yellow (#f59e0b)
 - `--color-danger` - Red (#ef4444)

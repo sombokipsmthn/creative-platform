@@ -39,7 +39,7 @@ export default async function EquipmentPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans transition-colors duration-300 dark:bg-[#09090b] dark:text-zinc-100">
       <a
         href="#equipment-catalog"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-purple-600 focus:px-4 focus:py-2 focus:text-xs focus:font-sans focus:uppercase focus:tracking-widest focus:text-white"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-primary focus:px-4 focus:py-2 focus:text-xs focus:font-sans focus:uppercase focus:tracking-widest focus:text-white"
       >
         Skip to equipment catalog
       </a>
@@ -47,15 +47,15 @@ export default async function EquipmentPage() {
       <Header />
 
       <section className="relative mx-auto max-w-7xl px-6 pb-12 pt-36 text-center">
-        <div className="pointer-events-none absolute top-1/4 left-1/2 h-100 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full bg-purple-600/15 blur-3xl" />
+        <div className="pointer-events-none absolute top-1/4 left-1/2 h-100 w-150 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
 
-        <p className="text-xs font-sans font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">
+        <p className="text-xs font-sans font-bold uppercase tracking-widest text-primary dark:text-primary">
           Production kit
         </p>
 
         <h1 className="heading-editorial mx-auto mt-4 max-w-4xl text-slate-900 dark:text-white">
           Equipment available for{" "}
-          <span className="font-normal text-purple-600 dark:text-purple-400">
+          <span className="font-normal text-primary dark:text-primary">
             Nairobi productions
           </span>
         </h1>
@@ -82,7 +82,7 @@ export default async function EquipmentPage() {
           <div className="flex items-center gap-6">
             <Link
               href="/contact"
-              className="hover:text-purple-600 dark:hover:text-purple-400"
+              className="hover:text-primary dark:hover:text-primary"
             >
               Start a project
             </Link>

@@ -48,7 +48,7 @@ export default function ContractDetailContent({
     return (
       <div className="min-h-screen p-6">
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
           <p>Loading contract...</p>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function ContractDetailContent({
           <div className="space-y-3">
             {events.map((event) => (
               <div key={event.id} className="flex items-center space-x-3 text-sm">
-                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-purple-100 text-purple-600">
+                <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-primary">
                   <FilePlus className="h-3 w-3" />
                 </div>
                 <div className="flex-1">
@@ -249,7 +249,7 @@ function getStatusColor(status: string) {
     case 'viewed':
       return 'bg-yellow-100 text-yellow-800';
     case 'awaiting_signature':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-primary/10 text-primary';
     case 'signed':
       return 'bg-green-100 text-green-800';
     case 'declined':

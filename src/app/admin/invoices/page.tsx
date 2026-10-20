@@ -480,7 +480,7 @@ export default function InvoicesPage() {
                       {/* INVOICE */}
                       <td className="w-full caption-bottom text-sm-cell">
                         <div className="space-y-1">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
                             <FileText className="h-4 w-4" />
                           </div>
                           <div className="flex-1 min-w-0 space-y-1">

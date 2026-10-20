@@ -400,7 +400,7 @@ export default function AdminProjectsPage() {
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
             ['Published', publishedCount, 'text-emerald-600 dark:text-emerald-400'],
-            ['Featured', featuredCount, 'text-purple-600 dark:text-purple-400'],
+            ['Featured', featuredCount, 'text-primary dark:text-primary'],
             ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
             ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
@@ -492,7 +492,7 @@ export default function AdminProjectsPage() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-primary/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
                   <div className="h-12 w-12 shrink-0 rounded-2xl bg-purple-100">

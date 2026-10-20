@@ -221,7 +221,7 @@ export default function ContractsPage() {
 
           <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
             <p className="text-sm font-medium text-muted-foreground">Awaiting Signature</p>
-            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            <p className="text-2xl font-bold text-primary dark:text-primary">
               {stats.awaiting_signature}
             </p>
           </div>
@@ -353,7 +353,7 @@ export default function ContractsPage() {
                       {/* CONTRACT */}
                       <td className="w-full caption-bottom text-sm-cell">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
                             <FileSignature className="h-4 w-4" />
                           </div>
                           <div className="min-w-0 space-y-1">

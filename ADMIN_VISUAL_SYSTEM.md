@@ -130,12 +130,12 @@ Usage:
 - `.admin-status-badge.warning` - Yellow variant
 - `.admin-status-badge.danger` - Red variant
 - `.admin-status-badge.info` - Blue variant
-- `.admin-status-badge.accent` - Purple variant
+- `.admin-status-badge.accent` - primary variant
 
 ### Buttons
 
 - `.admin-button` - Base button
-- `.admin-button-primary` - Purple, main action
+- `.admin-button-primary` - primary, main action
 - `.admin-button-secondary` - Soft surface, secondary
 - `.admin-button-ghost` - Transparent, minimal
 - `.admin-button-danger` - Red, destructive
@@ -277,9 +277,9 @@ When updating an admin page to use the new system:
 
 1. **Clean Hierarchy** - Page context → primary action → summary → filters → content
 2. **Consistent Spacing** - Use CSS variables for gaps and padding
-3. **Minimal Button Styles** - Primary (purple) for main action, secondary for alternatives
+3. **Minimal Button Styles** - Primary (primary) for main action, secondary for alternatives
 4. **Restrained Rounded** - Moderate radius (0.75rem-1rem), no excessive pills
-5. **Purple Accent** - Primary actions and active states use purple
+5. **primary Accent** - Primary actions and active states use primary
 6. **Soft Shadows** - Subtle elevation, not dramatic
 7. **Dark Mode Ready** - All classes respect dark color scheme
 8. **Responsive** - Mobile-first, adapts to tablet/desktop
@@ -298,8 +298,8 @@ Via CSS variables in `globals.css`:
 - `--color-bg-input` - Form input background
 - `--color-border-subtle` - Light borders
 - `--color-border-strong` - Stronger borders
-- `--color-accent` - Purple primary
-- `--color-accent-soft` - Light purple background
+- `--color-accent` - primary primary
+- `--color-accent-soft` - Light primary background
 - `--color-success` - Green (#10b981)
 - `--color-warning` - Yellow (#f59e0b)
 - `--color-danger` - Red (#ef4444)

@@ -246,7 +246,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
           onSubmit={handleVerifyPin}
           className="max-w-md w-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center"
         >
-          <div className="w-14 h-14 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 mx-auto flex items-center justify-center">
+          <div className="w-14 h-14 rounded-full bg-primary/10 text-primary dark:text-primary mx-auto flex items-center justify-center">
             <Lock className="w-6 h-6" />
           </div>
 
@@ -254,7 +254,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             <h1 className="text-2xl font-light text-slate-900 dark:text-white">
               {title}
             </h1>
-            <p className="text-xs font-sans uppercase tracking-widest text-purple-500 mt-2">
+            <p className="text-xs font-sans uppercase tracking-widest text-primary mt-2">
               Private Client Gallery
             </p>
           </div>
@@ -284,7 +284,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
       <header className="sticky top-0 z-40 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <Link href="/" className="font-bold tracking-widest text-sm uppercase">
-            KIPSMTHN<span className="text-purple-500">.</span>
+            KIPSMTHN<span className="text-primary">.</span>
           </Link>
           <div className="flex items-center gap-2">
             <ThemeToggle />

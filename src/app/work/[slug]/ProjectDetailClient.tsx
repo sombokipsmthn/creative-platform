@@ -55,7 +55,7 @@ function StorySection({ title, body }: { title: string; body: string | null }) {
   if (!body) return null;
   return (
     <section className="space-y-4">
-      <h2 className="ui-eyebrow text-purple-600 dark:text-purple-400">
+      <h2 className="ui-eyebrow text-primary dark:text-primary">
         {title}
       </h2>
       <div className="prose prose-slate dark:prose-invert max-w-none leading-8 whitespace-pre-wrap text-slate-700 dark:text-zinc-300 font-light">
@@ -78,14 +78,14 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
   ].filter((s) => s.body);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-primary selection:text-white transition-colors duration-300">
       <Header />
 
       {/* Back to portfolio */}
       <div className="ui-shell px-6 pt-8">
         <Link
           href="/work"
-          className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-500 hover:text-purple-600 dark:hover:text-purple-400 transition"
+          className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-500 hover:text-primary dark:hover:text-primary transition"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           All Work
@@ -98,7 +98,7 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
           <div className="space-y-4 max-w-4xl">
             <div className="flex flex-wrap items-center gap-3 text-xs font-sans uppercase tracking-widest">
               {project.category && (
-                <span className="px-2.5 py-1 bg-purple-600/15 border border-purple-400/40 text-purple-600 dark:text-purple-300 rounded-sm font-semibold">
+                <span className="px-2.5 py-1 bg-primary/10 border border-primary/40 text-primary dark:text-primary rounded-sm font-semibold">
                   {project.category}
                 </span>
               )}
@@ -244,19 +244,19 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
 
       {/* Contact CTA */}
       <section className="py-20 px-6 max-w-7xl mx-auto">
-        <div className="rounded-[2rem] bg-purple-600 p-8 md:p-14 text-white">
+        <div className="rounded-[2rem] bg-primary p-8 md:p-14 text-white">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
             <div>
-              <p className="text-xs font-sans uppercase tracking-[0.25em] text-purple-200">Let&apos;s work together</p>
+              <p className="text-xs font-sans uppercase tracking-[0.25em] text-primary">Let&apos;s work together</p>
               <h2 className="mt-5 text-3xl md:text-5xl font-light tracking-tight">Have a project in mind?</h2>
-              <p className="mt-5 max-w-xl text-sm md:text-base leading-7 text-purple-100">
+              <p className="mt-5 max-w-xl text-sm md:text-base leading-7 text-primary">
                 Tell us about your brief, timeline, and vision. We&apos;ll help you bring it to life.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/contact"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-semibold text-purple-700 transition hover:bg-purple-50"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-sm font-semibold text-primary transition hover:bg-primary/10"
               >
                 Start a conversation
                 <ArrowRight className="h-4 w-4" />
@@ -272,9 +272,9 @@ export default function ProjectDetailClient({ project, slug }: { project: Projec
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <h2 className="text-2xl md:text-3xl font-light text-slate-900 dark:text-white font-sans uppercase">
-                KIPSMTHN<span className="text-purple-500">.</span>
+                KIPSMTHN<span className="text-primary">.</span>
               </h2>
-              <p className="text-xs text-purple-600 dark:text-purple-400 font-sans">somboriot@gmail.com • +254 722 145 776</p>
+              <p className="text-xs text-primary dark:text-primary font-sans">somboriot@gmail.com • +254 722 145 776</p>
             </div>
 
             <div className="flex flex-wrap gap-2">

@@ -138,7 +138,7 @@ export default function WorkflowTabs() {
             >
               <span
                 className={`font-mono text-[10px] font-bold ${
-                  activeTab === idx ? "text-purple-600 dark:text-purple-400" : "text-slate-400"
+                  activeTab === idx ? "text-primary dark:text-primary" : "text-slate-400"
                 }`}
               >
                 {step.stepNumber}

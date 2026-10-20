@@ -1,23 +1,190 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { ArrowRight, FilePlus, Loader2, RefreshCw, Search } from 'lucide-react';
-import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { useRouter } from 'next/navigation';
+import {
+  FilePlus,
+  Loader2,
+  Search,
+  ArrowRight,
+} from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ContractTemplate } from '@/lib/types/contracts';
 
-const categories = ['all', 'Photography', 'Video and production', 'Confidentiality and NDAs', 'Intellectual property and licensing', 'Model and location releases', 'Freelance and crew agreements', 'Consulting and creative services', 'General business agreements'];
 export default function ContractTemplatesPage() {
-  const [templates, setTemplates] = useState<ContractTemplate[]>([]); const [search, setSearch] = useState(''); const [category, setCategory] = useState('all'); const [preview, setPreview] = useState<ContractTemplate | null>(null); const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading'); const [error, setError] = useState('');
-  const load = useCallback(async () => { setState('loading'); setError(''); try { const response = await fetch(`/api/contracts/templates?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`, { cache: 'no-store' }); if (!response.ok) throw new Error('Unable to load contract templates.'); const data = await response.json(); const list = Array.isArray(data) ? data : data?.templates; if (!Array.isArray(list)) throw new Error('The template response was malformed.'); setTemplates(list); setState('ready'); } catch (err) { setError(err instanceof Error ? err.message : 'Unable to load contract templates.'); setState('error'); } }, [search, category]);
-  useEffect(() => { void load(); }, [load]);
-  return <div className="ui-page ui-page-padded"><div className="ui-shell space-y-8"><AdminPageHeader title="Contract templates" description="Use reviewed starting points for photography, production, licensing and business agreements." breadcrumb={{ label: 'Contracts', href: '/admin/contracts' }} primaryAction={<Link href="/admin/contracts/builder" className="ui-button ui-button-secondary">Start from scratch</Link>} />
-    <div className="flex flex-wrap gap-3"><div className="relative min-w-64 flex-1"><Search className="absolute left-3 top-3 h-4 w-4" /><input className="ui-input pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search templates" /></div><select className="ui-input" value={category} onChange={(event) => setCategory(event.target.value)}>{categories.map((item) => <option key={item} value={item}>{item === 'all' ? 'All categories' : item}</option>)}</select></div>
-    {state === 'loading' && <div className="ui-empty-state p-12"><Loader2 className="animate-spin" /><p>Loading templates…</p></div>}
-    {state === 'error' && <div className="ui-card ui-empty-state p-12"><p>{error}</p><Button variant="outline" onClick={() => void load()}><RefreshCw className="h-4 w-4" /> Retry</Button></div>}
-    {state === 'ready' && templates.length === 0 && <div className="ui-card ui-empty-state p-12"><FilePlus /><h2 className="ui-section-title">No templates found</h2><p className="ui-body">Try another search or start a contract from scratch.</p></div>}
-    {state === 'ready' && templates.length > 0 && <div className="grid gap-4 md:grid-cols-2">{templates.map((template) => <article className="ui-card flex flex-col gap-5 p-5" key={template.id}><div className="flex items-start justify-between gap-4"><div><p className="ui-meta">{template.category} · {template.isSystemTemplate ? 'Built-in' : 'Custom'} · v{template.version || 1}</p><h2 className="ui-section-title mt-2">{template.name}</h2></div><FilePlus className="h-5 w-5" /></div><p className="ui-body flex-1">{template.description || 'A reusable contract starting point.'}</p><p className="ui-meta">{template.variables?.length || 0} fields · Review: {template.reviewStatus || 'unreviewed'}</p><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => setPreview(template)}>Preview</Button>{!template.isSystemTemplate && <><Button variant="outline" onClick={async () => { const response = await fetch(`/api/contracts/templates/${template.id}`, { method: "POST" }); if (response.ok) void load(); }}>Duplicate</Button><Link className="ui-button ui-button-secondary" href={`/admin/contracts/templates/${template.id}/edit`}>Edit</Link><Button variant="outline" onClick={async () => { if (!window.confirm("Archive this template?")) return; const response = await fetch(`/api/contracts/templates/${template.id}`, { method: "DELETE" }); if (response.ok) void load(); }}>Archive</Button></>}<Link href={`/admin/contracts/builder?templateId=${template.id}`} className="ui-button ui-button-primary">Use template <ArrowRight className="h-4 w-4" /></Link></div></article>)}</div>}
-    {preview && <div className="ui-overlay" onClick={() => setPreview(null)}><section className="ui-modal ui-modal-lg" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="ui-meta">{preview.category} · v{preview.version || 1}</p><h2 className="ui-section-title">{preview.name}</h2><p className="ui-body">{preview.description}</p></div><Button variant="ghost" onClick={() => setPreview(null)}>Close</Button></div><article className="mt-5 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-xl border p-5">{preview.content}</article><div className="mt-5 flex justify-end"><Link href={`/admin/contracts/builder?templateId=${preview.id}`} className="ui-button ui-button-primary">Use template</Link></div></section></div>}
-  </div></div>;
+  const router = useRouter();
+  const [templates, setTemplates] = useState<ContractTemplate[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [previewTemplate, setPreviewTemplate] = useState<ContractTemplate | null>(null);
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await fetch(
+          `/api/contracts/templates?search=${encodeURIComponent(search)}&category=${selectedCategory}`,
+          {
+            cache: 'no-store',
+          }
+        );
+        if (!res.ok) throw new Error('Failed to fetch templates');
+        const data = await res.json();
+        const nextTemplates = Array.isArray(data) ? data : data?.templates;
+        if (!Array.isArray(nextTemplates)) throw new Error('Invalid template response');
+        setTemplates(nextTemplates);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadTemplates();
+  }, [search, selectedCategory]);
+
+  const handleUseTemplate = (template: ContractTemplate) => {
+    router.push(`/admin/contracts/builder?templateId=${template.id}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen min-h-screen p-6">
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+          <p>Loading templates...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen p-6">
+        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 p-4 mb-6">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        {/* Header */}
+        <header className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
+                Contract Templates
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Start with a contract template designed for your creative work.
+              </p>
+            </div>
+            <Button asChild variant="secondary" className="whitespace-nowrap"><Link href="/admin/contracts/builder">Start from Scratch</Link></Button>
+          </div>
+        </header>
+
+        {/* Filters */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center gap-4">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input type="text" placeholder="Search templates..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-10 w-full" />
+          </div>
+          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+            <SelectTrigger className="w-full md:w-48"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="all">All Categories</SelectItem><SelectItem value="Photography">Photography</SelectItem><SelectItem value="Video">Video</SelectItem><SelectItem value="Design">Design</SelectItem><SelectItem value="Creative Services">Creative Services</SelectItem><SelectItem value="Consulting">Consulting</SelectItem><SelectItem value="Events">Events</SelectItem><SelectItem value="General Business">General Business</SelectItem><SelectItem value="Legal & Protection">Legal & Protection</SelectItem></SelectContent>
+          </Select>
+        </div>
+
+        {/* Template preview modal */}
+        {previewTemplate && (
+          <div
+            className="ui-overlay"
+            role="presentation"
+            onClick={() => setPreviewTemplate(null)}
+          >
+            <section
+              className="ui-modal ui-modal-lg max-h-[90vh] overflow-hidden p-0"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="template-preview-title"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <header className="flex items-start justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-5">
+                <div>
+                  <p className="text-sm text-muted-foreground">{previewTemplate.category}</p>
+                  <h2 id="template-preview-title" className="mt-1 text-xl font-semibold">
+                    {previewTemplate.name}
+                  </h2>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    {previewTemplate.description}
+                  </p>
+                </div>
+                <Button type="button" variant="ghost" size="icon-sm" aria-label="Close preview" onClick={() => setPreviewTemplate(null)} className="px-2">✕</Button>
+              </header>
+              <div className="max-h-[calc(90vh-10rem)] overflow-y-auto px-6 py-6">
+                <article className="whitespace-pre-wrap text-sm leading-7 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-lg border border-gray-200 dark:border-gray-700 font-mono text-xs">
+                  {previewTemplate.content}
+                </article>
+                <p className="mt-4 text-xs text-gray-600 dark:text-gray-400">
+                  Items shown as [Add field name] will be filled in as you edit the contract.
+                </p>
+              </div>
+              <footer className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+                <Button type="button" variant="secondary" onClick={() => setPreviewTemplate(null)}>Close</Button>
+                <Button type="button" variant="primary" onClick={() => { handleUseTemplate(previewTemplate); setPreviewTemplate(null); }}>Use Template <ArrowRight className="h-4 w-4" /></Button>
+              </footer>
+            </section>
+          </div>
+        )}
+
+        {/* Templates list */}
+        <div className="space-y-4">
+          {templates.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-600 dark:text-gray-400">No templates found.</p>
+            </div>
+          ) : (
+            templates.map((template) => (
+              <article
+                key={template.id}
+                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 flex-1">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                      <FilePlus className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
+                        {template.name}
+                      </h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
+                        {template.category}
+                      </p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {template.description || 'A professional contract template for your needs.'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <Button onClick={() => setPreviewTemplate(template)} variant="secondary" size="sm">Preview</Button>
+                    <Button onClick={() => handleUseTemplate(template)} variant="primary" size="sm">Use</Button>
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

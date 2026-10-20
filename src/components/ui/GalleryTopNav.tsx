@@ -1,5 +1,7 @@
 'use client';
 
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 interface GalleryTab {
   id: string;
   label: string;
@@ -18,35 +20,15 @@ export default function GalleryTopNav({
   onTabChange,
 }: GalleryTopNavProps) {
   return (
-    <div className="">
-      <div className="">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onTabChange(tab.id)}
-              className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all  whitespace-nowrap flex items-center gap-2 ${
-                isActive
-                  ? 'border-[var(--color-accent)] text-[var(--color-accent)] font-bold'
-                  : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'
-              }`}
-            >
-              {tab.icon && (
-                <span className={`flex h-5 w-5 shrink-0 items-center justify-center text-current ${
-                  isActive
-                    ? 'text-[var(--color-accent)]'
-                    : 'text-[var(--color-text-muted)]'
-                }`}>
-                  {tab.icon}
-                </span>
-              )}
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-    </div>
+    <Tabs value={activeTab} onValueChange={onTabChange} className="border-b border-border">
+      <TabsList variant="line" className="w-full justify-start gap-6 overflow-x-auto rounded-none p-0">
+        {tabs.map((tab) => (
+          <TabsTrigger key={tab.id} value={tab.id} data-testid={`gallery-tab-${tab.id}`} className="flex-none gap-2 px-0 py-3 text-xs uppercase tracking-widest">
+            {tab.icon}
+            <span>{tab.label}</span>
+          </TabsTrigger>
+        ))}
+      </TabsList>
+    </Tabs>
   );
 }

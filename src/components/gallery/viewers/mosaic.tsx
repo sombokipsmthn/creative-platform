@@ -13,7 +13,7 @@ interface MosaicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
 
 /**
  * Mosaic Theme Viewer
- *
+ * 
  * Dynamic grid with varied image aspect ratios.
  * Playful, energetic feel.
  * Organic masonry-style layout.
@@ -32,9 +32,9 @@ export function GalleryViewerMosaic({
 
   if (photos.length === 0) {
     return (
-      <div className="">
-        <div className="">
-          <p className="">No photos in gallery</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#09090b] p-6">
+        <div className="text-center">
+          <p className="text-lg font-light text-slate-400 dark:text-zinc-500">No photos in gallery</p>
         </div>
       </div>
     );
@@ -60,22 +60,22 @@ export function GalleryViewerMosaic({
 
   return (
     <div
-      className=""
+      className="min-h-screen"
       style={{
         backgroundColor: theme.preset.backgroundColor,
         color: theme.preset.textColor,
       }}
     >
       {/* Header */}
-      <div className="">
-        <h1 className="">{title}</h1>
-        {description && <p className="">{description}</p>}
+      <div className="border-b border-slate-200 dark:border-zinc-800 px-6 py-8 sm:px-10 lg:px-16">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-base text-slate-600 dark:text-zinc-400">{description}</p>}
       </div>
 
       {/* Mosaic Grid */}
-      <div className="">
-        <div className="">
-          <div className="">
+      <div className="px-6 py-8 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-6xl">
+          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [column-fill:_balance]">
             {photos.map((photo, idx) => {
               const isFavorite = favorites.has(photo.id) || photo.isFavorite;
               const aspectRatio = getAspectRatio(idx);
@@ -89,29 +89,29 @@ export function GalleryViewerMosaic({
               return (
                 <div
                   key={photo.id}
-                  className=""
+                  className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-105"
                 >
                   <div className={`${heightClass} relative group`}>
                     <Image
                       src={photo.displayUrl}
                       alt={photo.filename}
                       fill
-                      className=""
+                      className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
 
                     {/* Overlay on Hover */}
-                    <div className="to-transparent">
-                      <p className="">
+                    <div className="absolute inset-0 flex items-end justify-between bg-gradient-to-t from-black/60 to-transparent p-3 opacity-0 transition-opacity group-hover:opacity-100">
+                      <p className="flex-1 text-xs font-light text-white truncate">
                         {photo.filename}
                       </p>
-                      <div className="">
+                      <div className="ml-2 flex gap-2 shrink-0">
                         {allowFavorites && (
                           <Button
                             variant="ghost"
                             size="icon"
                             onClick={() => handleFavorite(photo.id)}
-                            className=""
+                            className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
                             <Heart
                               className={`h-4 w-4 ${
@@ -125,9 +125,9 @@ export function GalleryViewerMosaic({
                             variant="ghost"
                             size="icon"
                             onClick={() => onPhotoDownload?.(photo.id)}
-                            className=""
+                            className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
-                            <Download className="" />
+                            <Download className="h-4 w-4 text-white" />
                           </Button>
                         )}
                       </div>
@@ -141,14 +141,14 @@ export function GalleryViewerMosaic({
       </div>
 
       {/* Footer Stats */}
-      <div className="">
-        <div className="">
-          <p className="">
-            <span className="">{photos.length}</span> photos
+      <div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 px-6 py-6 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-6xl flex items-center justify-between gap-4">
+          <p className="text-sm text-slate-600 dark:text-zinc-400">
+            <span className="font-semibold">{photos.length}</span> photos
           </p>
           {favorites.size > 0 && (
-            <p className="">
-              <span className="">{favorites.size}</span> favorited
+            <p className="text-sm text-slate-600 dark:text-zinc-400">
+              <span className="font-semibold">{favorites.size}</span> favorited
             </p>
           )}
         </div>

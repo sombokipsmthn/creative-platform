@@ -3545,38 +3545,3 @@ console.log("Gallery watermark smoke passed.");
 ALTER TABLE "galleries"
   ADD COLUMN IF NOT EXISTS "focal_point" jsonb DEFAULT '{}'::jsonb;
 ```
-
-## Final addendum: dev-branch and migration reconciliation
-
-- The requested `dev` branch was verified in a separate clean worktree at `/tmp/creative-platform-dev` because the original checkout had unrelated `Calendar-Fix` changes that Git correctly refused to overwrite.
-- The original checkout was not reset, stashed, discarded, or overwritten. Its Calendar-Fix changes remain untouched.
-- The clean `dev` migration journal was missing entries for applied files `0031_local_init.sql`, `0032_creator_portfolios.sql`, and `0033_gallery_watermark_presets.sql`. Their SHA-256 hashes matched the database migration rows, so matching journal entries were restored without changing migration SQL.
-- A forward repair artifact is present at `drizzle/0034_repair_gallery_schema.sql`. It is idempotent and documents the verified missing gallery and photo columns plus the watermark preset table.
-- `drizzle-kit migrate` still attempts the repair against the historically inconsistent migration ledger and does not complete; no destructive or metadata rewrite was performed. The database schema itself was verified and repaired idempotently.
-- Clean-worktree source checks passed before final branch reconciliation: typecheck, lint, 58 tests, authenticated settings smoke, gallery watermark smoke, responsive smoke with 48 checks, and production build in the dependency-equipped original checkout.
-- A clean-worktree production build could not be rerun because the temporary external `node_modules` symlink is outside Turbopack’s allowed filesystem root. This is an environment limitation, not a source failure.
-- Final original worktree status includes unrelated Calendar-Fix files and the report/scripts from this task. No temporary tagged galleries remain.
-
-## Final migration reconciliation result
-
-- Clean `dev` worktree: `/tmp/creative-platform-dev`.
-- Original `Calendar-Fix` worktree was not modified, reset, stashed, or switched.
-- Database migration rows 31–33 were matched to `0031_local_init.sql`, `0032_creator_portfolios.sql`, and `0033_gallery_watermark_presets.sql` by SHA-256 hash.
-- Migration row 34 was registered using the exact SHA-256 hash of `drizzle/0034_repair_gallery_schema.sql` and explicit next ID 34. The migration sequence was updated to the current maximum ID.
-- `npm run db:migrate`: passed after reconciliation and completed without applying additional SQL.
-- The repair SQL remains idempotent and forward-only.
-
-## CI completion addendum
-
-- The clean `dev` CI workflow now runs `npm run test:authenticated-settings` and `npm run test:gallery-watermark` in the existing isolated Postgres service job, alongside the 48-check responsive smoke.
-- CI uses the service database URL `postgresql://postgres:[REDACTED]@localhost:5432/creative_platform` and the existing CI-only Better Auth secret, not development or production credentials.
-- The workflow structure was parsed successfully and includes the responsive, authenticated settings, and gallery watermark steps.
-- Dependencies were installed inside the clean `dev` worktree with `npm ci`; `npm run build` then passed there. The Node runtime emitted an engine warning because the local environment is Node 26 while the project declares Node 22; CI explicitly uses Node 22.
-
-## CI verification addendum
-
-- `.github/workflows/ci.yml` now runs the authenticated settings smoke and gallery watermark smoke in the existing isolated Postgres service job, in addition to the responsive admin smoke.
-- The CI database URL is the service-local URL `postgresql://postgres:[REDACTED]@localhost:5432/creative_platform`; no development or production connection string is used.
-- The workflow structure was validated structurally for all three browser commands and the isolated database URL.
-- `npm ci`, typecheck, lint, all 58 tests, and the clean `dev` production build passed.
-- The local environment is Node 26, which emits an engine warning because the project declares Node 22; the CI workflow explicitly uses Node 22.

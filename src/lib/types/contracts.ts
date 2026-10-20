@@ -5,9 +5,6 @@ export interface Contract {
   projectId?: string | null;
   quoteId?: string | null;
   templateId?: string | null;
-  templateVersion?: number | null;
-  templateSnapshot?: string | null;
-  contractType?: string | null;
   title: string;
   contractNumber: string;
   status: string;
@@ -16,13 +13,6 @@ export interface Contract {
   totalAmount?: number | null;
   token: string;
   expiresAt?: Date | null;
-  effectiveAt?: Date | null;
-  termStartAt?: Date | null;
-  termEndAt?: Date | null;
-  renewalAt?: Date | null;
-  noticeDeadline?: Date | null;
-  terminationAt?: Date | null;
-  signatories?: Array<{ name?: string; email?: string; role?: string }>;
   sentAt?: Date | null;
   viewedAt?: Date | null;
   signedAt?: Date | null;
@@ -34,8 +24,8 @@ export interface Contract {
   cancelledAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-  client?: { id?: string; name?: string | null; email?: string | null; company?: string | null; phone?: string | null } | null;
-  project?: { id?: string; name?: string | null } | null;
+  client?: { name?: string | null; email?: string | null; company?: string | null; phone?: string | null } | null;
+  project?: { name?: string | null } | null;
 }
 
 export interface NewContract {
@@ -47,16 +37,9 @@ export interface NewContract {
   content?: string;
   currency?: string;
   totalAmount?: number;
-  contractType?: string | null;
-  effectiveAt?: string | Date | null;
-  termStartAt?: string | Date | null;
-  termEndAt?: string | Date | null;
-  renewalAt?: string | Date | null;
-  noticeDeadline?: string | Date | null;
-  signatories?: Array<{ name?: string; email?: string; role?: string }>;
 }
 
-export type UpdateContractInput = Partial<NewContract> & { status?: string; expiresAt?: string | Date | null };
+export type UpdateContractInput = Partial<NewContract>;
 
 export interface ContractTemplate {
   id: string;
@@ -69,9 +52,6 @@ export interface ContractTemplate {
   variables?: string[] | null;
   isSystemTemplate: boolean;
   isActive: boolean;
-  version?: number;
-  reviewStatus?: string | null;
-  reviewedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -80,26 +60,18 @@ export interface ContractEvent {
   id: string;
   contractId: string;
   eventType: string;
-  metadata?: Record<string, unknown> | null;
-  actorId?: string | null;
-  outcome?: string | null;
+  metadata?: string | null;
   createdAt: Date;
 }
 
 export interface ContractStats {
-  total?: number;
-  active?: number;
-  awaiting_signature?: number;
-  expiring_soon?: number;
-  signed_this_month?: number;
-  draft?: number;
+  totalContracts?: number;
+  drafts?: number;
   sent?: number;
   viewed?: number;
   awaitingSignature?: number;
   signed?: number;
-  declined?: number;
   expired?: number;
-  cancelled?: number;
 }
 
 export interface Client {

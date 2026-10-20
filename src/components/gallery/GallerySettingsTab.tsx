@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, AlertCircle, Trash2 } from 'lucide-react'
+import { Loader2, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input, Textarea } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface GallerySettingsTabProps {
   galleryId: string
@@ -25,20 +28,14 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [watermark, setWatermark] = useState({ enabled: true, text: 'KIPSMTHN', position: 'bottom-right', opacity: 55, fontSize: 42 })
-  const [presets, setPresets] = useState<Array<{ id: string; name: string; enabled: boolean; text: string; position: string; opacity: number; fontSize: number }>>([])
-  const [presetName, setPresetName] = useState('')
 
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         setLoading(true)
-        const [galleryResponse, presetsResponse] = await Promise.all([
-          fetch(`/api/galleries/${galleryId}`),
-          fetch('/api/watermark-presets', { cache: 'no-store' }),
-        ])
-        if (galleryResponse.ok) {
-          const data = await galleryResponse.json() as { gallery?: Record<string, unknown>; watermark?: Record<string, unknown> }
+        const response = await fetch(`/api/galleries/${galleryId}`)
+        if (response.ok) {
+          const data = await response.json() as { gallery?: Record<string, unknown> }
           const g = data.gallery || {}
           setTitle(String(g.title || ''))
           setDescription(String(g.description || ''))
@@ -47,12 +44,6 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
           setAllowDownloads(Boolean(g.allow_downloads ?? true))
           setAllowFavorites(Boolean(g.allow_favorites ?? true))
           setAllowSelections(Boolean(g.allow_selections ?? true))
-          const w = data.watermark || {}
-          setWatermark({ enabled: w.enabled !== false, text: String(w.text || 'KIPSMTHN'), position: String(w.position || 'bottom-right'), opacity: Number(w.opacity ?? 55), fontSize: Number(w.font_size ?? 42) })
-        }
-        if (presetsResponse.ok) {
-          const data = await presetsResponse.json() as { presets?: typeof presets }
-          setPresets(data.presets || [])
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load settings')
@@ -60,38 +51,9 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
         setLoading(false)
       }
     }
-    void fetchSettings()
+    fetchSettings()
   }, [galleryId])
 
-  const saveWatermark = async (next: typeof watermark) => {
-    const response = await fetch(`/api/galleries/${galleryId}/watermark`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled: next.enabled, text: next.text, position: next.position, opacity: next.opacity, fontSize: next.fontSize }) })
-    if (!response.ok) throw new Error('Failed to save watermark settings')
-    setWatermark(next)
-    await onRefresh()
-  }
-
-  const savePreset = async () => {
-    if (!presetName.trim()) return
-    setError(null)
-    try {
-      const response = await fetch('/api/watermark-presets', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: presetName, ...watermark }) })
-      const body = await response.json()
-      if (!response.ok) throw new Error(body.error || 'Failed to save preset')
-      setPresets(current => [...current, body.preset].sort((a, b) => a.name.localeCompare(b.name)))
-      setPresetName('')
-    } catch (err) { setError(err instanceof Error ? err.message : 'Failed to save preset') }
-  }
-
-  const deletePreset = async (id: string) => {
-    const response = await fetch('/api/watermark-presets', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) })
-    if (!response.ok) { const body = await response.json().catch(() => null); setError(body?.error || 'Failed to delete preset'); return }
-    setPresets(current => current.filter(preset => preset.id !== id))
-  }
-
-  const applyPreset = async (preset: typeof presets[number]) => {
-    try { await saveWatermark({ enabled: preset.enabled, text: preset.text, position: preset.position, opacity: preset.opacity, fontSize: preset.fontSize }) }
-    catch (err) { setError(err instanceof Error ? err.message : 'Failed to apply preset') }
-  }
   const handleSave = async () => {
     setSaving(true)
     setError(null)
@@ -100,7 +62,15 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
       const response = await fetch(`/api/galleries/${galleryId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, category, slug, allowDownloads, allowFavorites, allowSelections }),
+        body: JSON.stringify({
+          title,
+          description,
+          category,
+          slug,
+          allowDownloads,
+          allowFavorites,
+          allowSelections,
+        }),
       })
       if (!response.ok) {
         const body = await response.json().catch(() => null) as { error?: string } | null
@@ -116,12 +86,11 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
     }
   }
 
-
   if (loading) {
     return (
-      <div className="ui-card">
-        <div className="">
-          <Loader2 className="" />
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
+        <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading...</span>
         </div>
       </div>
@@ -129,152 +98,107 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
   }
 
   return (
-    <div className="">
+    <div className="space-y-6">
       {error && (
-        <div className="">
-          <AlertCircle className="" />
-          <p className="">{error}</p>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="">
-          <p className="">Saved successfully</p>
+        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-sm text-green-700 font-medium">Saved successfully</p>
         </div>
       )}
 
-      {/* WATERMARK PRESETS */}
-      <div className="ui-card">
-        <h2 className="">Watermark presets</h2>
-        <p className="ui-meta">Workspace presets are private to this creator and can be applied to this gallery.</p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <label className="block"><span className="ui-label">Watermark text</span><input className="gallery-input" value={watermark.text} onChange={e => setWatermark(current => ({ ...current, text: e.target.value }))} /></label>
-          <label className="block"><span className="ui-label">Position</span><select className="gallery-input" value={watermark.position} onChange={e => setWatermark(current => ({ ...current, position: e.target.value }))}><option value="top-left">Top left</option><option value="top-right">Top right</option><option value="bottom-left">Bottom left</option><option value="bottom-right">Bottom right</option><option value="center">Center</option></select></label>
-          <label className="block"><span className="ui-label">Opacity</span><input className="gallery-input" type="number" min="0" max="100" value={watermark.opacity} onChange={e => setWatermark(current => ({ ...current, opacity: Number(e.target.value) }))} /></label>
-          <label className="block"><span className="ui-label">Font size</span><input className="gallery-input" type="number" min="12" max="160" value={watermark.fontSize} onChange={e => setWatermark(current => ({ ...current, fontSize: Number(e.target.value) }))} /></label>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2"><button type="button" className="gallery-btn gallery-btn-primary" onClick={() => void saveWatermark(watermark)}>Save watermark</button><input className="gallery-input max-w-xs" placeholder="Preset name" value={presetName} onChange={e => setPresetName(e.target.value)} /><button type="button" className="gallery-btn gallery-btn-secondary" onClick={() => void savePreset()} disabled={!presetName.trim()}>Save preset</button></div>
-        {presets.length > 0 && <div className="mt-4 grid gap-2">{presets.map(preset => <div key={preset.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3"><span>{preset.name}</span><div className="flex gap-2"><button type="button" className="gallery-btn gallery-btn-secondary" onClick={() => void applyPreset(preset)}>Apply</button><button type="button" className="gallery-btn gallery-btn-secondary" aria-label={`Delete ${preset.name}`} onClick={() => void deletePreset(preset.id)}><Trash2 className="h-4 w-4" /></button></div></div>)}</div>}
-      </div>
-
-
-      <div className="ui-card">
-        <h2 className="">General</h2>
-
+      {/* GENERAL SECTION */}
+      <Card><CardHeader><CardTitle>General</CardTitle></CardHeader><CardContent className="space-y-4">
         <div>
-          <label className="block">Gallery Name</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="gallery-input"
-            placeholder="Gallery title"
-          />
+          <label className="block text-sm font-medium mb-2">Gallery Name</label>
+          <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Gallery title" />
         </div>
 
         <div>
-          <label className="block">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="gallery-input"
-            placeholder="Gallery description"
-          />
+          <label className="block text-sm font-medium mb-2">Description</label>
+          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="min-h-24" placeholder="Gallery description" />
         </div>
 
-        <div className="">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
-            <label className="block">Category</label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="gallery-input"
-              placeholder="e.g. Wedding, Portrait"
-            />
+            <label className="block text-sm font-medium mb-2">Category</label>
+            <Input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Wedding, Portrait" />
           </div>
 
           <div>
-            <label className="block">Slug</label>
-            <input
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-              className="gallery-input"
-              placeholder="gallery-slug"
-            />
-            <p className="">Used in the gallery URL</p>
+            <label className="block text-sm font-medium mb-2">Slug</label>
+            <Input type="text" value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))} placeholder="gallery-slug" />
+            <p className="text-xs text-[var(--color-text-muted)] mt-1">Used in the gallery URL</p>
           </div>
         </div>
-      </div>
+      </CardContent></Card>
 
       {/* CLIENT PERMISSIONS SECTION */}
-      <div className="ui-card">
-        <h2 className="">Client Permissions</h2>
-
-        <div className="">
-          <label className="">
+      <Card><CardHeader><CardTitle>Client Permissions</CardTitle></CardHeader><CardContent className="space-y-4">
+        <div className="space-y-3">
+          <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={allowDownloads}
               onChange={(e) => setAllowDownloads(e.target.checked)}
-              className=""
+              className="w-5 h-5 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] mt-0.5"
             />
             <div>
-              <p className="">Allow Downloads</p>
-              <p className="">
+              <p className="font-medium">Allow Downloads</p>
+              <p className="text-sm text-[var(--color-text-muted)]">
                 Clients can download photos from the gallery
               </p>
             </div>
           </label>
 
-          <label className="">
+          <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={allowFavorites}
               onChange={(e) => setAllowFavorites(e.target.checked)}
-              className=""
+              className="w-5 h-5 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] mt-0.5"
             />
             <div>
-              <p className="">Allow Favorites</p>
-              <p className="">
+              <p className="font-medium">Allow Favorites</p>
+              <p className="text-sm text-[var(--color-text-muted)]">
                 Clients can mark photos as favorites
               </p>
             </div>
           </label>
 
-          <label className="">
+          <label className="flex items-start gap-3 cursor-pointer">
             <input
               type="checkbox"
               checked={allowSelections}
               onChange={(e) => setAllowSelections(e.target.checked)}
-              className=""
+              className="w-5 h-5 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] mt-0.5"
             />
             <div>
-              <p className="">Allow Selections</p>
-              <p className="">
+              <p className="font-medium">Allow Selections</p>
+              <p className="text-sm text-[var(--color-text-muted)]">
                 Clients can select/cart multiple photos
               </p>
             </div>
           </label>
         </div>
-      </div>
+      </CardContent></Card>
 
       {/* SAVE BUTTON */}
-      <button
-        onClick={() => void handleSave()}
-        disabled={saving}
-        className="gallery-btn gallery-btn-primary"
-      >
+      <Button onClick={() => void handleSave()} disabled={saving} variant="primary">
         {saving ? (
           <>
-            <Loader2 className="" />
+            <Loader2 className="w-4 h-4 animate-spin" />
             Saving...
           </>
         ) : (
           'Save Settings'
         )}
-      </button>
+      </Button>
     </div>
   )
 }

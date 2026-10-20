@@ -321,32 +321,38 @@ export default function InvoicesPage() {
         />
 
         {error && !loading && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </div>
         )}
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <Card variant="stat" title="Total Invoices">
-            {summary.total}
-          </Card>
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+            <p className="text-2xl font-bold">{summary.total}</p>
+          </div>
 
-          <Card variant="stat" title="Draft">
-            <span className="text-amber-600 dark:text-amber-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Draft</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {summary.draft}
             </span>
           </Card>
 
-          <Card variant="stat" title="Paid">
-            <span className="text-emerald-600 dark:text-emerald-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Paid</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {summary.paid}
             </span>
           </Card>
 
-          <Card variant="stat" title="Outstanding">
-            {formatMoney(summary.outstanding, 'KES')}
-          </Card>
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">
+              {formatMoney(summary.outstanding, 'KES')}
+            </p>
+          </div>
         </div>
 
         {/* Table Filter Bar */}
@@ -407,143 +413,143 @@ export default function InvoicesPage() {
         )}
 
         {/* TABLE */}
-        <Card>
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
-            <CardContent className="p-12">
-              <div className="flex flex-col items-center gap-3">
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-48" />
-                <Skeleton className="h-4 w-40" />
-                <Skeleton className="h-4 w-36" />
-                <Skeleton className="h-4 w-44" />
-              </div>
-            </CardContent>
+            <div className="flex items-center justify-center p-12">
+              <p className="text-xs font-sans uppercase tracking-widest">
+                Loading invoices...
+              </p>
+            </div>
           ) : filteredInvoices.length === 0 ? (
-            <CardContent className="flex flex-col items-center gap-3 p-12">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-                <FileText className="h-6 w-6 text-muted-foreground" />
+            <div className="rounded-xl border border-dashed p-12 text-center p-12">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <FileText className="h-6 w-6" />
               </div>
-              <h2 className="text-lg font-semibold text-foreground">
-                No invoices found
-              </h2>
-              <p className="text-sm text-muted-foreground text-center">
+
+              <h2 className="text-2xl font-semibold tracking-tight">No invoices found</h2>
+
+              <p className="text-sm text-muted-foreground">
                 {hasFilters
                   ? 'Try changing your filters or search terms.'
                   : 'Invoices will appear here once they are created.'}
               </p>
-              <div className="mt-4">
-                <Button variant="primary">
+
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="primary"
+                  className="mt-6"
+                >
                   Create First Invoice
                 </Button>
               </div>
             </CardContent>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Invoice</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Issued</TableHead>
-                  <TableHead>Total</TableHead>
-                  <TableHead />
-                </TableRow>
-              </TableHeader>
+            <div className="overflow-x-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead>
+                  <tr>
+                    <th className="w-full caption-bottom text-sm-header">Invoice</th>
+                    <th className="w-full caption-bottom text-sm-header">Client</th>
+                    <th className="w-full caption-bottom text-sm-header">Status</th>
+                    <th className="w-full caption-bottom text-sm-header">Issued</th>
+                    <th className="w-full caption-bottom text-sm-header">Total</th>
+                    <th className="w-full caption-bottom text-sm-header" />
+                  </tr>
+                </thead>
 
-              <TableBody>
-                {filteredInvoices.map((invoice) => (
-                  <TableRow key={invoice.id}>
-                    {/* INVOICE */}
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
-                          <FileText className="h-4 w-4" />
+                <tbody>
+                  {filteredInvoices.map((invoice) => (
+                    <tr
+                      key={invoice.id}
+                      className="w-full caption-bottom text-sm-row"
+                    >
+                      {/* INVOICE */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <div className="space-y-1">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                            <FileText className="h-4 w-4" />
+                          </div>
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {invoice.title || 'Untitled Invoice'}
+                            </p>
+                            <p className="text-sm text-muted-foreground text-xs text-slate-500 dark:text-zinc-600">
+                              {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
+                            </p>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0 space-y-1">
-                          <p className="font-medium text-slate-900 dark:text-white">
-                            {invoice.title || 'Untitled Invoice'}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
-                          </p>
+                      </td>
+
+                      {/* CLIENT */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                          {getClientName(invoice.client)}
+                        </p>
+                      </td>
+
+                      {/* STATUS */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <div className="flex flex-col items-start gap-2">
+                          <span
+                            className={`${getStatusBadgeClass(invoice.status)}`}
+                          >
+                            {getStatusLabel(invoice.status)}
+                          </span>
                         </div>
-                      </div>
-                    </TableCell>
+                      </td>
 
-                    {/* CLIENT */}
-                    <TableCell>
-                      <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
-                        {getClientName(invoice.client)}
-                      </p>
-                    </TableCell>
+                      {/* ISSUED */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                          {formatDate(invoice.issueDate)}
+                        </p>
+                      </td>
 
-                    {/* STATUS */}
-                    <TableCell>
-                      <Badge variant={getStatusBadgeVariant(invoice.status)}>
-                        {getStatusLabel(invoice.status)}
-                      </Badge>
-                    </TableCell>
+                      {/* TOTAL */}
+                      <td className="w-full caption-bottom text-sm-cell text-right font-medium text-slate-900 dark:text-white">
+                        {formatMoney(invoice.total, invoice.currency)}
+                      </td>
 
-                    {/* ISSUED */}
-                    <TableCell>
-                      <p className="text-sm text-slate-500 dark:text-zinc-600">
-                        {formatDate(invoice.issueDate)}
-                      </p>
-                    </TableCell>
-
-                    {/* TOTAL */}
-                    <TableCell className="text-right font-medium text-slate-900 dark:text-white">
-                      {formatMoney(invoice.total, invoice.currency)}
-                    </TableCell>
-
-                    {/* ACTION */}
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button asChild variant="secondary" size="sm">
-                          <Link href={`/admin/invoices/${invoice.id}`}>
+                      {/* ACTION */}
+                      <td className="w-full caption-bottom text-sm-cell text-right">
+                        <div className="flex gap-2">
+                          <Link
+                            href={`/admin/invoices/${invoice.id}`}
+                            className="text-sm font-sans"
+                          >
                             View
                             <ArrowUpRight className="h-3 w-3" />
                           </Link>
-                        </Button>
-                        <Button asChild variant="secondary" size="sm">
-                          <Link href={`/admin/invoices/${invoice.id}/edit`}>
-                            Edit
-                            <Plus className="h-3 w-3" />
-                          </Link>
-                        </Button>
-                        {invoice.status === 'draft' && (
-                          <>
-                            <Button asChild variant="success" size="sm">
-                              <Link href={`/admin/invoices/${invoice.id}/send`}>
+                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/invoices/${invoice.id}/edit`}>Edit <Plus className="h-3 w-3" /></Link></Button>
+                          {invoice.status === 'draft' && (
+                            <>
+                              <Link
+                                href={`/admin/invoices/${invoice.id}/send`}
+                                className="text-sm font-sans"
+                              >
                                 Send
                                 <CheckCircle2 className="h-3 w-3" />
                               </Link>
-                            </Button>
-                            <Button asChild variant="secondary" size="sm">
-                              <Link href={`/admin/invoices/${invoice.id}/duplicate`}>
-                                Duplicate
-                                <FilePlus className="h-3 w-3" />
-                              </Link>
-                            </Button>
-                          </>
-                        )}
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => {
-                            if (!window.confirm('Delete this invoice?')) return;
-                            // Delete logic would go here - keeping inline for now
-                            window.location.reload(); // Placeholder
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                              <Button asChild variant="secondary" size="sm"><Link href={`/admin/invoices/${invoice.id}/duplicate`}>Duplicate <FilePlus className="h-3 w-3" /></Link></Button>
+                            </>
+                          )}
+                          <button
+                            onClick={() => {
+                              if (!window.confirm('Delete this invoice?')) return;
+                              // Delete logic would go here - keeping inline for now
+                              window.location.reload(); // Placeholder
+                            }}
+                            className="text-sm font-sans"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </Card>
 

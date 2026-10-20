@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, Calendar, ChevronDown } from 'lucide-react';
 import type { FieldMetadata, FieldType } from '@/lib/contracts/fieldMetadata';
 import type { Client, Project } from '@/lib/types/contracts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface EditableFieldProps {
   field: FieldMetadata;
@@ -41,6 +43,8 @@ export function EditableField({
 
   // Synchronize the local editor buffer when the parent value changes.
   useEffect(() => {
+    // The editor buffer intentionally mirrors a changing parent value.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTempValue(value);
   }, [value]);
 
@@ -134,8 +138,8 @@ export function EditableField({
 
       case 'currency':
         return (
-          <div className="">
-            <span className="">{currency}</span>
+          <div className="inline-flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{currency}</span>
             <input
               ref={inputRef as React.Ref<HTMLInputElement>}
               type="number"
@@ -151,7 +155,7 @@ export function EditableField({
 
       case 'percentage':
         return (
-          <div className="">
+          <div className="inline-flex items-center gap-2">
             <input
               ref={inputRef as React.Ref<HTMLInputElement>}
               type="number"
@@ -163,7 +167,7 @@ export function EditableField({
               max="100"
               className={`${baseInputClasses} w-20`}
             />
-            <span className="">%</span>
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">%</span>
           </div>
         );
 
@@ -195,58 +199,19 @@ export function EditableField({
 
       case 'client':
         return (
-          <select
-            ref={inputRef as React.Ref<HTMLSelectElement>}
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className={`${baseInputClasses} w-64`}
-          >
-            <option value="">Select a client...</option>
-            {clients?.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name} {client.company ? `(${client.company})` : ''}
-              </option>
-            ))}
-          </select>
+          <Select value={tempValue || 'none'} onValueChange={(value) => setTempValue(value === 'none' ? '' : value)}><SelectTrigger className={`${baseInputClasses} w-64`}><SelectValue placeholder="Select a client..." /></SelectTrigger><SelectContent><SelectItem value="none">Select a client...</SelectItem>{clients?.map((client) => <SelectItem key={client.id} value={client.id}>{client.name} {client.company ? `(${client.company})` : ''}</SelectItem>)}</SelectContent></Select>
         );
 
       case 'project':
         return (
-          <select
-            ref={inputRef as React.Ref<HTMLSelectElement>}
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className={`${baseInputClasses} w-64`}
-          >
-            <option value="">Select a project...</option>
-            {projects?.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
+          <Select value={tempValue || 'none'} onValueChange={(value) => setTempValue(value === 'none' ? '' : value)}><SelectTrigger className={`${baseInputClasses} w-64`}><SelectValue placeholder="Select a project..." /></SelectTrigger><SelectContent><SelectItem value="none">Select a project...</SelectItem>{projects?.map((project) => <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>)}</SelectContent></Select>
         );
 
       case 'select':
         // For currency select
         if (field.key === 'currency') {
           return (
-            <select
-              ref={inputRef as React.Ref<HTMLSelectElement>}
-              value={tempValue}
-              onChange={(e) => setTempValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className={`${baseInputClasses} w-32`}
-            >
-              <option value="KES">KES</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="ZAR">ZAR</option>
-              <option value="NGN">NGN</option>
-            </select>
+            <Select value={tempValue} onValueChange={setTempValue}><SelectTrigger className={`${baseInputClasses} w-32`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="KES">KES</SelectItem><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="ZAR">ZAR</SelectItem><SelectItem value="NGN">NGN</SelectItem></SelectContent></Select>
           );
         }
         // Default text input
@@ -279,24 +244,11 @@ export function EditableField({
   })();
 
   return (
-    <div className="">
+    <div className="inline-flex items-center gap-2 align-top">
       {inputContent}
-      <div className="">
-        <button
-          onClick={handleSave}
-          disabled={isRequired && !tempValue.trim()}
-          className=""
-          title="Save"
-        >
-          <Check className="" />
-        </button>
-        <button
-          onClick={onCancel}
-          className=""
-          title="Cancel"
-        >
-          <X className="" />
-        </button>
+      <div className="flex gap-1">
+        <Button variant="ghost" size="icon-sm" onClick={handleSave} disabled={isRequired && !tempValue.trim()} className="text-green-600" title="Save"><Check className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon-sm" onClick={onCancel} className="text-red-600" title="Cancel"><X className="h-4 w-4" /></Button>
       </div>
     </div>
   );

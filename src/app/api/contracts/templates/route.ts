@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
         limit: Number(searchParams.get('limit')) || 50,
         offset: Number(searchParams.get('offset')) || 0,
       });
-      return NextResponse.json({ templates: result.templates, total: result.total });
+      return NextResponse.json(result.templates);
     } catch (error) {
       console.error('GET /api/contracts/templates error:', error);
       return NextResponse.json({ error: 'Failed to fetch templates' }, { status: 500 });

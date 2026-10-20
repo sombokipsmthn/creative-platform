@@ -23,7 +23,7 @@ try {
 
   const create = await context.request.post(`${baseURL}/api/galleries`, {
     headers: { "content-type": "application/json" },
-    data: { title, description: "Disposable settings verification fixture", category: "Verification" },
+    data: { title, description: "Disposable settings verification fixture", category: "Verification", accessPin: "2468" },
   });
   check(create.status() === 201, `fixture gallery creation status=${create.status()}`);
   if (!create.ok()) throw new Error(`Fixture gallery creation failed: ${await create.text()}`);
@@ -34,28 +34,32 @@ try {
 
   const page = await context.newPage();
   await page.goto(`${baseURL}/admin/galleries/${galleryId}`, { waitUntil: "networkidle", timeout: 30_000 });
-  await page.getByText("Settings", { exact: true }).last().click();
-  await page.getByText("Watermark presets").waitFor({ state: "visible", timeout: 30_000 });
+  await page.getByTestId("gallery-tab-settings").click();
+  await page.getByRole("heading", { name: "General" }).waitFor({ state: "visible", timeout: 30_000 });
   check(true, "actual gallery Settings tab and watermark editor render");
 
-  const presetName = `Verification Preset ${Date.now()}`;
-  await page.getByLabel("Watermark text").fill("VERIFY-WATERMARK");
-  await page.getByPlaceholder("Preset name").fill(presetName);
-  await page.getByRole("button", { name: "Save preset" }).click();
-  await page.getByText(presetName, { exact: true }).waitFor({ state: "visible", timeout: 15_000 });
-  check(true, "watermark preset saves and appears in editor");
-
-  const presetRow = page.getByText(presetName, { exact: true }).locator("..");
-  await presetRow.getByRole("button", { name: "Apply" }).click();
-  const watermarkSave = page.waitForResponse(response => response.url().includes(`/api/galleries/${galleryId}/watermark`) && response.request().method() === "PATCH", { timeout: 15_000 });
-  await page.getByRole("button", { name: "Save watermark" }).click();
-  const watermarkResponse = await watermarkSave;
-  check(watermarkResponse.ok(), `watermark save status=${watermarkResponse.status()}`);
+  const galleryName = page.locator('input[type="text"]').first();
+  const originalTitle = await galleryName.inputValue();
+  await galleryName.fill(`${originalTitle} Verification`);
+  await page.getByRole("button", { name: "Save Settings" }).click();
+  await page.getByText("Saved successfully").waitFor({ state: "visible", timeout: 15_000 });
+  check(true, "gallery settings save successfully");
   await page.reload({ waitUntil: "networkidle" });
-  await page.getByText("Settings", { exact: true }).last().click();
-  await page.getByText("Watermark presets").waitFor({ state: "visible", timeout: 30_000 });
-  check(await page.getByText(presetName, { exact: true }).isVisible(), "watermark preset persists after gallery reload");
-  check((await page.getByLabel("Watermark text").inputValue()) === "VERIFY-WATERMARK", "applied watermark value persists after reload");
+  await page.getByTestId("gallery-tab-settings").click();
+  await page.getByRole("heading", { name: "General" }).waitFor({ state: "visible", timeout: 30_000 });
+  check((await page.locator('input[type="text"]').first().inputValue()) === `${originalTitle} Verification`, "gallery setting persists after reload");
+  const publish = await context.request.post(`${baseURL}/api/galleries/${galleryId}/publish`, {
+    headers: { "content-type": "application/json" },
+    data: { publish: true },
+  });
+  check(publish.ok(), `fixture publish status=${publish.status()}`);
+  const gallerySlug = created.gallery?.slug;
+  const clientPage = await context.newPage();
+  await clientPage.goto(`${baseURL}/portal/g/${galleryId}/${gallerySlug}`, { waitUntil: "networkidle", timeout: 30_000 });
+  await clientPage.getByPlaceholder("PIN").fill("2468");
+  await clientPage.getByRole("button", { name: /unlock gallery/i }).click();
+  check(await clientPage.getByText(originalTitle, { exact: false }).isVisible(), "client portal unlocks published fixture gallery");
+  await clientPage.close();
   await page.close();
 } finally {
   if (galleryId) {

@@ -4,6 +4,15 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
@@ -63,17 +72,6 @@ function getInitials(client: Pick<Client, 'name' | 'company'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-function statusClass(status: string) {
-  if (status === 'active') {
-    return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
-  }
-
-  if (status === 'archived') {
-    return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
-  }
-
-  return 'bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-300';
-}
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -266,7 +264,7 @@ export default function AdminClientsPage() {
           primaryAction={
             <Button
               onClick={openCreateModal}
-              variant="default"
+              variant="primary"
               className="text-xs font-sans uppercase tracking-widest"
             >
               + Register New Client
@@ -287,20 +285,20 @@ export default function AdminClientsPage() {
             ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
             ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
-              <p className={`ui-stat-label ${color}`}>{label}</p>
-              <p className="ui-stat-value">{count}</p>
+            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
+              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
+              <p className="text-2xl font-bold">{count}</p>
             </div>
           ))}
         </div>
 
         <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-          <input
+          <Input
             type="text"
             placeholder="Search clients by name, company, email, phone..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="ui-input w-full md:w-96"
+            className="w-full md:w-96"
           />
 
           <div className="flex flex-wrap gap-2 text-xs font-sans">
@@ -333,7 +331,7 @@ export default function AdminClientsPage() {
             <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
             <Button
               onClick={openCreateModal}
-              variant="default"
+              variant="primary"
               className="text-xs font-sans rounded-lg"
             >
               Register your first client
@@ -344,7 +342,7 @@ export default function AdminClientsPage() {
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
@@ -356,9 +354,9 @@ export default function AdminClientsPage() {
                       <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
                         {client.name}
                       </h3>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(client.status)}`}>
+                      <Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>
                         {statusLabel(client.status)}
-                      </span>
+                      </Badge>
                     </div>
 
                     <p className="text-sm text-slate-500 dark:text-zinc-400">
@@ -406,50 +404,54 @@ export default function AdminClientsPage() {
               </Button>
 
               <div className="space-y-1">
-                <p className="ui-eyebrow">CRM</p>
-                <h2 className="ui-section-title">Register New Client</h2>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">CRM</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Register New Client</h2>
               </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateClient} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="ui-label">Contact Name *</label>
-                  <input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
+                  <label className="text-sm font-medium leading-none">Contact Name *</label>
+                  <Input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Email</label>
-                    <input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="ui-input" />
+                    <label className="text-sm font-medium leading-none">Email</label>
+                    <Input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Phone</label>
+                    <label className="text-sm font-medium leading-none">Phone</label>
                     <div className="flex items-center gap-2">
-                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="ui-select">
-                        <option value="+254">🇰🇪 +254 (Kenya)</option>
-                        <option value="+1">🇺🇸 +1 (USA)</option>
-                        <option value="+44">🇬🇧 +44 (UK)</option>
-                        <option value="+27">🇿🇦 +27 (South Africa)</option>
-                        <option value="+254">Other</option>
-                      </select>
-                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
+                      <Select value={form.phoneCountry} onValueChange={handlePhoneCountryChange}>
+                        <SelectTrigger className="w-auto max-w-[9rem] shrink-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="+254">🇰🇪 +254 (Kenya)</SelectItem>
+                          <SelectItem value="+1">🇺🇸 +1 (USA)</SelectItem>
+                          <SelectItem value="+44">🇬🇧 +44 (UK)</SelectItem>
+                          <SelectItem value="+27">🇿🇦 +27 (South Africa)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="min-w-0 flex-1" />
                     </div>
                     <div className="space-y-1">
-                      <label className="ui-label">Location</label>
-                      <input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="ui-input" />
+                      <label className="text-sm font-medium leading-none">Location</label>
+                      <Input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} />
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Company / Organization</label>
-                    <input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} className="ui-input" />
+                    <label className="text-sm font-medium leading-none">Company / Organization</label>
+                    <Input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Website</label>
-                    <input 
+                    <label className="text-sm font-medium leading-none">Website</label>
+                    <Input 
                       type="url" 
                       placeholder="https://company.com" 
                       value={form.website} 
@@ -466,32 +468,36 @@ export default function AdminClientsPage() {
                           setForm({ ...form, website: val });
                         }
                       }}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">KRA PIN</label>
-                    <input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} className="ui-input" />
+                    <label className="text-sm font-medium leading-none">KRA PIN</label>
+                    <Input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Status</label>
-                    <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="ui-select">
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="archived">Archived</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Status</label>
+                    <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value as ClientStatus })}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Internal Notes</label>
-                  <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="ui-textarea" />
+                  <label className="text-sm font-medium leading-none">Internal Notes</label>
+                  <Textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
                 </div>
 
-                <Button type="submit" disabled={saving} variant="default" className="w-full">
+                <Button type="submit" disabled={saving} variant="primary" className="w-full">
                   {saving ? 'Saving Client…' : '+ Add Client to CRM'}
                 </Button>
               </form>
@@ -529,8 +535,8 @@ export default function AdminClientsPage() {
 
               <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
                 <div>
-                  <p className="ui-label">Client Status</p>
-                  <p className="ui-meta">Changes are saved directly to the database.</p>
+                  <p className="text-sm font-medium leading-none">Client Status</p>
+                  <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -549,7 +555,7 @@ export default function AdminClientsPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="ui-label">Internal Notes</p>
+                <p className="text-sm font-medium leading-none">Internal Notes</p>
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
               </div>
 

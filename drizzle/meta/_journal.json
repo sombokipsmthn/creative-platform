@@ -222,36 +222,36 @@
     {
       "idx": 31,
       "version": "7",
-      "when": 1792400000000,
-      "tag": "0031_local_init",
+      "when": 1792450000000,
+      "tag": "0035_studio_events",
       "breakpoints": true
     },
     {
       "idx": 32,
       "version": "7",
-      "when": 1792401000000,
-      "tag": "0032_creator_portfolios",
+      "when": 1792500000000,
+      "tag": "0036_add_client_kra_pin",
       "breakpoints": true
     },
     {
       "idx": 33,
       "version": "7",
-      "when": 1792401100000,
-      "tag": "0033_gallery_watermark_presets",
+      "when": 1792600000000,
+      "tag": "0037_reconcile_studio_events",
       "breakpoints": true
     },
     {
       "idx": 34,
       "version": "7",
-      "when": 1792436000000,
-      "tag": "0034_repair_gallery_schema",
+      "when": 1792700000000,
+      "tag": "0038_payment_ledger",
       "breakpoints": true
     },
     {
       "idx": 35,
       "version": "7",
-      "when": 1792441543584,
-      "tag": "0035_contracts_lifecycle",
+      "when": 1792800000000,
+      "tag": "0039_payment_standalone",
       "breakpoints": true
     }
   ]

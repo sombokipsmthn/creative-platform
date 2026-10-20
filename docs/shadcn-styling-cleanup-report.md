@@ -1,3 +1,5 @@
+> **Historical snapshot notice (2026-10-21):** This report records a prior cleanup pass and does not establish the current state of every component. The active styling contract is [Design System](./design-system.md); current product decisions are in [Project Handbook](./PROJECT-HANDBOOK.md).
+
 # shadcn Styling Cleanup Report
 
 ## Branch and safety

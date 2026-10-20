@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
@@ -17,9 +16,21 @@ import {
   Trash2,
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import { Card, CardContent } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/Table';
+import { Alert, AlertDescription } from '@/components/ui/Alert';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 type Client = {
   id: string;
@@ -94,21 +105,19 @@ function getStatusLabel(status: string) {
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 }
 
-function getStatusBadgeClass(status: string) {
+function getStatusBadgeVariant(status: string): 'success' | 'secondary' | 'destructive' | 'default' {
   switch (status.toLowerCase()) {
     case 'paid':
-      return 'ui-badge ui-badge-success';
+      return 'success';
     case 'sent':
-      return 'ui-badge ui-badge-accent';
     case 'viewed':
-      return 'ui-badge ui-badge-accent';
+      return 'secondary';
     case 'overdue':
-      return 'ui-badge ui-badge-danger';
     case 'cancelled':
-      return 'ui-badge ui-badge-danger';
+      return 'destructive';
     case 'draft':
     default:
-      return 'ui-badge';
+      return 'default';
   }
 }
 
@@ -140,7 +149,6 @@ function getInitials(client?: Client | null) {
 }
 
 export default function InvoicesPage() {
-  const router = useRouter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
@@ -303,7 +311,8 @@ export default function InvoicesPage() {
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
-              onClick={() => router.push('/admin/invoices/new')}
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
             >
               <Plus className="h-3.5 w-3.5" />
               New Invoice
@@ -312,38 +321,32 @@ export default function InvoicesPage() {
         />
 
         {error && !loading && (
-          <div className="ui-card p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          </div>
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
         )}
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Total Invoices</p>
-            <p className="ui-stat-value">{summary.total}</p>
-          </div>
+          <Card variant="stat" title="Total Invoices">
+            {summary.total}
+          </Card>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Draft</p>
-            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
+          <Card variant="stat" title="Draft">
+            <span className="text-amber-600 dark:text-amber-400">
               {summary.draft}
-            </p>
-          </div>
+            </span>
+          </Card>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Paid</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+          <Card variant="stat" title="Paid">
+            <span className="text-emerald-600 dark:text-emerald-400">
               {summary.paid}
-            </p>
-          </div>
+            </span>
+          </Card>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Outstanding</p>
-            <p className="ui-stat-value text-slate-900 dark:text-white">
-              {formatMoney(summary.outstanding, 'KES')}
-            </p>
-          </div>
+          <Card variant="stat" title="Outstanding">
+            {formatMoney(summary.outstanding, 'KES')}
+          </Card>
         </div>
 
         {/* Table Filter Bar */}
@@ -357,8 +360,10 @@ export default function InvoicesPage() {
             setCurrency(filters.currency ?? 'all');
             setClientId(filters.clientId ?? 'all');
           }}
-          filterOptions={[
-
+          onAddItem={() => {
+            // Navigate to new invoice page - we'll need to create this route
+          }}
+          filterOptions={ [
             {
               label: 'Status',
               value: 'status',
@@ -384,13 +389,13 @@ export default function InvoicesPage() {
               ],
               type: 'pills'
             }
-          ]}
+          ] }
           itemLabel="Invoice"
         />
 
         {hasFilters && (
           <div className="flex items-center justify-between px-2">
-            <p className="ui-meta">Showing filtered results</p>
+            <p className="text-sm text-muted-foreground">Showing filtered results</p>
             <Button
               onClick={resetFilters}
               variant="ghost"
@@ -402,163 +407,150 @@ export default function InvoicesPage() {
         )}
 
         {/* TABLE */}
-        <div className="ui-card">
+        <Card>
           {loading ? (
-            <div className="ui-loading-state p-12">
-              <p className="text-xs font-sans uppercase tracking-widest">
-                Loading invoices...
-              </p>
-            </div>
-          ) : filteredInvoices.length === 0 ? (
-            <div className="ui-empty-state p-12">
-              <div className="ui-empty-icon">
-                <FileText className="h-6 w-6" />
+            <CardContent className="p-12">
+              <div className="flex flex-col items-center gap-3">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-48" />
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-4 w-44" />
               </div>
-
-              <h2 className="ui-section-title">No invoices found</h2>
-
-              <p className="ui-body">
+            </CardContent>
+          ) : filteredInvoices.length === 0 ? (
+            <CardContent className="flex flex-col items-center gap-3 p-12">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                <FileText className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h2 className="text-lg font-semibold text-foreground">
+                No invoices found
+              </h2>
+              <p className="text-sm text-muted-foreground text-center">
                 {hasFilters
                   ? 'Try changing your filters or search terms.'
                   : 'Invoices will appear here once they are created.'}
               </p>
-
-              <div className="flex justify-center mt-4">
-                <Button
-                  variant="default"
-                  className="mt-6"
-                  onClick={() => router.push('/admin/invoices/new')}
-                >
+              <div className="mt-4">
+                <Button variant="primary">
                   Create First Invoice
                 </Button>
               </div>
-            </div>
+            </CardContent>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="ui-table">
-                <thead>
-                  <tr>
-                    <th className="ui-table-header">Invoice</th>
-                    <th className="ui-table-header">Client</th>
-                    <th className="ui-table-header">Status</th>
-                    <th className="ui-table-header">Issued</th>
-                    <th className="ui-table-header">Total</th>
-                    <th className="ui-table-header" />
-                  </tr>
-                </thead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Invoice</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Issued</TableHead>
+                  <TableHead>Total</TableHead>
+                  <TableHead />
+                </TableRow>
+              </TableHeader>
 
-                <tbody>
-                  {filteredInvoices.map((invoice) => (
-                    <tr
-                      key={invoice.id}
-                      className="ui-table-row"
-                    >
-                      {/* INVOICE */}
-                      <td className="ui-table-cell">
-                        <div className="space-y-1">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
-                            <FileText className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
-                              {invoice.title || 'Untitled Invoice'}
-                            </p>
-                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
-                              {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
-                            </p>
-                          </div>
+              <TableBody>
+                {filteredInvoices.map((invoice) => (
+                  <TableRow key={invoice.id}>
+                    {/* INVOICE */}
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                          <FileText className="h-4 w-4" />
                         </div>
-                      </td>
-
-                      {/* CLIENT */}
-                      <td className="ui-table-cell">
-                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
-                          {getClientName(invoice.client)}
-                        </p>
-                      </td>
-
-                      {/* STATUS */}
-                      <td className="ui-table-cell">
-                        <div className="flex flex-col items-start gap-2">
-                          <span
-                            className={`${getStatusBadgeClass(invoice.status)}`}
-                          >
-                            {getStatusLabel(invoice.status)}
-                          </span>
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <p className="font-medium text-slate-900 dark:text-white">
+                            {invoice.title || 'Untitled Invoice'}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
+                          </p>
                         </div>
-                      </td>
+                      </div>
+                    </TableCell>
 
-                      {/* ISSUED */}
-                      <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {formatDate(invoice.issueDate)}
-                        </p>
-                      </td>
+                    {/* CLIENT */}
+                    <TableCell>
+                      <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                        {getClientName(invoice.client)}
+                      </p>
+                    </TableCell>
 
-                      {/* TOTAL */}
-                      <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
-                        {formatMoney(invoice.total, invoice.currency)}
-                      </td>
+                    {/* STATUS */}
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(invoice.status)}>
+                        {getStatusLabel(invoice.status)}
+                      </Badge>
+                    </TableCell>
 
-                      {/* ACTION */}
-                      <td className="ui-table-cell text-right">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/invoices/${invoice.id}`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
-                          >
+                    {/* ISSUED */}
+                    <TableCell>
+                      <p className="text-sm text-slate-500 dark:text-zinc-600">
+                        {formatDate(invoice.issueDate)}
+                      </p>
+                    </TableCell>
+
+                    {/* TOTAL */}
+                    <TableCell className="text-right font-medium text-slate-900 dark:text-white">
+                      {formatMoney(invoice.total, invoice.currency)}
+                    </TableCell>
+
+                    {/* ACTION */}
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button asChild variant="secondary" size="sm">
+                          <Link href={`/admin/invoices/${invoice.id}`}>
                             View
                             <ArrowUpRight className="h-3 w-3" />
                           </Link>
-                          <Link
-                            href={`/admin/invoices/${invoice.id}/edit`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
-                          >
+                        </Button>
+                        <Button asChild variant="secondary" size="sm">
+                          <Link href={`/admin/invoices/${invoice.id}/edit`}>
                             Edit
                             <Plus className="h-3 w-3" />
                           </Link>
-                          {invoice.status === 'draft' && (
-                            <>
-                              <Link
-                                href={`/admin/invoices/${invoice.id}/send`}
-                                className="ui-button ui-button-success text-sm font-sans"
-                              >
+                        </Button>
+                        {invoice.status === 'draft' && (
+                          <>
+                            <Button asChild variant="success" size="sm">
+                              <Link href={`/admin/invoices/${invoice.id}/send`}>
                                 Send
                                 <CheckCircle2 className="h-3 w-3" />
                               </Link>
-                              <Link
-                                href={`/admin/invoices/${invoice.id}/duplicate`}
-                                className="ui-button ui-button-secondary text-sm font-sans"
-                              >
+                            </Button>
+                            <Button asChild variant="secondary" size="sm">
+                              <Link href={`/admin/invoices/${invoice.id}/duplicate`}>
                                 Duplicate
                                 <FilePlus className="h-3 w-3" />
                               </Link>
-                            </>
-                          )}
-                          <button
-                            onClick={() => {
-                              if (!window.confirm('Delete this invoice?')) return;
-                              // Delete logic would go here - keeping inline for now
-                              window.location.reload(); // Placeholder
-                            }}
-                            className="ui-button ui-button-destructive text-sm font-sans"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                            </Button>
+                          </>
+                        )}
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => {
+                            if (!window.confirm('Delete this invoice?')) return;
+                            // Delete logic would go here - keeping inline for now
+                            window.location.reload(); // Placeholder
+                          }}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
-        </div>
+        </Card>
 
         {/* PAGINATION */}
         {pagination && pagination.totalPages > 0 && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
-            <p className="ui-meta">
+            <p className="text-sm text-muted-foreground">
               {pagination.total === 0
                 ? 'No invoices'
                 : `Showing page ${pagination.page} of ${pagination.totalPages}`}

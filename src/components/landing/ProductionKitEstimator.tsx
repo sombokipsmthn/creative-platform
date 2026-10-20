@@ -149,8 +149,8 @@ export default function ProductionKitEstimator() {
                   onClick={() => setDays(d)}
                   className={`py-2 px-3 rounded-xl border text-xs font-medium transition-all ${
                     days === d
-                      ? "bg-purple-600 border-purple-600 text-white shadow-md shadow-purple-600/20"
-                      : "bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-purple-300"
+                      ? "bg-primary border-primary text-white shadow-md shadow-primary/20"
+                      : "bg-slate-50 dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-primary"
                   }`}
                 >
                   {d} {d === 1 ? "Day" : "Days"}
@@ -173,7 +173,7 @@ export default function ProductionKitEstimator() {
                     onClick={() => toggleService(service.id)}
                     className={`flex items-start justify-between gap-3 p-3.5 rounded-2xl border cursor-pointer transition-all ${
                       isSelected
-                        ? "bg-purple-50/50 dark:bg-purple-950/20 border-purple-500/40 text-slate-900 dark:text-white"
+                        ? "bg-primary/15 dark:bg-primary/10 border-primary/40 text-slate-900 dark:text-white"
                         : "bg-slate-50/60 dark:bg-zinc-900/40 border-slate-200/80 dark:border-zinc-800/80 text-slate-600 dark:text-zinc-400 hover:bg-slate-100/50 dark:hover:bg-zinc-900/80"
                     }`}
                   >
@@ -181,7 +181,7 @@ export default function ProductionKitEstimator() {
                       <div
                         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-colors ${
                           isSelected
-                            ? "bg-purple-600 border-purple-600 text-white"
+                            ? "bg-primary border-primary text-white"
                             : "border-slate-300 dark:border-zinc-700 bg-white dark:bg-zinc-800"
                         }`}
                       >

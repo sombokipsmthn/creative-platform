@@ -91,7 +91,7 @@ jobs:
         run: npm audit --json > npm-audit-development.json || true
 
       - name: Upload development audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-audit-development
           path: npm-audit-development.json
@@ -174,7 +174,7 @@ jobs:
           NEXT_PUBLIC_APP_URL: http://127.0.0.1:3010
       - name: Upload server log on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: responsive-admin-next-log
           path: /tmp/creative-platform-next.log
@@ -205,7 +205,7 @@ jobs:
           DOCKER_BUILDKIT: 1
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: next-build
           path: .next/

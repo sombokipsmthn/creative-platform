@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ExternalLink, UserRound, BriefcaseBusiness, ShieldCheck, Settings, Image, Globe, CreditCard, Bell, Key, Mail, Smartphone, Loader2 } from 'lucide-react';
+import { ArrowRight, ExternalLink, UserRound, BriefcaseBusiness, ShieldCheck, Settings, Image, Globe, CreditCard, Bell, Key, Mail, Smartphone, Loader2, X } from 'lucide-react';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WatermarkStudio from '@/components/WatermarkStudio';
 import { authClient } from '@/lib/auth-client';
+import CreatorOnboardingModal from '@/components/CreatorOnboardingModal';
 
 type SettingsTab =
   | 'account-profile'
@@ -70,6 +71,7 @@ const tabConfig: { id: SettingsTab; label: string; icon: React.ReactNode; descri
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('account-profile');
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // Account & Profile State
   const [profile, setProfile] = useState({
@@ -83,6 +85,7 @@ export default function AdminSettingsPage() {
     website: '',
     businessName: '',
     avatarUrl: '',
+    onboardingStatus: '',
   });
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
@@ -133,6 +136,7 @@ export default function AdminSettingsPage() {
             website: data.profile?.website || '',
             businessName: data.businessProfile?.businessName || '',
             avatarUrl: data.profile?.avatarUrl || data.user?.image || '',
+            onboardingStatus: data.user?.onboardingStatus || '',
           });
         }
       } catch (error) {
@@ -423,6 +427,87 @@ export default function AdminSettingsPage() {
                       className="min-h-32 resize-y"
                     />
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Onboarding Recovery Section */}
+            <Card>
+              <CardHeader>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Creator setup</p>
+                <h3 className="text-2xl font-semibold tracking-tight">Onboarding & setup</h3>
+                <p className="text-sm text-muted-foreground mt-2">Complete or resume your creator setup.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {profile.onboardingStatus === "complete" && (
+                    <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-400">
+                        <Check className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-emerald-800 dark:text-emerald-200">Setup complete</p>
+                        <p className="mt-1 text-sm text-emerald-600 dark:text-emerald-400">Your creator profile and services are fully configured.</p>
+                      </div>
+                    </div>
+                  )}
+                  {profile.onboardingStatus === "skipped" && (
+                    <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
+                        <X className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-amber-800 dark:text-amber-200">Setup was skipped</p>
+                        <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">You chose to explore the dashboard first. Resume setup anytime to complete your profile and services.</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setShowOnboarding(true)}
+                        variant="outline"
+                        className="whitespace-nowrap"
+                      >
+                        Resume setup
+                      </Button>
+                    </div>
+                  )}
+                  {profile.onboardingStatus === "incomplete" && (
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 dark:border-primary/20 dark:bg-primary/10">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
+                        <BriefcaseBusiness className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium text-primary dark:text-primary">Setup in progress</p>
+                        <p className="mt-1 text-sm text-primary/80 dark:text-primary/80">Complete your creator profile, services, and business details.</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setShowOnboarding(true)}
+                        variant="primary"
+                        className="whitespace-nowrap"
+                      >
+                        Continue setup
+                      </Button>
+                    </div>
+                  )}
+                  {(!profile.onboardingStatus || profile.onboardingStatus === "pending") && (
+                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400">
+                        <BriefcaseBusiness className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-medium">Get started with setup</p>
+                        <p className="mt-1 text-sm text-muted-foreground">Set up your creator profile, services, and business details to start receiving clients.</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => setShowOnboarding(true)}
+                        variant="primary"
+                        className="whitespace-nowrap"
+                      >
+                        Start setup
+                      </Button>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -937,6 +1022,15 @@ export default function AdminSettingsPage() {
           {renderTabContent()}
         </form>
       </div>
+
+      {showOnboarding && (
+        <CreatorOnboardingModal
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onComplete={() => setShowOnboarding(false)}
+          onDismiss={() => setShowOnboarding(false)}
+        />
+      )}
     </div>
   );
 }

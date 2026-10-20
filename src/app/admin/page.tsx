@@ -1,48 +1,83 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
-import { useCreator } from '@/context/CreatorContext';
-import { formatCurrency } from '@/lib/utils';
+import { authClient } from '@/lib/auth-client';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useMemo, useState, useEffect } from 'react';
+import { format } from 'date-fns';
 import {
-  AlertCircle,
-  ArrowUpRight,
-  Clock3,
-  FileText,
-  FolderKanban,
-  GalleryHorizontalEnd,
-  Receipt,
-  Sparkles,
-  Users,
-  Wallet,
-  X,
+  AlertCircle, ArrowUpRight, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd,
+  LayoutDashboard, Receipt, Users, Wallet, CalendarDays, ChevronLeft, ChevronRight,
+  ExternalLink, TrendingUp
 } from 'lucide-react';
 
+import { useCreator } from '@/context/CreatorContext';
 import { Button } from '@/components/ui/button';
+import { formatCurrency } from '@/lib/utils';
+import CreatorOnboardingModal from '@/components/CreatorOnboardingModal';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import StatusBadge from '@/components/admin/StatusBadge';
 
-type Range = '7d' | '30d' | '90d' | '12m' | 'all';
-
-type DashboardStats = {
-  range: Range;
+// Types
+interface DashboardStats {
+  range: '7d' | '30d' | '90d' | '12m' | 'all';
   overview: {
-    clients: number; newClients: number; activeClients: number;
-    projects: number; newProjects: number; activeProjects: number; completedProjects: number;
-    quotes: number; newQuotes: number; invoices: number; newInvoices: number;
-    galleries: number; newGalleries: number;
+    clients: number;
+    newClients: number;
+    activeClients: number;
+    projects: number;
+    newProjects: number;
+    activeProjects: number;
+    completedProjects: number;
+    quotes: number;
+    newQuotes: number;
+    invoices: number;
+    newInvoices: number;
+    galleries: number;
+    newGalleries: number;
   };
   finance: {
-    periodQuotedValue: number; acceptedQuoteValue: number;
-    periodInvoicedValue: number; periodPaidValue: number; overdueInvoices: number;
+    periodQuotedValue: number;
+    acceptedQuoteValue: number;
+    periodInvoicedValue: number;
+    periodPaidValue: number;
+    overdueInvoices: number;
   };
   quotes: { statuses: Record<string, number>; conversionRate: number };
   invoices: { statuses: Record<string, number> };
   galleries: { statuses: Record<string, number> };
-  attention: { overdueInvoices: number; pendingQuotes: number; activeProjects: number; activeGalleries: number };
+  attention: {
+    overdueInvoices: number;
+    pendingQuotes: number;
+    activeProjects: number;
+    activeGalleries: number;
+  };
   activity: Array<{ id: string; type: 'client' | 'project' | 'quote' | 'invoice' | 'gallery'; title: string; description: string; date: string }>;
-};
+}
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  description: string | null;
+  startDate: string;
+  endDate: string | null;
+  category: 'Project' | 'Quotation' | 'Invoice' | 'Gallery' | 'Contract' | 'Studio event';
+  status: string;
+  sourceType: string;
+  sourceId: string;
+  relatedClientId?: string | null;
+  relatedProjectId?: string | null;
+  relatedQuoteId?: string | null;
+  relatedInvoiceId?: string | null;
+  relatedGalleryId?: string | null;
+  isTentative?: boolean;
+}
+
+type Range = '7d' | '30d' | '90d' | '12m' | 'all';
 
 const ranges: Array<{ value: Range; label: string }> = [
   { value: '7d', label: '7 days' },
@@ -52,230 +87,759 @@ const ranges: Array<{ value: Range; label: string }> = [
   { value: 'all', label: 'all time' },
 ];
 
-const tourSteps = [
-  { title: 'Your command center', body: 'This is your business overview. The cards show clients, projects, quotes, invoices and the money moving through your studio.', target: 'tour-overview' },
-  { title: 'Clients', body: 'Keep every client, contact and relationship in one place. This is the first thing we recommend setting up.', target: 'tour-clients' },
-  { title: 'Quotes', body: 'Build production quotes, select equipment and services, and track what has been sent or accepted.', target: 'tour-quotes' },
-  { title: 'Invoices', body: 'Turn accepted work into invoices and keep track of what is paid or overdue.', target: 'tour-invoices' },
-  { title: 'Projects & galleries', body: 'Manage production projects and eventually deliver client work through your private galleries.', target: 'tour-projects' },
-] as const;
+const rangeLabels: Record<string, string> = {
+  '7d': 'last 7 days',
+  '30d': 'last 30 days',
+  '90d': 'last 90 days',
+  '12m': 'last 12 months',
+  all: 'all time',
+};
 
-function number(value: number) { return new Intl.NumberFormat('en-US').format(value); }
-function date(value: string) { return new Intl.DateTimeFormat('en-KE', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(value)); }
-
-function Metric({ label, value, detail, href, icon, target }: { label: string; value: string; detail: string; href: string; icon: React.ReactNode; target?: string }) {
-  return <Link data-tour={target} href={href} className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
-    <div className="flex items-start justify-between"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">{icon}</span><ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-primary" /></div>
-    <p className="mt-5 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">{label}</p>
-    <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{value}</p>
-    <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">{detail}</p>
-  </Link>;
+function formatNumber(value: number) {
+  return new Intl.NumberFormat('en-US').format(value);
 }
 
-function QuickAction({ href, label, detail, icon, target }: { href: string; label: string; detail: string; icon: React.ReactNode; target?: string }) {
-  return <Link data-tour={target} href={href} className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950">
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">{icon}</span>
-    <span className="min-w-0 flex-1"><span className="block text-sm font-medium text-slate-800 dark:text-zinc-100">{label}</span><span className="block truncate text-xs text-slate-500 dark:text-zinc-500">{detail}</span></span>
-    <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-primary" />
-  </Link>;
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat('en-KE', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(value));
 }
 
-function Panel({ title, eyebrow, action, children }: { title: string; eyebrow?: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return <section className="ui-panel"><div className="ui-panel-header"><div>{eyebrow && <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{eyebrow}</p>}<h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title mt-1">{title}</h2></div>{action}</div>{children}</section>;
+function formatDateShort(value: string) {
+  return new Intl.DateTimeFormat('en-KE', { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(value));
 }
 
-function ActivityRow({ item }: { item: DashboardStats['activity'][number] }) {
-  const icons = { client: <Users className="h-4 w-4" />, project: <FolderKanban className="h-4 w-4" />, quote: <FileText className="h-4 w-4" />, invoice: <Receipt className="h-4 w-4" />, gallery: <GalleryHorizontalEnd className="h-4 w-4" /> };
-  return <div className="flex items-center gap-3 px-5 py-3.5"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-zinc-900 dark:text-zinc-300">{icons[item.type]}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{item.title}</p><p className="truncate text-xs text-slate-500 dark:text-zinc-500">{item.description}</p></div><time className="shrink-0 text-[10px] font-sans text-slate-400">{date(item.date)}</time></div>;
+function formatTime(value: string) {
+  return new Intl.DateTimeFormat('en-KE', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
 }
 
-function Tour({ step, onNext, onSkip }: { step: number; onNext: () => void; onSkip: () => void }) {
-  const current = tourSteps[step];
-  useEffect(() => {
-    document.querySelector(`[data-tour="${current.target}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [current.target]);
+function isToday(dateString: string) {
+  const today = new Date();
+  const date = new Date(dateString);
+  return date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
+}
 
-  return <div className="fixed inset-0 z-[80] bg-black/45 p-4 backdrop-blur-[1px]">
-    <div className="absolute bottom-5 left-1/2 w-[min(440px,calc(100vw-32px))] -translate-x-1/2 rounded-2xl border border-white/20 bg-white p-5 shadow-2xl dark:border-zinc-700 dark:bg-zinc-950">
-      <div className="flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary text-white"><Sparkles className="h-4 w-4" /></span><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><p className="text-[9px] font-sans uppercase tracking-[0.2em] text-primary dark:text-primary">Platform tour · {step + 1}/{tourSteps.length}</p><button type="button" onClick={onSkip} className="text-slate-400 hover:text-slate-700 dark:hover:text-white"><X className="h-4 w-4" /></button></div><h3 className="mt-1 text-base font-semibold">{current.title}</h3><p className="mt-2 text-sm leading-6 text-slate-500 dark:text-zinc-400">{current.body}</p></div></div>
-      <div className="mt-4 flex items-center justify-between"><button type="button" onClick={onSkip} className="text-xs font-medium text-slate-400 hover:text-slate-700 dark:hover:text-white">Skip tour</button><button type="button" onClick={onNext} className="rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white">{step === tourSteps.length - 1 ? 'Finish tour' : 'Next'}</button></div>
+function isTomorrow(dateString: string) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const date = new Date(dateString);
+  return date.getDate() === tomorrow.getDate() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    date.getFullYear() === tomorrow.getFullYear();
+}
+
+// Components
+function Panel({ eyebrow, title, action, children, className = '' }: { eyebrow?: string; title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
+  return (
+    <section className={`rounded-2xl border bg-card shadow-sm ${className}`}>
+      <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
+        <div>
+          {eyebrow && (
+            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              {eyebrow}
+            </p>
+          )}
+          <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
+        </div>
+        {action}
+      </div>
+      <div className="p-5">{children}</div>
+    </section>
+  );
+}
+
+function QuickAction({ href, label, icon, detail }: { href: string; label: string; icon: React.ReactNode; detail?: string }) {
+  return (
+    <Link
+      href={href}
+      className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
+        {icon}
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-sm font-medium text-foreground">{label}</span>
+        {detail && <span className="block truncate text-xs text-muted-foreground">{detail}</span>}
+      </span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary">
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </svg>
+    </Link>
+  );
+}
+
+function MetricCard({ label, value, detail, href, icon, trend }: { label: string; value: string; detail: string; href: string; icon: React.ReactNode; trend?: { value: number; label: string } }) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-2xl border border-border bg-card shadow-sm transition-colors hover:border-primary/50"
+    >
+      <div className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">{icon}</span>
+          <ArrowUpRight className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
+        </div>
+        <p className="mt-4 text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+        <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+        {trend && (
+          <p className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            <TrendingUp className="h-3 w-3" />
+            {trend.value > 0 ? '+' : ''}{trend.value}% {trend.label}
+          </p>
+        )}
+      </div>
+    </Link>
+  );
+}
+
+function AttentionItem({ icon, title, detail, count, href, urgent }: { icon: React.ReactNode; title: string; detail: string; count: number | string; href: string; urgent?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-muted/50"
+    >
+      <div className="flex items-center gap-3">
+        <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${urgent ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300'}`}>
+          {icon}
+        </span>
+        <div>
+          <p className="text-sm font-medium">{title}</p>
+          <p className="text-sm text-muted-foreground">{detail}</p>
+        </div>
+      </div>
+      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${urgent ? 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'}`}>
+        {count}
+      </span>
+    </Link>
+  );
+}
+
+function ActivityRow({ type, title, description, date }: { type: string; title: string; description: string; date: string }) {
+  const iconMap: Record<string, React.ReactNode> = {
+    client: <Users className="h-4 w-4" />,
+    project: <LayoutDashboard className="h-4 w-4" />,
+    quote: <FileText className="h-4 w-4" />,
+    invoice: <Receipt className="h-4 w-4" />,
+    gallery: <GalleryHorizontalEnd className="h-4 w-4" />,
+  };
+
+  return (
+    <div className="flex items-center gap-3 px-5 py-3.5 border-b border-border/50 last:border-0">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">{iconMap[type]}</span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="truncate text-sm text-muted-foreground">{description}</p>
+      </div>
+      <time className="shrink-0 text-[10px] font-sans text-muted-foreground">{formatDate(date)}</time>
     </div>
-  </div>;
+  );
 }
 
-function FirstClientModal({ onClose, onCreated }: { onClose: () => void; onCreated: (client: { name: string }) => void }) {
-  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '' });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+function CalendarEventItem({ event, onClick }: { event: CalendarEvent; onClick?: () => void }) {
+  const categoryMeta: Record<string, { icon: typeof LayoutDashboard; tone: string }> = {
+    Project: { icon: LayoutDashboard, tone: 'bg-primary/10 text-primary' },
+    Quotation: { icon: FileText, tone: 'bg-secondary/10 text-secondary-foreground' },
+    Invoice: { icon: Receipt, tone: 'bg-amber-500/15 text-amber-700 dark:text-amber-300' },
+    Gallery: { icon: GalleryHorizontalEnd, tone: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
+    Contract: { icon: FileText, tone: 'bg-muted text-muted-foreground' },
+    'Studio event': { icon: CalendarDays, tone: 'bg-primary/10 text-primary' },
+  };
 
-  async function submit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!form.name.trim()) { setError('Client name is required.'); return; }
-    setSaving(true); setError('');
-    try {
-      const response = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data?.error || 'Unable to create client.');
-      localStorage.setItem('creative-os-first-client-prompted', '1');
-      onCreated({ name: data.name || form.name.trim() });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to create client.');
-    } finally { setSaving(false); }
-  }
+  const meta = categoryMeta[event.category] ?? categoryMeta.Project;
+  const Icon = meta.icon;
+  const startDate = new Date(event.startDate);
+  const isAllDay = !event.endDate || new Date(event.endDate).getTime() - startDate.getTime() >= 24 * 60 * 60 * 1000;
 
-  return <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"><div role="dialog" aria-modal="true" className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:p-8"><div className="flex items-start justify-between gap-4"><div><span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary"><Users className="h-5 w-5" /></span><h2 className="mt-4 text-2xl font-semibold tracking-tight">Add your first client</h2><p className="mt-2 text-sm leading-6 text-slate-500 dark:text-zinc-400">Let&apos;s get your workspace started. You can add the rest of the details later.</p></div><button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-900"><X className="h-5 w-5" /></button></div><form onSubmit={submit} className="mt-6 space-y-4"><label className="block text-sm font-medium">Client name<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus placeholder="Jane Doe" className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary dark:border-zinc-800 dark:bg-zinc-900" /></label><div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium">Company<input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Company name" className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary dark:border-zinc-800 dark:bg-zinc-900" /></label><label className="text-sm font-medium">Phone<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+254..." className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary dark:border-zinc-800 dark:bg-zinc-900" /></label></div><label className="block text-sm font-medium">Email<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="client@example.com" className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary dark:border-zinc-800 dark:bg-zinc-900" /></label>{error && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">{error}</p>}<div className="flex justify-end gap-2 pt-2"><button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500">Not now</button><button type="submit" disabled={saving} className="rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{saving ? 'Adding...' : 'Add client'}</button></div></form></div></div>;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="group flex w-full items-start gap-3 p-3 rounded-xl border border-transparent hover:border-border hover:bg-muted/50 transition"
+    >
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${meta.tone}`}>
+        <Icon className="h-4 w-4" aria-hidden="true" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-foreground truncate">{event.title}</p>
+        <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+          <span>{event.category}</span>
+          <span>·</span>
+          <span>{isAllDay ? 'All day' : formatTime(event.startDate)}</span>
+          {event.description && (
+            <>
+              <span>·</span>
+              <span className="truncate max-w-[200px]">{event.description}</span>
+            </>
+          )}
+        </p>
+      </div>
+      <StatusBadge status={event.status} />
+    </button>
+  );
 }
 
-export default function CreativeOSDashboardPage() {
+function DateStrip({ selectedDate, onDateChange, eventsByDay }: { selectedDate: Date; onDateChange: (date: Date) => void; eventsByDay: Map<string, CalendarEvent[]> }) {
+  const today = new Date();
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() + i);
+    return date;
+  });
+
+  return (
+    <div className="flex gap-1 overflow-x-auto pb-2 -mx-5 px-5" role="tablist" aria-label="Upcoming days">
+      {days.map((date) => {
+        const key = date.toISOString().split('T')[0];
+        const dayEvents = eventsByDay.get(key) ?? [];
+        const isSelected = selectedDate.toISOString().split('T')[0] === key;
+        const isToday = date.toDateString() === today.toDateString();
+
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={isSelected}
+            onClick={() => onDateChange(date)}
+            className={`flex flex-col items-center gap-1.5 rounded-xl px-4 py-3 min-w-[64px] transition ${isSelected ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-foreground'}`}
+          >
+            <span className={`text-[10px] font-sans uppercase tracking-widest ${isToday && !isSelected ? 'text-primary' : isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+              {isToday ? 'Today' : format(date, 'EEE')}
+            </span>
+            <span className={`text-xl font-semibold ${isSelected ? 'text-primary-foreground' : isToday ? 'text-primary' : 'text-foreground'}`}>
+              {date.getDate()}
+            </span>
+            {dayEvents.length > 0 && (
+              <span className={`text-[10px] font-medium ${isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'} rounded-full px-1.5 py-0.5`}>
+                {dayEvents.length}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function LoadingSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {Array.from({ length: count }).map((_, i) => (
+        <div key={i} className="h-36 animate-pulse rounded-2xl border border-border bg-card" />
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({ icon: Icon, title, description, action }: { icon: typeof CalendarDays; title: string; description: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4 py-12 text-center">
+      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Icon className="h-6 w-6" />
+      </span>
+      <div>
+        <p className="text-sm font-medium text-foreground">{title}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+// Main Dashboard Page
+export default function StudioCommandCenterPage() {
+  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const user = session?.user ?? null;
   const { activeCreator } = useCreator();
-  const [range, setRange] = useState<Range>('30d');
+  const [range, setRange] = useState<'7d' | '30d' | '90d' | '12m' | 'all'>('30d');
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [retryCount, setRetryCount] = useState(0);
-  const [tourStep, setTourStep] = useState<number | null>(null);
-  const [showFirstClient, setShowFirstClient] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [onboardingDismissed, setOnboardingDismissed] = useState(false);
 
+  // Calendar state
+  const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const [calendarError, setCalendarError] = useState('');
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
+
+  const name = activeCreator?.name || user?.name || 'Creator';
+  const email = activeCreator?.email || user?.email || '';
+  const avatar = activeCreator?.profile?.avatarUrl || user?.image || '';
+
+  // Fetch dashboard stats
   useEffect(() => {
-    const tourSeen = localStorage.getItem('creative-os-tour-seen') === '1';
-    if (!tourSeen) {
-      const showTour = window.setTimeout(() => setTourStep(0), 0);
-      return () => window.clearTimeout(showTour);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!stats || tourStep !== null) return;
-    const prompted = localStorage.getItem('creative-os-first-client-prompted') === '1';
-    if (stats.overview.clients === 0 && !prompted) {
-      const showPrompt = window.setTimeout(() => setShowFirstClient(true), 0);
-      return () => window.clearTimeout(showPrompt);
-    }
-  }, [stats, tourStep]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => controller.abort(), 15000);
-
-    async function load() {
+    if (!isLoaded || !user) return;
+    const loadStats = async () => {
       setLoading(true);
       setError('');
-
       try {
-        const response = await fetch(`/api/dashboard/stats?range=${range}`, {
-          cache: 'no-store',
-          credentials: 'include',
-          signal: controller.signal,
-        });
-        const data = await response.json().catch(() => null);
-
-        if (!response.ok) {
-          const message = typeof data?.error === 'string'
-            ? data.error
-            : `Dashboard request failed (HTTP ${response.status}).`;
-          throw new Error(message);
-        }
-
-        if (!data || typeof data !== 'object' || !data.overview || !data.finance) {
-          throw new Error('The dashboard API returned an invalid response. Check the terminal for API errors.');
-        }
-
-        if (!cancelled) setStats(data as DashboardStats);
+        const res = await fetch(`/api/dashboard/stats?range=${range}`, { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load dashboard data.');
+        setStats(data);
       } catch (err) {
-        if (cancelled) return;
-
-        if (err instanceof DOMException && err.name === 'AbortError') {
-          setError('The dashboard request timed out after 15 seconds. Check the terminal for database or authentication errors, then retry.');
-        } else {
-          setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
-        }
+        setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
       } finally {
-        window.clearTimeout(timeoutId);
+        setLoading(false);
+      }
+    };
+    void loadStats();
+  }, [isLoaded, user, range]);
+
+  // Fetch calendar events for next 7 days
+  useEffect(() => {
+    if (!user) return;
+    const loadCalendarEvents = async () => {
+      setCalendarLoading(true);
+      setCalendarError('');
+      try {
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(start);
+        end.setDate(start.getDate() + 7);
+        end.setHours(23, 59, 59, 999);
+
+        const params = new URLSearchParams({
+          start: start.toISOString(),
+          end: end.toISOString(),
+        });
+
+        const res = await fetch(`/api/calendar?${params.toString()}`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to load calendar events');
+        const data = await res.json();
+        setCalendarEvents(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setCalendarError(err instanceof Error ? err.message : 'Failed to load calendar events.');
+      } finally {
+        setCalendarLoading(false);
+      }
+    };
+    void loadCalendarEvents();
+  }, [user]);
+
+  // Check onboarding eligibility
+  useEffect(() => {
+    if (!user || onboardingDismissed) return;
+    let cancelled = false;
+
+    async function checkOnboarding() {
+      try {
+        const res = await fetch("/api/onboarding", { cache: "no-store" });
+        const data = await res.json();
+        if (!cancelled && data.user?.onboardingStatus !== "complete") {
+          setShowOnboarding(true);
+        }
+      } catch {
+        // Ignore errors
+      } finally {
         if (!cancelled) setLoading(false);
       }
     }
 
-    void load();
+    void checkOnboarding();
+    return () => { cancelled = true; };
+  }, [user, onboardingDismissed]);
 
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [range, retryCount]);
+  const invoicePaidRate = useMemo(() => {
+    if (!stats) return 0;
+    const total = Object.values(stats.invoices.statuses).reduce((sum, v) => sum + (v || 0), 0);
+    const paid = stats.invoices.statuses.paid || 0;
+    return total > 0 ? Math.round((paid / total) * 100) : 0;
+  }, [stats]);
 
-  if (!stats) {
+  // Group events by day for the selected date
+  const eventsByDay = useMemo(() => {
+    const grouped = new Map<string, CalendarEvent[]>();
+    calendarEvents.forEach(event => {
+      const date = new Date(event.startDate);
+      if (isNaN(date.getTime())) return;
+      const key = date.toISOString().split('T')[0];
+      grouped.set(key, [...(grouped.get(key) ?? []), event]);
+    });
+    return grouped;
+  }, [calendarEvents]);
+
+  const selectedDayEvents = useMemo(() => {
+    const key = selectedDate.toISOString().split('T')[0];
+    return eventsByDay.get(key) ?? [];
+  }, [eventsByDay, selectedDate]);
+
+  const allUpcomingEvents = useMemo(() => {
+    return [...calendarEvents].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  }, [calendarEvents]);
+
+  if (!isLoaded) {
     return (
-      <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6 dark:bg-[#09090b]">
-        <section className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          {loading ? (
-            <>
-              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary dark:border-zinc-700" />
-              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Loading Creative OS...</h1>
-              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Fetching your dashboard data.</p>
-            </>
-          ) : (
-            <>
-              <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300">
-                <AlertCircle className="h-5 w-5" />
-              </span>
-              <h1 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">Dashboard could not load</h1>
-              <p role="alert" className="mt-2 break-words text-sm leading-6 text-slate-600 dark:text-zinc-400">
-                {error || 'The dashboard request failed without returning an error message.'}
-              </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRetryCount((count) => count + 1)}
-                  className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary"
-                >
-                  Try again
-                </button>
-                <button
-                  type="button"
-                  onClick={() => window.location.reload()}
-                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
-                >
-                  Reload page
-                </button>
-              </div>
-            </>
-          )}
-        </section>
+      <main className="min-h-screen bg-background">
+        <div className="ui-shell py-12">
+          <LoadingSkeleton count={8} />
+        </div>
       </main>
     );
   }
 
-  return <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
-    <header className="border-b border-slate-200 dark:border-zinc-800"><div className="mx-auto max-w-7xl px-6 py-8 lg:py-10"><div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="mb-3 text-[10px] font-sans font-semibold uppercase tracking-[0.3em] text-primary dark:text-primary">Creative OS Command Center</p><div className="flex items-center gap-4">{activeCreator?.profile?.avatarUrl && <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-primary/30"><Image src={activeCreator.profile.avatarUrl} alt={activeCreator.name} fill unoptimized className="object-cover" /></div>}<div><h1 className="text-3xl font-light tracking-tight md:text-4xl">Welcome back, {activeCreator?.name || 'Creator'}.</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Run your creative business from one place.{activeCreator?.email ? ` · ${activeCreator.email}` : ''}</p></div></div></div><div className="flex flex-wrap items-center gap-2">{ranges.map((option) => <button key={option.value} type="button" onClick={() => setRange(option.value)} className={`rounded-full px-3.5 py-2 text-[10px] font-sans uppercase tracking-widest transition ${range === option.value ? 'bg-primary text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400'}`}>{option.label}</button>)}</div></div></div></header>
+  return (
+    <main className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border">
+        <div className="ui-shell py-6">
+          <AdminPageHeader
+            title="Studio Command Center"
+            description={`Welcome back, ${name.split(' ')[0]}. Here's what's happening across your studio.`}
+            breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+            primaryAction={
+              <div className="flex flex-wrap items-center gap-2">
+                {ranges.map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setRange(opt.value)}
+                    variant={range === opt.value ? 'primary' : 'secondary'}
+                    size="sm"
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            }
+          />
+        </div>
+      </header>
 
-    <div className="mx-auto max-w-7xl px-6 py-8">
-      {error && <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300"><AlertCircle className="h-4 w-4" />{error}</div>}
-      <section data-tour="tour-overview" className="mb-8"><div className="mb-4"><p className="text-[9px] font-sans uppercase tracking-[0.22em] text-primary dark:text-primary">Overview</p><h2 className="mt-1 text-xl font-semibold">Your business at a glance</h2></div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric label="Clients" value={number(stats?.overview.clients || 0)} detail={`+${number(stats?.overview.newClients || 0)} in selected period`} href="/admin/clients" icon={<Users className="h-4 w-4" />} target="tour-clients" />
-        <Metric label="Galleries" value={number(stats?.overview.galleries || 0)} detail={`${number(stats?.attention.activeGalleries || 0)} active`} href="/admin/galleries" icon={<GalleryHorizontalEnd className="h-4 w-4" />} target="tour-projects" />
-        <Metric label="Quotes" value={number(stats?.overview.quotes || 0)} detail={`${number(stats?.quotes.conversionRate || 0)}% conversion`} href="/admin/quotes/new" icon={<FileText className="h-4 w-4" />} target="tour-quotes" />
-        <Metric label="Invoices" value={number(stats?.overview.invoices || 0)} detail={`${stats?.finance.periodPaidValue ? Math.round((stats.finance.periodPaidValue / stats.finance.periodInvoicedValue) * 100) : 0}% paid`} href="/admin/invoices" icon={<Receipt className="h-4 w-4" />} target="tour-invoices" />
-      </div></section>
+      {/* Main Content */}
+      <div className="ui-shell py-8">
+        {error && (
+          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
 
-      <section className="mb-8"><div className="mb-4"><p className="text-[9px] font-sans uppercase tracking-[0.22em] text-primary dark:text-primary">Start here</p><h2 className="mt-1 text-xl font-semibold">Quick actions</h2></div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickAction href="/admin/clients" label="Add / Manage Client" detail="Build your CRM" icon={<Users className="h-4 w-4" />} target="tour-clients" /><QuickAction href="/admin/quotes/new" label="Create Quote" detail="Price a new production" icon={<FileText className="h-4 w-4" />} target="tour-quotes" /><QuickAction href="/admin/invoices" label="Manage Invoices" detail="Track billing and payments" icon={<Receipt className="h-4 w-4" />} target="tour-invoices" />      <QuickAction href="/admin/galleries" label="Open Galleries" detail="Manage client deliveries" icon={<GalleryHorizontalEnd className="h-4 w-4" />} target="tour-projects" /></div></section>
+        {/* Welcome & Quick Actions */}
+        <section className="mb-8">
+          <div className="mb-4">
+            <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground">Start here</p>
+            <h2 className="text-2xl font-semibold tracking-tight">Quick actions</h2>
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <QuickAction href="/admin/clients/new" label="Add Client" icon={<Users className="h-4 w-4" />} detail="Create new client record" />
+            <QuickAction href="/admin/quotes/new" label="Create Quote" icon={<FileText className="h-4 w-4" />} detail="Build a production quote" />
+            <QuickAction href="/admin/invoices/new" label="New Invoice" icon={<Receipt className="h-4 w-4" />} detail="Bill for completed work" />
+            <QuickAction href="/admin/calendar" label="Schedule Event" icon={<CalendarDays className="h-4 w-4" />} detail="Add to studio calendar" />
+          </div>
+        </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Panel eyebrow="Commercial movement" title="Money flow"><div className="p-5 space-y-5">{[["Quoted", stats?.finance.periodQuotedValue || 0], ["Invoiced", stats?.finance.periodInvoicedValue || 0], ["Paid", stats?.finance.periodPaidValue || 0]].map(([label, value]) => { const max = Math.max(stats?.finance.periodQuotedValue || 0, stats?.finance.periodInvoicedValue || 0, stats?.finance.periodPaidValue || 0, 1); return <div key={label as string}><div className="mb-1.5 flex justify-between text-xs"><span className="text-slate-500">{label}</span><span className="font-semibold">{formatCurrency(value as number)}</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-900"><div className="h-full rounded-full bg-primary transition-all" style={{ width: `${Math.max((value as number) > 0 ? 4 : 0, Math.round(((value as number) / max) * 100))}%` }} /></div></div>; })}<div className="grid grid-cols-2 gap-3"><div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-zinc-800 dark:bg-zinc-900"><p className="text-[9px] font-sans uppercase tracking-wider text-slate-400">Accepted quotes</p><p className="mt-1 text-lg font-semibold">{formatCurrency(stats?.finance.acceptedQuoteValue || 0)}</p></div><div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-zinc-800 dark:bg-zinc-900"><p className="text-[9px] font-sans uppercase tracking-wider text-slate-400">Overdue invoices</p><p className="mt-1 text-lg font-semibold">{number(stats?.finance.overdueInvoices || 0)}</p></div></div></div></Panel>
-        <Panel eyebrow="Quote pipeline" title="Quote status"><div className="p-5 space-y-3">{[['Draft', 'draft'], ['Sent', 'sent'], ['Accepted', 'accepted'], ['Rejected', 'rejected'], ['Invoiced', 'invoiced']].map(([label, key]) => { const value = stats?.quotes.statuses[key] || 0; const total = Math.max(stats?.overview.quotes || 0, 1); return <div key={key}><div className="mb-1.5 flex justify-between text-xs"><span className="text-slate-500">{label}</span><span className="font-semibold">{number(value)}</span></div><div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-900"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.round((value / total) * 100)}%` }} /></div></div>; })}</div></Panel>
+        {/* Loading Skeleton */}
+        {loading && !stats && <LoadingSkeleton count={8} />}
+
+        {stats && (
+          <>
+            {/* Top Row: Business Pulse + Attention Queue */}
+            <div className="grid gap-6 lg:grid-cols-[1fr_420px] mb-8">
+              {/* Business Pulse - Left Column */}
+              <div className="space-y-6">
+                <Panel
+                  eyebrow="Business pulse"
+                  title={`Performance ${rangeLabels[range]}`}
+                  action={
+                    <Link href="/admin/invoices" className="text-sm text-primary hover:underline flex items-center gap-1">
+                      View all <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  }
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <MetricCard
+                      label="Collected revenue"
+                      value={formatCurrency(stats.finance.periodPaidValue)}
+                      detail={`${stats.overview.newInvoices} invoices in period`}
+                      href="/admin/invoices"
+                      icon={<Wallet className="h-4 w-4" />}
+                      trend={{ value: invoicePaidRate, label: 'paid rate' }}
+                    />
+                    <MetricCard
+                      label="Active projects"
+                      value={formatNumber(stats.overview.activeProjects)}
+                      detail={`${stats.overview.completedProjects} completed`}
+                      href="/admin/projects"
+                      icon={<LayoutDashboard className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Quote pipeline"
+                      value={formatCurrency(stats.finance.acceptedQuoteValue)}
+                      detail={`${stats.quotes.conversionRate}% conversion rate`}
+                      href="/admin/quotes"
+                      icon={<CheckCircle2 className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Outstanding"
+                      value={formatNumber(stats.finance.overdueInvoices)}
+                      detail="Overdue invoices"
+                      href="/admin/invoices"
+                      icon={<Clock3 className="h-4 w-4" />}
+                      trend={{ value: -stats.finance.overdueInvoices, label: 'overdue' }}
+                    />
+                  </div>
+                </Panel>
+
+                {/* Entity Counts */}
+                <Panel
+                  eyebrow="Studio overview"
+                  title="Entity counts"
+                  action={
+                    <Link href="/admin/clients" className="text-sm text-primary hover:underline flex items-center gap-1">
+                      View all <ExternalLink className="h-3 w-3" />
+                    </Link>
+                  }
+                >
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <MetricCard
+                      label="Clients"
+                      value={formatNumber(stats.overview.clients)}
+                      detail={`${stats.overview.activeClients} active · ${stats.overview.newClients} new`}
+                      href="/admin/clients"
+                      icon={<Users className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Projects"
+                      value={formatNumber(stats.overview.projects)}
+                      detail={`${stats.overview.activeProjects} active · ${stats.overview.completedProjects} done`}
+                      href="/admin/projects"
+                      icon={<LayoutDashboard className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Quotes"
+                      value={formatNumber(stats.overview.quotes)}
+                      detail={`${stats.overview.newQuotes} new · ${stats.quotes.statuses.sent || 0} sent`}
+                      href="/admin/quotes"
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Galleries"
+                      value={formatNumber(stats.overview.galleries)}
+                      detail={`${stats.attention.activeGalleries} active`}
+                      href="/admin/galleries"
+                      icon={<GalleryHorizontalEnd className="h-4 w-4" />}
+                    />
+                  </div>
+                </Panel>
+              </div>
+
+              {/* Needs Your Attention - Right Column (Prominent) */}
+              <Panel
+                eyebrow="Priority queue"
+                title="Needs your attention"
+                className="lg:sticky lg:top-24 lg:self-start"
+              >
+                <div className="divide-y divide-border">
+                  {stats.attention.overdueInvoices > 0 && (
+                    <AttentionItem
+                      urgent
+                      icon={<Receipt className="h-4 w-4" />}
+                      title="Overdue invoices"
+                      detail={`${stats.finance.overdueInvoices} invoice${stats.finance.overdueInvoices !== 1 ? 's' : ''} past due — follow up on payments`}
+                      count={stats.finance.overdueInvoices}
+                      href="/admin/invoices?status=overdue"
+                    />
+                  )}
+                  {((stats.quotes.statuses.sent || 0) + (stats.quotes.statuses.draft || 0)) > 0 && (
+                    <AttentionItem
+                      icon={<FileText className="h-4 w-4" />}
+                      title="Quotes awaiting action"
+                      detail={`${stats.quotes.statuses.draft || 0} draft${stats.quotes.statuses.draft !== 1 ? 's' : ''}, ${stats.quotes.statuses.sent || 0} sent — review and follow up`}
+                      count={(stats.quotes.statuses.sent || 0) + (stats.quotes.statuses.draft || 0)}
+                      href="/admin/quotes"
+                    />
+                  )}
+                  {stats.attention.activeProjects > 0 && (
+                    <AttentionItem
+                      icon={<LayoutDashboard className="h-4 w-4" />}
+                      title="Active projects"
+                      detail={`${stats.attention.activeProjects} project${stats.attention.activeProjects !== 1 ? 's' : ''} in production — monitor progress`}
+                      count={stats.attention.activeProjects}
+                      href="/admin/projects?status=active"
+                    />
+                  )}
+                  {stats.attention.activeGalleries > 0 && (
+                    <AttentionItem
+                      icon={<GalleryHorizontalEnd className="h-4 w-4" />}
+                      title="Active galleries"
+                      detail={`${stats.attention.activeGalleries} gallery${stats.attention.activeGalleries !== 1 ? 'ies' : 'y'} live — check client delivery`}
+                      count={stats.attention.activeGalleries}
+                      href="/admin/galleries"
+                    />
+                  )}
+                  {stats.attention.overdueInvoices === 0 &&
+                    (stats.quotes.statuses.sent || 0) + (stats.quotes.statuses.draft || 0) === 0 &&
+                    stats.attention.activeProjects === 0 &&
+                    stats.attention.activeGalleries === 0 && (
+                      <div className="px-5 py-8 text-center">
+                        <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
+                        <p className="mt-3 text-sm font-medium text-foreground">All caught up</p>
+                        <p className="mt-1 text-sm text-muted-foreground">No items require immediate attention.</p>
+                      </div>
+                    )}
+                </div>
+              </Panel>
+            </div>
+
+            {/* Upcoming Schedule - Full Width */}
+            <Panel
+              eyebrow="Upcoming schedule"
+              title="Next 7 days"
+              action={
+                <Link href="/admin/calendar" className="text-sm text-primary hover:underline flex items-center gap-1">
+                  Open full calendar <ExternalLink className="h-3 w-3" />
+                </Link>
+              }
+            >
+              {calendarLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-16 animate-pulse rounded-xl border border-border bg-card" />
+                  ))}
+                </div>
+              ) : calendarError ? (
+                <EmptyState
+                  icon={AlertCircle}
+                  title="Calendar unavailable"
+                  description={calendarError}
+                  action={<Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>}
+                />
+              ) : allUpcomingEvents.length === 0 ? (
+                <EmptyState
+                  icon={CalendarDays}
+                  title="No upcoming events"
+                  description="No events scheduled for the next 7 days. Events from projects, quotes, invoices, galleries, and contracts will appear here."
+                  action={<Link href="/admin/calendar"><Button>Open calendar</Button></Link>}
+                />
+              ) : (
+                <>
+                  {/* Date Strip */}
+                  <DateStrip
+                    selectedDate={selectedDate}
+                    onDateChange={setSelectedDate}
+                    eventsByDay={eventsByDay}
+                  />
+
+                  {/* Selected Day Events or Upcoming List */}
+                  <div className="mt-4">
+                    {selectedDayEvents.length > 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-foreground">
+                          {selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? 's' : ''} on {formatDateShort(selectedDate.toISOString())}
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {selectedDayEvents.map(event => (
+                            <CalendarEventItem key={event.id} event={event} />
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <p className="text-sm text-muted-foreground">No events on {formatDateShort(selectedDate.toISOString())}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Showing next {Math.min(allUpcomingEvents.length, 5)} upcoming event{allUpcomingEvents.length !== 1 ? 's' : ''}:
+                        </p>
+                        <div className="mt-2 space-y-2">
+                          {allUpcomingEvents.slice(0, 5).map(event => (
+                            <CalendarEventItem key={event.id} event={event} />
+                          ))}
+                        </div>
+                        {allUpcomingEvents.length > 5 && (
+                          <Link href="/admin/calendar" className="mt-3 block text-center text-sm text-primary hover:underline">
+                            View all {allUpcomingEvents.length} upcoming events
+                          </Link>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </Panel>
+
+            {/* Bottom Row: Recent Activity + Quote Pipeline */}
+            <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+              <Panel
+                eyebrow="Workspace"
+                title="Recent activity"
+                action={
+                  <span className="text-[9px] font-sans uppercase tracking-widest text-muted-foreground">
+                    Live from your account
+                  </span>
+                }
+              >
+                <div className="divide-y divide-border">
+                  {stats.activity.length === 0 ? (
+                    <div className="px-5 py-10 text-center">
+                      <p className="text-sm font-medium text-foreground">No activity yet</p>
+                      <p className="text-sm text-muted-foreground">Create a client, project or quote to get started.</p>
+                    </div>
+                  ) : (
+                    stats.activity.map((item) => <ActivityRow key={item.id} {...item} />)
+                  )}
+                </div>
+              </Panel>
+
+              <Panel
+                eyebrow="Commercial health"
+                title="Quote pipeline"
+              >
+                <div className="space-y-4">
+                  {([
+                    ['Draft', Number(stats.quotes.statuses.draft || 0)],
+                    ['Sent', Number(stats.quotes.statuses.sent || 0)],
+                    ['Accepted', Number(stats.quotes.statuses.accepted || 0)],
+                    ['Rejected', Number(stats.quotes.statuses.rejected || 0)],
+                    ['Invoiced', Number(stats.quotes.statuses.invoiced || 0)],
+                  ] as Array<[string, number]>).filter(([, v]) => v > 0).map(([label, value]) => {
+                    const numValue = Number(value);
+                    return (
+                      <div key={label}>
+                        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
+                          <span className="text-muted-foreground">{label}</span>
+                          <span className="font-semibold text-foreground">{formatNumber(numValue)}</span>
+                        </div>
+                        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all"
+                            style={{ width: `${Math.min(100, Math.round((numValue / Math.max(stats.overview.quotes, 1)) * 100))}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div className="pt-4 border-t border-border">
+                    <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground">Conversion</p>
+                    <p className="mt-1 text-2xl font-semibold text-foreground">{stats.quotes.conversionRate}%</p>
+                    <p className="text-sm text-muted-foreground">Accepted vs. decided quotes.</p>
+                  </div>
+                </div>
+              </Panel>
+            </div>
+          </>
+        )}
+
+        {showOnboarding && (
+          <CreatorOnboardingModal
+            isOpen={showOnboarding}
+            onClose={() => {
+              setShowOnboarding(false);
+              setOnboardingDismissed(true);
+            }}
+            onComplete={() => {
+              setShowOnboarding(false);
+              setOnboardingDismissed(true);
+            }}
+            onDismiss={() => {
+              setShowOnboarding(false);
+              setOnboardingDismissed(true);
+            }}
+          />
+        )}
       </div>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]"><Panel eyebrow="Latest" title="Recent activity" action={<Link href="/admin" className="text-[10px] font-medium text-primary">Refresh</Link>}><div className="divide-y divide-slate-100 dark:divide-zinc-900">{loading ? <div className="px-5 py-10 text-center text-xs text-slate-400"><Clock3 className="mx-auto mb-2 h-4 w-4 animate-pulse" />Loading activity...</div> : stats?.activity.length ? stats.activity.slice(0, 8).map((item) => <ActivityRow key={item.id} item={item} />) : <div className="px-5 py-10 text-center text-sm text-slate-400">No activity yet.</div>}</div></Panel>
-        <Panel eyebrow="Attention" title="Things to review"><div className="divide-y divide-slate-100 dark:divide-zinc-900">{[
-          ['Overdue invoices', stats?.attention.overdueInvoices || 0, '/admin/invoices', <Wallet key="overdue" className="h-4 w-4" />],
-          ['Pending quotes', stats?.attention.pendingQuotes || 0, '/admin/quotes/new', <FileText key="quotes" className="h-4 w-4" />],
-          ['Active projects', stats?.attention.activeProjects || 0, '/admin/galleries', <FolderKanban key="projects" className="h-4 w-4" />],
-          ['Active galleries', stats?.attention.activeGalleries || 0, '/admin/galleries', <GalleryHorizontalEnd key="galleries" className="h-4 w-4" />],
-        ].map(([label, value, href, icon]) => <Link key={label as string} href={href as string} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-zinc-900/50"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300">{icon}</span><div><span className="block text-sm font-medium">{label}</span><span className="block text-xs text-slate-500">Review in workspace</span></div></div><span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">{number(value as number)}</span></Link>)}</div></Panel></div>
-    </div>
-
-    {tourStep !== null && <Tour step={tourStep} onNext={() => { setTourStep((current) => (current ?? 0) + 1); if (tourStep >= tourSteps.length - 1) { localStorage.setItem('creative-os-tour-seen', '1'); setTourStep(null); } }} onSkip={() => { localStorage.setItem('creative-os-tour-seen', '1'); setTourStep(null); if (stats?.overview.clients === 0 && localStorage.getItem('creative-os-first-client-prompted') !== '1') setShowFirstClient(true); }} />}
-    {showFirstClient && <FirstClientModal onClose={() => { localStorage.setItem('creative-os-first-client-prompted', '1'); setShowFirstClient(false); }} onCreated={() => { setShowFirstClient(false); setRange((current) => current); }} />}
-  </main>;
+    </main>
+  );
 }

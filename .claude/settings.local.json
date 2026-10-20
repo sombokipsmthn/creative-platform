@@ -57,7 +57,8 @@
       "Bash(neon psql *)",
       "Bash(neon branch *)",
       "Bash(cp *)",
-      "Bash(rm *)"
+      "Bash(rm *)",
+      "WebFetch(domain:vercel.com)"
     ]
   },
   "skillOverrides": {}

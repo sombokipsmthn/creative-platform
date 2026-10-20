@@ -1,536 +1,247 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, List } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import { addDays, addMonths, addWeeks, eachDayOfInterval, endOfMonth, endOfWeek, format, isSameDay, isSameMonth, parseISO, startOfDay, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
+import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, Clock3, FileText, FolderKanban, Images, Receipt, RefreshCw } from 'lucide-react';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, eachDayOfInterval, differenceInCalendarDays, isSameDay, isSameMonth, isSameWeek, parseISO, addDays, subDays } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import StatusBadge from '@/components/admin/StatusBadge';
 
 type CalendarView = 'month' | 'week' | 'agenda';
+type EventCategory = 'Project' | 'Quotation' | 'Invoice' | 'Gallery' | 'Contract' | 'Studio event';
 
 type CalendarEvent = {
   id: string;
   title: string;
-  description?: string;
-  startDate: string; // ISO string
-  endDate?: string; // ISO string
-  allDay: boolean;
-  category: string;
+  description?: string | null;
+  startDate: string;
+  endDate?: string | null;
+  category: EventCategory;
   status: string;
-  relatedClientId?: string;
-  relatedProjectId?: string;
-  relatedQuoteId?: string;
-  relatedInvoiceId?: string;
-  relatedGalleryId?: string;
   sourceType: string;
   sourceId: string;
-  isTentative: boolean;
+  relatedClientId?: string | null;
+  relatedProjectId?: string | null;
+  relatedQuoteId?: string | null;
+  relatedInvoiceId?: string | null;
+  relatedGalleryId?: string | null;
+  isTentative?: boolean;
 };
 
-type CalendarState = {
-  currentDate: Date;
-  view: CalendarView;
-  events: CalendarEvent[];
-  loading: boolean;
-  error: string | null;
+type FilterRecord = { id: string; name: string; company?: string | null };
+
+const categoryMeta: Record<EventCategory, { icon: typeof FolderKanban; tone: string }> = {
+  Project: { icon: FolderKanban, tone: 'bg-primary/10 text-primary' },
+  Quotation: { icon: FileText, tone: 'bg-secondary text-secondary-foreground' },
+  Invoice: { icon: Receipt, tone: 'bg-amber-500/15 text-amber-700 dark:text-amber-300' },
+  Gallery: { icon: Images, tone: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
+  Contract: { icon: FileText, tone: 'bg-muted text-muted-foreground' },
+  'Studio event': { icon: CalendarDays, tone: 'bg-primary/10 text-primary' },
 };
+
+function dateRange(view: CalendarView, date: Date) {
+  if (view === 'month') return { start: startOfWeek(startOfMonth(date), { weekStartsOn: 1 }), end: endOfWeek(endOfMonth(date), { weekStartsOn: 1 }) };
+  if (view === 'week') return { start: startOfWeek(date, { weekStartsOn: 1 }), end: endOfWeek(date, { weekStartsOn: 1 }) };
+  return { start: startOfDay(date), end: addDays(startOfDay(date), 30) };
+}
+
+function eventDate(event: CalendarEvent) {
+  const value = parseISO(event.startDate);
+  return Number.isNaN(value.getTime()) ? null : value;
+}
+
+function EventMarker({ event, onSelect }: { event: CalendarEvent; onSelect: (event: CalendarEvent) => void }) {
+  const meta = categoryMeta[event.category] ?? categoryMeta.Project;
+  const Icon = meta.icon;
+  return (
+    <button type="button" onClick={() => onSelect(event)} className="group flex w-full min-w-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-xs transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <span className={`flex size-4 shrink-0 items-center justify-center rounded-sm ${meta.tone}`}><Icon className="size-3" aria-hidden="true" /></span>
+      <span className="min-w-0 truncate font-medium text-foreground">{event.title}</span>
+    </button>
+  );
+}
+
+function LoadingState() {
+  return <div className="grid gap-4" role="status" aria-label="Loading command center">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <Skeleton key={index} className="h-28 rounded-xl" />)}</div>
+    <Skeleton className="h-[34rem] rounded-xl" />
+  </div>;
+}
 
 export default function CalendarPage() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const [state, setState] = useState<CalendarState>({
-    currentDate: new Date(),
-    view: 'month',
-    events: [],
-    loading: true,
-    error: null,
-  });
+  const [view, setView] = useState<CalendarView>('month');
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [category, setCategory] = useState<'all' | EventCategory>('all');
+  const [clientId, setClientId] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [clients, setClients] = useState<FilterRecord[]>([]);
+  const [projects, setProjects] = useState<FilterRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [eventFormOpen, setEventFormOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null);
+  const [eventSaving, setEventSaving] = useState(false);
+  const [refreshNonce, setRefreshNonce] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
-  // Fetch events for the current view's date range
+  const range = useMemo(() => dateRange(view, currentDate), [view, currentDate]);
+
   useEffect(() => {
-    let cancelled = false;
-    async function fetchEvents() {
-      if (cancelled) return;
-      setState(prev => ({ ...prev, loading: true, error: null }));
+    Promise.all([
+      fetch('/api/clients', { cache: 'no-store' }).then(response => response.ok ? response.json() : []),
+      fetch('/api/projects', { cache: 'no-store' }).then(response => response.ok ? response.json() : []),
+    ]).then(([clientRows, projectRows]) => {
+      setClients(Array.isArray(clientRows) ? clientRows : []);
+      setProjects(Array.isArray(projectRows) ? projectRows : []);
+    }).catch(() => undefined);
+  }, []);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadEvents() {
+      setLoading(true);
+      setError(null);
       try {
-        let startDate: Date, endDate: Date;
-
-        switch (state.view) {
-          case 'month':
-            startDate = startOfMonth(state.currentDate);
-            endDate = endOfMonth(state.currentDate);
-            break;
-          case 'week':
-            startDate = startOfWeek(state.currentDate, { weekStartsOn: 1 }); // Monday start
-            endDate = endOfWeek(state.currentDate, { weekStartsOn: 1 });
-            break;
-          case 'agenda':
-            // For agenda, we'll show a fixed range (e.g., next 30 days)
-            startDate = startOfDay(state.currentDate);
-            endDate = addDays(startDate, 30);
-            break;
-        }
-
-        const response = await fetch(
-          `/api/calendar?start=${startDate.toISOString()}&end=${endDate.toISOString()}&view=${state.view}`,
-          { cache: 'no-store' }
-        );
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch calendar data: ${response.status}`);
-        }
-
+        const params = new URLSearchParams({ start: range.start.toISOString(), end: range.end.toISOString(), view });
+        if (clientId) params.set('clientId', clientId);
+        if (projectId) params.set('projectId', projectId);
+        const response = await fetch(`/api/calendar?${params.toString()}`, { cache: 'no-store', signal: controller.signal });
+        if (!response.ok) throw new Error(`Calendar request failed with status ${response.status}`);
         const data = await response.json();
-        if (!cancelled) {
-          setState(prev => ({
-            ...prev,
-            events: data as CalendarEvent[],
-            loading: false,
-          }));
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setState(prev => ({
-            ...prev,
-            loading: false,
-            error: err instanceof Error ? err.message : 'Unknown error',
-          }));
-        }
+        setEvents(Array.isArray(data) ? data : []);
+      } catch (cause) {
+        if (cause instanceof DOMException && cause.name === 'AbortError') return;
+        setError(cause instanceof Error ? cause.message : 'Calendar data could not be loaded.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
+    void loadEvents();
+    return () => controller.abort();
+  }, [range, view, clientId, projectId, refreshNonce]);
 
-    fetchEvents();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [state.currentDate, state.view]);
-
-  const handlePrev = () => {
-    setState(prev => ({
-      ...prev,
-      currentDate:
-        state.view === 'month' ? subMonths(prev.currentDate, 1) :
-        state.view === 'week' ? subDays(prev.currentDate, 7) :
-        subDays(prev.currentDate, 1),
-    }));
-  };
-
-  const handleNext = () => {
-    setState(prev => ({
-      ...prev,
-      currentDate:
-        state.view === 'month' ? addMonths(prev.currentDate, 1) :
-        state.view === 'week' ? addDays(prev.currentDate, 7) :
-        addDays(prev.currentDate, 1),
-    }));
-  };
-
-  const handleToday = () => {
-    setState(prev => ({ ...prev, currentDate: new Date() }));
-  };
-
-  const handleViewChange = (view: CalendarView) => {
-    setState(prev => ({ ...prev, view }));
-  };
-
-  const isToday = (date: Date) => isSameDay(date, new Date());
-  const isCurrentMonth = (date: Date) => isSameMonth(date, state.currentDate);
-  const isCurrentWeek = (date: Date) => isSameWeek(date, state.currentDate, { weekStartsOn: 1 });
-
-  // Group events by day for month and week views
+  const visibleEvents = useMemo(() => category === 'all' ? events : events.filter(event => event.category === category), [category, events]);
   const eventsByDay = useMemo(() => {
-    const map: Map<string, CalendarEvent[]> = new Map();
-    state.events.forEach(event => {
-      const start = parseISO(event.startDate);
-      const dateKey = format(start, 'yyyy-MM-dd');
-      if (!map.has(dateKey)) {
-        map.set(dateKey, []);
-      }
-      map.get(dateKey)!.push(event);
+    const grouped = new Map<string, CalendarEvent[]>();
+    visibleEvents.forEach(event => {
+      const date = eventDate(event);
+      if (!date) return;
+      const key = format(date, 'yyyy-MM-dd');
+      grouped.set(key, [...(grouped.get(key) ?? []), event]);
     });
-    return map;
-  }, [state.events]);
+    return grouped;
+  }, [visibleEvents]);
 
-  // Group events by day - inline lookup (no separate function needed)
-
-  if (state.loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b]">
-        <p className="text-xs font-sans uppercase tracking-widest text-slate-500">Loading calendar...</p>
-      </div>
-    );
+  function move(direction: -1 | 1) {
+    setCurrentDate(date => view === 'month' ? (direction === 1 ? addMonths(date, 1) : subMonths(date, 1)) : (direction === 1 ? addWeeks(date, 1) : subWeeks(date, 1)));
   }
 
-  if (state.error) {
-    return (
-      <div className="p-6">
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {state.error}
-        </div>
-      </div>
-    );
+  function resetToday() { setCurrentDate(new Date()); }
+
+  async function saveEvent(formData: FormData) {
+    setEventSaving(true);
+    try {
+      const response = await fetch(editingEvent ? `/api/calendar/events/${editingEvent.sourceId}` : '/api/calendar/events', { method: editingEvent ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.fromEntries(formData.entries())) });
+      if (!response.ok) throw new Error(editingEvent ? 'Event could not be updated' : 'Event could not be created');
+      setEventFormOpen(false);
+      setEditingEvent(null);
+      setRefreshNonce(value => value + 1);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Event could not be saved.');
+    } finally {
+      setEventSaving(false);
+    }
   }
 
-  return (
-    <div className="min-h-screen max-w-full overflow-x-hidden bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
-      <header className="border-b border-slate-200 dark:border-zinc-800">
-        <div className="flex flex-wrap items-center justify-between gap-4 overflow-x-auto px-4 py-4 lg:px-8">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
-              Creator Command Centre Calendar
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button type="button" onClick={handlePrev} variant="outline" size="icon"><ChevronLeft className="h-4 w-4" /></Button>
-
-            <div className="flex-1 flex justify-center">
-              <span className="text-center text-slate-900 dark:text-white font-medium">
-                {format(state.currentDate, state.view === 'month' ? 'MMMM yyyy' : state.view === 'week' ? "PPP '–' PPP" : 'MMMM d, yyyy')}
-              </span>
-            </div>
-
-            <Button type="button" onClick={handleNext} variant="outline" size="icon"><ChevronRight className="h-4 w-4" /></Button>
-
-            <Button type="button" onClick={handleToday} variant="outline">Today</Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="flex gap-2">
-              <Button type="button" onClick={() => handleViewChange('month')} variant={state.view === 'month' ? 'primary' : 'outline'}>Month</Button>
-              <Button type="button" onClick={() => handleViewChange('week')} variant={state.view === 'week' ? 'primary' : 'outline'}>Week</Button>
-              <Button type="button" onClick={() => handleViewChange('agenda')} variant={state.view === 'agenda' ? 'primary' : 'outline'}>Agenda</Button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="p-6">
-        {state.view === 'month' && (
-          <MonthView
-            currentDate={state.currentDate}
-            events={state.events}
-            eventsByDay={eventsByDay}
-            isToday={isToday}
-            isCurrentMonth={isCurrentMonth}
-          />
-        )}
-        {state.view === 'week' && (
-          <WeekView
-            currentDate={state.currentDate}
-            events={state.events}
-            eventsByDay={eventsByDay}
-            isToday={isToday}
-            isCurrentWeek={isCurrentWeek}
-          />
-        )}
-        {state.view === 'agenda' && (
-          <AgendaView
-            events={state.events}
-            currentDate={state.currentDate}
-          />
-        )}
-      </main>
-    </div>
-  );
-}
-
-// Month view component
-function MonthView({
-  currentDate,
-  events,
-  eventsByDay,
-  isToday,
-  isCurrentMonth,
-}: {
-  currentDate: Date;
-  events: CalendarEvent[];
-  eventsByDay: Map<string, CalendarEvent[]>;
-  isToday: (date: Date) => boolean;
-  isCurrentMonth: (date: Date) => boolean;
-}) {
-  const daysInMonth = eachDayOfInterval({
-    start: startOfMonth(currentDate),
-    end: endOfMonth(currentDate),
-  });
-
-  const startDayOfWeek = daysInMonth[0].getDay(); // 0 = Sunday, 1 = Monday, etc.
-  const daysToPad = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1; // Adjust for Monday start
-
-  return (
-    <div className="gap-1">
-      {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-500">
-        {[...Array(7)].map((_, i) => {
-          const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][
-            (i + 1) % 7
-          ]; // Start with Monday
-          return <div key={i}>{dayName}</div>;
-        })}
-      </div>
-
-      {/* Days */}
-      <div className="grid grid-cols-7 gap-1">
-        {/* Padding for days before the 1st */}
-        {[...Array(daysToPad)].map((_, i) => (
-          <div key={`pad-${i}`} className="h-24 bg-slate-50/50 dark:bg-zinc-950/50" />
-        ))}
-
-        {/* Days of the month */}
-        {daysInMonth.map((day, index) => {
-          const dateKey = format(day, 'yyyy-MM-dd');
-          const dayEvents = eventsByDay.get(dateKey) || [];
-          const isTodayDay = isToday(day);
-          const isCurrentMonthDay = isCurrentMonth(day);
-
-          return (
-            <div
-              key={index}
-              className={`group relative h-24 min-w-0 transition-colors hover:bg-slate-50 dark:hover:bg-zinc-900 ${
-                isTodayDay
-                  ? 'border-2 border-purple-600'
-                  : isCurrentMonthDay
-                    ? 'bg-white dark:bg-zinc-950'
-                    : 'bg-slate-50 dark:bg-zinc-900/50'
-              }`}
-            >
-              <div className="flex justify-between items-start p-2">
-                <span className={`text-[10px] font-sans ${isTodayDay ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
-                  {format(day, 'd')}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">
-                  {dayEvents.length}
-                </span>
-              </div>
-
-              <div className="mt-1 space-y-1 h-[calc(100%-2rem)] overflow-hidden">
-                {dayEvents.slice(0, 3).map((event) => (
-                  <div
-                    key={event.id}
-                    className={`truncate rounded-sm px-1 py-0.5 text-[9px] font-medium ${
-                      event.isTentative
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`}
-                  >
-                    {event.title}
-                  </div>
-                ))}
-
-                {dayEvents.length > 3 && (
-                  <div className="text-[9px] text-slate-400 dark:text-zinc-500">
-                    +{dayEvents.length - 3} more
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// Week view component
-function WeekView({
-  currentDate,
-  events,
-  eventsByDay,
-  isToday,
-  isCurrentWeek,
-}: {
-  currentDate: Date;
-  events: CalendarEvent[];
-  eventsByDay: Map<string, CalendarEvent[]>;
-  isToday: (date: Date) => boolean;
-  isCurrentWeek: (date: Date) => boolean;
-}) {
-  const startOfWeekDate = startOfWeek(currentDate, { weekStartsOn: 1 });
-  const daysOfWeek = eachDayOfInterval({
-    start: startOfWeekDate,
-    end: endOfWeek(currentDate, { weekStartsOn: 1 }),
-  });
-
-  return (
-    <div className="space-y-4">
-      <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-          Week of {format(startOfWeekDate, 'MMM d')} – {format(endOfWeek(currentDate, { weekStartsOn: 1 }), 'MMM d, yyyy')}
-        </h3>
-      </div>
-
-      <div className="grid grid-cols-7 gap-2">
-        {[...Array(7)].map((_, i) => {
-          const day = addDays(startOfWeekDate, i);
-          const dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.getDay()];
-          return (
-            <div
-              key={i}
-              className={`text-center text-[10px] font-sans uppercase tracking-widest ${
-                isToday(day) ? 'font-bold text-purple-600' : 'text-slate-400'
-              }`}
-            >
-              <div>{dayName}</div>
-              <div className="text-xs">{format(day, 'MMM d')}</div>
-            </div>
-          );
-        })}
-
-        {daysOfWeek.map((day, index) => {
-          const dateKey = format(day, 'yyyy-MM-dd');
-          const dayEvents = eventsByDay.get(dateKey) || [];
-          const isTodayDay = isToday(day);
-          const isCurrentWeekDay = isCurrentWeek(day);
-
-          return (
-            <div
-              key={index}
-              className={`relative h-96 min-w-0 transition-colors hover:bg-slate-50 dark:hover:bg-zinc-900 ${
-                isTodayDay
-                  ? 'border-2 border-purple-600'
-                  : isCurrentWeekDay
-                    ? 'bg-white dark:bg-zinc-950'
-                    : 'bg-slate-50 dark:bg-zinc-950/50'
-              }`}
-            >
-              <div className="flex items-start justify-between p-2">
-                <span className={`text-[10px] font-sans ${
-                  isTodayDay ? 'font-bold text-purple-600' : 'text-slate-400'
-                }`}>
-                  {format(day, 'd')}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-zinc-400">
-                  {dayEvents.length}
-                </span>
-              </div>
-
-              <div className="mt-1 h-[calc(100%-2rem)] space-y-1 overflow-hidden">
-                {dayEvents.map((event) => (
-                  <div
-                    key={event.id}
-                    className={`mb-1.5 truncate rounded-sm px-2 py-1 text-[9px] font-medium ${
-                      event.isTentative
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`}
-                  >
-                    {event.title}
-                    {event.description && (
-                      <div className="mt-0.5 truncate text-xs text-slate-500 dark:text-zinc-400">
-                        {event.description}
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {dayEvents.length === 0 && (
-                  <div className="mt-2 text-center text-xs text-slate-400 dark:text-zinc-500">
-                    No events
-                  </div>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-// Agenda view component
-function AgendaView({
-  events,
-  currentDate,
-}: {
-  events: CalendarEvent[];
-  currentDate: Date;
-}) {
-  const startDate = startOfDay(currentDate);
-  const endDate = addDays(startDate, 30);
-
-  const upcomingEvents = events
-    .filter((event) => {
-      const eventStart = parseISO(event.startDate);
-      return eventStart >= startDate && eventStart <= endDate;
-    })
-    .sort((a, b) => parseISO(a.startDate).getTime() - parseISO(b.startDate).getTime());
-
-  if (upcomingEvents.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-slate-500 dark:text-zinc-400">No upcoming events in the next 30 days.</p>
-      </div>
-    );
+  async function deleteEvent() {
+    if (!selectedEvent || selectedEvent.sourceType !== 'studio_event' || !window.confirm('Delete this studio event?')) return;
+    setEventSaving(true);
+    try {
+      const response = await fetch(`/api/calendar/events/${selectedEvent.sourceId}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Event could not be deleted');
+      setSelectedEvent(null);
+      setRefreshNonce(value => value + 1);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Event could not be deleted.');
+    } finally {
+      setEventSaving(false);
+    }
   }
 
-  return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-        Upcoming events ({format(startDate, 'MMM d, yyyy')} – {format(endDate, 'MMM d, yyyy')})
-      </h3>
+  const sourceHref = selectedEvent?.sourceType === 'project' ? `/admin/projects/${selectedEvent.sourceId}` : selectedEvent?.sourceType === 'quote' ? `/admin/quotes/${selectedEvent.sourceId}` : selectedEvent?.sourceType === 'invoice' ? `/admin/invoices/${selectedEvent.sourceId}` : selectedEvent?.sourceType === 'gallery' ? `/admin/galleries/${selectedEvent.sourceId}` : selectedEvent?.sourceType === 'contract' ? `/admin/contracts/${selectedEvent.sourceId}` : null;
 
-      <div className="space-y-3">
-        {upcomingEvents.map((event) => {
-          const eventStart = parseISO(event.startDate);
-          const eventEnd = event.endDate ? parseISO(event.endDate) : null;
+  return <div className="ui-page ui-page-padded">
+    <div className="ui-shell">
+      <AdminPageHeader title="Studio Command Center" description="Plan production activity, deadlines, and client work from one operational workspace." breadcrumb={{ label: 'Dashboard', href: '/admin' }} primaryAction={<div className="flex gap-2"><Button type="button" variant="outline" onClick={() => { setEditingEvent(null); setEventFormOpen(true); }}><CalendarDays aria-hidden="true" />New event</Button><Button type="button" onClick={resetToday}><CalendarDays aria-hidden="true" />Today</Button></div>} />
 
-          return (
-            <div
-              key={event.id}
-              className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3 transition-colors hover:bg-slate-50 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-900"
-            >
-              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
-                <CalendarIcon className="h-4 w-4" />
-              </div>
+      {eventFormOpen && <EventForm event={editingEvent} clients={clients} projects={projects} saving={eventSaving} onCancel={() => { setEventFormOpen(false); setEditingEvent(null); }} onSubmit={saveEvent} />}
 
-              <div className="min-w-0 flex-1">
-                <div className="mb-1 flex items-start justify-between">
-                  <h4 className="truncate text-lg font-medium text-slate-900 dark:text-white">
-                    {event.title}
-                  </h4>
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs ${
-                      event.isTentative
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                        : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                    }`}
-                  >
-                    {event.isTentative ? 'Tentative' : 'Confirmed'}
-                  </span>
-                </div>
+      <div className="mb-6 grid gap-4 lg:grid-cols-2"><Card><CardHeader><CardTitle className="text-sm">Payment tracking</CardTitle></CardHeader><CardContent><div className="flex items-start gap-3"><CircleAlert className="mt-0.5 size-5 text-muted-foreground" aria-hidden="true" /><div><p className="text-sm font-medium">Payment ledger not connected</p><p className="mt-1 text-sm text-muted-foreground">Invoice dates are shown, but balances and partial payments are unavailable until payment records are connected.</p></div></div></CardContent></Card><Card><CardHeader><CardTitle className="text-sm">Booking schedule</CardTitle></CardHeader><CardContent><div className="flex items-start gap-3"><CalendarDays className="mt-0.5 size-5 text-muted-foreground" aria-hidden="true" /><div><p className="text-sm font-medium">No external booking source</p><p className="mt-1 text-sm text-muted-foreground">Use New event for manually scheduled studio activity. No booking records are being inferred.</p></div></div></CardContent></Card></div>
 
-                <p className="mb-1 text-sm text-slate-500 dark:text-zinc-400">
-                  {format(eventStart, 'PPP')}{eventEnd ? ` – ${format(eventEnd, 'PPP')}` : ''}
-                </p>
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <SummaryCard label="Visible events" value={visibleEvents.length} detail="In the current range" icon={CalendarDays} />
+        <SummaryCard label="Projects" value={visibleEvents.filter(event => event.category === 'Project').length} detail="Production activity" icon={FolderKanban} />
+        <SummaryCard label="Financial milestones" value={visibleEvents.filter(event => event.category === 'Invoice' || event.category === 'Quotation').length} detail="Quotes and invoices" icon={Receipt} />
+        <SummaryCard label="Needs review" value={visibleEvents.filter(event => ['overdue', 'expired', 'declined'].includes(event.status.toLowerCase())).length} detail="Derived from source status" icon={CircleAlert} />
+      </div>
 
-                {event.description && (
-                  <p className="mb-1 text-xs text-slate-500 dark:text-zinc-400">
-                    {event.description}
-                  </p>
-                )}
-
-                <div className="flex flex-wrap gap-1 text-xs text-slate-400 dark:text-zinc-500">
-                  <span>Category: {event.category}</span>
-                  {event.relatedClientId && <span>Client</span>}
-                  {event.relatedProjectId && <span>Project</span>}
-                  {event.relatedQuoteId && <span>Quote</span>}
-                  {event.relatedInvoiceId && <span>Invoice</span>}
-                  {event.relatedGalleryId && <span>Gallery</span>}
-                </div>
-              </div>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <Card className="min-w-0">
+          <CardHeader className="gap-4 border-b sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0"><CardTitle>Calendar workspace</CardTitle><p className="mt-1 text-sm text-muted-foreground">{format(currentDate, view === 'month' ? 'MMMM yyyy' : view === 'week' ? "MMM d, yyyy" : 'MMM d, yyyy')}</p></div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1" role="group" aria-label="Calendar navigation"><Button type="button" variant="outline" size="icon-sm" onClick={() => move(-1)} aria-label="Previous period"><ChevronLeft aria-hidden="true" /></Button><Button type="button" variant="outline" size="icon-sm" onClick={() => move(1)} aria-label="Next period"><ChevronRight aria-hidden="true" /></Button></div>
+              <div className="flex rounded-lg bg-muted p-1" role="tablist" aria-label="Calendar view"><ViewButton active={view === 'month'} onClick={() => setView('month')}>Month</ViewButton><ViewButton active={view === 'week'} onClick={() => setView('week')}>Week</ViewButton><ViewButton active={view === 'agenda'} onClick={() => setView('agenda')}>Agenda</ViewButton></div>
             </div>
-          );
-        })}
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="flex flex-wrap items-center gap-2 border-b p-4" aria-label="Event filters"><span className="mr-1 text-xs font-medium text-muted-foreground">Show</span><FilterButton active={category === 'all'} onClick={() => setCategory('all')}>All</FilterButton>{(Object.keys(categoryMeta) as EventCategory[]).map(item => <FilterButton key={item} active={category === item} onClick={() => setCategory(item)}>{item}</FilterButton>)}<select aria-label="Filter by client" value={clientId} onChange={event => setClientId(event.target.value)} className="h-7 rounded-lg border border-input bg-background px-2 text-xs"><option value="">All clients</option>{clients.map(client => <option key={client.id} value={client.id}>{client.company || client.name}</option>)}</select><select aria-label="Filter by project" value={projectId} onChange={event => setProjectId(event.target.value)} className="h-7 rounded-lg border border-input bg-background px-2 text-xs"><option value="">All projects</option>{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></div>
+            {loading ? <div className="p-4"><LoadingState /></div> : error ? <div className="admin-empty-state"><CircleAlert className="size-6 text-destructive" aria-hidden="true" /><h2>Calendar unavailable</h2><p>{error}</p><Button type="button" variant="outline" onClick={() => setCurrentDate(new Date())}><RefreshCw aria-hidden="true" />Retry</Button></div> : view === 'month' ? <MonthView currentDate={currentDate} eventsByDay={eventsByDay} onSelect={setSelectedEvent} /> : view === 'week' ? <WeekView currentDate={currentDate} eventsByDay={eventsByDay} onSelect={setSelectedEvent} /> : <AgendaView events={visibleEvents} onSelect={setSelectedEvent} />}
+          </CardContent>
+        </Card>
+
+        <EventDetail event={selectedEvent} sourceHref={sourceHref} busy={eventSaving} onEdit={() => { setEditingEvent(selectedEvent); setEventFormOpen(true); }} onDelete={deleteEvent} />
       </div>
     </div>
-  );
+  </div>;
 }
 
-// Helper function to get events for a day (used in views)
-function getEventsForDay(date: Date, eventsByDay: Map<string, CalendarEvent[]>): CalendarEvent[] {
-  const dateKey = format(date, 'yyyy-MM-dd');
-  return eventsByDay.get(dateKey) || [];
+function SummaryCard({ label, value, detail, icon: Icon }: { label: string; value: number; detail: string; icon: typeof CalendarDays }) {
+  return <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</CardTitle><span className="flex size-8 items-center justify-center rounded-md bg-secondary text-secondary-foreground"><Icon className="size-4" aria-hidden="true" /></span></CardHeader><CardContent><p className="text-2xl font-bold tabular-nums">{value}</p><p className="mt-1 text-xs text-muted-foreground">{detail}</p></CardContent></Card>;
+}
+
+function ViewButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) { return <button type="button" role="tab" aria-selected={active} onClick={onClick} className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}>{children}</button>; }
+function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: string }) { return <Button type="button" variant={active ? 'secondary' : 'ghost'} size="sm" aria-pressed={active} onClick={onClick}>{children}</Button>; }
+
+function MonthView({ currentDate, eventsByDay, onSelect }: { currentDate: Date; eventsByDay: Map<string, CalendarEvent[]>; onSelect: (event: CalendarEvent) => void }) {
+  const days = eachDayOfInterval({ start: startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 }), end: endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 }) });
+  return <div className="overflow-x-auto"><div className="min-w-[42rem]"><div className="grid grid-cols-7 border-b bg-muted/40">{['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => <div key={day} className="p-3 text-center text-xs font-medium text-muted-foreground">{day}</div>)}</div><div className="grid grid-cols-7">{days.map(day => { const dayEvents = eventsByDay.get(format(day, 'yyyy-MM-dd')) ?? []; const today = isSameDay(day, new Date()); return <div key={day.toISOString()} className={`min-h-28 border-b border-r p-2 ${!isSameMonth(day, currentDate) ? 'bg-muted/20' : ''}`}><div className="mb-1 flex items-center justify-between"><span className={`text-xs font-medium ${today ? 'flex size-6 items-center justify-center rounded-full bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>{format(day, 'd')}</span>{dayEvents.length > 0 && <span className="text-[10px] text-muted-foreground">{dayEvents.length}</span>}</div><div className="space-y-0.5">{dayEvents.slice(0, 3).map(event => <EventMarker key={`${event.sourceType}-${event.sourceId}`} event={event} onSelect={onSelect} />)}{dayEvents.length > 3 && <p className="px-1.5 text-[11px] text-muted-foreground">+{dayEvents.length - 3} more</p>}</div></div>; })}</div></div></div>;
+}
+
+function WeekView({ currentDate, eventsByDay, onSelect }: { currentDate: Date; eventsByDay: Map<string, CalendarEvent[]>; onSelect: (event: CalendarEvent) => void }) {
+  const days = eachDayOfInterval({ start: startOfWeek(currentDate, { weekStartsOn: 1 }), end: endOfWeek(currentDate, { weekStartsOn: 1 }) });
+  return <div className="grid grid-cols-1 divide-y md:grid-cols-7 md:divide-x md:divide-y-0">{days.map(day => <div key={day.toISOString()} className="min-h-64 p-3"><div className="mb-3 flex items-center justify-between"><div><p className="text-xs font-medium text-muted-foreground">{format(day, 'EEE')}</p><p className={`text-lg font-semibold ${isSameDay(day, new Date()) ? 'text-primary' : ''}`}>{format(day, 'd')}</p></div><span className="text-xs text-muted-foreground">{format(day, 'MMM')}</span></div><div className="space-y-1">{(eventsByDay.get(format(day, 'yyyy-MM-dd')) ?? []).map(event => <EventMarker key={`${event.sourceType}-${event.sourceId}`} event={event} onSelect={onSelect} />)}</div></div>)}</div>;
+}
+
+function AgendaView({ events, onSelect }: { events: CalendarEvent[]; onSelect: (event: CalendarEvent) => void }) {
+  const sorted = [...events].sort((a, b) => (eventDate(a)?.getTime() ?? 0) - (eventDate(b)?.getTime() ?? 0));
+  if (!sorted.length) return <div className="admin-empty-state"><CalendarDays className="size-6 text-muted-foreground" aria-hidden="true" /><h2>No events in this range</h2><p>Authorized production and financial milestones will appear here.</p></div>;
+  return <div className="divide-y">{sorted.map(event => { const date = eventDate(event); return <button key={`${event.sourceType}-${event.sourceId}`} type="button" onClick={() => onSelect(event)} className="flex w-full items-start gap-4 p-4 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"><span className="w-20 shrink-0 text-xs text-muted-foreground">{date ? format(date, 'EEE, MMM d') : 'Undated'}</span><span className="min-w-0 flex-1"><span className="block truncate font-medium">{event.title}</span><span className="mt-1 block truncate text-sm text-muted-foreground">{event.description || event.category}</span></span><StatusBadge status={event.status} /></button>; })}</div>;
+}
+
+function EventForm({ event, clients, projects, saving, onCancel, onSubmit }: { event: CalendarEvent | null; clients: FilterRecord[]; projects: FilterRecord[]; saving: boolean; onCancel: () => void; onSubmit: (formData: FormData) => void }) {
+  const startValue = event?.startDate ? event.startDate.slice(0, 16) : '';
+  const endValue = event?.endDate ? event.endDate.slice(0, 16) : '';
+  return <Card className="mb-6"><CardHeader><CardTitle>{event ? 'Edit studio event' : 'New studio event'}</CardTitle></CardHeader><CardContent><form className="grid gap-4 sm:grid-cols-2" action={onSubmit}><label className="grid gap-1 text-sm"><span>Title</span><input name="title" defaultValue={event?.title ?? ''} required className="h-8 rounded-lg border border-input bg-background px-2.5" /></label><label className="grid gap-1 text-sm"><span>Starts</span><input name="startsAt" defaultValue={startValue} type="datetime-local" required className="h-8 rounded-lg border border-input bg-background px-2.5" /></label><label className="grid gap-1 text-sm"><span>Ends</span><input name="endsAt" defaultValue={endValue} type="datetime-local" className="h-8 rounded-lg border border-input bg-background px-2.5" /></label><label className="grid gap-1 text-sm"><span>Client</span><select name="clientId" defaultValue={event?.relatedClientId ?? ''} className="h-8 rounded-lg border border-input bg-background px-2.5"><option value="">No client</option>{clients.map(client => <option key={client.id} value={client.id}>{client.company || client.name}</option>)}</select></label><label className="grid gap-1 text-sm"><span>Project</span><select name="projectId" defaultValue={event?.relatedProjectId ?? ''} className="h-8 rounded-lg border border-input bg-background px-2.5"><option value="">No project</option>{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></label><label className="grid gap-1 text-sm sm:col-span-2"><span>Description</span><textarea name="description" defaultValue={event?.description ?? ''} className="min-h-20 rounded-lg border border-input bg-background p-2.5" /></label><div className="flex gap-2 sm:col-span-2"><Button type="submit" disabled={saving}>{saving ? 'Saving…' : event ? 'Save changes' : 'Create event'}</Button><Button type="button" variant="outline" onClick={onCancel}>Cancel</Button></div></form></CardContent></Card>;
+}
+
+function EventDetail({ event, sourceHref, onEdit, onDelete, busy }: { event: CalendarEvent | null; sourceHref: string | null; onEdit: () => void; onDelete: () => void; busy: boolean }) {
+  if (!event) return <Card className="h-fit"><CardHeader><CardTitle>Event details</CardTitle></CardHeader><CardContent><div className="admin-empty-state p-4"><Clock3 className="size-6 text-muted-foreground" aria-hidden="true" /><p>Select an event to inspect its source and status.</p></div></CardContent></Card>;
+  const date = eventDate(event);
+  return <Card className="h-fit"><CardHeader><div className="flex items-start justify-between gap-3"><div><CardTitle>{event.title}</CardTitle><p className="mt-1 text-sm text-muted-foreground">{event.category}</p></div><Badge variant={event.isTentative ? 'warning' : 'secondary'}>{event.isTentative ? 'Tentative' : 'Source record'}</Badge></div></CardHeader><CardContent className="space-y-4"><div><p className="ui-eyebrow">When</p><p className="mt-1 text-sm">{date ? format(date, 'EEEE, MMMM d, yyyy') : 'Date unavailable'}</p></div><div><p className="ui-eyebrow">Status</p><div className="mt-1"><StatusBadge status={event.status} /></div></div>{event.description && <div><p className="ui-eyebrow">Notes</p><p className="mt-1 text-sm text-muted-foreground">{event.description}</p></div>}<div><p className="ui-eyebrow">Source</p><div className="flex flex-wrap gap-2">{sourceHref ? <Link className="mt-1 inline-flex text-sm text-primary underline-offset-4 hover:underline" href={sourceHref}>Open source record <span aria-hidden="true">→</span></Link> : <p className="mt-1 text-sm text-muted-foreground">Studio event</p>}{event.sourceType === 'studio_event' && <><Button type="button" variant="outline" size="sm" onClick={onEdit}>Edit</Button><Button type="button" variant="destructive" size="sm" disabled={busy} onClick={onDelete}>Delete</Button></>}</div></div></CardContent></Card>;
 }

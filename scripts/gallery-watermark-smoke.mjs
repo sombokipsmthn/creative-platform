@@ -23,7 +23,7 @@ try {
 
   const create = await context.request.post(`${baseURL}/api/galleries`, {
     headers: { "content-type": "application/json" },
-    data: { title, description: "Disposable settings verification fixture", category: "Verification" },
+    data: { title, description: "Disposable settings verification fixture", category: "Verification", accessPin: "2468" },
   });
   check(create.status() === 201, `fixture gallery creation status=${create.status()}`);
   if (!create.ok()) throw new Error(`Fixture gallery creation failed: ${await create.text()}`);
@@ -45,9 +45,21 @@ try {
   await page.getByText("Saved successfully").waitFor({ state: "visible", timeout: 15_000 });
   check(true, "gallery settings save successfully");
   await page.reload({ waitUntil: "networkidle" });
-  await page.getByRole("button", { name: /^Settings$/i }).click();
+  await page.getByTestId("gallery-tab-settings").click();
   await page.getByRole("heading", { name: "General" }).waitFor({ state: "visible", timeout: 30_000 });
   check((await page.locator('input[type="text"]').first().inputValue()) === `${originalTitle} Verification`, "gallery setting persists after reload");
+  const publish = await context.request.post(`${baseURL}/api/galleries/${galleryId}/publish`, {
+    headers: { "content-type": "application/json" },
+    data: { publish: true },
+  });
+  check(publish.ok(), `fixture publish status=${publish.status()}`);
+  const gallerySlug = created.gallery?.slug;
+  const clientPage = await context.newPage();
+  await clientPage.goto(`${baseURL}/portal/g/${galleryId}/${gallerySlug}`, { waitUntil: "networkidle", timeout: 30_000 });
+  await clientPage.getByPlaceholder("PIN").fill("2468");
+  await clientPage.getByRole("button", { name: /unlock gallery/i }).click();
+  check(await clientPage.getByText(originalTitle, { exact: false }).isVisible(), "client portal unlocks published fixture gallery");
+  await clientPage.close();
   await page.close();
 } finally {
   if (galleryId) {

@@ -138,6 +138,7 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     let cancelled = false;
@@ -383,6 +384,17 @@ export default function AdminProjectsPage() {
               + New Project
             </Button>
           }
+          secondaryActions={[
+            <Button
+              key="view-toggle"
+              variant="ghost"
+              size="icon"
+              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              aria-label={viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
+            >
+              {viewMode === 'grid' ? '✓' : '□'}
+            </Button>
+          ]}
         />
 
         {error && !isAddProjectOpen && !selectedProject && (
@@ -483,20 +495,38 @@ export default function AdminProjectsPage() {
         </div>
 
         {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading projects…</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-w-16 aspect-h-10 rounded-xl border border-dashed animate-pulse">
+                <div className="h-full w-full flex items-center justify-center bg-purple-50 dark:bg-purple-900/20">
+                  <div className="h-12 w-12 rounded-2xl bg-purple-200 dark:bg-purple-800 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">- -</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-            <p className="text-sm text-slate-600 dark:text-zinc-400">No projects found.</p>
-            <div className="flex justify-center mt-4">
-              <Button
-                onClick={() => openCreateModal()}
-                variant="primary"
-                className="text-xs font-sans rounded-lg"
-              >
-                Create your first project
-              </Button>
+          <div className="text-center py-12">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-24 w-24 rounded-full border border-dashed animate-pulse bg-purple-50 dark:bg-purple-900/20">
+                <div className="h-12 w-12 rounded-full bg-purple-200 dark:bg-purple-800 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">- -</span>
+                </div>
+              </div>
+              <p className="text-lg font-medium text-slate-600 dark:text-zinc-400">No projects found.</p>
+              <p className="text-sm text-slate-500 dark:text-zinc-500">
+                Create a project or adjust your current search and filters.
+              </p>
+              <div className="mt-6">
+                <Button
+                  onClick={() => openCreateModal()}
+                  variant="primary"
+                  className="px-6 py-3"
+                >
+                  Create your first project
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
@@ -507,8 +537,23 @@ export default function AdminProjectsPage() {
                 className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
-                    {getInitials(project)}
+                  <div className="h-12 w-12 shrink-0 rounded-2xl bg-purple-100">
+                    {project.coverMediaId ? (
+                      <div className="h-full w-full bg-purple-100">
+                        <img
+                          src={`/api/projects/${project.id}/media?cover=true`}
+                          alt={`${project.name} cover`}
+                          className="h-full w-full object-cover rounded-2xl"
+                          onError={(e) => {
+                            e.target.src = '/api/projects/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-purple-700 dark:text-purple-300">
+                        {getInitials(project)}
+                      </div>
+                    )}
                   </div>
 
                   <div className="min-w-0 space-y-2">

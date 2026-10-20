@@ -5,7 +5,9 @@ This document describes the live implementation of the KIPSMTHN Creative Platfor
 
 Historical references to older auth and architecture decisions remain in archive and compliance materials for traceability, but they do not supersede the current implementation.
 
-_Last Updated: 2026-10-10_
+_Last Updated: 2026-10-21_
+
+> **Status and precedence update — 2026-10-21:** The consolidated source for current decisions is [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md); use [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md) to navigate related material. This implementation spec is not a substitute for checking current source files and runtime behavior. Treat any stale route inventories, version numbers, storage-provider claims, feature checkboxes, or completion statements below as unverified until checked against the current `dev` branch. Do not mark requested authentication providers or workflows complete without runtime validation.
 
 ---
 
@@ -142,16 +144,11 @@ The repository should keep these categories distinct:
 
 - `README.md` — project overview and active implementation summary
 - `KIPSMTHN-IMPLEMENTATION-SPEC.md` — current implementation reference
-- `docs/00-project/` — product/project context
-- `docs/01-specifications/` — active feature and system expectations
-- `docs/02-architecture/` — system architecture and design details
-- `docs/03-design-system/` — UI and styling system guidance
-- `docs/04-security-compliance/` — active security/compliance guidance
-- `docs/05-development-operations/` — operational workflows
-- `docs/06-decisions/` — design and architecture decisions
-- `docs/07-audits/` — current audit and review material
-- `docs/08-history/` — migration and historical notes
-- `docs/archive/` and `docs/soc2/` — retained historical records and archival evidence
+- `docs/PROJECT-HANDBOOK.md` — canonical consolidated project decisions and requirements
+- `docs/DOCUMENTATION-INDEX.md` — verified map of active and historical documentation
+- `docs/design-system.md`, `docs/api-reference.md`, and `docs/demo-account.md` — active specialist guides
+- `docs/audits/`, `docs/reports/`, and `docs/studio-command-center-implementation.md` — dated audits, verification reports, and feature history
+- `docs/archive/` and `docs/soc2/` — retained historical records, plans, and evidence
 
 This structure preserves the repo’s memory without letting legacy materials overwrite the current implementation.
 
@@ -756,3 +753,16 @@ This implementation specification has been reviewed and approved by:
 
 ---
 *This document is the single source of truth for the KIPSMTHN Creative Platform implementation. All development, testing, and deployment activities should align with this specification.*
+
+## Current implementation notes and required behavior (2026-10-21)
+
+- Better Auth is the active authentication system; do not reintroduce Clerk runtime dependencies or middleware assumptions.
+- The intended authentication experience combines available sign-in methods, local user resolution, and onboarding. Google OAuth and passkeys require actual configuration and runtime verification. Demo login must target the dedicated demo database and seeded account.
+- Preserve calendar functionality and existing workflows while repairing auth/dashboard regressions or applying styling changes.
+- Keep the public homepage separate from the authenticated creator workspace.
+- Use the canonical shadcn/ui primitives and semantic tokens. Shared global styling belongs in `src/app/globals.css`; typography, sizing, spacing, radii, buttons, inputs, and admin headers should remain consistent. Avoid monospace product UI and unsupported hardcoded theme colors.
+- Admin Search/Status/Category filters and New/Create controls may receive styling-only changes when requested; their existing data and business logic must not change.
+- Requested local development convention is Next.js on port 3000, with all other resources on separate ports. Verify scripts and local services before reporting completion.
+- For schema errors such as a missing table, verify the database target and Drizzle migration state; fix the underlying schema/database mismatch instead of masking the failure.
+- Development data cleanup must preserve the equipment catalogue and valid migration history, remove only confirmed creator-owned records and their positively identified uploaded objects, and never affect production.
+- For status reporting, distinguish implemented/verified, partial, requested/planned, and blocked/unverified. A successful build does not prove authenticated runtime workflows work.

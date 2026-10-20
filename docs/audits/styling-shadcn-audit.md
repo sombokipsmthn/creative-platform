@@ -1,3 +1,5 @@
+> **Historical snapshot notice (2026-10-21):** Findings in this audit reflect the time it was produced. Use [Design System](../design-system.md) for active styling rules and [Project Handbook](../PROJECT-HANDBOOK.md) for current decisions. Revalidate every finding against the current code before treating it as open or resolved.
+
 # KIPSMTHN Creative Platform — Legacy Styling Removal & shadcn/ui Adoption Audit
 
 **Date:** 2026-10-20  

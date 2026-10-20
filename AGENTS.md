@@ -1,3 +1,5 @@
+> **Canonical documentation entry point:** Read [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md) and [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md) before non-trivial changes. Better Auth remains the active auth system. Preserve existing calendar/business workflows, use the existing shadcn/global-token system, keep the public site separate from the creator workspace, and verify the current `dev` branch rather than trusting stale docs. Do not claim requested features are implemented without code/runtime evidence. The handbook documents database-target safety, equipment preservation, styling-only admin filter tasks, and the requested local port convention.
+
 # KIPSMTHN Creative Platform Agent Rules
 
 ## Canonical UI system

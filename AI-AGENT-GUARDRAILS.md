@@ -6,6 +6,10 @@
 > **Required working branch:** `dev`  
 > **Document intent:** Keep the platform coherent, scalable, minimal, secure, and maintainable. This is a guardrail and navigation document, not proof that every subsystem has been fully audited.
 
+## Canonical consolidated reference
+
+Before non-trivial work, read [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md) and [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md). They consolidate the product decisions and documentation precedence. Better Auth remains active; preserve the calendar and existing workflows during auth/UI fixes; keep global styling in the existing shadcn/token system; do not claim Google/passkey/onboarding flows work without runtime verification. Verify database identity before any database write and preserve equipment/migration history during approved development resets. The requested local port policy is app on 3000 and other resources on distinct ports, subject to checking actual configuration.
+
 ## 1. Non-negotiable rules
 
 1. **Inspect before changing.** Read the relevant implementation, its callers, related API routes, types, schema, tests, and current Git diff before editing. Do not ask the user to paste code that can be inspected in the repository.

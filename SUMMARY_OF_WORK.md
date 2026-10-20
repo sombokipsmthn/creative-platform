@@ -1,3 +1,5 @@
+> **Historical record notice (2026-10-21):** This file records work from an earlier engineering session; it is not a live status dashboard. Validate every item against the current `dev` branch before treating it as current. The consolidated project decisions live in [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md), with links in [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md).
+
 # Summary of Work Completed - Autonomous Engineering Mission
 
 ## Overview

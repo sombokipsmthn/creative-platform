@@ -1,6 +1,6 @@
 # Demo creator account and data lifecycle
 
-This feature is intended for a dedicated demo/test environment on the `demo-account-test-workspace` branch. Do not point demo testing at production data.
+This guide applies to the current `dev` branch and a dedicated demo/test database. Do not assume a special branch or point demo testing at production data. Always verify the actual database identity before seeding or deleting anything; `DEMO_DATABASE_URL` must not silently fall back to `DATABASE_URL`.
 
 ## Seed the demo workspace
 
@@ -36,3 +36,6 @@ If storage deletion fails, the database account is not deleted. This is permanen
 3. Confirm the storage provider credentials point to the demo bucket.
 4. Add a UI confirmation flow that calls `DELETE /api/account` only after the creator types the confirmation phrase.
 5. Test deletion with an account containing gallery and project uploads, then verify unrelated creators and equipment remain.
+
+
+See [Project Handbook](./PROJECT-HANDBOOK.md) for the current authentication/onboarding decisions and database safety rules.

@@ -1,8 +1,10 @@
 # KIPSMTHN Creative Platform — Single Source of Truth Specification
 
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-21
 
 > This document is the authoritative specification for the KIPSMTHN Creative Platform. It consolidates information from the existing codebase, `KIPSMTHN-IMPLEMENTATION-SPEC.md`, and active documentation. Historical and archived materials are maintained for reference only and do not override the live implementation.
+
+> **Current-document precedence (2026-10-21):** Use [the Project Handbook](./docs/PROJECT-HANDBOOK.md) and [Documentation Index](./docs/DOCUMENTATION-INDEX.md) as the consolidated reference for decisions and status. This spec describes product scope; it does not certify that each feature is implemented. Better Auth remains active; preserve the calendar and existing business behavior during auth/UI fixes. The current code and tests take precedence over stale route lists, package versions, or historical completion claims below.
 
 ---
 
@@ -563,3 +565,17 @@ After any material change to the implementation:
 - ✅ No lockfiles, migrations, assets, or scripts were removed as part of documentation cleanup
 - ✅ No production data was modified
 - ✅ All unique necessary information has been migrated to the specification
+
+
+## 14. Consolidated decisions added 2026-10-21
+
+- Keep the public marketing site separate from the authenticated creator workspace.
+- Treat Better Auth, local user resolution, and creator ownership checks as the active identity model. Google and passkeys must be tested in their real configuration; do not mark them complete from configuration alone.
+- Treat Google sign-in, passkey sign-in, and onboarding as one coherent journey. New users should reach onboarding; returning users should reach the workspace; sign-out must remain accessible. Onboarding should be skippable where requested, with profile completion available later.
+- Preserve calendar functionality during authentication, dashboard, and styling work.
+- Centralize UI tokens in `src/app/globals.css` and reuse existing shadcn/ui primitives. Maintain consistent typography and avoid monospace UI styling, unsupported theme colors, duplicate primitives, and page-level token systems.
+- Standardize admin headers through reusable components. When the task is explicitly styling-only, preserve Search/Status/Category filter behavior and New/Create action logic.
+- Keep equipment out of primary navigation/dashboard where that is the current product decision, while preserving the equipment catalogue for quoting and production workflows.
+- Requested local port convention: Next.js app on port 3000 by default; other local resources use distinct documented ports. Verify configuration before claiming this is implemented.
+- Development data reset: never target production; verify actual database identity; preserve the equipment catalogue and migration history; delete only media objects positively linked to deleted records; require explicit approval for destructive execution.
+- Use `docs/PROJECT-HANDBOOK.md` as the canonical reference for these decisions and `docs/DOCUMENTATION-INDEX.md` to locate specialist documentation.

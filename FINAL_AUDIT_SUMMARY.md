@@ -1,3 +1,5 @@
+> **Historical snapshot:** This report records the audit/CI state at the time of the referenced commits. It is not evidence that the current repository, branch protections, deployment variables, or application behavior remain in that state. Re-check the current `dev` branch and deployment configuration before relying on it. See [Project Handbook](./docs/PROJECT-HANDBOOK.md).
+
 ## Final Report
 
 **Audit Complete**: GitHub Actions workflows updated to use 'dev' branch instead of obsolete 'develop' references.

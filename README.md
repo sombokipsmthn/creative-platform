@@ -10,7 +10,8 @@ The current implementation is in active use via a shared database-backed app lay
 
 For implementation detail and current architecture status, see:
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
-- [docs/00-project/README.md](./docs/00-project/README.md)
+- [Project Handbook](./docs/PROJECT-HANDBOOK.md)
+- [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
 
 ---
 
@@ -42,15 +43,7 @@ This means the current app identity model is Better Auth-based, not Clerk-based.
 
 The project documentation is organized by active vs historical intent:
 
-- `docs/00-project` — product and project-level context
-- `docs/01-specifications` — active feature and implementation expectations
-- `docs/02-architecture` — system design and runtime structure
-- `docs/03-design-system` — design tokens and UI system usage
-- `docs/04-security-compliance` — active security/compliance guidance
-- `docs/05-development-operations` — build, deploy, and operational guidance
-- `docs/06-decisions` — architectural and product decisions
-- `docs/07-audits` — implementation and documentation audits
-- `docs/08-history` — history, migration notes, and legacy context
+- `docs/` — active specialist docs, audits, reports, and historical material; see [Documentation Index](./docs/DOCUMENTATION-INDEX.md) for the verified map
 
 Historical materials retained for record:
 
@@ -206,9 +199,16 @@ Validation completed for the redesign branch includes the production build, Type
 
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
 - shadcn primitives in `src/components/ui/`
-- [docs/00-project/README.md](./docs/00-project/README.md)
-- [docs/01-specifications/README.md](./docs/01-specifications/README.md)
-- [docs/02-architecture/README.md](./docs/02-architecture/README.md)
-- [docs/04-security-compliance/README.md](./docs/04-security-compliance/README.md)
+- [Project Handbook](./docs/PROJECT-HANDBOOK.md)
+- [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
+- [Project Handbook](./docs/PROJECT-HANDBOOK.md)
+- [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
+- [Demo Account Guide](./docs/demo-account.md)
+- [API Reference](./docs/api-reference.md)
+- [SOC 2 Documentation](./docs/soc2/README.md)
 - [docs/design-system.md](./docs/design-system.md)
 - [docs/audits/styling-shadcn-audit.md](./docs/audits/styling-shadcn-audit.md)
+
+## Canonical project documentation (2026-10-21)
+
+Before making changes, start with [the Project Handbook](./docs/PROJECT-HANDBOOK.md) and [Documentation Index](./docs/DOCUMENTATION-INDEX.md). These are the single entry points for current decisions and specialist references. The repository's current code, schema, migrations, tests, and active configuration determine what is implemented; a plan or historical report does not prove completion. Better Auth remains the active authentication system. See the handbook for the current requirements around the auth/onboarding journey, database-target safety, preserving equipment and calendar behavior, design-system consistency, admin filter styling, and local port policy.

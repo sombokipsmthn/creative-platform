@@ -1,3 +1,5 @@
+> **Current-status note (2026-10-21):** This document captures dashboard implementation requirements/history, not proof that every item is currently implemented. Use [Project Handbook](./PROJECT-HANDBOOK.md) for current decisions and check the current code/tests for status. Preserve Better Auth, the calendar, existing data flows, and shared design tokens while addressing dashboard regressions. Keep the public marketing homepage separate from the authenticated workspace; do not infer completion from a UI-only or static build check.
+
 # KIPSMTHN Studio Command Center Implementation
 
 ## Feature objective

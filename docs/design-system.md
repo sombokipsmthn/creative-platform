@@ -36,3 +36,12 @@ Use `@/components/ui/<lowercase-name>` in new code. Do not create case-only dupl
 ## Automated versus review checks
 
 `npm run design-system:check` verifies the token declarations, canonical lowercase component set, uppercase compatibility exports, duplicate primitive files, competing UI package imports, and obsolete global stylesheet imports. ESLint, TypeScript, tests, and the build catch implementation regressions. Reviewers must still inspect representative marketing, dashboard, admin, and client portal screens in light and dark themes, including keyboard focus and responsive layouts; the repository does not claim automated visual protection.
+
+
+## Product typography and consistency
+
+- Keep font family, weight, size, line height, and letter spacing consistent across page titles, section headings, body copy, labels, metadata, tables, and controls.
+- Do not introduce monospace typography into the product UI. Use the font and typography tokens already established by the app.
+- Keep spacing, radii, borders, shadows, icon sizes, and control heights consistent through global tokens and shared primitives rather than one-off page styles.
+- Styling-only requests must preserve handlers, data fetching, filter behavior, forms, permissions, calendar behavior, and business logic.
+- For the current authoritative product requirements and documentation precedence, see [Project Handbook](./PROJECT-HANDBOOK.md) and [Documentation Index](./DOCUMENTATION-INDEX.md).

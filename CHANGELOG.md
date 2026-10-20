@@ -1,5 +1,15 @@
 # Changelog
 
+## Documentation consolidation — 2026-10-21
+
+- Added `docs/PROJECT-HANDBOOK.md` as the canonical consolidated reference for product decisions, Better Auth, database safety, UI consistency, current requirements, and agent workflow.
+- Added `docs/DOCUMENTATION-INDEX.md` to direct contributors to the active source of truth and specialist docs.
+- Aligned the README, product/implementation specs, agent guidance, API reference, design system, and demo-account guide with the consolidated decisions.
+- Marked historical summaries and destructive data-reset plans as historical evidence, not live status or authorization.
+- Documented the requested port policy (Next.js on 3000; other resources on separate ports) as a requirement that must be verified against scripts before being reported as implemented.
+
+# Changelog
+
 All notable changes to the KIPSMTHN Creative Platform will be documented in this file.
 
 ## [2.0.0] - 2026-09-02

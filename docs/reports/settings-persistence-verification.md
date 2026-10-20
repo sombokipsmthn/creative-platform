@@ -1,3 +1,5 @@
+> **Snapshot and status warning (2026-10-21):** This is a generated verification report for a specific run. It is not a guarantee that current settings persistence is healthy. Re-run the relevant checks against the current `dev` branch before using it as current evidence. See [Project Handbook](../PROJECT-HANDBOOK.md) and [Documentation Index](../DOCUMENTATION-INDEX.md).
+
 # Settings Persistence and Verification Report
 
 ## A. Executive summary

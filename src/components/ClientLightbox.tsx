@@ -147,7 +147,7 @@ export default function ClientLightbox({
           <button
             onClick={() => onToggleFavorite(item.id)}
             className={`px-4 py-1.5 text-xs font-sans uppercase rounded-full transition-all ${
-              isFavorite ? 'bg-purple-600 text-white' : 'border border-zinc-700 text-zinc-300 hover:border-purple-500'
+              isFavorite ? 'bg-primary text-white' : 'border border-zinc-700 text-zinc-300 hover:border-primary'
             }`}
           >
             {isFavorite ? '♥ Selected' : '♡ Add to Selects'}
@@ -156,7 +156,7 @@ export default function ClientLightbox({
           <button
             onClick={() => setShowExif(!showExif)}
             className={`px-3 py-1.5 text-xs font-sans rounded-full border transition-all ${
-              showExif ? 'border-purple-500 text-purple-400' : 'border-zinc-800 text-zinc-400 hover:text-white'
+              showExif ? 'border-primary text-primary' : 'border-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
             EXIF
@@ -165,7 +165,7 @@ export default function ClientLightbox({
           <button
             onClick={() => setShowComments(!showComments)}
             className={`px-3 py-1.5 text-xs font-sans rounded-full border transition-all ${
-              showComments ? 'border-purple-500 text-purple-400' : 'border-zinc-800 text-zinc-400 hover:text-white'
+              showComments ? 'border-primary text-primary' : 'border-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
             Comments ({comments.length})

@@ -1,12 +1,4 @@
-/**
- * Creative Platform — Global Design System
- * Single source of truth for the platform's visual language.
- */
-
-/* ─── 0. Font Imports ──────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-
-/* ─── 1. Tailwind + Custom Variant ─────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));

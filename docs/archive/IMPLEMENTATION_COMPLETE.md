@@ -1,3 +1,5 @@
+> **Historical archive notice (2026-10-21):** The title and completion checkboxes describe a past implementation snapshot, not the current completion state. Verify current code, tests, and environment before relying on any claim. The current source of truth is [Project Handbook](../PROJECT-HANDBOOK.md).
+
 # Admin UX/Visual Hierarchy Consistency Pass - Final Report
 
 ## Executive Summary

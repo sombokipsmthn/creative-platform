@@ -200,7 +200,14 @@ export async function POST(request: Request) {
             LIMIT 1
           `);
 
-          const watermarkOptions = {
+          const watermarkOptions: {
+            enabled: boolean;
+            text: string;
+            position: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "center";
+            opacity: number;
+            fontSize: number;
+            imageBuffer: Buffer | null;
+          } = {
             enabled: watermarkResult.rows[0]?.enabled !== false,
             text: String(watermarkResult.rows[0]?.text || "KIPSMTHN"),
             position: (watermarkResult.rows[0]?.position || "bottom-right") as
@@ -215,7 +222,7 @@ export async function POST(request: Request) {
           };
           if (watermarkResult.rows[0]?.image_path) {
             const storedImage = await getGalleryStorage().getObject(String(watermarkResult.rows[0].image_path));
-            watermarkOptions.imageBuffer = storedImage?.body ?? null;
+            watermarkOptions.imageBuffer = (storedImage?.body as Buffer) ?? null;
           }
 
           let processed;

@@ -32,23 +32,6 @@ const socialProviders = {
 };
 
 const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-<<<<<<< HEAD
-const trustedOrigins = Array.from(
-  new Set([
-    baseURL,
-    process.env.NEXT_PUBLIC_APP_URL,
-    "http://localhost:3000",
-    "http://localhost:3010",
-    "http://localhost:3011",
-    "http://localhost:3100",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3010",
-    "http://127.0.0.1:3011",
-    "http://127.0.0.1:3100",
-  ].filter((origin): origin is string => Boolean(origin))),
-);
-=======
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",

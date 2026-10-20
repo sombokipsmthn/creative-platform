@@ -5,7 +5,6 @@ import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
   FileText,
-  Wallet,
   GalleryHorizontalEnd,
   LayoutDashboard,
   Settings2,
@@ -66,7 +65,6 @@ const sections = [
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
       { name: 'Quotes', href: '/admin/quotes', icon: FileText },
       { name: 'Invoices', href: '/admin/invoices', icon: FileText },
-      { name: 'Payments', href: '/admin/payments', icon: Wallet },
       { name: 'Projects', href: '/admin/projects', icon: FileText },
       { name: 'Clients', href: '/admin/clients', icon: FileText },
     ],
@@ -101,18 +99,10 @@ function AdminLayoutContent({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-<<<<<<< HEAD
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { content: splitViewContent } = useSplitView();
-  const { data: session, isPending: authPending } = authClient.useSession();
-  const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
-  const bootstrapStarted = useRef(false);
-=======
   const splitView = useSplitView();
   const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [loadingBadgeCounts, setLoadingBadgeCounts] = useState(false);
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 
   // During SSR, document.cookie is not available, so we check if we SHOULD have the bypass cookie
   // based on environment and route. During client, we check the actual cookie.
@@ -137,90 +127,12 @@ function AdminLayoutContent({
         .then(setBadgeCounts)
         .finally(() => setLoadingBadgeCounts(false));
     }
-<<<<<<< HEAD
-
-    bootstrapStarted.current = true;
-    void fetch("/api/dev-auth/bootstrap", {
-      method: "POST",
-      credentials: "include",
-    })
-      .then((response) => {
-        if (response.ok) {
-          window.location.reload();
-        } else {
-          console.error("Local auth bootstrap failed with status:", response.status);
-        }
-      })
-      .catch((error) => console.error("Local auth bootstrap request failed:", error));
-  }, [authPending, localAuthBypass, session?.user]);
-
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (!mobileOpen) return;
-
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setMobileOpen(false);
-    }
-
-    window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [mobileOpen]);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    let cancelled = false;
-
-    fetchBadgeCounts().then((counts) => {
-      if (!cancelled) setBadgeCounts(counts);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-=======
->>>>>>> c898786fba874637680566941fd0b37ceea58254
   }, [isAuthenticated]);
 
   const isOnboardingRoute = (pathname: string) =>
     pathname.startsWith('/admin/onboarding');
 
-<<<<<<< HEAD
-      {/* Main Workspace Area */}
-      <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
-        {/* Top Header */}
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border/70 bg-background/90 px-4 backdrop-blur-xl sm:px-6">
-          <div className="flex items-center gap-3">
-            {/* Mobile Nav Trigger */}
-            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="lg:hidden h-9 w-9"
-                  aria-label="Toggle navigation menu"
-                  aria-expanded={mobileOpen}
-                >
-                  <Menu className="h-5 w-5" aria-hidden="true" />
-                  <span className="sr-only">Toggle navigation menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[280px] border-r border-sidebar-border bg-sidebar p-0 text-sidebar-foreground">
-                <SheetHeader className="sr-only">
-                  <SheetTitle>Navigation Menu</SheetTitle>
-                </SheetHeader>
-                <SidebarContent
-                  pathname={pathname}
-                  badgeCounts={badgeCounts}
-                  onNavigate={() => setMobileOpen(false)}
-                />
-              </SheetContent>
-            </Sheet>
-=======
   const isAdminRoute = (pathname: string) => pathname.startsWith('/admin');
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 
   return (
       <>

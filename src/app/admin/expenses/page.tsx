@@ -12,6 +12,18 @@ type Expense = { id: string; description: string; supplier: string | null; categ
 type Form = { description: string; category: string; amount: string; expenseDate: string; supplier: string; paymentMethod: string; taxAmount: string; notes: string };
 const initialForm: Form = { description: '', category: '', amount: '', expenseDate: new Date().toISOString().slice(0, 10), supplier: '', paymentMethod: '', taxAmount: '0', notes: '' };
 
+type ExpenseReceipt = {
+  id: string;
+  merchant: string;
+  merchantKraPin: string;
+  category: string;
+  amountKes: number;
+  vatAmountKes: number;
+  date: string;
+  receiptImage: string;
+  status: string;
+};
+
 export default function AdminExpensesPage() {
   const [expenses, setExpenses] = useState<ExpenseReceipt[]>([
     {

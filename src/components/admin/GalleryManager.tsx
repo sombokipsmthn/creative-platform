@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import { SelectCompat } from '@/components/ui/select-compat';
 import { Button } from '@/components/ui/button';
 

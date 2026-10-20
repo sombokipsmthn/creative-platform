@@ -144,7 +144,7 @@ export default function EquipmentPage() {
           {loading ? (
             <div className="admin-empty-state" role="status" aria-live="polite"><Loader2 aria-hidden="true" className="animate-spin" /><p>Loading equipment…</p></div>
           ) : filteredEquipment.length === 0 ? (
-            <EmptyState icon={<PackagePlus />} title={equipment.length === 0 ? 'No equipment yet' : 'No matching equipment'} description={equipment.length === 0 ? 'Add your first catalogue item so it can be selected in quote line items.' : 'Try a different search term.'} filtered={equipment.length > 0} action={equipment.length === 0 ? <Button type="button" onClick={openCreate}>Add first equipment item</Button> : undefined} />
+            <EmptyState icon={<PackagePlus />} title={equipment.length === 0 ? 'No equipment yet' : 'No matching equipment'} description={equipment.length === 0 ? 'Add your first catalogue item so it can be selected in quote line items.' : 'Try a different search term.'} action={equipment.length === 0 ? <Button type="button" onClick={openCreate}>Add first equipment item</Button> : undefined} />
           ) : (
             <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full min-w-[640px] text-left text-sm">

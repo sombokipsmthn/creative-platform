@@ -79,12 +79,6 @@ export async function fetchContracts({ search, status, clientId, limit = 50, off
 }
 
 export async function fetchContract(id: string) {
-<<<<<<< HEAD
-  const creatorId = await userId();
-  const [row] = await db.select({ contract: contracts, client: { id: clients.id, name: clients.name, email: clients.email, company: clients.company, phone: clients.phone }, project: { id: projects.id, name: projects.name } }).from(contracts).leftJoin(clients, eq(contracts.clientId, clients.id)).leftJoin(projects, eq(contracts.projectId, projects.id)).where(and(eq(contracts.id, id), eq(contracts.creatorId, creatorId)));
-  if (!row) throw new Error('Contract not found');
-  return { ...row.contract, status: row.contract.status || 'draft', client: row.client, project: row.project };
-=======
       const user = await getCurrentUser();
     if (!user) throw new Error("Unauthenticated");
     const userId = user.id;
@@ -93,7 +87,6 @@ export async function fetchContract(id: string) {
   const [contract] = await db.select().from(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId)));
   if (!contract) throw new Error('Contract not found or unauthorized');
   return contract;
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 }
 
 export async function createContract(data: NewContractInput) {

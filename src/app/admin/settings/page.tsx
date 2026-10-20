@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
-import WatermarkStudio from '@/components/WatermarkStudio';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import WatermarkPreview from '@/components/WatermarkPreview';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
@@ -24,7 +25,44 @@ export default function AdminSettingsPage() {
   const [customDomain, setCustomDomain] = useState('kipsmthn.com');
   const [hidePlatformBranding, setHidePlatformBranding] = useState(true);
 
+  // 2. Watermark State
+  const [watermarkText, setWatermarkText] = useState('KIPSMTHN PROOF');
+  const [watermarkOpacity, setWatermarkOpacity] = useState(30);
+  const [watermarkPosition, setWatermarkPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'>('bottom-right');
+  const [watermarkSize, setWatermarkSize] = useState(42);
+  const [watermarkPreset, setWatermarkPreset] = useState<'proof' | 'brand'>('proof');
+  const [applyWatermarkToProofs, setApplyWatermarkToProofs] = useState(true);
 
+  // Apply preset when changed
+  useEffect(() => {
+    const applyPreset = window.setTimeout(() => {
+      if (watermarkPreset === 'proof') {
+        setWatermarkText('KIPSMTHN PROOF');
+        setWatermarkOpacity(30);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(42);
+      } else {
+        setWatermarkText('KIPSMTHN');
+        setWatermarkOpacity(55);
+        setWatermarkPosition('bottom-right');
+        setWatermarkSize(36);
+      }
+    }, 0);
+    return () => window.clearTimeout(applyPreset);
+  }, [watermarkPreset]);
+
+  // Handle watermark changes from preview
+  const handleWatermarkChange = (settings: {
+    text: string;
+    opacity: number;
+    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+    size: number;
+  }) => {
+    setWatermarkText(settings.text);
+    setWatermarkOpacity(settings.opacity);
+    setWatermarkPosition(settings.position);
+    setWatermarkSize(settings.size);
+  };
 
   // 3. Presets State
   const [defaultSelectionLimit, setDefaultSelectionLimit] = useState(25);
@@ -39,8 +77,6 @@ export default function AdminSettingsPage() {
   const [kraPin, setKraPin] = useState('A012345678X');
   const [defaultCurrency, setDefaultCurrency] = useState('KES');
   const [defaultWhtRate, setDefaultWhtRate] = useState('5%');
-
-  const settingsFormId = 'platform-settings-form';
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,21 +100,16 @@ export default function AdminSettingsPage() {
           title="Platform Settings"
           description="Configure how the platform behaves for your workspace, galleries, and client communications."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          primaryAction={activeTab === 'watermark' ? undefined : (
+          primaryAction={
             <Button
               variant="primary"
-<<<<<<< HEAD
-              type="submit"
-              form={settingsFormId}
-=======
               type="button"
->>>>>>> c898786fba874637680566941fd0b37ceea58254
               className="w-full"
               onClick={() => (document.getElementById('settings-form') as HTMLFormElement | null)?.requestSubmit()}
             >
               Save Settings Changes
             </Button>
-          )}
+          }
           tabs={tabs.map(tab => ({
             label: tab.label,
             href: '#',
@@ -88,12 +119,8 @@ export default function AdminSettingsPage() {
         />
 
         {/* TAB CONTENTS */}
-<<<<<<< HEAD
-        <form id={settingsFormId} onSubmit={handleSaveSettings} className="space-y-8">
-=======
         <form id="settings-form" onSubmit={handleSaveSettings} className="space-y-8">
           {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 
           {/* TAB 1: BRANDING */}
           {activeTab === 'branding' && (
@@ -105,14 +132,8 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                   <div className="space-y-1">
-<<<<<<< HEAD
-                    <label htmlFor="default-site-address" className="ui-label">Default Site Address</label>
-                    <input
-                      id="default-site-address"
-=======
                     <label className="text-sm font-medium leading-none">Default Site Address</label>
                     <Input
->>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       value={domainSlug}
                       onChange={(e) => setDomainSlug(e.target.value)}
@@ -136,7 +157,7 @@ export default function AdminSettingsPage() {
                         type="checkbox"
                         checked={hidePlatformBranding}
                         onChange={(e) => setHidePlatformBranding(e.target.checked)}
-                        className="w-4 h-4 accent-primary rounded"
+                        className="w-4 h-4 accent-purple-600 rounded"
                       />
                       Hide default platform branding from client galleries
                     </label>
@@ -152,13 +173,13 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary dark:text-primary font-sans text-xl">+</div>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600/20 dark:text-purple-400 font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
                     <p className="text-[10px] text-slate-500 font-sans">PNG or SVG with transparent background</p>
                   </div>
 
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary dark:text-primary font-sans text-xl">+</div>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600/20 dark:text-purple-400 font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Favicon Icon</p>
                     <p className="text-[10px] text-slate-500 font-sans">32x32 PNG, ICO or SVG file</p>
                   </div>
@@ -168,42 +189,21 @@ export default function AdminSettingsPage() {
           )}
 
           {/* TAB 2: WATERMARK */}
-<<<<<<< HEAD
           {activeTab === 'watermark' && (
             <div className="space-y-6">
               {/* Watermark Presets */}
-              <div className="ui-card">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Watermark Presets</h2>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Watermark Presets</h2>
                 </div>
-                <div className="ui-card-content inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
-                  <button
-                    type="button"
-                    onClick={() => setWatermarkPreset('proof')}
-                    className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
-                      watermarkPreset === 'proof'
-                        ? 'ui-button ui-button-primary'
-                        : 'ui-button ui-button-secondary'
-                    }`}
-                  >
-                    Proof
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWatermarkPreset('brand')}
-                    className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
-                      watermarkPreset === 'brand'
-                        ? 'ui-button ui-button-primary'
-                        : 'ui-button ui-button-secondary'
-                    }`}
-                  >
-                    Brand
-                  </button>
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
+                  <Button type="button" onClick={() => setWatermarkPreset('proof')} variant={watermarkPreset === 'proof' ? 'primary' : 'secondary'} size="sm">Proof</Button>
+                  <Button type="button" onClick={() => setWatermarkPreset('brand')} variant={watermarkPreset === 'brand' ? 'primary' : 'secondary'} size="sm">Brand</Button>
                 </div>
               </div>
 
               {/* Watermark Preview Component */}
-              <div className="ui-card">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
                 <WatermarkPreview
                   watermarkText={watermarkText}
                   watermarkOpacity={watermarkOpacity}
@@ -214,26 +214,25 @@ export default function AdminSettingsPage() {
               </div>
 
               {/* Watermark Controls */}
-              <div className="ui-card">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Watermark Details</h2>
-                  <p className="ui-meta">Adjust the watermark text and appearance.</p>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Watermark Details</h2>
+                  <p className="text-sm text-muted-foreground">Adjust the watermark text and appearance.</p>
                 </div>
-                <div className="ui-card-content space-y-4">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Watermark Text</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Watermark Text</label>
+                    <Input
                       type="text"
                       value={watermarkText}
                       onChange={(e) => setWatermarkText(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-sans">
                       <span className="text-slate-700 dark:text-zinc-300">Opacity</span>
-                      <span className="text-primary font-bold">{watermarkOpacity}%</span>
+                      <span className="text-purple-600 font-bold">{watermarkOpacity}%</span>
                     </div>
                     <input
                       type="range"
@@ -241,14 +240,14 @@ export default function AdminSettingsPage() {
                       max={80}
                       value={watermarkOpacity}
                       onChange={(e) => setWatermarkOpacity(parseInt(e.target.value, 10))}
-                      className="w-full accent-primary cursor-pointer"
+                      className="w-full accent-purple-600 cursor-pointer"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-sans">
                       <span className="text-slate-700 dark:text-zinc-300">Size</span>
-                      <span className="text-primary font-bold">{watermarkSize}px</span>
+                      <span className="text-purple-600 font-bold">{watermarkSize}px</span>
                     </div>
                     <input
                       type="range"
@@ -256,7 +255,7 @@ export default function AdminSettingsPage() {
                       max={64}
                       value={watermarkSize}
                       onChange={(e) => setWatermarkSize(parseInt(e.target.value, 10))}
-                      className="w-full accent-primary cursor-pointer"
+                      className="w-full accent-purple-600 cursor-pointer"
                     />
                   </div>
 
@@ -266,7 +265,7 @@ export default function AdminSettingsPage() {
                         type="checkbox"
                         checked={applyWatermarkToProofs}
                         onChange={(e) => setApplyWatermarkToProofs(e.target.checked)}
-                        className="w-4 h-4 accent-primary rounded"
+                        className="w-4 h-4 accent-purple-600 rounded"
                       />
                       Apply watermark to all web-resolution proof images automatically
                     </label>
@@ -275,9 +274,6 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           )}
-=======
-          {activeTab === 'watermark' && <WatermarkStudio />}
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 
           {/* TAB 3: PRESETS */}
           {activeTab === 'presets' && (

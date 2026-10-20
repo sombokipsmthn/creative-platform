@@ -55,12 +55,6 @@ export function ContractBuilder({
   );
   const [template, setTemplate] = useState<ContractTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
-<<<<<<< HEAD
-  const [draftId, setDraftId] = useState<string | undefined>(contractId);
-  const [templateError, setTemplateError] = useState('');
-
-=======
->>>>>>> c898786fba874637680566941fd0b37ceea58254
   const [currency, setCurrency] = useState(initialContract?.currency ?? 'KES');
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -89,41 +83,14 @@ export function ContractBuilder({
     enabled: !!templateId,
   });
 
-  // Load the selected template, or restore the immutable snapshot for an existing draft.
+  // Set template when loaded
   useEffect(() => {
-<<<<<<< HEAD
-    if (template) return;
-    if (templateId && templatesQuery.data) {
-      const found = templatesQuery.data.find((item: ContractTemplate) => item.id === templateId);
-=======
     if (templateId && templatesQuery.data && !template) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
       // eslint-disable-next-line react-hooks/set-state-in-effect
->>>>>>> c898786fba874637680566941fd0b37ceea58254
       if (found) setTemplate(found);
-      else setTemplateError('The selected template is unavailable.');
-      return;
     }
-    if (mode === 'edit' && initialContract) {
-      setTemplate({
-        id: initialContract.templateId || `draft-${initialContract.id}`,
-        creatorId: initialContract.creatorId,
-        name: initialContract.title,
-        description: 'Restored from the saved contract snapshot.',
-        category: initialContract.contractType || 'General business agreements',
-        documentType: initialContract.contractType || 'contract',
-        content: initialContract.templateSnapshot || initialContract.content || '',
-        variables: Array.from(initialContract.content?.matchAll(/\\{\\{(\\w+)\\}\\}/g) || [], (match) => match[1]),
-        isSystemTemplate: false,
-        isActive: true,
-        version: initialContract.templateVersion || 1,
-        createdAt: initialContract.createdAt,
-        updatedAt: initialContract.updatedAt,
-      });
-    } else if (mode === 'new' && !templateId) {
-      setTemplate({ id: 'scratch', name: 'Blank contract', description: '', category: 'General business agreements', documentType: 'general', content: '', variables: [], isSystemTemplate: false, isActive: true, version: 1, createdAt: new Date(), updatedAt: new Date() });
-    }
-  }, [template, templateId, templatesQuery.data, mode, initialContract]);
+  }, [templateId, templatesQuery.data, template]);
 
   // Initialize values from client/project when they change
   useEffect(() => {
@@ -411,17 +378,13 @@ export function ContractBuilder({
     setValidationErrors((prev) => prev.filter((f) => f !== key));
   };
 
-  const isLoading = clientsQuery.isLoading || projectsQuery.isLoading || (Boolean(templateId) && templatesQuery.isLoading) || !template;
-
-  if (templateError) {
-    return <div className="ui-page"><div className="ui-empty-state p-12"><AlertCircle /><p>{templateError}</p><button className="ui-button ui-button-secondary" onClick={() => router.push('/admin/contracts/templates')}>Back to templates</button></div></div>;
-  }
+  const isLoading = clientsQuery.isLoading || projectsQuery.isLoading || !template;
 
   if (isLoading) {
     return (
       <div className="ui-page min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
           <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
         </div>
       </div>
@@ -608,7 +571,7 @@ export function ContractBuilder({
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-primary to-primary h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${completionStats.percentage}%` }}
                   />
                 </div>

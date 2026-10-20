@@ -1,4 +1,5 @@
-import sharp from "sharp";
+import Sharp from "sharp";
+const sharp = Sharp as any;
 
 export type WatermarkOptions = {
     enabled: boolean;
@@ -193,7 +194,7 @@ export async function processImage(
         const displayMeta = await sharp(display).metadata();
         const watermarkWidth = displayMeta.width || 2400;
         const watermarkHeight = displayMeta.height || 2400;
-        const composites: sharp.OverlayOptions[] = [];
+        const composites: any[] = [];
 
         if (watermarkOptions.text.trim()) {
             composites.push({

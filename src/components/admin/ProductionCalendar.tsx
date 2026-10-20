@@ -54,7 +54,7 @@ export function ProductionCalendar() {
     <section className="rounded-2xl border border-slate-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden">
       <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-zinc-900">
         <div className="flex items-center gap-2">
-          <CalendarIcon className="h-4 w-4 text-primary dark:text-primary" />
+          <CalendarIcon className="h-4 w-4 text-purple-600 dark:text-purple-400" />
           <h2 className="text-base font-semibold text-slate-900 dark:text-white">
             {format(currentDate, 'MMMM yyyy')}
           </h2>
@@ -98,17 +98,13 @@ export function ProductionCalendar() {
               });
 
               return (
-<<<<<<< HEAD
-                <div key={i} className="">
-                  <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-primary font-bold' : 'text-slate-400'}`}>
-=======
                 <div key={i} className="group relative h-24 bg-white p-2 transition hover:bg-slate-50 dark:bg-zinc-950 dark:hover:bg-zinc-900">
-                  <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-primary font-bold' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
                     {format(day, 'd')}
                   </span>
                   <div className="mt-1 space-y-1">
                     {dayProjects.slice(0, 3).map(p => (
-                      <div key={p.id} className="truncate rounded-sm bg-primary/10 px-1 py-0.5 text-[9px] font-medium text-primary dark:bg-primary/15 dark:text-primary">
+                      <div key={p.id} className="truncate rounded-sm bg-purple-100 px-1 py-0.5 text-[9px] font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
                         {p.name}
                       </div>
                     ))}

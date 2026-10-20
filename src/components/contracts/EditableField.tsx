@@ -1,10 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { Check, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import type { FieldMetadata } from '@/lib/contracts/fieldMetadata';
+import React, { useState, useEffect, useRef } from 'react';
+import { Check, X, Calendar, ChevronDown } from 'lucide-react';
+import type { FieldMetadata, FieldType } from '@/lib/contracts/fieldMetadata';
 import type { Client, Project } from '@/lib/types/contracts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -23,13 +21,26 @@ interface EditableFieldProps {
   currency?: string;
 }
 
-export function EditableField({ field, value, isEditing, onStartEdit, onSave, onCancel, clients, projects, isRequired, isInvalid, currency = 'KES' }: EditableFieldProps) {
+/**
+ * Renders an inline editable field with type-appropriate controls
+ * Used directly within the contract document
+ */
+export function EditableField({
+  field,
+  value,
+  isEditing,
+  onStartEdit,
+  onSave,
+  onCancel,
+  clients,
+  projects,
+  isRequired,
+  isInvalid,
+  currency = 'KES',
+}: EditableFieldProps) {
   const [tempValue, setTempValue] = useState(value);
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(null);
 
-<<<<<<< HEAD
-  useEffect(() => setTempValue(value), [value]);
-=======
   // Synchronize the local editor buffer when the parent value changes.
   useEffect(() => {
     // The editor buffer intentionally mirrors a changing parent value.
@@ -37,20 +48,31 @@ export function EditableField({ field, value, isEditing, onStartEdit, onSave, on
     setTempValue(value);
   }, [value]);
 
->>>>>>> c898786fba874637680566941fd0b37ceea58254
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
-      if (inputRef.current instanceof HTMLInputElement || inputRef.current instanceof HTMLTextAreaElement) inputRef.current.select();
+      if (inputRef.current instanceof HTMLInputElement || inputRef.current instanceof HTMLTextAreaElement) {
+        inputRef.current.select();
+      }
     }
   }, [isEditing]);
 
-  const save = () => { if (!isRequired || tempValue.trim()) onSave(tempValue); };
-  const keyDown = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter' && field.type !== 'textarea') save();
-    if (event.key === 'Escape') onCancel();
+  const handleSave = () => {
+    if (isRequired && !tempValue.trim()) {
+      return;
+    }
+    onSave(tempValue);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && field.type !== 'textarea') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      onCancel();
+    }
+  };
+
+  // Display mode
   if (!isEditing) {
     const isEmpty = !value || value.trim() === '';
     const placeholder = `Add ${field.label.toLowerCase()}`;
@@ -61,7 +83,7 @@ export function EditableField({ field, value, isEditing, onStartEdit, onSave, on
         className={`inline-block cursor-pointer px-1 py-0.5 rounded transition-colors ${
           isEmpty
             ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 font-medium'
-            : 'hover:bg-primary/10 dark:hover:bg-primary/15 font-semibold text-inherit'
+            : 'hover:bg-purple-100 dark:hover:bg-purple-900/30 font-semibold text-inherit'
         } ${isInvalid ? 'ring-2 ring-red-500 dark:ring-red-400' : ''}`}
         title={`Click to edit ${field.label.toLowerCase()}`}
       >
@@ -72,7 +94,7 @@ export function EditableField({ field, value, isEditing, onStartEdit, onSave, on
 
   // Edit mode - render appropriate input type
   const baseInputClasses =
-    'px-3 py-2 bg-white dark:bg-gray-800 border-2 border-primary dark:border-primary rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring dark:focus:ring-ring';
+    'px-3 py-2 bg-white dark:bg-gray-800 border-2 border-purple-400 dark:border-purple-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400';
 
   const inputContent = (() => {
     switch (field.type) {
@@ -230,5 +252,4 @@ export function EditableField({ field, value, isEditing, onStartEdit, onSave, on
       </div>
     </div>
   );
->>>>>>> c898786fba874637680566941fd0b37ceea58254
 }

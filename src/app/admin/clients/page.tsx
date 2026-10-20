@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
-import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -343,16 +342,16 @@ export default function AdminClientsPage() {
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-primary/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary dark:bg-primary/15 dark:text-primary">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
                     {getInitials(client)}
                   </div>
 
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-primary">
+                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
                         {client.name}
                       </h3>
                       <Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>
@@ -502,7 +501,8 @@ export default function AdminClientsPage() {
                   {saving ? 'Saving Client…' : '+ Add Client to CRM'}
                 </Button>
               </form>
-          </StandardCreationDialog>
+            </div>
+          </div>
         )}
 
         {selectedClient && (
@@ -518,7 +518,7 @@ export default function AdminClientsPage() {
               </Button>
 
               <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
-                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full">{selectedClient.company}</span>}
+                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">{selectedClient.company}</span>}
                 <h2 className="text-2xl font-light">{selectedClient.name}</h2>
                 <p className="text-xs font-sans text-slate-600 dark:text-zinc-400 break-words">
                   {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}

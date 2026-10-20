@@ -146,7 +146,7 @@ export default function StudioTimelinePlayer() {
           </div>
           <span className="text-slate-400">|</span>
           <span className="font-semibold text-white tracking-wide flex items-center gap-2">
-            <Film className="h-3.5 w-3.5 text-purple-400" />
+            <Film className="h-3.5 w-3.5 text-primary" />
             KIPSMTHN Studio Engine v4
           </span>
           <span className="hidden sm:inline text-slate-500">/</span>
@@ -165,7 +165,7 @@ export default function StudioTimelinePlayer() {
                 onClick={() => setActiveRatio(ratio)}
                 className={`rounded px-2 py-1 transition-colors ${
                   activeRatio.id === ratio.id
-                    ? "bg-purple-600 text-white font-medium shadow-sm"
+                    ? "bg-primary text-white font-medium shadow-sm"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -182,7 +182,7 @@ export default function StudioTimelinePlayer() {
                 onClick={() => setActiveLut(lut)}
                 className={`rounded px-2 py-1 transition-colors ${
                   activeLut.id === lut.id
-                    ? "bg-purple-600 text-white font-medium shadow-sm"
+                    ? "bg-primary text-white font-medium shadow-sm"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -213,7 +213,7 @@ export default function StudioTimelinePlayer() {
             {/* Video Canvas HUD Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30 pointer-events-none p-4 flex flex-col justify-between">
               <div className="flex items-center justify-between text-[11px] font-mono text-white/90">
-                <span className="bg-black/60 backdrop-blur px-2.5 py-1 rounded border border-white/10 text-purple-300 font-semibold">
+                <span className="bg-black/60 backdrop-blur px-2.5 py-1 rounded border border-white/10 text-primary font-semibold">
                   REC ● 4K 10-BIT PRORES
                 </span>
                 <span className="bg-black/60 backdrop-blur px-2.5 py-1 rounded border border-white/10">
@@ -237,7 +237,7 @@ export default function StudioTimelinePlayer() {
             {!isPlaying && (
               <button
                 onClick={togglePlay}
-                className="absolute inset-0 m-auto h-16 w-16 flex items-center justify-center rounded-full bg-purple-600/90 text-white shadow-xl hover:scale-105 hover:bg-purple-500 transition-all z-10"
+                className="absolute inset-0 m-auto h-16 w-16 flex items-center justify-center rounded-full bg-primary/15 text-white shadow-xl hover:scale-105 hover:bg-primary transition-all z-10"
                 aria-label="Play video"
               >
                 <Play className="h-7 w-7 fill-white ml-1" />
@@ -250,7 +250,7 @@ export default function StudioTimelinePlayer() {
         <div className="flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-white/10 bg-slate-900/60 p-4 sm:p-5">
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <span className="text-xs font-semibold uppercase tracking-wider text-purple-400">
+              <span className="text-xs font-semibold uppercase tracking-wider text-primary">
                 Shot Sequences
               </span>
               <span className="text-[10px] text-slate-400 font-mono">
@@ -269,13 +269,13 @@ export default function StudioTimelinePlayer() {
                   }}
                   className={`w-full text-left p-2.5 rounded-xl border transition-all text-xs ${
                     activeSceneIndex === idx
-                      ? "bg-purple-600/20 border-purple-500/50 text-white shadow-sm"
+                      ? "bg-primary/10 border-primary/50 text-white shadow-sm"
                       : "bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                   }`}
                 >
                   <div className="flex items-center justify-between font-semibold text-white">
                     <span className="truncate">{scene.title.split("·")[1]?.trim() || scene.title}</span>
-                    <span className="font-mono text-[10px] text-purple-300 ml-2">{scene.duration}</span>
+                    <span className="font-mono text-[10px] text-primary ml-2">{scene.duration}</span>
                   </div>
                   <p className="text-[11px] text-slate-400 mt-1 truncate">{scene.camera} · {scene.lens}</p>
                 </button>
@@ -290,7 +290,7 @@ export default function StudioTimelinePlayer() {
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Active Color Grade</span>
-                <span className="text-purple-300 font-medium">{activeLut.label}</span>
+                <span className="text-primary font-medium">{activeLut.label}</span>
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Deliverable Sync</span>
@@ -305,7 +305,7 @@ export default function StudioTimelinePlayer() {
           <div className="pt-4 border-t border-white/10">
             <Link
               href="/admin/galleries"
-              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-xs font-semibold text-white transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-primary hover:bg-primary text-xs font-semibold text-white transition-colors"
             >
               Open in Creator Workspace →
             </Link>
@@ -320,7 +320,7 @@ export default function StudioTimelinePlayer() {
           <div className="flex items-center gap-2">
             <button
               onClick={togglePlay}
-              className="h-8 w-8 flex items-center justify-center rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-colors"
+              className="h-8 w-8 flex items-center justify-center rounded-lg bg-primary hover:bg-primary text-white transition-colors"
               aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-white ml-0.5" />}
@@ -342,7 +342,7 @@ export default function StudioTimelinePlayer() {
 
             {/* Timecode readouts */}
             <div className="font-mono text-xs text-white/90 bg-white/5 px-2.5 py-1 rounded border border-white/10 ml-2">
-              <span className="text-purple-400">{formatTimecode(progress)}</span>
+              <span className="text-primary">{formatTimecode(progress)}</span>
               <span className="text-slate-500"> / </span>
               <span className="text-slate-400">00:03:24:00</span>
             </div>
@@ -390,8 +390,8 @@ export default function StudioTimelinePlayer() {
           </div>
 
           {/* Track 1: Video A-Roll */}
-          <div className="relative h-9 mb-1.5 rounded-lg bg-gradient-to-r from-purple-900/60 via-purple-700/50 to-indigo-900/60 border border-purple-500/30 flex items-center px-3 overflow-hidden">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-purple-200 z-10 flex items-center gap-1.5">
+          <div className="relative h-9 mb-1.5 rounded-lg bg-gradient-to-r from-primary/60 via-primary/50 to-indigo-900/60 border border-primary/30 flex items-center px-3 overflow-hidden">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-primary z-10 flex items-center gap-1.5">
               <Film className="h-3 w-3" /> V1 · 4K A-Roll Master Cut
             </span>
             {/* Cut dividers */}

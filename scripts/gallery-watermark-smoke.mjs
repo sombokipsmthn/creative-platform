@@ -34,7 +34,7 @@ try {
 
   const page = await context.newPage();
   await page.goto(`${baseURL}/admin/galleries/${galleryId}`, { waitUntil: "networkidle", timeout: 30_000 });
-  await page.getByText("Settings", { exact: true }).last().click();
+  await page.getByRole("button", { name: /^Settings$/i }).click();
   await page.getByText("Watermark presets").waitFor({ state: "visible", timeout: 30_000 });
   check(true, "actual gallery Settings tab and watermark editor render");
 
@@ -52,7 +52,7 @@ try {
   const watermarkResponse = await watermarkSave;
   check(watermarkResponse.ok(), `watermark save status=${watermarkResponse.status()}`);
   await page.reload({ waitUntil: "networkidle" });
-  await page.getByText("Settings", { exact: true }).last().click();
+  await page.getByRole("button", { name: /^Settings$/i }).click();
   await page.getByText("Watermark presets").waitFor({ state: "visible", timeout: 30_000 });
   check(await page.getByText(presetName, { exact: true }).isVisible(), "watermark preset persists after gallery reload");
   check((await page.getByLabel("Watermark text").inputValue()) === "VERIFY-WATERMARK", "applied watermark value persists after reload");

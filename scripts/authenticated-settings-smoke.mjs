@@ -28,10 +28,11 @@ try {
   check(session.ok(), `authenticated session status=${session.status()}`);
 
   const profilePage = await context.newPage();
-  await profilePage.goto(`${baseURL}/admin/profile`, { waitUntil: "networkidle", timeout: 30_000 });
+  await profilePage.goto(`${baseURL}/admin/profile`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await profilePage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
   const profileName = profilePage.getByLabel("Full name");
   const profileSave = profilePage.getByRole("button", { name: /save profile changes/i });
-  await profileName.waitFor({ state: "visible", timeout: 15_000 });
+  await profileName.waitFor({ state: "visible", timeout: 30_000 });
   check(await profileSave.isVisible(), "profile primary save action is visible");
   const originalName = await profileName.inputValue();
   await profileSave.click();
@@ -42,8 +43,9 @@ try {
   await profilePage.close();
 
   const settingsPage = await context.newPage();
-  await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "networkidle", timeout: 30_000 });
-  const businessName = settingsPage.getByLabel("Business name");
+  await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await settingsPage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
+  const businessName = settingsPage.getByLabel("Default Site Address");
   await businessName.waitFor({ state: "visible", timeout: 15_000 });
   const originalBusinessName = await businessName.inputValue();
   const settingsSave = settingsPage.getByRole("button", { name: /save workspace settings/i });

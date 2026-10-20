@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000';
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000';
 const browser = await chromium.launch({ headless: true });
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
 let failures = 0;
@@ -14,13 +14,14 @@ try {
   const templates = Array.isArray(templatesPayload) ? templatesPayload : templatesPayload.templates;
   check(Array.isArray(templates), 'template response contains an array');
   const page = await context.newPage();
-  await page.goto(`${baseURL}/admin/contracts/templates`, { waitUntil: 'networkidle', timeout: 30_000 });
+  await page.goto(`${baseURL}/admin/contracts/templates`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+  await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {});
   check(await page.getByRole('heading', { name: 'Contract templates' }).isVisible(), 'template library renders');
   if (templates?.length) {
     const first = page.locator('article').first();
-    await first.getByRole('button', { name: 'Preview' }).click();
+    await first.getByRole('button', { name: /Preview/i }).click();
     check(await page.getByRole('dialog').isVisible(), 'template preview opens');
-    await page.getByRole('link', { name: /Use template/ }).last().click();
+    await page.getByRole('button', { name: /Use Template/i }).last().click();
     await page.waitForURL(/\/admin\/contracts\/builder\?templateId=/, { timeout: 30_000 });
     check(await page.getByText(/Loading contract builder|Contract completion/).first().isVisible(), 'document builder route opens');
   }

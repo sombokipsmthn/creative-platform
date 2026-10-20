@@ -99,7 +99,7 @@ export function ProductionCalendar() {
 
               return (
                 <div key={i} className="">
-                  <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
+                  <span className={`text-[10px] font-sans ${isSameDay(day, new Date()) ? 'text-primary font-bold' : 'text-slate-400'}`}>
                     {format(day, 'd')}
                   </span>
                   <div className="">

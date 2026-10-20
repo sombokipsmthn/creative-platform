@@ -529,7 +529,7 @@ export function AdminResourceToolbar({
                     {filter.label}
                   </label>
                   {filter.type === 'pills' ? (
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1" role="listbox" aria-label={filter.label}>
                       {(filter.options || []).map((option) => {
                         const active = (filter.value ?? 'all') === option.value;
                         return (
@@ -544,9 +544,9 @@ export function AdminResourceToolbar({
                               'ui-tab-pill',
                               active && 'ui-tab-pill-active'
                             )}
-                            aria-pressed={active}
+                            aria-selected={active}
                             disabled={loading}
-                            role="menuitem"
+                            role="option"
                           >
                             {active && <Check className="h-3 w-3" />}
                             {option.label}

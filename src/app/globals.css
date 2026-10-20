@@ -628,12 +628,13 @@ body {
 .admin-tab.is-active { border-bottom-color: var(--primary); font-weight: 600; }
 .admin-tab.is-disabled { pointer-events: none; opacity: .5; }
 .admin-filter-bar { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+.admin-search { position: relative; display: flex; min-width: min(100%, 20rem); flex: 1 1 16rem; align-items: center; }
 .admin-search > svg { position: absolute; left: .75rem; width: 1rem; height: 1rem; color: var(--muted-foreground); pointer-events: none; }
 .admin-search input { height: 2.5rem; padding-left: 2.25rem; padding-right: 2.25rem; }
 .admin-search-clear { position: absolute; right: .5rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .375rem; padding: .25rem; color: var(--muted-foreground); }
 .admin-search-clear:hover { background: var(--muted); color: var(--foreground); }
 .admin-search-clear svg { width: .875rem; height: .875rem; }
-.admin-filter-controls, .admin-filter-actions { display: flex; flex: 0 1 auto; min-width: min(100%, 12rem); flex-wrap: wrap; align-items: center; gap: .5rem; }
+.admin-filter-controls, .admin-filter-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 .admin-select-label { position: relative; display: inline-flex; align-items: center; }
 .admin-select-label select { height: 2.5rem; appearance: none; border: 1px solid var(--input); border-radius: var(--radius-md); background: var(--background); padding: 0 .625rem 0 .75rem; padding-right: 2rem; color: var(--foreground); font-size: .875rem; }
 .admin-select-label svg { position: absolute; right: .625rem; width: .875rem; pointer-events: none; }
@@ -662,16 +663,14 @@ body {
 .admin-stat-detail { margin-top: .375rem; color: var(--muted-foreground); font-size: .75rem; }
 .status-badge { gap: .375rem; }
 .status-badge__dot { width: .375rem; height: .375rem; border-radius: 999px; background: currentColor; }
-@media (max-width: 640px) { .admin-page-header__row { flex-direction: column; } .admin-page-actions { justify-content: flex-start; } .admin-pagination { align-items: stretch; flex-direction: column; } .admin-pagination-controls { justify-content: space-between; } .admin-filter-bar { align-items: stretch; } .admin-search, .admin-filter-controls, .admin-filter-actions { width: 100%; } .admin-filter-actions { justify-content: flex-start; } .admin-select-label, .admin-select-label select { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; } }
-@media (min-width: 768px) { .admin-filter-bar { align-items: center; } }
-
+@media (max-width: 640px) { .admin-page-header__row { flex-direction: column; } .admin-page-actions { justify-content: flex-start; } .admin-pagination { align-items: stretch; flex-direction: column; } .admin-pagination-controls { justify-content: space-between; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 
-/* Keep legacy palette utilities scoped to deliberate admin surfaces. */
-.admin-surface [class*="purple"],
-.admin-surface [class*="violet"],
-.admin-surface [class*="indigo"],
-.admin-surface [class*="fuchsia"] {
+
+[class*="purple"],
+[class*="violet"],
+[class*="indigo"],
+[class*="fuchsia"] {
   background-image: none !important;
   background-color: color-mix(in srgb, var(--muted) 72%, transparent) !important;
   border-color: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
@@ -692,4 +691,22 @@ body {
 
 hr {
   border-color: color-mix(in srgb, var(--foreground) 8%, transparent);
+}
+
+.typeset-docs {
+  --typeset-font-body: var(--font-geist);
+  --typeset-font-heading: var(--font-geist);
+  --typeset-font-mono: var(--font-geist-mono);
+  --typeset-size: 15px;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.25em;
+}
+
+.typeset-docs {
+  --typeset-font-body: var(--font-geist);
+  --typeset-font-heading: var(--font-geist);
+  --typeset-font-mono: var(--font-geist-mono);
+  --typeset-size: 15px;
+  --typeset-leading: 1.75;
+  --typeset-flow: 1.25em;
 }

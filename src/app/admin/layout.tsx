@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import {
   LayoutDashboard,
@@ -206,9 +206,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { content: splitViewContent } = useSplitView();
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
   const [mobileOpen, setMobileOpen] = useState(false);
+  const bootstrapStarted = useRef(false);
 
   // Keep local development bypass support
   const localAuthBypass =
@@ -224,6 +225,31 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       pathname.startsWith("/admin"));
 
   const isAuthenticated = localAuthBypass || Boolean(session?.user);
+
+  useEffect(() => {
+    if (
+      authPending ||
+      !localAuthBypass ||
+      session?.user ||
+      bootstrapStarted.current
+    ) {
+      return;
+    }
+
+    bootstrapStarted.current = true;
+    void fetch("/api/dev-auth/bootstrap", {
+      method: "POST",
+      credentials: "include",
+    })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          console.error("Local auth bootstrap failed with status:", response.status);
+        }
+      })
+      .catch((error) => console.error("Local auth bootstrap request failed:", error));
+  }, [authPending, localAuthBypass, session?.user]);
 
   useEffect(() => {
     setMobileMenuOpen(false);

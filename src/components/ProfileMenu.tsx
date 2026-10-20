@@ -33,59 +33,69 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
         <button
           type="button"
           aria-label="Open profile menu"
-          className="inline-flex min-h-10 items-center gap-2 rounded-lg px-2 py-1 text-left outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring sm:px-2.5"
+          className=""
         >
-          <Avatar className="size-8 shrink-0">
+          <Avatar className="order">
             {avatarUrl && <AvatarImage src={avatarUrl} alt={fullName} />}
-            <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
+            <AvatarFallback className="">
               {initials}
             </AvatarFallback>
           </Avatar>
 
           {showLabel && (
-            <span className="hidden min-w-0 text-left lg:block">
-              <span className="block max-w-32 truncate text-sm font-medium text-foreground">
+            <div className="hidden">
+              <span className="block">
                 {fullName}
               </span>
-              <span className="block text-xs text-muted-foreground">Creator</span>
-            </span>
+              <span className="block">
+                Creator
+              </span>
+            </div>
           )}
 
-          <ChevronDown aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+          <ChevronDown className="" />
         </button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" sideOffset={8} className="w-64">
-        <DropdownMenuLabel className="px-3 py-2">
-          <div className="min-w-0">
-            <p className="truncate text-sm font-medium">{fullName}</p>
-            {email && <p className="truncate text-xs font-normal text-muted-foreground">{email}</p>}
+      <DropdownMenuContent align="end" className="">
+        <DropdownMenuLabel className="">
+          <div className="">
+            <p className="">{fullName}</p>
+            {email && (
+              <p className="">
+                {email}
+              </p>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
-          <Link href="/admin/profile">
-            <User aria-hidden="true" />
-            <span>Account &amp; Profile</span>
+          <Link href="/admin/profile" className="">
+            <User className="" />
+            <span>Account & Profile</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/admin/settings">
-            <Settings aria-hidden="true" />
+          <Link href="/admin/settings" className="">
+            <Settings className="" />
             <span>Platform Settings</span>
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href="/">
-            <ExternalLink aria-hidden="true" />
+          <Link href="/" className="">
+            <ExternalLink className="" />
             <span>Public Site</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
-          <LogOut aria-hidden="true" />
+
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          className=""
+        >
+          <LogOut className="" />
           <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

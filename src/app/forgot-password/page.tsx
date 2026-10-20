@@ -37,8 +37,7 @@ export default function ForgotPasswordPage() {
           <h1 className="">Forgot password?</h1>
           <p className="">Enter your email and we’ll send a secure reset link.</p>
           <form onSubmit={handleSubmit} className="">
-            <label htmlFor="forgot-password-email" className="sr-only">Email address</label>
-            <input id="forgot-password-email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isLoading} placeholder="you@example.com" className="" />
+            <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isLoading} placeholder="you@example.com" className="" />
             {message && <p className="">{message}</p>}
             {error && <p className="">{error}</p>}
             <button type="submit" disabled={isLoading} className="">{isLoading ? "Sending..." : "Send reset link"}</button>

@@ -141,7 +141,7 @@ export default function ClientGalleryPortal({
 
   return (
     <div className="ui-page">
-      <Header />
+      <Header variant="client" />
       <div className="ui-page-padded">
         <section className="ui-shell">
           <div className="">

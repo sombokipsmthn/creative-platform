@@ -726,26 +726,24 @@ export function ContractBuilder({
             </div>
 
             {/* Contract Content (Read-only) */}
-            <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 shadow-sm mb-6">
-              <div className="typeset typeset-docs max-w-[37em]">
-                <div className="prose prose-sm max-w-none text-gray-900 dark:text-gray-50">
-                  {!!resolvedContent ? (
-                    <>
-                      {resolvedContent.split('\n\n').map((paragraph, index) => (
-                        <p key={index} className="mb-6 leading-7">
-                          {paragraph.split('\n').map((line, lineIndex) => (
-                            <>
-                              {line}
-                              {lineIndex < paragraph.split('\n').length - 1 && <br />}
-                            </>
-                          ))}
-                        </p>
-                      ))}
-                    </>
-                  ) : (
-                    <p className="text-gray-500 italic">No content</p>
-                  )}
-                </div>
+            <div className="">
+              <div className="">
+                {!!resolvedContent ? (
+                  <>
+                    {resolvedContent.split('\n\n').map((paragraph, index) => (
+                      <p key={index} className="">
+                        {paragraph.split('\n').map((line, lineIndex) => (
+                          <>
+                            {line}
+                            {lineIndex < paragraph.split('\n').length - 1 && <br />}
+                          </>
+                        ))}
+                      </p>
+                    ))}
+                  </>
+                ) : (
+                  <p className="">No content</p>
+                )}
               </div>
             </div>
 

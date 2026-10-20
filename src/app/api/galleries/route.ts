@@ -123,9 +123,17 @@ export async function POST(request: Request) {
       VALUES (${gallery.id}, 'All Photos', 0)
     `);
 
+    const defaultPreset = await db.execute(sql`
+      SELECT enabled, type, text, position, opacity, font_size, image_url, image_path, image_filename, image_mime_type
+      FROM gallery_watermark_presets
+      WHERE creator_id = ${creator.id}
+      ORDER BY updated_at DESC, created_at ASC
+      LIMIT 1
+    `);
+    const watermark = defaultPreset.rows[0];
     await db.execute(sql`
-      INSERT INTO gallery_watermarks (gallery_id)
-      VALUES (${gallery.id})
+      INSERT INTO gallery_watermarks (gallery_id, enabled, type, text, position, opacity, font_size, image_url, image_path, image_filename, image_mime_type)
+      VALUES (${gallery.id}, ${watermark?.enabled !== false}, ${watermark?.type === "image" ? "image" : "text"}, ${String(watermark?.text || "KIPSMTHN")}, ${String(watermark?.position || "bottom-right")}, ${Number(watermark?.opacity ?? 55)}, ${Number(watermark?.font_size ?? 42)}, ${watermark?.image_url ? String(watermark.image_url) : null}, ${watermark?.image_path ? String(watermark.image_path) : null}, ${watermark?.image_filename ? String(watermark.image_filename) : null}, ${watermark?.image_mime_type === "image/png" ? "image/png" : null})
       ON CONFLICT (gallery_id) DO NOTHING
     `);
 

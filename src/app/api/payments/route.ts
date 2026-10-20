@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
-import { listPaymentsForCreator, recordPayment } from "@/lib/services/payments";
+import { getPaymentSummary, listPaymentsForCreator, recordPayment } from "@/lib/services/payments";
 
 export async function GET(request: Request) {
   return withCreatorApi(request, async (request, user) => {
     const search = new URL(request.url).searchParams;
-    return listPaymentsForCreator(user.id, { status: search.get("status"), invoiceId: search.get("invoiceId"), clientId: search.get("clientId") });
+    if (search.get("view") === "summary") return getPaymentSummary(user.id);
+    return listPaymentsForCreator(user.id, { status: search.get("status"), invoiceId: search.get("invoiceId"), clientId: search.get("clientId"), method: search.get("method"), search: search.get("search"), from: search.get("from"), to: search.get("to") });
   });
 }
 

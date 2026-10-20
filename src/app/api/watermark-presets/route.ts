@@ -19,10 +19,15 @@ function parsePreset(body: unknown) {
     value: {
       name,
       enabled: value.enabled !== false,
+      type: value.type === "image" ? "image" : "text",
       text: text || "KIPSMTHN",
       position: typeof value.position === "string" && positions.has(value.position) ? value.position : "bottom-right",
       opacity: clamp(value.opacity, 0, 100, 55),
       fontSize: clamp(value.fontSize, 12, 160, 42),
+      imageUrl: typeof value.imageUrl === "string" ? value.imageUrl : null,
+      imagePath: typeof value.imagePath === "string" ? value.imagePath : null,
+      imageFilename: typeof value.imageFilename === "string" ? value.imageFilename.slice(0, 180) : null,
+      imageMimeType: value.imageMimeType === "image/png" ? "image/png" : null,
     },
   } as const;
 }

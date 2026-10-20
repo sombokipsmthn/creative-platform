@@ -3,14 +3,14 @@ import { deleteSchedule, saveSchedule } from "@/lib/services/payments";
 
 type RouteContext = { params: Promise<{ id: string; scheduleId: string }> };
 
-export async function PATCH(request: Request, context: RouteContext) {
+export async function PATCH(request: Request, context: { params: Promise<{ id: string; scheduleId: string }> }) {
   return withCreatorApi(request, async (request, user) => {
     const { id, scheduleId } = await context.params;
     return saveSchedule(user.id, id, await request.json(), scheduleId);
   });
 }
 
-export async function DELETE(request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: { params: Promise<{ id: string; scheduleId: string }> }) {
   return withCreatorApi(request, async (_request, user) => {
     const { id, scheduleId } = await context.params;
     return deleteSchedule(user.id, id, scheduleId);

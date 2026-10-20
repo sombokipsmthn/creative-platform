@@ -266,9 +266,10 @@ Build a phased Studio Command Center for `/admin` that combines operational KPIs
 
 ## Payment ledger follow-up completion
 
-- Payment schedules and term-amendment tables are present; dedicated editing APIs/UI remain outside the current invoice form scope.
-- Immutable payment audit records are written for creation, verification, and reversal; a dedicated audit timeline UI remains a follow-up.
-- Refund policy: refunds are represented as explicit future financial events, not destructive edits or successful payments. No refund mutation is exposed until refund accounting and approval rules are finalized.
+- Added dedicated schedule and term-amendment creation UI and creator-scoped APIs from invoice details.
+- Added schedule update/delete API endpoints and invoice-level schedule editing support.
+- Added immutable payment audit timeline UI for creation, verification, reversal, and refund events.
+- Added a full-refund-only workflow requiring a reason; refunds preserve the original record and mark it `refunded`; partial refunds remain blocked pending accounting approval.
 - Overpayment policy: confirmed payments cannot exceed the invoice total; overpayments are rejected with a clear validation error.
 - Provider, webhook, email-ingestion, and automated-verification work remains deferred.
 

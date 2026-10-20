@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
-import { refundPayment, reversePayment, verifyPayment } from "@/lib/services/payments";
+import { refundPayment, reversePayment, updatePaymentMetadata, verifyPayment } from "@/lib/services/payments";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+export async function PATCH(request: Request, context: RouteContext) {
+  return withCreatorApi(request, async (request, user) => updatePaymentMetadata(user.id, (await context.params).id, await request.json()));
+}
 
 export async function POST(request: Request, context: RouteContext) {
   return withCreatorApi(request, async (request, user) => {

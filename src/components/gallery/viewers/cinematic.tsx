@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Download, Heart, ChevronDown } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { Button } from '@/components/ui/button';
 
 interface CinematicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -12,7 +13,7 @@ interface CinematicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
 
 /**
  * Cinematic Theme Viewer
- *
+ * 
  * Full-screen hero images with minimal UI.
  * Fade-in navigation controls.
  * Dark theme, dramatic lighting.
@@ -61,8 +62,8 @@ export function GalleryViewerCinematic({
 
   if (photos.length === 0) {
     return (
-      <div className="">
-        <p className="">No photos in gallery</p>
+      <div className="flex min-h-screen items-center justify-center bg-black">
+        <p className="text-gray-400">No photos in gallery</p>
       </div>
     );
   }
@@ -92,19 +93,19 @@ export function GalleryViewerCinematic({
   };
 
   return (
-    <div className="">
+    <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Full-screen Image */}
-      <div className="">
+      <div className="absolute inset-0">
         <Image
           src={currentPhoto.displayUrl}
           alt={currentPhoto.filename}
           fill
-          className=""
+          className="object-cover transition-opacity duration-1000"
           sizes="100vw"
           priority
         />
         {/* Gradient overlay for text readability */}
-        <div className="to-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
       </div>
 
       {/* Header - Top */}
@@ -113,8 +114,8 @@ export function GalleryViewerCinematic({
           showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div className="">
-          <h1 className="">{title}</h1>
+        <div className="px-6 py-6 sm:px-10 lg:px-16">
+          <h1 className="text-3xl font-light text-white sm:text-4xl">{title}</h1>
         </div>
       </div>
 
@@ -125,26 +126,26 @@ export function GalleryViewerCinematic({
         }`}
       >
         {/* Previous Button */}
-        <button
+        <Button type="button"
           onClick={handlePrev}
-          className=""
+          className="rounded-full bg-white/10 p-4 backdrop-blur transition hover:bg-white/20"
           aria-label="Previous photo"
         >
-          <svg className="" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-        </button>
+        </Button>
 
         {/* Next Button */}
-        <button
+        <Button type="button"
           onClick={handleNext}
-          className=""
+          className="rounded-full bg-white/10 p-4 backdrop-blur transition hover:bg-white/20"
           aria-label="Next photo"
         >
-          <svg className="" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-        </button>
+        </Button>
       </div>
 
       {/* Bottom - Controls */}
@@ -153,17 +154,17 @@ export function GalleryViewerCinematic({
           showUI ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div className="to-transparent">
+        <div className="flex items-center justify-between gap-4 border-t border-white/10 bg-gradient-to-t from-black/80 to-transparent px-6 py-6 sm:px-10 lg:px-16">
           {/* Counter & Progress */}
-          <div className="">
-            <div className="">
-              <p className="">
+          <div className="flex-1">
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-white/80">
                 {currentIndex + 1} / {photos.length}
               </p>
               {/* Progress dots */}
-              <div className="">
+              <div className="flex gap-1">
                 {photos.map((_, idx) => (
-                  <button
+                  <Button
                     key={idx}
                     onClick={() => {
                       setCurrentIndex(idx);
@@ -180,42 +181,42 @@ export function GalleryViewerCinematic({
           </div>
 
           {/* Actions */}
-          <div className="">
+          <div className="flex gap-3">
             {allowFavorites && (
-              <button
+              <Button type="button"
                 onClick={handleFavorite}
-                className=""
+                className="rounded-full bg-white/10 p-3 backdrop-blur transition hover:bg-white/20"
               >
                 <Heart
                   className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-white'}`}
                 />
-              </button>
+              </Button>
             )}
 
             {allowDownloads && (
-              <button
+              <Button type="button"
                 onClick={() => onPhotoDownload?.(currentPhoto.id)}
-                className=""
+                className="rounded-full bg-white/10 p-3 backdrop-blur transition hover:bg-white/20"
               >
-                <Download className="" />
-              </button>
+                <Download className="h-5 w-5 text-white" />
+              </Button>
             )}
 
             {/* Autoplay Toggle */}
-            <button
+            <Button type="button"
               onClick={() => setAutoplay(!autoplay)}
-              className=""
+              className="rounded-full bg-white/10 p-3 backdrop-blur transition hover:bg-white/20"
             >
               {autoplay ? (
-                <svg className="" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
               ) : (
-                <svg className="" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
                 </svg>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -226,7 +227,7 @@ export function GalleryViewerCinematic({
           showUI ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <ChevronDown className="" />
+        <ChevronDown className="h-5 w-5 animate-bounce text-white/50" />
       </div>
     </div>
   );

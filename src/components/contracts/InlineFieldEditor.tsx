@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface InlineFieldEditorProps {
   value: string;
@@ -55,8 +57,8 @@ export function InlineFieldEditor({
 
   if (!isEditing) {
     return (
-      <span className="inline">
-        {value || <span className="">[Add {placeholder.toLowerCase()}]</span>}
+      <span className="inline text-inherit">
+        {value || <span className="text-gray-400 font-medium">[Add {placeholder.toLowerCase()}]</span>}
       </span>
     );
   }
@@ -65,7 +67,7 @@ export function InlineFieldEditor({
     'w-full px-2 py-1 bg-white dark:bg-gray-800 border border-purple-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500';
 
   return (
-    <div className="">
+    <div className="inline-flex items-center gap-2 align-top">
       {type === 'textarea' ? (
         <textarea
           ref={inputRef as React.Ref<HTMLTextAreaElement>}
@@ -77,20 +79,10 @@ export function InlineFieldEditor({
           className={`${inputClasses} block resize-none`}
         />
       ) : type === 'select' ? (
-        <select
-          ref={inputRef as React.Ref<HTMLSelectElement>}
-          value={tempValue}
-          onChange={(e) => setTempValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className={`${inputClasses} block`}
-        >
-          <option value="">Select...</option>
-          {selectOptions?.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <Select value={tempValue || 'none'} onValueChange={(value) => setTempValue(value === 'none' ? '' : value)}>
+          <SelectTrigger className={`${inputClasses} block`}><SelectValue placeholder="Select..." /></SelectTrigger>
+          <SelectContent><SelectItem value="none">Select...</SelectItem>{selectOptions?.map((opt) => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}</SelectContent>
+        </Select>
       ) : (
         <input
           ref={inputRef as React.Ref<HTMLInputElement>}
@@ -103,21 +95,9 @@ export function InlineFieldEditor({
         />
       )}
 
-      <div className="">
-        <button
-          onClick={handleSave}
-          className=""
-          title="Save"
-        >
-          <Check className="" />
-        </button>
-        <button
-          onClick={onCancel}
-          className=""
-          title="Cancel"
-        >
-          <X className="" />
-        </button>
+      <div className="flex gap-1">
+        <Button variant="ghost" size="icon-sm" onClick={handleSave} className="text-green-600" title="Save"><Check className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon-sm" onClick={onCancel} className="text-red-600" title="Cancel"><X className="h-4 w-4" /></Button>
       </div>
     </div>
   );

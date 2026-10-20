@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, contracts, contractEvents, galleries, invoices, invoiceItems, projects, quotes, quoteItems, studioEvents } from "@/db/schema";
+import { clients } from "@/db/schema";
 import { withCreatorApi, ApiError } from "@/lib/api/route-boundaries";
 
 type RouteContext = {
@@ -211,15 +210,6 @@ export async function PATCH(
       ) {
         updateData.phone =
           cleanString(body.phone);
-      }
-
-      if (
-        Object.prototype.hasOwnProperty.call(
-          body,
-          "kraPin"
-        )
-      ) {
-        updateData.kraPin = cleanString(body.kraPin);
       }
 
       if (
@@ -516,37 +506,6 @@ export async function PATCH(
           status: 500,
         }
       );
-    }
-  });
-}
-export async function DELETE(request: Request, context: RouteContext) {
-  return withCreatorApi(request, async (_request, user) => {
-    try {
-      const { id } = await context.params;
-      if (!id) return NextResponse.json({ error: "Client ID is required." }, { status: 400 });
-      const deleted = await db.transaction(async (tx) => {
-        const client = await tx.query.clients.findFirst({ where: and(eq(clients.id, id), eq(clients.creatorId, user.id)), columns: { id: true } });
-        if (!client) return false;
-        await tx.execute(sql`DELETE FROM contract_events WHERE contract_id IN (SELECT id FROM contracts WHERE client_id = ${id} AND creator_id = ${user.id})`);
-        await tx.delete(contracts).where(and(eq(contracts.clientId, id), eq(contracts.creatorId, user.id)));
-        await tx.execute(sql`DELETE FROM invoice_items WHERE invoice_id IN (SELECT id FROM invoices WHERE client_id = ${id} AND creator_id = ${user.id})`);
-        await tx.delete(invoices).where(and(eq(invoices.clientId, id), eq(invoices.creatorId, user.id)));
-        await tx.execute(sql`DELETE FROM quote_items WHERE quote_id IN (SELECT id FROM quotes WHERE client_id = ${id} AND creator_id = ${user.id})`);
-        await tx.delete(quotes).where(and(eq(quotes.clientId, id), eq(quotes.creatorId, user.id)));
-        const studioEventsTable = await tx.execute(sql`SELECT to_regclass('public.studio_events') AS name`);
-        if (studioEventsTable.rows[0]?.name) {
-          await tx.delete(studioEvents).where(and(eq(studioEvents.clientId, id), eq(studioEvents.creatorId, user.id)));
-        }
-        await tx.delete(galleries).where(and(eq(galleries.clientId, id), eq(galleries.creatorId, user.id)));
-        await tx.delete(projects).where(and(eq(projects.clientId, id), eq(projects.creatorId, user.id)));
-        await tx.delete(clients).where(and(eq(clients.id, id), eq(clients.creatorId, user.id)));
-        return true;
-      });
-      if (!deleted) return NextResponse.json({ error: "Client not found." }, { status: 404 });
-      return NextResponse.json({ success: true, id });
-    } catch (error) {
-      console.error("DELETE /api/clients/[id] error:", error);
-      return NextResponse.json({ error: "Failed to delete client and associated data." }, { status: 500 });
     }
   });
 }

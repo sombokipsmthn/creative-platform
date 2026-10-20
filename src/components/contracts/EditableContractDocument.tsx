@@ -51,8 +51,8 @@ export function EditableContractDocument({
 
   if (!content) {
     return (
-      <div className="">
-        <p className="">No content</p>
+      <div className="prose prose-sm max-w-none">
+        <p className="text-gray-500 italic">No content</p>
       </div>
     );
   }
@@ -65,7 +65,7 @@ export function EditableContractDocument({
   const flushParagraph = () => {
     if (currentParagraph.length > 0) {
       elements.push(
-        <p key={`p-${elements.length}`} className="">
+        <p key={`p-${elements.length}`} className="mb-4 leading-7 text-gray-900 dark:text-gray-50">
           {currentParagraph}
         </p>
       );
@@ -117,7 +117,7 @@ export function EditableContractDocument({
       elements.push(
         <h3
           key={`num-heading-${lineIndex}`}
-          className=""
+          className="text-lg font-bold mb-3 mt-4 text-gray-900 dark:text-gray-50"
         >
           {number}. {title}
         </h3>
@@ -128,7 +128,7 @@ export function EditableContractDocument({
     // Blank line
     if (trimmedLine === '') {
       flushParagraph();
-      elements.push(<div key={`space-${lineIndex}`} className="" />);
+      elements.push(<div key={`space-${lineIndex}`} className="mb-2" />);
       return;
     }
 
@@ -189,8 +189,8 @@ export function EditableContractDocument({
   flushParagraph();
 
   return (
-    <div className="">
-      {elements.length > 0 ? elements : <p className="">No content</p>}
+    <div className="prose prose-sm dark:prose-invert max-w-none text-gray-900 dark:text-gray-50">
+      {elements.length > 0 ? elements : <p className="text-gray-500 italic">No content</p>}
     </div>
   );
 }

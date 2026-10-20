@@ -1,4 +1,5 @@
 import ContractDocument from '@/components/documents/ContractDocument';
+import { Button } from '@/components/ui/button';
 import { UpdateContractStatus } from '@/components/UpdateContractStatus';
 
 type PageProps = {
@@ -17,10 +18,8 @@ export default async function ContractPage({ params }: { params: Promise<{ token
       <div className="ui-contract-viewer">
         <ContractDocument token={token} />
       </div>
-      <div className="ui-contract-actions">
-        <button className="ui-button ui-button-outline">
-          Download PDF
-        </button>
+      <div className="ui-contract-actions mt-6">
+        <Button variant="outline">Download PDF</Button>
         <UpdateContractStatus token={token} />
       </div>
     </div>

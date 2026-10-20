@@ -251,6 +251,28 @@ Build a phased Studio Command Center for `/admin` that combines operational KPIs
   - Result: passed.
 - No database reset, destructive cleanup, commit, push, or deployment was performed.
 
+## Payment ledger implementation
+
+- Added integer minor-unit `payments`, `payment_schedules`, `payment_term_amendments`, and `payment_audit_events` tables in `src/db/schema.ts`.
+- Added migration `drizzle/0038_payment_ledger.sql` and journal entry `0038_payment_ledger`.
+- Added creator-scoped manual payment recording at `/api/payments`.
+- Added invoice payment summaries at `/api/invoices/[id]/payments`.
+- Added verification, reversal, and audit-event actions at `/api/payments/[id]`.
+- Confirmed payments alone reduce invoice balances; pending, failed, cancelled, reversed, and refunded records do not.
+- Blocked currency mismatches and confirmed over-allocation server-side.
+- Added invoice-detail financial summaries and manual Record payment form.
+- Replaced the payments placeholder with a ledger-backed payments overview.
+- Kept provider integration neutral; no SDK, credentials, webhooks, or live payment processing were added.
+
+## Payment ledger follow-up completion
+
+- Added dedicated schedule and term-amendment creation UI and creator-scoped APIs from invoice details.
+- Added schedule update/delete API endpoints and invoice-level schedule editing support.
+- Added immutable payment audit timeline UI for creation, verification, reversal, and refund events.
+- Added a full-refund-only workflow requiring a reason; refunds preserve the original record and mark it `refunded`; partial refunds remain blocked pending accounting approval.
+- Overpayment policy: confirmed payments cannot exceed the invoice total; overpayments are rejected with a clear validation error.
+- Provider, webhook, email-ingestion, and automated-verification work remains deferred.
+
 ## Known blockers and remaining tasks
 
 - The requested `dev` branch is not checked out; current work must avoid switching branches because the worktree contains user changes.

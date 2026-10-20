@@ -13,7 +13,7 @@ import {
 
 export const users = pgTable("users", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  authUserId: text("auth_user_id").unique().$defaultFn(() => crypto.randomUUID()),
+  authUserId: text("auth_user_id").unique(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   emailVerified: boolean("email_verified").default(false).notNull(),
@@ -102,20 +102,6 @@ export const creatorProfiles = pgTable("creator_profiles", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const creatorPortfolios = pgTable("creator_portfolios", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
-  headline: text("headline"),
-  contactEmail: text("contact_email"),
-  socialLinks: jsonb("social_links").default({}).notNull(),
-  selectedProjectIds: jsonb("selected_project_ids").default([]).notNull(),
-  layout: text("layout").default("editorial").notNull(),
-  isPublished: boolean("is_published").default(false).notNull(),
-  publishedAt: timestamp("published_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
-
 export const creatorServices = pgTable("creator_services", {
   id: uuid("id").defaultRandom().primaryKey(),
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -125,9 +111,6 @@ export const creatorServices = pgTable("creator_services", {
   defaultRate: integer("default_rate").default(0).notNull(),
   currency: text("currency").default("KES").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  version: integer("version").default(1).notNull(),
-  reviewStatus: text("review_status").default("unreviewed").notNull(),
-  reviewedAt: timestamp("reviewed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
@@ -152,7 +135,6 @@ export const clients = pgTable("clients", {
   company: text("company"),
   email: text("email"),
   phone: text("phone"),
-  kraPin: text("kra_pin"),
   website: text("website"),
   location: text("location"),
   notes: text("notes"),
@@ -317,6 +299,88 @@ export const studioEvents = pgTable("studio_events", {
   clientIdx: index("studio_events_client_id_idx").on(table.clientId),
   projectIdx: index("studio_events_project_id_idx").on(table.projectId),
   startsAtIdx: index("studio_events_starts_at_idx").on(table.startsAt),
+}));
+
+export const payments = pgTable("payments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: text("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  invoiceId: uuid("invoice_id").references(() => invoices.id, { onDelete: "set null" }),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  reference: text("reference").notNull().unique(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull(),
+  method: text("method").notNull(),
+  origin: text("origin").default("manual").notNull(),
+  status: text("status").default("pending_verification").notNull(),
+  paidAt: timestamp("paid_at").notNull(),
+  confirmedAt: timestamp("confirmed_at"),
+  confirmedBy: text("confirmed_by").references(() => users.id, { onDelete: "set null" }),
+  transactionReference: text("transaction_reference"),
+  evidenceReference: text("evidence_reference"),
+  notes: text("notes"),
+  reversalReason: text("reversal_reason"),
+  relatedPaymentId: uuid("related_payment_id"),
+  providerName: text("provider_name"),
+  externalTransactionId: text("external_transaction_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdx: index("payments_creator_id_idx").on(table.creatorId),
+  invoiceIdx: index("payments_invoice_id_idx").on(table.invoiceId),
+  clientIdx: index("payments_client_id_idx").on(table.clientId),
+  projectIdx: index("payments_project_id_idx").on(table.projectId),
+  statusIdx: index("payments_status_idx").on(table.status),
+  paidAtIdx: index("payments_paid_at_idx").on(table.paidAt),
+}));
+
+export const paymentSchedules = pgTable("payment_schedules", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: text("client_id").notNull().references(() => clients.id, { onDelete: "cascade" }),
+  invoiceId: uuid("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  label: text("label").notNull(),
+  amount: integer("amount").notNull(),
+  currency: text("currency").notNull(),
+  dueDate: timestamp("due_date").notNull(),
+  milestone: text("milestone"),
+  status: text("status").default("scheduled").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdx: index("payment_schedules_creator_id_idx").on(table.creatorId),
+  invoiceIdx: index("payment_schedules_invoice_id_idx").on(table.invoiceId),
+  dueDateIdx: index("payment_schedules_due_date_idx").on(table.dueDate),
+}));
+
+export const paymentTermAmendments = pgTable("payment_term_amendments", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  invoiceId: uuid("invoice_id").notNull().references(() => invoices.id, { onDelete: "cascade" }),
+  previousTerms: text("previous_terms"),
+  newTerms: text("new_terms").notNull(),
+  agreementDate: timestamp("agreement_date").notNull(),
+  evidenceReference: text("evidence_reference"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdx: index("payment_term_amendments_creator_id_idx").on(table.creatorId),
+  invoiceIdx: index("payment_term_amendments_invoice_id_idx").on(table.invoiceId),
+}));
+
+export const paymentAuditEvents = pgTable("payment_audit_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  paymentId: uuid("payment_id").notNull().references(() => payments.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(),
+  actorId: text("actor_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  metadata: jsonb("metadata").default({}).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  paymentIdx: index("payment_audit_events_payment_id_idx").on(table.paymentId),
+  creatorIdx: index("payment_audit_events_creator_id_idx").on(table.creatorId),
 }));
 
 export const equipment = pgTable("equipment", {
@@ -523,10 +587,15 @@ export const galleryWatermarks = pgTable("gallery_watermarks", {
   id: uuid("id").defaultRandom().primaryKey(),
   galleryId: uuid("gallery_id").notNull().unique().references(() => galleries.id, { onDelete: "cascade" }),
   enabled: boolean("enabled").default(true).notNull(),
+  type: text("type").default("text").notNull(),
   text: text("text").default("KIPSMTHN").notNull(),
   position: text("position").default("bottom-right").notNull(),
   opacity: integer("opacity").default(55).notNull(),
   fontSize: integer("font_size").default(42).notNull(),
+  imageUrl: text("image_url"),
+  imagePath: text("image_path"),
+  imageFilename: text("image_filename"),
+  imageMimeType: text("image_mime_type"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 
@@ -535,16 +604,22 @@ export const galleryWatermarkPresets = pgTable("gallery_watermark_presets", {
   creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   enabled: boolean("enabled").default(true).notNull(),
+  type: text("type").default("text").notNull(),
   text: text("text").default("KIPSMTHN").notNull(),
   position: text("position").default("bottom-right").notNull(),
   opacity: integer("opacity").default(55).notNull(),
   fontSize: integer("font_size").default(42).notNull(),
+  imageUrl: text("image_url"),
+  imagePath: text("image_path"),
+  imageFilename: text("image_filename"),
+  imageMimeType: text("image_mime_type"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => [
-  index("gallery_watermark_presets_creator_idx").using("btree", table.creatorId.asc().nullsLast().op("text_ops")),
-  unique("gallery_watermark_presets_creator_name_key").on(table.creatorId, table.name),
-]);
+}, (table) => ({
+  creatorNameUnique: unique("gallery_watermark_presets_creator_name_key").on(table.creatorId, table.name),
+  creatorIdx: index("gallery_watermark_presets_creator_idx").on(table.creatorId),
+}));
+
 export const galleryDownloadPresets = pgTable("gallery_download_presets", {
   id: uuid("id").defaultRandom().primaryKey(),
   galleryId: uuid("gallery_id").notNull().references(() => galleries.id, { onDelete: "cascade" }),
@@ -577,6 +652,20 @@ export const galleryDownloads = pgTable("gallery_downloads", {
     photoCreatedIdx: index("gallery_downloads_photo_created_idx").on(table.photoId, table.createdAt),
   }));
 
+export const creatorPortfolios = pgTable("creator_portfolios", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  headline: text("headline"),
+  contactEmail: text("contact_email"),
+  socialLinks: jsonb("social_links").default({}).notNull(),
+  selectedProjectIds: jsonb("selected_project_ids").default([]).notNull(),
+  layout: text("layout").default("editorial").notNull(),
+  isPublished: boolean("is_published").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const contractTemplates = pgTable("contract_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
   creatorId: text("creator_id").references(() => users.id, { onDelete: "cascade" }),
@@ -588,9 +677,6 @@ export const contractTemplates = pgTable("contract_templates", {
   variables: jsonb("variables").default([]).notNull(),
   isSystemTemplate: boolean("is_system_template").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
-  version: integer("version").default(1).notNull(),
-  reviewStatus: text("review_status").default("unreviewed").notNull(),
-  reviewedAt: timestamp("reviewed_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()},
   (table) => ({
@@ -605,17 +691,6 @@ export const contracts = pgTable("contracts", {
   projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
   quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "set null" }),
   templateId: uuid("template_id").references(() => contractTemplates.id, { onDelete: "set null" }),
-  templateVersion: integer("template_version"),
-  templateSnapshot: text("template_snapshot"),
-  contractType: text("contract_type"),
-  effectiveAt: timestamp("effective_at"),
-  termStartAt: timestamp("term_start_at"),
-  termEndAt: timestamp("term_end_at"),
-  renewalAt: timestamp("renewal_at"),
-  noticeDeadline: timestamp("notice_deadline"),
-  terminationAt: timestamp("termination_at"),
-  signatories: jsonb("signatories").default([]).notNull(),
-
   title: text("title").notNull(),
   contractNumber: text("contract_number").notNull().unique(),
   status: text("status").default("draft").notNull(),
@@ -650,8 +725,6 @@ export const contractEvents = pgTable("contract_events", {
   contractId: uuid("contract_id").notNull().references(() => contracts.id, { onDelete: "cascade" }),
   eventType: text("event_type").notNull(),
   metadata: jsonb("metadata").default({}).notNull(),
-  actorId: text("actor_id").references(() => users.id, { onDelete: "set null" }),
-  outcome: text("outcome"),
   createdAt: timestamp("created_at").defaultNow().notNull()},
   (table) => ({
     contractIdx: index("contract_events_contract_id_idx").on(table.contractId),

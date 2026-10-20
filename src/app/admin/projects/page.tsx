@@ -128,6 +128,7 @@ export default function AdminProjectsPage() {
   const [filterFeatured, setFilterFeatured] = useState<'ALL' | 'true' | 'false'>('ALL');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<{
     name: string;
     description: string;
@@ -147,7 +148,7 @@ export default function AdminProjectsPage() {
     status: ProjectStatus;
     visibility: 'public' | 'private' | 'draft';
     featured: boolean;
-    clientId: string;
+    clientId: string | undefined;
     startDate: string;
     endDate: string;
   }>(() => ({
@@ -255,11 +256,6 @@ export default function AdminProjectsPage() {
       }
     }
 
-    let loading = true;
-    // Initialize loading state
-    const [setLoading, setLoadingInternal] = useReactState(true);
-    // We'll handle loading differently
-
     loadData();
 
     return () => {
@@ -317,7 +313,6 @@ export default function AdminProjectsPage() {
 
   function openCreateModal(clientId?: string) {
     setForm({
-      ...(clientId ? { clientId } : {}),
       name: '',
       description: '',
       shortDescription: '',
@@ -336,6 +331,7 @@ export default function AdminProjectsPage() {
       status: 'draft' as ProjectStatus,
       visibility: 'private' as 'public' | 'private' | 'draft',
       featured: false,
+      clientId: clientId || '',
       startDate: '',
       endDate: '',
     });
@@ -1083,8 +1079,7 @@ export default function AdminProjectsPage() {
                 </div>
 
                 <div className="admin-content-block">
-                  {[
-                    'active',
+                  {([
                     'completed',
                     'on hold',
                     'cancelled',

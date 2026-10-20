@@ -136,7 +136,7 @@ export default function AdminSettingsPage() {
               <Link href="/admin/galleries" className="ui-card ui-card-interactive p-4"><span className="flex items-center justify-between font-medium">Galleries and watermarks <ArrowRight className="h-4 w-4" /></span><span className="ui-meta mt-2 block">Configure watermarking, delivery, proofing, and gallery access on the gallery itself.</span></Link>
               <Link href="/admin/contracts/templates" className="ui-card ui-card-interactive p-4"><span className="flex items-center justify-between font-medium">Contract templates <ArrowRight className="h-4 w-4" /></span><span className="ui-meta mt-2 block">Manage reusable contract content in the templates workspace.</span></Link>
             </div>
-          )}
+          </section>
 
           {/* TAB 6: INTEGRATIONS */}
           {activeTab === 'integrations' && (

@@ -1,52 +1,431 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
-import { AlertCircle, ArrowUpRight, FileSignature, Plus, RefreshCw } from 'lucide-react';
-import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import type { Client, Contract, ContractStats } from '@/lib/types/contracts';
+import { useEffect, useState } from 'react';
+import {
+  ArrowUpRight,
+  CheckCircle2,
+  FilePlus,
+  FileSignature,
+  Loader2,
+  Plus,
+  Trash2,
+} from 'lucide-react';
 
-const statuses = ['all', 'draft', 'sent', 'viewed', 'awaiting_signature', 'signed', 'declined', 'expired', 'cancelled'];
-const label = (value: string) => value.split('_').map((part) => part[0]?.toUpperCase() + part.slice(1)).join(' ');
-const date = (value?: Date | null) => value ? new Date(value).toLocaleDateString() : '—';
-const statusVariant = (status: string) => status === 'signed' ? 'success' : status === 'declined' || status === 'cancelled' ? 'destructive' : status === 'expired' ? 'warning' : status === 'sent' || status === 'viewed' ? 'secondary' : 'outline';
+import TableFilterBar from '@/components/admin/TableFilterBar';
+import { Button } from '@/components/ui/button';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+
+type Contract = {
+  id: string;
+  contractNumber: string;
+  title: string;
+  status: string;
+  clientName: string;
+  projectName?: string | null;
+  createdAt: string;
+  sentAt?: string | null;
+  signedAt?: string | null;
+};
+
+type Client = {
+  id: string;
+  name: string;
+  company?: string | null;
+};
+
+type Stats = {
+  total: number;
+  draft: number;
+  sent: number;
+  viewed: number;
+  awaiting_signature: number;
+  signed: number;
+  declined: number;
+  expired: number;
+  cancelled: number;
+};
 
 export default function ContractsPage() {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
-  const [stats, setStats] = useState<ContractStats>({});
-  const [search, setSearch] = useState(''); const [status, setStatus] = useState('all'); const [clientId, setClientId] = useState('all'); const [page, setPage] = useState(0); const [total, setTotal] = useState(0);
-  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading'); const [error, setError] = useState('');
+  const [stats, setStats] = useState<Stats>({
+    total: 0,
+    draft: 0,
+    sent: 0,
+    viewed: 0,
+    awaiting_signature: 0,
+    signed: 0,
+    declined: 0,
+    expired: 0,
+    cancelled: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setState('loading'); setError('');
-    try {
-      const params = new URLSearchParams({ search, status, limit: '25', offset: String(page * 25) });
-      if (clientId !== 'all') params.set('clientId', clientId);
-      const response = await fetch(`/api/contracts?${params}`, { cache: 'no-store' });
-      if (!response.ok) throw new Error(response.status === 401 ? 'Please sign in to view contracts.' : 'Unable to load contracts.');
-      const data = await response.json(); setContracts(Array.isArray(data.contracts) ? data.contracts : []); setStats(data.stats || {}); setTotal(Number(data.total || 0)); setState('ready');
-    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to load contracts.'); setState('error'); }
-  }, [search, status, clientId, page]);
+  // Filter states
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [clientId, setClientId] = useState<string>('all');
 
-  useEffect(() => { void load(); }, [load]);
-  useEffect(() => { fetch('/api/clients', { cache: 'no-store' }).then((response) => response.ok ? response.json() : []).then((data) => setClients(Array.isArray(data) ? data : [])).catch(() => setClients([])); }, []);
+  // Fetch clients for the filter
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const res = await fetch('/api/clients', { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed to fetch clients');
+        const data = await res.json();
+        setClients(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch clients:', err);
+      }
+    };
+    fetchClients();
+  }, []);
 
-  return <div className="ui-page ui-page-padded"><div className="ui-shell space-y-8">
-    <AdminPageHeader title="Contracts" description="Manage reusable templates, agreements, signatures and terms." breadcrumb={{ label: 'Dashboard', href: '/admin' }} primaryAction={<Button asChild><Link href="/admin/contracts/new"><Plus /> New contract</Link></Button>} />
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">{[['Active agreements', stats.active], ['Awaiting signature', stats.awaiting_signature], ['Expiring soon', stats.expiring_soon], ['Signed this month', stats.signed_this_month]].map(([name, value]) => <Card key={String(name)}><CardHeader><CardDescription>{name}</CardDescription><CardTitle className="text-3xl">{value ?? 0}</CardTitle></CardHeader></Card>)}</div>
-    <Card><CardHeader className="gap-4 border-b sm:flex-row sm:items-center sm:justify-between"><div><CardTitle>Contract repository</CardTitle><CardDescription>Search and filter persisted agreements.</CardDescription></div><Button asChild variant="outline"><Link href="/admin/contracts/templates">Browse templates</Link></Button></CardHeader><CardContent className="space-y-4 pt-6">
-      <div className="flex flex-wrap gap-3"><Input className="min-w-64 flex-1" value={search} onChange={(event) => { setPage(0); setSearch(event.target.value); }} placeholder="Search title or contract number" /><select className="h-10 rounded-lg border border-input bg-background px-3 text-sm" value={clientId} onChange={(event) => { setPage(0); setClientId(event.target.value); }}><option value="all">All clients</option>{clients.map((client) => <option key={client.id} value={client.id}>{client.name}{client.company ? ` (${client.company})` : ''}</option>)}</select><select className="h-10 rounded-lg border border-input bg-background px-3 text-sm" value={status} onChange={(event) => { setPage(0); setStatus(event.target.value); }}>{statuses.map((item) => <option key={item} value={item}>{item === 'all' ? 'All statuses' : label(item)}</option>)}</select></div>
-      {state === 'loading' && <div className="flex min-h-40 items-center justify-center text-sm text-muted-foreground">Loading contracts…</div>}
-      {state === 'error' && <div className="flex min-h-40 flex-col items-center justify-center gap-3 text-center"><AlertCircle className="text-destructive" /><p className="text-sm text-muted-foreground">{error}</p><Button variant="outline" onClick={() => void load()}><RefreshCw /> Retry</Button></div>}
-      {state === 'ready' && contracts.length === 0 && <div className="flex min-h-56 flex-col items-center justify-center gap-3 text-center"><FileSignature className="size-8 text-muted-foreground" /><h3 className="font-medium">No contracts found</h3><p className="text-sm text-muted-foreground">Create an agreement from a template or start from scratch.</p><Button asChild><Link href="/admin/contracts/new">Create contract</Link></Button></div>}
-      {state === 'ready' && contracts.length > 0 && <Table><TableHeader><TableRow><TableHead>Agreement</TableHead><TableHead>Client / project</TableHead><TableHead>Status</TableHead><TableHead>Term</TableHead><TableHead>Updated</TableHead><TableHead className="text-right">Action</TableHead></TableRow></TableHeader><TableBody>{contracts.map((contract) => <TableRow key={contract.id}><TableCell><Link className="font-medium hover:underline" href={`/admin/contracts/${contract.id}`}>{contract.title}</Link><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></TableCell><TableCell>{contract.client?.name || 'Unknown'}<p className="text-xs text-muted-foreground">{contract.project?.name || 'No project'}</p></TableCell><TableCell><Badge variant={statusVariant(contract.status)}>{label(contract.status)}</Badge></TableCell><TableCell className="text-muted-foreground">{date(contract.termEndAt || contract.expiresAt)}</TableCell><TableCell className="text-muted-foreground">{date(contract.updatedAt)}</TableCell><TableCell className="text-right"><Button asChild variant="outline" size="sm"><Link href={`/admin/contracts/${contract.id}`}>Open <ArrowUpRight /></Link></Button></TableCell></TableRow>)}</TableBody></Table>}
-      {state === 'ready' && total > 25 && <div className="flex items-center justify-between border-t pt-4"><Button variant="outline" disabled={page === 0} onClick={() => setPage((current) => current - 1)}>Previous</Button><span className="text-sm text-muted-foreground">Page {page + 1} of {Math.ceil(total / 25)}</span><Button variant="outline" disabled={(page + 1) * 25 >= total} onClick={() => setPage((current) => current + 1)}>Next</Button></div>}
-    </CardContent></Card>
-  </div></div>;
+  // Fetch contracts, stats, and templates (we only need contracts and stats here)
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = new URLSearchParams();
+        params.set('search', search);
+        params.set('status', status);
+        if (clientId !== 'all') params.set('clientId', clientId);
+
+        const res = await fetch(`/api/contracts?${params.toString()}`, {
+          cache: 'no-store',
+        });
+        if (res.status === 401) {
+          throw new Error('Please sign in to view your contracts.');
+        }
+        if (!res.ok) throw new Error('Failed to fetch contracts data');
+        const data = await res.json();
+        setContracts(data.contracts || []);
+        setStats(data.stats || {
+          total: 0,
+          draft: 0,
+          sent: 0,
+          viewed: 0,
+          awaiting_signature: 0,
+          signed: 0,
+          declined: 0,
+          expired: 0,
+          cancelled: 0,
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [search, status, clientId]);
+
+  function formatStatus(status: string) {
+    return status
+      .split('_')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  function getStatusBadgeClass(status: string) {
+    switch (status) {
+      case 'draft':
+        return 'ui-badge';
+      case 'sent':
+        return 'ui-badge ui-badge-accent';
+      case 'viewed':
+        return 'ui-badge ui-badge-accent';
+      case 'awaiting_signature':
+        return 'ui-badge ui-badge-info';
+      case 'signed':
+        return 'ui-badge ui-badge-success';
+      case 'declined':
+        return 'ui-badge ui-badge-danger';
+      case 'expired':
+        return 'ui-badge ui-badge-warning';
+      case 'cancelled':
+        return 'ui-badge ui-badge-danger';
+      default:
+        return 'ui-badge';
+    }
+  }
+
+  return (
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl space-y-8">
+        <AdminPageHeader
+          title="Contracts"
+          description="Create, send and manage agreements with your clients."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={
+            <Button
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New Contract
+            </Button>
+          }
+        />
+
+        {error && !loading && (
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          </div>
+        )}
+
+        {/* SUMMARY */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Total Contracts</p>
+            <p className="text-2xl font-bold">{stats.total}</p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Drafts</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {stats.draft}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Sent</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              {stats.sent}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Viewed</p>
+            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+              {stats.viewed}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Awaiting Signature</p>
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              {stats.awaiting_signature}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Signed</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {stats.signed}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Declined</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {stats.declined}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Expired</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {stats.expired}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Cancelled</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {stats.cancelled}
+            </p>
+          </div>
+        </div>
+
+        {/* Table Filter Bar */}
+        <TableFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          filters={{ status, clientId }}
+          onFiltersChange={(filters) => {
+            setSearch(filters.search ?? '');
+            setStatus(filters.status ?? 'all');
+            setClientId(filters.clientId ?? 'all');
+          }}
+          onAddItem={() => {
+            // We'll handle the "New Contract" button in the header
+          }}
+          filterOptions={ [
+            {
+              label: 'Status',
+              value: 'status',
+              options: [
+                { label: 'All Statuses', value: 'all' },
+                { label: 'Draft', value: 'draft' },
+                { label: 'Sent', value: 'sent' },
+                { label: 'Viewed', value: 'viewed' },
+                { label: 'Awaiting Signature', value: 'awaiting_signature' },
+                { label: 'Signed', value: 'signed' },
+                { label: 'Declined', value: 'declined' },
+                { label: 'Expired', value: 'expired' },
+                { label: 'Cancelled', value: 'cancelled' },
+              ]
+            },
+            {
+              label: 'Client',
+              value: 'clientId',
+              options: [
+                { label: 'All Clients', value: 'all' },
+                ...clients.map(client => ({
+                  label: client.name + (client.company ? ` (${client.company})` : ''),
+                  value: client.id,
+                })),
+              ]
+            }
+          ] }
+          itemLabel="Contract"
+        />
+
+        {/* TABLE */}
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          {loading ? (
+            <div className="flex items-center justify-center p-12">
+              <p className="text-xs font-sans uppercase tracking-widest">
+                Loading contracts…
+              </p>
+            </div>
+          ) : contracts.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-12 text-center p-12">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <FilePlus className="h-6 w-6" />
+              </div>
+
+              <h2 className="text-2xl font-semibold tracking-tight">No contracts yet</h2>
+
+              <p className="text-sm text-muted-foreground">
+                Create your first contract or browse templates.
+              </p>
+
+              <div className="flex justify-center mt-4">
+                <Button
+                  variant="primary"
+                  className="mt-6"
+                >
+                  Create First Contract
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full caption-bottom text-sm">
+                <thead>
+                  <tr>
+                    <th className="w-full caption-bottom text-sm-header">Contract</th>
+                    <th className="w-full caption-bottom text-sm-header">Client</th>
+                    <th className="w-full caption-bottom text-sm-header">Project</th>
+                    <th className="w-full caption-bottom text-sm-header">Status</th>
+                    <th className="w-full caption-bottom text-sm-header">Created</th>
+                    <th className="w-full caption-bottom text-sm-header">Sent</th>
+                    <th className="w-full caption-bottom text-sm-header">Signed</th>
+                    <th className="w-full caption-bottom text-sm-header" />
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {contracts.map((contract) => (
+                    <tr
+                      key={contract.id}
+                      className="w-full caption-bottom text-sm-row"
+                    >
+                      {/* CONTRACT */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                            <FileSignature className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 space-y-1">
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {contract.title}
+                            </p>
+                            <p className="text-sm text-muted-foreground text-xs text-slate-500 dark:text-zinc-600">
+                              #{contract.contractNumber}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* CLIENT */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
+                          {contract.clientName}
+                        </p>
+                      </td>
+
+                      {/* PROJECT */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        {contract.projectName ?? (
+                          <span className="text-xs text-muted-foreground text-xs text-slate-500 dark:text-zinc-600 italic">
+                            None
+                          </span>
+                        )}
+                      </td>
+
+                      {/* STATUS */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <div className="flex flex-col items-start gap-2">
+                          <span
+                            className={`${getStatusBadgeClass(contract.status)}`}
+                          >
+                            {formatStatus(contract.status)}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* CREATED */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                          {new Date(contract.createdAt).toLocaleDateString()}
+                        </p>
+                      </td>
+
+                      {/* SENT */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                          {contract.sentAt ? new Date(contract.sentAt).toLocaleDateString() : '-'}
+                        </p>
+                      </td>
+
+                      {/* SIGNED */}
+                      <td className="w-full caption-bottom text-sm-cell">
+                        <p className="text-sm text-slate-500 dark:text-zinc-600">
+                          {contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '-'}
+                        </p>
+                      </td>
+
+                      {/* ACTION */}
+                      <td className="w-full caption-bottom text-sm-cell text-right">
+                        <div className="flex gap-2">
+                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/contracts/${contract.id}`}>View <ArrowUpRight className="h-3 w-3" /></Link></Button>
+                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/contracts/${contract.id}/edit`}>Edit <Plus className="h-3 w-3" /></Link></Button>
+                          {contract.status === 'draft' && (
+                            <>
+                              <Button asChild variant="success" size="sm"><Link href={`/admin/contracts/${contract.id}/send`}>Send <CheckCircle2 className="h-3 w-3" /></Link></Button>
+                              <Button asChild variant="secondary" size="sm"><Link href={`/admin/contracts/${contract.id}/duplicate`}>Duplicate <FilePlus className="h-3 w-3" /></Link></Button>
+                            </>
+                          )}
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (!window.confirm('Delete this contract?')) return;
+                            window.location.reload();
+                          }} aria-label="Delete contract"><Trash2 className="h-3 w-3" /></Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 }

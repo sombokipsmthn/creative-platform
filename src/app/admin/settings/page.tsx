@@ -1,59 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import WatermarkPreview from '@/components/WatermarkPreview';
+import { useState } from 'react';
+import WatermarkStudio from '@/components/WatermarkStudio';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations';
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('branding');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // 1. Branding State
   const [domainSlug, setDomainSlug] = useState('kipsmthn.platform.com');
   const [customDomain, setCustomDomain] = useState('kipsmthn.com');
   const [hidePlatformBranding, setHidePlatformBranding] = useState(true);
 
-  // 2. Watermark State
-  const [watermarkText, setWatermarkText] = useState('KIPSMTHN PROOF');
-  const [watermarkOpacity, setWatermarkOpacity] = useState(30);
-  const [watermarkPosition, setWatermarkPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'>('bottom-right');
-  const [watermarkSize, setWatermarkSize] = useState(42);
-  const [watermarkPreset, setWatermarkPreset] = useState<'proof' | 'brand'>('proof');
-  const [applyWatermarkToProofs, setApplyWatermarkToProofs] = useState(true);
 
-  // Apply preset when changed
-  useEffect(() => {
-    const applyPreset = window.setTimeout(() => {
-      if (watermarkPreset === 'proof') {
-        setWatermarkText('KIPSMTHN PROOF');
-        setWatermarkOpacity(30);
-        setWatermarkPosition('bottom-right');
-        setWatermarkSize(42);
-      } else {
-        setWatermarkText('KIPSMTHN');
-        setWatermarkOpacity(55);
-        setWatermarkPosition('bottom-right');
-        setWatermarkSize(36);
-      }
-    }, 0);
-    return () => window.clearTimeout(applyPreset);
-  }, [watermarkPreset]);
-
-  // Handle watermark changes from preview
-  const handleWatermarkChange = (settings: {
-    text: string;
-    opacity: number;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-    size: number;
-  }) => {
-    setWatermarkText(settings.text);
-    setWatermarkOpacity(settings.opacity);
-    setWatermarkPosition(settings.position);
-    setWatermarkSize(settings.size);
-  };
 
   // 3. Presets State
   const [defaultSelectionLimit, setDefaultSelectionLimit] = useState(25);
@@ -73,7 +44,8 @@ export default function AdminSettingsPage() {
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Settings successfully saved for tab: ${activeTab.toUpperCase()}`);
+    setSaveMessage('Workspace settings saved.');
+    window.setTimeout(() => setSaveMessage(null), 3000);
   };
 
   const tabs: { id: SettingsTab; label: string }[] = [
@@ -92,16 +64,21 @@ export default function AdminSettingsPage() {
           title="Platform Settings"
           description="Configure how the platform behaves for your workspace, galleries, and client communications."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          primaryAction={
+          primaryAction={activeTab === 'watermark' ? undefined : (
             <Button
               variant="primary"
+<<<<<<< HEAD
               type="submit"
               form={settingsFormId}
+=======
+              type="button"
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
               className="w-full"
+              onClick={() => (document.getElementById('settings-form') as HTMLFormElement | null)?.requestSubmit()}
             >
               Save Settings Changes
             </Button>
-          }
+          )}
           tabs={tabs.map(tab => ({
             label: tab.label,
             href: '#',
@@ -111,40 +88,48 @@ export default function AdminSettingsPage() {
         />
 
         {/* TAB CONTENTS */}
+<<<<<<< HEAD
         <form id={settingsFormId} onSubmit={handleSaveSettings} className="space-y-8">
+=======
+        <form id="settings-form" onSubmit={handleSaveSettings} className="space-y-8">
+          {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
 
           {/* TAB 1: BRANDING */}
           {activeTab === 'branding' && (
             <div className="space-y-6">
-              <div className="ui-card">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Domain & Custom URLs</h2>
-                  <p className="ui-meta">Your client galleries are always available on your default site address.</p>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Domain & Custom URLs</h2>
+                  <p className="text-sm text-muted-foreground">Your client galleries are always available on your default site address.</p>
                 </div>
-                <div className="ui-card-content space-y-4">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label htmlFor="default-site-address" className="ui-label">Default Site Address</label>
                     <input
                       id="default-site-address"
+=======
+                    <label className="text-sm font-medium leading-none">Default Site Address</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       value={domainSlug}
                       onChange={(e) => setDomainSlug(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Custom Domain</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Custom Domain</label>
+                    <Input
                       type="text"
                       value={customDomain}
                       onChange={(e) => setCustomDomain(e.target.value)}
-                      className="ui-input"
                     />
-                    <p className="ui-caption">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
+                    <p className="text-xs text-muted-foreground">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
                   </div>
                 </div>
-                <div className="ui-card-footer">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-footer">
                   <div className="flex items-center gap-3">
                     <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
                       <input
@@ -160,12 +145,12 @@ export default function AdminSettingsPage() {
               </div>
 
               {/* Logo & Favicon Upload Cards */}
-              <div className="ui-card space-y-4">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Logos & Favicon</h2>
-                  <p className="ui-meta">Upload custom brand logos for your client portal header and browser tab icon.</p>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm space-y-4">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Logos & Favicon</h2>
+                  <p className="text-sm text-muted-foreground">Upload custom brand logos for your client portal header and browser tab icon.</p>
                 </div>
-                <div className="ui-card-content grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
                     <div className="w-12 h-12 mx-auto rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
@@ -183,6 +168,7 @@ export default function AdminSettingsPage() {
           )}
 
           {/* TAB 2: WATERMARK */}
+<<<<<<< HEAD
           {activeTab === 'watermark' && (
             <div className="space-y-6">
               {/* Watermark Presets */}
@@ -289,43 +275,43 @@ export default function AdminSettingsPage() {
               </div>
             </div>
           )}
+=======
+          {activeTab === 'watermark' && <WatermarkStudio />}
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
 
           {/* TAB 3: PRESETS */}
           {activeTab === 'presets' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">Default Gallery Presets</h2>
-                <p className="ui-meta">Pre-fill settings when creating new private client galleries.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Default Gallery Presets</h2>
+                <p className="text-sm text-muted-foreground">Pre-fill settings when creating new private client galleries.</p>
               </div>
-              <div className="ui-card-content">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-1">
-                    <label className="ui-label">Default Photo Selection Limit</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Default Photo Selection Limit</label>
+                    <Input
                       type="number"
                       value={defaultSelectionLimit}
                       onChange={(e) => setDefaultSelectionLimit(parseInt(e.target.value, 10))}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Default Expiration (Days)</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Default Expiration (Days)</label>
+                    <Input
                       type="number"
                       value={defaultExpiryDays}
                       onChange={(e) => setDefaultExpiryDays(parseInt(e.target.value, 10))}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Default Master PIN</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Default Master PIN</label>
+                    <Input
                       type="text"
                       value={defaultPin}
                       onChange={(e) => setDefaultPin(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
                 </div>
@@ -335,29 +321,27 @@ export default function AdminSettingsPage() {
 
           {/* TAB 4: EMAIL TEMPLATES */}
           {activeTab === 'templates' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">Email Invitation Templates</h2>
-                <p className="ui-meta">Customize automated client notification emails.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Email Invitation Templates</h2>
+                <p className="text-sm text-muted-foreground">Customize automated client notification emails.</p>
               </div>
-              <div className="ui-card-content space-y-4">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                 <div className="space-y-1">
-                  <label className="ui-label">Email Subject</label>
-                  <input
+                  <label className="text-sm font-medium leading-none">Email Subject</label>
+                  <Input
                     type="text"
                     value={invitationSubject}
                     onChange={(e) => setInvitationSubject(e.target.value)}
-                    className="ui-input"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Email Message Body</label>
-                  <textarea
+                  <label className="text-sm font-medium leading-none">Email Message Body</label>
+                  <Textarea
                     rows={6}
                     value={invitationBody}
                     onChange={(e) => setInvitationBody(e.target.value)}
-                    className="ui-input"
                   />
                 </div>
               </div>
@@ -366,47 +350,48 @@ export default function AdminSettingsPage() {
 
           {/* TAB 5: PREFERENCES */}
           {activeTab === 'preferences' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">Kenyan Tax & Business Preferences</h2>
-                <p className="ui-meta">Configure KRA PIN, base currency, and WHT rules.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Kenyan Tax & Business Preferences</h2>
+                <p className="text-sm text-muted-foreground">Configure KRA PIN, base currency, and WHT rules.</p>
               </div>
-              <div className="ui-card-content">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
-                    <label className="ui-label">Creator KRA PIN Number</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Creator KRA PIN Number</label>
+                    <Input
                       type="text"
                       value={kraPin}
                       onChange={(e) => setKraPin(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Default Currency</label>
-                    <select
-                      value={defaultCurrency}
-                      onChange={(e) => setDefaultCurrency(e.target.value)}
-                      className="ui-select"
-                    >
-                      <option value="KES">KES — Kenyan Shilling (KSh)</option>
-                      <option value="USD">USD — US Dollar ($)</option>
-                      <option value="EUR">EUR — Euro (€)</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Default Currency</label>
+                    <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="KES">KES — Kenyan Shilling (KSh)</SelectItem>
+                        <SelectItem value="USD">USD — US Dollar ($)</SelectItem>
+                        <SelectItem value="EUR">EUR — Euro (€)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Withholding Tax (WHT) Rate</label>
-                    <select
-                      value={defaultWhtRate}
-                      onChange={(e) => setDefaultWhtRate(e.target.value)}
-                      className="ui-select"
-                    >
-                      <option value="5%">5% — Resident Professional Services</option>
-                      <option value="20%">20% — Non-Resident Fee</option>
-                      <option value="0%">0% — Tax Exempt</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Withholding Tax (WHT) Rate</label>
+                    <Select value={defaultWhtRate} onValueChange={setDefaultWhtRate}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5%">5% — Resident Professional Services</SelectItem>
+                        <SelectItem value="20%">20% — Non-Resident Fee</SelectItem>
+                        <SelectItem value="0%">0% — Tax Exempt</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>
@@ -415,12 +400,12 @@ export default function AdminSettingsPage() {
 
           {/* TAB 6: INTEGRATIONS */}
           {activeTab === 'integrations' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">API Integrations & Storage</h2>
-                <p className="ui-meta">Manage external services connected to KIPSMTHN.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">API Integrations & Storage</h2>
+                <p className="text-sm text-muted-foreground">Manage external services connected to KIPSMTHN.</p>
               </div>
-              <div className="ui-card-content space-y-4">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                 <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">KRA eTIMS Taxpayer Portal Bridge</p>

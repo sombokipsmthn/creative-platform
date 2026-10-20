@@ -12,9 +12,8 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import type { Contract, ContractEvent } from '@/lib/types/contracts';
 import { ContractDocument } from '@/components/contracts/ContractDocument';
-import { ContractBuilder } from '@/components/contracts/ContractBuilder';
-import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
+import { ContractBuilder } from '@/components/contracts/ContractBuilder';
 
 export default function ContractDetailPage({
   params,
@@ -57,19 +56,31 @@ export default function ContractDetailPage({
 
   if (loading) {
     return (
-      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading contract…</p></div></div></div>
+      <div className="min-h-screen min-h-screen p-6">
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+          <p>Loading contract...</p>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><AlertCircle aria-hidden="true" /><p>{error}</p><Button asChild variant="outline"><Link href="/admin/contracts">Back to contracts</Link></Button></div></div></div>
+      <div className="min-h-screen p-6">
+        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 p-4 mb-6">
+          <p>{error}</p>
+        </div>
+      </div>
     );
   }
 
   if (!contract) {
     return (
-      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state"><p>Contract not found.</p><Button asChild variant="outline"><Link href="/admin/contracts">Back to contracts</Link></Button></div></div></div>
+      <div className="min-h-screen p-6">
+        <p>Contract not found.</p>
+        <Button asChild variant="secondary"><Link href="/admin/contracts">Back to Contracts</Link></Button>
+      </div>
     );
   }
 
@@ -129,15 +140,29 @@ export default function ContractDetailPage({
   };
 
   return (
-    <div className="ui-page ui-page-padded">
-      <div className="ui-shell">
-        <AdminPageHeader title={contract.title} description={`Contract #${contract.contractNumber}`} breadcrumb={{ label: 'Contracts', href: '/admin/contracts' }} primaryAction={<div className="admin-page-actions"><Button type="button" onClick={handleSend} disabled={contract.status !== 'draft' || isSending}>{isSending ? <Loader2 aria-hidden="true" /> : 'Send contract'}</Button><Button type="button" variant="outline" onClick={handleCopyLink}>Copy signing link</Button><Button type="button" variant="outline" onClick={handleSaveAsTemplate}>Save as template</Button></div>} />
+    <div className="min-h-screen min-h-screen p-6">
+      <header className="mb-8">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">{contract.title}</h1>
+            <p className="text-sm text-gray-600 dark:text-gray-400">Contract #{contract.contractNumber}</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Button onClick={handleSend} variant="primary" disabled={contract.status !== 'draft' || isSending}>
+              {isSending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Send Contract'}
+            </Button>
+            <Button onClick={handleCopyLink} variant="secondary">Copy Signing Link</Button>
+            <Button onClick={handleSaveAsTemplate} variant="secondary">Save as Template</Button>
+            <Button asChild variant="ghost"><Link href="/admin/contracts">Back to Contracts</Link></Button>
+          </div>
+        </div>
+      </header>
 
       {/* Status cards */}
-      <div className="">
-        <div className="ui-card">
-          <h3 className="">Status</h3>
-          <p className="">
+      <div className="grid gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Status</h3>
+          <p className="mt-2">
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${
               getStatusColor(contract.status)
             }`}>
@@ -145,37 +170,37 @@ export default function ContractDetailPage({
             </span>
           </p>
           {contract.sentAt && (
-            <p className="">
+            <p className="mt-2 text-xs text-gray-600 dark:text-gray-400">
               Sent: {new Date(contract.sentAt).toLocaleDateString()}
             </p>
           )}
           {contract.signedAt && (
-            <p className="">
+            <p className="mt-1 text-xs text-gray-600 dark:text-gray-400">
               Signed: {new Date(contract.signedAt).toLocaleDateString()}
             </p>
           )}
         </div>
 
-        <div className="ui-card">
-          <h3 className="">Client</h3>
-          <p className="">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Client</h3>
+          <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-50">
             {contract.client?.name || 'Unknown'}
           </p>
           {contract.client?.company && (
-            <p className="">{contract.client.company}</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400">{contract.client.company}</p>
           )}
         </div>
 
-        <div className="ui-card">
-          <h3 className="">Project</h3>
-          <p className="">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Project</h3>
+          <p className="mt-2 text-sm text-gray-900 dark:text-gray-50">
             {contract.project ? contract.project.name : 'None'}
           </p>
         </div>
 
-        <div className="ui-card">
-          <h3 className="">Financials</h3>
-          <p className="">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Financials</h3>
+          <p className="mt-2 text-sm text-gray-900 dark:text-gray-50">
             {contract.currency}
             {contract.totalAmount != null ? ` ${formatCurrency(contract.totalAmount)}` : ' —'}
           </p>
@@ -183,40 +208,38 @@ export default function ContractDetailPage({
       </div>
 
       {/* Public signing section */}
-      <div className="ui-card">
-        <h2 className="">Client signing link</h2>
-        <p className="">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm mb-6 border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/30">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Client signing link</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Share this secure link with the client to view and sign the contract.
         </p>
-        <div className="">
-          <input readOnly value={publicLink} className="ui-input" aria-label="Client signing link" />
-          <button onClick={handleCopyLink} className="ui-button ui-button-primary">
-            Copy link
-          </button>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+          <input readOnly value={publicLink} className="ui-input flex-1 text-sm" aria-label="Client signing link" />
+          <Button onClick={handleCopyLink} variant="primary" className="whitespace-nowrap">Copy link</Button>
         </div>
       </div>
 
       {/* Contract content */}
-      <div className="ui-card">
-        <h2 className="">Contract Document</h2>
-        <div className="">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-6">Contract Document</h2>
+        <div className="prose prose-sm dark:prose-invert max-w-none">
           <ContractDocument content={contract.content || ''} />
         </div>
       </div>
 
       {/* Activity history */}
       {events.length > 0 && (
-        <div className="ui-card">
-          <h2 className="">Activity History</h2>
-          <div className="">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-4">Activity History</h2>
+          <div className="space-y-3">
             {events.map((event) => (
-              <div key={event.id} className="">
-                <div className="">
-                  <FilePlus className="" />
+              <div key={event.id} className="flex items-center space-x-3 text-sm">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                  <FilePlus className="h-3 w-3" />
                 </div>
-                <div className="">
-                  <p className="">{formatEventType(event.eventType)}</p>
-                  <p className="">
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 dark:text-gray-50">{formatEventType(event.eventType)}</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">
                     {new Date(event.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -226,7 +249,6 @@ export default function ContractDetailPage({
         </div>
       )}
     </div>
-  </div>
   );
 }
 

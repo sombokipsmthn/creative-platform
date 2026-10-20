@@ -102,6 +102,8 @@ This means the repo’s live state is the authoritative source for implementatio
 
 ## Design system
 
+The platform uses shadcn/ui as its single source of truth. The official reference is [shadcn/ui components](https://ui.shadcn.com/docs/components); canonical tokens live in `src/app/globals.css`, shared primitives live in `src/components/ui/`, and the permanent rules are documented in [docs/design-system.md](./docs/design-system.md). Run `npm run design-system:check` to enforce the repository guardrails.
+
 The platform’s UI system is centralized in `src/app/globals.css` and follows a semantic class pattern.
 
 Core patterns:

@@ -19,10 +19,15 @@ function parsePreset(body: unknown) {
     value: {
       name,
       enabled: value.enabled !== false,
+      type: value.type === "image" ? "image" : "text",
       text: text || "KIPSMTHN",
       position: typeof value.position === "string" && positions.has(value.position) ? value.position : "bottom-right",
       opacity: clamp(value.opacity, 0, 100, 55),
       fontSize: clamp(value.fontSize, 12, 160, 42),
+      imageUrl: typeof value.imageUrl === "string" ? value.imageUrl : null,
+      imagePath: typeof value.imagePath === "string" ? value.imagePath : null,
+      imageFilename: typeof value.imageFilename === "string" ? value.imageFilename.slice(0, 180) : null,
+      imageMimeType: value.imageMimeType === "image/png" ? "image/png" : null,
     },
   } as const;
 }
@@ -61,7 +66,8 @@ export async function PATCH(request: Request) {
     if (!id) return NextResponse.json({ error: "Preset ID is required." }, { status: 400 });
     const parsed = parsePreset(body);
     if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
-    const [preset] = await db.update(galleryWatermarkPresets).set({ ...parsed.value, updatedAt: new Date() })
+    const [preset] = await db.update(galleryWatermarkPresets)
+      .set({ ...parsed.value, updatedAt: new Date() })
       .where(and(eq(galleryWatermarkPresets.id, id), eq(galleryWatermarkPresets.creatorId, user.id)))
       .returning();
     if (!preset) return NextResponse.json({ error: "Preset not found." }, { status: 404 });

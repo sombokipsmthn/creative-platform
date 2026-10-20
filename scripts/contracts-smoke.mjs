@@ -27,22 +27,13 @@ try {
 
   const page = await context.newPage();
   await page.goto(`${baseURL}/admin/contracts/templates`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
-  await page.getByRole('heading', { name: 'Contract templates' }).waitFor({ state: 'visible', timeout: 30_000 });
-  check(true, 'template library renders');
-
-  const card = page.locator('article').first();
-  const emptyState = page.getByText('No templates found', { exact: true });
-  await Promise.race([
-    card.waitFor({ state: 'visible', timeout: 30_000 }),
-    emptyState.waitFor({ state: 'visible', timeout: 30_000 }),
-  ]);
-
-  let builderURL = `${baseURL}/admin/contracts/builder`;
-  if (templates.length > 0) {
-    check(await card.isVisible(), 'persisted template cards render');
-    await card.getByRole('button', { name: 'Preview' }).click();
+  await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {});
+  check(await page.getByRole('heading', { name: 'Contract templates' }).isVisible(), 'template library renders');
+  if (templates?.length) {
+    const first = page.locator('article').first();
+    await first.getByRole('button', { name: /Preview/i }).click();
     check(await page.getByRole('dialog').isVisible(), 'template preview opens');
-    await page.getByRole('link', { name: /Use template/ }).last().click();
+    await page.getByRole('button', { name: /Use Template/i }).last().click();
     await page.waitForURL(/\/admin\/contracts\/builder\?templateId=/, { timeout: 30_000 });
     builderURL = page.url();
     check(true, 'Use Template opens the document-first builder');

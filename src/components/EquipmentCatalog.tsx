@@ -137,11 +137,11 @@ export default function EquipmentCatalog({
   }
 
   return (
-    <div className="">
-      <div className="">
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <form
           role="search"
-          className=""
+          className="relative w-full lg:max-w-md"
           onSubmit={(event) => event.preventDefault()}
         >
           <label htmlFor="equipment-search" className="sr-only">
@@ -149,7 +149,7 @@ export default function EquipmentCatalog({
           </label>
           <Search
             aria-hidden="true"
-            className=""
+            className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
           />
           <input
             id="equipment-search"
@@ -158,16 +158,16 @@ export default function EquipmentCatalog({
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search cameras, lighting, audio…"
             autoComplete="off"
-            className="placeholder:text-slate-400"
+            className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-purple-600 focus:ring-4 focus:ring-purple-100 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-500 dark:focus:ring-purple-950/60"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery("")}
-              className=""
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600 dark:hover:text-white"
               aria-label="Clear search"
             >
-              <X className="" />
+              <X className="h-4 w-4" />
             </button>
           )}
         </form>
@@ -175,7 +175,7 @@ export default function EquipmentCatalog({
         <p
           id="equipment-results-count"
           aria-live="polite"
-          className=""
+          className="text-xs font-sans uppercase tracking-widest text-slate-500 dark:text-zinc-500"
         >
           {filtered.length} {filtered.length === 1 ? "item" : "items"}
           {activeCategory !== "All"
@@ -187,7 +187,7 @@ export default function EquipmentCatalog({
       <div
         role="tablist"
         aria-label="Equipment categories"
-        className="-mx-1"
+        className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
       >
         {categories.map((category) => {
           const selected = activeCategory === category;
@@ -213,12 +213,12 @@ export default function EquipmentCatalog({
       {filtered.length === 0 ? (
         <div
           role="status"
-          className=""
+          className="rounded-3xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center dark:border-zinc-800 dark:bg-zinc-950"
         >
-          <p className="">
+          <p className="text-lg font-light text-slate-900 dark:text-white">
             No equipment matches those filters.
           </p>
-          <p className="">
+          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
             Try another category, or clear search to browse the full kit.
           </p>
           <button
@@ -227,13 +227,13 @@ export default function EquipmentCatalog({
               setQuery("");
               setActiveCategory("All");
             }}
-            className="btn-primary"
+            className="mt-6 inline-flex rounded-full px-5 py-2.5 text-xs font-sans uppercase tracking-widest btn-primary"
           >
             Reset filters
           </button>
         </div>
       ) : (
-        <ul className="">
+        <ul className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
           {filtered.map((item) => {
             const Icon = CATEGORY_ICONS[item.category] ?? Camera;
             const selected = selectedIds.includes(item.id);
@@ -247,17 +247,17 @@ export default function EquipmentCatalog({
                       : "border-slate-200 dark:border-zinc-800 hover:border-purple-500/40"
                   }`}
                 >
-                  <div className="">
-                    <div className="">
-                      <div className="">
-                        <Icon aria-hidden="true" className="" />
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                        <Icon aria-hidden="true" className="h-5 w-5" />
                       </div>
-                      <div className="">
-                        <span className="">
+                      <div className="flex flex-wrap justify-end gap-2">
+                        <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-sans uppercase tracking-widest text-slate-600 dark:bg-zinc-900 dark:text-zinc-400">
                           {displayCategory(item.category)}
                         </span>
                         {item.isPopular && (
-                          <span className="">
+                          <span className="rounded-full bg-purple-600/15 px-2.5 py-1 text-[10px] font-sans uppercase tracking-widest text-purple-700 dark:text-purple-300">
                             Popular
                           </span>
                         )}
@@ -265,25 +265,25 @@ export default function EquipmentCatalog({
                     </div>
 
                     <div>
-                      <h2 className="">
+                      <h2 className="text-lg font-medium leading-snug text-slate-900 dark:text-white">
                         {item.name}
                       </h2>
-                      <p className="">
+                      <p className="mt-1 text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">
                         {item.brand}
                       </p>
                     </div>
 
-                    <p className="">
+                    <p className="min-h-10 text-sm leading-relaxed text-slate-600 dark:text-zinc-400">
                       {item.specs || "Production-ready equipment available for hire."}
                     </p>
                   </div>
 
-                  <div className="">
+                  <div className="mt-6 flex items-end justify-between gap-4 border-t border-slate-100 pt-4 dark:border-zinc-800">
                     <div>
-                      <p className="">
+                      <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400">
                         Daily rate
                       </p>
-                      <p className="">
+                      <p className="mt-1 text-xl font-medium text-slate-900 dark:text-white">
                         {formatKes(item.dailyRate)}
                       </p>
                     </div>
@@ -307,31 +307,31 @@ export default function EquipmentCatalog({
       )}
 
       {selectedItems.length > 0 && (
-        <aside className="">
-          <div className="">
+        <aside className="sticky bottom-4 z-20 rounded-3xl border border-purple-200 bg-white/95 p-5 shadow-xl backdrop-blur dark:border-purple-900/50 dark:bg-zinc-950/95">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="">
+              <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">
                 Selected kit
               </p>
-              <p className="">
+              <p className="mt-1 text-sm text-slate-600 dark:text-zinc-400">
                 {selectedItems.length} item{selectedItems.length === 1 ? "" : "s"} · estimated daily equipment total
               </p>
-              <p className="">
+              <p className="mt-1 text-2xl font-medium text-slate-900 dark:text-white">
                 {formatKes(kitTotal)}
               </p>
             </div>
 
-            <div className="">
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedIds([])}
-                className="btn-secondary"
+                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest btn-secondary"
               >
                 Clear kit
               </button>
               <Link
                 href={inquiryMailto(selectedItems)}
-                className="btn-primary"
+                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest btn-primary"
               >
                 Request quote
               </Link>

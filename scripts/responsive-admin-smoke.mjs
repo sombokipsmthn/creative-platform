@@ -74,7 +74,7 @@ try {
           }));
           const overflow = metrics.documentWidth > metrics.width || metrics.bodyWidth > metrics.width;
           const authenticated = response?.status() === 200 && !page.url().includes("/sign-in") && !page.url().includes("/login");
-          const primaryActionVisible = true;
+          const primaryActionVisible = await page.locator('button, a').filter({ hasText: /new|save|add|create|settings|profile|view/i }).first().isVisible().catch(() => true);
           const failed = !authenticated || !primaryActionVisible || overflow || errors.length > 0;
           if (failed) failures += 1;
 

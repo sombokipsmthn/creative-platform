@@ -1,17 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
-import { Geist, Geist_Mono } from 'next/font/google';
 import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
-import { Outfit } from "next/font/google";
-import { cn } from "@/lib/utils";
-
-const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
-
-const Analytics = () => null;
+import { Analytics } from '@vercel/analytics/next';
 
 validateEnv();
 
@@ -24,17 +18,17 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
-  title: 'Kipsmthn Creative Platform',
-  description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
+  title: 'Kipsmthn | Creative Platform',
+  description: 'Commercial Photography, Brand Films, Motion Graphics & Startup Ecosystem Storytelling.',
   openGraph: {
-    title: 'Kipsmthn Creative Platform',
-    description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
-    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'Kipsmthn Creative Platform' }],
+    title: 'Kipsmthn | Creative Platform',
+    description: 'Creative infrastructure for photographers, filmmakers and studios in Nairobi.',
+    images: [{ url: '/og-image.svg', width: 1200, height: 630, alt: 'KIPSMTHN — Creative Platform' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Kipsmthn Creative Platform',
-    description: 'A modern, responsive creative platform and portfolio with content management and professional showcase capabilities.',
+    title: 'Kipsmthn | Creative Platform',
+    description: 'Creative infrastructure for photographers, filmmakers and studios in Nairobi.',
     images: ['/og-image.svg'],
   },
   icons: { icon: '/site-icon.svg', shortcut: '/site-icon.svg', apple: '/site-icon.svg' },
@@ -42,7 +36,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={cn("dark", "font-sans", outfit.variable)} suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (
@@ -56,6 +50,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         )}
       </head>
+<<<<<<< HEAD
       <body className="font-sans antialiased selection:bg-primary selection:text-primary-foreground">
         <a
           href="#main-content"
@@ -63,8 +58,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         >
           Skip to main content
         </a>
+=======
+      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
         <QueryProvider>
-          <CreatorProvider><div id="main-content">{children}</div></CreatorProvider>
+          <CreatorProvider>{children}</CreatorProvider>
         </QueryProvider>
         <Analytics />
       </body>

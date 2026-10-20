@@ -4,7 +4,21 @@ import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+<<<<<<< HEAD
+=======
+import StatusBadge from '@/components/admin/StatusBadge';
+import EmptyState from '@/components/admin/EmptyState';
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -103,6 +117,7 @@ function getInitials(project: Pick<Project, 'name'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
+<<<<<<< HEAD
 function statusClass(status: string) {
   if (status === 'active') {
     return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
@@ -122,6 +137,8 @@ function statusClass(status: string) {
 
   return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
 }
+=======
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -138,6 +155,10 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+<<<<<<< HEAD
+=======
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
 
   useEffect(() => {
     let cancelled = false;
@@ -256,6 +277,7 @@ export default function AdminProjectsPage() {
   const draftCount = projects.filter((p) => p.status === 'draft').length;
   const publishedCount = projects.filter((p) => p.visibility === 'public').length;
   const featuredCount = projects.filter((p) => p.featured).length;
+<<<<<<< HEAD
   const hasActiveFilters = Boolean(searchQuery || filterClient || filterStatus !== 'ALL' || filterVisibility !== 'ALL' || filterFeatured !== 'ALL');
 
   function clearFilters() {
@@ -265,6 +287,8 @@ export default function AdminProjectsPage() {
     setFilterVisibility('ALL');
     setFilterFeatured('ALL');
   }
+=======
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
 
   function openCreateModal(clientId?: string) {
     setForm({
@@ -377,7 +401,11 @@ export default function AdminProjectsPage() {
   */
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+=======
+    <div className="min-h-screen max-w-full overflow-x-hidden px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
       <div className="mx-auto max-w-7xl space-y-8">
         <AdminPageHeader
           title="Projects"
@@ -392,6 +420,17 @@ export default function AdminProjectsPage() {
               + New Project
             </Button>
           }
+          secondaryActions={[
+            <Button
+              key="view-toggle"
+              variant="ghost"
+              size="icon"
+              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              aria-label={viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
+            >
+              {viewMode === 'grid' ? '✓' : '□'}
+            </Button>
+          ]}
         />
 
         {error && !isAddProjectOpen && !selectedProject && (
@@ -400,11 +439,16 @@ export default function AdminProjectsPage() {
           </div>
         )}
 
+<<<<<<< HEAD
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+=======
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
           {[
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
             ['Published', publishedCount, 'text-emerald-600 dark:text-emerald-400'],
+<<<<<<< HEAD
             ['Featured', featuredCount, 'text-primary'],
             ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
             ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
@@ -412,17 +456,31 @@ export default function AdminProjectsPage() {
             <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
               <p className={`ui-stat-label ${color}`}>{label}</p>
               <p className="ui-stat-value">{count}</p>
+=======
+            ['Featured', featuredCount, 'text-purple-600 dark:text-purple-400'],
+            ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
+            ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
+          ].map(([label, count, color]) => (
+            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
+              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
+              <p className="text-2xl font-bold">{count}</p>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
             </div>
           ))}
         </div>
 
         <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-2 items-center">
+<<<<<<< HEAD
             <input
+=======
+            <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
               type="text"
               placeholder="Search projects by name, description, client..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
+<<<<<<< HEAD
               className="ui-input w-full md:w-64"
             />
 
@@ -438,6 +496,20 @@ export default function AdminProjectsPage() {
                 </option>
               ))}
             </select>
+=======
+              className="w-full md:w-64"
+            />
+
+            <Select value={filterClient ?? 'all'} onValueChange={(value) => setFilterClient(value === 'all' ? null : value)}>
+              <SelectTrigger className="w-full md:w-64"><SelectValue placeholder="All Clients" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clients</SelectItem>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>{client.name} {client.company ? `(${client.company})` : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs font-sans">
@@ -451,6 +523,7 @@ export default function AdminProjectsPage() {
                 ['draft', draftCount],
               ] as const
             ).map(([status, count]) => (
+<<<<<<< HEAD
               <Button
                 key={status}
                 variant={filterStatus === status ? 'primary' : 'secondary'}
@@ -488,10 +561,19 @@ export default function AdminProjectsPage() {
                 </Button>
               ))}
             </div>
+=======
+              <Button key={status} variant={filterStatus === status ? 'primary' : 'secondary'} onClick={() => setFilterStatus(status)}>
+                {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
+              </Button>
+            ))}
+            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Visibility:</span>{(['ALL', 'public', 'private', 'draft'] as const).map(vis => <Button key={vis} variant={filterVisibility === vis ? 'primary' : 'secondary'} onClick={() => setFilterVisibility(vis)}>{vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}</Button>)}</div>
+            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Featured:</span>{(['ALL', 'true', 'false'] as const).map(feat => <Button key={feat} variant={filterFeatured === feat ? 'primary' : 'secondary'} onClick={() => setFilterFeatured(feat)}>{feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}</Button>)}</div>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
           </div>
         </div>
 
         {loading ? (
+<<<<<<< HEAD
           <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
             <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading projects…</p>
           </div>
@@ -529,6 +611,77 @@ export default function AdminProjectsPage() {
                       <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(project.status)}`}>
                         {statusLabel(project.status)}
                       </span>
+=======
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-w-16 aspect-h-10 rounded-xl border border-dashed animate-pulse">
+                <div className="h-full w-full flex items-center justify-center bg-purple-50 dark:bg-purple-900/20">
+                  <div className="h-12 w-12 rounded-2xl bg-purple-200 dark:bg-purple-800 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">- -</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredProjects.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-24 w-24 rounded-full border border-dashed animate-pulse bg-purple-50 dark:bg-purple-900/20">
+                <div className="h-12 w-12 rounded-full bg-purple-200 dark:bg-purple-800 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">- -</span>
+                </div>
+              </div>
+              <p className="text-lg font-medium text-slate-600 dark:text-zinc-400">No projects found.</p>
+              <p className="text-sm text-slate-500 dark:text-zinc-500">
+                Create a project or adjust your current search and filters.
+              </p>
+              <div className="mt-6">
+                <Button
+                  onClick={() => openCreateModal()}
+                  variant="primary"
+                  className="px-6 py-3"
+                >
+                  Create your first project
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="admin-content-block">
+            {filteredProjects.map((project) => (
+              <div
+                key={project.id}
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+              >
+                <div className="flex min-w-0 items-start gap-4">
+                  <div className="h-12 w-12 shrink-0 rounded-2xl bg-purple-100">
+                    {project.coverMediaId ? (
+                      <div className="h-full w-full bg-purple-100">
+                        <img
+                          src={`/api/projects/${project.id}/media?cover=true`}
+                          alt={`${project.name} cover`}
+                          className="h-full w-full object-cover rounded-2xl"
+                          onError={(e) => {
+                            e.target.src = '/api/projects/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-purple-700 dark:text-purple-300">
+                        {getInitials(project)}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="admin-content-block">
+                    <div className="admin-content-block">
+                      <h3 className="admin-content-block">
+                        {project.name}
+                      </h3>
+                      <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                        {statusLabel(project.status)}
+                      </Badge>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       {project.featured && (
                         <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
                           <Star className="h-3 w-3" />
@@ -585,13 +738,18 @@ export default function AdminProjectsPage() {
                   </div>
                 </div>
 
+<<<<<<< HEAD
                 <div className="flex flex-wrap gap-2 w-full lg:w-auto lg:justify-end">
+=======
+                <div className="admin-content-block">
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   <Button
                     onClick={() => {
                       setError('');
                       setSelectedProject(project);
                     }}
                     variant="secondary"
+<<<<<<< HEAD
                     className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
                   >
                     View project
@@ -600,6 +758,16 @@ export default function AdminProjectsPage() {
                   <Link
                     href={`/admin/projects/${project.id}`}
                     className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-2 text-xs font-sans text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900 transition"
+=======
+                    className="admin-content-block"
+                  >
+                    View project
+                    <ArrowUpRight className="admin-content-block" />
+                  </Button>
+                  <Link
+                    href={`/admin/projects/${project.id}`}
+                    className="admin-content-block"
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   >
                     Edit
                   </Link>
@@ -608,16 +776,26 @@ export default function AdminProjectsPage() {
                       href={`/work/${project.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
+<<<<<<< HEAD
                       className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-sans text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"
                     >
                       <Eye className="h-3.5 w-3.5" />
+=======
+                      className="admin-content-block"
+                    >
+                      <Eye className="admin-content-block" />
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       Preview
                     </a>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
+<<<<<<< HEAD
                     className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
+=======
+                    className="admin-content-block"
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                     onClick={async () => {
                       if (!confirm('Delete this project? This cannot be undone.')) return;
                       try {
@@ -637,7 +815,11 @@ export default function AdminProjectsPage() {
                     }}
                     aria-label="Delete project"
                   >
+<<<<<<< HEAD
                     <Trash2 className="h-4 w-4" />
+=======
+                    <Trash2 className="admin-content-block" />
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   </Button>
                 </div>
               </div>
@@ -658,14 +840,20 @@ export default function AdminProjectsPage() {
               </Button>
 
               <div className="space-y-1">
+<<<<<<< HEAD
                 <p className="ui-eyebrow">PROJECTS</p>
                 <h2 className="ui-section-title">New Project</h2>
+=======
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">PROJECTS</p>
+                <h2 className="text-2xl font-semibold tracking-tight">New Project</h2>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
               </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-1">
+<<<<<<< HEAD
                   <label className="ui-label">Project Name *</label>
                   <input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
                 </div>
@@ -684,33 +872,71 @@ export default function AdminProjectsPage() {
                       </option>
                     ))}
                   </select>
+=======
+                  <label className="text-sm font-medium leading-none">Project Name *</label>
+                  <Input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Client</label>
+                  <Select value={form.clientId || 'none'} onValueChange={(value) => setForm({ ...form, clientId: value === 'none' ? '' : value })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a client (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Select a client (optional)</SelectItem>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name} {client.company ? `(${client.company})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Description</label>
                     <textarea
+=======
+                    <label className="text-sm font-medium leading-none">Description</label>
+                    <Textarea
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       rows={2}
                       placeholder="Brief project description..."
                       value={form.description}
                       onChange={(event) => setForm({ ...form, description: event.target.value })}
+<<<<<<< HEAD
                       className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="ui-label">Short Description</label>
                     <input
+=======
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium leading-none">Short Description</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="One-line summary for portfolio cards"
                       value={form.shortDescription}
                       onChange={(event) => setForm({ ...form, shortDescription: event.target.value })}
+<<<<<<< HEAD
                       className="ui-input"
+=======
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Category</label>
                     <select
                       value={form.category}
@@ -729,40 +955,67 @@ export default function AdminProjectsPage() {
                   <div className="space-y-1">
                     <label className="ui-label">Year</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Category</label>
+                    <Select value={form.category || 'none'} onValueChange={(value) => setForm({ ...form, category: value === 'none' ? '' : value })}>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Select category</SelectItem>
+                        <SelectItem value="Photography">Photography</SelectItem>
+                        <SelectItem value="Videography">Videography</SelectItem>
+                        <SelectItem value="Branding">Branding</SelectItem>
+                        <SelectItem value="UI/UX">UI/UX</SelectItem>
+                        <SelectItem value="Motion">Motion Graphics</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium leading-none">Year</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="e.g. 2026"
                       value={form.year}
                       onChange={(event) => setForm({ ...form, year: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Location</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Location</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="e.g. Nairobi, Kenya"
                       value={form.location}
                       onChange={(event) => setForm({ ...form, location: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Slug</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Slug</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="auto-generated from name"
                       value={form.slug}
                       onChange={(event) => setForm({ ...form, slug: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Status</label>
                     <select
                       value={form.status}
@@ -787,42 +1040,71 @@ export default function AdminProjectsPage() {
                       <option value="public">Public</option>
                       <option value="draft">Draft</option>
                     </select>
+=======
+                    <label className="text-sm font-medium leading-none">Status</label>
+                    <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value as ProjectStatus })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="on hold">On Hold</SelectItem><SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium leading-none">Visibility</label>
+                    <Select value={form.visibility} onValueChange={(value) => setForm({ ...form, visibility: value as 'public' | 'private' | 'draft' })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="private">Private</SelectItem><SelectItem value="public">Public</SelectItem><SelectItem value="draft">Draft</SelectItem></SelectContent>
+                    </Select>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Start Date</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Start Date</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="date"
                       value={form.startDate}
                       onChange={(event) => setForm({ ...form, startDate: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">End Date</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">End Date</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="date"
                       value={form.endDate}
                       onChange={(event) => setForm({ ...form, endDate: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Total Amount</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Total Amount</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="number"
                       placeholder="0"
                       value={form.totalAmount}
                       onChange={(event) => setForm({ ...form, totalAmount: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Currency</label>
                     <select
                       value={form.currency}
@@ -836,40 +1118,71 @@ export default function AdminProjectsPage() {
                       <option value="ZAR">ZAR</option>
                       <option value="NGN">NGN</option>
                     </select>
+=======
+                    <label className="text-sm font-medium leading-none">Currency</label>
+                    <Select value={form.currency} onValueChange={(value) => setForm({ ...form, currency: value })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="KES">KES</SelectItem><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="ZAR">ZAR</SelectItem><SelectItem value="NGN">NGN</SelectItem>
+                      </SelectContent>
+                    </Select>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Payment Terms</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Payment Terms</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="e.g. 50% deposit, 50% on delivery"
                       value={form.paymentTerms}
                       onChange={(event) => setForm({ ...form, paymentTerms: event.target.value })}
+<<<<<<< HEAD
                       className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
                     <label className="ui-label">Revisions Policy</label>
                     <input
+=======
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium leading-none">Revisions Policy</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="e.g. 2 rounds of revisions included"
                       value={form.revisionsPolicy}
                       onChange={(event) => setForm({ ...form, revisionsPolicy: event.target.value })}
+<<<<<<< HEAD
                       className="ui-input"
+=======
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
+<<<<<<< HEAD
                     <label className="ui-label">Licensing Terms</label>
                     <input
+=======
+                    <label className="text-sm font-medium leading-none">Licensing Terms</label>
+                    <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                       type="text"
                       placeholder="e.g. Commercial use rights"
                       value={form.licensingTerms}
                       onChange={(event) => setForm({ ...form, licensingTerms: event.target.value })}
+<<<<<<< HEAD
                       className="ui-input"
                     />
                   </div>
@@ -883,21 +1196,39 @@ export default function AdminProjectsPage() {
                       <option value="false">No</option>
                       <option value="true">Yes</option>
                     </select>
+=======
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium leading-none">Featured</label>
+                    <Select value={form.featured ? 'true' : 'false'} onValueChange={(value) => setForm({ ...form, featured: value === 'true' })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="false">No</SelectItem><SelectItem value="true">Yes</SelectItem></SelectContent>
+                    </Select>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   </div>
                 </div>
 
                 <div className="space-y-1">
+<<<<<<< HEAD
                   <label className="ui-label">Notice Period</label>
                   <input
+=======
+                  <label className="text-sm font-medium leading-none">Notice Period</label>
+                  <Input
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                     type="text"
                     placeholder="e.g. 14 days"
                     value={form.noticePeriod}
                     onChange={(event) => setForm({ ...form, noticePeriod: event.target.value })}
-                    className="ui-input"
                   />
                 </div>
 
+<<<<<<< HEAD
                 <Button type="submit" disabled={saving} variant="primary" className="w-full">
+=======
+                <Button type="submit" disabled={saving} variant="primary" className="admin-content-block">
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                   {saving ? 'Saving Project…' : '+ Create Project'}
                 </Button>
               </form>
@@ -942,8 +1273,8 @@ export default function AdminProjectsPage() {
 
               <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
                 <div>
-                  <p className="ui-label">Project Status</p>
-                  <p className="ui-meta">Changes are saved directly to the database.</p>
+                  <p className="text-sm font-medium leading-none">Project Status</p>
+                  <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
@@ -968,14 +1299,22 @@ export default function AdminProjectsPage() {
               </div>
 
               <div className="space-y-2">
+<<<<<<< HEAD
                 <p className="ui-label">Description</p>
+=======
+                <p className="text-sm font-medium leading-none">Description</p>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">
                   {selectedProject.description || 'No description.'}
                 </p>
               </div>
 
               <div className="space-y-2">
+<<<<<<< HEAD
                 <p className="ui-label">Details</p>
+=======
+                <p className="text-sm font-medium leading-none">Details</p>
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                 <div className="grid gap-4 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
                   <div>Client: {selectedProject.client?.name || 'None'}</div>
                   <div>

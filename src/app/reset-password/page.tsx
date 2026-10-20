@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -29,15 +31,15 @@ function ResetPasswordForm() {
     setIsLoading(false);
   }
 
-  return <form onSubmit={handleSubmit} className="">
-    <input type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} disabled={isLoading || !token} placeholder="New password" className="" />
-    <input type="password" required minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} disabled={isLoading || !token} placeholder="Confirm new password" className="" />
-    {message && <p className="">{message}</p>}
-    {error && <p className="">{error}</p>}
-    <button type="submit" disabled={isLoading || !token} className="">{isLoading ? "Resetting..." : "Reset password"}</button>
+  return <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+    <Input type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} disabled={isLoading || !token} placeholder="New password" />
+    <Input type="password" required minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} disabled={isLoading || !token} placeholder="Confirm new password" />
+    {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{message}</p>}
+    {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
+    <Button type="submit" disabled={isLoading || !token} variant="primary" className="w-full">{isLoading ? "Resetting..." : "Reset password"}</Button>
   </form>;
 }
 
 export default function ResetPasswordPage() {
-  return <main className=""><div className=""><Link href="/sign-in" className="">← Back to sign in</Link><div className=""><h1 className="">Reset your password</h1><p className="">Choose a new password for your workspace.</p><Suspense fallback={<p className="">Loading reset link...</p>}><ResetPasswordForm /></Suspense></div></div></main>;
+  return <main className="min-h-screen bg-slate-50 dark:bg-[#09090b] flex items-center justify-center px-6"><div className="w-full max-w-md"><Link href="/sign-in" className="mb-6 inline-flex text-sm text-zinc-500">← Back to sign in</Link><div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950"><h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Reset your password</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Choose a new password for your workspace.</p><Suspense fallback={<p className="mt-6 text-sm text-slate-500">Loading reset link...</p>}><ResetPasswordForm /></Suspense></div></div></main>;
 }

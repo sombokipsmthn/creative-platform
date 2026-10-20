@@ -45,29 +45,29 @@ export default function WorkPage() {
     : allProjects.filter((p) => p.category === selectedPillar);
 
   return (
-    <div className="">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-100 font-sans selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
 
       {/* 1. HERO SECTION */}
-      <section className="">
-        <div className="" />
+      <section className="relative pt-36 pb-12 px-6 max-w-7xl mx-auto text-center space-y-6">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="">
+        <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400 font-bold">
           KIPSMTHN PORTFOLIO ARCHIVE
         </p>
 
-        <h1 className="">
-          Selected Works Across <span className="">Four Creative Pillars</span>
+        <h1 className="text-4xl font-light tracking-tight text-slate-900 dark:text-white max-w-4xl mx-auto">
+          Selected Works Across <span className="font-normal text-purple-600 dark:text-purple-400">Four Creative Pillars</span>
         </h1>
 
-        <p className="">
+        <p className="text-sm text-slate-500 dark:text-zinc-400 max-w-2xl mx-auto">
           A curated collection of commercial production, brand films, and creative systems from KIPSMTHN Studio.
         </p>
       </section>
 
       {/* 2. FILTER TABS */}
-      <section className="">
-        <div className="">
+      <section className="max-w-7xl mx-auto px-6 mb-12">
+        <div className="flex flex-wrap gap-3 justify-center">
           {['All', 'Branding', 'Photography', 'Videography'].map((pillar) => (
             <button
               key={pillar}
@@ -81,24 +81,24 @@ export default function WorkPage() {
       </section>
 
       {/* 3. PROJECT GRID */}
-      <section className="">
-        <div className="">
+      <section className="max-w-7xl mx-auto px-6 pb-24">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProjects.map((project) => (
-            <Link href={`/work/${project.id}`} key={project.id} className="block">
-              <div className="">
+            <Link href={`/work/${project.id}`} key={project.id} className="group block">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-slate-200 dark:bg-zinc-800">
                 {project.image && (
                   <Image
                     src={project.image}
                     alt={project.name}
                     fill
-                    className=""
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
               </div>
-              <div className="">
-                <p className="">{project.category}</p>
-                <h3 className="">{project.name}</h3>
-                <p className="">{project.description}</p>
+              <div className="mt-4">
+                <p className="text-xs font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400">{project.category}</p>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{project.name}</h3>
+                <p className="text-sm text-slate-500 dark:text-zinc-400">{project.description}</p>
               </div>
             </Link>
           ))}

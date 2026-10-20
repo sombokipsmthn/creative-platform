@@ -2,6 +2,9 @@
 
 import { useState, useCallback } from 'react'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
 
 interface GalleryThemeSelectorProps {
   galleryId: string
@@ -27,66 +30,58 @@ export default function GalleryThemeSelector({
   )
 
   return (
-    <div className="">
+    <div className="space-y-4">
       <div>
-        <h3 className="">
+        <h3 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">
           Select a Gallery Theme
         </h3>
-        <p className="">
+        <p className="text-xs text-[var(--color-text-muted)] mb-4">
           Choose from professionally designed themes. Each provides a unique visual presentation for your gallery.
         </p>
       </div>
 
       {/* Theme grid */}
-      <div className="">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {GALLERY_THEMES.map(theme => {
           const isCurrent = currentThemeId === theme.id
           const isHovered = hoveredTheme === theme.id
 
           return (
-            <div key={theme.id} className="">
-              <button
-                onClick={() => handleThemeSelect(theme.id)}
-                className={`p-4 rounded-lg border transition-all text-left ${
-                  isCurrent
-                    ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
-                    : 'border-[var(--color-border-subtle)] hover:border-[var(--color-border-emphasis)]'
-                }`}
-                disabled={isSaving}
-              >
-                <div className="">
-                  <h4 className="">
+            <div key={theme.id} className="relative group">
+              <Button type="button" onClick={() => handleThemeSelect(theme.id)} disabled={isSaving} variant={isCurrent ? 'primary' : 'outline'} className="h-auto w-full justify-start p-4 text-left">
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="font-semibold text-[var(--color-text-primary)]">
                     {theme.label}
                   </h4>
                   {isCurrent && (
-                    <span className="">
+                    <span className="text-xs font-semibold text-[var(--color-accent)]">
                       ✓
                     </span>
                   )}
                 </div>
-                <p className="">
+                <p className="text-xs text-[var(--color-text-muted)] mb-3">
                   {theme.description}
                 </p>
-                <div className="">
+                <div className="flex gap-2">
                   <div
-                    className=""
-
+                    className="w-6 h-6 rounded border border-[var(--color-border-subtle)]"
+                    style={{ backgroundColor: theme.preset.accentColor }}
                   />
                   <div
-                    className=""
-
+                    className="w-6 h-6 rounded border border-[var(--color-border-subtle)]"
+                    style={{ backgroundColor: theme.preset.backgroundColor }}
                   />
                   <div
-                    className=""
-
+                    className="w-6 h-6 rounded border border-[var(--color-border-subtle)]"
+                    style={{ backgroundColor: theme.preset.textColor }}
                   />
                 </div>
-              </button>
+              </Button>
 
               {/* Theme preview on hover */}
               {isHovered && (
-                <div className="">
-                  <div className="">
+                <div className="absolute left-0 top-0 w-full h-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="text-[var(--color-text-muted)] text-sm">
                     Preview
                   </div>
                 </div>
@@ -97,22 +92,13 @@ export default function GalleryThemeSelector({
       </div>
 
       {/* Custom theme name input */}
-      <div className="">
-        <label className="block">
+      <div className="border-t border-[var(--color-border-subtle)] pt-4">
+        <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
           Save as Custom Theme (Optional)
         </label>
-        <input
-          type="text"
-          value={customThemeName}
-          onChange={(e) => setCustomThemeName(e.target.value)}
-          placeholder="My Custom Theme"
-          className={`w-full gallery-input ${
-            isSaving ? 'opacity-50 cursor-not-allowed' : ''
-          }`}
-          disabled={isSaving}
-        />
+        <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
         {customThemeName && (
-          <p className="">
+          <p className="text-xs text-[var(--color-text-muted)] mt-1">
             Will be saved as a custom theme when you select a theme above.
           </p>
         )}

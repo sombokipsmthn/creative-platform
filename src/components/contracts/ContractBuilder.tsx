@@ -16,6 +16,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { Contract, ContractTemplate, Client, Project } from '@/lib/types/contracts';
 import { createContract, updateContract, fetchClients, fetchProjects } from '@/lib/api/contracts';
 import { EditableContractDocument } from './EditableContractDocument';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SelectCompat } from '@/components/ui/select-compat';
 import {
   getFieldMetadata,
   getRequiredFields,
@@ -52,9 +55,12 @@ export function ContractBuilder({
   );
   const [template, setTemplate] = useState<ContractTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
+<<<<<<< HEAD
   const [draftId, setDraftId] = useState<string | undefined>(contractId);
   const [templateError, setTemplateError] = useState('');
 
+=======
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
   const [currency, setCurrency] = useState(initialContract?.currency ?? 'KES');
   const [error, setError] = useState('');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -78,18 +84,22 @@ export function ContractBuilder({
     queryFn: async () => {
       const res = await fetch('/api/contracts/templates');
       if (!res.ok) throw new Error('Failed to fetch templates');
-      const data = await res.json();
-      const templates = Array.isArray(data) ? data : Array.isArray(data?.templates) ? data.templates : [];
-      return templates;
+      return res.json();
     },
     enabled: !!templateId,
   });
 
   // Load the selected template, or restore the immutable snapshot for an existing draft.
   useEffect(() => {
+<<<<<<< HEAD
     if (template) return;
     if (templateId && templatesQuery.data) {
       const found = templatesQuery.data.find((item: ContractTemplate) => item.id === templateId);
+=======
+    if (templateId && templatesQuery.data && !template) {
+      const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
       if (found) setTemplate(found);
       else setTemplateError('The selected template is unavailable.');
       return;
@@ -119,12 +129,11 @@ export function ContractBuilder({
   useEffect(() => {
     if (!template) return;
 
-    setValues((currentValues) => {
-      const newValues: Record<string, string> = { ...currentValues };
-      const clientFieldKeys = getClientFields();
-      const projectFieldKeys = getProjectFields();
+    const newValues: Record<string, string> = { ...values };
+    const clientFieldKeys = getClientFields();
+    const projectFieldKeys = getProjectFields();
 
-      // Populate client fields
+    // Populate client fields
     if (selectedClient) {
       if (clientFieldKeys.includes('client_name') && !newValues.client_name) {
         newValues.client_name = selectedClient.name || '';
@@ -143,7 +152,7 @@ export function ContractBuilder({
       }
     }
 
-      // Populate project fields
+    // Populate project fields
     if (selectedProject) {
       if (projectFieldKeys.includes('project_name') && !newValues.project_name) {
         newValues.project_name = selectedProject.name || '';
@@ -184,13 +193,13 @@ export function ContractBuilder({
       }
     }
 
-      // Set default effective date
+    // Set default effective date
     if (!newValues.effective_date && template.variables?.includes('effective_date')) {
       newValues.effective_date = new Date().toISOString().slice(0, 10);
     }
 
-      return newValues;
-    });
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setValues(newValues);
   }, [template, selectedClient, selectedProject]);
 
   // Get required fields for this template
@@ -228,24 +237,23 @@ export function ContractBuilder({
   // Save mutation
   const saveMutation = useMutation({
     mutationFn: async () => {
-      if (draftId) {
-        return updateContract(draftId, {
+      if (mode === 'edit' && contractId) {
+        return updateContract(contractId, {
           title: title.trim(),
           content: resolvedContent,
           currency,
         });
+      } else {
+        if (!selectedClient) throw new Error('Please select a client');
+        return createContract({
+          title: title.trim(),
+          clientId: selectedClient.id,
+          projectId: selectedProject?.id || null,
+          templateId: template?.id,
+          content: resolvedContent,
+          currency,
+        });
       }
-      if (!selectedClient) throw new Error('Please select a client');
-      const created = await createContract({
-        title: title.trim(),
-        clientId: selectedClient.id,
-        projectId: selectedProject?.id || null,
-        templateId: template?.id,
-        content: resolvedContent,
-        currency,
-      });
-      setDraftId(created.id);
-      return created;
     },
     onSuccess: (contract) => {
       setSaveStatus('saved');
@@ -411,35 +419,33 @@ export function ContractBuilder({
 
   if (isLoading) {
     return (
-      <div className="ui-page">
-        <div className="">
-          <Loader2 className="" />
-          <p className="">Loading contract builder...</p>
+      <div className="ui-page min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+          <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="ui-page">
-      <div className="">
+    <div className="ui-page py-8">
+      <div className="mx-auto max-w-5xl px-6">
         {step === 1 ? (
           <>
             {/* Header */}
-            <div className="">
-              <button onClick={() => router.back()} className="ui-button ui-button-ghost">
-                <ArrowLeft className="" /> Back
-              </button>
-              <div className="">
+            <div className="mb-6 flex items-center justify-between">
+              <Button onClick={() => router.back()} variant="ghost"><ArrowLeft className="h-4 w-4" /> Back</Button>
+              <div className="flex items-center gap-4">
                 {saveStatus === 'saving' && (
-                  <div className="">
-                    <Loader2 className="" />
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Saving…
                   </div>
                 )}
                 {saveStatus === 'saved' && (
-                  <div className="">
-                    <Check className="" />
+                  <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                    <Check className="h-4 w-4" />
                     Saved
                   </div>
                 )}
@@ -448,19 +454,19 @@ export function ContractBuilder({
 
             {/* Errors */}
             {error && (
-              <div className="">
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
                 {error}
               </div>
             )}
 
             {/* Validation */}
             {validationErrors.length > 0 && (
-              <div className="">
-                <div className="">
-                  <AlertCircle className="" />
+              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-200">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
                   <div>
-                    <p className="">{validationErrors.length} items need your attention</p>
-                    <ul className="">
+                    <p className="font-medium">{validationErrors.length} items need your attention</p>
+                    <ul className="mt-2 space-y-1">
                       {validationErrors.map((field) => (
                         <li key={field}>
                           • {getFieldMetadata(field).label}
@@ -473,11 +479,11 @@ export function ContractBuilder({
             )}
 
             {/* Document Toolbar */}
-            <div className="">
+            <div className="mb-6 rounded-lg bg-white dark:bg-gray-800 px-6 py-4 border border-gray-200 dark:border-gray-700 space-y-4">
               {/* Contract Info */}
-              <div className="">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Contract Title
                   </label>
                   <input
@@ -485,21 +491,21 @@ export function ContractBuilder({
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Brand Photography Agreement"
-                    className="ui-input"
+                    className="ui-input w-full text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Client
                   </label>
-                  <select
+                  <SelectCompat
                     value={selectedClient?.id ?? ''}
                     onChange={(e) => {
                       const client = clientsQuery.data?.find((c) => c.id === e.target.value) ?? null;
                       setSelectedClient(client);
                     }}
-                    className="ui-input"
+                    className="ui-input w-full text-sm"
                     disabled={mode === 'edit'}
                   >
                     <option value="">Select a client...</option>
@@ -509,45 +515,45 @@ export function ContractBuilder({
                         {client.company ? ` (${client.company})` : ''}
                       </option>
                     ))}
-                  </select>
+                  </SelectCompat>
                 </div>
 
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Project (optional)
                   </label>
                   {isCreatingProject ? (
-                    <div className="">
+                    <div className="space-y-2">
                       <input
                         type="text"
                         value={newProject.name}
                         onChange={(e) => setNewProject({...newProject, name: e.target.value})}
                         placeholder="Project name"
-                        className="ui-input"
+                        className="ui-input w-full text-sm"
                       />
-                      <select
+                      <SelectCompat
                         value={newProject.status}
                         onChange={(e) => setNewProject({...newProject, status: e.target.value})}
-                        className="ui-input"
+                        className="ui-input w-full text-sm"
                       >
                         <option value="active">Active</option>
                         <option value="draft">Draft</option>
                         <option value="completed">Completed</option>
                         <option value="on hold">On Hold</option>
                         <option value="cancelled">Cancelled</option>
-                      </select>
-                      <div className="">
+                      </SelectCompat>
+                      <div className="grid gap-2 grid-cols-2">
                         <input
                           type="date"
                           value={newProject.startDate}
                           onChange={(e) => setNewProject({...newProject, startDate: e.target.value})}
-                          className="ui-input"
+                          className="ui-input w-full text-sm"
                         />
                         <input
                           type="date"
                           value={newProject.endDate}
                           onChange={(e) => setNewProject({...newProject, endDate: e.target.value})}
-                          className="ui-input"
+                          className="ui-input w-full text-sm"
                         />
                       </div>
                       <textarea
@@ -555,32 +561,21 @@ export function ContractBuilder({
                         onChange={(e) => setNewProject({...newProject, description: e.target.value})}
                         placeholder="Description"
                         rows={2}
-                        className="ui-input"
+                        className="ui-input w-full text-sm"
                       />
-                      <div className="">
-                        <button
-                          onClick={() => setIsCreatingProject(false)}
-                          className="ui-button ui-button-ghost"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleCreateProject}
-                          className="ui-button ui-button-primary"
-                        >
-                          Create Project
-                        </button>
+                      <div className="flex justify-end mt-2">
+                        <Button onClick={() => setIsCreatingProject(false)} variant="ghost">Cancel</Button><Button onClick={handleCreateProject} variant="primary">Create Project</Button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <select
+                      <SelectCompat
                         value={selectedProject?.id ?? ''}
                         onChange={(e) => {
                           const project = projectsQuery.data?.find((p) => p.id === e.target.value) ?? null;
                           setSelectedProject(project);
                         }}
-                        className="ui-input"
+                        className="ui-input w-full text-sm"
                       >
                         <option value="">No project</option>
                         {selectedClient ? (
@@ -592,14 +587,9 @@ export function ContractBuilder({
                               </option>
                             ))
                         ) : []}
-                      </select>
+                      </SelectCompat>
                       {selectedClient && !projectsQuery.data?.some(p => p.clientId === selectedClient.id) && (
-                        <button
-                          onClick={() => setIsCreatingProject(true)}
-                          className="ui-button ui-button-secondary"
-                        >
-                          Create New Project
-                        </button>
+                        <Button onClick={() => setIsCreatingProject(true)} variant="secondary" className="mt-2 w-full">Create New Project</Button>
                       )}
                     </>
                   )}
@@ -607,32 +597,36 @@ export function ContractBuilder({
               </div>
 
               {/* Completion */}
-              <div className="">
-                <div className="">
-                  <p className="">
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
                     Contract completion
                   </p>
-                  <p className="">
+                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                     {completionStats.percentage}%
                   </p>
                 </div>
-                <div className="">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                   <div
+<<<<<<< HEAD
                     className="bg-foreground"
+=======
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+>>>>>>> c898786fba874637680566941fd0b37ceea58254
                     style={{ width: `${completionStats.percentage}%` }}
                   />
                 </div>
-                <p className="">
+                <p className="text-xs text-gray-500 dark:text-gray-500">
                   {completionStats.completed} / {completionStats.total} required fields complete
                 </p>
               </div>
             </div>
 
             {/* Document */}
-            <div className="">
-              <div className="">
+            <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 shadow-sm mb-6">
+              <div className="max-w-3xl mx-auto space-y-6">
                 {title && (
-                  <h1 className="">{title}</h1>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-50">{title}</h1>
                 )}
 
                 {template && (
@@ -651,43 +645,31 @@ export function ContractBuilder({
             </div>
 
             {/* Actions */}
-            <div className="">
-              <p className="">
+            <div className="flex gap-3 justify-between items-center">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Editing {mode === 'new' ? 'new contract' : 'draft'}
               </p>
-              <div className="">
-                <button
-                  onClick={handleSaveDraft}
-                  disabled={saveMutation.isPending || saveStatus === 'saving'}
-                  className="ui-button ui-button-secondary"
-                >
+              <div className="flex gap-3">
+                <Button onClick={handleSaveDraft} disabled={saveMutation.isPending || saveStatus === 'saving'} variant="secondary">
                   {saveStatus === 'saving' ? (
                     <>
-                      <Loader2 className="" /> Saving…
+                      <Loader2 className="h-4 w-4 animate-spin" /> Saving…
                     </>
                   ) : (
                     <>
-                      <Save className="" /> Save Draft
+                      <Save className="h-4 w-4" /> Save Draft
                     </>
                   )}
-                </button>
+                </Button>
 
                 {mode === 'edit' ? (
-                  <button
-                    onClick={handleValidateAndSend}
-                    className="ui-button ui-button-primary"
-                    disabled={saveMutation.isPending}
-                  >
-                    <Send className="" /> Send Contract
-                  </button>
+                  <Button onClick={handleValidateAndSend} variant="primary" disabled={saveMutation.isPending}>
+                    <Send className="h-4 w-4" /> Send Contract
+                  </Button>
                 ) : (
-                  <button
-                    onClick={handleNext}
-                    className="ui-button ui-button-primary"
-                    disabled={saveMutation.isPending}
-                  >
-                    <Send className="" /> Next
-                  </button>
+                  <Button onClick={handleNext} variant="primary" disabled={saveMutation.isPending}>
+                    <Send className="h-4 w-4" /> Next
+                  </Button>
                 )}
               </div>
             </div>
@@ -695,20 +677,18 @@ export function ContractBuilder({
         ) : (
           <>
             {/* Header */}
-            <div className="">
-              <button onClick={() => setStep(1)} className="ui-button ui-button-ghost">
-                <ArrowLeft className="" /> Back to Edit
-              </button>
-              <div className="">
+            <div className="mb-6 flex items-center justify-between">
+              <Button onClick={() => setStep(1)} variant="ghost"><ArrowLeft className="h-4 w-4" /> Back to Edit</Button>
+              <div className="flex items-center gap-4">
                 {saveStatus === 'saving' && (
-                  <div className="">
-                    <Loader2 className="" />
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Saving…
                   </div>
                 )}
                 {saveStatus === 'saved' && (
-                  <div className="">
-                    <Check className="" />
+                  <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
+                    <Check className="h-4 w-4" />
                     Saved
                   </div>
                 )}
@@ -717,35 +697,35 @@ export function ContractBuilder({
 
             {/* Errors */}
             {error && (
-              <div className="">
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
                 {error}
               </div>
             )}
 
             {/* Contract Summary */}
-            <div className="">
-              <div className="">
+            <div className="mb-6 rounded-lg bg-white dark:bg-gray-800 px-6 py-4 border border-gray-200 dark:border-gray-700">
+              <div className="grid gap-4 md:grid-cols-3">
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Contract Title
                   </label>
-                  <p className="ui-input">{title}</p>
+                  <p className="ui-input w-full text-sm text-gray-900 dark:text-gray-50">{title}</p>
                 </div>
 
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Client
                   </label>
-                  <p className="ui-input">
+                  <p className="ui-input w-full text-sm text-gray-900 dark:text-gray-50">
                     {selectedClient ? `${selectedClient.name} ${selectedClient.company ? `(${selectedClient.company})` : ''}` : 'No client selected'}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Project
                   </label>
-                  <p className="ui-input">
+                  <p className="ui-input w-full text-sm text-gray-900 dark:text-gray-50">
                     {selectedProject ? selectedProject.name : 'No project'}
                   </p>
                 </div>
@@ -753,12 +733,12 @@ export function ContractBuilder({
             </div>
 
             {/* Contract Content (Read-only) */}
-            <div className="">
-              <div className="">
+            <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-8 shadow-sm mb-6">
+              <div className="prose prose-sm max-w-none text-gray-900 dark:text-gray-50">
                 {!!resolvedContent ? (
                   <>
                     {resolvedContent.split('\n\n').map((paragraph, index) => (
-                      <p key={index} className="">
+                      <p key={index} className="mb-6 leading-7">
                         {paragraph.split('\n').map((line, lineIndex) => (
                           <>
                             {line}
@@ -769,43 +749,31 @@ export function ContractBuilder({
                     ))}
                   </>
                 ) : (
-                  <p className="">No content</p>
+                  <p className="text-gray-500 italic">No content</p>
                 )}
               </div>
             </div>
 
             {/* Actions */}
-            <div className="">
-              <p className="">
+            <div className="flex gap-3 justify-between items-center">
+              <p className="text-xs text-gray-600 dark:text-gray-400">
                 Review contract details
               </p>
-              <div className="">
+              <div className="flex gap-3">
                 {selectedProject ? null : (
-                  <button
-                    onClick={() => {
-                      setStep(1);
-                      setIsCreatingProject(true);
-                    }}
-                    className="ui-button ui-button-secondary"
-                  >
-                    Create New Project
-                  </button>
+                  <Button onClick={() => { setStep(1); setIsCreatingProject(true); }} variant="secondary">Create New Project</Button>
                 )}
-                <button
-                  onClick={handleSaveAndContinue}
-                  disabled={saveMutation.isPending || saveStatus === 'saving'}
-                  className="ui-button ui-button-primary"
-                >
+                <Button onClick={handleSaveAndContinue} disabled={saveMutation.isPending || saveStatus === 'saving'} variant="primary">
                   {saveStatus === 'saving' ? (
                     <>
-                      <Loader2 className="" /> Saving…
+                      <Loader2 className="h-4 w-4 animate-spin" /> Saving…
                     </>
                   ) : (
                     <>
-                      <Save className="" /> Save & Continue
+                      <Save className="h-4 w-4" /> Save & Continue
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </>

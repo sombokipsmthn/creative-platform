@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SelectCompat } from '@/components/ui/select-compat';
 
 /* =========================================================
    TYPES
@@ -1346,36 +1347,36 @@ export default function NewQuotePage() {
   ======================================================= */
 
   return (
-    <div className="">
-      <div className="">
+    <div className="min-h-screen px-6 py-10">
+      <div className="max-w-6xl mx-auto">
         <form
           onSubmit={
             handleSubmit
           }
-          className=""
+          className="space-y-8"
         >
           {/* =================================================
               HEADER
           ================================================= */}
 
-          <div className="">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
               <Link
                 href="/admin/quotes"
-                className=""
+                className="text-[10px] font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400"
               >
                 ← Quotes
               </Link>
 
-              <p className="">
+              <p className="mt-5 text-[10px] font-sans uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400 font-semibold">
                 Sales & Production
               </p>
 
-              <h1 className="">
+              <h1 className="mt-2 text-4xl font-light tracking-tight text-slate-900 dark:text-white">
                 New Quote
               </h1>
 
-              <p className="">
+              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
                 Build a production
                 estimate from
                 equipment, crew
@@ -1384,10 +1385,10 @@ export default function NewQuotePage() {
               </p>
             </div>
 
-            <div className="">
+            <div className="flex gap-3">
               <Link
                 href="/admin/quotes"
-                className=""
+                className="px-5 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-sans uppercase tracking-widest text-slate-600 dark:text-zinc-400"
               >
                 Cancel
               </Link>
@@ -1395,7 +1396,7 @@ export default function NewQuotePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className=""
+                className="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
               >
                 {saving
                   ? "Saving..."
@@ -1409,8 +1410,8 @@ export default function NewQuotePage() {
           ================================================= */}
 
           {error && (
-            <div className="">
-              <p className="">
+            <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-5 py-4">
+              <p className="text-sm text-red-600 dark:text-red-400">
                 {error}
               </p>
             </div>
@@ -1420,19 +1421,19 @@ export default function NewQuotePage() {
               QUOTE DETAILS
           ================================================= */}
 
-          <section className="">
-            <div className="">
-              <h2 className="">
+          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+            <div className="mb-6">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                 Quote Details
               </h2>
 
-              <p className="">
+              <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
                 Client and project
                 information.
               </p>
             </div>
 
-            <div className="">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* TITLE */}
 
               <label className="block">
@@ -1472,7 +1473,7 @@ export default function NewQuotePage() {
                   Client
                 </span>
 
-                <select
+                <SelectCompat
                   value={
                     clientId
                   }
@@ -1558,7 +1559,7 @@ export default function NewQuotePage() {
                       </option>
                     )
                   )}
-                </select>
+                </SelectCompat>
               </label>
 
               {/* PROJECT */}
@@ -1602,7 +1603,7 @@ export default function NewQuotePage() {
                   Currency
                 </span>
 
-                <select
+                <SelectCompat
                   value={
                     currency
                   }
@@ -1633,7 +1634,7 @@ export default function NewQuotePage() {
                   <option value="GBP">
                     GBP
                   </option>
-                </select>
+                </SelectCompat>
               </label>
 
               {/* VALID UNTIL */}
@@ -1769,17 +1770,17 @@ export default function NewQuotePage() {
               LINE ITEMS
           ================================================= */}
 
-          <section className="">
+          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-visible">
             {/* HEADER */}
 
-            <div className="">
-              <div className="">
+            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="">
+                  <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                     Line Items
                   </h2>
 
-                  <p className="">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
                     Select a category
                     first. The
                     description
@@ -1789,13 +1790,13 @@ export default function NewQuotePage() {
                   </p>
                 </div>
 
-                <div className="">
+                <div className="flex gap-2">
                   <button
                     type="button"
                     onClick={
                       addEquipmentItem
                     }
-                    className=""
+                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-sans uppercase tracking-widest font-semibold"
                   >
                     + Equipment
                   </button>
@@ -1805,7 +1806,7 @@ export default function NewQuotePage() {
                     onClick={
                       addCustomItem
                     }
-                    className=""
+                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-sans uppercase tracking-widest"
                   >
                     + Custom Item
                   </button>
@@ -1815,7 +1816,7 @@ export default function NewQuotePage() {
 
             {/* LINE ITEM ROWS */}
 
-            <div className="">
+            <div className="divide-y divide-slate-100 dark:divide-zinc-900">
               {items.map(
                 (
                   item,
@@ -1841,18 +1842,18 @@ export default function NewQuotePage() {
                       key={
                         item.id
                       }
-                      className=""
+                      className="p-6"
                     >
                       {/* ITEM HEADER */}
 
-                      <div className="">
-                        <div className="">
-                          <span className="">
+                      <div className="flex items-center justify-between mb-5">
+                        <div className="flex items-center gap-3">
+                          <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-sans">
                             {index +
                               1}
                           </span>
 
-                          <span className="">
+                          <span className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                             {item.category ||
                               "Line Item"}
                           </span>
@@ -1865,7 +1866,7 @@ export default function NewQuotePage() {
                               item.id
                             )
                           }
-                          className=""
+                          className="text-xs text-red-500 hover:text-red-700"
                         >
                           Remove
                         </button>
@@ -1873,12 +1874,12 @@ export default function NewQuotePage() {
 
                       {/* GRID */}
 
-                      <div className="">
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
                         {/* =================================================
                             CATEGORY
                         ================================================= */}
 
-                        <div className="">
+                        <div className="lg:col-span-3">
                           <label className="block">
                             <span
                               className={
@@ -1888,7 +1889,7 @@ export default function NewQuotePage() {
                               Category
                             </span>
 
-                            <select
+                            <SelectCompat
                               value={
                                 item.category ||
                                 ""
@@ -1934,7 +1935,7 @@ export default function NewQuotePage() {
                                   </option>
                                 )
                               )}
-                            </select>
+                            </SelectCompat>
                           </label>
                         </div>
 
@@ -1944,7 +1945,7 @@ export default function NewQuotePage() {
                             Category controls this list.
                         ================================================= */}
 
-                        <div className="">
+                        <div className="lg:col-span-5">
                           <label className="block">
                             <span
                               className={
@@ -1954,7 +1955,7 @@ export default function NewQuotePage() {
                               Description
                             </span>
 
-                            <div className="">
+                            <div className="relative mt-2">
                               <input
                                 type="text"
                                 value={
@@ -2018,16 +2019,16 @@ export default function NewQuotePage() {
 
                               {isOpen &&
                                 item.category && (
-                                  <div className="">
-                                    <div className="">
-                                      <p className="">
+                                  <div className="absolute z-[100] mt-2 left-0 right-0 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
+                                      <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
                                         {
                                           item.category
                                         }{" "}
                                         options
                                       </p>
 
-                                      <span className="">
+                                      <span className="text-[10px] font-sans text-slate-400 dark:text-zinc-600">
                                         {
                                           options.length
                                         }{" "}
@@ -2035,17 +2036,17 @@ export default function NewQuotePage() {
                                       </span>
                                     </div>
 
-                                    <div className="">
+                                    <div className="max-h-80 overflow-y-auto">
                                       {options.length ===
                                         0 ? (
-                                        <div className="">
-                                          <p className="">
+                                        <div className="px-4 py-8 text-center">
+                                          <p className="text-xs text-slate-500 dark:text-zinc-500">
                                             No matching{" "}
                                             {item.category.toLowerCase()}{" "}
                                             items found.
                                           </p>
 
-                                          <p className="">
+                                          <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-600">
                                             Try another search term.
                                           </p>
                                         </div>
@@ -2065,17 +2066,17 @@ export default function NewQuotePage() {
                                                   option
                                                 )
                                               }
-                                              className=""
+                                              className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900 border-b border-slate-100 dark:border-zinc-900 last:border-b-0 transition"
                                             >
-                                              <div className="">
-                                                <div className="">
-                                                  <p className="">
+                                              <div className="flex items-start justify-between gap-3">
+                                                <div className="min-w-0">
+                                                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                                                     {
                                                       option.label
                                                     }
                                                   </p>
 
-                                                  <p className="">
+                                                  <p className="mt-1 text-[10px] uppercase tracking-wider text-slate-400 dark:text-zinc-600">
                                                     {option.type ===
                                                       "equipment"
                                                       ? `${option.category}${option.subcategory
@@ -2091,7 +2092,7 @@ export default function NewQuotePage() {
 
                                                 {option.rate >
                                                   0 && (
-                                                    <span className="">
+                                                    <span className="shrink-0 text-xs font-sans text-slate-600 dark:text-zinc-400">
                                                       {formatAmount(
                                                         option.rate,
                                                         currency
@@ -2118,7 +2119,7 @@ export default function NewQuotePage() {
                             QUANTITY
                         ================================================= */}
 
-                        <div className="">
+                        <div className="lg:col-span-1">
                           <label className="block">
                             <span
                               className={
@@ -2146,7 +2147,7 @@ export default function NewQuotePage() {
                                   )
                                 )
                               }
-                              className=""
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                             />
                           </label>
                         </div>
@@ -2155,7 +2156,7 @@ export default function NewQuotePage() {
                             UNIT
                         ================================================= */}
 
-                        <div className="">
+                        <div className="lg:col-span-1">
                           <label className="block">
                             <span
                               className={
@@ -2180,7 +2181,7 @@ export default function NewQuotePage() {
                                     .value
                                 )
                               }
-                              className=""
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                             />
                           </label>
                         </div>
@@ -2191,7 +2192,7 @@ export default function NewQuotePage() {
                             THIS IS THE ONLY AMOUNT FIELD.
                         ================================================= */}
 
-                        <div className="">
+                        <div className="lg:col-span-2">
                           <label className="block">
                             <span
                               className={
@@ -2201,8 +2202,8 @@ export default function NewQuotePage() {
                               Amount
                             </span>
 
-                            <div className="">
-                              <span className="">
+                            <div className="relative mt-2">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-sans text-slate-400 dark:text-zinc-600">
                                 {
                                   currency
                                 }
@@ -2230,7 +2231,7 @@ export default function NewQuotePage() {
                                   )
                                 }
                                 placeholder="0"
-                                className=""
+                                className="w-full px-4 py-3 pl-14 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-purple-500"
                               />
                             </div>
                           </label>
@@ -2239,7 +2240,7 @@ export default function NewQuotePage() {
 
                       {/* NOTES */}
 
-                      <div className="">
+                      <div className="mt-4">
                         <label className="block">
                           <span
                             className={
@@ -2265,7 +2266,7 @@ export default function NewQuotePage() {
                               )
                             }
                             placeholder="Optional notes"
-                            className=""
+                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                           />
                         </label>
                       </div>
@@ -2277,13 +2278,13 @@ export default function NewQuotePage() {
 
             {/* ADD BUTTONS */}
 
-            <div className="">
+            <div className="p-6 border-t border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
                 onClick={
                   addEquipmentItem
                 }
-                className=""
+                className="px-4 py-3 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-sans uppercase tracking-widest"
               >
                 + Add Equipment
               </button>
@@ -2293,7 +2294,7 @@ export default function NewQuotePage() {
                 onClick={
                   addCustomItem
                 }
-                className=""
+                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-xs font-sans uppercase tracking-widest"
               >
                 + Add Custom Line
               </button>
@@ -2304,15 +2305,15 @@ export default function NewQuotePage() {
               TERMS + PRICING
           ================================================= */}
 
-          <section className="">
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* TERMS */}
 
-            <div className="">
-              <h2 className="">
+            <div className="border-t border-slate-200 dark:border-zinc-800 pt-6">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                 Terms
               </h2>
 
-              <div className="">
+              <div className="mt-5 space-y-5">
                 {/* PAYMENT TERMS */}
 
                 <label className="block">
@@ -2324,7 +2325,7 @@ export default function NewQuotePage() {
                     Payment Terms
                   </span>
 
-                  <div className="">
+                  <div className="relative">
                     <input
                       value={
                         paymentTerms
@@ -2339,12 +2340,12 @@ export default function NewQuotePage() {
                         )
                       }
                       placeholder="e.g. 50% deposit, balance on completion"
-                      className=""
+                      className="mt-2 w-full px-4 py-3 pr-32 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
                     />
 
-                    <div className="">
-                      <select
-                        className=""
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                      <SelectCompat
+                        className="bg-transparent text-xs text-slate-500 dark:text-zinc-400 px-1 py-1 outline-none"
                         onChange={(
                           event
                         ) => {
@@ -2381,7 +2382,7 @@ export default function NewQuotePage() {
                         <option value="Net 30">
                           Net 30
                         </option>
-                      </select>
+                      </SelectCompat>
                     </div>
                   </div>
                 </label>
@@ -2452,7 +2453,7 @@ export default function NewQuotePage() {
                     }
                     rows={5}
                     placeholder="Additional quote notes..."
-                    className=""
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500 resize-none"
                   />
                 </label>
               </div>
@@ -2460,20 +2461,20 @@ export default function NewQuotePage() {
 
             {/* PRICING */}
 
-            <div className="">
-              <h2 className="">
+            <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
                 Pricing
               </h2>
 
-              <div className="">
+              <div className="mt-5 space-y-5">
                 {/* SUBTOTAL */}
 
-                <div className="">
-                  <span className="">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-500 dark:text-zinc-500">
                     Subtotal
                   </span>
 
-                  <span className="">
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {formatAmount(
                       subtotal,
                       currency
@@ -2492,8 +2493,8 @@ export default function NewQuotePage() {
                     Discount
                   </span>
 
-                  <div className="">
-                    <select
+                  <div className="mt-2 flex gap-2">
+                    <SelectCompat
                       value={
                         discountType
                       }
@@ -2509,7 +2510,7 @@ export default function NewQuotePage() {
                           | "fixed"
                         )
                       }
-                      className=""
+                      className="px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
                     >
                       <option value="none">
                         None
@@ -2522,7 +2523,7 @@ export default function NewQuotePage() {
                       <option value="fixed">
                         Fixed
                       </option>
-                    </select>
+                    </SelectCompat>
 
                     <input
                       type="number"
@@ -2548,19 +2549,19 @@ export default function NewQuotePage() {
                         discountType ===
                         "none"
                       }
-                      className=""
+                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
                     />
                   </div>
                 </div>
 
                 {/* DISCOUNT AMOUNT */}
 
-                <div className="">
-                  <span className="">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-500 dark:text-zinc-500">
                     Discount amount
                   </span>
 
-                  <span className="">
+                  <span className="text-slate-900 dark:text-white">
                     -{" "}
                     {formatAmount(
                       discountAmount,
@@ -2608,12 +2609,12 @@ export default function NewQuotePage() {
 
                 {/* TOTAL */}
 
-                <div className="">
-                  <span className="">
+                <div className="pt-5 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
+                  <span className="text-sm font-medium text-slate-900 dark:text-white">
                     Total
                   </span>
 
-                  <span className="">
+                  <span className="text-2xl font-light text-purple-600 dark:text-purple-400">
                     {formatAmount(
                       total,
                       currency
@@ -2628,13 +2629,13 @@ export default function NewQuotePage() {
               BOTTOM SAVE
           ================================================= */}
 
-          <div className="">
+          <div className="flex justify-end pb-10">
             <button
               type="submit"
               disabled={
                 saving
               }
-              className=""
+              className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
             >
               {saving
                 ? "Saving..."
@@ -2657,7 +2658,7 @@ export default function NewQuotePage() {
               null
             )
           }
-          className=""
+          className="fixed inset-0 z-[90] cursor-default bg-transparent"
         />
       )}
     </div>

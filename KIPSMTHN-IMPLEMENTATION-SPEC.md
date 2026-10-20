@@ -144,16 +144,11 @@ The repository should keep these categories distinct:
 
 - `README.md` — project overview and active implementation summary
 - `KIPSMTHN-IMPLEMENTATION-SPEC.md` — current implementation reference
-- `docs/00-project/` — product/project context
-- `docs/01-specifications/` — active feature and system expectations
-- `docs/02-architecture/` — system architecture and design details
-- `docs/03-design-system/` — UI and styling system guidance
-- `docs/04-security-compliance/` — active security/compliance guidance
-- `docs/05-development-operations/` — operational workflows
-- `docs/06-decisions/` — design and architecture decisions
-- `docs/07-audits/` — current audit and review material
-- `docs/08-history/` — migration and historical notes
-- `docs/archive/` and `docs/soc2/` — retained historical records and archival evidence
+- `docs/PROJECT-HANDBOOK.md` — canonical consolidated project decisions and requirements
+- `docs/DOCUMENTATION-INDEX.md` — verified map of active and historical documentation
+- `docs/design-system.md`, `docs/api-reference.md`, and `docs/demo-account.md` — active specialist guides
+- `docs/audits/`, `docs/reports/`, and `docs/studio-command-center-implementation.md` — dated audits, verification reports, and feature history
+- `docs/archive/` and `docs/soc2/` — retained historical records, plans, and evidence
 
 This structure preserves the repo’s memory without letting legacy materials overwrite the current implementation.
 

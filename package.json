@@ -26,9 +26,9 @@
     "npm": ">=10"
   },
   "dependencies": {
-    "@better-auth/drizzle-adapter": "^1.7.7",
+    "@better-auth/drizzle-adapter": "^1.7.10",
     "@better-auth/infra": "^0.4.16",
-    "@better-auth/passkey": "^1.7.7",
+    "@better-auth/passkey": "^1.7.10",
     "@libsql/client": "^0.18.0",
     "@neondatabase/serverless": "^1.1.0",
     "@radix-ui/react-slot": "^1.5.0",
@@ -59,7 +59,7 @@
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "read-excel-file": "^6.0.3",
-    "resend": "^6.32.1",
+    "resend": "^6.34.1",
     "shadcn": "^4.22.1",
     "sharp": "^0.35.5",
     "svix": "^2.3.0",

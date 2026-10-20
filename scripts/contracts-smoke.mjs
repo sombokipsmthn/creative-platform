@@ -17,6 +17,7 @@ try {
   await page.goto(`${baseURL}/admin/contracts/templates`, { waitUntil: 'networkidle', timeout: 30_000 });
   check(await page.getByRole('heading', { name: 'Contract templates' }).isVisible(), 'template library renders');
   if (templates?.length) {
+    await page.locator('article').first().waitFor({ state: 'visible', timeout: 30_000 });
     const first = page.locator('article').first();
     await first.getByRole('button', { name: 'Preview' }).click();
     check(await page.getByRole('dialog').isVisible(), 'template preview opens');

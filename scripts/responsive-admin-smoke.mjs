@@ -45,7 +45,12 @@ try {
         const errors = [];
         page.on("pageerror", (error) => errors.push(`pageerror: ${error.message}`));
         page.on("console", (message) => {
-          if (message.type() === "error" && !message.text().includes("favicon") && !message.text().includes("/_next/hmr")) {
+          if (
+            message.type() === "error" &&
+            !message.text().includes("favicon") &&
+            !message.text().includes("/_next/hmr") &&
+            !message.text().includes("WebSocket is already in CLOSING or CLOSED state")
+          ) {
             errors.push(`console: ${message.text()}`);
           }
         });

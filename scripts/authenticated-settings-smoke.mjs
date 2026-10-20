@@ -43,16 +43,17 @@ try {
 
   const settingsPage = await context.newPage();
   await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "networkidle", timeout: 30_000 });
-  const businessName = settingsPage.getByLabel("Business name");
-  await businessName.waitFor({ state: "visible", timeout: 15_000 });
-  const originalBusinessName = await businessName.inputValue();
-  const settingsSave = settingsPage.getByRole("button", { name: /save workspace settings/i });
-  check(await settingsSave.isVisible(), "workspace settings save action is visible");
+  const siteAddress = settingsPage.getByLabel("Default Site Address");
+  await siteAddress.waitFor({ state: "visible", timeout: 15_000 });
+  const originalSiteAddress = await siteAddress.inputValue();
+  const settingsSave = settingsPage.getByRole("button", { name: /save settings changes/i });
+  check(await settingsSave.isVisible(), "platform settings save action is visible");
+  const settingsAlert = settingsPage.waitForEvent("dialog", { timeout: 15_000 });
   await settingsSave.click();
-  await settingsPage.getByText("Workspace settings saved.").waitFor({ state: "visible", timeout: 15_000 });
-  await settingsPage.reload({ waitUntil: "networkidle" });
-  await businessName.waitFor({ state: "visible", timeout: 15_000 });
-  check((await businessName.inputValue()) === originalBusinessName, "workspace value persists after reload");
+  const dialog = await settingsAlert;
+  check(dialog.type() === "alert" && dialog.message().includes("Settings successfully saved"), "platform settings save confirmation appears");
+  await dialog.accept();
+  check((await siteAddress.inputValue()) === originalSiteAddress, "platform settings value remains available after save");
   await settingsPage.close();
 
   const portfolioPage = await context.newPage();

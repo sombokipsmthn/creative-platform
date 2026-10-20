@@ -1,3 +1,5 @@
+> **Current-state and evidence notice (2026-10-21):** This directory contains control documentation, plans, and evidence snapshots. Its presence does not establish SOC 2 certification or prove that a control currently operates. Revalidate implementation and evidence against the current `dev` branch before claiming a control is active. Better Auth is the active authentication system; Clerk references in older evidence are historical unless independently updated and verified. See [Project Handbook](../PROJECT-HANDBOOK.md).
+
 # SOC 2 Readiness Program — KIPSMTHN Creative Platform
 
 ## Purpose

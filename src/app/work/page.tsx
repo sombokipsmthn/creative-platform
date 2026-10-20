@@ -72,7 +72,7 @@ export default function WorkPage() {
             <button
               key={pillar}
               onClick={() => setSelectedPillar(pillar)}
-              className={`px-4 py-2 rounded-full text-xs font-medium uppercase tracking-wider transition-colors ${selectedPillar === pillar ? 'bg-purple-600 text-white' : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-300 dark:hover:bg-zinc-700'}`}
+              className={`px-4 py-2 rounded-full text-xs font-medium uppercase tracking-wider transition-colors ${selectedPillar === pillar ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-300 dark:hover:bg-zinc-700'}`}
             >
               {pillar}
             </button>

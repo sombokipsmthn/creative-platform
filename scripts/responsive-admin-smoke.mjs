@@ -69,8 +69,8 @@ try {
 
           const metrics = await page.evaluate(() => ({
             width: window.innerWidth,
-            documentWidth: document.documentElement.scrollWidth,
-            bodyWidth: document.body.scrollWidth,
+            documentWidth: document.documentElement?.scrollWidth ?? window.innerWidth,
+            bodyWidth: document.body?.scrollWidth ?? window.innerWidth,
           }));
           const overflow = metrics.documentWidth > metrics.width || metrics.bodyWidth > metrics.width;
           const authenticated = response?.status() === 200 && !page.url().includes("/sign-in") && !page.url().includes("/login");

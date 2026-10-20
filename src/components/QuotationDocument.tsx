@@ -107,7 +107,7 @@ export default function QuotationDocument({
         {/* HEADER */}
         <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
+            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-primary">
               Quotation
             </p>
 

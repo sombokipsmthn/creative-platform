@@ -147,7 +147,7 @@ export default function ClientLightbox({
           <button
             onClick={() => onToggleFavorite(item.id)}
             className={`px-4 py-1.5 text-xs font-sans uppercase rounded-full transition-all ${
-              isFavorite ? 'bg-purple-600 text-white' : 'border border-zinc-700 text-zinc-300 hover:border-purple-500'
+              isFavorite ? 'bg-primary text-white' : 'border border-zinc-700 text-zinc-300 hover:border-primary'
             }`}
           >
             {isFavorite ? '♥ Selected' : '♡ Add to Selects'}
@@ -156,7 +156,7 @@ export default function ClientLightbox({
           <button
             onClick={() => setShowExif(!showExif)}
             className={`px-3 py-1.5 text-xs font-sans rounded-full border transition-all ${
-              showExif ? 'border-purple-500 text-purple-400' : 'border-zinc-800 text-zinc-400 hover:text-white'
+              showExif ? 'border-primary text-primary' : 'border-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
             EXIF
@@ -165,7 +165,7 @@ export default function ClientLightbox({
           <button
             onClick={() => setShowComments(!showComments)}
             className={`px-3 py-1.5 text-xs font-sans rounded-full border transition-all ${
-              showComments ? 'border-purple-500 text-purple-400' : 'border-zinc-800 text-zinc-400 hover:text-white'
+              showComments ? 'border-primary text-primary' : 'border-zinc-800 text-zinc-400 hover:text-white'
             }`}
           >
             Comments ({comments.length})
@@ -176,7 +176,7 @@ export default function ClientLightbox({
       <div className="relative flex-1 flex items-center justify-center p-6 overflow-hidden">
         <button
           onClick={onPrev}
-          className="absolute left-6 z-10 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-xl text-zinc-300 hover:text-white hover:bg-purple-600 transition-all"
+          className="absolute left-6 z-10 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-xl text-zinc-300 hover:text-white hover:bg-primary transition-all"
         >
           ‹
         </button>
@@ -187,14 +187,14 @@ export default function ClientLightbox({
 
         <button
           onClick={onNext}
-          className="absolute right-6 z-10 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-xl text-zinc-300 hover:text-white hover:bg-purple-600 transition-all"
+          className="absolute right-6 z-10 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-800 flex items-center justify-center text-xl text-zinc-300 hover:text-white hover:bg-primary transition-all"
         >
           ›
         </button>
 
         {showExif && (
           <div className="absolute top-8 right-8 bg-zinc-900/90 border border-zinc-800 p-4 rounded-xl text-xs font-sans space-y-2 max-w-xs shadow-2xl backdrop-blur-md">
-            <p className="text-purple-400 font-bold border-b border-zinc-800 pb-1">Camera Details</p>
+            <p className="text-primary font-bold border-b border-zinc-800 pb-1">Camera Details</p>
             <p><span className="text-zinc-500">Camera:</span> {item.exif?.camera || 'Unknown'}</p>
             <p><span className="text-zinc-500">Aperture:</span> {item.exif?.aperture || '—'}</p>
             <p><span className="text-zinc-500">Shutter:</span> {item.exif?.shutter || '—'}</p>
@@ -217,7 +217,7 @@ export default function ClientLightbox({
                   comments.map((comment) => (
                     <div key={comment.id} className="p-3 bg-zinc-950 border border-zinc-800/80 rounded-lg space-y-1">
                       <div className="flex justify-between items-center text-[10px] text-zinc-500 gap-3">
-                        <span className="font-semibold text-purple-400">{comment.name}</span>
+                        <span className="font-semibold text-primary">{comment.name}</span>
                         <span>{comment.time}</span>
                       </div>
                       <p className="text-xs text-zinc-300 font-light">{comment.text}</p>
@@ -234,12 +234,12 @@ export default function ClientLightbox({
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 maxLength={2000}
-                className="w-full text-xs px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-white focus:border-purple-600 focus:outline-none"
+                className="w-full text-xs px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-md text-white focus:border-primary focus:outline-none"
               />
               <button
                 type="submit"
                 disabled={commentLoading || !newComment.trim()}
-                className="w-full py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-xs font-sans uppercase tracking-widest rounded-md transition-colors"
+                className="w-full py-2 bg-primary hover:bg-primary disabled:opacity-50 text-xs font-sans uppercase tracking-widest rounded-md transition-colors"
               >
                 {commentLoading ? 'Sending...' : 'Send Comment'}
               </button>

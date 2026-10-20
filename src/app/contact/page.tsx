@@ -36,13 +36,13 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="selection:bg-purple-600 selection:text-white transition-colors duration-300">
+    <div className="selection:bg-primary selection:text-white transition-colors duration-300">
       <Header />
 
       <section className="relative pt-36 pb-20 text-center space-y-8">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-purple-600/15 blur-3xl pointer-events-none rounded-full" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-100 bg-primary/10 blur-3xl pointer-events-none rounded-full" />
 
-        <p className="text-xs font-medium uppercase tracking-wider text-purple-600 dark:text-purple-400">
+        <p className="text-xs font-medium uppercase tracking-wider text-primary dark:text-primary">
           INITIATE COLLABORATION
         </p>
 
@@ -60,7 +60,7 @@ export default function ContactPage() {
         {/* Direct Inquiries Card */}
         <Card>
           <CardContent className="p-6 space-y-4">
-            <Badge variant="default" className="bg-purple-500/15 text-purple-700 dark:text-purple-300">
+            <Badge variant="default" className="bg-primary/10 text-primary dark:text-primary">
               Direct Inquiries
             </Badge>
             <h2 className="text-2xl font-semibold tracking-tight">
@@ -86,7 +86,7 @@ export default function ContactPage() {
         {/* Social & Digital Media Card */}
         <Card>
           <CardContent className="p-6 space-y-4">
-            <Badge variant="default" className="bg-purple-500/15 text-purple-700 dark:text-purple-300">
+            <Badge variant="default" className="bg-primary/10 text-primary dark:text-primary">
               Social & Digital Media
             </Badge>
             <h2 className="text-2xl font-semibold tracking-tight">

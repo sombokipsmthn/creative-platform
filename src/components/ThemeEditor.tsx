@@ -150,7 +150,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             onClick={() => setActiveSection(section.id)}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
               activeSection === section.id
-                ? 'border-purple-600 text-purple-600'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
             }`}
           >
@@ -179,7 +179,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                 onClick={() => applyThemePreset(theme.id)}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
                   currentThemeId === theme.id
-                    ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20'
+                    ? 'border-primary bg-primary/10 dark:bg-primary/10'
                     : 'border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
                 }`}
               >
@@ -188,7 +188,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                     {theme.label}
                   </h4>
                   {currentThemeId === theme.id && (
-                    <span className="text-purple-600 text-xs font-semibold">
+                    <span className="text-primary text-xs font-semibold">
                       ✓ Active
                     </span>
                   )}

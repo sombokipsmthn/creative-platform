@@ -34,9 +34,11 @@ export const metadata: Metadata = {
   icons: { icon: '/site-icon.svg', shortcut: '/site-icon.svg', apple: '/site-icon.svg' },
 };
 
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={`dark ${outfit.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (
@@ -50,17 +52,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         )}
       </head>
-<<<<<<< HEAD
       <body className="font-sans antialiased selection:bg-primary selection:text-primary-foreground">
-        <a
-          href="#main-content"
-          className="absolute left-4 top-2 z-50 -translate-y-24 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-transform focus:translate-y-0"
-        >
-          Skip to main content
-        </a>
-=======
-      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
->>>>>>> c898786fba874637680566941fd0b37ceea58254
         <QueryProvider>
           <CreatorProvider>{children}</CreatorProvider>
         </QueryProvider>

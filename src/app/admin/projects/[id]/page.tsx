@@ -367,7 +367,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
     return (
       <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
         <div className="mx-auto max-w-7xl flex items-center justify-center p-12">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-3 text-sm text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading project…</span>
         </div>
       </div>
@@ -382,7 +382,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
           <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
             {error}
           </div>
-          <Link href="/admin/projects" className="text-xs font-sans uppercase tracking-widest text-purple-600 hover:underline">
+          <Link href="/admin/projects" className="text-xs font-sans uppercase tracking-widest text-primary hover:underline">
             ← Back to projects
           </Link>
         </div>
@@ -432,7 +432,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 text-xs font-sans uppercase tracking-widest rounded-t-lg transition ${
                 activeTab === tab.id
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-primary text-white'
                   : 'bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800'
               }`}
             >
@@ -613,7 +613,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                     <div className="relative aspect-4/3">
                       <img src={resolveImage(media.displayUrl)} alt={media.altText || ''} className="object-cover w-full h-full" />
                       {media.isCover && (
-                        <div className="absolute top-2 right-2 px-2 py-0.5 bg-purple-600 text-white text-[10px] font-sans uppercase tracking-widest rounded-sm">Cover</div>
+                        <div className="absolute top-2 right-2 px-2 py-0.5 bg-primary text-white text-[10px] font-sans uppercase tracking-widest rounded-sm">Cover</div>
                       )}
                     </div>
                     <div className="p-3 space-y-1">
@@ -681,7 +681,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 id="featured"
                 checked={form.featured}
                 onChange={(e) => handleChange('featured', e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-purple-600 focus:ring-purple-500"
+                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-ring"
               />
               <label htmlFor="featured" className="text-sm text-slate-700 dark:text-zinc-300">Featured project</label>
             </div>
@@ -694,7 +694,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             {previewUrl && (
               <div className="flex items-center gap-3 p-4 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl">
                 <Eye className="h-5 w-5 text-slate-400" />
-                <Link href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-purple-600 hover:underline">
+                <Link href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
                   View public page
                 </Link>
               </div>
@@ -730,7 +730,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <Trash2 className="h-3.5 w-3.5 mr-1" />
             Delete
           </Button>
-          <Link href="/admin/projects" className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 hover:text-purple-600 transition">
+          <Link href="/admin/projects" className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 hover:text-primary transition">
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to projects
           </Link>

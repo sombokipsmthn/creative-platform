@@ -45,7 +45,7 @@ export function AdminPageHeader({
           {breadcrumb && (
             <Link
               href={breadcrumb.href}
-              className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline mb-1"
+              className="text-xs font-sans text-primary dark:text-primary hover:underline mb-1"
             >
               ← {breadcrumb.label}
             </Link>
@@ -80,7 +80,7 @@ export function AdminPageHeader({
                           href={tab.href}
                           className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
                             isActive
-                              ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
+                              ? 'border-primary text-primary dark:text-primary font-bold'
                               : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -92,7 +92,7 @@ export function AdminPageHeader({
                     ) : (
                       <span className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest ${
                         isActive
-                          ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold border-b-2'
+                          ? 'border-primary text-primary dark:text-primary font-bold border-b-2'
                           : isDisabled
                             ? 'text-slate-400 dark:text-zinc-500'
                             : 'text-slate-500 dark:text-zinc-400'

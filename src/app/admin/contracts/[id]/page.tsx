@@ -58,7 +58,7 @@ export default function ContractDetailPage({
     return (
       <div className="min-h-screen min-h-screen p-6">
         <div className="flex flex-col items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500 mb-4" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
           <p>Loading contract...</p>
         </div>
       </div>
@@ -208,7 +208,7 @@ export default function ContractDetailPage({
       </div>
 
       {/* Public signing section */}
-      <div className="rounded-xl border bg-card text-card-foreground shadow-sm mb-6 border-purple-200 dark:border-purple-900 bg-purple-50 dark:bg-purple-950/30">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm mb-6 border-primary dark:border-primary bg-primary/10 dark:bg-primary/15">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Client signing link</h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Share this secure link with the client to view and sign the contract.
@@ -234,7 +234,7 @@ export default function ContractDetailPage({
           <div className="space-y-3">
             {events.map((event) => (
               <div key={event.id} className="flex items-center space-x-3 text-sm">
-                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary">
                   <FilePlus className="h-3 w-3" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -261,7 +261,7 @@ function getStatusColor(status: string) {
     case 'viewed':
       return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
     case 'awaiting_signature':
-      return 'bg-muted text-foreground';
+      return 'bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary';
     case 'signed':
       return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
     case 'declined':

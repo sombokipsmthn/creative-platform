@@ -152,13 +152,13 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground font-sans text-xl">+</div>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary dark:text-primary font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
                     <p className="text-[10px] text-slate-500 font-sans">PNG or SVG with transparent background</p>
                   </div>
 
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground font-sans text-xl">+</div>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary dark:text-primary font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Favicon Icon</p>
                     <p className="text-[10px] text-slate-500 font-sans">32x32 PNG, ICO or SVG file</p>
                   </div>

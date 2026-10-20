@@ -97,13 +97,13 @@ function QuickAction({ href, label, icon }: { href: string; label: string; icon:
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-purple-800"
+      className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 dark:hover:border-primary"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
         {icon}
       </span>
       <span className="flex-1 text-sm font-medium text-slate-800 dark:text-zinc-100">{label}</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-purple-500">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-primary">
         <path d="M5 12h14M12 5l7 7-7 7" />
       </svg>
     </Link>
@@ -118,8 +118,8 @@ function MetricCard({ label, value, detail, href, icon }: { label: string; value
     >
       <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content">
         <div className="flex items-start justify-between gap-4">
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">{icon}</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-purple-500">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">{icon}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-primary">
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </div>
@@ -179,7 +179,7 @@ function StatusBar({ label, value, total }: { label: string; value: number; tota
         <span className="font-semibold text-slate-900 dark:text-white">{value}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-900">
-        <div className="h-full rounded-full bg-purple-600 transition-all" style={{ width: `${percentage}%` }} />
+        <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${percentage}%` }} />
       </div>
     </div>
   );
@@ -253,12 +253,12 @@ export default function CreativeOSDashboardPage() {
         <div className="mx-auto w-full max-w-7xl py-8 lg:py-10">
           <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="mb-3 text-[10px] font-sans font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">
+              <p className="mb-3 text-[10px] font-sans font-semibold uppercase tracking-[0.3em] text-primary dark:text-primary">
                 Dashboard
               </p>
               <div className="flex items-center gap-4">
                 {avatar && (
-                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30">
+                  <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-primary/30">
                     <Image src={avatar} alt={name} fill unoptimized className="object-cover" />
                   </div>
                 )}

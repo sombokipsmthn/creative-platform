@@ -421,7 +421,7 @@ export function ContractBuilder({
     return (
       <div className="ui-page min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
         </div>
       </div>
@@ -608,11 +608,7 @@ export function ContractBuilder({
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                   <div
-<<<<<<< HEAD
-                    className="bg-foreground"
-=======
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
->>>>>>> c898786fba874637680566941fd0b37ceea58254
+                    className="bg-gradient-to-r from-primary to-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${completionStats.percentage}%` }}
                   />
                 </div>

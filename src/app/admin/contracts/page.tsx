@@ -15,6 +15,7 @@ import {
 import TableFilterBar from '@/components/admin/TableFilterBar';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type Contract = {
   id: string;
@@ -61,6 +62,7 @@ export default function ContractsPage() {
     cancelled: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Filter states
@@ -177,6 +179,18 @@ export default function ContractsPage() {
           </div>
         )}
 
+        <StandardCreationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} title="Start a new contract" description="Choose the client and template in the existing contract builder before creating a draft.">
+          <div className="space-y-4 pr-8">
+            <p className="ui-eyebrow">LEGAL</p>
+            <h2 className="ui-section-title">Start a new contract</h2>
+            <p className="text-sm text-muted-foreground">The contract builder preserves templates, clauses, associations, and draft status in one supported workflow.</p>
+          </div>
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+            <Button type="button" onClick={() => window.location.assign('/admin/contracts/new')}>Continue to contract builder <ArrowUpRight aria-hidden="true" /></Button>
+          </div>
+        </StandardCreationDialog>
+
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
           <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
@@ -207,7 +221,7 @@ export default function ContractsPage() {
 
           <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
             <p className="text-sm font-medium text-muted-foreground">Awaiting Signature</p>
-            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+            <p className="text-2xl font-bold text-primary dark:text-primary">
               {stats.awaiting_signature}
             </p>
           </div>
@@ -339,7 +353,7 @@ export default function ContractsPage() {
                       {/* CONTRACT */}
                       <td className="w-full caption-bottom text-sm-cell">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
+                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
                             <FileSignature className="h-4 w-4" />
                           </div>
                           <div className="min-w-0 space-y-1">

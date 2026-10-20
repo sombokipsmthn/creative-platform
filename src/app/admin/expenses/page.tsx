@@ -8,17 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
 
-interface ExpenseReceipt {
-  id: string;
-  merchant: string;
-  merchantKraPin: string;
-  category: 'GEAR' | 'TRAVEL' | 'SOFTWARE' | 'CREW' | 'VENUE';
-  amountKes: number;
-  vatAmountKes: number;
-  date: string;
-  receiptImage: string;
-  status: 'CLAIMABLE' | 'PENDING_VERIFICATION' | 'CLAIMED';
-}
+type Expense = { id: string; description: string; supplier: string | null; category: string; amount: number; currency: string; expenseDate: string; paymentMethod: string | null; taxAmount: number; notes: string | null; project?: { id: string; name: string } | null };
+type Form = { description: string; category: string; amount: string; expenseDate: string; supplier: string; paymentMethod: string; taxAmount: string; notes: string };
+const initialForm: Form = { description: '', category: '', amount: '', expenseDate: new Date().toISOString().slice(0, 10), supplier: '', paymentMethod: '', taxAmount: '0', notes: '' };
 
 export default function AdminExpensesPage() {
   const [expenses, setExpenses] = useState<ExpenseReceipt[]>([
@@ -261,7 +253,7 @@ export default function AdminExpensesPage() {
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-secondary text-secondary-foreground rounded-full uppercase font-semibold">
+                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
                           {exp.category}
                         </span>
                         <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${

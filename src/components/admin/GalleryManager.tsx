@@ -122,9 +122,9 @@ export default function AdminGalleryManagerPage() {
       else setIsRefreshing(true);
 
       const [galRes, clientRes, activityRes] = await Promise.all([
-        fetch('/api/galleries', { cache: 'no-store' }),
-        fetch('/api/clients', { cache: 'no-store' }),
-        fetch('/api/galleries/activity', { cache: 'no-store' }),
+        fetch('/api/galleries', { cache: 'no-store', credentials: 'same-origin' }),
+        fetch('/api/clients', { cache: 'no-store', credentials: 'same-origin' }),
+        fetch('/api/galleries/activity', { cache: 'no-store', credentials: 'same-origin' }),
       ]);
 
       if (galRes.ok) {
@@ -206,7 +206,7 @@ export default function AdminGalleryManagerPage() {
           title: title.trim(),
           clientId: clientId || null,
           category,
-          accessPin: pin.trim() || '4821',
+          accessPin: pin.trim() || null,
           allowDownloads,
           allowFavorites,
           allowSelections,
@@ -299,7 +299,7 @@ export default function AdminGalleryManagerPage() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-xl shadow-2xl text-[11px] font-sans flex items-center gap-3 animate-fade-in border border-white/10 dark:border-zinc-200">
-          <Sparkles className="w-4 h-4 text-purple-500" />
+          <Sparkles className="w-4 h-4 text-primary" />
           <span className="font-medium">{toastMessage}</span>
         </div>
       )}
@@ -321,7 +321,7 @@ export default function AdminGalleryManagerPage() {
                 Galleries
               </h1>
               {isRefreshing && (
-                <RefreshCw className="w-4 h-4 text-purple-500 animate-spin opacity-50" />
+                <RefreshCw className="w-4 h-4 text-primary animate-spin opacity-50" />
               )}
             </div>
 
@@ -347,7 +347,7 @@ export default function AdminGalleryManagerPage() {
               <Activity className="w-3.5 h-3.5" />
               Activity
               {activities.length > 0 && activeTab !== 'activity' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
               )}
             </button>
 
@@ -515,7 +515,7 @@ export default function AdminGalleryManagerPage() {
                           <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                             <div className="space-y-1">
                               <p className="ui-meta text-white/80 flex items-center gap-2">
-                                <Users className="w-3 h-3 text-purple-400" />
+                                <Users className="w-3 h-3 text-primary" />
                                 {gal.client_name || 'Individual Client'}
                               </p>
                               <h3 className="text-lg font-medium text-white leading-tight drop-shadow-md">
@@ -540,7 +540,7 @@ export default function AdminGalleryManagerPage() {
                               <span className="ui-meta text-[8px] uppercase">Faves</span>
                             </div>
                             <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl flex flex-col items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                               <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{gal.selections_count || 0}</span>
                               <span className="ui-meta text-[8px] uppercase">Proofs</span>
                             </div>
@@ -593,7 +593,7 @@ export default function AdminGalleryManagerPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h2 className="ui-section-title text-2xl flex items-center gap-3">
-                  <Activity className="w-6 h-6 text-purple-600" />
+                  <Activity className="w-6 h-6 text-primary" />
                   Live Client Interaction
                 </h2>
                 <Button onClick={() => fetchData(true)} disabled={isRefreshing} variant="ghost" size="sm"><RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />Refresh</Button>
@@ -618,8 +618,8 @@ export default function AdminGalleryManagerPage() {
                 {activities.map((act, idx) => {
                   const typeStyles = {
                     favorite: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-500/10', label: 'Favorited a photo' },
-                    selection: { icon: CheckCircle2, color: 'text-purple-500', bg: 'bg-purple-500/10', label: 'Selected for proofing' },
-                    selection_and_favorite: { icon: Sparkles, color: 'text-indigo-500', bg: 'bg-indigo-500/10', label: 'Selected & Favorited' },
+                    selection: { icon: CheckCircle2, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected for proofing' },
+                    selection_and_favorite: { icon: Sparkles, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected & Favorited' },
                     comment: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Left a comment' },
                     download: { icon: Download, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Downloaded a photo' },
                     view: { icon: Eye, color: 'text-slate-500', bg: 'bg-slate-500/10', label: 'Viewed the gallery' },
@@ -632,7 +632,7 @@ export default function AdminGalleryManagerPage() {
                   return (
                     <div
                       key={act.id + idx}
-                      className="ui-card p-5 flex items-center gap-6 hover:border-purple-500/40 transition-all shadow-sm ui-fade-in"
+                      className="ui-card p-5 flex items-center gap-6 hover:border-primary/40 transition-all shadow-sm ui-fade-in"
                     >
                       <div className={`w-12 h-12 rounded-2xl ${config.bg} flex items-center justify-center shrink-0`}>
                         <Icon className={`w-6 h-6 ${config.color}`} />
@@ -643,11 +643,11 @@ export default function AdminGalleryManagerPage() {
                           <Clock className="w-3 h-3" />
                           <span>{new Date(act.created_at).toLocaleString()}</span>
                           <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-zinc-800" />
-                          <span className="text-purple-500 font-bold">{act.gallery_title}</span>
+                          <span className="text-primary font-bold">{act.gallery_title}</span>
                         </div>
 
                         <h4 className="ui-card-title text-sm truncate">
-                          <span className="text-purple-600 dark:text-purple-400">{act.client_name || 'A Client'}</span>
+                          <span className="text-primary dark:text-primary">{act.client_name || 'A Client'}</span>
                           {' '}{config.label}
                         </h4>
                       </div>
@@ -676,8 +676,13 @@ export default function AdminGalleryManagerPage() {
 
         {/* TAB 3: CREATE GALLERY FORM */}
         {activeTab === 'create' && (
-          <div className="max-w-2xl mx-auto">
-            <div className="ui-card rounded-[40px] p-8 md:p-12 shadow-2xl space-y-10">
+          <StandardCreationDialog
+            open
+            onOpenChange={(open) => { if (!open) setActiveTab('all'); }}
+            title="Create a new gallery"
+            description="Create a private draft gallery, then continue in the gallery manager to upload and configure delivery."
+            className="max-w-3xl"
+          >
               <div className="space-y-3 text-center">
                 <div className="ui-icon-box ui-icon-box-lg mx-auto">
                   <Plus className="w-6 h-6" />
@@ -693,10 +698,11 @@ export default function AdminGalleryManagerPage() {
               <form onSubmit={handleCreateGallery} className="space-y-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="ui-label ui-meta uppercase tracking-widest pl-1">
+                    <label htmlFor="gallery-title" className="ui-label ui-meta uppercase tracking-widest pl-1">
                       Gallery Title
                     </label>
                     <input
+                      id="gallery-title"
                       type="text"
                       required
                       placeholder="e.g. Safaricom Spark Accelerator 2026"
@@ -764,7 +770,7 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Downloads</p>
                       <p className="ui-caption font-sans">Allow full-resolution & ZIP delivery</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowDownloads ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
@@ -774,7 +780,7 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Favorites</p>
                       <p className="ui-caption font-sans">Allow hearting / liking photos</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowFavorites ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
@@ -784,13 +790,13 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Proofing</p>
                       <p className="ui-caption font-sans">Enable client selection for delivery</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowSelections ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
                 </div>
 
-                <Button type="submit" disabled={isCreating} variant="primary" size="lg" className="w-full h-16 rounded-2xl shadow-xl shadow-purple-500/10">
+                <Button type="submit" disabled={isCreating} variant="primary" size="lg" className="w-full h-16 rounded-2xl shadow-xl shadow-primary/10">
                   {isCreating ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
@@ -804,8 +810,7 @@ export default function AdminGalleryManagerPage() {
                   )}
                 </Button>
               </form>
-            </div>
-          </div>
+          </StandardCreationDialog>
         )}
       </div>
     </div>

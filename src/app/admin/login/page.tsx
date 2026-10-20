@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
         </Link>
 
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-600 text-white font-bold">
+          <div className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-white font-bold">
             K
           </div>
 
@@ -74,7 +74,7 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               required
-              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-zinc-950"
+              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:border-primary dark:bg-zinc-950"
               disabled={isLoading}
             />
           </div>
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-zinc-950"
+              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:border-primary dark:bg-zinc-950"
               disabled={isLoading}
             />
           </div>
@@ -104,7 +104,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-purple-600 px-4 py-3 text-center text-sm font-medium text-white shadow-lg shadow-purple-600/20 hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-xl bg-primary px-4 py-3 text-center text-sm font-medium text-white shadow-lg shadow-primary/20 hover:bg-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Signing in...' : 'Sign In'}
           </button>
@@ -113,7 +113,7 @@ export default function AdminLoginPage() {
         <div className="mt-6 text-center">
           <p className="text-xs text-slate-500 dark:text-zinc-400">
             Don&apos;t have an account?{' '}
-            <Link href="/admin/onboarding" className="text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
+            <Link href="/admin/onboarding" className="text-primary hover:text-primary dark:text-primary dark:hover:text-primary font-medium">
               Get started
             </Link>
           </p>

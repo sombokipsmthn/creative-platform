@@ -1337,7 +1337,7 @@ export default function NewQuotePage() {
   ======================================================= */
 
   const inputClass =
-    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-ring";
+    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary";
 
   const labelClass =
     "text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600";
@@ -1363,12 +1363,12 @@ export default function NewQuotePage() {
             <div>
               <Link
                 href="/admin/quotes"
-                className="text-[10px] font-sans uppercase tracking-widest text-purple-600 dark:text-purple-400"
+                className="text-[10px] font-sans uppercase tracking-widest text-primary dark:text-primary"
               >
                 ← Quotes
               </Link>
 
-              <p className="mt-5 text-[10px] font-sans uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400 font-semibold">
+              <p className="mt-5 text-[10px] font-sans uppercase tracking-[0.3em] text-primary dark:text-primary font-semibold">
                 Sales & Production
               </p>
 
@@ -1396,7 +1396,7 @@ export default function NewQuotePage() {
               <button
                 type="submit"
                 disabled={saving}
-                className="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
+                className="px-5 py-3 rounded-xl bg-primary hover:bg-primary disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
               >
                 {saving
                   ? "Saving..."
@@ -1796,7 +1796,7 @@ export default function NewQuotePage() {
                     onClick={
                       addEquipmentItem
                     }
-                    className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[10px] font-sans uppercase tracking-widest font-semibold"
+                    className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary text-white text-[10px] font-sans uppercase tracking-widest font-semibold"
                   >
                     + Equipment
                   </button>
@@ -1848,7 +1848,7 @@ export default function NewQuotePage() {
 
                       <div className="flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
-                          <span className="w-7 h-7 rounded-lg bg-purple-600/10 text-purple-600 dark:text-purple-400 flex items-center justify-center text-xs font-sans">
+                          <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary dark:text-primary flex items-center justify-center text-xs font-sans">
                             {index +
                               1}
                           </span>
@@ -2011,7 +2011,7 @@ export default function NewQuotePage() {
                                 }
                                 className={`w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none ${!item.category
                                   ? "opacity-60 cursor-not-allowed"
-                                  : "focus:border-ring"
+                                  : "focus:border-primary"
                                   }`}
                               />
 
@@ -2147,7 +2147,7 @@ export default function NewQuotePage() {
                                   )
                                 )
                               }
-                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
                             />
                           </label>
                         </div>
@@ -2181,7 +2181,7 @@ export default function NewQuotePage() {
                                     .value
                                 )
                               }
-                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
                             />
                           </label>
                         </div>
@@ -2231,7 +2231,7 @@ export default function NewQuotePage() {
                                   )
                                 }
                                 placeholder="0"
-                                className="w-full px-4 py-3 pl-14 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                                className="w-full px-4 py-3 pl-14 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary"
                               />
                             </div>
                           </label>
@@ -2266,7 +2266,7 @@ export default function NewQuotePage() {
                               )
                             }
                             placeholder="Optional notes"
-                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
                           />
                         </label>
                       </div>
@@ -2284,7 +2284,7 @@ export default function NewQuotePage() {
                 onClick={
                   addEquipmentItem
                 }
-                className="px-4 py-3 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 text-xs font-sans uppercase tracking-widest"
+                className="px-4 py-3 rounded-xl border border-primary dark:border-primary/50 text-primary dark:text-primary text-xs font-sans uppercase tracking-widest"
               >
                 + Add Equipment
               </button>
@@ -2340,7 +2340,7 @@ export default function NewQuotePage() {
                         )
                       }
                       placeholder="e.g. 50% deposit, balance on completion"
-                      className="mt-2 w-full px-4 py-3 pr-32 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500"
+                      className="mt-2 w-full px-4 py-3 pr-32 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
                     />
 
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
@@ -2453,7 +2453,7 @@ export default function NewQuotePage() {
                     }
                     rows={5}
                     placeholder="Additional quote notes..."
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500 resize-none"
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary resize-none"
                   />
                 </label>
               </div>
@@ -2614,7 +2614,7 @@ export default function NewQuotePage() {
                     Total
                   </span>
 
-                  <span className="text-2xl font-light text-purple-600 dark:text-purple-400">
+                  <span className="text-2xl font-light text-primary dark:text-primary">
                     {formatAmount(
                       total,
                       currency
@@ -2635,7 +2635,7 @@ export default function NewQuotePage() {
               disabled={
                 saving
               }
-              className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
+              className="px-6 py-3 rounded-xl bg-primary hover:bg-primary disabled:opacity-50 text-white text-xs font-sans uppercase tracking-widest font-semibold"
             >
               {saving
                 ? "Saving..."

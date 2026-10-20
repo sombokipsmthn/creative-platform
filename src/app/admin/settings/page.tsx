@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import WatermarkPreview from '@/components/WatermarkPreview';
+import { useState } from 'react';
+import WatermarkStudio from '@/components/WatermarkStudio';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
@@ -25,44 +24,7 @@ export default function AdminSettingsPage() {
   const [customDomain, setCustomDomain] = useState('kipsmthn.com');
   const [hidePlatformBranding, setHidePlatformBranding] = useState(true);
 
-  // 2. Watermark State
-  const [watermarkText, setWatermarkText] = useState('KIPSMTHN PROOF');
-  const [watermarkOpacity, setWatermarkOpacity] = useState(30);
-  const [watermarkPosition, setWatermarkPosition] = useState<'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'>('bottom-right');
-  const [watermarkSize, setWatermarkSize] = useState(42);
-  const [watermarkPreset, setWatermarkPreset] = useState<'proof' | 'brand'>('proof');
-  const [applyWatermarkToProofs, setApplyWatermarkToProofs] = useState(true);
 
-  // Apply preset when changed
-  useEffect(() => {
-    const applyPreset = window.setTimeout(() => {
-      if (watermarkPreset === 'proof') {
-        setWatermarkText('KIPSMTHN PROOF');
-        setWatermarkOpacity(30);
-        setWatermarkPosition('bottom-right');
-        setWatermarkSize(42);
-      } else {
-        setWatermarkText('KIPSMTHN');
-        setWatermarkOpacity(55);
-        setWatermarkPosition('bottom-right');
-        setWatermarkSize(36);
-      }
-    }, 0);
-    return () => window.clearTimeout(applyPreset);
-  }, [watermarkPreset]);
-
-  // Handle watermark changes from preview
-  const handleWatermarkChange = (settings: {
-    text: string;
-    opacity: number;
-    position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
-    size: number;
-  }) => {
-    setWatermarkText(settings.text);
-    setWatermarkOpacity(settings.opacity);
-    setWatermarkPosition(settings.position);
-    setWatermarkSize(settings.size);
-  };
 
   // 3. Presets State
   const [defaultSelectionLimit, setDefaultSelectionLimit] = useState(25);
@@ -100,7 +62,7 @@ export default function AdminSettingsPage() {
           title="Platform Settings"
           description="Configure how the platform behaves for your workspace, galleries, and client communications."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          primaryAction={
+          primaryAction={activeTab === 'watermark' ? undefined : (
             <Button
               variant="primary"
               type="button"
@@ -109,7 +71,7 @@ export default function AdminSettingsPage() {
             >
               Save Settings Changes
             </Button>
-          }
+          )}
           tabs={tabs.map(tab => ({
             label: tab.label,
             href: '#',
@@ -189,91 +151,7 @@ export default function AdminSettingsPage() {
           )}
 
           {/* TAB 2: WATERMARK */}
-          {activeTab === 'watermark' && (
-            <div className="space-y-6">
-              {/* Watermark Presets */}
-              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
-                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Watermark Presets</h2>
-                </div>
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
-                  <Button type="button" onClick={() => setWatermarkPreset('proof')} variant={watermarkPreset === 'proof' ? 'primary' : 'secondary'} size="sm">Proof</Button>
-                  <Button type="button" onClick={() => setWatermarkPreset('brand')} variant={watermarkPreset === 'brand' ? 'primary' : 'secondary'} size="sm">Brand</Button>
-                </div>
-              </div>
-
-              {/* Watermark Preview Component */}
-              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                <WatermarkPreview
-                  watermarkText={watermarkText}
-                  watermarkOpacity={watermarkOpacity}
-                  watermarkPosition={watermarkPosition}
-                  watermarkSize={watermarkSize}
-                  onWatermarkChange={handleWatermarkChange}
-                />
-              </div>
-
-              {/* Watermark Controls */}
-              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
-                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Watermark Details</h2>
-                  <p className="text-sm text-muted-foreground">Adjust the watermark text and appearance.</p>
-                </div>
-                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-medium leading-none">Watermark Text</label>
-                    <Input
-                      type="text"
-                      value={watermarkText}
-                      onChange={(e) => setWatermarkText(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-sans">
-                      <span className="text-slate-700 dark:text-zinc-300">Opacity</span>
-                      <span className="text-purple-600 font-bold">{watermarkOpacity}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={10}
-                      max={80}
-                      value={watermarkOpacity}
-                      onChange={(e) => setWatermarkOpacity(parseInt(e.target.value, 10))}
-                      className="w-full accent-purple-600 cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-sans">
-                      <span className="text-slate-700 dark:text-zinc-300">Size</span>
-                      <span className="text-purple-600 font-bold">{watermarkSize}px</span>
-                    </div>
-                    <input
-                      type="range"
-                      min={24}
-                      max={64}
-                      value={watermarkSize}
-                      onChange={(e) => setWatermarkSize(parseInt(e.target.value, 10))}
-                      className="w-full accent-purple-600 cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-200">
-                    <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={applyWatermarkToProofs}
-                        onChange={(e) => setApplyWatermarkToProofs(e.target.checked)}
-                        className="w-4 h-4 accent-purple-600 rounded"
-                      />
-                      Apply watermark to all web-resolution proof images automatically
-                    </label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {activeTab === 'watermark' && <WatermarkStudio />}
 
           {/* TAB 3: PRESETS */}
           {activeTab === 'presets' && (

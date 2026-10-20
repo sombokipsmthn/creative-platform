@@ -55,7 +55,9 @@
       "Bash(DEMO_DATABASE_URL=\"postgresql://localhost:5432/creative_platform_demo\" DEMO_CREATOR_PASSWORD=\"demopass123\" DEMO_CREATOR_EMAIL=\"demo.creator@kipsmthn.test\" DEMO_CREATOR_NAME=\"KIPSMTHN Demo Creator\" node *)",
       "Bash(neon run_sql *)",
       "Bash(neon psql *)",
-      "Bash(neon branch *)"
+      "Bash(neon branch *)",
+      "Bash(cp *)",
+      "Bash(rm *)"
     ]
   },
   "skillOverrides": {}

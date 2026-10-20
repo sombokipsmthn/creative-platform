@@ -5,6 +5,7 @@ import { authClient } from "@/lib/auth-client";
 import {
   BarChart3,
   FileText,
+  Wallet,
   GalleryHorizontalEnd,
   LayoutDashboard,
   Settings2,
@@ -65,6 +66,7 @@ const sections = [
       { name: 'Galleries', href: '/admin/galleries', icon: GalleryHorizontalEnd },
       { name: 'Quotes', href: '/admin/quotes', icon: FileText },
       { name: 'Invoices', href: '/admin/invoices', icon: FileText },
+      { name: 'Payments', href: '/admin/payments', icon: Wallet },
       { name: 'Projects', href: '/admin/projects', icon: FileText },
       { name: 'Clients', href: '/admin/clients', icon: FileText },
     ],

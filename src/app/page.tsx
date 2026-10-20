@@ -50,60 +50,35 @@ const platformFeatures = [
       "Convert accepted quotes into structured invoices with automated VAT/WHT calculations, payment tracking, and audit-ready records.",
   },
   {
-    icon: Images,
-    title: "Private Client Delivery",
-    description:
-      "Deliver client galleries with secure PIN protection, proof watermarking, favorite curation, selection approvals, and batch downloads.",
+    title: "House of Light",
+    type: "Residential · Karen",
+    year: "2024",
+    image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1400&q=85",
   },
   {
-    icon: FolderKanban,
-    title: "Production Calendar & Projects",
-    description:
-      "Coordinate shoot schedules, call times, location logistics, gear allocation, and project status milestones from enquiry to wrap.",
+    title: "Kijani Courtyard",
+    type: "Hospitality · Naivasha",
+    year: "2023",
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85",
   },
   {
-    icon: ShieldCheck,
-    title: "Legal Contract Builder",
-    description:
-      "Draft, sign, and archive standard commercial agreements with built-in licensing rights, revision policies, and audit logs.",
+    title: "Atelier No. 09",
+    type: "Workplace · Nairobi",
+    year: "2022",
+    image: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=85",
   },
 ];
 
-const workflowSteps = [
-  {
-    step: "01",
-    title: "Enquiry & Scoping",
-    description:
-      "Receive client briefs, catalog specific production requirements, and outline deliverables.",
-  },
-  {
-    step: "02",
-    title: "Quotation & Agreement",
-    description:
-      "Assemble gear and service line items, calculate fees, and issue branded proposals for approval.",
-  },
-  {
-    step: "03",
-    title: "Production Execution",
-    description:
-      "Track shoot dates, equipment inventory, location logistics, and daily team expenses.",
-  },
-  {
-    step: "04",
-    title: "Proofing & Delivery",
-    description:
-      "Share password-protected client galleries for photo selections, revisions, and final master downloads.",
-  },
+const principles = [
+  ["01", "Context", "We begin with what is already there: the climate, the light, the landscape, and the people who will inhabit it."],
+  ["02", "Material", "Honest materials, carefully detailed. Every surface is chosen to age with grace and tell a story over time."],
+  ["03", "Meaning", "The best spaces do more than perform. They create a sense of belonging that lasts long after the first impression."],
 ];
 
-const workspaceModules = [
-  { icon: Users, label: "Clients", href: "/admin/clients", count: "Verified CRM" },
-  { icon: FolderKanban, label: "Projects", href: "/admin/projects", count: "Active Shoots" },
-  { icon: FileText, label: "Quotes", href: "/admin/quotes", count: "Gear & Services" },
-  { icon: Wallet, label: "Invoices", href: "/admin/invoices", count: "eTIMS Invoicing" },
-  { icon: Images, label: "Galleries", href: "/admin/galleries", count: "Client Proofs" },
-  { icon: LayoutDashboard, label: "Calendar", href: "/admin/calendar", count: "Call Sheets" },
-];
+export const metadata = {
+  title: "Hously — Modern Architecture Studio",
+  description: "Hously is an architecture and interiors studio creating enduring spaces across East Africa.",
+};
 
 export default function HomePage() {
   return (
@@ -203,175 +178,45 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* WORKSPACE MODULES QUICK STRIP */}
-        <section className="border-b bg-muted/30 py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Workspace Architecture
-                </p>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Built for your complete creative pipeline
-                </h2>
-              </div>
-              <Button asChild variant="ghost" size="sm" className="gap-1.5">
-                <Link href="/admin">
-                  Enter Command Center <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </Button>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-              {workspaceModules.map((module) => {
-                const Icon = module.icon;
-                return (
-                  <Link key={module.label} href={module.href}>
-                    <Card className="group h-full transition-all hover:border-primary hover:shadow-md">
-                      <CardContent className="flex flex-col items-start p-5">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <h3 className="mt-4 text-sm font-semibold text-foreground">
-                          {module.label}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {module.count}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
+          <div className="hously-hero-image">
+            <Image src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90" alt="Warm modern living room with sculptural furniture" fill priority sizes="(max-width: 768px) 100vw, 58vw" className="object-cover" />
+            <div className="hously-image-note"><span>01</span><span>House of Light<br />Karen, Kenya</span></div>
           </div>
         </section>
 
-        {/* PLATFORM FEATURES */}
-        <section id="platform" className="py-20 md:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl space-y-4">
-              <Badge variant="secondary">Platform Capabilities</Badge>
-              <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                Everything required to run a high-caliber production business.
-              </h2>
-              <p className="text-base text-muted-foreground sm:text-lg">
-                Stop juggling disjointed apps for proposals, cloud drives,
-                invoices, and contracts. Run your creative business on a single,
-                refined foundation.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {platformFeatures.map((feature) => {
-                const Icon = feature.icon;
-                return (
-                  <Card key={feature.title} className="transition-all hover:shadow-md">
-                    <CardHeader className="space-y-3 pb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <CardTitle className="text-lg">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="text-sm leading-relaxed">
-                        {feature.description}
-                      </CardDescription>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+        <section id="studio" className="hously-statement">
+          <p className="hously-kicker">The studio</p>
+          <div>
+            <h2>We design for the way <em>life unfolds.</em></h2>
+            <p>Our work is rooted in a belief that architecture should feel inevitable — grounded in its place, generous in its details, and quietly expressive. From a first sketch to the final joinery, we make spaces that invite you to stay a little longer.</p>
+            <Link href="/about" className="hously-text-link">Discover Hously <ArrowRight className="size-4" /></Link>
           </div>
         </section>
 
-        {/* WORKFLOW ROADMAP */}
-        <section id="workflow" className="border-t bg-muted/20 py-20 md:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl space-y-3">
-              <Badge variant="secondary">Production Lifecycle</Badge>
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                From initial client pitch to master delivery
-              </h2>
-              <p className="text-sm text-muted-foreground sm:text-base">
-                Standardized stages keep project details aligned so nothing gets
-                lost between quotation and final invoice.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {workflowSteps.map((item) => (
-                <Card key={item.step} className="relative bg-card">
-                  <CardHeader className="pb-2">
-                    <span className="font-mono text-2xl font-bold text-primary/80">
-                      {item.step}
-                    </span>
-                    <CardTitle className="mt-2 text-base font-semibold">
-                      {item.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {item.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+        <section id="work" className="hously-work">
+          <div className="flex items-end justify-between gap-4">
+            <div><p className="hously-kicker">Selected work</p><h2>Recent <em>projects.</em></h2></div>
+            <Link href="/work" className="hously-text-link hidden sm:flex">View all work <ArrowRight className="size-4" /></Link>
+          </div>
+          <div className="hously-project-grid">
+            {projects.map((project, index) => (
+              <Link href="/work" key={project.title} className={`hously-project ${index === 0 ? "hously-project-featured" : ""}`}>
+                <div className="relative aspect-[4/5] overflow-hidden"><Image src={project.image} alt={project.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 hover:scale-105" /></div>
+                <div className="mt-4 flex items-start justify-between gap-4"><div><h3>{project.title}</h3><p>{project.type}</p></div><span>{project.year}</span></div>
+              </Link>
+            ))}
           </div>
         </section>
 
-        {/* CREATOR WORKSPACE BANNER */}
-        <section className="py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <Card className="overflow-hidden border-primary/20 bg-primary text-primary-foreground shadow-2xl">
-              <div className="grid gap-8 p-8 md:p-14 lg:grid-cols-12 lg:items-center">
-                <div className="space-y-4 lg:col-span-8">
-                  <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">
-                    Private Creator Workspace
-                  </Badge>
-                  <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-                    Your studio data is private. Your work stays protected.
-                  </h2>
-                  <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/80 sm:text-base">
-                    Log in to access your confidential client rosters, pending
-                    quotations, unpaid invoices, draft contracts, and upload
-                    galleries. The admin dashboard is secured and personalized
-                    for your creator profile.
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-3 lg:col-span-4 lg:items-end">
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="secondary"
-                    className="w-full sm:w-auto font-semibold gap-2"
-                  >
-                    <Link href="/admin">
-                      <span>Access Workspace</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    <Link href="/contact">Direct Collaboration</Link>
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
+        <section id="approach" className="hously-approach">
+          <div><p className="hously-kicker">Our approach</p><h2>Less noise.<br /><em>More feeling.</em></h2></div>
+          <div className="hously-principles">{principles.map(([number, title, description]) => <div className="hously-principle" key={number}><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div><Plus className="size-4" /></div>)}</div>
         </section>
+
+        <section className="hously-cta"><p className="hously-kicker">Have a project in mind?</p><h2>Let&apos;s make<br /><em>room for it.</em></h2><Link href="/contact" className="hously-cta-link">Begin a conversation <ArrowRight className="size-4" /></Link></section>
       </main>
 
-      <Footer />
+      <footer className="hously-footer"><span>HOUSLY®</span><span>Architecture for considered living</span><span>Nairobi · Kenya</span></footer>
     </div>
   );
 }

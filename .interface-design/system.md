@@ -11,8 +11,8 @@
 | -------- | ---------- | ----- |
 | **Human** | A creative entrepreneur or studio manager who opens the app between client calls, after a shoot, or first thing in the morning. They need to see what's owed, what's next, and what's delivered — quickly. | The interface must serve a working creative professional, not a generic SaaS user. |
 | **Primary verb** | Survey — "what's my status?" — then act — "create quote / invoice / gallery / client record." | The dashboard is a status overview first, action hub second. |
-| **Feel** | Tight but not cramped. Credible, not cute. Like a professional tool you'd trust with financial data. Warm enough to feel human (purple accent, organic shadows), cold enough to feel reliable (neutral backgrounds, clear hierarchy). | The product serves creative people who work with their hands and mind — the interface should feel like a good tool, not a toy. |
-| **Signature element** | Purple accent (`#7c3aed`) on interactive states + rounded cards with subtle elevation. The purple is the only bright hue; everything else is neutral structure. | A single accent color that's used consistently says "crafted" more than a palette of five colors used without thought. |
+| **Feel** | Tight but not cramped. Credible, not cute. Like a professional tool you'd trust with financial data. Warm enough to feel human (primary accent, organic shadows), cold enough to feel reliable (neutral backgrounds, clear hierarchy). | The product serves creative people who work with their hands and mind — the interface should feel like a good tool, not a toy. |
+| **Signature element | Use shadcn `--primary` and neutral semantic tokens for interactive states; keep backgrounds, borders, and surfaces neutral. | The same token-based interaction language should be used consistently across the product.
 
 ---
 
@@ -76,8 +76,8 @@ meta:       400 / muted
 | `--color-text-primary` | `#212529` | `#f8f9fa` | Body text |
 | `--color-text-secondary` | `#495057` | `#dee2e6` | Secondary text, meta |
 | `--color-text-muted` | `#6c757d` | `#adb5bd` | Disabled / helper text |
-| `--color-accent` | `#7c3aed` | `#8b5cf6` | Primary interactive state |
-| `--color-accent-hover` | `#6d28d9` | `#7c3aed` | Hover / active |
+| `--color-accent` | ``--primary`` | ``--primary`` | Primary interactive state |
+| `--color-accent-hover` | ``--primary`` | ``--primary`` | Hover / active |
 | `--color-amber` | `#f59e0b` | `#f59e0b` | Attention (overdue, pending) |
 | `--color-amber-soft` | `#fef3c7` | `#fef3c7` | Amber surface (badges, low-priority) |
 | `--color-red` | `#ef4444` | `#ef4444` | Danger (errors, overdue invoices) |
@@ -87,7 +87,7 @@ meta:       400 / muted
 | `--color-info` | `#3b82f6` | `#3b82f6` | Info links, secondary action |
 | `--color-text-inverse` | `#ffffff` | `#ffffff` | On-accent text |
 
-*All other `slate-*`, `zinc-*`, `purple-*`, `amber-*`, `red-*` Tailwind utilities now resolve to these tokens via `@theme` overrides.*
+*All other `slate-*`, `zinc-*`, `primary-*`, `amber-*`, `red-*` Tailwind utilities now resolve to these tokens via `@theme` overrides.*
 
 ---
 
@@ -139,7 +139,7 @@ All buttons use `border-radius: var(--radius-sm)` (0.375rem). Primary button: `-
 - `--color-bg-input` fill  
 - `--color-border-subtle` border  
 - `--color-text-primary` text  
-- Focus: `focus:border-purple-500` (= `--color-accent`)  
+- Focus: `focus:border-primary` (= `--color-accent`)  
 - No decorative focus ring that fights the background
 
 ### Select / Dropdown
@@ -158,7 +158,7 @@ All buttons use `border-radius: var(--radius-sm)` (0.375rem). Primary button: `-
 - `--color-border-subtle`: `#e9ecef` → `#3a3a3a`  
 - Shadows → borders (they don't read on dark)  
 - Accent hue stays; only lightness shifts  
-- One semantic hue only (purple) — no multi-hue theming
+- One semantic hue only (primary) — no multi-hue theming
 
 ---
 

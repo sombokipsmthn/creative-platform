@@ -1,5 +1,7 @@
 # Better Auth Identity Standardization & Development Data Reset — Implementation Plan
 
+> **Historical plan warning (2026-10-21):** This plan is not proof that all tasks were implemented and is not permission to run a destructive reset. Check the current scripts and database state; require explicit user approval of the exact target and manifest. Never touch production, preserve equipment and migration history, and only delete storage objects positively linked to records being purged. See [Project Handbook](../../PROJECT-HANDBOOK.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implement the safe data reset utility and verification procedures for the creative-platform repository, enabling a controlled development data purge after manual approval.

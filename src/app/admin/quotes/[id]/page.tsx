@@ -181,7 +181,7 @@ function getStatusClass(value?: string | null) {
     case 'sent':
       return 'lue-200 bg-blue-50 text-blue-700';
     case 'invoiced':
-      return 'border-violet-200 bg-violet-50 text-violet-700';
+      return 'border-primary bg-primary/10 text-primary';
     default:
       return 'border-amber-200 bg-amber-50 text-amber-700';
   }

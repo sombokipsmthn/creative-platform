@@ -755,3 +755,73 @@ export const uploadAudit = pgTable("upload_audit", {
 
 // Better Auth core tables are represented by the users, sessions, accounts,
 // and verifications tables above.
+
+export const creatorWorkspaceBranding = pgTable("creator_workspace_branding", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  customDomain: text("custom_domain"),
+  hidePlatformBranding: boolean("hide_platform_branding").default(true).notNull(),
+  headerLogoUrl: text("header_logo_url"),
+  faviconUrl: text("favicon_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const creatorEmailTemplates = pgTable("creator_email_templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  invitationSubject: text("invitation_subject").default('Your Private Client Gallery is Ready — KIPSMTHN').notNull(),
+  invitationBody: text("invitation_body").default('Hello {ClientName},\n\nYour private gallery "{GalleryTitle}" is now live on KIPSMTHN.\n\nUse your access PIN: {PIN} to view, favorite, and download your deliverables.\n\nBest regards,\n{CreatorName}').notNull(),
+  reminderSubject: text("reminder_subject").default('Reminder: Your gallery "{GalleryTitle}" expires in {DaysRemaining} days').notNull(),
+  reminderBody: text("reminder_body").default('Hello {ClientName},\n\nThis is a friendly reminder that your access to "{GalleryTitle}" will expire on {ExpiryDate}.\n\nVisit the gallery to make your final selections and downloads.\n\nBest regards,\n{CreatorName}').notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const creatorNotificationPreferences = pgTable("creator_notification_preferences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  gallerySelections: boolean("gallery_selections").default(true).notNull(),
+  galleryComments: boolean("gallery_comments").default(true).notNull(),
+  galleryShares: boolean("gallery_shares").default(true).notNull(),
+  galleryApprovals: boolean("gallery_approvals").default(true).notNull(),
+  contractSigned: boolean("contract_signed").default(true).notNull(),
+  contractViewed: boolean("contract_viewed").default(true).notNull(),
+  contractDeclined: boolean("contract_declined").default(true).notNull(),
+  invoicePaid: boolean("invoice_paid").default(true).notNull(),
+  invoiceOverdue: boolean("invoice_overdue").default(true).notNull(),
+  paymentReceived: boolean("payment_received").default(true).notNull(),
+  emailEnabled: boolean("email_enabled").default(true).notNull(),
+  inAppEnabled: boolean("in_app_enabled").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const creatorIntegrations = pgTable("creator_integrations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  integrationKey: text("integration_key").notNull(),
+  name: text("name").notNull(),
+  description: text("description"),
+  status: text("status").default('inactive').notNull(),
+  config: jsonb("config").default({}).notNull(),
+  connectedAt: timestamp("connected_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userKeyUnique: unique("creator_integrations_user_key_unique").on(table.userId, table.integrationKey),
+}));
+
+export const creatorGalleryDefaults = pgTable("creator_gallery_defaults", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  defaultPhotoSelectionLimit: integer("default_photo_selection_limit").default(25).notNull(),
+  defaultExpirationDays: integer("default_expiration_days").default(60).notNull(),
+  defaultMasterPin: text("default_master_pin").default('4821').notNull(),
+  defaultAllowDownloads: boolean("default_allow_downloads").default(true).notNull(),
+  defaultAllowFavorites: boolean("default_allow_favorites").default(true).notNull(),
+  defaultAllowSelections: boolean("default_allow_selections").default(true).notNull(),
+  defaultRequirePin: boolean("default_require_pin").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

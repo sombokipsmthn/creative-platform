@@ -114,7 +114,7 @@ export async function GET(request: Request) {
       db.select({ status: invoices.status, count: count() }).from(invoices).where(eq(invoices.creatorId, creator)).groupBy(invoices.status),
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updatedAt, periodStart), lt(invoices.updatedAt, periodEnd))),
-      db.select({ value: sum(payments.amount) }).from(payments).where(and(eq(payments.creatorId, creator), eq(payments.status, "confirmed"), gte(payments.paidAt, periodStart), lt(payments.paidAt, periodEnd))),
+      db.select({ value: sum(payments.amount) }).from(payments).where(and(eq(payments.creatorId, creator), gte(payments.payment_date, periodStart), lt(payments.payment_date, periodEnd))),
       db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.dueDate, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
       db.select({ id: clients.id, name: clients.name, createdAt: clients.createdAt }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.createdAt)).limit(5),
       db.select({

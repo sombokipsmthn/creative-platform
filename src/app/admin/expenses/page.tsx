@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, RefreshCw, Filter, Plus } from 'lucide-react';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type Expense = { id: string; description: string; supplier: string | null; category: string; amount: number; currency: string; expenseDate: string; paymentMethod: string | null; taxAmount: number; notes: string | null; project?: { id: string; name: string } | null };
 type Form = { description: string; category: string; amount: string; expenseDate: string; supplier: string; paymentMethod: string; taxAmount: string; notes: string };
@@ -245,6 +246,62 @@ export default function AdminExpensesPage() {
             </form>
           </div>
         </div>
+
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
+          search=""
+          onSearchChange={() => {}}
+          searchPlaceholder="Search expenses by merchant, category, date…"
+          filters={[
+            {
+              id: 'status',
+              label: 'Status',
+              value: 'all',
+              options: [
+                { label: 'All Statuses', value: 'all' },
+                { label: 'Claimable', value: 'CLAIMABLE' },
+                { label: 'Pending Verification', value: 'PENDING_VERIFICATION' },
+              ],
+            },
+            {
+              id: 'category',
+              label: 'Category',
+              value: 'all',
+              options: [
+                { label: 'All Categories', value: 'all' },
+                { label: 'Camera & Production Gear', value: 'GEAR' },
+                { label: 'Production Travel & Transport', value: 'TRAVEL' },
+                { label: 'Software & Cloud Subscriptions', value: 'SOFTWARE' },
+                { label: 'Crew & Technical Assistant Fees', value: 'CREW' },
+                { label: 'Studio & Venue Hire', value: 'VENUE' },
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={() => {}}
+          onClearAll={() => {}}
+          primaryAction={{
+            label: 'Scan Receipt',
+            onClick: handleSimulateScan,
+            variant: 'primary',
+            size: 'sm',
+            className: 'text-xs font-sans uppercase tracking-widest',
+            icon: <Plus className="h-3.5 w-3.5" />,
+            disabled: isScanning,
+          } as AdminToolbarAction}
+          secondaryActions={[
+            {
+              label: 'Refresh',
+              onClick: () => {}, // No refresh needed for local state
+              variant: 'outline',
+              size: 'sm',
+              icon: <RefreshCw className="h-3.5 w-3.5" />,
+            } as AdminToolbarAction,
+          ]}
+          resultCount={expenses.length}
+          filteredCount={expenses.length}
+          resultLabel="Receipts"
+          loading={isScanning}
+        />
 
         {/* EXPENSES LIST */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm space-y-6">

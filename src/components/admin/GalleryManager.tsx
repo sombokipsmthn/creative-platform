@@ -26,11 +26,11 @@ import {
   Users,
 } from 'lucide-react';
 
-import TableFilterBar from '@/components/admin/TableFilterBar';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import { SelectCompat } from '@/components/ui/select-compat';
 import { Button } from '@/components/ui/button';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 interface GalleryItem {
   id: string;
@@ -388,49 +388,78 @@ export default function AdminGalleryManagerPage() {
         {activeTab === 'all' && (
           <>
             <div className="space-y-6">
-              <div className="flex justify-end">
-                <div className="ui-tab-pills" aria-label="Gallery view">
-                  <button type="button" className={`ui-tab-pill ${galleryView === 'grid' ? 'ui-tab-pill-active' : ''}`} onClick={() => changeGalleryView('grid')} aria-pressed={galleryView === 'grid'}>Grid</button>
-                  <button type="button" className={`ui-tab-pill ${galleryView === 'list' ? 'ui-tab-pill-active' : ''}`} onClick={() => changeGalleryView('list')} aria-pressed={galleryView === 'list'}>List</button>
-                </div>
-              </div>
-              <TableFilterBar
+              <AdminResourceToolbar
                 search={searchQuery}
                 onSearchChange={setSearchQuery}
-                filters={{ status: filterStatus, category: filterCategory }}
-                onFiltersChange={(filters) => {
-                  const nextStatus = filters.status;
-                  if (nextStatus === 'all' || nextStatus === 'draft' || nextStatus === 'published') {
-                    setFilterStatus(nextStatus);
-                  }
-                  setFilterCategory(filters.category ?? 'all');
-                }}
-                onAddItem={() => {
-                  setActiveTab('create');
-                }}
-                filterOptions={ [
+                searchPlaceholder="Search galleries by title, client, category…"
+                filters={[
                   {
+                    id: 'status',
                     label: 'Status',
-                    value: 'status',
+                    value: filterStatus,
                     options: [
                       { label: 'All Statuses', value: 'all' },
                       { label: 'Draft', value: 'draft' },
                       { label: 'Published', value: 'published' },
-                    ]
+                    ],
                   },
                   {
+                    id: 'category',
                     label: 'Category',
-                    value: 'category',
+                    value: filterCategory,
                     options: [
                       { label: 'All Categories', value: 'all' },
                       ...CATEGORY_OPTIONS.map((cat) => ({
                         label: cat,
                         value: cat,
-                      }))
-                    ]
-                  }
+                      })),
+                    ],
+                  },
+                ] as AdminFilterConfig[]}
+                onFilterChange={(id, value) => {
+                  if (id === 'status') setFilterStatus(value as 'all' | 'draft' | 'published');
+                  if (id === 'category') setFilterCategory(value ?? 'all');
+                }}
+                onClearAll={() => {
+                  setSearchQuery('');
+                  setFilterStatus('all');
+                  setFilterCategory('all');
+                }}
+                primaryAction={{
+                  label: 'New Gallery',
+                  onClick: () => setActiveTab('create'),
+                  variant: 'primary',
+                  size: 'sm',
+                  className: 'text-xs font-sans uppercase tracking-widest',
+                  icon: <Plus className="h-3.5 w-3.5" />,
+                } as AdminToolbarAction}
+                secondaryActions={[
+                  {
+                    label: '',
+                    onClick: () => fetchData(true),
+                    variant: 'outline',
+                    size: 'sm',
+                    icon: <RefreshCw className={isRefreshing ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />,
+                    disabled: isRefreshing,
+                  } as AdminToolbarAction,
+                  {
+                    label: 'Grid',
+                    onClick: () => changeGalleryView('grid'),
+                    variant: galleryView === 'grid' ? 'primary' : 'secondary',
+                    size: 'sm',
+                  } as AdminToolbarAction,
+                  {
+                    label: 'List',
+                    onClick: () => changeGalleryView('list'),
+                    variant: galleryView === 'list' ? 'primary' : 'secondary',
+                    size: 'sm',
+                  } as AdminToolbarAction,
                 ]}
-                itemLabel="Gallery" />
+                resultCount={galleries.length}
+                filteredCount={filteredGalleries.length}
+                resultLabel="Galleries"
+                loading={isLoading}
+              />
 
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

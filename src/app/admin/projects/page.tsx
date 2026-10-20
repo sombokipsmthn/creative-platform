@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, RefreshCw, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import {
@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
-import AdminListToolbar from '@/components/admin/AdminListToolbar';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -130,83 +130,74 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadData = useCallback(async (silent = false) => {
+    try {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+      setError('');
+
+      // Load clients for the client filter dropdown
+      const clientsResponse = await fetch('/api/clients', { cache: 'no-store' });
+      if (!clientsResponse.ok) {
+        throw new Error('Failed to load clients');
+      }
+      const clientsData = await clientsResponse.json();
+
+      // Load projects
+      const params = new URLSearchParams();
+      if (filterClient) {
+        params.append('clientId', filterClient);
+      }
+      if (filterStatus && filterStatus !== 'ALL') {
+        params.append('status', filterStatus);
+      }
+      if (filterVisibility && filterVisibility !== 'ALL') {
+        params.append('visibility', filterVisibility);
+      }
+      if (filterFeatured && filterFeatured !== 'ALL') {
+        params.append('featured', filterFeatured);
+      }
+
+      const projectsResponse = await fetch(`/api/projects?${params.toString()}`, {
+        cache: 'no-store',
+      });
+
+      if (!projectsResponse.ok) {
+        throw new Error('Failed to load projects');
+      }
+
+      const projectsData = await projectsResponse.json();
+
+      setClients(Array.isArray(clientsData) ? clientsData : []);
+      setProjects(
+        projectsData.map((proj: Project) => ({
+          ...proj,
+          client: proj.client
+            ? {
+                id: proj.client.id,
+                name: proj.client.name,
+                company: proj.client.company,
+                email: proj.client.email,
+                phone: proj.client.phone,
+                location: proj.client.location,
+              }
+            : null,
+        }))
+      );
+    } catch (err) {
+      console.error('Failed to load projects:', err);
+      setError('Unable to load projects. Please try again.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [filterClient, filterStatus, filterVisibility, filterFeatured]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadData() {
-      try {
-        setLoading(true);
-        setError('');
-
-        // Load clients for the client filter dropdown
-        const clientsResponse = await fetch('/api/clients', { cache: 'no-store' });
-        if (!clientsResponse.ok) {
-          throw new Error('Failed to load clients');
-        }
-        const clientsData = await clientsResponse.json();
-
-        // Load projects
-        const params = new URLSearchParams();
-        if (filterClient) {
-          params.append('clientId', filterClient);
-        }
-        if (filterStatus && filterStatus !== 'ALL') {
-          params.append('status', filterStatus);
-        }
-        if (filterVisibility && filterVisibility !== 'ALL') {
-          params.append('visibility', filterVisibility);
-        }
-        if (filterFeatured && filterFeatured !== 'ALL') {
-          params.append('featured', filterFeatured);
-        }
-
-        const projectsResponse = await fetch(`/api/projects?${params.toString()}`, {
-          cache: 'no-store',
-        });
-
-        if (!projectsResponse.ok) {
-          throw new Error('Failed to load projects');
-        }
-
-        const projectsData = await projectsResponse.json();
-
-        if (!cancelled) {
-          setClients(Array.isArray(clientsData) ? clientsData : []);
-          setProjects(
-            projectsData.map((proj: Project) => ({
-              ...proj,
-              client: proj.client
-                ? {
-                    id: proj.client.id,
-                    name: proj.client.name,
-                    company: proj.client.company,
-                    email: proj.client.email,
-                    phone: proj.client.phone,
-                    location: proj.client.location,
-                  }
-                : null,
-            }))
-          );
-        }
-      } catch (err) {
-        console.error('Failed to load projects:', err);
-        if (!cancelled) {
-          setError('Unable to load projects. Please try again.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadData();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [filterClient, filterStatus]);
+    void loadData();
+  }, [loadData]);
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -399,89 +390,88 @@ export default function AdminProjectsPage() {
           ))}
         </div>
 
-        <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2 items-center">
-            <Input
-              type="text"
-              placeholder="Search projects by name, description, client..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="w-full md:w-64"
-            />
-
-            <Select value={filterClient ?? 'all'} onValueChange={(value) => setFilterClient(value === 'all' ? null : value)}>
-              <SelectTrigger className="w-full md:w-64"><SelectValue placeholder="All Clients" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Clients</SelectItem>
-                {clients.map((client) => (
-                  <SelectItem key={client.id} value={client.id}>{client.name} {client.company ? `(${client.company})` : ''}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-wrap gap-2 text-xs font-sans">
-            {(
-              [
-                ['ALL', projects.length],
-                ['active', activeCount],
-                ['completed', completedCount],
-                ['on hold', onHoldCount],
-                ['cancelled', cancelledCount],
-                ['draft', draftCount],
-              ] as const
-            ).map(([status, count]) => (
-              <Button
-                key={status}
-                variant={filterStatus === status ? 'primary' : 'secondary'}
-                onClick={() => setFilterStatus(status)}
-                className="text-xs font-sans uppercase tracking-widest"
-              >
-                {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
-              </Button>
-            ))}
-
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Visibility:</span>
-              {(['ALL', 'public', 'private', 'draft'] as const).map((vis) => (
-                <Button
-                  key={vis}
-                  variant={filterVisibility === vis ? 'primary' : 'secondary'}
-                  onClick={() => setFilterVisibility(vis)}
-                  className="text-xs font-sans uppercase tracking-widest"
-                >
-                  {vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}
-                </Button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Featured:</span>
-              {(['ALL', 'true', 'false'] as const).map((feat) => (
-                <Button
-                  key={feat}
-                  variant={filterFeatured === feat ? 'primary' : 'secondary'}
-                  onClick={() => setFilterFeatured(feat)}
-                  className="text-xs font-sans uppercase tracking-widest"
-                >
-                  {feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <AdminListToolbar
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
           search={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search projects by name, description, client…"
           filters={[
-            { id: 'status', label: 'Status', value: filterStatus.toLowerCase(), options: [{ label: 'All', value: 'all' }, ...(['active', 'completed', 'on hold', 'cancelled', 'draft'] as ProjectStatus[]).map((value) => ({ label: statusLabel(value), value }))] },
-            { id: 'visibility', label: 'Visibility', value: filterVisibility.toLowerCase(), options: [{ label: 'All', value: 'all' }, { label: 'Public', value: 'public' }, { label: 'Private', value: 'private' }, { label: 'Draft', value: 'draft' }] },
-            { id: 'featured', label: 'Featured', value: filterFeatured.toLowerCase(), options: [{ label: 'All', value: 'all' }, { label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }] },
+            {
+              id: 'status',
+              label: 'Status',
+              value: filterStatus.toLowerCase(),
+              options: [
+                { label: 'All', value: 'all' },
+                ...(['active', 'completed', 'on hold', 'cancelled', 'draft'] as ProjectStatus[]).map((value) => ({ label: statusLabel(value), value })),
+              ],
+            },
+            {
+              id: 'visibility',
+              label: 'Visibility',
+              value: filterVisibility.toLowerCase(),
+              options: [
+                { label: 'All', value: 'all' },
+                { label: 'Public', value: 'public' },
+                { label: 'Private', value: 'private' },
+                { label: 'Draft', value: 'draft' },
+              ],
+            },
+            {
+              id: 'featured',
+              label: 'Featured',
+              value: filterFeatured.toLowerCase(),
+              options: [
+                { label: 'All', value: 'all' },
+                { label: 'Yes', value: 'true' },
+                { label: 'No', value: 'false' },
+              ],
+            },
+            {
+              id: 'client',
+              label: 'Client',
+              value: filterClient ?? 'all',
+              options: [
+                { label: 'All Clients', value: 'all' },
+                ...clients.map((client) => ({
+                  label: client.name + (client.company ? ` (${client.company})` : ''),
+                  value: client.id,
+                })),
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            if (id === 'status') setFilterStatus(value === 'all' ? 'ALL' : value as ProjectStatus);
+            if (id === 'visibility') setFilterVisibility(value === 'all' ? 'ALL' : value as 'public' | 'private' | 'draft');
+            if (id === 'featured') setFilterFeatured(value === 'all' ? 'ALL' : value as 'true' | 'false');
+            if (id === 'client') setFilterClient(value === 'all' ? null : value ?? null);
+          }}
+          onClearAll={() => {
+            setSearchQuery('');
+            setFilterStatus('ALL');
+            setFilterVisibility('ALL');
+            setFilterFeatured('ALL');
+            setFilterClient(null);
+          }}
+          primaryAction={{
+            label: '+ New Project',
+            onClick: () => openCreateModal(),
+            variant: 'primary',
+            size: 'sm',
+            className: 'text-xs font-sans uppercase tracking-widest',
+          } as AdminToolbarAction}
+          secondaryActions={[
+            {
+              label: '',
+              onClick: () => void loadData(true),
+              variant: 'outline',
+              size: 'sm',
+              icon: <RefreshCw className="h-3.5 w-3.5" />,
+            } as AdminToolbarAction,
           ]}
-          onFilterChange={(id, value) => { if (id === 'status') setFilterStatus(value === 'all' ? 'ALL' : value as ProjectStatus); if (id === 'visibility') setFilterVisibility(value === 'all' ? 'ALL' : value as 'public' | 'private' | 'draft'); if (id === 'featured') setFilterFeatured(value === 'all' ? 'ALL' : value as 'true' | 'false'); }}
-          primaryAction={<Button type="button" onClick={() => openCreateModal()}>+ New Project</Button>}
+          resultCount={projects.length}
+          filteredCount={filteredProjects.length}
+          resultLabel="Projects"
+          loading={loading}
         />
 
         <AdminDataTable

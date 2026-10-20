@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import EmptyState from '@/components/admin/EmptyState';
 import AdminDataTable, { type AdminColumn } from '@/components/admin/AdminDataTable';
-import AdminListToolbar from '@/components/admin/AdminListToolbar';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type Equipment = {
   id: string;
@@ -128,17 +128,34 @@ export default function EquipmentPage() {
         {error && !open && <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300" role="alert">{error}</div>}
 
         <section className="ui-card space-y-5" aria-labelledby="equipment-list-title">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 id="equipment-list-title" className="ui-section-title">Equipment catalogue</h2>
-              <p className="ui-meta">Rates are available to quote builders and do not create a quotation by themselves.</p>
-            </div>
-            <Button type="button" variant="outline" size="sm" onClick={() => void loadEquipment(true)} disabled={refreshing}>
-              <RefreshCw aria-hidden="true" className={refreshing ? 'animate-spin' : ''} />Refresh
-            </Button>
-          </div>
-
-          <AdminListToolbar search={query} onSearchChange={setQuery} searchPlaceholder="Search equipment, category, brand…" primaryAction={<Button type="button" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Add equipment</Button>} />
+          <AdminResourceToolbar
+            search={query}
+            onSearchChange={setQuery}
+            searchPlaceholder="Search equipment, category, brand…"
+            filters={[]}
+            onFilterChange={() => {}}
+            onClearAll={() => setQuery('')}
+            primaryAction={{
+              label: 'Add equipment',
+              onClick: openCreate,
+              variant: 'primary',
+              icon: <Plus className="mr-2 h-4 w-4" />,
+            } as AdminToolbarAction}
+            secondaryActions={[
+              {
+                label: 'Refresh',
+                onClick: () => void loadEquipment(true),
+                variant: 'outline',
+                size: 'sm',
+                icon: <RefreshCw aria-hidden="true" className={refreshing ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />,
+                disabled: refreshing,
+              } as AdminToolbarAction,
+            ]}
+            resultCount={equipment.length}
+            filteredCount={filteredEquipment.length}
+            resultLabel="Equipment"
+            loading={loading}
+          />
 
           {loading ? (
             <div className="admin-empty-state" role="status" aria-live="polite"><Loader2 aria-hidden="true" className="animate-spin" /><p>Loading equipment…</p></div>

@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowUpRight, Mail, MapPin, Phone, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import {
@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
-import AdminListToolbar from '@/components/admin/AdminListToolbar';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -86,44 +86,35 @@ export default function AdminClientsPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadClients = useCallback(async (silent = false) => {
+    try {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+      setError('');
+
+      const response = await fetch('/api/clients', { cache: 'no-store' });
+
+      if (!response.ok) {
+        throw new Error('Failed to load clients');
+      }
+
+      const data = await response.json();
+
+      setClients(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load clients:', err);
+      setError('Unable to load clients. Please try again.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadClients() {
-      try {
-        setLoading(true);
-        setError('');
-
-        const response = await fetch('/api/clients', { cache: 'no-store' });
-
-        if (!response.ok) {
-          throw new Error('Failed to load clients');
-        }
-
-        const data = await response.json();
-
-        if (!cancelled) {
-          setClients(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error('Failed to load clients:', err);
-        if (!cancelled) {
-          setError('Unable to load clients. Please try again.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadClients();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void loadClients();
+  }, [loadClients]);
 
   const filteredClients = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -294,43 +285,53 @@ export default function AdminClientsPage() {
           ))}
         </div>
 
-        <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-          <Input
-            type="text"
-            placeholder="Search clients by name, company, email, phone..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="w-full md:w-96"
-          />
-
-          <div className="flex flex-wrap gap-2 text-xs font-sans">
-            {(
-              [
-                ['ALL', clients.length],
-                ['active', activeCount],
-                ['inactive', inactiveCount],
-                ['archived', archivedCount],
-              ] as const
-            ).map(([status, count]) => (
-              <Button
-                key={status}
-                variant={filterStatus === status ? 'primary' : 'secondary'}
-                onClick={() => setFilterStatus(status)}
-                className="text-xs font-sans uppercase tracking-widest"
-              >
-                {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        <AdminListToolbar
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
           search={searchQuery}
           onSearchChange={setSearchQuery}
           searchPlaceholder="Search clients by name, company, email, phone…"
-          filters={[{ id: 'status', label: 'Status', value: filterStatus.toLowerCase(), options: [{ label: 'All', value: 'all' }, { label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }, { label: 'Archived', value: 'archived' }] }]}
-          onFilterChange={(_, value) => setFilterStatus(value === 'all' ? 'ALL' : value as ClientStatus)}
-          primaryAction={<Button type="button" onClick={openCreateModal}>+ Register New Client</Button>}
+          filters={[
+            {
+              id: 'status',
+              label: 'Status',
+              value: filterStatus.toLowerCase(),
+              options: [
+                { label: 'All', value: 'all' },
+                { label: 'Active', value: 'active' },
+                { label: 'Inactive', value: 'inactive' },
+                { label: 'Archived', value: 'archived' },
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            if (id === 'status') {
+              setFilterStatus(value === 'all' ? 'ALL' : (value as ClientStatus));
+            }
+          }}
+          onClearAll={() => {
+            setSearchQuery('');
+            setFilterStatus('ALL');
+          }}
+          primaryAction={{
+            label: '+ Register New Client',
+            onClick: openCreateModal,
+            variant: 'primary',
+            size: 'sm',
+            className: 'text-xs font-sans uppercase tracking-widest',
+          } as AdminToolbarAction}
+          secondaryActions={[
+            {
+              label: '',
+              onClick: () => void loadClients(true),
+              variant: 'outline',
+              size: 'sm',
+              icon: <RefreshCw className="h-3.5 w-3.5" />,
+            } as AdminToolbarAction,
+          ]}
+          resultCount={clients.length}
+          filteredCount={filteredClients.length}
+          resultLabel="Clients"
+          loading={loading}
         />
 
         <AdminDataTable

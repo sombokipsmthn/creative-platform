@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -9,14 +9,15 @@ import {
   FileSignature,
   Loader2,
   Plus,
+  RefreshCw,
   Trash2,
 } from 'lucide-react';
 
-import TableFilterBar from '@/components/admin/TableFilterBar';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type Contract = {
   id: string;
@@ -87,44 +88,45 @@ export default function ContractsPage() {
   }, []);
 
   // Fetch contracts, stats, and templates (we only need contracts and stats here)
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  const loadContracts = useCallback(async (silent = false) => {
+    try {
+      if (!silent) setLoading(true);
       setError(null);
-      try {
-        const params = new URLSearchParams();
-        params.set('search', search);
-        params.set('status', status);
-        if (clientId !== 'all') params.set('clientId', clientId);
+      const params = new URLSearchParams();
+      params.set('search', search);
+      params.set('status', status);
+      if (clientId !== 'all') params.set('clientId', clientId);
 
-        const res = await fetch(`/api/contracts?${params.toString()}`, {
-          cache: 'no-store',
-        });
-        if (res.status === 401) {
-          throw new Error('Please sign in to view your contracts.');
-        }
-        if (!res.ok) throw new Error('Failed to fetch contracts data');
-        const data = await res.json();
-        setContracts(data.contracts || []);
-        setStats(data.stats || {
-          total: 0,
-          draft: 0,
-          sent: 0,
-          viewed: 0,
-          awaiting_signature: 0,
-          signed: 0,
-          declined: 0,
-          expired: 0,
-          cancelled: 0,
-        });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+      const res = await fetch(`/api/contracts?${params.toString()}`, {
+        cache: 'no-store',
+      });
+      if (res.status === 401) {
+        throw new Error('Please sign in to view your contracts.');
       }
-    };
-    fetchData();
+      if (!res.ok) throw new Error('Failed to fetch contracts data');
+      const data = await res.json();
+      setContracts(data.contracts || []);
+      setStats(data.stats || {
+        total: 0,
+        draft: 0,
+        sent: 0,
+        viewed: 0,
+        awaiting_signature: 0,
+        signed: 0,
+        declined: 0,
+        expired: 0,
+        cancelled: 0,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   }, [search, status, clientId]);
+
+  useEffect(() => {
+    void loadContracts();
+  }, [loadContracts]);
 
   function formatStatus(status: string) {
     return status
@@ -256,23 +258,16 @@ export default function ContractsPage() {
           </div>
         </div>
 
-        {/* Table Filter Bar */}
-        <TableFilterBar
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
           search={search}
           onSearchChange={setSearch}
-          filters={{ status, clientId }}
-          onFiltersChange={(filters) => {
-            setSearch(filters.search ?? '');
-            setStatus(filters.status ?? 'all');
-            setClientId(filters.clientId ?? 'all');
-          }}
-          onAddItem={() => {
-            // We'll handle the "New Contract" button in the header
-          }}
-          filterOptions={ [
+          searchPlaceholder="Search contracts by title, client, number…"
+          filters={[
             {
+              id: 'status',
               label: 'Status',
-              value: 'status',
+              value: status,
               options: [
                 { label: 'All Statuses', value: 'all' },
                 { label: 'Draft', value: 'draft' },
@@ -283,21 +278,51 @@ export default function ContractsPage() {
                 { label: 'Declined', value: 'declined' },
                 { label: 'Expired', value: 'expired' },
                 { label: 'Cancelled', value: 'cancelled' },
-              ]
+              ],
             },
             {
+              id: 'clientId',
               label: 'Client',
-              value: 'clientId',
+              value: clientId,
               options: [
                 { label: 'All Clients', value: 'all' },
-                ...clients.map(client => ({
+                ...clients.map((client) => ({
                   label: client.name + (client.company ? ` (${client.company})` : ''),
                   value: client.id,
                 })),
-              ]
-            }
-          ] }
-          itemLabel="Contract"
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            if (id === 'status') setStatus(value ?? 'all');
+            if (id === 'clientId') setClientId(value ?? 'all');
+          }}
+          onClearAll={() => {
+            setSearch('');
+            setStatus('all');
+            setClientId('all');
+          }}
+          primaryAction={{
+            label: 'New Contract',
+            onClick: () => window.location.assign('/admin/contracts/new'),
+            variant: 'primary',
+            size: 'sm',
+            className: 'text-xs font-sans uppercase tracking-widest',
+            icon: <Plus className="h-3.5 w-3.5" />,
+          } as AdminToolbarAction}
+          secondaryActions={[
+            {
+              label: 'Refresh',
+              onClick: () => void loadContracts(true),
+              variant: 'outline',
+              size: 'sm',
+              icon: <RefreshCw className="h-3.5 w-3.5" />,
+            } as AdminToolbarAction,
+          ]}
+          resultCount={stats.total}
+          filteredCount={contracts.length}
+          resultLabel="Contracts"
+          loading={loading}
         />
 
         {/* TABLE */}

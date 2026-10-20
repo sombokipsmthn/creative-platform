@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, ArrowRight } from 'lucide-react';
+import { Plus, ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import TableFilterBar from '@/components/admin/TableFilterBar';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type QuoteClient = {
   id: string;
@@ -62,53 +62,43 @@ export default function QuotesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadQuotes = useCallback(async (silent = false) => {
+    try {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+      setError('');
 
-    async function loadQuotes() {
-      try {
-        setLoading(true);
-        setError('');
+      const params = new URLSearchParams();
+      params.set('search', search);
+      params.set('status', statusFilter);
 
-        const params = new URLSearchParams();
-        params.set('search', search);
-        params.set('status', statusFilter);
+      const response = await fetch(`/api/quotes?${params.toString()}`, {
+        cache: 'no-store',
+      });
 
-        const response = await fetch(`/api/quotes?${params.toString()}`, {
-          cache: 'no-store',
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to load quotes');
-        }
-
-        const data = await response.json();
-
-        if (!cancelled) {
-          setQuotes(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error('Failed to load quotes:', err);
-
-        if (!cancelled) {
-          setError('Unable to load quotes. Please try again.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
+      if (!response.ok) {
+        throw new Error('Failed to load quotes');
       }
+
+      const data = await response.json();
+
+      setQuotes(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load quotes:', err);
+      setError('Unable to load quotes. Please try again.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-
-    loadQuotes();
-
-    return () => {
-      cancelled = true;
-    };
   }, [search, statusFilter]);
+
+  useEffect(() => {
+    void loadQuotes();
+  }, [loadQuotes]);
 
   const filteredQuotes = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -219,22 +209,16 @@ export default function QuotesPage() {
           </div>
         </div>
 
-        {/* Table Filter Bar */}
-        <TableFilterBar
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
           search={search}
           onSearchChange={setSearch}
-          filters={{ status: statusFilter }}
-          onFiltersChange={(filters) => {
-            setSearch(filters.search ?? '');
-            setStatusFilter(filters.status ?? 'all');
-          }}
-          onAddItem={() => {
-            router.push('/admin/quotes/new');
-          }}
-          filterOptions={[
+          searchPlaceholder="Search quotes by title, client, number…"
+          filters={[
             {
+              id: 'status',
               label: 'Status',
-              value: 'status',
+              value: statusFilter,
               options: [
                 { label: 'All statuses', value: 'all' },
                 { label: 'Draft', value: 'draft' },
@@ -244,10 +228,37 @@ export default function QuotesPage() {
                 { label: 'Invoiced', value: 'invoiced' },
                 { label: 'Declined', value: 'declined' },
                 { label: 'Expired', value: 'expired' },
-              ]
-            }
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            if (id === 'status') setStatusFilter(value ?? 'all');
+          }}
+          onClearAll={() => {
+            setSearch('');
+            setStatusFilter('all');
+          }}
+          primaryAction={{
+            label: 'New Quote',
+            onClick: () => router.push('/admin/quotes/new'),
+            variant: 'primary',
+            size: 'sm',
+            className: 'text-xs font-sans uppercase tracking-widest',
+            icon: <Plus className="h-3.5 w-3.5" />,
+          } as AdminToolbarAction}
+          secondaryActions={[
+            {
+              label: 'Refresh',
+              onClick: () => void loadQuotes(true),
+              variant: 'outline',
+              size: 'sm',
+              icon: <RefreshCw className="h-3.5 w-3.5" />,
+            } as AdminToolbarAction,
           ]}
-          itemLabel="Quote"
+          resultCount={quotes.length}
+          filteredCount={filteredQuotes.length}
+          resultLabel="Quotes"
+          loading={loading}
         />
 
         {/* ERROR */}

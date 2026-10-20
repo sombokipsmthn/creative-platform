@@ -18,8 +18,8 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
-import TableFilterBar from '@/components/admin/TableFilterBar';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type Client = {
   id: string;
@@ -346,62 +346,73 @@ export default function InvoicesPage() {
           </div>
         </div>
 
-        {/* Table Filter Bar */}
-        <TableFilterBar
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
           search={search}
           onSearchChange={setSearch}
-          filters={{ status, currency, clientId }}
-          onFiltersChange={(filters) => {
-            setPage(1);
-            setStatus(filters.status ?? 'all');
-            setCurrency(filters.currency ?? 'all');
-            setClientId(filters.clientId ?? 'all');
-          }}
-          onAddItem={() => {
-            // Navigate to new invoice page - we'll need to create this route
-          }}
-          filterOptions={ [
+          searchPlaceholder="Search invoices by number, title, client…"
+          filters={[
             {
+              id: 'status',
               label: 'Status',
-              value: 'status',
-              options: STATUSES.map(s => ({
+              value: status,
+              options: STATUSES.map((s) => ({
                 label: s === 'all' ? 'All statuses' : getStatusLabel(s),
-                value: s
-              }))
+                value: s,
+              })),
             },
             {
+              id: 'currency',
               label: 'Currency',
-              value: 'currency',
-              options: CURRENCIES
+              value: currency,
+              options: CURRENCIES,
             },
             {
+              id: 'clientId',
               label: 'Client',
-              value: 'clientId',
+              value: clientId,
               options: [
                 { label: 'All clients', value: 'all' },
-                ...clients.map(c => ({
+                ...clients.map((c) => ({
                   label: getClientName(c),
-                  value: c.id
-                }))
+                  value: c.id,
+                })),
               ],
-              type: 'pills'
-            }
-          ] }
-          itemLabel="Invoice"
+              type: 'pills',
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            setPage(1);
+            if (id === 'status') setStatus(value ?? 'all');
+            if (id === 'currency') setCurrency(value ?? 'all');
+            if (id === 'clientId') setClientId(value ?? 'all');
+          }}
+          onClearAll={resetFilters}
+          primaryAction={{
+            label: 'New Invoice',
+            onClick: () => {
+              // Navigate to new invoice page
+            },
+            variant: 'primary',
+            size: 'sm',
+            className: 'text-xs font-sans uppercase tracking-widest',
+            icon: <Plus className="h-3.5 w-3.5" />,
+          } as AdminToolbarAction}
+          secondaryActions={[
+            {
+              label: 'Refresh',
+              onClick: () => void loadInvoices(true),
+              variant: 'outline',
+              size: 'sm',
+              icon: <RefreshCw className={refreshing ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />,
+              disabled: refreshing,
+            } as AdminToolbarAction,
+          ]}
+          resultCount={summary.total}
+          filteredCount={filteredInvoices.length}
+          resultLabel="Invoices"
+          loading={loading}
         />
-
-        {hasFilters && (
-          <div className="flex items-center justify-between px-2">
-            <p className="text-sm text-muted-foreground">Showing filtered results</p>
-            <Button
-              onClick={resetFilters}
-              variant="ghost"
-              className="text-xs font-sans uppercase tracking-widest"
-            >
-              Clear filters
-            </Button>
-          </div>
-        )}
 
         {/* TABLE */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">

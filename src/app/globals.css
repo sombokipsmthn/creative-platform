@@ -666,18 +666,6 @@ body {
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 
 
-[class*="purple"],
-[class*="violet"],
-[class*="indigo"],
-[class*="fuchsia"] {
-  background-image: none !important;
-  background-color: color-mix(in srgb, var(--muted) 72%, transparent) !important;
-  border-color: color-mix(in srgb, var(--foreground) 10%, transparent) !important;
-  color: var(--foreground) !important;
-  --tw-ring-color: var(--ring) !important;
-  --tw-shadow-color: transparent !important;
-}
-
 .admin-surface .border,
 .admin-surface .border-t,
 .admin-surface .border-b,

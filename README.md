@@ -212,3 +212,7 @@ Validation completed for the redesign branch includes the production build, Type
 - [docs/04-security-compliance/README.md](./docs/04-security-compliance/README.md)
 - [docs/design-system.md](./docs/design-system.md)
 - [docs/audits/styling-shadcn-audit.md](./docs/audits/styling-shadcn-audit.md)
+
+## Canonical project documentation (2026-10-21)
+
+Before making changes, start with [the Project Handbook](./docs/PROJECT-HANDBOOK.md) and [Documentation Index](./docs/DOCUMENTATION-INDEX.md). These are the single entry points for current decisions and specialist references. The repository's current code, schema, migrations, tests, and active configuration determine what is implemented; a plan or historical report does not prove completion. Better Auth remains the active authentication system. See the handbook for the current requirements around the auth/onboarding journey, database-target safety, preserving equipment and calendar behavior, design-system consistency, admin filter styling, and local port policy.

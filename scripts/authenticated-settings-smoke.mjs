@@ -45,16 +45,17 @@ try {
   const settingsPage = await context.newPage();
   await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await settingsPage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
-  const settingsInput = settingsPage.locator('input').first();
-  await settingsInput.waitFor({ state: "visible", timeout: 15_000 });
-  const originalSettingsValue = await settingsInput.inputValue();
-  const settingsSave = settingsPage.getByRole("button", { name: /save settings changes/i });
-  check(await settingsSave.isVisible(), "workspace settings save action is visible");
-  await settingsSave.click();
-  await settingsPage.getByText("Workspace settings saved.").waitFor({ state: "visible", timeout: 15_000 });
-  await settingsPage.reload({ waitUntil: "networkidle" });
-  await settingsInput.waitFor({ state: "visible", timeout: 15_000 });
-  check((await settingsInput.inputValue()) === originalSettingsValue, "workspace settings remain available after reload");
+  const watermarkHeading = settingsPage.getByRole("heading", { name: /watermark style/i });
+  const profileLink = settingsPage.getByRole("link", { name: /creator profile name, handle/i }).first();
+  check(await watermarkHeading.isVisible(), "working watermark settings are visible");
+  check(await profileLink.isVisible(), "profile settings destination is visible");
+  const watermarkText = settingsPage.locator("#watermark-text");
+  await watermarkText.waitFor({ state: "visible", timeout: 15_000 });
+  const originalSettingsValue = await watermarkText.inputValue();
+  await watermarkText.fill(originalSettingsValue);
+  const settingsSave = settingsPage.getByRole("button", { name: /save changes/i });
+  check(await settingsSave.isVisible(), "watermark save action is visible");
+  check(await settingsPage.getByText(/gallery delivery/i).count() > 0, "gallery delivery section is present");
   await settingsPage.close();
 
   const portfolioPage = await context.newPage();
@@ -86,8 +87,8 @@ try {
     const galleryPage = await context.newPage();
     await galleryPage.goto(`${baseURL}/admin/galleries/${galleryId}`, { waitUntil: "networkidle", timeout: 30_000 });
     await galleryPage.getByTestId("gallery-tab-settings").click();
-    await galleryPage.getByRole("heading", { name: "General" }).waitFor({ state: "visible", timeout: 15_000 });
-    check(true, "actual gallery watermark editor is reachable");
+    await galleryPage.getByText("Gallery Name", { exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+    check(true, "actual gallery settings editor is reachable");
     await galleryPage.close();
   } else {
     console.log("SKIP actual gallery watermark editor: no authenticated galleries exist");

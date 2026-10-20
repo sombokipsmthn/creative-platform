@@ -6,7 +6,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   return withCreatorApi(request, async (_request, user) => {
     try {
       const { id } = await params;
-      const contract = await fetchContract(id);
+      const contract = await fetchContract(id, user.id);
       return NextResponse.json({
         ...contract,
         status: contract.status || 'draft',

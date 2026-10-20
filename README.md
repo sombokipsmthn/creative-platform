@@ -104,7 +104,7 @@ This means the repo’s live state is the authoritative source for implementatio
 
 The platform uses shadcn/ui as its single source of truth. The official reference is [shadcn/ui components](https://ui.shadcn.com/docs/components); canonical tokens live in `src/app/globals.css`, shared primitives live in `src/components/ui/`, and the permanent rules are documented in [docs/design-system.md](./docs/design-system.md). Run `npm run design-system:check` to enforce the repository guardrails.
 
-The platform’s UI system is centralized in `src/app/globals.css` and follows a semantic class pattern.
+The platform’s UI system is centralized in `src/app/globals.css` and follows a semantic class pattern. The verified repository configuration is `radix-nova` with a stone base and CSS variables; no separate Shade CN preset identifier is present in the repository. Live product UI must not introduce purple/violet literals, legacy Hausly/Hously branding, or unsupported theme variants.
 
 Core patterns:
 
@@ -115,6 +115,17 @@ Core patterns:
 - `.ui-page-title`, `.ui-section-title`, `.ui-eyebrow`, `.ui-meta`
 
 Shared UI uses the shadcn primitives and semantic theme tokens in `src/app/globals.css`.
+
+### Current UX redesign inventory
+
+- Public `/` is a marketing experience with audience-focused navigation and creator workspace access separated at `/admin`.
+- `/admin/settings` contains only working settings destinations and the persisted global watermark studio.
+- Creator profile and public portfolio remain separate, linked destinations under the authenticated workspace.
+- Admin navigation uses grouped Overview, Operations, and Settings sections with responsive mobile-sheet navigation.
+- Dashboard, onboarding, settings, and gallery theme defaults use semantic primary tokens instead of legacy purple styling.
+- Route capabilities remain intact across clients, projects, galleries, quotes, invoices, payments, contracts, calendar, equipment, profile, portfolio, and client portals.
+
+Validation completed for the redesign branch includes the production build, TypeScript, design-system guardrails, and the repository test suite. Browser checks confirmed public homepage layout and primary actions at mobile and desktop sizes, with no horizontal overflow after the responsive header fix. Settings page shell and profile/portfolio destinations rendered at both sizes; the persisted watermark panel could not complete because the existing local API returned HTTP 500 and the dev server later reset under repeated smoke traffic. Full authenticated smoke results remain environment-blocked, not represented as passing.
 
 ---
 

@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import AdminDataTable from '@/components/admin/AdminDataTable';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import { SelectCompat } from '@/components/ui/select-compat';
 import { Button } from '@/components/ui/button';
@@ -96,6 +97,17 @@ export default function AdminGalleryManagerPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'published'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [galleryView, setGalleryView] = useState<'grid' | 'list'>('grid');
+
+  useEffect(() => {
+    const savedView = window.localStorage.getItem('kipsmthn-gallery-view');
+    if (savedView === 'grid' || savedView === 'list') setGalleryView(savedView);
+  }, []);
+
+  function changeGalleryView(view: 'grid' | 'list') {
+    setGalleryView(view);
+    window.localStorage.setItem('kipsmthn-gallery-view', view);
+  }
 
   // Form states for creating new gallery
   const [title, setTitle] = useState('');
@@ -376,6 +388,12 @@ export default function AdminGalleryManagerPage() {
         {activeTab === 'all' && (
           <>
             <div className="space-y-6">
+              <div className="flex justify-end">
+                <div className="ui-tab-pills" aria-label="Gallery view">
+                  <button type="button" className={`ui-tab-pill ${galleryView === 'grid' ? 'ui-tab-pill-active' : ''}`} onClick={() => changeGalleryView('grid')} aria-pressed={galleryView === 'grid'}>Grid</button>
+                  <button type="button" className={`ui-tab-pill ${galleryView === 'list' ? 'ui-tab-pill-active' : ''}`} onClick={() => changeGalleryView('list')} aria-pressed={galleryView === 'list'}>List</button>
+                </div>
+              </div>
               <TableFilterBar
                 search={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -447,6 +465,22 @@ export default function AdminGalleryManagerPage() {
                     </p>
                   </div>
                 </div>
+              ) : galleryView === 'list' ? (
+                <AdminDataTable
+                  rows={filteredGalleries}
+                  getRowLabel={(gallery) => gallery.title}
+                  columns={[
+                    { id: 'gallery', header: 'Gallery', cell: (gallery) => <div className="flex items-center gap-3"><div className="relative h-10 w-14 overflow-hidden rounded-lg bg-muted">{gallery.cover_url && <Image src={gallery.cover_url} alt="" fill className="object-cover" unoptimized />}</div><div><p className="font-medium">{gallery.title}</p><p className="text-xs text-muted-foreground">{gallery.client_name || 'Individual Client'}</p></div></div>, accessor: (gallery) => gallery.title, sortable: true },
+                    { id: 'photos', header: 'Photos', accessor: (gallery) => gallery.photo_count, align: 'right' },
+                    { id: 'status', header: 'Status', cell: (gallery) => <span className="ui-badge">{gallery.status}</span>, accessor: (gallery) => gallery.status },
+                    { id: 'updated', header: 'Updated', cell: (gallery) => new Date(gallery.last_activity_at || gallery.created_at).toLocaleDateString('en-KE'), accessor: (gallery) => gallery.last_activity_at || gallery.created_at, hideOnMobile: true },
+                  ]}
+                  rowActions={[
+                    { label: 'Manage', onSelect: (gallery) => router.push(`/admin/galleries/${gallery.id}`) },
+                    { label: 'Copy share link', onSelect: (gallery) => copyShareLink(gallery.slug) },
+                    { label: 'Delete', destructive: true, onSelect: (gallery) => void handleDeleteGallery(gallery.id, gallery.title) },
+                  ]}
+                />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
                   {filteredGalleries.map((gal) => {
@@ -575,7 +609,7 @@ export default function AdminGalleryManagerPage() {
                             <div className="flex gap-2">
                               <Button onClick={(e) => { e.preventDefault(); copyShareLink(gal.slug || gal.id); }} variant="secondary" className="flex-1 rounded-xl" title="Copy Client Link"><Copy className="w-3 h-3" />Link</Button>
 
-                              <Button onClick={(e) => { e.preventDefault(); handleDeleteGallery(gal.id, gal.title); }} variant="destructive" size="icon" aria-label="Delete gallery"><Trash2 className="w-3.5 h-3.5" /></Button>
+                              <Button onClick={(e) => { e.preventDefault(); handleDeleteGallery(gal.id, gal.title); }} variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Delete gallery"><Trash2 className="w-3.5 h-3.5" /></Button>
                             </div>
                           </div>
                         </div>

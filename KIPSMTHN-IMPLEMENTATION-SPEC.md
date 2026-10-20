@@ -157,7 +157,33 @@ This structure preserves the repo’s memory without letting legacy materials ov
 
 ---
 
-## 7. Implementation summary
+## 7. UX and presentation implementation
+
+### Verified redesign state
+- Public homepage `/` presents the creative-business platform to visitors; authenticated creator operations remain under `/admin`.
+- `/admin/settings` was reorganized around working capabilities: creator profile, public portfolio, gallery delivery, and authentication guidance.
+- Unsupported non-persistent controls for custom domains, platform-brand removal, email templates, unsupported integrations, and hardcoded tax preferences were removed from the settings UI rather than presented as working features.
+- The persisted `WatermarkStudio` remains the gallery-delivery control and uses the existing watermark preset APIs, image upload flow, save/revert feedback, and gallery-specific inheritance behavior.
+- Shared admin headers and navigation use semantic shadcn tokens and responsive layouts.
+- Live onboarding, dashboard loading, and gallery theme defaults no longer use legacy purple literals; historical backup files remain unchanged for audit evidence.
+- The repository contains no verifiable Shade CN preset identifier or `bJMXaQi0` reference. The verified project configuration remains `radix-nova`, stone base, and CSS variables in `components.json`.
+
+### Route inventory reviewed
+- Public: `/`, `/about`, `/services`, `/work`, `/contact`, `/privacy`, `/p/[handle]`, and `/work/[slug]`.
+- Authentication: `/sign-in`, `/sign-up`, `/auth`, `/forgot-password`, `/reset-password`, and `/thanks`.
+- Creator workspace: `/admin`, `/admin/calendar`, `/admin/clients`, `/admin/projects`, `/admin/galleries`, `/admin/quotes`, `/admin/invoices`, `/admin/payments`, `/admin/contracts`, `/admin/expenses`, `/admin/equipment`, `/admin/profile`, `/admin/portfolio`, `/admin/settings`, and onboarding.
+- Client delivery: `/Portal`, `/Portal/g/[secretToken]`, `/Portal/g/[secretToken]/[slug]`, and `/contract/[token]`.
+- API contracts and database behavior were preserved during presentation changes.
+
+### Validation record
+- Production build: passed.
+- TypeScript check: passed.
+- Design-system guardrails: passed.
+- Vitest suite: 15 files and 73 tests passed in the last completed run.
+- ESLint: zero errors with seven existing React hook warnings outside the redesign scope.
+- Browser visual checks: public homepage passed at mobile and desktop sizes with primary actions and no horizontal overflow. Settings shell, profile destination, and portfolio destination rendered at both sizes. Watermark API returned HTTP 500 in the local environment, blocking complete settings interaction verification. Repeated authenticated smoke traffic eventually caused the development server to reset, so the full authenticated smoke suite is not reported as passing.
+
+## 8. Implementation summary
 
 The current app is a Better Auth + Drizzle + Next.js platform with creator-scoped ownership rules and a database-backed business workflow. The live implementation is authoritative; older documentation that assumes Clerk or a different auth architecture should be treated as historical context until explicitly rewritten or archived.
 

@@ -38,7 +38,7 @@ export function AdminPageHeader({
   const router = useRouter();
 
   return (
-    <div className={`border-b border-slate-200 dark:border-zinc-800/80 pb-6 mb-8 ${className}`}>
+    <div className={`border-b border-border pb-6 mb-8 ${className}`}>
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         {/* Left side: Breadcrumb and Title/Description */}
         <div className="flex-1 min-w-0 mb-4 md:mb-0">

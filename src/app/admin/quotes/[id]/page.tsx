@@ -818,7 +818,7 @@ export default function QuoteDetailPage() {
                         <Input type="number" min="0" value={Math.round(numberValue(item.amount))} onChange={(event) => updateItem(item.id, 'amount', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-12 pr-3 text-right font-sans text-sm font-medium text-slate-900 outline-none focus:border-primary print:border-0 print:bg-transparent" />
                       </div>
 
-                      <button type="button" onClick={() => removeItem(item.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-500 print:hidden" aria-label="Remove item"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => removeItem(item.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-muted hover:text-foreground print:hidden" aria-label="Remove item"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   ))}
                 </div>
@@ -835,7 +835,7 @@ export default function QuoteDetailPage() {
                           <SelectContent>{categoryOptions.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
-                      <button type="button" onClick={() => removeItem(item.id)} className="mt-6 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                      <button type="button" onClick={() => removeItem(item.id)} className="mt-6 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-muted hover:text-foreground"><Trash2 className="h-4 w-4" /></button>
                     </div>
 
                     <div className="relative mt-4">

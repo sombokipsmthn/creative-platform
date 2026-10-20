@@ -16,7 +16,6 @@ export async function POST(
       const contract = await sendContract(id);
       return NextResponse.json(contract);
     } catch (error) {
-      if (error instanceof Error && /required|invalid|cannot|not found/i.test(error.message)) return NextResponse.json({ error: error.message }, { status: 400 });
       console.error('POST /api/contracts/[id]/send error:', error);
       return NextResponse.json({ error: 'Failed to send contract' }, { status: 500 });
     }

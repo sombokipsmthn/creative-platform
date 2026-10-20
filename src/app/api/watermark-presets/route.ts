@@ -61,7 +61,8 @@ export async function PATCH(request: Request) {
     if (!id) return NextResponse.json({ error: "Preset ID is required." }, { status: 400 });
     const parsed = parsePreset(body);
     if ("error" in parsed) return NextResponse.json({ error: parsed.error }, { status: 400 });
-    const [preset] = await db.update(galleryWatermarkPresets).set({ ...parsed.value, updatedAt: new Date() })
+    const [preset] = await db.update(galleryWatermarkPresets)
+      .set({ ...parsed.value, updatedAt: new Date() })
       .where(and(eq(galleryWatermarkPresets.id, id), eq(galleryWatermarkPresets.creatorId, user.id)))
       .returning();
     if (!preset) return NextResponse.json({ error: "Preset not found." }, { status: 404 });

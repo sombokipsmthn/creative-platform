@@ -12,10 +12,6 @@ export async function GET(request: NextRequest) {
           search: searchParams.get('search') || undefined,
           status: searchParams.get('status') || undefined,
           clientId: searchParams.get('clientId') || undefined,
-          projectId: searchParams.get('projectId') || undefined,
-          contractType: searchParams.get('contractType') || undefined,
-          limit: Number(searchParams.get('limit')) || 50,
-          offset: Number(searchParams.get('offset')) || 0,
         }),
         fetchContractTemplates({}),
       ]);

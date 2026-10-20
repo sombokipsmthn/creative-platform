@@ -72,17 +72,6 @@ function getInitials(client: Pick<Client, 'name' | 'company'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-function statusClass(status: string) {
-  if (status === 'active') {
-    return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
-  }
-
-  if (status === 'archived') {
-    return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
-  }
-
-  return 'bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-300';
-}
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -304,12 +293,12 @@ export default function AdminClientsPage() {
         </div>
 
         <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-          <input
+          <Input
             type="text"
             placeholder="Search clients by name, company, email, phone..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
-            className="ui-input w-full md:w-96"
+            className="w-full md:w-96"
           />
 
           <div className="flex flex-wrap gap-2 text-xs font-sans">
@@ -435,18 +424,22 @@ export default function AdminClientsPage() {
                   <div className="space-y-1">
                     <label className="ui-label">Phone</label>
                     <div className="flex items-center gap-2">
-                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="ui-select">
-                        <option value="+254">🇰🇪 +254 (Kenya)</option>
-                        <option value="+1">🇺🇸 +1 (USA)</option>
-                        <option value="+44">🇬🇧 +44 (UK)</option>
-                        <option value="+27">🇿🇦 +27 (South Africa)</option>
-                        <option value="+254">Other</option>
-                      </select>
-                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
+                      <Select value={form.phoneCountry} onValueChange={handlePhoneCountryChange}>
+                        <SelectTrigger className="w-auto max-w-[9rem] shrink-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="+254">🇰🇪 +254 (Kenya)</SelectItem>
+                          <SelectItem value="+1">🇺🇸 +1 (USA)</SelectItem>
+                          <SelectItem value="+44">🇬🇧 +44 (UK)</SelectItem>
+                          <SelectItem value="+27">🇿🇦 +27 (South Africa)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="min-w-0 flex-1" />
                     </div>
                     <div className="space-y-1">
                       <label className="ui-label">Location</label>
-                      <input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="ui-input" />
+                      <Input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} />
                     </div>
                   </div>
                 </div>
@@ -454,11 +447,11 @@ export default function AdminClientsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="ui-label">Company / Organization</label>
-                    <input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} className="ui-input" />
+                    <Input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="ui-label">Website</label>
-                    <input 
+                    <Input 
                       type="url" 
                       placeholder="https://company.com" 
                       value={form.website} 
@@ -475,7 +468,6 @@ export default function AdminClientsPage() {
                           setForm({ ...form, website: val });
                         }
                       }}
-                      className="ui-input"
                     />
                   </div>
                 </div>
@@ -483,15 +475,20 @@ export default function AdminClientsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <label className="ui-label">KRA PIN</label>
-                    <input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} className="ui-input" />
+                    <Input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} />
                   </div>
                   <div className="space-y-1">
                     <label className="ui-label">Status</label>
-                    <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="ui-select">
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="archived">Archived</option>
-                    </select>
+                    <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value as ClientStatus })}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 

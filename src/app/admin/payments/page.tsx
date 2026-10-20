@@ -7,11 +7,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import StatusBadge from '@/components/admin/StatusBadge';
+import AdminDataTable from '@/components/admin/AdminDataTable';
 
 type Client = { id: string; name: string; company?: string | null };
 type Project = { id: string; name: string; clientId?: string | null };
 type Invoice = { id: string; invoiceNumber: string; title: string; total: number; currency: string; clientId: string };
-type Row = { payment: { id: string; amount: number; currency: string; method: string; status: string; paidAt: string; reference: string; transactionReference?: string | null }; invoice?: Invoice | null; client: Client };
+type PaymentRow = { payment: { id: string; amount: number; currency: string; method: string; status: string; paidAt: string; reference: string; transactionReference?: string | null }; invoice?: Invoice | null; client: Client };
+type Row = PaymentRow & { id: string };
 type Summary = { receivedThisMonth: Record<string, number>; outstandingByCurrency: Record<string, number>; awaitingPayment: number; paymentsRecorded: number; currencies: string[] };
 
 const methods = [{ value: 'mpesa', label: 'M-Pesa' }, { value: 'bank_transfer', label: 'Bank transfer' }, { value: 'cash', label: 'Cash' }, { value: 'card', label: 'Card recorded externally' }, { value: 'cheque', label: 'Cheque' }, { value: 'other', label: 'Other' }];
@@ -20,6 +22,7 @@ const statuses = [{ value: 'confirmed', label: 'Received' }, { value: 'pending_v
 function money(value: number, currency: string) { return `${currency} ${value.toLocaleString('en-KE')}`; }
 function label(value: string) { return value.replaceAll('_', ' ').replace(/\b\w/g, (part) => part.toUpperCase()); }
 function responseData<T>(value: unknown): T[] { if (Array.isArray(value)) return value as T[]; const record = value as { data?: T[]; items?: T[] } | null; return record?.data ?? record?.items ?? []; }
+function paymentRows(value: unknown): Row[] { return responseData<PaymentRow>(value).map((row) => ({ ...row, id: row.payment.id })); }
 
 export default function PaymentsPage() {
   const [rows, setRows] = useState<Row[]>([]);
@@ -46,7 +49,7 @@ export default function PaymentsPage() {
       const responses = [paymentsResponse, summaryResponse, clientsResponse, projectsResponse, invoicesResponse];
       if (responses.some((response) => !response.ok)) throw new Error('Payment workspace data could not be loaded.');
       const [paymentData, summaryData, clientData, projectData, invoiceData] = await Promise.all(responses.map((response) => response.json()));
-      setRows(responseData<Row>(paymentData)); setSummary(summaryData); setClients(responseData<Client>(clientData)); setProjects(responseData<Project>(projectData));
+      setRows(paymentRows(paymentData)); setSummary(summaryData); setClients(responseData<Client>(clientData)); setProjects(responseData<Project>(projectData));
       const invoiceRows = responseData<{ invoice?: Invoice; client?: Client }>(invoiceData).map((item) => ('invoice' in item ? item.invoice : item)).filter((item): item is Invoice => Boolean(item && 'id' in item));
       setInvoices(invoiceRows);
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'Payment workspace data could not be loaded.'); } finally { setLoading(false); }
@@ -87,7 +90,24 @@ export default function PaymentsPage() {
       <select aria-label="Payment status" value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">All statuses</option>{statuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
       <Input aria-label="Payments from date" type="date" value={filters.from} onChange={(event) => setFilters({ ...filters, from: event.target.value })} className="w-auto" /><Input aria-label="Payments to date" type="date" value={filters.to} onChange={(event) => setFilters({ ...filters, to: event.target.value })} className="w-auto" /><Filter className="hidden h-4 w-4 text-muted-foreground lg:block" />
     </div>
-    <Card><CardContent className="p-0">{loading ? <div className="grid gap-3 p-6"><Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" /></div> : error ? <div className="p-10 text-center"><p className="font-medium">Payments unavailable</p><p className="mt-1 text-sm text-muted-foreground">{error}</p><Button variant="secondary" className="mt-4" onClick={() => void load()}>Retry</Button></div> : rows.length === 0 ? <div className="p-12 text-center"><Wallet className="mx-auto h-10 w-10 text-muted-foreground" /><h2 className="mt-4 text-lg font-semibold">Start tracking payments</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Record payments received through M-Pesa, bank transfer, cash or another channel. The ledger keeps confirmed receipts separate from payments awaiting verification.</p><Button className="mt-5" onClick={openForm}><Plus className="mr-2 h-4 w-4" />Record payment</Button></div> : <div className="overflow-x-auto"><table className="w-full text-sm"><thead className="border-b bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground"><tr>{['Date', 'Client', 'Invoice', 'Method', 'Reference', 'Amount', 'Status', 'Actions'].map((heading) => <th key={heading} className="whitespace-nowrap px-5 py-3 font-medium">{heading}</th>)}</tr></thead><tbody className="divide-y">{rows.map(({ payment, invoice, client }) => <tr key={payment.id} className="hover:bg-muted/20"><td className="whitespace-nowrap px-5 py-4 text-muted-foreground">{new Date(payment.paidAt).toLocaleDateString('en-KE')}</td><td className="px-5 py-4 font-medium">{client.company || client.name}</td><td className="px-5 py-4">{invoice ? invoice.invoiceNumber : <span className="text-muted-foreground">Standalone</span>}</td><td className="px-5 py-4">{label(payment.method)}</td><td className="px-5 py-4 text-muted-foreground">{payment.transactionReference || payment.reference}</td><td className="whitespace-nowrap px-5 py-4 font-medium">{money(payment.amount, payment.currency)}</td><td className="px-5 py-4"><StatusBadge status={payment.status} /></td><td className="px-5 py-4"><div className="flex gap-1">{payment.status === 'pending_verification' && <Button variant="ghost" size="sm" onClick={() => void paymentAction(payment.id, 'verify')}>Verify</Button>}{payment.status === 'confirmed' && <><Button variant="ghost" size="sm" onClick={() => void paymentAction(payment.id, 'refund')}>Refund</Button><Button variant="ghost" size="sm" onClick={() => void paymentAction(payment.id, 'reverse')}>Reverse</Button></>}</div></td></tr>)}</tbody></table></div>}</CardContent></Card>
+    <Card><CardContent className="p-0">{loading ? <div className="grid gap-3 p-6"><Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" /></div> : error ? <div className="p-10 text-center"><p className="font-medium">Payments unavailable</p><p className="mt-1 text-sm text-muted-foreground">{error}</p><Button variant="secondary" className="mt-4" onClick={() => void load()}>Retry</Button></div> : rows.length === 0 ? <div className="p-12 text-center"><Wallet className="mx-auto h-10 w-10 text-muted-foreground" /><h2 className="mt-4 text-lg font-semibold">Start tracking payments</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Record payments received through M-Pesa, bank transfer, cash or another channel. The ledger keeps confirmed receipts separate from payments awaiting verification.</p><Button className="mt-5" onClick={openForm}><Plus className="mr-2 h-4 w-4" />Record payment</Button></div>  : <AdminDataTable<Row>
+          rows={rows}
+          getRowLabel={({ payment }) => payment.reference}
+          columns={[
+            { id: 'date', header: 'Date', cell: ({ payment }) => new Date(payment.paidAt).toLocaleDateString('en-KE'), accessor: ({ payment }) => payment.paidAt },
+            { id: 'client', header: 'Client', cell: ({ client }) => client.company || client.name, accessor: ({ client }) => client.company || client.name },
+            { id: 'invoice', header: 'Invoice', cell: ({ invoice }) => invoice ? invoice.invoiceNumber : <span className="text-muted-foreground">Standalone</span> },
+            { id: 'method', header: 'Method', cell: ({ payment }) => label(payment.method), accessor: ({ payment }) => payment.method },
+            { id: 'reference', header: 'Reference', cell: ({ payment }) => payment.transactionReference || payment.reference, hideOnMobile: true },
+            { id: 'amount', header: 'Amount', align: 'right', cell: ({ payment }) => money(payment.amount, payment.currency), accessor: ({ payment }) => payment.amount },
+            { id: 'status', header: 'Status', cell: ({ payment }) => <StatusBadge status={payment.status} /> },
+          ]}
+          rowActions={[
+            { label: 'Verify', hidden: ({ payment }) => payment.status !== 'pending_verification', onSelect: ({ payment }) => void paymentAction(payment.id, 'verify') },
+            { label: 'Refund', hidden: ({ payment }) => payment.status !== 'confirmed', onSelect: ({ payment }) => void paymentAction(payment.id, 'refund') },
+            { label: 'Reverse', hidden: ({ payment }) => payment.status !== 'confirmed', onSelect: ({ payment }) => void paymentAction(payment.id, 'reverse') },
+          ]}
+        />}</CardContent></Card>
     {formOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="record-payment-title"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background p-6 shadow-xl"><div className="flex items-start justify-between"><div><h2 id="record-payment-title" className="text-xl font-semibold">Record payment</h2><p className="mt-1 text-sm text-muted-foreground">Manual tracking only. No transaction is initiated.</p></div><Button variant="ghost" size="icon" onClick={() => setFormOpen(false)} aria-label="Close"><X className="h-4 w-4" /></Button></div><form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2">
       <Field label="Client" required><select required value={form.clientId} onChange={(event) => updateForm('clientId', event.target.value)} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">Select client</option>{clients.map((client) => <option key={client.id} value={client.id}>{client.company ? `${client.company} · ${client.name}` : client.name}</option>)}</select></Field>
       <Field label="Amount received" required><Input required min="1" step="1" type="number" value={form.amount} onChange={(event) => updateForm('amount', event.target.value)} placeholder="Amount in minor units" /></Field>

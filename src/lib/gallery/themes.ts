@@ -162,7 +162,7 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       showDescription: true,
       showCollections: true,
       showLogo: true,
-      accentColor: '#6D28D9',
+      accentColor: '#111827',
       backgroundColor: '#FFFFFF',
       textColor: '#171717',
       borderRadius: 6,

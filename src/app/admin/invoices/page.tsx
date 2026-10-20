@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import AdminDataTable from '@/components/admin/AdminDataTable';
 
 type Client = {
   id: string;
@@ -434,112 +435,25 @@ export default function InvoicesPage() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead>
-                  <tr>
-                    <th className="w-full caption-bottom text-sm-header">Invoice</th>
-                    <th className="w-full caption-bottom text-sm-header">Client</th>
-                    <th className="w-full caption-bottom text-sm-header">Status</th>
-                    <th className="w-full caption-bottom text-sm-header">Issued</th>
-                    <th className="w-full caption-bottom text-sm-header">Total</th>
-                    <th className="w-full caption-bottom text-sm-header" />
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredInvoices.map((invoice) => (
-                    <tr
-                      key={invoice.id}
-                      className="w-full caption-bottom text-sm-row"
-                    >
-                      {/* INVOICE */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <div className="space-y-1">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
-                            <FileText className="h-4 w-4" />
-                          </div>
-                          <div className="flex-1 min-w-0 space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
-                              {invoice.title || 'Untitled Invoice'}
-                            </p>
-                            <p className="text-sm text-muted-foreground text-xs text-slate-500 dark:text-zinc-600">
-                              {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* CLIENT */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
-                          {getClientName(invoice.client)}
-                        </p>
-                      </td>
-
-                      {/* STATUS */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <div className="flex flex-col items-start gap-2">
-                          <span
-                            className={`${getStatusBadgeClass(invoice.status)}`}
-                          >
-                            {getStatusLabel(invoice.status)}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* ISSUED */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {formatDate(invoice.issueDate)}
-                        </p>
-                      </td>
-
-                      {/* TOTAL */}
-                      <td className="w-full caption-bottom text-sm-cell text-right font-medium text-slate-900 dark:text-white">
-                        {formatMoney(invoice.total, invoice.currency)}
-                      </td>
-
-                      {/* ACTION */}
-                      <td className="w-full caption-bottom text-sm-cell text-right">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/invoices/${invoice.id}`}
-                            className="text-sm font-sans"
-                          >
-                            View
-                            <ArrowUpRight className="h-3 w-3" />
-                          </Link>
-                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/invoices/${invoice.id}/edit`}>Edit <Plus className="h-3 w-3" /></Link></Button>
-                          {invoice.status === 'draft' && (
-                            <>
-                              <Link
-                                href={`/admin/invoices/${invoice.id}/send`}
-                                className="text-sm font-sans"
-                              >
-                                Send
-                                <CheckCircle2 className="h-3 w-3" />
-                              </Link>
-                              <Button asChild variant="secondary" size="sm"><Link href={`/admin/invoices/${invoice.id}/duplicate`}>Duplicate <FilePlus className="h-3 w-3" /></Link></Button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => {
-                              if (!window.confirm('Delete this invoice?')) return;
-                              // Delete logic would go here - keeping inline for now
-                              window.location.reload(); // Placeholder
-                            }}
-                            className="text-sm font-sans"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <AdminDataTable
+              rows={filteredInvoices}
+              getRowLabel={(invoice) => invoice.title || invoice.invoiceNumber}
+              columns={[
+                { id: 'invoice', header: 'Invoice', cell: (invoice) => <div><p className="font-medium">{invoice.title || 'Untitled Invoice'}</p><p className="text-xs text-muted-foreground">{invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}</p></div>, accessor: (invoice) => invoice.title, sortable: true },
+                { id: 'client', header: 'Client', accessor: (invoice) => getClientName(invoice.client) },
+                { id: 'status', header: 'Status', cell: (invoice) => <span className={getStatusBadgeClass(invoice.status)}>{getStatusLabel(invoice.status)}</span>, accessor: (invoice) => invoice.status },
+                { id: 'issued', header: 'Issued', cell: (invoice) => formatDate(invoice.issueDate), accessor: (invoice) => invoice.issueDate, hideOnMobile: true },
+                { id: 'due', header: 'Due', cell: (invoice) => formatDate(invoice.dueDate), accessor: (invoice) => invoice.dueDate, hideOnMobile: true },
+                { id: 'total', header: 'Total', align: 'right', cell: (invoice) => formatMoney(invoice.total, invoice.currency), accessor: (invoice) => invoice.total },
+              ]}
+              rowActions={[
+                { label: 'View', onSelect: (invoice) => window.location.assign(`/admin/invoices/${invoice.id}`) },
+                { label: 'Edit', onSelect: (invoice) => window.location.assign(`/admin/invoices/${invoice.id}/edit`) },
+                { label: 'Send', hidden: (invoice) => invoice.status !== 'draft', onSelect: (invoice) => window.location.assign(`/admin/invoices/${invoice.id}/send`) },
+                { label: 'Duplicate', hidden: (invoice) => invoice.status !== 'draft', onSelect: (invoice) => window.location.assign(`/admin/invoices/${invoice.id}/duplicate`) },
+                { label: 'Delete', destructive: true, onSelect: () => window.location.reload() },
+              ]}
+            />
           )}
         </div>
 

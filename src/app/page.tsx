@@ -71,7 +71,7 @@ export default function HomePage() {
             <div className="absolute left-1/2 top-12 h-[420px] w-[720px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
             <div className="absolute -right-40 top-72 h-[340px] w-[340px] rounded-full bg-primary/10 blur-3xl" />
           </div>
-          <div className="relative mx-auto max-w-7xl px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:px-10 lg:pt-28">
+          <div className="relative mx-auto w-full max-w-7xl overflow-hidden px-5 pb-20 pt-16 sm:px-8 sm:pt-24 lg:px-10 lg:pt-28">
             <div className="max-w-5xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary dark:text-primary">The creative business platform</p>
               <h1 className="mt-7 max-w-5xl text-5xl font-light leading-[0.98] tracking-tight text-slate-950 dark:text-white sm:text-6xl md:text-7xl lg:text-[6.25rem]">The operating system for your creative business.</h1>

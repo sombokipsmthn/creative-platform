@@ -16,6 +16,7 @@ import TableFilterBar from '@/components/admin/TableFilterBar';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
+import AdminDataTable from '@/components/admin/AdminDataTable';
 
 type Contract = {
   id: string;
@@ -329,114 +330,25 @@ export default function ContractsPage() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead>
-                  <tr>
-                    <th className="w-full caption-bottom text-sm-header">Contract</th>
-                    <th className="w-full caption-bottom text-sm-header">Client</th>
-                    <th className="w-full caption-bottom text-sm-header">Project</th>
-                    <th className="w-full caption-bottom text-sm-header">Status</th>
-                    <th className="w-full caption-bottom text-sm-header">Created</th>
-                    <th className="w-full caption-bottom text-sm-header">Sent</th>
-                    <th className="w-full caption-bottom text-sm-header">Signed</th>
-                    <th className="w-full caption-bottom text-sm-header" />
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {contracts.map((contract) => (
-                    <tr
-                      key={contract.id}
-                      className="w-full caption-bottom text-sm-row"
-                    >
-                      {/* CONTRACT */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
-                            <FileSignature className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
-                              {contract.title}
-                            </p>
-                            <p className="text-sm text-muted-foreground text-xs text-slate-500 dark:text-zinc-600">
-                              #{contract.contractNumber}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* CLIENT */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
-                          {contract.clientName}
-                        </p>
-                      </td>
-
-                      {/* PROJECT */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        {contract.projectName ?? (
-                          <span className="text-xs text-muted-foreground text-xs text-slate-500 dark:text-zinc-600 italic">
-                            None
-                          </span>
-                        )}
-                      </td>
-
-                      {/* STATUS */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <div className="flex flex-col items-start gap-2">
-                          <span
-                            className={`${getStatusBadgeClass(contract.status)}`}
-                          >
-                            {formatStatus(contract.status)}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* CREATED */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {new Date(contract.createdAt).toLocaleDateString()}
-                        </p>
-                      </td>
-
-                      {/* SENT */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {contract.sentAt ? new Date(contract.sentAt).toLocaleDateString() : '-'}
-                        </p>
-                      </td>
-
-                      {/* SIGNED */}
-                      <td className="w-full caption-bottom text-sm-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '-'}
-                        </p>
-                      </td>
-
-                      {/* ACTION */}
-                      <td className="w-full caption-bottom text-sm-cell text-right">
-                        <div className="flex gap-2">
-                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/contracts/${contract.id}`}>View <ArrowUpRight className="h-3 w-3" /></Link></Button>
-                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/contracts/${contract.id}/edit`}>Edit <Plus className="h-3 w-3" /></Link></Button>
-                          {contract.status === 'draft' && (
-                            <>
-                              <Button asChild variant="success" size="sm"><Link href={`/admin/contracts/${contract.id}/send`}>Send <CheckCircle2 className="h-3 w-3" /></Link></Button>
-                              <Button asChild variant="secondary" size="sm"><Link href={`/admin/contracts/${contract.id}/duplicate`}>Duplicate <FilePlus className="h-3 w-3" /></Link></Button>
-                            </>
-                          )}
-                          <Button variant="destructive" size="sm" onClick={() => {
-                            if (!window.confirm('Delete this contract?')) return;
-                            window.location.reload();
-                          }} aria-label="Delete contract"><Trash2 className="h-3 w-3" /></Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <AdminDataTable
+              rows={contracts}
+              getRowLabel={(contract) => contract.title}
+              columns={[
+                { id: 'contract', header: 'Contract', cell: (contract) => <div><p className="font-medium">{contract.title}</p><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></div>, accessor: (contract) => contract.title, sortable: true },
+                { id: 'client', header: 'Client', accessor: (contract) => contract.clientName },
+                { id: 'project', header: 'Project', accessor: (contract) => contract.projectName || 'None', hideOnMobile: true },
+                { id: 'status', header: 'Status', cell: (contract) => <span className={getStatusBadgeClass(contract.status)}>{formatStatus(contract.status)}</span>, accessor: (contract) => contract.status },
+                { id: 'created', header: 'Created', cell: (contract) => new Date(contract.createdAt).toLocaleDateString(), accessor: (contract) => contract.createdAt, hideOnMobile: true },
+                { id: 'signed', header: 'Signed', cell: (contract) => contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '—', accessor: (contract) => contract.signedAt, hideOnMobile: true },
+              ]}
+              rowActions={[
+                { label: 'View', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}`) },
+                { label: 'Edit', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/edit`) },
+                { label: 'Send', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/send`) },
+                { label: 'Duplicate', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/duplicate`) },
+                { label: 'Delete', destructive: true, onSelect: () => window.location.reload() },
+              ]}
+            />
           )}
         </div>
       </div>

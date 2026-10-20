@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import AdminDataTable from '@/components/admin/AdminDataTable';
 
 /* =========================================================
    TYPES
@@ -378,30 +379,18 @@ export default function InvoiceDetailPage() {
             {items.length === 0 ? (
               <p className="py-8 text-center italic text-sm text-slate-400">No line items on this invoice.</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="py-2 pr-4 text-left text-[10px] font-sans uppercase tracking-widest text-slate-400">Description</th>
-                      <th className="py-2 pr-4 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Qty</th>
-                      <th className="py-2 pr-4 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Unit Price</th>
-                      <th className="py-2 text-right text-[10px] font-sans uppercase tracking-widest text-slate-400">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {items.map((item) => (
-                      <tr key={item.id}>
-                        <td className="py-3 pr-4">
-                          <p className="font-medium text-slate-900">{item.description || '—'}</p>
-                        </td>
-                        <td className="py-3 pr-4 text-right font-sans text-slate-700">{item.quantity}</td>
-                        <td className="py-3 pr-4 text-right font-sans text-slate-700">{fmt(item.unitPrice, currency)}</td>
-                        <td className="py-3 text-right font-sans font-medium text-slate-900">{fmt(item.amount, currency)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <AdminDataTable
+                rows={items}
+                getRowLabel={(item) => item.description || 'Invoice item'}
+                className="rounded-xl border-slate-200 print:border-0"
+                columns={[
+                  { id: 'description', header: 'Description', cell: (item) => <span className="font-medium text-slate-900">{item.description || '—'}</span>, accessor: (item) => item.description },
+                  { id: 'quantity', header: 'Qty', align: 'right', cell: (item) => item.quantity, accessor: (item) => item.quantity },
+                  { id: 'unitPrice', header: 'Unit price', align: 'right', cell: (item) => fmt(item.unitPrice, currency), accessor: (item) => item.unitPrice, hideOnMobile: true },
+                  { id: 'amount', header: 'Amount', align: 'right', cell: (item) => <span className="font-medium text-slate-900">{fmt(item.amount, currency)}</span>, accessor: (item) => item.amount },
+                ]}
+                mobileCard={(item) => <div className="flex items-start justify-between gap-4"><div><p className="font-medium text-slate-900">{item.description || '—'}</p><p className="mt-1 text-xs text-slate-500">Qty {item.quantity} · Unit {fmt(item.unitPrice, currency)}</p></div><span className="font-medium text-slate-900">{fmt(item.amount, currency)}</span></div>}
+              />
             )}
           </div>
 

@@ -28,8 +28,8 @@ Client / Creator
 
 1. User accesses the platform and is redirected to the authentication page.
 2. User enters credentials and submits the form.
-3. The application sends the credentials to Clerk for authentication.
-4. Clerk validates the credentials and issues a session token.
+3. The application sends the credentials to Better Auth for authentication.
+4. Better Auth validates the credentials and issues a session token.
 5. The user is redirected to the appropriate dashboard based on their role.
 
 ### 2. Data Access

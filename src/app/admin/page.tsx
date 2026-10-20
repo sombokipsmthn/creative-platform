@@ -211,7 +211,7 @@ export default function CreativeOSDashboardPage() {
         <section className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
           {loading ? (
             <>
-              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-purple-600 dark:border-zinc-700 dark:border-t-purple-400" />
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-primary dark:border-zinc-700" />
               <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Loading Creative OS...</h1>
               <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Fetching your dashboard data.</p>
             </>

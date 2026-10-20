@@ -1,6 +1,6 @@
 # KIPSMTHN Design System
 
-The permanent visual reference is the official [shadcn/ui component documentation](https://ui.shadcn.com/docs/components). KIPSMTHN keeps its brand content and media treatments, but shared product UI follows shadcn/ui's component language.
+The permanent visual reference is the repository's verified shadcn/ui configuration in `components.json` (`radix-nova`, stone base, CSS variables) together with the official [shadcn/ui component documentation](https://ui.shadcn.com/docs/components). No separate Shade CN preset identifier is present in the repository; do not invent or substitute one. KIPSMTHN keeps its brand content and media treatments, but shared product UI follows shadcn/ui's component language.
 
 ## Sources of truth
 
@@ -28,8 +28,10 @@ Use `@/components/ui/<lowercase-name>` in new code. Do not create case-only dupl
 4. Prefer semantic tokens and canonical primitives over raw repeated visual definitions.
 5. Keep domain-specific gallery image treatments, charts, print styles, and media layout styles when they do not conflict with shared UI behavior.
 6. Preserve Better Auth, Drizzle, route structure, form behavior, validation, and business workflows.
-7. Run `npm run design-system:check`, lint, TypeScript, tests, and the production build before committing.
-8. Update this document when the canonical tokens or shared component conventions change.
+7. Use only verified semantic theme tokens. Never add purple, violet, legacy template branding, or hardcoded theme colors to product UI.
+8. Preserve historical and security documentation unless it exclusively describes discarded presentation work.
+9. Run `npm run design-system:check`, lint, TypeScript, tests, and the production build before committing.
+10. Update this document when the canonical tokens or shared component conventions change.
 
 ## Automated versus review checks
 

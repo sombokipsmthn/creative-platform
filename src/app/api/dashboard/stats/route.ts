@@ -189,7 +189,7 @@ export async function GET(request: Request) {
       attention: {
         overdueInvoices: Number(overdueInvoices[0]?.value ?? 0),
         pendingQuotes: (quoteStatuses.sent ?? 0) + (quoteStatuses.draft ?? 0),
-        activeProjects,
+        activeProjects: Number(activeProjects[0]?.value ?? 0),
         activeGalleries: (galleryStatuses.active ?? 0) + (galleryStatuses.published ?? 0),
       },
       activity,

@@ -6,10 +6,12 @@
   "tailwind": {
     "config": "",
     "css": "src/app/globals.css",
-    "baseColor": "stone",
+    "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
+  "rtl": false,
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -17,9 +19,12 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "iconLibrary": "remixicon",
-  "rtl": false,
-  "menuColor": "default",
-  "menuAccent": "bold",
-  "registries": {}
+  "menuColor": "default-translucent",
+  "menuAccent": "subtle",
+  "registries": {
+    "@soundcn": "https://soundcn.xyz/r/{name}.json",
+    "@animate-ui": "https://animate-ui.com/r/{name}.json",
+    "@ns-ui": "https://design.helpmarq.com/r/{name}.json",
+    "@uiable": "https://uiable.com/r/{name}.json"
+  }
 }

@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminListToolbar from '@/components/admin/AdminListToolbar';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -322,74 +324,34 @@ export default function AdminClientsPage() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading clients…</p>
-          </div>
-        ) : filteredClients.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-            <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
-            <Button
-              onClick={openCreateModal}
-              variant="primary"
-              className="text-xs font-sans rounded-lg"
-            >
-              Register your first client
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {filteredClients.map((client) => (
-              <div
-                key={client.id}
-                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-primary/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
-              >
-                <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary dark:bg-primary/15 dark:text-primary">
-                    {getInitials(client)}
-                  </div>
+        <AdminListToolbar
+          search={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search clients by name, company, email, phone…"
+          filters={[{ id: 'status', label: 'Status', value: filterStatus.toLowerCase(), options: [{ label: 'All', value: 'all' }, { label: 'Active', value: 'active' }, { label: 'Inactive', value: 'inactive' }, { label: 'Archived', value: 'archived' }] }]}
+          onFilterChange={(_, value) => setFilterStatus(value === 'all' ? 'ALL' : value as ClientStatus)}
+          primaryAction={<Button type="button" onClick={openCreateModal}>+ Register New Client</Button>}
+        />
 
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-primary">
-                        {client.name}
-                      </h3>
-                      <Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>
-                        {statusLabel(client.status)}
-                      </Badge>
-                    </div>
-
-                    <p className="text-sm text-slate-500 dark:text-zinc-400">
-                      {client.company || 'Independent client'}
-                    </p>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-zinc-400">
-                      {client.email && <span className="inline-flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" />{client.email}</span>}
-                      {client.phone && <span className="inline-flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" />{client.phone}</span>}
-                      {client.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-400" />{client.location}</span>}
-                    </div>
-
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-600">
-                      Added {formatDate(client.createdAt)}
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    setError('');
-                    setSelectedClient(client);
-                  }}
-                  variant="secondary"
-                  className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
-                >
-                  View client
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        <AdminDataTable
+          rows={filteredClients}
+          loading={loading}
+          error={error && !isAddClientOpen && !selectedClient ? error : null}
+          emptyTitle="No clients found"
+          emptyDescription="Register your first client to begin managing relationships."
+          emptyAction={<Button type="button" onClick={openCreateModal}>Register your first client</Button>}
+          selectable
+          getRowLabel={(client) => client.name}
+          onRowClick={(client) => { setError(''); setSelectedClient(client); }}
+          mobileCard={(client, actions) => <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium">{client.name}</p><p className="text-sm text-muted-foreground">{client.company || 'Independent client'}</p><p className="mt-2 text-xs text-muted-foreground">{client.email || client.phone || client.location || 'No contact details'}</p><div className="mt-2"><Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>{statusLabel(client.status)}</Badge></div></div>{actions}</div>}
+          columns={[
+            { id: 'client', header: 'Client', cell: (client) => <div className="flex items-center gap-3"><span className="ui-avatar ui-avatar-sm">{getInitials(client)}</span><div><p className="font-medium">{client.name}</p><p className="text-xs text-muted-foreground">{client.company || 'Independent client'}</p></div></div>, accessor: (client) => client.name, sortable: true },
+            { id: 'contact', header: 'Contact', cell: (client) => <div><p>{client.email || '—'}</p><p className="text-xs text-muted-foreground">{client.phone || client.location || ''}</p></div>, hideOnMobile: true },
+            { id: 'status', header: 'Status', cell: (client) => <Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>{statusLabel(client.status)}</Badge>, accessor: (client) => client.status },
+            { id: 'created', header: 'Added', cell: (client) => formatDate(client.createdAt), accessor: (client) => client.createdAt, hideOnMobile: true },
+          ]}
+          rowActions={[{ label: 'View client', onSelect: (client) => { setError(''); setSelectedClient(client); } }]}
+        />
 
         {isAddClientOpen && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">

@@ -78,11 +78,9 @@ export async function fetchContracts({ search, status, clientId, limit = 50, off
   };
 }
 
-export async function fetchContract(id: string) {
-      const user = await getCurrentUser();
-    if (!user) throw new Error("Unauthenticated");
-    const userId = user.id;
-  if (!userId) throw new Error('Unauthenticated');
+export async function fetchContract(id: string, authenticatedUserId?: string) {
+    const userId = authenticatedUserId ?? (await getCurrentUser())?.id;
+    if (!userId) throw new Error("Unauthenticated");
 
   const [contract] = await db.select().from(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId)));
   if (!contract) throw new Error('Contract not found or unauthorized');
@@ -490,10 +488,9 @@ export async function declinePublicContract(token: string, signatureData: unknow
 
 // Add the named exports that the API routes expect
 export const fetchContractByToken = getPublicContract;
-export const fetchContractEvents = async (contractId: string) => {
-      const user = await getCurrentUser();
-    if (!user) throw new Error("Unauthenticated");
-    const userId = user.id;
+export const fetchContractEvents = async (contractId: string, authenticatedUserId?: string) => {
+    const userId = authenticatedUserId ?? (await getCurrentUser())?.id;
+    if (!userId) throw new Error("Unauthenticated");
   if (!userId) throw new Error('Unauthenticated');
 
   // Verify that the contract belongs to the current user

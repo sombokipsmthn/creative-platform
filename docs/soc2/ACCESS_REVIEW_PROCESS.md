@@ -20,7 +20,7 @@ This process applies to access reviews for:
 - **Infrastructure Providers**:
   - Vercel (production deployments, environment variables, integrations)
   - Neon (PostgreSQL database, connection strings, database roles)
-  - Clerk (authentication, user management, webhooks, MFA settings)
+  - Better Auth (authentication, user management, webhooks, MFA settings)
   - GitHub (repository access, branch protection, workflow permissions, tokens)
   - Cloudflare R2 (if/when used for storage)
   - Any other third-party services with access to platform data
@@ -53,7 +53,7 @@ This process applies to access reviews for:
 1. Generate access reports from each provider:
    - Vercel: Team members, environment variables, integrations, deployment permissions
    - Neon: Database users, roles, connection strings in use
-   - Clerk: Users, roles, MFA enforcement, webhook secrets
+   - Better Auth: Users, roles, MFA enforcement, webhook secrets
    - GitHub: Repository permissions, team membership, API tokens, SSH keys
    - Cloudflare R2: Bucket access, API tokens (if applicable)
    - Internal: Admin panel access logs, API key usage (if applicable)

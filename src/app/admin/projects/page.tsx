@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import AdminListToolbar from '@/components/admin/AdminListToolbar';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -469,158 +471,42 @@ export default function AdminProjectsPage() {
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading projects…</p>
-          </div>
-        ) : filteredProjects.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-            <p className="text-sm text-slate-600 dark:text-zinc-400">No projects found.</p>
-            <div className="flex justify-center mt-4">
-              <Button
-                onClick={() => openCreateModal()}
-                variant="primary"
-                className="text-xs font-sans rounded-lg"
-              >
-                Create your first project
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {filteredProjects.map((project) => (
-              <div
-                key={project.id}
-                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-primary/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
-              >
-                <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary dark:bg-primary/15 dark:text-primary">
-                    {getInitials(project)}
-                  </div>
+        <AdminListToolbar
+          search={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search projects by name, description, client…"
+          filters={[
+            { id: 'status', label: 'Status', value: filterStatus.toLowerCase(), options: [{ label: 'All', value: 'all' }, ...(['active', 'completed', 'on hold', 'cancelled', 'draft'] as ProjectStatus[]).map((value) => ({ label: statusLabel(value), value }))] },
+            { id: 'visibility', label: 'Visibility', value: filterVisibility.toLowerCase(), options: [{ label: 'All', value: 'all' }, { label: 'Public', value: 'public' }, { label: 'Private', value: 'private' }, { label: 'Draft', value: 'draft' }] },
+            { id: 'featured', label: 'Featured', value: filterFeatured.toLowerCase(), options: [{ label: 'All', value: 'all' }, { label: 'Yes', value: 'true' }, { label: 'No', value: 'false' }] },
+          ]}
+          onFilterChange={(id, value) => { if (id === 'status') setFilterStatus(value === 'all' ? 'ALL' : value as ProjectStatus); if (id === 'visibility') setFilterVisibility(value === 'all' ? 'ALL' : value as 'public' | 'private' | 'draft'); if (id === 'featured') setFilterFeatured(value === 'all' ? 'ALL' : value as 'true' | 'false'); }}
+          primaryAction={<Button type="button" onClick={() => openCreateModal()}>+ New Project</Button>}
+        />
 
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-primary">
-                        {project.name}
-                      </h3>
-                      <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                        {statusLabel(project.status)}
-                      </Badge>
-                      {project.featured && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                          <Star className="h-3 w-3" />
-                          Featured
-                        </span>
-                      )}
-                      {project.visibility === 'public' && project.publishedAt && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                          <Eye className="h-3 w-3" />
-                          Published
-                        </span>
-                      )}
-                      {project.visibility === 'private' && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
-                          <EyeOff className="h-3 w-3" />
-                          Private
-                        </span>
-                      )}
-                      {project.visibility === 'draft' && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                          Draft
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-slate-500 dark:text-zinc-400">
-                      {project.client?.name || 'No client'}
-                    </p>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-zinc-400">
-                      {project.client?.email && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Mail className="h-3.5 w-3.5 text-slate-400" />
-                          {project.client?.email}
-                        </span>
-                      )}
-                      {project.client?.phone && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Phone className="h-3.5 w-3.5 text-slate-400" />
-                          {project.client?.phone}
-                        </span>
-                      )}
-                      {project.client?.location && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                          {project.client?.location}
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-600">
-                      Added {formatDate(project.createdAt)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex flex-wrap gap-2 w-full lg:w-auto lg:justify-end">
-                  <Button
-                    onClick={() => {
-                      setError('');
-                      setSelectedProject(project);
-                    }}
-                    variant="secondary"
-                    className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
-                  >
-                    View project
-                    <ArrowUpRight className="h-3.5 w-3.5" />
-                  </Button>
-                  <Link
-                    href={`/admin/projects/${project.id}`}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-2 text-xs font-sans text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900 transition"
-                  >
-                    Edit
-                  </Link>
-                  {project.slug && project.visibility === 'public' && (
-                    <a
-                      href={`/work/${project.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-sans text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      Preview
-                    </a>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
-                    onClick={async () => {
-                      if (!confirm('Delete this project? This cannot be undone.')) return;
-                      try {
-                        setError('');
-                        const response = await fetch(`/api/projects/${project.id}`, {
-                          method: 'DELETE',
-                        });
-                        if (!response.ok) {
-                          const data = await response.json();
-                          throw new Error(data?.error || 'Failed to delete project');
-                        }
-                        setProjects((current) => current.filter((p) => p.id !== project.id));
-                      } catch (err) {
-                        console.error('Failed to delete project:', err);
-                        setError(err instanceof Error ? err.message : 'Failed to delete project.');
-                      }
-                    }}
-                    aria-label="Delete project"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <AdminDataTable
+          rows={filteredProjects}
+          loading={loading}
+          error={error && !isAddProjectOpen && !selectedProject ? error : null}
+          emptyTitle="No projects found"
+          emptyDescription="Create a project to start tracking a client engagement."
+          emptyAction={<Button type="button" onClick={() => openCreateModal()}>Create your first project</Button>}
+          selectable
+          getRowLabel={(project) => project.name}
+          mobileCard={(project, actions) => <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium">{project.name}</p><p className="text-sm text-muted-foreground">{project.client?.name || 'No client'}</p><div className="mt-2 flex flex-wrap gap-2"><Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>{statusLabel(project.status)}</Badge>{project.featured && <Badge variant="warning"><Star className="mr-1 h-3 w-3" />Featured</Badge>}{project.visibility === 'public' && <Badge variant="success"><Eye className="mr-1 h-3 w-3" />Public</Badge>}</div></div>{actions}</div>}
+          columns={[
+            { id: 'project', header: 'Project', cell: (project) => <div><p className="font-medium">{project.name}</p><p className="text-xs text-muted-foreground">{project.client?.name || 'No client'}</p></div>, accessor: (project) => project.name, sortable: true },
+            { id: 'status', header: 'Status', cell: (project) => <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>{statusLabel(project.status)}</Badge>, accessor: (project) => project.status },
+            { id: 'visibility', header: 'Visibility', cell: (project) => <div className="flex flex-wrap gap-1">{project.visibility === 'public' && <Badge variant="success"><Eye className="mr-1 h-3 w-3" />Public</Badge>}{project.visibility === 'private' && <Badge variant="secondary"><EyeOff className="mr-1 h-3 w-3" />Private</Badge>}{project.visibility === 'draft' && <Badge variant="warning">Draft</Badge>}{project.featured && <Badge variant="warning"><Star className="mr-1 h-3 w-3" />Featured</Badge>}</div>, hideOnMobile: true },
+            { id: 'dates', header: 'Timeline', cell: (project) => <div><p>{project.startDate || project.endDate ? `${formatDate(project.startDate)} – ${formatDate(project.endDate)}` : '—'}</p><p className="text-xs text-muted-foreground">Added {formatDate(project.createdAt)}</p></div>, hideOnMobile: true },
+          ]}
+          rowActions={[
+            { label: 'View project', onSelect: (project) => { setError(''); setSelectedProject(project); } },
+            { label: 'Edit', onSelect: (project) => window.location.assign(`/admin/projects/${project.id}`) },
+            { label: 'Preview', hidden: (project) => !project.slug || project.visibility !== 'public', onSelect: (project) => window.open(`/work/${project.slug}`, '_blank', 'noopener,noreferrer') },
+            { label: 'Delete', destructive: true, onSelect: async (project) => { if (!confirm('Delete this project? This cannot be undone.')) return; const response = await fetch(`/api/projects/${project.id}`, { method: 'DELETE' }); if (response.ok) setProjects((current) => current.filter((item) => item.id !== project.id)); else setError('Failed to delete project.'); } },
+          ]}
+        />
 
         {isAddProjectOpen && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">

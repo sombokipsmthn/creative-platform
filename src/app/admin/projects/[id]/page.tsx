@@ -726,7 +726,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               Unpublish
             </Button>
           )}
-          <Button variant="ghost" onClick={handleDelete} disabled={saving} className="text-xs font-sans uppercase tracking-widest text-red-600 dark:text-red-400 hover:bg-red-500/10">
+          <Button variant="ghost" onClick={handleDelete} disabled={saving} className="text-xs font-sans uppercase tracking-widest text-muted-foreground hover:bg-muted hover:text-foreground">
             <Trash2 className="h-3.5 w-3.5 mr-1" />
             Delete
           </Button>

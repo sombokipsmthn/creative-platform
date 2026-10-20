@@ -41,7 +41,7 @@ The platform utilizes the following software assets:
 | SW-006 | Animation | Framer Motion | Latest | Platform Engineer | MIT | Low |
 | SW-007 | Icons | Lucide React | Latest | Platform Engineer | ISC | Low |
 | SW-008 | ORM | Drizzle ORM | Latest | Platform Engineer | MIT | High |
-| SW-009 | Authentication | Clerk | Latest | Security Lead | Proprietary | High |
+| SW-009 | Authentication | Better Auth | Latest | Security Lead | Proprietary | High |
 | SW-010 | Database | Neon/Postgres | Latest | Platform Engineer | Open Source | High |
 | SW-011 | Storage | Vercel Blob | Latest | Platform Engineer | Proprietary | High |
 | SW-012 | Email Service | Resend | Latest | Platform Engineer | Proprietary | Medium |

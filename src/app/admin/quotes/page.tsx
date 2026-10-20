@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Plus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import AdminDataTable from '@/components/admin/AdminDataTable';
 
 type QuoteClient = {
   id: string;
@@ -293,127 +294,22 @@ export default function QuotesPage() {
               )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full caption-bottom text-sm">
-                <thead>
-                  <tr>
-                    <th className="w-full caption-bottom text-sm-header">Quote</th>
-                    <th className="w-full caption-bottom text-sm-header">Client</th>
-                    <th className="w-full caption-bottom text-sm-header">Project</th>
-                    <th className="w-full caption-bottom text-sm-header">Status</th>
-                    <th className="w-full caption-bottom text-sm-header">Created</th>
-                    <th className="w-full caption-bottom text-sm-header">Total</th>
-                    <th className="w-full caption-bottom text-sm-header" />
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {filteredQuotes.map((quote) => {
-                    const status =
-                      quote.status?.toLowerCase() || 'draft';
-
-                    const hasInvoice = Boolean(quote.invoiceId);
-
-                    return (
-                      <tr
-                        key={quote.id}
-                        className="w-full caption-bottom text-sm-row"
-                      >
-                        {/* QUOTE */}
-                        <td className="w-full caption-bottom text-sm-cell">
-                          <div className="space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
-                              {quote.title || 'Untitled Quote'}
-                            </p>
-
-                            <p className="text-sm text-muted-foreground">
-                              {quote.quoteNumber || quote.id.slice(0, 8).toUpperCase()}
-                            </p>
-                          </div>
-                        </td>
-
-                        {/* CLIENT */}
-                        <td className="w-full caption-bottom text-sm-cell">
-                          {quote.client ? (
-                            <div className="space-y-1">
-                              <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
-                                {quote.client.name}
-                              </p>
-
-                              {quote.client.company && (
-                                <p className="text-xs text-muted-foreground">
-                                  {quote.client.company}
-                                </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              No client
-                            </span>
-                          )}
-                        </td>
-
-                        {/* PROJECT */}
-                        <td className="w-full caption-bottom text-sm-cell">
-                          {quote.projectName || '—'}
-                        </td>
-
-                        {/* STATUS */}
-                        <td className="w-full caption-bottom text-sm-cell">
-                          <div className="flex flex-col items-start gap-2">
-                            <span
-                              className={`ui-badge ${status === 'accepted' ? 'ui-badge-success' :
-                                status === 'declined' ? 'ui-badge-danger' :
-                                  status === 'sent' || status === 'viewed' ? 'ui-badge-accent' :
-                                    'ui-badge'
-                                }`}
-                            >
-                              {formatStatus(status)}
-                            </span>
-
-                            {hasInvoice && (
-                              <Button
-                                onClick={() => router.push(`/admin/invoices/${quote.invoiceId}`)}
-                                variant="ghost"
-                                size="sm"
-                                className="h-auto p-0 normal-case tracking-normal"
-                              >
-                                View Invoice →
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* CREATED */}
-                        <td className="w-full caption-bottom text-sm-cell">
-                          {formatDate(quote.createdAt)}
-                        </td>
-
-                        {/* TOTAL */}
-                        <td className="w-full caption-bottom text-sm-cell text-right font-medium text-slate-900 dark:text-white">
-                          {formatAmount(
-                            quote.total,
-                            quote.currency
-                          )}
-                        </td>
-
-                        {/* ACTION */}
-                        <td className="w-full caption-bottom text-sm-cell text-right">
-                          <Button
-                            onClick={() => router.push(`/admin/quotes/${quote.id}`)}
-                            variant="secondary"
-                            size="sm"
-                          >
-                            View
-                            <ArrowRight className="h-3 w-3" />
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <AdminDataTable
+              rows={filteredQuotes}
+              getRowLabel={(quote) => quote.title || quote.quoteNumber || quote.id}
+              columns={[
+                { id: 'quote', header: 'Quote', cell: (quote) => <div><p className="font-medium">{quote.title || 'Untitled Quote'}</p><p className="text-xs text-muted-foreground">{quote.quoteNumber || quote.id.slice(0, 8).toUpperCase()}</p></div>, accessor: (quote) => quote.title, sortable: true },
+                { id: 'client', header: 'Client', cell: (quote) => quote.client ? <div><p className="font-medium">{quote.client.name}</p>{quote.client.company && <p className="text-xs text-muted-foreground">{quote.client.company}</p>}</div> : <span className="text-muted-foreground">No client</span>, accessor: (quote) => quote.client?.name },
+                { id: 'project', header: 'Project', accessor: (quote) => quote.projectName || '—', hideOnMobile: true },
+                { id: 'status', header: 'Status', cell: (quote) => <span className={`ui-badge ${quote.status === 'accepted' ? 'ui-badge-success' : quote.status === 'declined' ? 'ui-badge-danger' : quote.status === 'sent' || quote.status === 'viewed' ? 'ui-badge-accent' : ''}`}>{formatStatus(quote.status || 'draft')}</span>, accessor: (quote) => quote.status },
+                { id: 'created', header: 'Created', cell: (quote) => formatDate(quote.createdAt), accessor: (quote) => quote.createdAt, hideOnMobile: true },
+                { id: 'total', header: 'Total', align: 'right', cell: (quote) => formatAmount(quote.total, quote.currency), accessor: (quote) => quote.total },
+              ]}
+              rowActions={[
+                { label: 'View', onSelect: (quote) => router.push(`/admin/quotes/${quote.id}`) },
+                { label: 'View invoice', hidden: (quote) => !quote.invoiceId, onSelect: (quote) => router.push(`/admin/invoices/${quote.invoiceId}`) },
+              ]}
+            />
           )}
         </div>
       </div>

@@ -32,7 +32,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 | **Neon PostgreSQL Database** | Automated daily snapshots + continuous WAL archiving | Daily full + hourly incremental | 30 days | At rest (Vercel-managed) |
 | **Vercel Blob Storage** | Replicated across regions automatically | Continuous | N/A (provider-managed) | At rest + in transit (TLS) |
 | **GitHub Repository** | Git native redundancy + Vercel deployments | Continuous | Indefinite (git history) | At rest + in transit |
-| **Clerk User Data** | Provider-managed backups | Continuous | N/A (provider-managed) | See Clerk documentation |
+| **Better Auth User Data** | Provider-managed backups | Continuous | N/A (provider-managed) | See Better Auth documentation |
 | **Configuration Files** | Git version control + environment variable exports | On change | Indefinite | Encrypted in transit |
 
 ### Backup Locations
@@ -103,7 +103,7 @@ This document defines the backup and disaster recovery strategy for the KIPSMTHN
 | ---------- | -------- | ------------------- | ------- | -------------- |
 | **Neon Database Outage** | Complete data unavailability | Point-in-time recovery from backup | Platform Engineer | Vercel support, DB credentials |
 | **Vercel Platform Outage** | Application unavailable | Failover to secondary region (if configured) | Platform Engineer | Vercel status, DNS propagation |
-| **Clerk Authentication Outage** | Users cannot sign in | Enable fallback authentication or wait for recovery | Security Lead | Clerk status, communication plan |
+| **Better Auth Authentication Outage** | Users cannot sign in | Enable fallback authentication or wait for recovery | Security Lead | Better Auth status, communication plan |
 | **GitHub Repository Loss** | Codebase at risk | Restore from Vercel deployments + manual backups | Platform Engineer | Vercel deploy history, local clones |
 | **Security Incident** | Potential data breach | Isolate affected systems, restore from clean backups | Security Lead | Incident response team, legal counsel |
 

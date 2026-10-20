@@ -13,7 +13,7 @@ export async function GET(
   return withCreatorApi(request, async (_req, user) => {
     try {
       const { id } = await context.params;
-      const events = await fetchContractEvents(id);
+      const events = await fetchContractEvents(id, user.id);
       return NextResponse.json(events);
     } catch (error) {
       console.error('GET /api/contracts/[id]/events error:', error);

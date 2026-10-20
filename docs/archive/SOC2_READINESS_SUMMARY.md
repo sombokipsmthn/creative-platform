@@ -134,7 +134,7 @@ All required evidence is available in the repository:
 
 3. **Evidence Collection**: While evidence structure and documentation are complete, actual evidence collection (access reviews, test results, etc.) will be ongoing as part of the continuous compliance program.
 
-4. **External Dependencies**: Security of third-party services (Vercel, Neon, Clerk, GitHub) relies on provider security controls and is monitored per vendor risk management process.
+4. **External Dependencies**: Security of third-party services (Vercel, Neon, Better Auth, GitHub) relies on provider security controls and is monitored per vendor risk management process.
 
 ---
 

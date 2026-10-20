@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import EmptyState from '@/components/admin/EmptyState';
+import AdminDataTable, { type AdminColumn } from '@/components/admin/AdminDataTable';
+import AdminListToolbar from '@/components/admin/AdminListToolbar';
 
 type Equipment = {
   id: string;
@@ -136,24 +138,23 @@ export default function EquipmentPage() {
             </Button>
           </div>
 
-          <div className="relative max-w-xl">
-            <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input type="search" aria-label="Search equipment" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search equipment, category, brand…" className="pl-9" />
-          </div>
+          <AdminListToolbar search={query} onSearchChange={setQuery} searchPlaceholder="Search equipment, category, brand…" primaryAction={<Button type="button" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Add equipment</Button>} />
 
           {loading ? (
             <div className="admin-empty-state" role="status" aria-live="polite"><Loader2 aria-hidden="true" className="animate-spin" /><p>Loading equipment…</p></div>
           ) : filteredEquipment.length === 0 ? (
             <EmptyState icon={<PackagePlus />} title={equipment.length === 0 ? 'No equipment yet' : 'No matching equipment'} description={equipment.length === 0 ? 'Add your first catalogue item so it can be selected in quote line items.' : 'Try a different search term.'} action={equipment.length === 0 ? <Button type="button" onClick={openCreate}>Add first equipment item</Button> : undefined} />
           ) : (
-            <div className="overflow-x-auto rounded-lg border border-border">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead className="border-b border-border bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3">Equipment</th><th className="px-4 py-3">Category</th><th className="px-4 py-3">Brand</th><th className="px-4 py-3 text-right">Daily rate</th></tr></thead>
-                <tbody className="divide-y divide-border">
-                  {filteredEquipment.map((item) => <tr key={item.id} className="align-top"><td className="px-4 py-4"><p className="font-medium">{item.name}</p>{item.specs && <p className="mt-1 max-w-md text-xs text-muted-foreground">{item.specs}</p>}</td><td className="px-4 py-4">{item.category}{item.subcategory ? <span className="block text-xs text-muted-foreground">{item.subcategory}</span> : null}</td><td className="px-4 py-4">{item.brand || '—'}</td><td className="px-4 py-4 text-right font-medium">KES {Number(item.dailyRate || 0).toLocaleString('en-KE')}</td></tr>)}
-                </tbody>
-              </table>
-            </div>
+            <AdminDataTable
+              rows={filteredEquipment}
+              getRowLabel={(item) => item.name}
+              columns={[
+                { id: 'equipment', header: 'Equipment', cell: (item) => <div><p className="font-medium">{item.name}</p>{item.specs && <p className="mt-1 max-w-md text-xs text-muted-foreground">{item.specs}</p>}</div>, sortable: true, accessor: (item) => item.name },
+                { id: 'category', header: 'Category', cell: (item) => <div>{item.category}{item.subcategory && <span className="block text-xs text-muted-foreground">{item.subcategory}</span>}</div>, sortable: true, accessor: (item) => item.category },
+                { id: 'brand', header: 'Brand', accessor: (item) => item.brand || '—', hideOnMobile: true },
+                { id: 'dailyRate', header: 'Daily rate', align: 'right', cell: (item) => `KES ${Number(item.dailyRate || 0).toLocaleString('en-KE')}`, accessor: (item) => item.dailyRate },
+              ] as AdminColumn<Equipment>[]}
+            />
           )}
         </section>
 

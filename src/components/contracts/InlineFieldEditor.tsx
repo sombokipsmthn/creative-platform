@@ -55,8 +55,8 @@ export function InlineFieldEditor({
 
   if (!isEditing) {
     return (
-      <span className="inline">
-        {value || <span className="">[Add {placeholder.toLowerCase()}]</span>}
+      <span className="inline text-inherit">
+        {value || <span className="text-gray-400 font-medium">[Add {placeholder.toLowerCase()}]</span>}
       </span>
     );
   }
@@ -65,7 +65,7 @@ export function InlineFieldEditor({
     'w-full px-2 py-1 bg-white dark:bg-gray-800 border border-purple-400 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500';
 
   return (
-    <div className="">
+    <div className="inline-flex items-center gap-2 align-top">
       {type === 'textarea' ? (
         <textarea
           ref={inputRef as React.Ref<HTMLTextAreaElement>}
@@ -103,20 +103,20 @@ export function InlineFieldEditor({
         />
       )}
 
-      <div className="">
+      <div className="flex gap-1">
         <button
           onClick={handleSave}
-          className=""
+          className="p-1 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 rounded"
           title="Save"
         >
-          <Check className="" />
+          <Check className="h-4 w-4" />
         </button>
         <button
           onClick={onCancel}
-          className=""
+          className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
           title="Cancel"
         >
-          <X className="" />
+          <X className="h-4 w-4" />
         </button>
       </div>
     </div>

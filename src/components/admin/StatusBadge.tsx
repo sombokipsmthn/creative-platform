@@ -1,5 +1,47 @@
 'use client';
-import { Badge } from '@/components/ui/badge';
-interface Props { status: string; variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent' | 'secondary' | 'outline' }
-const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning'> = { active: 'success', inactive: 'outline', archived: 'secondary', draft: 'secondary', sent: 'outline', viewed: 'outline', accepted: 'success', declined: 'destructive', paid: 'success', unpaid: 'warning', pending: 'warning', overdue: 'destructive', failed: 'destructive', completed: 'success', published: 'success', unpublished: 'secondary', awaiting_signature: 'warning', signed: 'success', expired: 'warning', cancelled: 'destructive' };
-export default function StatusBadge({ status, variant }: Props) { const key = status.toLowerCase(); const label = status.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase()); const resolved = variant === 'danger' ? 'destructive' : variant === 'success' || variant === 'warning' || variant === 'outline' || variant === 'secondary' || variant === 'default' ? variant : variants[key] || 'secondary'; return <Badge variant={resolved} className="status-badge"><span aria-hidden="true" className="status-badge__dot" />{label}</Badge>; }
+
+interface StatusBadgeProps {
+  status: string;
+  variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
+}
+
+const variantMap = {
+  default: 'ui-badge',
+  success: 'ui-badge ui-badge-success',
+  warning: 'ui-badge ui-badge-warning',
+  danger: 'ui-badge ui-badge-danger',
+  info: 'ui-badge ui-badge-info',
+  accent: 'ui-badge ui-badge-accent',
+};
+
+const statusVariantMap: Record<string, StatusBadgeProps['variant']> = {
+  active: 'success',
+  inactive: 'warning',
+  archived: 'default',
+  draft: 'default',
+  sent: 'info',
+  viewed: 'info',
+  accepted: 'success',
+  declined: 'danger',
+  paid: 'success',
+  pending: 'warning',
+  overdue: 'danger',
+  completed: 'success',
+  published: 'success',
+  unpublished: 'default',
+};
+
+export default function StatusBadge({
+  status,
+  variant,
+}: StatusBadgeProps) {
+  const displayVariant = variant || statusVariantMap[status.toLowerCase()] || 'default';
+  const displayLabel = status.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
+
+  return (
+    <span className={variantMap[displayVariant]}>
+      <span className="ui-badge-dot" />
+      {displayLabel}
+    </span>
+  );
+}

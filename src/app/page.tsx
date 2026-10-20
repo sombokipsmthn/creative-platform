@@ -1,377 +1,332 @@
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  CheckCircle2,
-  FileText,
-  FolderKanban,
-  Images,
-  LayoutDashboard,
-  ShieldCheck,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { ArrowRight, Check, FileText, FolderKanban, Images, LayoutDashboard, Users, Wallet } from "lucide-react";
 
 import Header from "@/components/header";
-import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import ThemeToggle from "@/components/ThemeToggle";
+import { Card } from "@/components/ui/card";
 
 export const metadata = {
-  title: "KIPSMTHN — Creative Platform & Operating System",
-  description:
-    "The operating system for commercial photographers, filmmakers, and creative studios. Manage clients, contracts, quotes, equipment, invoices, and private delivery galleries in one unified workspace.",
+  title: {
+    template: "%s | KIPSMTHN",
+    default: "KIPSMTHN - Creative Business Platform",
+  },
+  description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+  openGraph: {
+    title: "KIPSMTHN - Creative Business Platform",
+    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://kipsmthn.com',
+    siteName: "KIPSMTHN",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80",
+        width: 1200,
+        height: 800,
+        alt: "Creative business platform with workspace and tools",
+      },
+      {
+        url: "/og-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "KIPSMTHN Creative Business Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "KIPSMTHN - Creative Business Platform",
+    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+    images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"],
+  },
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon-16x16.png",
+    apple: "/apple-touch-icon.png",
+  },
+  keywords: [
+    "creative business platform",
+    "photography business software",
+    "filmmaker workflow management",
+    "studio management software",
+    "creative freelancer tools",
+    "client project management",
+    "creative invoicing software",
+    "private gallery delivery",
+    "creative quotes and estimates",
+    "photographer business tools"
+  ],
+  authors: [
+    {
+      name: "KIPSMTHN",
+      url: "https://kipsmthn.com",
+    },
+  ],
+  creator: "KIPSMTHN",
+  publisher: "KIPSMTHN",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
 };
 
 const platformFeatures = [
-  {
-    icon: Users,
-    title: "Client & CRM Hub",
-    description:
-      "Maintain verified contact records, company profiles, KRA PIN compliance, and engagement histories in one structured view.",
-  },
-  {
-    icon: FileText,
-    title: "Production Quotations",
-    description:
-      "Generate itemized estimates mapped directly to your local camera kits, lighting gear, crew day rates, and post-production deliverables.",
-  },
-  {
-    icon: Wallet,
-    title: "Invoices & eTIMS Readiness",
-    description:
-      "Convert accepted quotes into structured invoices with automated VAT/WHT calculations, payment tracking, and audit-ready records.",
-  },
-  {
-    icon: Images,
-    title: "Private Client Delivery",
-    description:
-      "Deliver client galleries with secure PIN protection, proof watermarking, favorite curation, selection approvals, and batch downloads.",
-  },
-  {
-    icon: FolderKanban,
-    title: "Production Calendar & Projects",
-    description:
-      "Coordinate shoot schedules, call times, location logistics, gear allocation, and project status milestones from enquiry to wrap.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Legal Contract Builder",
-    description:
-      "Draft, sign, and archive standard commercial agreements with built-in licensing rights, revision policies, and audit logs.",
-  },
+  { number: "01", title: "Build your creative presence", description: "Create a polished portfolio that gives your work a professional home and makes it easier for the right clients to discover you." },
+  { number: "02", title: "Manage clients in one place", description: "Keep client information, projects, quotes, invoices, and production details connected instead of scattered across different tools." },
+  { number: "03", title: "Create professional quotes", description: "Build clean, branded quotations with equipment, services, production costs, deposits, discounts, tax, and payment terms." },
+  { number: "04", title: "Deliver private galleries", description: "Give clients a simple private destination for reviewing, selecting, commenting on, and accessing their creative work." },
+  { number: "05", title: "Keep your workflow moving", description: "Move from enquiry to project, quotation, production, delivery, and payment without rebuilding the same information every time." },
+  { number: "06", title: "Stay in control", description: "Your creative business deserves a system designed around how you actually work — flexible, visual, and straightforward." },
 ];
 
-const workflowSteps = [
-  {
-    step: "01",
-    title: "Enquiry & Scoping",
-    description:
-      "Receive client briefs, catalog specific production requirements, and outline deliverables.",
-  },
-  {
-    step: "02",
-    title: "Quotation & Agreement",
-    description:
-      "Assemble gear and service line items, calculate fees, and issue branded proposals for approval.",
-  },
-  {
-    step: "03",
-    title: "Production Execution",
-    description:
-      "Track shoot dates, equipment inventory, location logistics, and daily team expenses.",
-  },
-  {
-    step: "04",
-    title: "Proofing & Delivery",
-    description:
-      "Share password-protected client galleries for photo selections, revisions, and final master downloads.",
-  },
+const workflow = [
+  { step: "01", title: "Create", text: "Build your profile and showcase the work you want clients to see." },
+  { step: "02", title: "Connect", text: "Manage clients and turn enquiries into organized projects." },
+  { step: "03", title: "Quote", text: "Create professional quotations using your own services and equipment." },
+  { step: "04", title: "Deliver", text: "Give clients a private, polished place to receive their work." },
 ];
 
 const workspaceModules = [
-  { icon: Users, label: "Clients", href: "/admin/clients", count: "Verified CRM" },
-  { icon: FolderKanban, label: "Projects", href: "/admin/projects", count: "Active Shoots" },
-  { icon: FileText, label: "Quotes", href: "/admin/quotes", count: "Gear & Services" },
-  { icon: Wallet, label: "Invoices", href: "/admin/invoices", count: "eTIMS Invoicing" },
-  { icon: Images, label: "Galleries", href: "/admin/galleries", count: "Client Proofs" },
-  { icon: LayoutDashboard, label: "Calendar", href: "/admin/calendar", count: "Call Sheets" },
+  { icon: Users, title: "Clients", text: "CRM and client records" },
+  { icon: FolderKanban, title: "Projects", text: "Projects, portfolios and production" },
+  { icon: FileText, title: "Quotes", text: "Professional production quotations" },
+  { icon: Wallet, title: "Invoices", text: "Billing and payment tracking" },
+  { icon: Images, title: "Galleries", text: "Private client delivery" },
+  { icon: LayoutDashboard, title: "Dashboard", text: "One view across the business" },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
+    <div className="selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
-
-      <main className="flex-1">
+      <main>
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden border-b py-20 md:py-28 lg:py-32">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
-              <div className="space-y-6 lg:col-span-7">
-                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-                  The operating system for your{" "}
-                  <span className="text-primary underline decoration-muted-foreground/30 underline-offset-8">
-                    creative studio
-                  </span>
-                  .
-                </h1>
-
-                <p className="max-w-2xl text-base text-muted-foreground sm:text-lg md:text-xl leading-relaxed">
-                  Bring your portfolio showcase, client CRM, production quotes,
-                  eTIMS invoices, and private delivery galleries into one
-                  seamless, unified workspace.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <Button asChild size="lg" className="gap-2">
-                    <Link href="/admin">
-                      <span>Launch Studio Workspace</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-
-                  <Button asChild variant="outline" size="lg">
-                    <Link href="/equipment">Browse Production Kit</Link>
-                  </Button>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-6 pt-4 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>Nairobi & East Africa Production Hub</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>KRA eTIMS & 5% WHT Compliant</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4 text-primary" />
-                    <span>Private Client Portals</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5">
-                <Card className="overflow-hidden border-2 shadow-xl">
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-                    <Image
-                      src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"
-                      alt="Production studio workspace overview"
-                      fill
-                      priority
-                      referrerPolicy="no-referrer"
-                      className="object-cover transition-transform duration-500 hover:scale-105"
-                      sizes="(max-width: 768px) 100vw, 500px"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4 text-white">
-                      <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
-                        Live Client Production
-                      </p>
-                      <h2 className="text-lg font-bold">
-                        Clean Energy Impact & Ecosystem Media
-                      </h2>
-                      <p className="text-xs text-white/70">
-                        Nairobi, Kenya · Sony FX Cinema Package
-                      </p>
-                    </div>
-                  </div>
-
-                  <CardContent className="grid grid-cols-3 divide-x p-4 text-center">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Equipment</p>
-                      <p className="text-lg font-bold text-foreground">12+ Units</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Deliverables</p>
-                      <p className="text-lg font-bold text-foreground">4K + RAW</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Gallery</p>
-                      <p className="text-lg font-bold text-foreground">Active PIN</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
+        <section className="relative overflow-hidden">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-1/2 top-20 h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-purple-600/10 blur-3xl" />
+            <div className="absolute -right-40 top-80 h-[360px] w-[360px] rounded-full bg-fuchsia-500/5 blur-3xl" />
           </div>
-        </section>
 
-        {/* WORKSPACE MODULES QUICK STRIP */}
-        <section className="border-b bg-muted/30 py-12">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Workspace Architecture
-                </p>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                  Built for your complete creative pipeline
-                </h2>
+          <div className="relative mx-auto max-w-7xl">
+            <div className="max-w-5xl">
+              <p className="text-xs font-medium uppercase tracking-wider text-purple-600 dark:text-purple-400">
+                Creative Business Platform
+              </p>
+              <h1 className="mt-7 max-w-5xl text-5xl font-light leading-[0.94] tracking-tight text-slate-950 dark:text-white md:text-7xl lg:text-[6.5rem]">
+                The operating system for your creative business.
+              </h1>
+              <p className="mt-8 max-w-2xl text-base leading-8 text-slate-600 dark:text-zinc-400 md:text-lg">
+                Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.
+              </p>
+              <div className="relative mt-10 h-48 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800 md:h-64">
+                <Image
+                  src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"
+                  alt="Creative business platform with workspace and tools"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                  className="object-cover"
+                />
               </div>
-              <Button asChild variant="ghost" size="sm" className="gap-1.5">
-                <Link href="/admin">
-                  Enter Command Center <ArrowRight className="h-3.5 w-3.5" />
+              <div className="mt-10 flex flex-wrap gap-3">
+                <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700">
+                  Get started<ArrowRight className="h-4 w-4" />
                 </Link>
-              </Button>
+                <Link href="#platform" className="inline-flex items-center rounded-full border border-slate-200 px-7 py-4 text-sm font-medium transition hover:border-purple-400 hover:text-purple-600 dark:border-zinc-800 dark:hover:border-purple-800 dark:hover:text-purple-400">
+                  Explore the platform
+                </Link>
+              </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-              {workspaceModules.map((module) => {
-                const Icon = module.icon;
-                return (
-                  <Link key={module.label} href={module.href}>
-                    <Card className="group h-full transition-all hover:border-primary hover:shadow-md">
-                      <CardContent className="flex flex-col items-start p-5">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                          <Icon className="h-5 w-5" />
-                        </div>
-                        <h3 className="mt-4 text-sm font-semibold text-foreground">
-                          {module.label}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {module.count}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* PLATFORM FEATURES */}
-        <section id="platform" className="py-20 md:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl space-y-4">
-              <Badge variant="secondary">Platform Capabilities</Badge>
-              <h2 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-                Everything required to run a high-caliber production business.
-              </h2>
-              <p className="text-base text-muted-foreground sm:text-lg">
-                Stop juggling disjointed apps for proposals, cloud drives,
-                invoices, and contracts. Run your creative business on a single,
-                refined foundation.
-              </p>
-            </div>
-
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {platformFeatures.map((feature) => {
-                const Icon = feature.icon;
-                return (
-                  <Card key={feature.title} className="transition-all hover:shadow-md">
-                    <CardHeader className="space-y-3 pb-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-primary">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <CardTitle className="text-lg">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CardDescription className="text-sm leading-relaxed">
-                        {feature.description}
-                      </CardDescription>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* WORKFLOW ROADMAP */}
-        <section id="workflow" className="border-t bg-muted/20 py-20 md:py-28">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl space-y-3">
-              <Badge variant="secondary">Production Lifecycle</Badge>
-              <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-                From initial client pitch to master delivery
-              </h2>
-              <p className="text-sm text-muted-foreground sm:text-base">
-                Standardized stages keep project details aligned so nothing gets
-                lost between quotation and final invoice.
-              </p>
-            </div>
-
-            <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {workflowSteps.map((item) => (
-                <Card key={item.step} className="relative bg-card">
-                  <CardHeader className="pb-2">
-                    <span className="font-mono text-2xl font-bold text-primary/80">
-                      {item.step}
-                    </span>
-                    <CardTitle className="mt-2 text-base font-semibold">
-                      {item.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {item.description}
-                    </p>
-                  </CardContent>
+            {/* FEATURES */}
+            <div className="mt-20 grid gap-4 md:grid-cols-3">
+              {[["01", "One workspace", "Stop stitching together disconnected tools."], ["02", "One workflow", "Move from client enquiry to delivery without losing context."], ["03", "One business", "Keep the creative and commercial sides of your work connected."]].map(([number, title, text]) => (
+                <Card key={number} className="p-6 hover:border-purple-600/50 dark:hover:border-purple-600/50 transition-colors cursor-pointer">
+                  <span className="font-sans text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">{number}</span>
+                  <h2 className="mt-6 text-xl font-medium tracking-tight">{title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-zinc-500">{text}</p>
                 </Card>
               ))}
             </div>
           </div>
         </section>
 
-        {/* CREATOR WORKSPACE BANNER */}
-        <section className="py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <Card className="overflow-hidden border-primary/20 bg-primary text-primary-foreground shadow-2xl">
-              <div className="grid gap-8 p-8 md:p-14 lg:grid-cols-12 lg:items-center">
-                <div className="space-y-4 lg:col-span-8">
-                  <Badge variant="outline" className="border-primary-foreground/30 text-primary-foreground">
-                    Private Creator Workspace
-                  </Badge>
-                  <h2 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-                    Your studio data is private. Your work stays protected.
+        {/* PLATFORM */}
+        <section id="platform" className="border-t border-slate-200 dark:border-zinc-800">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">The platform</p>
+                <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">Everything your creative business needs.</h2>
+                <p className="mt-6 max-w-md text-base leading-8 text-slate-600 dark:text-zinc-400">
+                  KIPSMTHN brings the systems behind your creative work into a single place, so your tools support the way you work instead of getting in the way.
+                </p>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {platformFeatures.map((feature) => (
+                  <article key={feature.number} className="group rounded-[1.5rem] border border-slate-200 p-7 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-600/5 dark:border-zinc-800 dark:hover:border-purple-900">
+                    <span className="font-sans text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">{feature.number}</span>
+                    <h3 className="mt-8 text-2xl font-light tracking-tight">{feature.title}</h3>
+                    <p className="mt-4 text-sm leading-7 text-slate-500 dark:text-zinc-400">{feature.description}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* WORKFLOW */}
+        <section id="workflow" className="px-6 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Workflow</p>
+              <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">From first contact to final delivery.</h2>
+            </div>
+            <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {workflow.map((item) => (
+                <article key={item.step} className="relative rounded-[1.5rem] border border-slate-200 p-7 dark:border-zinc-800">
+                  <span className="font-sans text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">{item.step}</span>
+                  <h3 className="mt-8 text-2xl font-light tracking-tight">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-zinc-400">{item.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* WORK */}
+        <section id="work" className="border-y border-slate-200 dark:border-zinc-800">
+          <div className="mx-auto max-w-7xl">
+            <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Your workspace</p>
+                <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">One place for the work behind the work.</h2>
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {workspaceModules.map((module) => {
+                  const Icon = module.icon;
+                  return (
+                    <div key={module.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-zinc-800 dark:bg-zinc-950">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-purple-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-purple-400">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <h3 className="mt-5 text-sm font-semibold">{module.title}</h3>
+                      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-zinc-500">{module.text}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* CALL TO ACTION */}
+        <section className="px-6 py-24 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <div className="rounded-[2rem] bg-purple-600 p-8 text-white md:p-14">
+              <div className="grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-200">For creators</p>
+                  <h2 className="mt-5 max-w-3xl text-4xl font-light tracking-tight md:text-6xl">
+                    Your workspace is private. Your business stays yours.
                   </h2>
-                  <p className="max-w-2xl text-sm leading-relaxed text-primary-foreground/80 sm:text-base">
-                    Log in to access your confidential client rosters, pending
-                    quotations, unpaid invoices, draft contracts, and upload
-                    galleries. The admin dashboard is secured and personalized
-                    for your creator profile.
+                  <p className="mt-6 max-w-2xl text-base leading-8 text-purple-100">
+                    Once you sign in, your creator workspace becomes the place where your clients, projects, financial records and production workflow live. It is separate from this public platform homepage.
                   </p>
                 </div>
-
-                <div className="flex flex-col gap-3 lg:col-span-4 lg:items-end">
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="secondary"
-                    className="w-full sm:w-auto font-semibold gap-2"
-                  >
-                    <Link href="/admin">
-                      <span>Access Workspace</span>
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    size="lg"
-                    variant="outline"
-                    className="w-full sm:w-auto border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-                  >
-                    <Link href="/contact">Direct Collaboration</Link>
-                  </Button>
+                <div className="space-y-3 rounded-2xl bg-white/10 p-5 backdrop-blur">
+                  {["Private creator dashboard", "Your clients and projects", "Your quotes and invoices", "Your galleries and delivery workflow"].map((item) => (
+                    <div key={item} className="flex items-center gap-3 text-sm text-purple-50">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/15">
+                        <Check className="h-3.5 w-3.5" />
+                      </span>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-10 flex flex-wrap gap-3">
+                  <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-purple-700 transition hover:bg-purple-50">
+                    Create your workspace<ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <Link href="/sign-in" className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-sm font-medium text-white transition hover:bg-white/10">
+                    Sign in
+                  </Link>
                 </div>
               </div>
-            </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* PRICING */}
+        <section id="pricing" className="border-t border-slate-200 dark:border-zinc-800">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Start here</p>
+            <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">
+              Spend less time managing the business. Spend more time making the work.
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-600 dark:text-zinc-400">
+              Explore the platform, create your account, and keep your creator workspace separate from the public-facing experience.
+            </p>
+            <div className="mt-9 flex justify-center gap-3">
+              <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700">
+                Get started<ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
           </div>
         </section>
       </main>
 
-      <Footer />
+      <footer className="border-t border-slate-200 bg-slate-50/70 px-6 pb-8 pt-16 dark:border-zinc-800 dark:bg-zinc-950/70">
+        <div className="mx-auto max-w-7xl">
+          <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+            <div className="max-w-sm">
+              <Link href="/" className="inline-block text-xl font-medium tracking-[0.2em]">
+                KIPSMTHN<span className="text-purple-600">.</span>
+              </Link>
+              <p className="mt-4 text-sm leading-7 text-slate-500 dark:text-zinc-400">
+                Creative infrastructure for photographers, filmmakers, studios, and creative teams — from first enquiry to final delivery.
+              </p>
+              <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-purple-600 transition hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300">
+                Create your workspace<ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-zinc-100">Platform</h2>
+              <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
+                <Link href="#platform" className="transition hover:text-purple-600 dark:hover:text-purple-400">Features</Link>
+                <Link href="#workflow" className="transition hover:text-purple-600 dark:hover:text-purple-400">Workflow</Link>
+                <Link href="#work" className="transition hover:text-purple-600 dark:hover:text-purple-400">Workspace</Link>
+                <Link href="#pricing" className="transition hover:text-purple-600 dark:hover:text-purple-400">Get started</Link>
+              </nav>
+            </div>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-zinc-100">Company</h2>
+              <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
+                <Link href="/about" className="transition hover:text-purple-600 dark:hover:text-purple-400">About</Link>
+                <Link href="/services" className="transition hover:text-purple-600 dark:hover:text-purple-400">Services</Link>
+                <Link href="/work" className="transition hover:text-purple-600 dark:hover:text-purple-400">Work</Link>
+                <Link href="/contact" className="transition hover:text-purple-600 dark:hover:text-purple-400">Contact</Link>
+              </nav>
+            </div>
+            <div>
+              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-zinc-100">Account</h2>
+              <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
+                <Link href="/sign-in" className="transition hover:text-purple-600 dark:hover:text-purple-400">Sign in</Link>
+                <Link href="/sign-up" className="transition hover:text-purple-600 dark:hover:text-purple-400">Create account</Link>
+              </nav>
+            </div>
+          </div>
+          <div className="mt-14 flex flex-col gap-5 border-t border-slate-200 pt-6 text-xs text-slate-500 dark:border-zinc-800 dark:text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+            <p>© {new Date().getFullYear()} KIPSMTHN. All rights reserved.</p>
+            <div className="flex items-center gap-5">
+              <Link href="/privacy" className="transition hover:text-purple-600 dark:hover:text-purple-400">Privacy</Link>
+              <span>Creative Business Platform</span>
+              <ThemeToggle />
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

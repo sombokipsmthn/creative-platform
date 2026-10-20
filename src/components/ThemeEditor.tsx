@@ -122,8 +122,8 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
   if (loading || !savedTheme) {
     return (
-      <div className="">
-        <p className="">Loading theme editor...</p>
+      <div className="p-8 text-center">
+        <p className="text-sm text-slate-500">Loading theme editor...</p>
       </div>
     )
   }
@@ -133,9 +133,9 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
   )?.id
 
   return (
-    <div className="">
+    <div className="space-y-6">
       {/* Section Navigation */}
-      <div className="">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 dark:border-zinc-800">
         {[
           { id: 'themes' as const, label: 'Themes', icon: '🎨' },
           { id: 'cover' as const, label: 'Cover', icon: '🖼️' },
@@ -147,7 +147,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
           <button
             key={section.id}
             onClick={() => setActiveSection(section.id)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium  transition ${
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
               activeSection === section.id
                 ? 'border-purple-600 text-purple-600'
                 : 'border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
@@ -161,17 +161,17 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
       {/* THEMES SECTION */}
       {activeSection === 'themes' && (
-        <div className="">
+        <div className="space-y-4">
           <div>
-            <h3 className="">
+            <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-4">
               Select a Gallery Theme
             </h3>
-            <p className="">
+            <p className="text-xs text-slate-500 dark:text-zinc-400 mb-4">
               Choose from five professionally designed themes. Each provides a unique visual presentation for your gallery.
             </p>
           </div>
 
-          <div className="">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {GALLERY_THEMES.map(theme => (
               <button
                 key={theme.id}
@@ -182,27 +182,27 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                     : 'border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
                 }`}
               >
-                <div className="">
-                  <h4 className="">
+                <div className="flex items-start justify-between mb-3">
+                  <h4 className="font-semibold text-slate-900 dark:text-white">
                     {theme.label}
                   </h4>
                   {currentThemeId === theme.id && (
-                    <span className="">
+                    <span className="text-purple-600 text-xs font-semibold">
                       ✓ Active
                     </span>
                   )}
                 </div>
-                <p className="">
+                <p className="text-xs text-slate-600 dark:text-zinc-400">
                   {theme.description}
                 </p>
-                <div className="">
+                <div className="mt-3 flex gap-2">
                   <div
-                    className=""
-
+                    className="w-6 h-6 rounded"
+                    style={{ backgroundColor: theme.preset.accentColor }}
                   />
                   <div
-                    className=""
-
+                    className="w-6 h-6 rounded border"
+                    style={{ backgroundColor: theme.preset.backgroundColor }}
                   />
                 </div>
               </button>
@@ -213,13 +213,13 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
       {/* COVER SECTION */}
       {activeSection === 'cover' && (
-        <div className="">
-          <h3 className="">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white">
             Cover Settings
           </h3>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Cover Style
             </label>
             <select
@@ -227,7 +227,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
               onChange={(e) =>
                 updateTheme({ coverStyle: e.target.value })
               }
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="image">Image (Full Cover)</option>
               <option value="split">Split (Image + Text)</option>
@@ -240,9 +240,9 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
           {['image', 'split', 'centered', 'immersive'].includes(savedTheme.coverStyle) && (
             <>
-              <div className="">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
                     Focal Point X: {savedTheme.coverFocalX}%
                   </label>
                   <input
@@ -253,11 +253,11 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                     onChange={(e) =>
                       updateTheme({ coverFocalX: parseInt(e.target.value) })
                     }
-                    className=""
+                    className="w-full"
                   />
                 </div>
                 <div>
-                  <label className="block">
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
                     Focal Point Y: {savedTheme.coverFocalY}%
                   </label>
                   <input
@@ -268,13 +268,13 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                     onChange={(e) =>
                       updateTheme({ coverFocalY: parseInt(e.target.value) })
                     }
-                    className=""
+                    className="w-full"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block">
+                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
                   Overlay Opacity: {savedTheme.coverOverlayOpacity}%
                 </label>
                 <input
@@ -285,41 +285,41 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                   onChange={(e) =>
                     updateTheme({ coverOverlayOpacity: parseInt(e.target.value) })
                   }
-                  className=""
+                  className="w-full"
                 />
               </div>
             </>
           )}
 
-          <div className="">
-            <label className="">
+          <div className="space-y-3 border-t border-slate-200 dark:border-zinc-800 pt-4">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showTitle}
                 onChange={(e) => updateTheme({ showTitle: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded"
               />
-              <span className="">Show Gallery Title</span>
+              <span className="text-sm text-slate-700 dark:text-zinc-300">Show Gallery Title</span>
             </label>
 
-            <label className="">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showDescription}
                 onChange={(e) => updateTheme({ showDescription: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded"
               />
-              <span className="">Show Description</span>
+              <span className="text-sm text-slate-700 dark:text-zinc-300">Show Description</span>
             </label>
 
-            <label className="">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showLogo}
                 onChange={(e) => updateTheme({ showLogo: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded"
               />
-              <span className="">Show Logo</span>
+              <span className="text-sm text-slate-700 dark:text-zinc-300">Show Logo</span>
             </label>
           </div>
         </div>
@@ -327,19 +327,19 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
       {/* TYPOGRAPHY SECTION */}
       {activeSection === 'typography' && (
-        <div className="">
-          <h3 className="">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white">
             Typography
           </h3>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Font Family
             </label>
             <select
               value={savedTheme.fontFamily}
               onChange={(e) => updateTheme({ fontFamily: e.target.value })}
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="sans">Sans Serif (Modern)</option>
               <option value="serif">Serif (Editorial)</option>
@@ -348,8 +348,8 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             </select>
           </div>
 
-          <div className="">
-            <p className="">
+          <div className="p-4 rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50">
+            <p className="text-xs text-slate-600 dark:text-zinc-400">
               Font family changes how your gallery title, descriptions, and labels appear across the client gallery.
             </p>
           </div>
@@ -358,73 +358,73 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
       {/* COLORS SECTION */}
       {activeSection === 'colors' && (
-        <div className="">
-          <h3 className="">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white">
             Color Scheme
           </h3>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Accent Color
             </label>
-            <div className="">
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={savedTheme.accentColor}
                 onChange={(e) => updateTheme({ accentColor: e.target.value })}
-                className=""
+                className="w-12 h-10 rounded-lg border border-slate-200 dark:border-zinc-800 cursor-pointer"
               />
               <input
                 type="text"
                 value={savedTheme.accentColor}
                 onChange={(e) => updateTheme({ accentColor: e.target.value })}
-                className=""
+                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Background Color
             </label>
-            <div className="">
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={savedTheme.backgroundColor}
                 onChange={(e) => updateTheme({ backgroundColor: e.target.value })}
-                className=""
+                className="w-12 h-10 rounded-lg border border-slate-200 dark:border-zinc-800 cursor-pointer"
               />
               <input
                 type="text"
                 value={savedTheme.backgroundColor}
                 onChange={(e) => updateTheme({ backgroundColor: e.target.value })}
-                className=""
+                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Text Color
             </label>
-            <div className="">
+            <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={savedTheme.textColor}
                 onChange={(e) => updateTheme({ textColor: e.target.value })}
-                className=""
+                className="w-12 h-10 rounded-lg border border-slate-200 dark:border-zinc-800 cursor-pointer"
               />
               <input
                 type="text"
                 value={savedTheme.textColor}
                 onChange={(e) => updateTheme({ textColor: e.target.value })}
-                className=""
+                className="flex-1 px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white text-xs"
               />
             </div>
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Border Radius: {savedTheme.borderRadius}px
             </label>
             <input
@@ -433,7 +433,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
               max="24"
               value={savedTheme.borderRadius}
               onChange={(e) => updateTheme({ borderRadius: parseInt(e.target.value) })}
-              className=""
+              className="w-full"
             />
           </div>
         </div>
@@ -441,19 +441,19 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
       {/* GRID SECTION */}
       {activeSection === 'grid' && (
-        <div className="">
-          <h3 className="">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white">
             Grid & Layout
           </h3>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Grid Style
             </label>
             <select
               value={savedTheme.gridStyle}
               onChange={(e) => updateTheme({ gridStyle: e.target.value })}
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="masonry">Masonry (Varied Heights)</option>
               <option value="vertical">Vertical (Column Stack)</option>
@@ -463,13 +463,13 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Thumbnail Size
             </label>
             <select
               value={savedTheme.thumbnailSize}
               onChange={(e) => updateTheme({ thumbnailSize: e.target.value })}
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="small">Small (Compact View)</option>
               <option value="regular">Regular (Balanced)</option>
@@ -478,13 +478,13 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Grid Spacing
             </label>
             <select
               value={savedTheme.gridSpacing}
               onChange={(e) => updateTheme({ gridSpacing: e.target.value })}
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="tight">Tight (Minimal Gap)</option>
               <option value="regular">Regular (Balanced Gap)</option>
@@ -493,13 +493,13 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
           </div>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Aspect Ratio
             </label>
             <select
               value={savedTheme.aspectRatio}
               onChange={(e) => updateTheme({ aspectRatio: e.target.value })}
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="auto">Auto (Original Proportions)</option>
               <option value="1:1">Square (1:1)</option>
@@ -511,7 +511,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
           {savedTheme.gridStyle === 'masonry' && (
             <div>
-              <label className="block">
+              <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
                 Masonry Columns: {savedTheme.masonryColumns}
               </label>
               <input
@@ -520,7 +520,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                 max="6"
                 value={savedTheme.masonryColumns}
                 onChange={(e) => updateTheme({ masonryColumns: parseInt(e.target.value) })}
-                className=""
+                className="w-full"
               />
             </div>
           )}
@@ -529,46 +529,46 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
 
       {/* GENERAL SECTION */}
       {activeSection === 'general' && (
-        <div className="">
-          <h3 className="">
+        <div className="space-y-4">
+          <h3 className="text-sm font-medium text-slate-900 dark:text-white">
             General Settings
           </h3>
 
           <div>
-            <label className="block">
+            <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Navigation Style
             </label>
             <select
               value={savedTheme.navigationStyle}
               onChange={(e) => updateTheme({ navigationStyle: e.target.value })}
-              className=""
+              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             >
               <option value="icons-and-text">Icons with Text</option>
               <option value="icons-only">Icons Only</option>
             </select>
           </div>
 
-          <div className="">
-            <h4 className="">
+          <div className="space-y-3 border-t border-slate-200 dark:border-zinc-800 pt-4">
+            <h4 className="text-xs font-medium text-slate-900 dark:text-white">
               Visibility Options
             </h4>
 
-            <label className="">
+            <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={savedTheme.showCollections}
                 onChange={(e) => updateTheme({ showCollections: e.target.checked })}
-                className=""
+                className="w-4 h-4 rounded"
               />
-              <span className="">Show Collections</span>
+              <span className="text-sm text-slate-700 dark:text-zinc-300">Show Collections</span>
             </label>
           </div>
 
-          <div className="">
-            <p className="">
-              Current theme: <span className="">{savedTheme.name}</span>
+          <div className="p-4 rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50">
+            <p className="text-xs text-slate-600 dark:text-zinc-400">
+              Current theme: <span className="font-semibold">{savedTheme.name}</span>
             </p>
-            <p className="">
+            <p className="text-xs text-slate-500 dark:text-zinc-500 mt-1">
               Type: {savedTheme.type}
             </p>
           </div>
@@ -576,7 +576,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
       )}
 
       {/* Save Status */}
-      <div className="">
+      <div className="fixed bottom-4 right-4 text-xs text-slate-500 dark:text-zinc-500">
         {isSaving ? '💾 Saving...' : '✓ Saved'}
       </div>
     </div>

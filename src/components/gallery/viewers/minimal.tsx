@@ -12,7 +12,7 @@ interface MinimalViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
 
 /**
  * Minimal Theme Viewer
- *
+ * 
  * Clean, spacious single-image focus with navigation.
  * Large images with plenty of whitespace.
  * Minimal UI chrome.
@@ -32,9 +32,9 @@ export function GalleryViewerMinimal({
 
   if (photos.length === 0) {
     return (
-      <div className="">
-        <div className="">
-          <p className="">No photos in gallery</p>
+      <div className="flex min-h-screen items-center justify-center bg-white p-6">
+        <div className="text-center">
+          <p className="text-lg font-light text-gray-400">No photos in gallery</p>
         </div>
       </div>
     );
@@ -67,30 +67,30 @@ export function GalleryViewerMinimal({
 
   return (
     <div
-      className=""
+      className="min-h-screen"
       style={{
         backgroundColor: theme.preset.backgroundColor,
         color: theme.preset.textColor,
       }}
     >
       {/* Header */}
-      <div className="">
-        <h1 className="">{title}</h1>
-        {description && <p className="">{description}</p>}
+      <div className="border-b border-gray-200 px-6 py-6 sm:px-10 lg:px-16">
+        <h1 className="text-2xl font-light tracking-tight sm:text-3xl">{title}</h1>
+        {description && <p className="mt-2 text-sm text-gray-500">{description}</p>}
       </div>
 
       {/* Main Content */}
-      <div className="">
+      <div className="mx-auto max-w-5xl px-6 py-8 sm:px-10 lg:px-16">
         {/* Image Container */}
-        <div className="">
-          <div className="">
-            <div className="">
+        <div className="mb-8 flex items-center justify-center">
+          <div className="relative w-full max-w-2xl">
+            <div className="relative aspect-auto overflow-hidden bg-gray-100">
               <Image
                 src={currentPhoto.displayUrl}
                 alt={currentPhoto.filename}
                 width={currentPhoto.width || 1200}
                 height={currentPhoto.height || 800}
-                className=""
+                className="h-full w-full object-cover"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 60vw"
               />
             </div>
@@ -98,20 +98,20 @@ export function GalleryViewerMinimal({
         </div>
 
         {/* Photo Counter & Navigation */}
-        <div className="">
+        <div className="flex items-center justify-between gap-4">
           {/* Left Navigation */}
           <button
             onClick={handlePrev}
             disabled={!hasPrev}
-            className=""
+            className="rounded-full p-3 transition disabled:opacity-30 hover:bg-gray-100"
             aria-label="Previous photo"
           >
-            <ChevronLeft className="" />
+            <ChevronLeft className="h-5 w-5" />
           </button>
 
           {/* Counter */}
-          <div className="">
-            <p className="">
+          <div className="flex-1 text-center">
+            <p className="text-sm font-light text-gray-500">
               {currentIndex + 1} of {photos.length}
             </p>
           </div>
@@ -120,35 +120,35 @@ export function GalleryViewerMinimal({
           <button
             onClick={handleNext}
             disabled={!hasNext}
-            className=""
+            className="rounded-full p-3 transition disabled:opacity-30 hover:bg-gray-100"
             aria-label="Next photo"
           >
-            <ChevronRight className="" />
+            <ChevronRight className="h-5 w-5" />
           </button>
         </div>
 
         {/* Actions */}
         {(allowDownloads || allowFavorites) && (
-          <div className="">
+          <div className="mt-6 flex gap-3 border-t border-gray-200 pt-6">
             {allowFavorites && (
               <button
                 onClick={handleFavorite}
-                className=""
+                className="flex items-center gap-2 rounded-lg px-4 py-2 transition hover:bg-gray-100"
               >
                 <Heart
                   className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`}
                 />
-                <span className="">{isFavorite ? 'Favorited' : 'Favorite'}</span>
+                <span className="text-sm">{isFavorite ? 'Favorited' : 'Favorite'}</span>
               </button>
             )}
 
             {allowDownloads && (
               <button
                 onClick={() => onPhotoDownload?.(currentPhoto.id)}
-                className=""
+                className="flex items-center gap-2 rounded-lg px-4 py-2 transition hover:bg-gray-100"
               >
-                <Download className="" />
-                <span className="">Download</span>
+                <Download className="h-5 w-5 text-gray-400" />
+                <span className="text-sm">Download</span>
               </button>
             )}
           </div>
@@ -156,9 +156,9 @@ export function GalleryViewerMinimal({
       </div>
 
       {/* Thumbnail Strip */}
-      <div className="">
-        <div className="">
-          <div className="">
+      <div className="border-t border-gray-200 bg-gray-50 px-6 py-6 sm:px-10 lg:px-16">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex gap-2 overflow-x-auto pb-2">
             {photos.map((photo, idx) => (
               <button
                 key={photo.id}
@@ -171,7 +171,7 @@ export function GalleryViewerMinimal({
                   src={photo.thumbnailUrl}
                   alt={`Thumbnail ${idx + 1}`}
                   fill
-                  className=""
+                  className="object-cover"
                   sizes="64px"
                 />
               </button>

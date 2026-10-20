@@ -73,9 +73,9 @@ export default function GalleryActivityTab({ galleryId }: GalleryActivityTabProp
 
   if (loading && activity.length === 0) {
     return (
-      <div className="ui-card">
-        <div className="">
-          <Loader2 className="" />
+      <div className="ui-card p-6">
+        <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+          <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading activity...</span>
         </div>
       </div>
@@ -83,13 +83,13 @@ export default function GalleryActivityTab({ galleryId }: GalleryActivityTabProp
   }
 
   return (
-    <div className="">
-      <div className="ui-card">
-        <div className="">
-          <h2 className="">Client Activity</h2>
+    <div className="mx-auto max-w-2xl space-y-6">
+      <div className="ui-card p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Client Activity</h2>
           <button
             disabled={loading}
-            className="gallery-btn gallery-btn-secondary"
+            className="gallery-btn gallery-btn-secondary gap-2"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -97,51 +97,51 @@ export default function GalleryActivityTab({ galleryId }: GalleryActivityTabProp
         </div>
 
         {error && (
-          <div className="">
-            <AlertCircle className="" />
-            <p className="">{error}</p>
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
           </div>
         )}
 
         {activity.length === 0 ? (
-          <div className="">
-            <p className="">No activity yet</p>
-            <p className="">
+          <div className="py-8 text-center">
+            <p className="text-[var(--color-text-muted)]">No activity yet</p>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">
               Activity will appear here when clients access your gallery
             </p>
           </div>
         ) : (
-          <div className="">
+          <div className="space-y-3">
             {activity.map((item) => (
               <div
                 key={item.id}
-                className=""
+                className="p-4 border border-[var(--color-border-subtle)] rounded-lg"
               >
-                <div className="">
-                  <div className="">
-                    <p className="">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="font-medium">
                       {getEventLabel(item.event_type)}
                     </p>
-                    <div className="">
+                    <div className="mt-1 space-y-1">
                       {item.client_name && (
-                        <p className="">
-                          Client: <span className="">{item.client_name}</span>
+                        <p className="text-sm text-[var(--color-text-muted)]">
+                          Client: <span className="font-medium">{item.client_name}</span>
                         </p>
                       )}
                       {item.photo_filename && (
-                        <p className="">
-                          Photo: <span className="">{item.photo_filename}</span>
+                        <p className="text-sm text-[var(--color-text-muted)]">
+                          Photo: <span className="font-medium">{item.photo_filename}</span>
                         </p>
                       )}
                       {item.collection_title && (
-                        <p className="">
-                          Collection: <span className="">{item.collection_title}</span>
+                        <p className="text-sm text-[var(--color-text-muted)]">
+                          Collection: <span className="font-medium">{item.collection_title}</span>
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="">
-                    <p className="">
+                  <div className="text-right">
+                    <p className="text-xs text-[var(--color-text-muted)] whitespace-nowrap">
                       {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                     </p>
                   </div>

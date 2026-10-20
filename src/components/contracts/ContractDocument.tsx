@@ -39,8 +39,8 @@ export function ContractDocument({
 }: ContractDocumentProps) {
   if (!content) {
     return (
-      <div className="">
-        <p className="">No content</p>
+      <div className="prose prose-sm max-w-none">
+        <p className="text-gray-500 italic">No content</p>
       </div>
     );
   }
@@ -55,7 +55,7 @@ export function ContractDocument({
       const text = currentParagraph.join('\n').trim();
       if (text) {
         elements.push(
-          <p key={`p-${elements.length}`} className="">
+          <p key={`p-${elements.length}`} className="mb-4 leading-7 text-gray-900 dark:text-gray-50">
             {text}
           </p>
         );
@@ -95,7 +95,7 @@ export function ContractDocument({
     // Blank line - flush paragraph
     if (trimmedLine === '') {
       flushParagraph();
-      elements.push(<div key={`space-${index}`} className="" />);
+      elements.push(<div key={`space-${index}`} className="mb-2" />);
       return;
     }
 
@@ -106,8 +106,8 @@ export function ContractDocument({
   flushParagraph();
 
   return (
-    <div className="">
-      {elements.length > 0 ? elements : <p className="">No content</p>}
+    <div className="prose prose-sm max-w-none space-y-2 text-gray-900 dark:text-gray-50">
+      {elements.length > 0 ? elements : <p className="text-gray-500 italic">No content</p>}
     </div>
   );
 }

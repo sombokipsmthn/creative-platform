@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useCreator } from '@/context/CreatorContext';
@@ -17,65 +18,30 @@ import {
   Users,
   Wallet,
   X,
-  Plus,
-  TrendingUp,
-  ChevronRight,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type Range = '7d' | '30d' | '90d' | '12m' | 'all';
 
 type DashboardStats = {
   range: Range;
   overview: {
-    clients: number;
-    newClients: number;
-    activeClients: number;
-    projects: number;
-    newProjects: number;
-    activeProjects: number;
-    completedProjects: number;
-    quotes: number;
-    newQuotes: number;
-    invoices: number;
-    newInvoices: number;
-    galleries: number;
-    newGalleries: number;
+    clients: number; newClients: number; activeClients: number;
+    projects: number; newProjects: number; activeProjects: number; completedProjects: number;
+    quotes: number; newQuotes: number; invoices: number; newInvoices: number;
+    galleries: number; newGalleries: number;
   };
   finance: {
-    periodQuotedValue: number;
-    acceptedQuoteValue: number;
-    periodInvoicedValue: number;
-    periodPaidValue: number;
-    overdueInvoices: number;
+    periodQuotedValue: number; acceptedQuoteValue: number;
+    periodInvoicedValue: number; periodPaidValue: number; overdueInvoices: number;
   };
   quotes: { statuses: Record<string, number>; conversionRate: number };
   invoices: { statuses: Record<string, number> };
   galleries: { statuses: Record<string, number> };
-  attention: {
-    overdueInvoices: number;
-    pendingQuotes: number;
-    activeProjects: number;
-    activeGalleries: number;
-  };
-  activity: Array<{
-    id: string;
-    type: 'client' | 'project' | 'quote' | 'invoice' | 'gallery';
-    title: string;
-    description: string;
-    date: string;
-  }>;
+  attention: { overdueInvoices: number; pendingQuotes: number; activeProjects: number; activeGalleries: number };
+  activity: Array<{ id: string; type: 'client' | 'project' | 'quote' | 'invoice' | 'gallery'; title: string; description: string; date: string }>;
 };
 
 const ranges: Array<{ value: Range; label: string }> = [
@@ -83,120 +49,81 @@ const ranges: Array<{ value: Range; label: string }> = [
   { value: '30d', label: '30 days' },
   { value: '90d', label: '90 days' },
   { value: '12m', label: '12 months' },
-  { value: 'all', label: 'All time' },
+  { value: 'all', label: 'all time' },
 ];
 
-function number(value: number) {
-  return new Intl.NumberFormat('en-US').format(value);
+const tourSteps = [
+  { title: 'Your command center', body: 'This is your business overview. The cards show clients, projects, quotes, invoices and the money moving through your studio.', target: 'tour-overview' },
+  { title: 'Clients', body: 'Keep every client, contact and relationship in one place. This is the first thing we recommend setting up.', target: 'tour-clients' },
+  { title: 'Quotes', body: 'Build production quotes, select equipment and services, and track what has been sent or accepted.', target: 'tour-quotes' },
+  { title: 'Invoices', body: 'Turn accepted work into invoices and keep track of what is paid or overdue.', target: 'tour-invoices' },
+  { title: 'Projects & galleries', body: 'Manage production projects and eventually deliver client work through your private galleries.', target: 'tour-projects' },
+] as const;
+
+function number(value: number) { return new Intl.NumberFormat('en-US').format(value); }
+function date(value: string) { return new Intl.DateTimeFormat('en-KE', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date(value)); }
+
+function Metric({ label, value, detail, href, icon, target }: { label: string; value: string; detail: string; href: string; icon: React.ReactNode; target?: string }) {
+  return <Link data-tour={target} href={href} className="group rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-950">
+    <div className="flex items-start justify-between"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">{icon}</span><ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-purple-500" /></div>
+    <p className="mt-5 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">{label}</p>
+    <p className="mt-2 text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">{value}</p>
+    <p className="mt-1 text-xs text-slate-500 dark:text-zinc-500">{detail}</p>
+  </Link>;
 }
 
-function date(value: string) {
-  return new Intl.DateTimeFormat('en-KE', {
-    day: 'numeric',
-    month: 'short',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value));
+function QuickAction({ href, label, detail, icon, target }: { href: string; label: string; detail: string; icon: React.ReactNode; target?: string }) {
+  return <Link data-tour={target} href={href} className="group flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950">
+    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">{icon}</span>
+    <span className="min-w-0 flex-1"><span className="block text-sm font-medium text-slate-800 dark:text-zinc-100">{label}</span><span className="block truncate text-xs text-slate-500 dark:text-zinc-500">{detail}</span></span>
+    <ArrowUpRight className="h-4 w-4 text-slate-300 transition group-hover:text-purple-500" />
+  </Link>;
 }
 
-function MetricCard({
-  label,
-  value,
-  detail,
-  href,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Card className="transition-all hover:border-ring/50 hover:shadow-md">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {label}
-        </CardTitle>
-        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-secondary text-secondary-foreground">
-          <Icon className="h-4 w-4" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold tracking-tight text-foreground tabular-nums">
-          {value}
-        </div>
-        <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
-        <Button asChild variant="ghost" size="sm" className="mt-3 -ml-2 h-7 px-2 text-xs font-normal text-muted-foreground hover:text-foreground">
-          <Link href={href}>
-            <span>View all</span>
-            <ChevronRight className="ml-1 h-3 w-3" />
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
-  );
+function Panel({ title, eyebrow, action, children }: { title: string; eyebrow?: string; action?: React.ReactNode; children: React.ReactNode }) {
+  return <section className="ui-panel"><div className="ui-panel-header"><div>{eyebrow && <p className="ui-eyebrow">{eyebrow}</p>}<h2 className="ui-card-title mt-1">{title}</h2></div>{action}</div>{children}</section>;
 }
 
-function QuickActionButton({
-  href,
-  label,
-  detail,
-  icon: Icon,
-}: {
-  href: string;
-  label: string;
-  detail: string;
-  icon: React.ComponentType<{ className?: string }>;
-}) {
-  return (
-    <Link href={href} className="group block">
-      <Card className="transition-all hover:border-primary hover:shadow-sm">
-        <CardContent className="flex items-center gap-3.5 p-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-            <Icon className="h-5 w-5" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
-              {label}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">{detail}</p>
-          </div>
-          <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-primary" />
-        </CardContent>
-      </Card>
-    </Link>
-  );
+function ActivityRow({ item }: { item: DashboardStats['activity'][number] }) {
+  const icons = { client: <Users className="h-4 w-4" />, project: <FolderKanban className="h-4 w-4" />, quote: <FileText className="h-4 w-4" />, invoice: <Receipt className="h-4 w-4" />, gallery: <GalleryHorizontalEnd className="h-4 w-4" /> };
+  return <div className="flex items-center gap-3 px-5 py-3.5"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-zinc-900 dark:text-zinc-300">{icons[item.type]}</span><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium">{item.title}</p><p className="truncate text-xs text-slate-500 dark:text-zinc-500">{item.description}</p></div><time className="shrink-0 text-[10px] font-sans text-slate-400">{date(item.date)}</time></div>;
 }
 
-function ActivityRow({
-  item,
-}: {
-  item: DashboardStats['activity'][number];
-}) {
-  const icons = {
-    client: Users,
-    project: FolderKanban,
-    quote: FileText,
-    invoice: Receipt,
-    gallery: GalleryHorizontalEnd,
-  };
-  const Icon = icons[item.type] || FileText;
+function Tour({ step, onNext, onSkip }: { step: number; onNext: () => void; onSkip: () => void }) {
+  const current = tourSteps[step];
+  useEffect(() => {
+    document.querySelector(`[data-tour="${current.target}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [current.target]);
 
-  return (
-    <div className="flex items-center gap-3.5 py-3 transition-colors hover:bg-muted/30 px-3 rounded-lg">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-secondary text-secondary-foreground">
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-foreground">{item.title}</p>
-        <p className="truncate text-xs text-muted-foreground">{item.description}</p>
-      </div>
-      <time className="shrink-0 text-xs text-muted-foreground tabular-nums">
-        {date(item.date)}
-      </time>
+  return <div className="fixed inset-0 z-[80] bg-black/45 p-4 backdrop-blur-[1px]">
+    <div className="absolute bottom-5 left-1/2 w-[min(440px,calc(100vw-32px))] -translate-x-1/2 rounded-2xl border border-white/20 bg-white p-5 shadow-2xl dark:border-zinc-700 dark:bg-zinc-950">
+      <div className="flex items-start gap-3"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white"><Sparkles className="h-4 w-4" /></span><div className="min-w-0 flex-1"><div className="flex items-center justify-between gap-3"><p className="text-[9px] font-sans uppercase tracking-[0.2em] text-purple-600 dark:text-purple-400">Platform tour · {step + 1}/{tourSteps.length}</p><button type="button" onClick={onSkip} className="text-slate-400 hover:text-slate-700 dark:hover:text-white"><X className="h-4 w-4" /></button></div><h3 className="mt-1 text-base font-semibold">{current.title}</h3><p className="mt-2 text-sm leading-6 text-slate-500 dark:text-zinc-400">{current.body}</p></div></div>
+      <div className="mt-4 flex items-center justify-between"><button type="button" onClick={onSkip} className="text-xs font-medium text-slate-400 hover:text-slate-700 dark:hover:text-white">Skip tour</button><button type="button" onClick={onNext} className="rounded-xl bg-purple-600 px-4 py-2.5 text-xs font-semibold text-white">{step === tourSteps.length - 1 ? 'Finish tour' : 'Next'}</button></div>
     </div>
-  );
+  </div>;
+}
+
+function FirstClientModal({ onClose, onCreated }: { onClose: () => void; onCreated: (client: { name: string }) => void }) {
+  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '' });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  async function submit(event: React.FormEvent) {
+    event.preventDefault();
+    if (!form.name.trim()) { setError('Client name is required.'); return; }
+    setSaving(true); setError('');
+    try {
+      const response = await fetch('/api/clients', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || 'Unable to create client.');
+      localStorage.setItem('creative-os-first-client-prompted', '1');
+      onCreated({ name: data.name || form.name.trim() });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to create client.');
+    } finally { setSaving(false); }
+  }
+
+  return <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm"><div role="dialog" aria-modal="true" className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 sm:p-8"><div className="flex items-start justify-between gap-4"><div><span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300"><Users className="h-5 w-5" /></span><h2 className="mt-4 text-2xl font-semibold tracking-tight">Add your first client</h2><p className="mt-2 text-sm leading-6 text-slate-500 dark:text-zinc-400">Let&apos;s get your workspace started. You can add the rest of the details later.</p></div><button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-900"><X className="h-5 w-5" /></button></div><form onSubmit={submit} className="mt-6 space-y-4"><label className="block text-sm font-medium">Client name<input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} autoFocus placeholder="Jane Doe" className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-900" /></label><div className="grid gap-4 sm:grid-cols-2"><label className="text-sm font-medium">Company<input value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} placeholder="Company name" className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-900" /></label><label className="text-sm font-medium">Phone<input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="+254..." className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-900" /></label></div><label className="block text-sm font-medium">Email<input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="client@example.com" className="mt-2 h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-purple-500 dark:border-zinc-800 dark:bg-zinc-900" /></label>{error && <p className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">{error}</p>}<div className="flex justify-end gap-2 pt-2"><button type="button" onClick={onClose} className="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-500">Not now</button><button type="submit" disabled={saving} className="rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60">{saving ? 'Adding...' : 'Add client'}</button></div></form></div></div>;
 }
 
 export default function CreativeOSDashboardPage() {
@@ -206,6 +133,25 @@ export default function CreativeOSDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [retryCount, setRetryCount] = useState(0);
+  const [tourStep, setTourStep] = useState<number | null>(null);
+  const [showFirstClient, setShowFirstClient] = useState(false);
+
+  useEffect(() => {
+    const tourSeen = localStorage.getItem('creative-os-tour-seen') === '1';
+    if (!tourSeen) {
+      const showTour = window.setTimeout(() => setTourStep(0), 0);
+      return () => window.clearTimeout(showTour);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!stats || tourStep !== null) return;
+    const prompted = localStorage.getItem('creative-os-first-client-prompted') === '1';
+    if (stats.overview.clients === 0 && !prompted) {
+      const showPrompt = window.setTimeout(() => setShowFirstClient(true), 0);
+      return () => window.clearTimeout(showPrompt);
+    }
+  }, [stats, tourStep]);
 
   useEffect(() => {
     let cancelled = false;
@@ -225,15 +171,14 @@ export default function CreativeOSDashboardPage() {
         const data = await response.json().catch(() => null);
 
         if (!response.ok) {
-          const message =
-            typeof data?.error === 'string'
-              ? data.error
-              : `Dashboard request failed (HTTP ${response.status}).`;
+          const message = typeof data?.error === 'string'
+            ? data.error
+            : `Dashboard request failed (HTTP ${response.status}).`;
           throw new Error(message);
         }
 
         if (!data || typeof data !== 'object' || !data.overview || !data.finance) {
-          throw new Error('The dashboard API returned an invalid response.');
+          throw new Error('The dashboard API returned an invalid response. Check the terminal for API errors.');
         }
 
         if (!cancelled) setStats(data as DashboardStats);
@@ -241,7 +186,7 @@ export default function CreativeOSDashboardPage() {
         if (cancelled) return;
 
         if (err instanceof DOMException && err.name === 'AbortError') {
-          setError('The dashboard request timed out. Please try again.');
+          setError('The dashboard request timed out after 15 seconds. Check the terminal for database or authentication errors, then retry.');
         } else {
           setError(err instanceof Error ? err.message : 'Failed to load dashboard data.');
         }
@@ -260,379 +205,77 @@ export default function CreativeOSDashboardPage() {
     };
   }, [range, retryCount]);
 
-  if (loading && !stats) {
+  if (!stats) {
     return (
-      <div className="p-6 md:p-8 space-y-8 max-w-7xl mx-auto">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-4 w-full max-w-96" />
-        </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-        </div>
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <Skeleton className="h-72 rounded-xl" />
-          <Skeleton className="h-72 rounded-xl" />
-        </div>
-      </div>
+      <main className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6 dark:bg-[#09090b]">
+        <section className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+          {loading ? (
+            <>
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-purple-600 dark:border-zinc-700 dark:border-t-purple-400" />
+              <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Loading Creative OS...</h1>
+              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Fetching your dashboard data.</p>
+            </>
+          ) : (
+            <>
+              <span className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300">
+                <AlertCircle className="h-5 w-5" />
+              </span>
+              <h1 className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">Dashboard could not load</h1>
+              <p role="alert" className="mt-2 break-words text-sm leading-6 text-slate-600 dark:text-zinc-400">
+                {error || 'The dashboard request failed without returning an error message.'}
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRetryCount((count) => count + 1)}
+                  className="rounded-xl bg-purple-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-purple-700"
+                >
+                  Try again
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.reload()}
+                  className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                >
+                  Reload page
+                </button>
+              </div>
+            </>
+          )}
+        </section>
+      </main>
     );
   }
 
-  return (
-    <div className="min-w-0 overflow-x-hidden p-4 md:p-8 max-w-7xl mx-auto space-y-8">
-      {/* Top Welcome Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b pb-6">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-              Welcome back, {activeCreator?.name || 'Creator'}
-            </h1>
-            <Badge variant="outline" className="hidden sm:inline-flex text-xs">
-              Studio Active
-            </Badge>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Complete overview of clients, quotations, active productions, and invoices.
-          </p>
-        </div>
+  return <main className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#09090b] dark:text-zinc-100">
+    <header className="border-b border-slate-200 dark:border-zinc-800"><div className="mx-auto max-w-7xl px-6 py-8 lg:py-10"><div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between"><div><p className="mb-3 text-[10px] font-sans font-semibold uppercase tracking-[0.3em] text-purple-600 dark:text-purple-400">Creative OS Command Center</p><div className="flex items-center gap-4">{activeCreator?.profile?.avatarUrl && <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-purple-500/30"><Image src={activeCreator.profile.avatarUrl} alt={activeCreator.name} fill unoptimized className="object-cover" /></div>}<div><h1 className="text-3xl font-light tracking-tight md:text-4xl">Welcome back, {activeCreator?.name || 'Creator'}.</h1><p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">Run your creative business from one place.{activeCreator?.email ? ` · ${activeCreator.email}` : ''}</p></div></div></div><div className="flex flex-wrap items-center gap-2">{ranges.map((option) => <button key={option.value} type="button" onClick={() => setRange(option.value)} className={`rounded-full px-3.5 py-2 text-[10px] font-sans uppercase tracking-widest transition ${range === option.value ? 'bg-purple-600 text-white' : 'border border-slate-200 bg-white text-slate-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400'}`}>{option.label}</button>)}</div></div></div></header>
 
-        {/* Date Range Selector */}
-        <div className="flex min-w-0 flex-wrap items-center gap-1.5 p-1 pl-0 bg-muted rounded-lg border">
-          {ranges.map((option) => (
-            <Button
-              key={option.value}
-              variant={range === option.value ? 'secondary' : 'ghost'}
-              size="sm"
-              onClick={() => setRange(option.value)}
-              className={`h-7 px-2.5 text-xs font-medium rounded-md ${
-                range === option.value ? 'bg-background shadow-xs font-semibold' : 'text-muted-foreground'
-              }`}
-            >
-              {option.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl px-6 py-8">
+      {error && <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300"><AlertCircle className="h-4 w-4" />{error}</div>}
+      <section data-tour="tour-overview" className="mb-8"><div className="mb-4"><p className="text-[9px] font-sans uppercase tracking-[0.22em] text-purple-600 dark:text-purple-400">Overview</p><h2 className="mt-1 text-xl font-semibold">Your business at a glance</h2></div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric label="Clients" value={number(stats?.overview.clients || 0)} detail={`+${number(stats?.overview.newClients || 0)} in selected period`} href="/admin/clients" icon={<Users className="h-4 w-4" />} target="tour-clients" />
+        <Metric label="Galleries" value={number(stats?.overview.galleries || 0)} detail={`${number(stats?.attention.activeGalleries || 0)} active`} href="/admin/galleries" icon={<GalleryHorizontalEnd className="h-4 w-4" />} target="tour-projects" />
+        <Metric label="Quotes" value={number(stats?.overview.quotes || 0)} detail={`${number(stats?.quotes.conversionRate || 0)}% conversion`} href="/admin/quotes/new" icon={<FileText className="h-4 w-4" />} target="tour-quotes" />
+        <Metric label="Invoices" value={number(stats?.overview.invoices || 0)} detail={`${stats?.finance.periodPaidValue ? Math.round((stats.finance.periodPaidValue / stats.finance.periodInvoicedValue) * 100) : 0}% paid`} href="/admin/invoices" icon={<Receipt className="h-4 w-4" />} target="tour-invoices" />
+      </div></section>
 
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error loading dashboard</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
-            <span>{error}</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setRetryCount((c) => c + 1)}
-              className="ml-4 h-7 text-xs"
-            >
-              Retry
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
+      <section className="mb-8"><div className="mb-4"><p className="text-[9px] font-sans uppercase tracking-[0.22em] text-purple-600 dark:text-purple-400">Start here</p><h2 className="mt-1 text-xl font-semibold">Quick actions</h2></div><div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"><QuickAction href="/admin/clients" label="Add / Manage Client" detail="Build your CRM" icon={<Users className="h-4 w-4" />} target="tour-clients" /><QuickAction href="/admin/quotes/new" label="Create Quote" detail="Price a new production" icon={<FileText className="h-4 w-4" />} target="tour-quotes" /><QuickAction href="/admin/invoices" label="Manage Invoices" detail="Track billing and payments" icon={<Receipt className="h-4 w-4" />} target="tour-invoices" />      <QuickAction href="/admin/galleries" label="Open Galleries" detail="Manage client deliveries" icon={<GalleryHorizontalEnd className="h-4 w-4" />} target="tour-projects" /></div></section>
 
-      {/* METRICS GRID */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold tracking-tight text-foreground">
-            Key Performance Metrics
-          </h2>
-          <span className="text-xs text-muted-foreground">Updated in real-time</span>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <MetricCard
-            label="Clients"
-            value={number(stats?.overview.clients || 0)}
-            detail={`+${number(stats?.overview.newClients || 0)} in period`}
-            href="/admin/clients"
-            icon={Users}
-          />
-          <MetricCard
-            label="Active Galleries"
-            value={number(stats?.overview.galleries || 0)}
-            detail={`${number(stats?.attention.activeGalleries || 0)} delivering proofs`}
-            href="/admin/galleries"
-            icon={GalleryHorizontalEnd}
-          />
-          <MetricCard
-            label="Quotations"
-            value={number(stats?.overview.quotes || 0)}
-            detail={`${number(stats?.quotes.conversionRate || 0)}% conversion rate`}
-            href="/admin/quotes"
-            icon={FileText}
-          />
-          <MetricCard
-            label="Invoices"
-            value={number(stats?.overview.invoices || 0)}
-            detail={`${stats?.finance.periodPaidValue ? Math.round((stats.finance.periodPaidValue / (stats.finance.periodInvoicedValue || 1)) * 100) : 0}% collected`}
-            href="/admin/invoices"
-            icon={Receipt}
-          />
-        </div>
-      </section>
-
-      {/* QUICK ACTIONS */}
-      <section className="space-y-4">
-        <h2 className="text-base font-semibold tracking-tight text-foreground">
-          Quick Workflows
-        </h2>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <QuickActionButton
-            href="/admin/clients"
-            label="Client Directory"
-            detail="Manage CRM & contacts"
-            icon={Users}
-          />
-          <QuickActionButton
-            href="/admin/quotes/new"
-            label="Create Quote"
-            detail="Estimate equipment & crew"
-            icon={FileText}
-          />
-          <QuickActionButton
-            href="/admin/invoices/new"
-            label="Issue Invoice"
-            detail="eTIMS & payment tracking"
-            icon={Receipt}
-          />
-          <QuickActionButton
-            href="/admin/galleries"
-            label="Client Galleries"
-            detail="Deliver proofs with PIN"
-            icon={GalleryHorizontalEnd}
-          />
-        </div>
-      </section>
-
-      {/* FINANCIAL & PIPELINE TWO-COLUMN */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Money Flow Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">
-                Financial Movement
-              </CardTitle>
-              <Badge variant="secondary" className="gap-1 text-xs">
-                <TrendingUp className="h-3 w-3 text-primary" />
-                Revenue Pipeline
-              </Badge>
-            </div>
-            <CardDescription>
-              Quoted proposals vs issued invoices and received payments
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {[
-              ['Quoted', stats?.finance.periodQuotedValue || 0],
-              ['Invoiced', stats?.finance.periodInvoicedValue || 0],
-              ['Collected', stats?.finance.periodPaidValue || 0],
-            ].map(([label, value]) => {
-              const max = Math.max(
-                stats?.finance.periodQuotedValue || 0,
-                stats?.finance.periodInvoicedValue || 0,
-                stats?.finance.periodPaidValue || 0,
-                1
-              );
-              const percentage = Math.round(((value as number) / max) * 100);
-
-              return (
-                <div key={label as string} className="space-y-1.5">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium text-muted-foreground">{label}</span>
-                    <span className="font-semibold text-foreground">
-                      {formatCurrency(value as number)}
-                    </span>
-                  </div>
-                  <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-500"
-                      style={{ width: `${Math.max(percentage > 0 ? 4 : 0, percentage)}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="rounded-lg border bg-muted/30 p-3.5">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                  Accepted Quotes
-                </p>
-                <p className="mt-1 text-lg font-bold text-foreground">
-                  {formatCurrency(stats?.finance.acceptedQuoteValue || 0)}
-                </p>
-              </div>
-              <div className="rounded-lg border bg-muted/30 p-3.5">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
-                  Overdue Invoices
-                </p>
-                <p className="mt-1 text-lg font-bold text-destructive">
-                  {number(stats?.finance.overdueInvoices || 0)}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quote Pipeline Status */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">
-                Quotation Pipeline
-              </CardTitle>
-              <Badge variant="outline" className="text-xs">
-                {number(stats?.overview.quotes || 0)} Total
-              </Badge>
-            </div>
-            <CardDescription>
-              Conversion flow of quotes through creation to invoiced
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3.5">
-            {[
-              ['Draft', 'draft'],
-              ['Sent', 'sent'],
-              ['Accepted', 'accepted'],
-              ['Rejected', 'rejected'],
-              ['Invoiced', 'invoiced'],
-            ].map(([label, key]) => {
-              const count = stats?.quotes.statuses[key] || 0;
-              const total = Math.max(stats?.overview.quotes || 0, 1);
-              const percentage = Math.round((count / total) * 100);
-
-              return (
-                <div key={key} className="space-y-1">
-                  <div className="flex justify-between text-xs">
-                    <span className="font-medium text-muted-foreground">{label}</span>
-                    <span className="font-semibold text-foreground">
-                      {number(count)}{' '}
-                      <span className="text-[11px] text-muted-foreground font-normal">
-                        ({percentage}%)
-                      </span>
-                    </span>
-                  </div>
-                  <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all duration-500"
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
-        </Card>
+        <Panel eyebrow="Commercial movement" title="Money flow"><div className="p-5 space-y-5">{[["Quoted", stats?.finance.periodQuotedValue || 0], ["Invoiced", stats?.finance.periodInvoicedValue || 0], ["Paid", stats?.finance.periodPaidValue || 0]].map(([label, value]) => { const max = Math.max(stats?.finance.periodQuotedValue || 0, stats?.finance.periodInvoicedValue || 0, stats?.finance.periodPaidValue || 0, 1); return <div key={label as string}><div className="mb-1.5 flex justify-between text-xs"><span className="text-slate-500">{label}</span><span className="font-semibold">{formatCurrency(value as number)}</span></div><div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-900"><div className="h-full rounded-full bg-purple-600 transition-all" style={{ width: `${Math.max((value as number) > 0 ? 4 : 0, Math.round(((value as number) / max) * 100))}%` }} /></div></div>; })}<div className="grid grid-cols-2 gap-3"><div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-zinc-800 dark:bg-zinc-900"><p className="text-[9px] font-sans uppercase tracking-wider text-slate-400">Accepted quotes</p><p className="mt-1 text-lg font-semibold">{formatCurrency(stats?.finance.acceptedQuoteValue || 0)}</p></div><div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-zinc-800 dark:bg-zinc-900"><p className="text-[9px] font-sans uppercase tracking-wider text-slate-400">Overdue invoices</p><p className="mt-1 text-lg font-semibold">{number(stats?.finance.overdueInvoices || 0)}</p></div></div></div></Panel>
+        <Panel eyebrow="Quote pipeline" title="Quote status"><div className="p-5 space-y-3">{[['Draft', 'draft'], ['Sent', 'sent'], ['Accepted', 'accepted'], ['Rejected', 'rejected'], ['Invoiced', 'invoiced']].map(([label, key]) => { const value = stats?.quotes.statuses[key] || 0; const total = Math.max(stats?.overview.quotes || 0, 1); return <div key={key}><div className="mb-1.5 flex justify-between text-xs"><span className="text-slate-500">{label}</span><span className="font-semibold">{number(value)}</span></div><div className="h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-900"><div className="h-full rounded-full bg-purple-600" style={{ width: `${Math.round((value / total) * 100)}%` }} /></div></div>; })}</div></Panel>
       </div>
 
-      {/* RECENT ACTIVITY & ATTENTION REQUIRED */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Recent Activity Feed */}
-        <Card className="lg:col-span-7">
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <div>
-              <CardTitle className="text-base font-semibold">
-                Recent Studio Activity
-              </CardTitle>
-              <CardDescription>
-                Real-time chronological events across your workspace
-              </CardDescription>
-            </div>
-            <Button asChild variant="ghost" size="sm" className="h-8 text-xs">
-              <Link href="/admin">Refresh</Link>
-            </Button>
-          </CardHeader>
-          <CardContent className="divide-y divide-border">
-            {stats?.activity && stats.activity.length > 0 ? (
-              stats.activity.slice(0, 7).map((item) => (
-                <ActivityRow key={item.id} item={item} />
-              ))
-            ) : (
-              <div className="py-12 text-center text-sm text-muted-foreground">
-                <Clock3 className="mx-auto mb-2 h-5 w-5 opacity-40" />
-                No recent activity recorded yet.
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Action Items / Attention List */}
-        <Card className="lg:col-span-5">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">
-              Action Items
-            </CardTitle>
-            <CardDescription>
-              Tasks and status milestones requiring creator review
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="divide-y divide-border p-0">
-            {[
-              {
-                label: 'Overdue Invoices',
-                count: stats?.attention.overdueInvoices || 0,
-                href: '/admin/invoices',
-                icon: Wallet,
-                badgeVariant: 'destructive' as const,
-              },
-              {
-                label: 'Pending Quotes',
-                count: stats?.attention.pendingQuotes || 0,
-                href: '/admin/quotes',
-                icon: FileText,
-                badgeVariant: 'secondary' as const,
-              },
-              {
-                label: 'Active Productions',
-                count: stats?.attention.activeProjects || 0,
-                href: '/admin/projects',
-                icon: FolderKanban,
-                badgeVariant: 'secondary' as const,
-              },
-              {
-                label: 'Client Proof Galleries',
-                count: stats?.attention.activeGalleries || 0,
-                href: '/admin/galleries',
-                icon: GalleryHorizontalEnd,
-                badgeVariant: 'secondary' as const,
-              },
-            ].map((actionItem) => {
-              const Icon = actionItem.icon;
-              return (
-                <Link
-                  key={actionItem.label}
-                  href={actionItem.href}
-                  className="flex items-center justify-between p-4 transition-colors hover:bg-muted/40"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary text-secondary-foreground">
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-foreground">
-                        {actionItem.label}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Review in workspace
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant={actionItem.badgeVariant} className="font-mono">
-                    {number(actionItem.count)}
-                  </Badge>
-                </Link>
-              );
-            })}
-          </CardContent>
-        </Card>
-      </div>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]"><Panel eyebrow="Latest" title="Recent activity" action={<Link href="/admin" className="text-[10px] font-medium text-purple-600">Refresh</Link>}><div className="divide-y divide-slate-100 dark:divide-zinc-900">{loading ? <div className="px-5 py-10 text-center text-xs text-slate-400"><Clock3 className="mx-auto mb-2 h-4 w-4 animate-pulse" />Loading activity...</div> : stats?.activity.length ? stats.activity.slice(0, 8).map((item) => <ActivityRow key={item.id} item={item} />) : <div className="px-5 py-10 text-center text-sm text-slate-400">No activity yet.</div>}</div></Panel>
+        <Panel eyebrow="Attention" title="Things to review"><div className="divide-y divide-slate-100 dark:divide-zinc-900">{[
+          ['Overdue invoices', stats?.attention.overdueInvoices || 0, '/admin/invoices', <Wallet key="overdue" className="h-4 w-4" />],
+          ['Pending quotes', stats?.attention.pendingQuotes || 0, '/admin/quotes/new', <FileText key="quotes" className="h-4 w-4" />],
+          ['Active projects', stats?.attention.activeProjects || 0, '/admin/galleries', <FolderKanban key="projects" className="h-4 w-4" />],
+          ['Active galleries', stats?.attention.activeGalleries || 0, '/admin/galleries', <GalleryHorizontalEnd key="galleries" className="h-4 w-4" />],
+        ].map(([label, value, href, icon]) => <Link key={label as string} href={href as string} className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-zinc-900/50"><div className="flex items-center gap-3"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300">{icon}</span><div><span className="block text-sm font-medium">{label}</span><span className="block text-xs text-slate-500">Review in workspace</span></div></div><span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/30 dark:text-amber-300">{number(value as number)}</span></Link>)}</div></Panel></div>
     </div>
-  );
+
+    {tourStep !== null && <Tour step={tourStep} onNext={() => { setTourStep((current) => (current ?? 0) + 1); if (tourStep >= tourSteps.length - 1) { localStorage.setItem('creative-os-tour-seen', '1'); setTourStep(null); } }} onSkip={() => { localStorage.setItem('creative-os-tour-seen', '1'); setTourStep(null); if (stats?.overview.clients === 0 && localStorage.getItem('creative-os-first-client-prompted') !== '1') setShowFirstClient(true); }} />}
+    {showFirstClient && <FirstClientModal onClose={() => { localStorage.setItem('creative-os-first-client-prompted', '1'); setShowFirstClient(false); }} onCreated={() => { setShowFirstClient(false); setRange((current) => current); }} />}
+  </main>;
 }

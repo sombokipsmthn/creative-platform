@@ -5,11 +5,20 @@ import Link from 'next/link';
 import WatermarkPreview from '@/components/WatermarkPreview';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 type SettingsTab = 'branding' | 'watermark' | 'presets' | 'templates' | 'preferences' | 'integrations';
 
 export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('branding');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   // 1. Branding State
   const [domainSlug, setDomainSlug] = useState('kipsmthn.platform.com');
@@ -71,7 +80,8 @@ export default function AdminSettingsPage() {
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Settings successfully saved for tab: ${activeTab.toUpperCase()}`);
+    setSaveMessage('Workspace settings saved.');
+    window.setTimeout(() => setSaveMessage(null), 3000);
   };
 
   const tabs: { id: SettingsTab; label: string }[] = [
@@ -93,7 +103,9 @@ export default function AdminSettingsPage() {
           primaryAction={
             <Button
               variant="primary"
+              type="button"
               className="w-full"
+              onClick={() => (document.getElementById('settings-form') as HTMLFormElement | null)?.requestSubmit()}
             >
               Save Settings Changes
             </Button>
@@ -107,7 +119,8 @@ export default function AdminSettingsPage() {
         />
 
         {/* TAB CONTENTS */}
-        <form onSubmit={handleSaveSettings} className="space-y-8">
+        <form id="settings-form" onSubmit={handleSaveSettings} className="space-y-8">
+          {saveMessage && <p role="status" className="ui-meta">{saveMessage}</p>}
 
           {/* TAB 1: BRANDING */}
           {activeTab === 'branding' && (
@@ -120,21 +133,19 @@ export default function AdminSettingsPage() {
                 <div className="ui-card-content space-y-4">
                   <div className="space-y-1">
                     <label className="ui-label">Default Site Address</label>
-                    <input
+                    <Input
                       type="text"
                       value={domainSlug}
                       onChange={(e) => setDomainSlug(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="ui-label">Custom Domain</label>
-                    <input
+                    <Input
                       type="text"
                       value={customDomain}
                       onChange={(e) => setCustomDomain(e.target.value)}
-                      className="ui-input"
                     />
                     <p className="ui-caption">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
                   </div>
@@ -231,11 +242,10 @@ export default function AdminSettingsPage() {
                 <div className="ui-card-content space-y-4">
                   <div className="space-y-1">
                     <label className="ui-label">Watermark Text</label>
-                    <input
+                    <Input
                       type="text"
                       value={watermarkText}
                       onChange={(e) => setWatermarkText(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
 
@@ -296,31 +306,28 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-1">
                     <label className="ui-label">Default Photo Selection Limit</label>
-                    <input
+                    <Input
                       type="number"
                       value={defaultSelectionLimit}
                       onChange={(e) => setDefaultSelectionLimit(parseInt(e.target.value, 10))}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="ui-label">Default Expiration (Days)</label>
-                    <input
+                    <Input
                       type="number"
                       value={defaultExpiryDays}
                       onChange={(e) => setDefaultExpiryDays(parseInt(e.target.value, 10))}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="ui-label">Default Master PIN</label>
-                    <input
+                    <Input
                       type="text"
                       value={defaultPin}
                       onChange={(e) => setDefaultPin(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
                 </div>
@@ -338,21 +345,19 @@ export default function AdminSettingsPage() {
               <div className="ui-card-content space-y-4">
                 <div className="space-y-1">
                   <label className="ui-label">Email Subject</label>
-                  <input
+                  <Input
                     type="text"
                     value={invitationSubject}
                     onChange={(e) => setInvitationSubject(e.target.value)}
-                    className="ui-input"
                   />
                 </div>
 
                 <div className="space-y-1">
                   <label className="ui-label">Email Message Body</label>
-                  <textarea
+                  <Textarea
                     rows={6}
                     value={invitationBody}
                     onChange={(e) => setInvitationBody(e.target.value)}
-                    className="ui-input"
                   />
                 </div>
               </div>
@@ -370,38 +375,39 @@ export default function AdminSettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
                     <label className="ui-label">Creator KRA PIN Number</label>
-                    <input
+                    <Input
                       type="text"
                       value={kraPin}
                       onChange={(e) => setKraPin(e.target.value)}
-                      className="ui-input"
                     />
                   </div>
 
                   <div className="space-y-1">
                     <label className="ui-label">Default Currency</label>
-                    <select
-                      value={defaultCurrency}
-                      onChange={(e) => setDefaultCurrency(e.target.value)}
-                      className="ui-select"
-                    >
-                      <option value="KES">KES — Kenyan Shilling (KSh)</option>
-                      <option value="USD">USD — US Dollar ($)</option>
-                      <option value="EUR">EUR — Euro (€)</option>
-                    </select>
+                    <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="KES">KES — Kenyan Shilling (KSh)</SelectItem>
+                        <SelectItem value="USD">USD — US Dollar ($)</SelectItem>
+                        <SelectItem value="EUR">EUR — Euro (€)</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-1">
                     <label className="ui-label">Withholding Tax (WHT) Rate</label>
-                    <select
-                      value={defaultWhtRate}
-                      onChange={(e) => setDefaultWhtRate(e.target.value)}
-                      className="ui-select"
-                    >
-                      <option value="5%">5% — Resident Professional Services</option>
-                      <option value="20%">20% — Non-Resident Fee</option>
-                      <option value="0%">0% — Tax Exempt</option>
-                    </select>
+                    <Select value={defaultWhtRate} onValueChange={setDefaultWhtRate}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="5%">5% — Resident Professional Services</SelectItem>
+                        <SelectItem value="20%">20% — Non-Resident Fee</SelectItem>
+                        <SelectItem value="0%">0% — Tax Exempt</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               </div>

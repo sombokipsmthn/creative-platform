@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Activity,
-  ArrowLeft,
+  Archive,
   CheckCircle2,
   Clock,
   Copy,
@@ -308,10 +308,10 @@ export default function AdminGalleryManagerPage() {
           <div className="space-y-1">
             <Link
               href="/admin"
-  className="ui-meta tracking-widest text-slate-400 hover:text-[var(--color-accent)] transition-colors flex items-center gap-2"
-  >
-  <ArrowLeft className="w-3 h-3" />
-  <span>Dashboard</span>
+              className="ui-meta uppercase tracking-widest text-slate-400 hover:text-[var(--color-accent)] transition-colors flex items-center gap-2"
+            >
+              <Archive className="w-3 h-3" />
+              <span>Back to Studio</span>
             </Link>
 
             <div className="flex items-center gap-4">

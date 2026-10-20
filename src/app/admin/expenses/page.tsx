@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Loader2 } from 'lucide-react';
 
 interface ExpenseReceipt {
@@ -115,9 +114,20 @@ export default function AdminExpensesPage() {
   const estimatedTaxShield = totalClaimable * 0.3;
 
   return (
-    <div className="ui-page ui-page-padded">
-      <div className="ui-shell">
-        <AdminPageHeader title="KRA Receipt Scanner & Expense Claims" description="Capture receipts and track claimable production expenses." breadcrumb={{ label: 'Dashboard', href: '/admin' }} />
+    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="space-y-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
+            <div>
+              <Link href="/admin" className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline">← Back to Dashboard</Link>
+              <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-sans rounded-full font-semibold">
+              <span>30% KRA Income Tax Shield Active</span>
+            </div>
+          </div>
 
           {/* Metrics Summary Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -141,6 +151,7 @@ export default function AdminExpensesPage() {
               <p className="ui-meta">Requires eTIMS PIN confirmation</p>
             </div>
           </div>
+        </div>
 
         {/* SCANNER FORM */}
         <div className="ui-card space-y-6">
@@ -158,7 +169,7 @@ export default function AdminExpensesPage() {
               <Button
                 onClick={handleSimulateScan}
                 disabled={isScanning}
-                variant="default"
+                variant="primary"
                 className="w-full md:w-auto"
               >
                 {isScanning ? <span className="flex items-center gap-2"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Scanning Receipt...</span> : 'Scan Receipt Photo (OCR)'}
@@ -232,7 +243,7 @@ export default function AdminExpensesPage() {
               <Button
                 type="submit"
                 className="w-full py-3.5"
-                variant="default"
+                variant="primary"
               >
                 + Record Expense for KRA Tax Return
               </Button>

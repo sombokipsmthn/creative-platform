@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 export default function NewContractPage() {
   const router = useRouter();
@@ -14,6 +13,11 @@ export default function NewContractPage() {
   }, [router]);
 
   return (
-    <div className="ui-page ui-page-padded"><div className="ui-shell"><AdminPageHeader title="New contract" description="Build a contract from scratch or start with a template." breadcrumb={{ label: 'Contracts', href: '/admin/contracts' }} /><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading contract builder…</p></div></div></div>
+    <div className="ui-page min-h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+        <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
+      </div>
+    </div>
   );
 }

@@ -33,17 +33,17 @@ export function UpdateContractStatus({ token }: UpdateContractStatusProps) {
   };
 
   return (
-    <div className="">
+    <div className="space-y-4">
       {status === 'loading' && <span>Recording your response...</span>}
-      {status === 'success' && <span className="">{action === 'signed' ? 'Signed successfully.' : 'Response recorded.'}</span>}
-      {status === 'error' && <span className="">Enter your name and a valid email, then try again.</span>}
+      {status === 'success' && <span className="text-green-600">{action === 'signed' ? 'Signed successfully.' : 'Response recorded.'}</span>}
+      {status === 'error' && <span className="text-red-600">Enter your name and a valid email, then try again.</span>}
       {!['loading', 'success'].includes(status) && (
         <>
-          <div className="">
+          <div className="grid gap-3 sm:grid-cols-2">
             <input className="ui-input" placeholder="Your full name" value={signerName} onChange={(event) => setSignerName(event.target.value)} />
             <input className="ui-input" type="email" placeholder="Your email address" value={signerEmail} onChange={(event) => setSignerEmail(event.target.value)} />
           </div>
-          <label className="">
+          <label className="flex items-start gap-2 text-sm text-slate-600">
             <input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} />
             <span>I agree that typing my name records my electronic signature for this agreement.</span>
           </label>

@@ -58,10 +58,10 @@ interface GalleryData {
 }
 
 const tabs = [
-  { id: 'photos', label: 'Photos & Videos', icon: <Layers className="" /> },
-  { id: 'design', label: 'Design', icon: <Palette className="" /> },
-  { id: 'settings', label: 'Settings', icon: <Settings className="" /> },
-  { id: 'activity', label: 'Activity', icon: <Heart className="" /> },
+  { id: 'photos', label: 'Photos & Videos', icon: <Layers className="h-4 w-4" /> },
+  { id: 'design', label: 'Design', icon: <Palette className="h-4 w-4" /> },
+  { id: 'settings', label: 'Settings', icon: <Settings className="h-4 w-4" /> },
+  { id: 'activity', label: 'Activity', icon: <Heart className="h-4 w-4" /> },
 ]
 
 export default function GalleryWorkspacePage() {
@@ -214,7 +214,7 @@ export default function GalleryWorkspacePage() {
   const handleDeletePhotos = async () => {
     if (selectedPhotos.size === 0) return
     if (!confirm(`Delete ${selectedPhotos.size} photo(s)?`)) return
-
+    
     setError(null)
     try {
       await fetch(`/api/galleries/${id}/photos`, {
@@ -274,38 +274,61 @@ export default function GalleryWorkspacePage() {
 
   if (loading) {
     return (
-      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="admin-empty-state" role="status"><Loader2 aria-hidden="true" /><p>Loading gallery…</p></div></div></div>
+      <div className="min-h-screen">
+        <main className="p-4 md:p-6 lg:p-8">
+          <div className="ui-card p-6">
+            <div className="h-3 w-20 animate-pulse rounded-full bg-[var(--color-bg-soft)]" />
+            <div className="mt-4 h-7 w-64 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+            <div className="mt-2 h-4 w-96 max-w-full animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+          </div>
+        </main>
+      </div>
     )
   }
 
   if (error && !gallery) {
     return (
-      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state" role="alert"><p>{error}</p></div></div></div>
+      <div className="min-h-screen">
+        <main className="p-4 md:p-6 lg:p-8">
+          <div className="ui-card p-6">
+            <div className="ui-alert ui-alert-error">
+              <p>{error}</p>
+            </div>
+          </div>
+        </main>
+      </div>
     )
   }
 
   if (!gallery) {
     return (
-      <div className="ui-page ui-page-padded"><div className="ui-shell"><div className="ui-card admin-empty-state"><p className="ui-eyebrow">Gallery Tools</p><h1 className="ui-page-title">No gallery data available</h1></div></div></div>
+      <div className="min-h-screen">
+        <main className="p-4 md:p-6 lg:p-8">
+          <div className="ui-card p-6">
+            <p className="ui-eyebrow">Gallery Tools</p>
+            <h1 className="ui-page-title">No gallery data available</h1>
+          </div>
+        </main>
+      </div>
     )
   }
 
   return (
-    <div className="">
-      <main className="">
+    <div className="min-h-screen bg-[var(--color-bg)]">
+      <main className="p-4 md:p-6 lg:p-8">
         <div className="os-shell">
           {/* HEADER */}
-          <header className="">
-            <div className="">
+          <header className="mb-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
                 <p className="ui-eyebrow">Gallery Tools</p>
-                <h1 className="ui-page-title">{gallery.title}</h1>
-                <p className="ui-body">
+                <h1 className="ui-page-title truncate">{gallery.title}</h1>
+                <p className="ui-body text-[var(--color-text-muted)]">
                   {gallery.category || 'Client gallery'}{gallery.slug ? ` · /${gallery.slug}` : ''}
                 </p>
               </div>
 
-              <div className="">
+              <div className="flex flex-wrap items-center gap-2">
                 {gallery.slug && (
                   <a
                     href={`/portal/g/${gallery.id}`}
@@ -313,7 +336,7 @@ export default function GalleryWorkspacePage() {
                     rel="noreferrer"
                     className="gallery-btn gallery-btn-secondary"
                   >
-                    <Upload className="" />
+                    <Upload className="w-3.5 h-3.5" />
                     Preview
                   </a>
                 )}
@@ -323,7 +346,7 @@ export default function GalleryWorkspacePage() {
                   disabled={false}
                   className="gallery-btn gallery-btn-primary"
                 >
-                  <Upload className="" />
+                  <Upload className="w-4 h-4" />
                   Upload Photos
                 </button>
                 <button
@@ -332,10 +355,10 @@ export default function GalleryWorkspacePage() {
                   disabled={publishing}
                   className="gallery-btn gallery-btn-secondary"
                 >
-                  {publishing && <Loader2 className="" />}
+                  {publishing && <Loader2 className="w-4 h-4 animate-spin" />}
                   {gallery.status === 'published' ? 'Unpublish' : 'Publish'}
                 </button>
-                <span className="">
+                <span className="text-xs text-[var(--color-text-muted)]">
                   {gallery.status} · {gallery.photos?.length || 0} items
                 </span>
               </div>
@@ -351,26 +374,26 @@ export default function GalleryWorkspacePage() {
 
           {/* ERROR ALERT */}
           {error && (
-            <div className="">
-              <div className="">
-                <p className="">{error}</p>
+            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <div className="flex-1">
+                <p className="text-sm text-red-800">{error}</p>
               </div>
               <button
                 onClick={() => setError(null)}
-                className=""
+                className="text-red-600 hover:text-red-800"
               >
-                <X className="" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
 
           {/* TAB CONTENT */}
-          <div className="">
+          <div className="mt-6">
             {/* PHOTOS TAB */}
             {activeTab === 'photos' && (
-              <section className="os-reveal">
-                <PhotoUploader
-                  galleryId={id}
+              <section className="os-reveal space-y-6">
+                <PhotoUploader 
+                  galleryId={id} 
                   onUploadComplete={() => {
                     refreshGallery()
                   }}
@@ -378,26 +401,26 @@ export default function GalleryWorkspacePage() {
 
                 {/* SELECTION TOOLBAR */}
                 {selectedPhotos.size > 0 && (
-                  <div className="">
-                    <span className="">
+                  <div className="sticky top-0 z-10 bg-[var(--color-bg)] border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center justify-between gap-4">
+                    <span className="text-sm font-medium">
                       {selectedPhotos.size} item{selectedPhotos.size !== 1 ? 's' : ''} selected
                     </span>
-                    <div className="">
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => {
                           setShowCollectionPicker(true)
                           setMoveDestination(null)
                         }}
-                        className="gallery-btn gallery-btn-secondary"
+                        className="gallery-btn gallery-btn-secondary gap-2"
                       >
-                        <Copy className="" />
+                        <Copy className="w-4 h-4" />
                         Move
                       </button>
                       <button
                         onClick={() => void handleDeletePhotos()}
-                        className="gallery-btn gallery-btn-secondary"
+                        className="gallery-btn gallery-btn-secondary gap-2 text-red-600 hover:text-red-700"
                       >
-                        <Trash2 className="" />
+                        <Trash2 className="w-4 h-4" />
                         Delete
                       </button>
                       <button
@@ -412,51 +435,51 @@ export default function GalleryWorkspacePage() {
 
                 {/* MOVE DIALOG */}
                 {showCollectionPicker && selectedPhotos.size > 0 && (
-                  <div className="">
-                    <div className="">
-                      <div className="">
-                        <p className="">
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 w-full max-w-md">
+                      <div className="mb-4">
+                        <p className="font-medium">
                           Move {selectedPhotos.size} selected item{selectedPhotos.size !== 1 ? 's' : ''} to:
                         </p>
                       </div>
-                      <div className="">
-                        <label className="">
+                      <div className="space-y-3">
+                        <label className="flex items-center space-x-3">
                           <input
                             type="radio"
                             name="move-destination"
                             value="null"
                             checked={moveDestination === null}
                             onChange={() => setMoveDestination(null)}
-                            className=""
+                            className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border-subtle)]"
                           />
                           <span>All Photos (no collection)</span>
                         </label>
                         {gallery.collections?.map((coll) => (
-                          <label key={coll.id} className="">
+                          <label key={coll.id} className="flex items-center space-x-3">
                             <input
                               type="radio"
                               name="move-destination"
                               value={coll.id}
                               checked={moveDestination === coll.id}
                               onChange={() => setMoveDestination(coll.id)}
-                              className=""
+                              className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border-subtle)]"
                             />
-                            <span className="">
+                            <span className="flex-1">
                               {coll.title}
                             </span>
-                            <span className="">
+                            <span className="text-xs text-[var(--color-text-muted)]">
                               {coll.photo_count || 0} items
                             </span>
                           </label>
                         ))}
                       </div>
-                      <div className="">
+                      <div className="mt-4 flex justify-end space-x-3">
                         <button
                           onClick={() => {
                             setShowCollectionPicker(false)
                             setMoveDestination(null)
                           }}
-                          className=""
+                          className="px-4 py-2 bg-white dark:bg-zinc-700 border border-[var(--color-border-subtle)] rounded-md hover:bg-[var(--color-bg-soft)] dark:hover:bg-zinc-600"
                         >
                           Cancel
                         </button>
@@ -466,7 +489,7 @@ export default function GalleryWorkspacePage() {
                             setShowCollectionPicker(false)
                             setMoveDestination(null)
                           }}
-                          className=""
+                          className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-md hover:bg-[var(--color-accent)/80]"
                         >
                           Move items
                         </button>
@@ -476,14 +499,14 @@ export default function GalleryWorkspacePage() {
                 )}
 
                 {/* PHOTOS GRID */}
-                <div className="ui-card">
-                  <div className="">
-                    <h2 className="">Photos & Videos</h2>
-                    <div className="">
+                <div className="ui-card p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">Photos & Videos</h2>
+                    <div className="flex items-center gap-2">
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                        className="gallery-input"
+                        className="gallery-input text-sm py-2"
                       >
                         <option value="custom">Custom Order</option>
                         <option value="filename_asc">Filename A–Z</option>
@@ -491,7 +514,7 @@ export default function GalleryWorkspacePage() {
                         <option value="date_uploaded_new">Uploaded (newest)</option>
                         <option value="date_uploaded_old">Uploaded (oldest)</option>
                       </select>
-                      <label className="">
+                      <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
                         <input
                           type="checkbox"
                           checked={selectedPhotos.size === (gallery?.photos?.length || 0) && (gallery?.photos?.length || 0) > 0}
@@ -501,7 +524,7 @@ export default function GalleryWorkspacePage() {
                             }
                           }}
                           onChange={() => handleSelectAll()}
-                          className=""
+                          className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] cursor-pointer"
                         />
                         <span>Select All</span>
                       </label>
@@ -509,45 +532,45 @@ export default function GalleryWorkspacePage() {
                   </div>
 
                   {filteredPhotos.length > 0 ? (
-                    <div className="">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                       {filteredPhotos.map((photo) => {
                         const mediaType = getMediaType(photo)
-
+                        
                         return (
                           <div
                             key={photo.id}
-                            className=""
+                            className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] cursor-pointer"
                             onClick={() => handlePhotoToggle(photo.id)}
                           >
                             {/* CHECKBOX */}
-                            <div className="">
+                            <div className="absolute top-2 left-2 z-10 w-5 h-5 rounded border-2 border-white bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                               {selectedPhotos.has(photo.id) && (
-                                <div className="" />
+                                <div className="w-3 h-3 rounded-sm bg-white" />
                               )}
                             </div>
 
                             {/* HIDDEN INDICATOR */}
                             {photo.isHidden && (
-                              <div className="">
-                                <EyeOff className="" />
+                              <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/70 flex items-center justify-center">
+                                <EyeOff className="w-3 h-3 text-white" />
                               </div>
                             )}
 
                             {/* MEDIA DISPLAY */}
                             {mediaType === 'video' ? (
-                              <div className="">
+                              <div className="relative w-full h-full">
                                 <video
                                   src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl}
-                                  className=""
+                                  className="object-cover w-full h-full"
                                   preload="metadata"
                                 />
                                 {/* Video Icon Overlay */}
-                                <div className="">
-                                  <Video className="" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                  <Video className="w-8 h-8 text-white" />
                                 </div>
                                 {/* Duration Badge */}
                                 {photo.duration && (
-                                  <div className="">
+                                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
                                     {formatDuration(photo.duration)}
                                   </div>
                                 )}
@@ -567,27 +590,27 @@ export default function GalleryWorkspacePage() {
                             )}
 
                             {/* FILENAME OVERLAY */}
-                            <div className="to-transparent">
-                              <p className="">
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 opacity-0 group-hover:opacity-100 transition">
+                              <p className="truncate text-[10px] font-medium text-white">
                                 {photo.filename.split('.').slice(0, -1).join('.')}
                               </p>
                             </div>
 
                             {/* HOVER ACTIONS */}
-                            <div className="">
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 z-10">
                               <button
                                 type="button"
                                 onClick={(e) => {
                                   e.stopPropagation()
                                   void handleToggleHidden(photo.id, photo.isHidden)
                                 }}
-                                className=""
+                                className="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
                                 title={photo.isHidden ? 'Show' : 'Hide'}
                               >
                                 {photo.isHidden ? (
-                                  <EyeOff className="" />
+                                  <EyeOff className="w-4 h-4 text-black" />
                                 ) : (
-                                  <Eye className="" />
+                                  <Eye className="w-4 h-4 text-black" />
                                 )}
                               </button>
                             </div>
@@ -596,8 +619,8 @@ export default function GalleryWorkspacePage() {
                       })}
                     </div>
                   ) : (
-                    <div className="">
-                      <p className="">
+                    <div className="text-center py-12">
+                      <p className="text-sm text-[var(--color-text-muted)]">
                         No photos in this gallery yet. Use the upload area above to add photos.
                       </p>
                     </div>
@@ -605,20 +628,20 @@ export default function GalleryWorkspacePage() {
                 </div>
 
                 {/* COLLECTIONS */}
-                <div className="ui-card">
-                  <div className="">
-                    <h2 className="">Collections</h2>
+                <div className="ui-card p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">Collections</h2>
                     <button
                       type="button"
                       onClick={() => document.getElementById('new-collection-input')?.focus()}
-                      className="gallery-btn gallery-btn-secondary"
+                      className="gallery-btn gallery-btn-secondary gap-2"
                     >
-                      <Plus className="" />
+                      <Plus className="w-4 h-4" />
                       New
                     </button>
                   </div>
 
-                  <div className="">
+                  <div className="flex gap-2">
                     <input
                       id="new-collection-input"
                       value={collectionTitle}
@@ -627,20 +650,20 @@ export default function GalleryWorkspacePage() {
                         if (event.key === 'Enter') void handleCreateCollection()
                       }}
                       placeholder="e.g. Ceremony, Portraits"
-                      className="gallery-input"
+                      className="gallery-input flex-1"
                     />
                     <button
                       type="button"
                       onClick={() => void handleCreateCollection()}
                       disabled={creatingCollection || !collectionTitle.trim()}
-                      className="gallery-btn gallery-btn-secondary"
+                      className="gallery-btn gallery-btn-secondary shrink-0"
                     >
-                      {creatingCollection ? <Loader2 className="" /> : <Plus className="" />}
+                      {creatingCollection ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                     </button>
                   </div>
 
                   {gallery.collections && gallery.collections.length > 0 ? (
-                    <div className="">
+                    <div className="space-y-2">
                       <button
                         onClick={() => setActiveCollection(null)}
                         className={`w-full text-left p-3 rounded-lg border transition ${
@@ -649,8 +672,8 @@ export default function GalleryWorkspacePage() {
                             : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
                         }`}
                       >
-                        <span className="">All Photos & Videos</span>
-                        <span className="">
+                        <span className="font-medium">All Photos & Videos</span>
+                        <span className="text-xs ml-2 opacity-70">
                           {gallery.photos?.length || 0} items
                         </span>
                       </button>
@@ -664,15 +687,15 @@ export default function GalleryWorkspacePage() {
                               : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
                           }`}
                         >
-                          <span className="">{collection.title}</span>
-                          <span className="">
+                          <span className="font-medium">{collection.title}</span>
+                          <span className="text-xs ml-2 opacity-70">
                             {collection.photo_count || 0} items
                           </span>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <p className="">No collections yet. Create one to organize your photos and videos.</p>
+                    <p className="text-sm text-[var(--color-text-muted)]">No collections yet. Create one to organize your photos and videos.</p>
                   )}
                 </div>
               </section>

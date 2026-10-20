@@ -209,7 +209,7 @@ export default function PhotoUploader({
   ).length;
 
   return (
-    <div className="">
+    <div className="space-y-4">
       {/* File Input */}
       <input
         ref={fileInputRef}
@@ -248,14 +248,14 @@ export default function PhotoUploader({
             isDragging ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
           }`}
         />
-        <p className="">
+        <p className="text-sm font-medium">
           {isDragging
             ? 'Drop photos to upload'
             : 'Drag & drop photos here'}
         </p>
-        <p className="">
+        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
           or{' '}
-          <span className="">
+          <span className="font-medium text-[var(--color-accent)]">
             browse files
           </span>{' '}
           &mdash; JPEG, PNG, WebP, HEIC, HEIF, MP4 (max 100MB each)
@@ -264,22 +264,22 @@ export default function PhotoUploader({
 
       {/* Upload Queue */}
       {uploadItems.length > 0 && (
-        <div className="">
+        <div className="space-y-3">
           {/* Summary Row */}
-          <div className="">
-            <span className="">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-[var(--color-text-muted)]">
               Uploading
               {isUploading && ' ·'}
               {' '}
               {uploadedCount} of {uploadItems.length} photos
               {failedCount > 0 && (
-                <span className="">
+                <span className="ml-2 text-[var(--color-danger)]">
                   {failedCount} failed
                 </span>
               )}
             </span>
 
-            <div className="">
+            <div className="flex items-center gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -288,7 +288,7 @@ export default function PhotoUploader({
                   fileInputRef.current?.click();
                 }}
               >
-                <Upload className="" />
+                <Upload className="h-3.5 w-3.5" />
                 Add more
               </Button>
               {(failedCount > 0 || uploadedCount > 0) && (
@@ -297,7 +297,7 @@ export default function PhotoUploader({
                   size="sm"
                   onClick={clearCompleted}
                 >
-                  <Trash2 className="" />
+                  <Trash2 className="h-3.5 w-3.5" />
                   Clear
                 </Button>
               )}
@@ -305,30 +305,30 @@ export default function PhotoUploader({
           </div>
 
           {/* File List */}
-          <ul className="">
+          <ul className="divide-y divide-[var(--color-border-subtle)] rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg)]">
             {uploadItems.map((item) => (
               <li
                 key={item.id}
-                className=""
+                className="flex items-center gap-3 p-3"
               >
                 {/* Thumbnail */}
-                <div className="">
+                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--color-bg-soft)]">
                   <img
                     src={item.previewUrl}
                     alt={item.file.name}
-                    className=""
+                    className="h-full w-full object-cover"
                   />
                 </div>
 
                 {/* File Info */}
-                <div className="">
-                  <p className="">
+                <div className="min-w-0 flex-1 space-y-0.5">
+                  <p className="truncate text-sm font-medium">
                     {item.file.name}
                   </p>
-                  <p className="">
+                  <p className="text-xs text-[var(--color-text-muted)]">
                     {(item.file.size / 1024 / 1024).toFixed(2)} MB
                     {item.error && (
-                      <span className="">
+                      <span className="ml-2 text-[var(--color-danger)]">
                         {item.error}
                       </span>
                     )}
@@ -336,34 +336,34 @@ export default function PhotoUploader({
                 </div>
 
                 {/* Status */}
-                <div className="">
+                <div className="flex w-28 flex-shrink-0 items-center justify-end gap-1.5 text-xs">
                   {item.status === 'queued' && (
                     <>
-                      <span className="">
+                      <span className="text-[var(--color-text-muted)]">
                         Waiting
                       </span>
                       <button
                         type="button"
                         onClick={() => removeItem(item.id)}
                         aria-label={`Remove ${item.file.name}`}
-                        className=""
+                        className="rounded-full p-1 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-danger)]"
                       >
-                        <X className="" />
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     </>
                   )}
 
                   {item.status === 'uploading' && (
                     <>
-                      <Loader2 className="" />
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-accent)]" />
                       <span>{item.progress}%</span>
                     </>
                   )}
 
                   {item.status === 'uploaded' && (
                     <>
-                      <Check className="" />
-                      <span className="">
+                      <Check className="h-4 w-4 text-[var(--color-success)]" />
+                      <span className="text-[var(--color-success)]">
                         Uploaded
                       </span>
                     </>
@@ -371,13 +371,13 @@ export default function PhotoUploader({
 
                   {item.status === 'failed' && (
                     <>
-                      <X className="" />
+                      <X className="h-4 w-4 text-[var(--color-danger)]" />
                       <button
                         type="button"
                         onClick={() => retryItem(item.id)}
-                        className=""
+                        className="inline-flex items-center gap-1 font-medium text-[var(--color-accent)] hover:underline"
                       >
-                        <RefreshCw className="" />
+                        <RefreshCw className="h-3 w-3" />
                         Retry
                       </button>
                     </>
@@ -391,13 +391,13 @@ export default function PhotoUploader({
           {!isUploading &&
             uploadItems.length > 0 &&
             failedCount === 0 && (
-              <div className="">
-                <Check className="" />
-                <p className="">
+              <div className="rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] p-4 text-center">
+                <Check className="mx-auto mb-2 h-6 w-6 text-[var(--color-success)]" />
+                <p className="text-sm font-medium">
                   {uploadedCount} photo{uploadedCount !== 1 ? 's' : ''}{' '}
                   uploaded
                 </p>
-                <p className="">
+                <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
                   Your photos are now available in the gallery. You can keep
                   working or upload more.
                 </p>

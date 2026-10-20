@@ -246,8 +246,8 @@ export default function ClientGalleryPage({
 
   if (loading) {
     return (
-      <div className="">
-        <div className="">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-xs font-sans uppercase tracking-[0.3em] text-zinc-500">
           Loading gallery
         </div>
       </div>
@@ -256,7 +256,7 @@ export default function ClientGalleryPage({
 
   if (!gallery) {
     return (
-      <div className="">
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
         Gallery not found.
       </div>
     );
@@ -267,17 +267,17 @@ export default function ClientGalleryPage({
     !authenticated
   ) {
     return (
-      <main className="">
-        <div className="">
-          <div className="">
-            <Lock className="" />
+      <main className="min-h-screen bg-[#090909] text-white flex items-center justify-center px-6">
+        <div className="w-full max-w-sm text-center">
+          <div className="mx-auto w-14 h-14 rounded-full bg-white/5 flex items-center justify-center">
+            <Lock className="w-5 h-5 text-zinc-400" />
           </div>
 
-          <h1 className="">
+          <h1 className="mt-6 text-2xl font-light">
             {gallery.title}
           </h1>
 
-          <p className="">
+          <p className="mt-2 text-sm text-zinc-500">
             Enter the gallery PIN to
             continue.
           </p>
@@ -298,12 +298,12 @@ export default function ClientGalleryPage({
             inputMode="numeric"
             maxLength={8}
             placeholder="PIN"
-            className=""
+            className="mt-8 w-full text-center tracking-[0.4em] px-4 py-4 rounded-xl bg-white/5 border border-white/10 outline-none"
           />
 
           <button
             onClick={unlock}
-            className=""
+            className="mt-3 w-full py-3.5 rounded-xl bg-white text-black text-sm font-medium"
           >
             Enter Gallery
           </button>
@@ -313,29 +313,29 @@ export default function ClientGalleryPage({
   }
 
   return (
-    <main className="" data-gallery-theme={gallery.theme || 'reference-pending'}>
-      <header className="">
-        <div className="">
-          <div className="">
+    <main className="min-h-screen bg-[#080808] text-white" data-gallery-theme={gallery.theme || 'reference-pending'}>
+      <header className="sticky top-0 z-30 bg-black/80 backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-[1800px] mx-auto px-4 md:px-8 py-5">
+          <div className="flex items-center justify-between gap-4">
             <div>
-              <h1 className="">
+              <h1 className="text-xl md:text-2xl font-light">
                 {gallery.title}
               </h1>
 
-              <p className="">
+              <p className="text-xs text-zinc-500 mt-1">
                 {visiblePhotos.length}{" "}
                 photos
               </p>
             </div>
 
-            <button className="">
+            <button className="px-4 py-2 rounded-lg border border-white/10 text-xs">
               Share
             </button>
           </div>
 
           {collections.length >
             0 && (
-            <div className="">
+            <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
               <button
                 onClick={() =>
                   setActiveCollection(
@@ -381,13 +381,13 @@ export default function ClientGalleryPage({
         </div>
       </header>
 
-      <section className="">
-        <div className="">
+      <section className="max-w-[1800px] mx-auto p-3 md:p-8">
+        <div className="columns-2 md:columns-3 lg:columns-4 gap-3 md:gap-5">
           {visiblePhotos.map(
             (photo, index) => (
               <div
                 key={photo.id}
-                className=""
+                className="relative mb-3 md:mb-5 break-inside-avoid group"
               >
                 <button
                   onClick={() =>
@@ -395,7 +395,7 @@ export default function ClientGalleryPage({
                       index
                     )
                   }
-                  className="block"
+                  className="block w-full text-left"
                 >
                   <Image
                     src={
@@ -406,11 +406,11 @@ export default function ClientGalleryPage({
                     }
                     width={1800}
                     height={1200}
-                    className=""
+                    className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.01]"
                   />
                 </button>
 
-                <div className="">
+                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {gallery.allow_favorites && (
                     <button
                       onClick={() =>
@@ -425,7 +425,7 @@ export default function ClientGalleryPage({
                       }`}
                     >
                       <Heart
-                        className=""
+                        className="w-4 h-4"
                         fill={
                           photo.is_favorite
                             ? "currentColor"
@@ -463,16 +463,16 @@ export default function ClientGalleryPage({
         visiblePhotos[
           viewerIndex
         ] && (
-          <div className="">
+          <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
             <button
               onClick={() =>
                 setViewerIndex(
                   null
                 )
               }
-              className=""
+              className="absolute top-5 right-5 z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
             >
-              <X className="" />
+              <X className="w-5 h-5" />
             </button>
 
             <button
@@ -484,12 +484,12 @@ export default function ClientGalleryPage({
                   )
                 )
               }
-              className=""
+              className="absolute left-4 md:left-8 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"
             >
               <ChevronLeft />
             </button>
 
-            <div className="">
+            <div className="relative w-[90vw] h-[90vh]">
               <Image
                 src={
                   visiblePhotos[
@@ -503,7 +503,7 @@ export default function ClientGalleryPage({
                 }
                 fill
                 sizes="90vw"
-                className=""
+                className="object-contain"
               />
             </div>
 
@@ -517,7 +517,7 @@ export default function ClientGalleryPage({
                   )
                 )
               }
-              className=""
+              className="absolute right-4 md:right-8 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"
             >
               <ChevronRight />
             </button>
@@ -530,9 +530,9 @@ export default function ClientGalleryPage({
                   ].original_url
                 }
                 download
-                className=""
+                className="absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-full bg-white text-black text-xs flex items-center gap-2"
               >
-                <Download className="" />
+                <Download className="w-3.5 h-3.5" />
                 Download
               </a>
             )}

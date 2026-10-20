@@ -111,8 +111,8 @@ export default function CreatorOnboardingModal({
     vatRegistered: false,
     vatNumber: "",
     currency: "KES",
-    depositPercentage: "50",
-    whtRate: "5",
+    depositPercentage: 50,
+    whtRate: 5,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +212,7 @@ export default function CreatorOnboardingModal({
   };
 
   const skipBusiness = () => {
-    setBusiness({ businessName: "", phone: "", kraPin: "", vatRegistered: false, vatNumber: "", currency: "KES", depositPercentage: "50", whtRate: "5" });
+    setBusiness({ businessName: "", phone: "", kraPin: "", vatRegistered: false, vatNumber: "", currency: "KES", depositPercentage: 50, whtRate: 5 });
     setCurrentStep(4);
   };
 
@@ -418,7 +418,7 @@ export default function CreatorOnboardingModal({
                                         {key === "fullDay" ? "Full Day" : key === "halfDay" ? "Half Day" : "Hourly"}
                                       </button>
                                       {service.rates?.[key] !== undefined && (
-                                        <Input type="number" min="0" value={service.rates[key] || ""} onChange={(e) => updateServiceRate(index, key, e.target.value)} placeholder="Amount" className="h-9 w-24 rounded-lg border border-gray-200 px-2 text-sm" />
+                                        <Input type="number" min="0" value={service.rates[key] || ""} onChange={(e) => updateServiceRate(index, key, Number(e.target.value))} placeholder="Amount" className="h-9 w-24 rounded-lg border border-gray-200 px-2 text-sm" />
                                       )}
                                     </div>
                                   ))}
@@ -478,10 +478,10 @@ export default function CreatorOnboardingModal({
                             </Select>
                           </label>
                           <label className="text-sm font-medium">Deposit %
-                            <Input type="number" min="0" max="100" value={business.depositPercentage} onChange={(e) => updateBusiness("depositPercentage", e.target.value)} className="mt-2 h-12 w-full rounded-xl border border-gray-200 px-4 text-sm" />
+                            <Input type="number" min="0" max="100" value={business.depositPercentage} onChange={(e) => updateBusiness("depositPercentage", Number(e.target.value))} className="mt-2 h-12 w-full rounded-xl border border-gray-200 px-4 text-sm" />
                           </label>
                           <label className="text-sm font-medium">WHT rate
-                            <Select value={business.whtRate} onValueChange={(value) => updateBusiness("whtRate", value)}>
+                            <Select value={String(business.whtRate)} onValueChange={(value) => updateBusiness("whtRate", Number(value))}>
                               <SelectTrigger className="mt-2 w-full">
                                 <SelectValue />
                               </SelectTrigger>

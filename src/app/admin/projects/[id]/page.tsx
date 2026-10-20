@@ -415,7 +415,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 text-xs font-sans uppercase tracking-widest rounded-t-lg transition ${
                 activeTab === tab.id
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : 'bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800'
               }`}
             >

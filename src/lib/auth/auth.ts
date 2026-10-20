@@ -43,9 +43,11 @@ const trustedOrigins = Array.from(
     process.env.NEXT_PUBLIC_APP_URL,
     "http://localhost:3000",
     "http://localhost:3010",
+    "http://localhost:3011",
     "http://localhost:3100",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:3010",
+    "http://127.0.0.1:3011",
     "http://127.0.0.1:3100",
   ].filter((origin): origin is string => Boolean(origin))),
 );

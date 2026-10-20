@@ -3,6 +3,7 @@ import Image from "next/image";
 import {
   ArrowRight,
   CheckCircle2,
+  Plus,
   FileText,
   FolderKanban,
   Images,
@@ -75,10 +76,10 @@ const principles = [
   ["03", "Meaning", "The best spaces do more than perform. They create a sense of belonging that lasts long after the first impression."],
 ];
 
-export const metadata = {
-  title: "Hously — Modern Architecture Studio",
-  description: "Hously is an architecture and interiors studio creating enduring spaces across East Africa.",
-};
+const projects = platformFeatures.filter(
+  (feature): feature is { title: string; type: string; year: string; image: string } =>
+    "image" in feature
+);
 
 export default function HomePage() {
   return (

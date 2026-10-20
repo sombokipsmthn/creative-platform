@@ -250,7 +250,7 @@ export default function AdminExpensesPage() {
               {expenses.map((exp) => (
                 <div
                   key={exp.id}
-                  className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-purple-600/50 transition-all group shadow-sm dark:shadow-none"
+                  className="ui-card ui-card-interactive p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 hover:border-ring/50 transition-all group shadow-sm dark:shadow-none"
                 >
                   <div className="flex items-center gap-4">
                     <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-800 shrink-0 bg-slate-100 dark:bg-zinc-900">
@@ -259,7 +259,7 @@ export default function AdminExpensesPage() {
 
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full uppercase font-semibold">
+                        <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-secondary text-secondary-foreground rounded-full uppercase font-semibold">
                           {exp.category}
                         </span>
                         <span className={`inline-flex items-center px-2.5 py-0.5 text-[10px] font-sans rounded-full ${

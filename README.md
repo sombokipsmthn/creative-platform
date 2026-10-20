@@ -112,14 +112,14 @@ Core patterns:
 - `.ui-input`, `.ui-select`, `.ui-textarea`
 - `.ui-page-title`, `.ui-section-title`, `.ui-eyebrow`, `.ui-meta`
 
-See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for the active design token and component guidance.
+Shared UI uses the shadcn primitives and semantic theme tokens in `src/app/globals.css`.
 
 ---
 
 ## Related documentation
 
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
-- [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md)
+- shadcn primitives in `src/components/ui/`
 - [docs/00-project/README.md](./docs/00-project/README.md)
 - [docs/01-specifications/README.md](./docs/01-specifications/README.md)
 - [docs/02-architecture/README.md](./docs/02-architecture/README.md)

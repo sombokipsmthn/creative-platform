@@ -206,11 +206,10 @@ function SidebarContent({
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { content: splitViewContent } = useSplitView();
   const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
-  const [mobileOpen, setMobileOpen] = useState(false);
   const bootstrapStarted = useRef(false);
 
   // Keep local development bypass support
@@ -254,19 +253,19 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }, [authPending, localAuthBypass, session?.user]);
 
   useEffect(() => {
-    setMobileMenuOpen(false);
+    setMobileOpen(false);
   }, [pathname]);
 
   useEffect(() => {
-    if (!mobileMenuOpen) return;
+    if (!mobileOpen) return;
 
     function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setMobileMenuOpen(false);
+      if (event.key === "Escape") setMobileOpen(false);
     }
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [mobileMenuOpen]);
+  }, [mobileOpen]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -296,8 +295,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             {/* Mobile Nav Trigger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9">
-                  <Menu className="h-5 w-5" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="lg:hidden h-9 w-9"
+                  aria-label="Toggle navigation menu"
+                  aria-expanded={mobileOpen}
+                >
+                  <Menu className="h-5 w-5" aria-hidden="true" />
                   <span className="sr-only">Toggle navigation menu</span>
                 </Button>
               </SheetTrigger>

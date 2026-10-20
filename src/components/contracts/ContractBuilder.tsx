@@ -53,6 +53,7 @@ export function ContractBuilder({
   const [template, setTemplate] = useState<ContractTemplate | null>(null);
   const [values, setValues] = useState<Record<string, string>>({});
   const [draftId, setDraftId] = useState<string | undefined>(contractId);
+  const [templateError, setTemplateError] = useState('');
 
   const [currency, setCurrency] = useState(initialContract?.currency ?? 'KES');
   const [error, setError] = useState('');
@@ -84,13 +85,35 @@ export function ContractBuilder({
     enabled: !!templateId,
   });
 
-  // Set template when loaded
+  // Load the selected template, or restore the immutable snapshot for an existing draft.
   useEffect(() => {
-    if (templateId && templatesQuery.data && !template) {
-      const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
+    if (template) return;
+    if (templateId && templatesQuery.data) {
+      const found = templatesQuery.data.find((item: ContractTemplate) => item.id === templateId);
       if (found) setTemplate(found);
+      else setTemplateError('The selected template is unavailable.');
+      return;
     }
-  }, [templateId, templatesQuery.data, template]);
+    if (mode === 'edit' && initialContract) {
+      setTemplate({
+        id: initialContract.templateId || `draft-${initialContract.id}`,
+        creatorId: initialContract.creatorId,
+        name: initialContract.title,
+        description: 'Restored from the saved contract snapshot.',
+        category: initialContract.contractType || 'General business agreements',
+        documentType: initialContract.contractType || 'contract',
+        content: initialContract.templateSnapshot || initialContract.content || '',
+        variables: Array.from(initialContract.content?.matchAll(/\\{\\{(\\w+)\\}\\}/g) || [], (match) => match[1]),
+        isSystemTemplate: false,
+        isActive: true,
+        version: initialContract.templateVersion || 1,
+        createdAt: initialContract.createdAt,
+        updatedAt: initialContract.updatedAt,
+      });
+    } else if (mode === 'new' && !templateId) {
+      setTemplate({ id: 'scratch', name: 'Blank contract', description: '', category: 'General business agreements', documentType: 'general', content: '', variables: [], isSystemTemplate: false, isActive: true, version: 1, createdAt: new Date(), updatedAt: new Date() });
+    }
+  }, [template, templateId, templatesQuery.data, mode, initialContract]);
 
   // Initialize values from client/project when they change
   useEffect(() => {
@@ -380,7 +403,11 @@ export function ContractBuilder({
     setValidationErrors((prev) => prev.filter((f) => f !== key));
   };
 
-  const isLoading = clientsQuery.isLoading || projectsQuery.isLoading || !template;
+  const isLoading = clientsQuery.isLoading || projectsQuery.isLoading || (Boolean(templateId) && templatesQuery.isLoading) || !template;
+
+  if (templateError) {
+    return <div className="ui-page"><div className="ui-empty-state p-12"><AlertCircle /><p>{templateError}</p><button className="ui-button ui-button-secondary" onClick={() => router.push('/admin/contracts/templates')}>Back to templates</button></div></div>;
+  }
 
   if (isLoading) {
     return (

@@ -1336,7 +1336,7 @@ export default function NewQuotePage() {
   ======================================================= */
 
   const inputClass =
-    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-purple-500";
+    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-ring";
 
   const labelClass =
     "text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600";
@@ -2010,7 +2010,7 @@ export default function NewQuotePage() {
                                 }
                                 className={`w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none ${!item.category
                                   ? "opacity-60 cursor-not-allowed"
-                                  : "focus:border-purple-500"
+                                  : "focus:border-ring"
                                   }`}
                               />
 

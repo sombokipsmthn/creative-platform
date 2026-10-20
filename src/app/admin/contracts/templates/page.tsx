@@ -5,153 +5,50 @@ import { useCallback, useEffect, useState } from 'react';
 import { ArrowRight, FilePlus, Loader2, RefreshCw, Search } from 'lucide-react';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
-import { useRouter } from 'next/navigation';
 import type { ContractTemplate } from '@/lib/types/contracts';
 
 const categories = ['all', 'Photography', 'Video and production', 'Confidentiality and NDAs', 'Intellectual property and licensing', 'Model and location releases', 'Freelance and crew agreements', 'Consulting and creative services', 'General business agreements'];
+
 export default function ContractTemplatesPage() {
-  const router = useRouter();
   const [templates, setTemplates] = useState<ContractTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [previewTemplate, setPreviewTemplate] = useState<ContractTemplate | null>(null);
+  const [category, setCategory] = useState('all');
+  const [preview, setPreview] = useState<ContractTemplate | null>(null);
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    const loadTemplates = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch('/api/contracts/templates', { cache: 'no-store' });
-        if (!response.ok) throw new Error('Failed to load templates');
-        const data = await response.json();
-        setTemplates(data);
-      } catch (reason) {
-        setError(reason instanceof Error ? reason.message : 'Failed to load templates');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadTemplates();
-  }, []);
-
-  const handleCreate = () => {
-    router.push('/admin/contracts/templates/new');
-  };
-
-  const handleRefresh = async () => {
-    setLoading(true);
-    setError(null);
+  const load = useCallback(async () => {
+    setState('loading'); setError('');
     try {
-      const response = await fetch('/api/contracts/templates', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Failed to refresh templates');
+      const response = await fetch(`/api/contracts/templates?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}`, { cache: 'no-store' });
+      if (!response.ok) throw new Error(response.status === 401 ? 'Please sign in to view templates.' : 'Unable to load contract templates.');
       const data = await response.json();
-      setTemplates(data);
-    } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Failed to refresh templates');
-    } finally {
-      setLoading(false);
-    }
-  };
+      const list = Array.isArray(data) ? data : data?.templates;
+      if (!Array.isArray(list)) throw new Error('The template response was malformed.');
+      setTemplates(list); setState('ready');
+    } catch (reason) { setError(reason instanceof Error ? reason.message : 'Unable to load contract templates.'); setState('error'); }
+  }, [search, category]);
 
-  const filteredTemplates = templates.filter((t) => {
-    if (selectedCategory === 'all') return true;
-    return t.category === selectedCategory;
-  }).filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => { void load(); }, [load]);
 
-  return (
-    <div className="ui-page ui-page-padded">
-      <div className="ui-shell">
-        <AdminPageHeader
-          title="Contract Templates"
-          description="Manage reusable contract templates for faster document creation."
-          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          primaryAction={
-            <Button onClick={handleCreate} variant="primary">
-              + New Template
-            </Button>
-          }
-        />
+  async function duplicate(template: ContractTemplate) {
+    const response = await fetch(`/api/contracts/templates/${template.id}`, { method: 'POST' });
+    if (!response.ok) setError('Unable to duplicate this template.'); else void load();
+  }
 
-        <div className="space-y-6">
-          <div className="ui-card">
-            <div className="ui-card-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <input
-                    type="text"
-                    placeholder="Search templates..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="ui-input pl-9 w-full sm:w-64"
-                  />
-                </div>
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="ui-select"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="secondary" onClick={handleRefresh} disabled={loading}>
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </Button>
-                <Button variant="primary" onClick={handleCreate}>
-                  <FilePlus className="h-4 w-4 mr-2" />
-                  New Template
-                </Button>
-              </div>
-            </div>
+  async function archive(template: ContractTemplate) {
+    if (!window.confirm(`Archive ${template.name}?`)) return;
+    const response = await fetch(`/api/contracts/templates/${template.id}`, { method: 'DELETE' });
+    if (!response.ok) setError('Unable to archive this template.'); else void load();
+  }
 
-            <div className="ui-card-content">
-              {loading ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-                </div>
-              ) : error ? (
-                <div className="p-4 text-red-600 dark:text-red-400">{error}</div>
-              ) : filteredTemplates.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-slate-500 dark:text-slate-400">No templates found.</p>
-                  <Button onClick={handleCreate} variant="primary" className="mt-4">
-                    Create your first template
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredTemplates.map((template) => (
-                    <div key={template.id} className="ui-card ui-card-interactive p-4">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-bold text-slate-900 dark:text-white">{template.name}</h3>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{template.category}</p>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{template.description}</p>
-                        </div>
-                        <ArrowRight className="text-slate-400 h-5 w-5 shrink-0" />
-                      </div>
-                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-zinc-800">
-                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/contracts/templates/${template.id}/edit`)}>
-                          Edit
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={() => router.push(`/admin/contracts/templates/${template.id}`)}>
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  return <div className="ui-page ui-page-padded"><div className="ui-shell space-y-8">
+    <AdminPageHeader title="Contract templates" description="Use reviewed starting points for photography, production, licensing and business agreements." breadcrumb={{ label: 'Contracts', href: '/admin/contracts' }} primaryAction={<Link href="/admin/contracts/builder" className="ui-button ui-button-secondary">Start from scratch</Link>} />
+    <div className="flex flex-wrap gap-3"><div className="relative min-w-64 flex-1"><Search className="absolute left-3 top-3 h-4 w-4" /><input className="ui-input pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search templates" /></div><select className="ui-input" value={category} onChange={(event) => setCategory(event.target.value)}>{categories.map((item) => <option key={item} value={item}>{item === 'all' ? 'All categories' : item}</option>)}</select><Button variant="outline" onClick={() => void load()}><RefreshCw className="h-4 w-4" /> Refresh</Button></div>
+    {state === 'loading' && <div className="ui-empty-state p-12"><Loader2 className="animate-spin" /><p>Loading templates…</p></div>}
+    {state === 'error' && <div className="ui-card ui-empty-state p-12"><p>{error}</p><Button variant="outline" onClick={() => void load()}>Retry</Button></div>}
+    {state === 'ready' && templates.length === 0 && <div className="ui-card ui-empty-state p-12"><FilePlus /><h2 className="ui-section-title">No templates found</h2><p className="ui-body">Try another search or start a contract from scratch.</p><Link href="/admin/contracts/builder" className="ui-button ui-button-primary">Start from scratch</Link></div>}
+    {state === 'ready' && templates.length > 0 && <div className="grid gap-4 md:grid-cols-2">{templates.map((template) => <article className="ui-card flex flex-col gap-5 p-5" key={template.id}><div className="flex items-start justify-between gap-4"><div><p className="ui-meta">{template.category} · {template.isSystemTemplate ? 'Built-in' : 'Custom'} · v{template.version || 1}</p><h2 className="ui-section-title mt-2">{template.name}</h2></div><FilePlus className="h-5 w-5" /></div><p className="ui-body flex-1">{template.description || 'A reusable contract starting point.'}</p><p className="ui-meta">{template.variables?.length || 0} fields · Review: {template.reviewStatus || 'unreviewed'}</p><div className="flex flex-wrap gap-2"><Button variant="outline" onClick={() => setPreview(template)}>Preview</Button>{!template.isSystemTemplate && <><Link className="ui-button ui-button-secondary" href={`/admin/contracts/templates/${template.id}/edit`}>Edit</Link><Button variant="outline" onClick={() => void duplicate(template)}>Duplicate</Button><Button variant="outline" onClick={() => void archive(template)}>Archive</Button></>}<Link href={`/admin/contracts/builder?templateId=${template.id}`} className="ui-button ui-button-primary">Use template <ArrowRight className="h-4 w-4" /></Link></div></article>)}</div>}
+    {preview && <div className="ui-overlay" onClick={() => setPreview(null)}><section className="ui-modal ui-modal-lg" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}><div className="flex items-start justify-between gap-4"><div><p className="ui-meta">{preview.category} · v{preview.version || 1}</p><h2 className="ui-section-title">{preview.name}</h2><p className="ui-body">{preview.description}</p></div><Button variant="ghost" onClick={() => setPreview(null)}>Close</Button></div><article className="mt-5 max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-xl border p-5">{preview.content}</article><div className="mt-5 flex justify-end"><Link href={`/admin/contracts/builder?templateId=${preview.id}`} className="ui-button ui-button-primary">Use template</Link></div></section></div>}
+  </div></div>;
 }

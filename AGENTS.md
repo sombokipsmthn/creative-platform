@@ -4,20 +4,20 @@ This file contains instructions and tips for working with the Creative Platform 
 
 ## Design System
 
-All UI components should use the centralized design system defined in `src/app/globals.css`. See [DESIGN_SYSTEM.md](./DESIGN_SYSTEM.md) for complete documentation.
+All UI components should use the shadcn primitives and semantic tokens defined in `src/app/globals.css`.
 
 ### Key Principles
 
 1. **Use semantic classes** - Prefer `.ui-*` classes over hardcoded Tailwind utilities
 2. **Dark mode first** - All components must work in both light and dark modes
-3. **Consistent spacing** - Use the design token scale (see DESIGN_SYSTEM.md)
+3. **Consistent spacing** - Use the spacing tokens exposed by the shadcn theme
 4. **No inline styles** - Use CSS classes for all styling
 
 ### When Adding New Components
 
 1. Check if a semantic class already exists in `globals.css`
 2. If not, add it to the appropriate section in `globals.css`
-3. Update DESIGN_SYSTEM.md to document the new class
+3. Keep shared styling in the existing shadcn primitives and theme tokens
 4. Use the class consistently across the platform
 
 ### Card Patterns
@@ -61,7 +61,7 @@ Always use the semantic classes:
 
 ### Buttons
 
-Use the Button component from `src/components/ui/Button.tsx` with semantic classes:
+Use the Button component from `src/components/ui/button.tsx` with shadcn variants:
 
 - Primary: `.ui-button-primary`
 - Secondary: `.ui-button-secondary`

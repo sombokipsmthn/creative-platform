@@ -1634,13 +1634,11 @@ html.dark {
   color: var(--color-accent);
 }
 
-<<<<<<< HEAD
 /* Shared admin system */
 .admin-page-header { display: grid; gap: 1rem; margin-bottom: 2rem; }
 .admin-page-header__row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; }
 .admin-page-title { font-size: clamp(1.5rem, 2vw, 2rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.025em; }
 .admin-page-description { margin-top: .5rem; max-width: 48rem; color: var(--muted-foreground); font-size: .9375rem; line-height: 1.5; }
-}
 
 .ui-step-description {
   font-size: var(--font-size-xs);

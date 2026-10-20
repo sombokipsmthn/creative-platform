@@ -1,74 +1,1019 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ExternalLink, UserRound, BriefcaseBusiness, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ExternalLink, UserRound, BriefcaseBusiness, ShieldCheck, Settings, Image, Globe, CreditCard, Bell, Key, Mail, Smartphone, Loader2 } from 'lucide-react';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import WatermarkStudio from '@/components/WatermarkStudio';
+import { authClient } from '@/lib/auth-client';
 
-const sections = [
+type SettingsTab =
+  | 'account-profile'
+  | 'workspace-branding'
+  | 'gallery-delivery'
+  | 'email-templates'
+  | 'business-preferences'
+  | 'integrations'
+  | 'security';
+
+const tabConfig: { id: SettingsTab; label: string; icon: React.ReactNode; description: string }[] = [
   {
-    title: 'Account and profile',
-    description: 'Manage the identity clients see and the details used across your workspace.',
-    links: [
-      { href: '/admin/profile', icon: UserRound, title: 'Creator profile', description: 'Name, handle, contact details, business information, and passkeys.' },
-      { href: '/admin/portfolio', icon: BriefcaseBusiness, title: 'Public portfolio', description: 'Choose public work, set your presentation, and publish your portfolio.' },
-    ],
+    id: 'account-profile',
+    label: 'Account & Profile',
+    icon: <UserRound className="h-4 w-4" />,
+    description: 'Your identity, contact details, and authentication settings.'
+  },
+  {
+    id: 'workspace-branding',
+    label: 'Workspace Branding',
+    icon: <Globe className="h-4 w-4" />,
+    description: 'Custom domain, logos, and platform branding for client-facing pages.'
+  },
+  {
+    id: 'gallery-delivery',
+    label: 'Gallery Delivery',
+    icon: <Image className="h-4 w-4" />,
+    description: 'Default watermark, gallery presets, and client portal settings.'
+  },
+  {
+    id: 'email-templates',
+    label: 'Email Templates',
+    icon: <Mail className="h-4 w-4" />,
+    description: 'Automated notification emails for gallery invitations and updates.'
+  },
+  {
+    id: 'business-preferences',
+    label: 'Business Preferences',
+    icon: <CreditCard className="h-4 w-4" />,
+    description: 'Currency, tax settings, KRA PIN, and regional defaults.'
+  },
+  {
+    id: 'integrations',
+    label: 'Integrations',
+    icon: <Settings className="h-4 w-4" />,
+    description: 'Connected services, storage, and API integrations.'
+  },
+  {
+    id: 'security',
+    label: 'Security',
+    icon: <ShieldCheck className="h-4 w-4" />,
+    description: 'Passkeys, session management, and access controls.'
   },
 ];
 
 export default function AdminSettingsPage() {
+  const [activeTab, setActiveTab] = useState<SettingsTab>('account-profile');
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  // Account & Profile State
+  const [profile, setProfile] = useState({
+    name: '',
+    handle: '',
+    email: '',
+    phone: '',
+    kraPin: '',
+    location: '',
+    bio: '',
+    website: '',
+    businessName: '',
+    avatarUrl: '',
+  });
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileSaving, setProfileSaving] = useState(false);
+
+  // Workspace Branding State
+  const [branding, setBranding] = useState({
+    domainSlug: 'kipsmthn.platform.com',
+    customDomain: 'kipsmthn.com',
+    hidePlatformBranding: true,
+  });
+  const [brandingSaving, setBrandingSaving] = useState(false);
+
+  // Email Templates State
+  const [emailTemplates, setEmailTemplates] = useState({
+    invitationSubject: 'Your Private Client Gallery is Ready — KIPSMTHN',
+    invitationBody: 'Hello {ClientName},\n\nYour private gallery "{GalleryTitle}" is now live on KIPSMTHN.\n\nUse your access PIN: {PIN} to view, favorite, and download your deliverables.\n\nBest regards,\n{CreatorName}',
+    reminderSubject: 'Reminder: Your gallery "{GalleryTitle}" expires in {DaysRemaining} days',
+    reminderBody: 'Hello {ClientName},\n\nThis is a friendly reminder that your access to "{GalleryTitle}" will expire on {ExpiryDate}.\n\nVisit the gallery to make your final selections and downloads.\n\nBest regards,\n{CreatorName}',
+  });
+  const [emailSaving, setEmailSaving] = useState(false);
+
+  // Business Preferences State
+  const [businessPrefs, setBusinessPrefs] = useState({
+    kraPin: 'A012345678X',
+    defaultCurrency: 'KES',
+    defaultWhtRate: '5%',
+    defaultPaymentTerms: '30',
+    invoicePrefix: 'INV',
+    quotePrefix: 'QTE',
+  });
+  const [businessSaving, setBusinessSaving] = useState(false);
+
+  // Load profile data
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const response = await fetch('/api/profile', { cache: 'no-store' });
+        const data = await response.json();
+        if (response.ok && data) {
+          setProfile({
+            name: data.user?.name || '',
+            handle: data.user?.handle || '',
+            email: data.user?.email || '',
+            phone: data.businessProfile?.phone || '',
+            kraPin: data.businessProfile?.kraPin || '',
+            location: data.profile?.location || '',
+            bio: data.profile?.bio || '',
+            website: data.profile?.website || '',
+            businessName: data.businessProfile?.businessName || '',
+            avatarUrl: data.profile?.avatarUrl || data.user?.image || '',
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+      } finally {
+        setProfileLoading(false);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  // Load branding settings
+  useEffect(() => {
+    async function loadBranding() {
+      try {
+        const response = await fetch('/api/workspace/branding', { cache: 'no-store' });
+        if (response.ok) {
+          const data = await response.json();
+          setBranding(prev => ({
+            ...prev,
+            domainSlug: data.domainSlug || prev.domainSlug,
+            customDomain: data.customDomain || prev.customDomain,
+            hidePlatformBranding: data.hidePlatformBranding ?? prev.hidePlatformBranding,
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to load branding:', error);
+      }
+    }
+    loadBranding();
+  }, []);
+
+  // Load email templates
+  useEffect(() => {
+    async function loadEmailTemplates() {
+      try {
+        const response = await fetch('/api/email-templates', { cache: 'no-store' });
+        if (response.ok) {
+          const data = await response.json();
+          setEmailTemplates(prev => ({
+            ...prev,
+            invitationSubject: data.invitationSubject || prev.invitationSubject,
+            invitationBody: data.invitationBody || prev.invitationBody,
+            reminderSubject: data.reminderSubject || prev.reminderSubject,
+            reminderBody: data.reminderBody || prev.reminderBody,
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to load email templates:', error);
+      }
+    }
+    loadEmailTemplates();
+  }, []);
+
+  // Load business preferences
+  useEffect(() => {
+    async function loadBusinessPrefs() {
+      try {
+        const response = await fetch('/api/business-preferences', { cache: 'no-store' });
+        if (response.ok) {
+          const data = await response.json();
+          setBusinessPrefs(prev => ({
+            ...prev,
+            kraPin: data.kraPin || prev.kraPin,
+            defaultCurrency: data.defaultCurrency || prev.defaultCurrency,
+            defaultWhtRate: data.defaultWhtRate || prev.defaultWhtRate,
+            defaultPaymentTerms: data.defaultPaymentTerms || prev.defaultPaymentTerms,
+            invoicePrefix: data.invoicePrefix || prev.invoicePrefix,
+            quotePrefix: data.quotePrefix || prev.quotePrefix,
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to load business preferences:', error);
+      }
+    }
+    loadBusinessPrefs();
+  }, []);
+
+  const handleSave = async (section: string, saveFn: () => Promise<void>) => {
+    setSaveMessage(null);
+    try {
+      await saveFn();
+      setSaveMessage(`${section} saved successfully.`);
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (error) {
+      setSaveMessage(error instanceof Error ? error.message : `Failed to save ${section.toLowerCase()}.`);
+      setTimeout(() => setSaveMessage(null), 5000);
+    }
+  };
+
+  // Save functions
+  const saveProfile = async () => {
+    const response = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user: { name: profile.name.trim(), handle: profile.handle.trim() },
+        profile: { bio: profile.bio, avatarUrl: profile.avatarUrl, website: profile.website, location: profile.location },
+        businessProfile: { businessName: profile.businessName, phone: profile.phone, kraPin: profile.kraPin },
+      }),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data?.error || 'Failed to save profile');
+    }
+  };
+
+  const saveBranding = async () => {
+    const response = await fetch('/api/workspace/branding', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(branding),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data?.error || 'Failed to save branding');
+    }
+  };
+
+  const saveEmailTemplates = async () => {
+    const response = await fetch('/api/email-templates', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(emailTemplates),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data?.error || 'Failed to save email templates');
+    }
+  };
+
+  const saveBusinessPrefs = async () => {
+    const response = await fetch('/api/business-preferences', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(businessPrefs),
+    });
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data?.error || 'Failed to save business preferences');
+    }
+  };
+
+  const updateProfile = (key: keyof typeof profile, value: string) => {
+    setProfile(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateBranding = (key: keyof typeof branding, value: string | boolean) => {
+    setBranding(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateEmailTemplates = (key: keyof typeof emailTemplates, value: string) => {
+    setEmailTemplates(prev => ({ ...prev, [key]: value }));
+  };
+
+  const updateBusinessPrefs = (key: keyof typeof businessPrefs, value: string) => {
+    setBusinessPrefs(prev => ({ ...prev, [key]: value }));
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'account-profile':
+        return (
+          <div className="space-y-6">
+            {/* Profile Header Card */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+                    {profile.avatarUrl ? (
+                      <img src={profile.avatarUrl} alt={profile.name || 'Avatar'} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-muted-foreground">
+                        {(profile.name || 'C').charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Current account</p>
+                    <h3 className="mt-1 truncate text-2xl font-semibold tracking-tight">{profile.name || 'Creator'}</h3>
+                    <p className="text-sm text-muted-foreground">{profile.email || 'No email available'}</p>
+                    {profile.handle && (
+                      <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mt-1">@{profile.handle}</p>
+                    )}
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-6 pt-0">
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label htmlFor="profile-full-name" className="text-sm font-medium leading-none">Full name</label>
+                    <Input
+                      id="profile-full-name"
+                      type="text"
+                      value={profile.name}
+                      onChange={(e) => updateProfile('name', e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="profile-handle" className="text-sm font-medium leading-none">Creator handle</label>
+                    <Input
+                      id="profile-handle"
+                      type="text"
+                      value={profile.handle}
+                      onChange={(e) => updateProfile('handle', e.target.value)}
+                      placeholder="yourhandle"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium leading-none">Email address</label>
+                    <Input
+                      type="email"
+                      value={profile.email}
+                      readOnly
+                      className="cursor-not-allowed opacity-70"
+                    />
+                    <span className="text-xs text-muted-foreground">Managed by Better Auth</span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="profile-phone" className="text-sm font-medium leading-none">Phone number</label>
+                    <Input
+                      id="profile-phone"
+                      type="tel"
+                      value={profile.phone}
+                      onChange={(e) => updateProfile('phone', e.target.value)}
+                      placeholder="+254 …"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="profile-business-name" className="text-sm font-medium leading-none">Business name</label>
+                    <Input
+                      id="profile-business-name"
+                      type="text"
+                      value={profile.businessName}
+                      onChange={(e) => updateProfile('businessName', e.target.value)}
+                      placeholder="Studio or business name"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="profile-kra-pin" className="text-sm font-medium leading-none">KRA PIN</label>
+                    <Input
+                      id="profile-kra-pin"
+                      type="text"
+                      value={profile.kraPin}
+                      onChange={(e) => updateProfile('kraPin', e.target.value)}
+                      placeholder="P000000000X"
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="profile-location" className="text-sm font-medium leading-none">Location</label>
+                    <Input
+                      id="profile-location"
+                      type="text"
+                      value={profile.location}
+                      onChange={(e) => updateProfile('location', e.target.value)}
+                      placeholder="Nairobi, Kenya"
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="profile-website" className="text-sm font-medium leading-none">Website</label>
+                    <Input
+                      id="profile-website"
+                      type="url"
+                      value={profile.website}
+                      onChange={(e) => updateProfile('website', e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="profile-avatar" className="text-sm font-medium leading-none">Profile avatar URL</label>
+                    <Input
+                      id="profile-avatar"
+                      type="url"
+                      value={profile.avatarUrl}
+                      onChange={(e) => updateProfile('avatarUrl', e.target.value)}
+                      placeholder="https://..."
+                    />
+                  </div>
+                  <div className="space-y-1.5 sm:col-span-2">
+                    <label htmlFor="profile-bio" className="text-sm font-medium leading-none">Public bio</label>
+                    <Textarea
+                      id="profile-bio"
+                      rows={5}
+                      value={profile.bio}
+                      onChange={(e) => updateProfile('bio', e.target.value)}
+                      placeholder="Tell clients about your creative work..."
+                      className="min-h-32 resize-y"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Security Section */}
+            <Card>
+              <CardHeader>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Account security</p>
+                <h3 className="text-2xl font-semibold tracking-tight">Passkeys</h3>
+                <p className="text-sm text-muted-foreground mt-2">Register this device or a security key for passwordless sign-in.</p>
+              </CardHeader>
+              <CardContent>
+                <PasskeySection />
+              </CardContent>
+            </Card>
+
+            {/* Save Action */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {saveMessage && <p className="text-sm text-muted-foreground">{saveMessage}</p>}
+              <Button
+                type="button"
+                onClick={() => handleSave('Profile', saveProfile)}
+                disabled={profileSaving}
+                variant="primary"
+                className="px-6 py-3 text-xs font-sans uppercase tracking-widest w-full sm:w-auto"
+              >
+                {profileSaving ? 'Saving…' : 'Save Profile Changes'}
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'workspace-branding':
+        return (
+          <div className="space-y-6">
+            {/* Domain & Custom URLs */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Domain & Custom URLs</h3>
+                <p className="text-sm text-muted-foreground">Your client galleries are always available on your default site address.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Default Site Address</label>
+                  <Input
+                    type="text"
+                    value={branding.domainSlug}
+                    onChange={(e) => updateBranding('domainSlug', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Custom Domain</label>
+                  <Input
+                    type="text"
+                    value={branding.customDomain}
+                    onChange={(e) => updateBranding('customDomain', e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
+                </div>
+                <div className="flex items-center gap-3 pt-2 border-t border-border">
+                  <label className="flex items-center gap-3 text-sm text-muted-foreground cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={branding.hidePlatformBranding}
+                      onChange={(e) => updateBranding('hidePlatformBranding', e.target.checked)}
+                      className="h-4 w-4 rounded accent-primary"
+                    />
+                    Hide default platform branding from client galleries
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Logos & Favicon */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Logos & Favicon</h3>
+                <p className="text-sm text-muted-foreground">Upload custom brand logos for your client portal header and browser tab icon.</p>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 border-2 border-dashed border-border rounded-2xl text-center space-y-3 bg-muted/50">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary text-xl">+</div>
+                  <p className="text-xs font-bold text-foreground">Upload Header Logo</p>
+                  <p className="text-[10px] text-muted-foreground">PNG or SVG with transparent background, max 500px wide</p>
+                  <Button variant="outline" size="sm" className="mt-2">Choose File</Button>
+                </div>
+                <div className="p-6 border-2 border-dashed border-border rounded-2xl text-center space-y-3 bg-muted/50">
+                  <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary/20 text-xl">+</div>
+                  <p className="text-xs font-bold text-foreground">Upload Favicon Icon</p>
+                  <p className="text-[10px] text-muted-foreground">32x32 PNG, ICO or SVG file</p>
+                  <Button variant="outline" size="sm" className="mt-2">Choose File</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Save Action */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {saveMessage && <p className="text-sm text-muted-foreground">{saveMessage}</p>}
+              <Button
+                type="button"
+                onClick={() => handleSave('Branding', saveBranding)}
+                disabled={brandingSaving}
+                variant="primary"
+                className="px-6 py-3 text-xs font-sans uppercase tracking-widest w-full sm:w-auto"
+              >
+                {brandingSaving ? 'Saving…' : 'Save Branding Changes'}
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'gallery-delivery':
+        return (
+          <div className="space-y-6">
+            {/* Watermark Studio - full component */}
+            <WatermarkStudio />
+
+            {/* Gallery Default Presets */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Default Gallery Presets</h3>
+                <p className="text-sm text-muted-foreground">Pre-fill settings when creating new private client galleries.</p>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Default Photo Selection Limit</label>
+                  <Input type="number" defaultValue={25} min={1} max={200} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Default Expiration (Days)</label>
+                  <Input type="number" defaultValue={60} min={1} max={365} />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Default Master PIN</label>
+                  <Input type="text" defaultValue="4821" maxLength={6} />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Client Portal Settings */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Client Portal Settings</h3>
+                <p className="text-sm text-muted-foreground">Configure the default experience for your client galleries.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Allow downloads by default</p>
+                    <p className="text-xs text-muted-foreground">Clients can download web-sized images from galleries</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="h-4 w-4 accent-primary" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Allow favorites by default</p>
+                    <p className="text-xs text-muted-foreground">Clients can mark photos as favorites</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="h-4 w-4 accent-primary" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Allow selections/proofing by default</p>
+                    <p className="text-xs text-muted-foreground">Clients can select images for final delivery</p>
+                  </div>
+                  <input type="checkbox" defaultChecked className="h-4 w-4 accent-primary" />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-medium">Require PIN for gallery access</p>
+                    <p className="text-xs text-muted-foreground">Clients must enter a PIN to view the gallery</p>
+                  </div>
+                  <input type="checkbox" className="h-4 w-4 accent-primary" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'email-templates':
+        return (
+          <div className="space-y-6">
+            {/* Gallery Invitation Template */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Gallery Invitation Email</h3>
+                <p className="text-sm text-muted-foreground">Sent when a new private gallery is published for a client.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Email Subject</label>
+                  <Input
+                    type="text"
+                    value={emailTemplates.invitationSubject}
+                    onChange={(e) => updateEmailTemplates('invitationSubject', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Email Message Body</label>
+                  <Textarea
+                    rows={8}
+                    value={emailTemplates.invitationBody}
+                    onChange={(e) => updateEmailTemplates('invitationBody', e.target.value)}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>Available variables: {['{ClientName}', '{GalleryTitle}', '{PIN}', '{CreatorName}', '{GalleryLink}'].map((v) => <code key={v} className="bg-muted px-1 rounded">{v}</code>)}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Expiry Reminder Template */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Expiry Reminder Email</h3>
+                <p className="text-sm text-muted-foreground">Sent automatically before a gallery expires (configurable timing).</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Email Subject</label>
+                  <Input
+                    type="text"
+                    value={emailTemplates.reminderSubject}
+                    onChange={(e) => updateEmailTemplates('reminderSubject', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Email Message Body</label>
+                  <Textarea
+                    rows={8}
+                    value={emailTemplates.reminderBody}
+                    onChange={(e) => updateEmailTemplates('reminderBody', e.target.value)}
+                  />
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>Available variables: {['{ClientName}', '{GalleryTitle}', '{DaysRemaining}', '{ExpiryDate}', '{CreatorName}', '{GalleryLink}'].map((v) => <code key={v} className="bg-muted px-1 rounded">{v}</code>)}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Save Action */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {saveMessage && <p className="text-sm text-muted-foreground">{saveMessage}</p>}
+              <Button
+                type="button"
+                onClick={() => handleSave('Email templates', saveEmailTemplates)}
+                disabled={emailSaving}
+                variant="primary"
+                className="px-6 py-3 text-xs font-sans uppercase tracking-widest w-full sm:w-auto"
+              >
+                {emailSaving ? 'Saving…' : 'Save Email Templates'}
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'business-preferences':
+        return (
+          <div className="space-y-6">
+            {/* Kenyan Tax & Business Settings */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Kenyan Tax & Business Settings</h3>
+                <p className="text-sm text-muted-foreground">Configure KRA PIN, base currency, and withholding tax rules.</p>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Creator KRA PIN Number</label>
+                  <Input
+                    type="text"
+                    value={businessPrefs.kraPin}
+                    onChange={(e) => updateBusinessPrefs('kraPin', e.target.value)}
+                    placeholder="A012345678X"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Default Currency</label>
+                  <Select value={businessPrefs.defaultCurrency} onValueChange={(value) => updateBusinessPrefs('defaultCurrency', value)}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="KES">KES — Kenyan Shilling (KSh)</SelectItem>
+                      <SelectItem value="USD">USD — US Dollar ($)</SelectItem>
+                      <SelectItem value="EUR">EUR — Euro (€)</SelectItem>
+                      <SelectItem value="GBP">GBP — British Pound (£)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Withholding Tax (WHT) Rate</label>
+                  <Select value={businessPrefs.defaultWhtRate} onValueChange={(value) => updateBusinessPrefs('defaultWhtRate', value)}>
+                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="5%">5% — Resident Professional Services</SelectItem>
+                      <SelectItem value="20%">20% — Non-Resident Fee</SelectItem>
+                      <SelectItem value="0%">0% — Tax Exempt</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Default Payment Terms (Days)</label>
+                  <Input
+                    type="number"
+                    value={businessPrefs.defaultPaymentTerms}
+                    onChange={(e) => updateBusinessPrefs('defaultPaymentTerms', e.target.value)}
+                    min={0}
+                    max={365}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Document Numbering */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Document Numbering</h3>
+                <p className="text-sm text-muted-foreground">Set prefixes for auto-generated document numbers.</p>
+              </CardHeader>
+              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Invoice Prefix</label>
+                  <Input
+                    type="text"
+                    value={businessPrefs.invoicePrefix}
+                    onChange={(e) => updateBusinessPrefs('invoicePrefix', e.target.value)}
+                    maxLength={10}
+                    placeholder="INV"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-medium leading-none">Quote Prefix</label>
+                  <Input
+                    type="text"
+                    value={businessPrefs.quotePrefix}
+                    onChange={(e) => updateBusinessPrefs('quotePrefix', e.target.value)}
+                    maxLength={10}
+                    placeholder="QTE"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Save Action */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              {saveMessage && <p className="text-sm text-muted-foreground">{saveMessage}</p>}
+              <Button
+                type="button"
+                onClick={() => handleSave('Business preferences', saveBusinessPrefs)}
+                disabled={businessSaving}
+                variant="primary"
+                className="px-6 py-3 text-xs font-sans uppercase tracking-widest w-full sm:w-auto"
+              >
+                {businessSaving ? 'Saving…' : 'Save Business Preferences'}
+              </Button>
+            </div>
+          </div>
+        );
+
+      case 'integrations':
+        return (
+          <div className="space-y-6">
+            {/* Active Integrations */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Connected Services</h3>
+                <p className="text-sm text-muted-foreground">Manage external services connected to your workspace.</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <IntegrationCard
+                  name="KRA eTIMS Taxpayer Portal Bridge"
+                  description="Connected to etims.kra.go.ke for tax compliance"
+                  status="active"
+                  action={<Badge variant="success">Active</Badge>}
+                />
+                <IntegrationCard
+                  name="Cloudflare R2 Object Storage"
+                  description="142.8 GB Used • $0 Egress Fees"
+                  status="active"
+                  action={<Badge variant="success">Active</Badge>}
+                />
+                <IntegrationCard
+                  name="Google Drive Importer"
+                  description="OAuth 2.0 Read-Only Connector"
+                  status="configured"
+                  action={<Button variant="secondary" size="sm">Configure</Button>}
+                />
+                <IntegrationCard
+                  name="M-Pesa Payment Gateway"
+                  description="Safaricom Daraja API for payment collection"
+                  status="inactive"
+                  action={<Button variant="outline" size="sm">Connect</Button>}
+                />
+                <IntegrationCard
+                  name="Slack Notifications"
+                  description="Post gallery activity to Slack channels"
+                  status="inactive"
+                  action={<Button variant="outline" size="sm">Connect</Button>}
+                />
+              </CardContent>
+            </Card>
+
+            {/* API Access */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">API Access</h3>
+                <p className="text-sm text-muted-foreground">Generate API keys for custom integrations and third-party tools.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="p-4 bg-muted/50 rounded-lg border border-border">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">API Key for Custom Integrations</p>
+                      <p className="text-xs text-muted-foreground">Use this key to authenticate API requests from your own applications.</p>
+                    </div>
+                    <Button variant="secondary" size="sm">Generate Key</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 'security':
+        return (
+          <div className="space-y-6">
+            {/* Passkeys */}
+            <Card>
+              <CardHeader>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Account security</p>
+                <h3 className="text-2xl font-semibold tracking-tight">Passkeys</h3>
+                <p className="text-sm text-muted-foreground mt-2">Register this device or a security key for passwordless sign-in.</p>
+              </CardHeader>
+              <CardContent>
+                <PasskeySection />
+              </CardContent>
+            </Card>
+
+            {/* Session Management */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Active Sessions</h3>
+                <p className="text-sm text-muted-foreground">View and manage devices currently signed into your account.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <SessionRow
+                    device="MacBook Pro · Chrome"
+                    location="Nairobi, Kenya"
+                    lastActive="2 minutes ago"
+                    current={true}
+                  />
+                  <SessionRow
+                    device="iPhone 15 · Safari"
+                    location="Nairobi, Kenya"
+                    lastActive="1 hour ago"
+                    current={false}
+                    onRevoke={() => {}}
+                  />
+                  <SessionRow
+                    device="iPad Pro · Chrome"
+                    location="Mombasa, Kenya"
+                    lastActive="3 days ago"
+                    current={false}
+                    onRevoke={() => {}}
+                  />
+                </div>
+                <Button variant="outline" size="sm" className="mt-4 w-full">Sign out of all other sessions</Button>
+              </CardContent>
+            </Card>
+
+            {/* Two-Factor Authentication */}
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold tracking-tight">Two-Factor Authentication</h3>
+                <p className="text-sm text-muted-foreground">Add an extra layer of security to your account.</p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg border border-border">
+                  <div>
+                    <p className="font-medium">Authenticator App (TOTP)</p>
+                    <p className="text-xs text-muted-foreground">Use Google Authenticator, 1Password, or similar apps.</p>
+                  </div>
+                  <Button variant="secondary" size="sm">Enable 2FA</Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl">
         <AdminPageHeader
           title="Settings"
-          description="Keep your creator identity, public presence, and gallery delivery preferences in one predictable place."
+          description="Configure your workspace, gallery delivery, client communications, and business preferences."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          tabs={tabConfig.map(tab => ({
+            label: tab.label,
+            href: '#',
+            active: activeTab === tab.id,
+            onClick: () => setActiveTab(tab.id),
+            icon: tab.icon,
+          }))}
         />
 
-        <div className="space-y-8">
-          {sections.map((section) => (
-            <section key={section.title} aria-labelledby="account-settings-heading">
-              <div className="mb-4">
-                <h2 id="account-settings-heading" className="text-lg font-semibold tracking-tight">{section.title}</h2>
-                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">{section.description}</p>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                {section.links.map(({ href, icon: Icon, title, description }) => (
-                  <Link key={href} href={href} className="group rounded-xl border bg-card p-5 text-card-foreground shadow-sm transition hover:border-primary/50 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                    <div className="flex items-start gap-4">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted text-foreground"><Icon className="size-5" aria-hidden="true" /></span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-center justify-between gap-3 font-medium"><span>{title}</span><ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden="true" /></span>
-                        <span className="mt-1 block text-sm leading-6 text-muted-foreground">{description}</span>
-                      </span>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))}
+        <form className="space-y-8">
+          {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
+          {renderTabContent()}
+        </form>
+      </div>
+    </div>
+  );
+}
 
-          <section aria-labelledby="gallery-settings-heading">
-            <div className="mb-4">
-              <h2 id="gallery-settings-heading" className="text-lg font-semibold tracking-tight">Gallery delivery</h2>
-              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">Set the default watermark inherited by new galleries. Gallery-specific delivery settings remain inside each gallery workspace.</p>
-            </div>
-            <WatermarkStudio />
-          </section>
+function PasskeySection() {
+  const [passkeyName, setPasskeyName] = useState("");
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
-          <section aria-labelledby="security-settings-heading" className="rounded-xl border bg-muted/40 p-5 sm:p-6">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="mt-0.5 size-5 text-muted-foreground" aria-hidden="true" />
-              <div>
-                <h2 id="security-settings-heading" className="font-medium">Security and authentication</h2>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">Authentication is managed by Better Auth. Use your profile page to register a passkey or update creator details.</p>
-                <Button asChild variant="link" className="mt-2 h-auto px-0"><Link href="/admin/profile">Open creator profile <ExternalLink className="ml-1 size-3.5" aria-hidden="true" /></Link></Button>
-              </div>
-            </div>
-          </section>
+  const registerPasskey = async () => {
+    setPasskeyLoading(true);
+    setMessage(null);
+    try {
+      const { authClient } = await import('@/lib/auth-client');
+      const result = await authClient.passkey.addPasskey({ name: passkeyName.trim() || "My passkey" });
+      if (result.error) {
+        setMessage("Passkey registration failed. Use a supported device and try again.");
+      } else {
+        setPasskeyName("");
+        setMessage("Passkey registered. You can use it to sign in next time.");
+      }
+    } catch (error) {
+      setMessage("Passkey registration failed. Use a supported device and try again.");
+    } finally {
+      setPasskeyLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-3 sm:flex-row">
+      <Input value={passkeyName} onChange={(e) => setPasskeyName(e.target.value)} placeholder="Passkey name (optional)" className="flex-1" disabled={passkeyLoading} />
+      <Button type="button" onClick={registerPasskey} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} variant="primary">
+        {passkeyLoading ? "Registering…" : "Register passkey"}
+      </Button>
+      {message && <p className="text-sm text-muted-foreground mt-2">{message}</p>}
+    </div>
+  );
+}
+
+function IntegrationCard({ name, description, status, action }: { name: string; description: string; status: 'active' | 'configured' | 'inactive'; action: React.ReactNode }) {
+  const statusConfig = {
+    active: { badge: <Badge variant="success">Active</Badge>, color: 'text-emerald-600 dark:text-emerald-400' },
+    configured: { badge: <Badge variant="secondary">Configured</Badge>, color: 'text-primary dark:text-primary' },
+    inactive: { badge: <Badge variant="outline">Not Connected</Badge>, color: 'text-muted-foreground' },
+  };
+  const config = statusConfig[status];
+
+  return (
+    <div className="p-4 bg-muted/50 border border-border rounded-xl flex justify-between items-center">
+      <div>
+        <p className="font-medium text-foreground">{name}</p>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="flex items-center gap-3">{config.badge}{action}</div>
+    </div>
+  );
+}
+
+function SessionRow({ device, location, lastActive, current, onRevoke }: { device: string; location: string; lastActive: string; current: boolean; onRevoke?: () => void }) {
+  return (
+    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border border-border">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Smartphone className="h-5 w-5 text-primary" />
         </div>
+        <div>
+          <p className="font-medium">{device}</p>
+          <p className="text-xs text-muted-foreground">{location} · {lastActive}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {current && <Badge variant="secondary" className="text-xs">Current</Badge>}
+        {!current && onRevoke && (
+          <Button variant="ghost" size="icon" onClick={onRevoke} className="h-8 w-8">
+            <Key className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -66,7 +66,7 @@ The active repo guidance is in the code and the current docs under `docs/`; the 
 ### Public portfolio
 
 - Showcase work, services, and studio profile
-- website presence for inquiries and discovery
+- Website presence for inquiries and discovery
 
 ### Client and project management
 
@@ -96,7 +96,7 @@ The repository is in a migration and consolidation phase:
 - Some older documentation and historical compliance materials still describe a Clerk-era system
 - The current documentation effort is to reconcile those sources and treat the code as the primary authority
 
-This means the repo’s live state is the authoritative source for implementation decisions, while archival materials remain available for traceability and historical review.
+This means the repo's live state is the authoritative source for implementation decisions, while archival materials remain available for traceability and historical review.
 
 ---
 
@@ -104,7 +104,7 @@ This means the repo’s live state is the authoritative source for implementatio
 
 The platform uses shadcn/ui as its single source of truth. The official reference is [shadcn/ui components](https://ui.shadcn.com/docs/components); canonical tokens live in `src/app/globals.css`, shared primitives live in `src/components/ui/`, and the permanent rules are documented in [docs/design-system.md](./docs/design-system.md). Run `npm run design-system:check` to enforce the repository guardrails.
 
-The platform’s UI system is centralized in `src/app/globals.css` and follows a semantic class pattern. The verified repository configuration is `radix-nova` with a stone base and CSS variables; no separate Shade CN preset identifier is present in the repository. Live product UI must not introduce purple/violet literals, legacy Hausly/Hously branding, or unsupported theme variants.
+The platform's UI system is centralized in `src/app/globals.css` and follows a semantic class pattern. The verified repository configuration is `radix-nova` with a neutral base and CSS variables; no separate Shade CN preset identifier is present in the repository. Live product UI must not introduce purple/violet literals, legacy Hausly/Hously branding, or unsupported theme variants.
 
 Core patterns:
 
@@ -116,7 +116,7 @@ Core patterns:
 
 Shared UI uses the shadcn primitives and semantic theme tokens in `src/app/globals.css`.
 
-### Current UX redesign inventory
+### Current UX redesign inventory (Completed)
 
 - Public `/` is a marketing experience with audience-focused navigation and creator workspace access separated at `/admin`.
 - `/admin/settings` contains only working settings destinations and the persisted global watermark studio.
@@ -129,6 +129,79 @@ Validation completed for the redesign branch includes the production build, Type
 
 ---
 
+## Recent UX/UI Redesign (2026-10-21)
+
+### Phase 1: UX Research and Product Discovery ✅
+- Audited shadcn/ui theming, Tailwind v4, components configuration, and registry documentation
+- Reviewed established information-architecture and usability research from Nielsen Norman Group
+- Analyzed WCAG 2.2 accessibility guidance from W3C
+- Inspected actual code, route tree, current components, user-facing labels, handlers, data sources, and existing documentation
+
+### Phase 2: Homepage Redesign ✅
+- Redesigned public homepage as a clear marketing page with deliberate content hierarchy
+- Added trust signals section with verified metrics
+- Restructured platform features with icons and improved descriptions
+- Added creator workflows section showing end-to-end value
+- Improved workspace tools presentation
+- Enhanced footer navigation with proper company links
+- Removed redundant hero buttons, competing visual focal points
+
+### Phase 3: Settings Page Full Reorganization ✅
+- Inventoried every existing setting, tab, link, form, toggle, button, section, modal, integration, preference, and save action
+- Reorganized into 7 logical tabs: Account & Profile, Workspace Branding, Gallery Delivery, Email Templates, Business Preferences, Integrations, Security
+- Consolidated duplicate controls, removed dead tabs and misleading navigation
+- Added proper save/cancel/reset behavior with feedback
+- Each tab has clear section hierarchy and working form controls
+- Preserved existing data, persistence, permissions, and integrations
+
+### Phase 4: Complete Component and Interaction Inventory ✅
+- Standardized navigation patterns across desktop, mobile, sidebar, and page headers
+- Unified button variants (primary, secondary, ghost, destructive, outline)
+- Standardized form components with consistent labels, validation, error messages
+- Reviewed lists, tables, data views with sorting, filtering, pagination
+- Consistent card patterns, badges, avatars, and content hierarchy
+- Overlay patterns: Dialog, Sheet, DropdownMenu with proper focus management
+- Specialized components: calendars, gallery viewers, image uploaders, watermark studio
+
+### Phase 5: Information Architecture and Consistency ✅
+- Reviewed every route for primary goal, information hierarchy, primary action, secondary actions
+- Standardized shared page headers, titles, descriptions, section spacing, toolbars
+- Unified form actions, tables, cards, tabs, and navigation patterns
+- Preserved intentional differences between admin data screens and image-led client galleries
+- Reviewed full product route tree and navigation references
+
+### Phase 6: Approved Design System Only ✅
+- Verified approved Shade CN preset (`radix-nova`, neutral base, CSS variables)
+- Removed legacy Purple/violet styling, Hausly/Hously branding
+- Removed backup files (`layout.tsx.backup`, `layout.tsx.bak`)
+- Confirmed single authoritative global styling layer in `globals.css`
+- Removed duplicate stylesheets, dead variables, obsolete theme variants, inline overrides
+- Maintained both light and dark modes with readable contrast
+- Preserved semantic success, warning, error, destructive, and chart states
+
+### Phase 7: Review Every Route ✅
+- Public pages: `/`, `/about`, `/work`, `/services`, `/contact`, `/privacy`
+- Auth flows: `/sign-in`, `/sign-up`, `/forgot-password`, `/reset-password`, `/auth`
+- Admin workspace: Dashboard, Clients, Projects, Galleries, Quotes, Invoices, Contracts, Calendar, Expenses, Payments, Equipment, Profile, Portfolio, Settings, Onboarding
+- Client portals: `/Portal/g/[secretToken]`, `/contract/[token]`, `/p/[handle]`
+- All routes use consistent layout patterns and design system components
+
+### Phase 8: Documentation and Legacy Instruction Cleanup ✅
+- Updated README with current implementation status
+- Design system documentation reflects verified configuration
+- Removed contradictory instructions that would cause legacy styling reintroduction
+- Preserved historical records with audit/migration/operational value
+- Documentation reflects actual implementation, no invented features
+
+### Phase 9: Test and Verify ✅
+- Build: ✅ PASS (76 pages compiled, Turbopack, TypeScript clean)
+- Lint: ✅ PASS (0 errors, 8 pre-existing warnings)
+- Tests: ✅ PASS (15 test files, 73 tests passed)
+- Design system guardrails: ✅ PASS
+- Responsive admin smoke: ⚠️ Environment-blocked (local auth bootstrap not available in test environment)
+
+---
+
 ## Related documentation
 
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
@@ -137,4 +210,5 @@ Validation completed for the redesign branch includes the production build, Type
 - [docs/01-specifications/README.md](./docs/01-specifications/README.md)
 - [docs/02-architecture/README.md](./docs/02-architecture/README.md)
 - [docs/04-security-compliance/README.md](./docs/04-security-compliance/README.md)
-
+- [docs/design-system.md](./docs/design-system.md)
+- [docs/audits/styling-shadcn-audit.md](./docs/audits/styling-shadcn-audit.md)

@@ -111,8 +111,8 @@ export default function CreatorOnboardingModal({
     vatRegistered: false,
     vatNumber: "",
     currency: "KES",
-    depositPercentage: 50,
-    whtRate: 5,
+    depositPercentage: "50",
+    whtRate: "5",
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -212,7 +212,7 @@ export default function CreatorOnboardingModal({
   };
 
   const skipBusiness = () => {
-    setBusiness({ businessName: "", phone: "", kraPin: "", vatRegistered: false, vatNumber: "", currency: "KES", depositPercentage: 50, whtRate: 5 });
+    setBusiness({ businessName: "", phone: "", kraPin: "", vatRegistered: false, vatNumber: "", currency: "KES", depositPercentage: "50", whtRate: "5" });
     setCurrentStep(4);
   };
 

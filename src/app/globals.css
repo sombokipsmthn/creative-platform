@@ -6,7 +6,6 @@
 
 /* ─── 2. Theme: Typography ─────────────────────────── */
 @theme inline {
-  --font-sans: var(--font-outfit);
   --font-mono: ui-monospace;
 
   /*

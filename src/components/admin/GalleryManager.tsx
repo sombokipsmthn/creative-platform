@@ -642,7 +642,7 @@ export default function AdminGalleryManagerPage() {
                   const typeStyles = {
                     favorite: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-500/10', label: 'Favorited a photo' },
                     selection: { icon: CheckCircle2, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected for proofing' },
-                    selection_and_favorite: { icon: Sparkles, color: 'text-indigo-500', bg: 'bg-indigo-500/10', label: 'Selected & Favorited' },
+                    selection_and_favorite: { icon: Sparkles, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected & Favorited' },
                     comment: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Left a comment' },
                     download: { icon: Download, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Downloaded a photo' },
                     view: { icon: Eye, color: 'text-slate-500', bg: 'bg-slate-500/10', label: 'Viewed the gallery' },

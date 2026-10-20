@@ -113,7 +113,7 @@ export default function ContractTemplatesPage() {
             <div className="ui-card-content">
               {loading ? (
                 <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 </div>
               ) : error ? (
                 <div className="p-4 text-red-600 dark:text-red-400">{error}</div>

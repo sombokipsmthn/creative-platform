@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SelectCompat } from '@/components/ui/select-compat';
 
 /* =========================================================
    TYPES
@@ -1472,7 +1473,7 @@ export default function NewQuotePage() {
                   Client
                 </span>
 
-                <select
+                <SelectCompat
                   value={
                     clientId
                   }
@@ -1558,7 +1559,7 @@ export default function NewQuotePage() {
                       </option>
                     )
                   )}
-                </select>
+                </SelectCompat>
               </label>
 
               {/* PROJECT */}
@@ -1602,7 +1603,7 @@ export default function NewQuotePage() {
                   Currency
                 </span>
 
-                <select
+                <SelectCompat
                   value={
                     currency
                   }
@@ -1633,7 +1634,7 @@ export default function NewQuotePage() {
                   <option value="GBP">
                     GBP
                   </option>
-                </select>
+                </SelectCompat>
               </label>
 
               {/* VALID UNTIL */}
@@ -1888,7 +1889,7 @@ export default function NewQuotePage() {
                               Category
                             </span>
 
-                            <select
+                            <SelectCompat
                               value={
                                 item.category ||
                                 ""
@@ -1934,7 +1935,7 @@ export default function NewQuotePage() {
                                   </option>
                                 )
                               )}
-                            </select>
+                            </SelectCompat>
                           </label>
                         </div>
 
@@ -2343,7 +2344,7 @@ export default function NewQuotePage() {
                     />
 
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
-                      <select
+                      <SelectCompat
                         className="bg-transparent text-xs text-slate-500 dark:text-zinc-400 px-1 py-1 outline-none"
                         onChange={(
                           event
@@ -2381,7 +2382,7 @@ export default function NewQuotePage() {
                         <option value="Net 30">
                           Net 30
                         </option>
-                      </select>
+                      </SelectCompat>
                     </div>
                   </div>
                 </label>
@@ -2493,7 +2494,7 @@ export default function NewQuotePage() {
                   </span>
 
                   <div className="mt-2 flex gap-2">
-                    <select
+                    <SelectCompat
                       value={
                         discountType
                       }
@@ -2522,7 +2523,7 @@ export default function NewQuotePage() {
                       <option value="fixed">
                         Fixed
                       </option>
-                    </select>
+                    </SelectCompat>
 
                     <input
                       type="number"

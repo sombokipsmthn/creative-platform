@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -37,10 +39,10 @@ export default function ForgotPasswordPage() {
           <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Forgot password?</h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Enter your email and we’ll send a secure reset link.</p>
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isLoading} placeholder="you@example.com" className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900" />
+            <Input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} disabled={isLoading} placeholder="you@example.com" />
             {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{message}</p>}
             {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
-            <button type="submit" disabled={isLoading} className="w-full rounded-xl bg-purple-600 px-4 py-3 text-sm font-medium text-white disabled:opacity-50">{isLoading ? "Sending..." : "Send reset link"}</button>
+            <Button type="submit" disabled={isLoading} variant="primary" className="w-full">{isLoading ? "Sending..." : "Send reset link"}</Button>
           </form>
         </div>
       </div>

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { formatDistanceToNow } from 'date-fns'
 
 interface ActivityItem {
@@ -73,27 +76,21 @@ export default function GalleryActivityTab({ galleryId }: GalleryActivityTabProp
 
   if (loading && activity.length === 0) {
     return (
-      <div className="ui-card p-6">
+      <Card><CardContent className="p-6">
         <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading activity...</span>
         </div>
-      </div>
+      </CardContent></Card>
     )
   }
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <div className="ui-card p-6 space-y-4">
+      <Card><CardContent className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Client Activity</h2>
-          <button
-            disabled={loading}
-            className="gallery-btn gallery-btn-secondary gap-2"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <Button type="button" disabled={loading} variant="outline" size="sm"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />Refresh</Button>
         </div>
 
         {error && (
@@ -150,7 +147,7 @@ export default function GalleryActivityTab({ galleryId }: GalleryActivityTabProp
             ))}
           </div>
         )}
-      </div>
+      </CardContent></Card>
     </div>
   )
 }

@@ -8,6 +8,8 @@ import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/comp
 import { isValidThemeId } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'
 import ThemeToggle from '@/components/ThemeToggle'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface GalleryPageProps {
   params: Promise<{
@@ -261,18 +263,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             Enter the PIN provided by your photographer to access this private gallery.
           </p>
 
-          <input
-            value={pin}
-            onChange={(e) => {
-              setPin(e.target.value)
-              setPinError(false)
-            }}
-            maxLength={6}
-            placeholder="PIN"
-            type="password"
-            autoFocus
-            className="w-full text-center text-3xl tracking-[0.5em] rounded-2xl bg-slate-100 dark:bg-zinc-900 p-4 font-sans outline-none border border-slate-200 dark:border-zinc-800 focus:border-purple-600"
-          />
+          <Input value={pin} onChange={(e) => { setPin(e.target.value); setPinError(false) }} maxLength={6} placeholder="PIN" type="password" autoFocus className="w-full text-center text-3xl tracking-[0.5em]" />
 
           {pinError && (
             <p className="text-xs font-sans text-red-500">
@@ -280,12 +271,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             </p>
           )}
 
-          <button
-            type="submit"
-            className="w-full py-4 rounded-xl bg-purple-600 text-white text-xs font-sans uppercase tracking-widest hover:bg-purple-700 transition font-bold"
-          >
-            Unlock Gallery
-          </button>
+          <Button type="submit" variant="primary" className="w-full py-4 text-xs uppercase tracking-widest">Unlock Gallery</Button>
         </form>
       </main>
     )

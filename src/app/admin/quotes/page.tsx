@@ -170,10 +170,10 @@ export default function QuotesPage() {
         {/* HEADER */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="ui-eyebrow">Sales & Production</p>
-            <h1 className="ui-page-title">Quotes</h1>
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Sales & Production</p>
+            <h1 className="text-3xl font-semibold tracking-tight">Quotes</h1>
 
-            <p className="ui-meta">
+            <p className="text-sm text-muted-foreground">
               Production estimates and client proposals.
             </p>
           </div>
@@ -190,28 +190,28 @@ export default function QuotesPage() {
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Total Quotes</p>
-            <p className="ui-stat-value">{quotes.length}</p>
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Total Quotes</p>
+            <p className="text-2xl font-bold">{quotes.length}</p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Accepted</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Accepted</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {acceptedQuotes}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Invoiced</p>
-            <p className="ui-stat-value text-cyan-600 dark:text-cyan-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Invoiced</p>
+            <p className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">
               {invoicedQuotes}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Pipeline Value</p>
-            <p className="ui-stat-value">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Pipeline Value</p>
+            <p className="text-2xl font-bold">
               {formatAmount(totalValue, 'KES')}
             </p>
           </div>
@@ -250,13 +250,13 @@ export default function QuotesPage() {
 
         {/* ERROR */}
         {error && (
-          <div className="ui-card p-4">
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* TABLE */}
-        <div className="ui-card">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
             <div className="px-6 py-16 text-center">
               <p className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
@@ -264,18 +264,18 @@ export default function QuotesPage() {
               </p>
             </div>
           ) : filteredQuotes.length === 0 ? (
-            <div className="ui-empty-state">
-              <div className="ui-empty-icon">
+            <div className="rounded-xl border border-dashed p-12 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <Plus className="h-6 w-6" />
               </div>
 
-              <h2 className="ui-section-title">
+              <h2 className="text-2xl font-semibold tracking-tight">
                 {quotes.length === 0
                   ? 'No quotes yet'
                   : 'No matching quotes'}
               </h2>
 
-              <p className="ui-body">
+              <p className="text-sm text-muted-foreground">
                 {quotes.length === 0
                   ? 'Create your first production quote to start building your sales pipeline.'
                   : 'Try changing your search or status filter.'}
@@ -293,16 +293,16 @@ export default function QuotesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="ui-table">
+              <table className="w-full caption-bottom text-sm">
                 <thead>
                   <tr>
-                    <th className="ui-table-header">Quote</th>
-                    <th className="ui-table-header">Client</th>
-                    <th className="ui-table-header">Project</th>
-                    <th className="ui-table-header">Status</th>
-                    <th className="ui-table-header">Created</th>
-                    <th className="ui-table-header">Total</th>
-                    <th className="ui-table-header" />
+                    <th className="w-full caption-bottom text-sm-header">Quote</th>
+                    <th className="w-full caption-bottom text-sm-header">Client</th>
+                    <th className="w-full caption-bottom text-sm-header">Project</th>
+                    <th className="w-full caption-bottom text-sm-header">Status</th>
+                    <th className="w-full caption-bottom text-sm-header">Created</th>
+                    <th className="w-full caption-bottom text-sm-header">Total</th>
+                    <th className="w-full caption-bottom text-sm-header" />
                   </tr>
                 </thead>
 
@@ -316,23 +316,23 @@ export default function QuotesPage() {
                     return (
                       <tr
                         key={quote.id}
-                        className="ui-table-row"
+                        className="w-full caption-bottom text-sm-row"
                       >
                         {/* QUOTE */}
-                        <td className="ui-table-cell">
+                        <td className="w-full caption-bottom text-sm-cell">
                           <div className="space-y-1">
                             <p className="font-medium text-slate-900 dark:text-white">
                               {quote.title || 'Untitled Quote'}
                             </p>
 
-                            <p className="ui-meta">
+                            <p className="text-sm text-muted-foreground">
                               {quote.quoteNumber || quote.id.slice(0, 8).toUpperCase()}
                             </p>
                           </div>
                         </td>
 
                         {/* CLIENT */}
-                        <td className="ui-table-cell">
+                        <td className="w-full caption-bottom text-sm-cell">
                           {quote.client ? (
                             <div className="space-y-1">
                               <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
@@ -340,25 +340,25 @@ export default function QuotesPage() {
                               </p>
 
                               {quote.client.company && (
-                                <p className="ui-caption">
+                                <p className="text-xs text-muted-foreground">
                                   {quote.client.company}
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span className="ui-caption">
+                            <span className="text-xs text-muted-foreground">
                               No client
                             </span>
                           )}
                         </td>
 
                         {/* PROJECT */}
-                        <td className="ui-table-cell">
+                        <td className="w-full caption-bottom text-sm-cell">
                           {quote.projectName || '—'}
                         </td>
 
                         {/* STATUS */}
-                        <td className="ui-table-cell">
+                        <td className="w-full caption-bottom text-sm-cell">
                           <div className="flex flex-col items-start gap-2">
                             <span
                               className={`ui-badge ${status === 'accepted' ? 'ui-badge-success' :
@@ -384,12 +384,12 @@ export default function QuotesPage() {
                         </td>
 
                         {/* CREATED */}
-                        <td className="ui-table-cell">
+                        <td className="w-full caption-bottom text-sm-cell">
                           {formatDate(quote.createdAt)}
                         </td>
 
                         {/* TOTAL */}
-                        <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
+                        <td className="w-full caption-bottom text-sm-cell text-right font-medium text-slate-900 dark:text-white">
                           {formatAmount(
                             quote.total,
                             quote.currency
@@ -397,7 +397,7 @@ export default function QuotesPage() {
                         </td>
 
                         {/* ACTION */}
-                        <td className="ui-table-cell text-right">
+                        <td className="w-full caption-bottom text-sm-cell text-right">
                           <Button
                             onClick={() => router.push(`/admin/quotes/${quote.id}`)}
                             variant="secondary"

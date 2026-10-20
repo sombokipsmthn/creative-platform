@@ -285,9 +285,9 @@ export default function AdminClientsPage() {
             ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
             ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
-              <p className={`ui-stat-label ${color}`}>{label}</p>
-              <p className="ui-stat-value">{count}</p>
+            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
+              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
+              <p className="text-2xl font-bold">{count}</p>
             </div>
           ))}
         </div>
@@ -342,7 +342,7 @@ export default function AdminClientsPage() {
             {filteredClients.map((client) => (
               <div
                 key={client.id}
-                className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
@@ -404,25 +404,25 @@ export default function AdminClientsPage() {
               </Button>
 
               <div className="space-y-1">
-                <p className="ui-eyebrow">CRM</p>
-                <h2 className="ui-section-title">Register New Client</h2>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">CRM</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Register New Client</h2>
               </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateClient} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="ui-label">Contact Name *</label>
+                  <label className="text-sm font-medium leading-none">Contact Name *</label>
                   <Input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Email</label>
+                    <label className="text-sm font-medium leading-none">Email</label>
                     <Input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Phone</label>
+                    <label className="text-sm font-medium leading-none">Phone</label>
                     <div className="flex items-center gap-2">
                       <Select value={form.phoneCountry} onValueChange={handlePhoneCountryChange}>
                         <SelectTrigger className="w-auto max-w-[9rem] shrink-0">
@@ -438,7 +438,7 @@ export default function AdminClientsPage() {
                       <Input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="min-w-0 flex-1" />
                     </div>
                     <div className="space-y-1">
-                      <label className="ui-label">Location</label>
+                      <label className="text-sm font-medium leading-none">Location</label>
                       <Input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} />
                     </div>
                   </div>
@@ -446,11 +446,11 @@ export default function AdminClientsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Company / Organization</label>
+                    <label className="text-sm font-medium leading-none">Company / Organization</label>
                     <Input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Website</label>
+                    <label className="text-sm font-medium leading-none">Website</label>
                     <Input 
                       type="url" 
                       placeholder="https://company.com" 
@@ -474,11 +474,11 @@ export default function AdminClientsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">KRA PIN</label>
+                    <label className="text-sm font-medium leading-none">KRA PIN</label>
                     <Input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Status</label>
+                    <label className="text-sm font-medium leading-none">Status</label>
                     <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value as ClientStatus })}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -493,7 +493,7 @@ export default function AdminClientsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Internal Notes</label>
+                  <label className="text-sm font-medium leading-none">Internal Notes</label>
                   <Textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
                 </div>
 
@@ -535,8 +535,8 @@ export default function AdminClientsPage() {
 
               <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
                 <div>
-                  <p className="ui-label">Client Status</p>
-                  <p className="ui-meta">Changes are saved directly to the database.</p>
+                  <p className="text-sm font-medium leading-none">Client Status</p>
+                  <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -555,7 +555,7 @@ export default function AdminClientsPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="ui-label">Internal Notes</p>
+                <p className="text-sm font-medium leading-none">Internal Notes</p>
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
               </div>
 

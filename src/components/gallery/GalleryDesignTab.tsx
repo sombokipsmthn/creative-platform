@@ -5,6 +5,9 @@ import { Loader2, AlertCircle, Check } from 'lucide-react'
 import Image from 'next/image'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'
+import { SelectCompat } from '@/components/ui/select-compat';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface GalleryPhoto {
   id: string
@@ -195,7 +198,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   if (loading || !savedTheme) {
     return (
-      <div className="ui-card p-6">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
         <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading design settings...</span>
@@ -257,14 +260,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Custom Theme Name (Optional)
             </label>
-            <input
-              type="text"
-              value={customThemeName}
-              onChange={(e) => setCustomThemeName(e.target.value)}
-              placeholder="My Custom Theme"
-              className={`w-full gallery-input ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
-              disabled={isSaving}
-            />
+            <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
             {customThemeName && (
               <p className="text-xs text-[var(--color-text-muted)] mt-1">
                 Will be saved as a custom theme when you select a theme above.
@@ -338,11 +334,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 />
               </div>
 
-              <button
-                onClick={() => void handleSaveFocalPoint()}
-                disabled={isSaving}
-                className="gallery-btn gallery-btn-primary"
-              >
+              <Button type="button" onClick={() => void handleSaveFocalPoint()} disabled={isSaving} variant="primary">
                 {isSaving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -351,7 +343,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 ) : (
                   'Save Focal Point'
                 )}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -359,7 +351,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Cover Style
             </label>
-            <select
+            <SelectCompat
               value={savedTheme.coverStyle}
               onChange={(e) => void updateTheme({ coverStyle: e.target.value })}
               className="w-full gallery-input"
@@ -370,7 +362,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="minimal">Minimal (Text Only)</option>
               <option value="immersive">Immersive (Full Bleed)</option>
               <option value="none">None</option>
-            </select>
+            </SelectCompat>
           </div>
 
           {['image', 'split', 'centered', 'immersive'].includes(savedTheme.coverStyle) && (
@@ -469,7 +461,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
               Font Family
             </label>
-            <select
+            <SelectCompat
               value={savedTheme.fontFamily}
               onChange={(e) => void updateTheme({ fontFamily: e.target.value })}
               className="w-full gallery-input"
@@ -478,7 +470,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="serif">Serif (Editorial)</option>
               <option value="modern">Modern (Geometric)</option>
               <option value="editorial">Editorial (Story)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <p className="text-xs text-[var(--color-text-muted)]">
@@ -569,7 +561,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Style</label>
-            <select
+            <SelectCompat
               value={savedTheme.gridStyle}
               onChange={(e) => void updateTheme({ gridStyle: e.target.value })}
               className="w-full gallery-input"
@@ -578,12 +570,12 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="vertical">Vertical (Column Stack)</option>
               <option value="horizontal">Horizontal (Row Stack)</option>
               <option value="uniform">Uniform (Equal Sizes)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Thumbnail Size</label>
-            <select
+            <SelectCompat
               value={savedTheme.thumbnailSize}
               onChange={(e) => void updateTheme({ thumbnailSize: e.target.value })}
               className="w-full gallery-input"
@@ -591,12 +583,12 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="small">Small (Compact View)</option>
               <option value="regular">Regular (Balanced)</option>
               <option value="large">Large (Spacious)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Spacing</label>
-            <select
+            <SelectCompat
               value={savedTheme.gridSpacing}
               onChange={(e) => void updateTheme({ gridSpacing: e.target.value })}
               className="w-full gallery-input"
@@ -604,12 +596,12 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="tight">Tight (Minimal Gap)</option>
               <option value="regular">Regular (Balanced Gap)</option>
               <option value="wide">Wide (Spacious Gap)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Aspect Ratio</label>
-            <select
+            <SelectCompat
               value={savedTheme.aspectRatio}
               onChange={(e) => void updateTheme({ aspectRatio: e.target.value })}
               className="w-full gallery-input"
@@ -619,7 +611,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <option value="16:9">Widescreen (16:9)</option>
               <option value="4:3">Standard (4:3)</option>
               <option value="3:2">Classic (3:2)</option>
-            </select>
+            </SelectCompat>
           </div>
 
           {savedTheme.gridStyle === 'masonry' && (
@@ -647,14 +639,14 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Navigation Style</label>
-            <select
+            <SelectCompat
               value={savedTheme.navigationStyle}
               onChange={(e) => void updateTheme({ navigationStyle: e.target.value })}
               className="w-full gallery-input"
             >
               <option value="icons-and-text">Icons with Text</option>
               <option value="icons-only">Icons Only</option>
-            </select>
+            </SelectCompat>
           </div>
 
           <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">

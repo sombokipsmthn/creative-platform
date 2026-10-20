@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Plus, Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type FilterValue = string | undefined;
 
@@ -59,8 +62,7 @@ export default function TableFilterBar({
     onSearchChange(event.target.value);
   };
 
-  const handleFilterChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = event.target;
+  const handleFilterChange = (name: string, value: string) => {
     onFiltersChange({
       ...filters,
       [name]: value === 'all' ? undefined : value,
@@ -73,12 +75,12 @@ export default function TableFilterBar({
         <div className="admin-filter-search">
           <div className="relative w-full md:w-96">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-faint)]" />
-            <input
+            <Input
               type="search"
               placeholder={`Search ${itemLabel.toLowerCase()} by name, client, status...`}
               value={search}
               onChange={handleSearchChange}
-              className="ui-input w-full pl-10"
+              className="w-full pl-10"
               aria-label={`Search ${itemLabel}`}
             />
           </div>
@@ -115,36 +117,36 @@ export default function TableFilterBar({
             }
 
             return (
-              <select
+              <Select
                 key={option.value}
-                name={option.value}
                 value={filters[option.value] ?? 'all'}
-                onChange={handleFilterChange}
-                className="ui-select min-w-[9.5rem]"
-                aria-label={option.label}
+                onValueChange={(value) => handleFilterChange(option.value, value)}
               >
-                <option value="all">All {option.label.toLowerCase()}</option>
-                {option.options?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="min-w-[9.5rem]" aria-label={option.label}>
+                  <SelectValue placeholder={`All ${option.label.toLowerCase()}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All {option.label.toLowerCase()}</SelectItem>
+                  {option.options?.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             );
           })}
 
           {actions.length > 0 && (
             <div ref={actionsRef} className="relative">
-              <button
+              <Button
                 type="button"
-                className="ui-button ui-button-secondary"
+                variant="secondary"
                 onClick={() => setActionsOpen((current) => !current)}
                 aria-haspopup="menu"
                 aria-expanded={actionsOpen}
               >
                 Actions
                 <ChevronDown className={`h-3.5 w-3.5 transition-transform ${actionsOpen ? 'rotate-180' : ''}`} />
-              </button>
+              </Button>
 
               {actionsOpen && (
                 <div
@@ -152,20 +154,19 @@ export default function TableFilterBar({
                   role="menu"
                 >
                   {actions.map((action) => (
-                    <button
+                    <Button
                       key={action.label}
                       type="button"
+                      variant="ghost"
                       role="menuitem"
-                      className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-xs font-medium transition hover:bg-[var(--color-bg-soft)] ${
-                        action.destructive ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-primary)]'
-                      }`}
+                      className={`w-full justify-start rounded-lg px-3 py-2.5 text-left text-xs font-medium ${action.destructive ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-primary)]'}`}
                       onClick={() => {
                         setActionsOpen(false);
                         action.onClick();
                       }}
                     >
                       {action.label}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -173,14 +174,15 @@ export default function TableFilterBar({
           )}
 
           {onAddItem && (
-            <button
+            <Button
               type="button"
               onClick={onAddItem}
-              className="ui-button ui-button-primary text-xs font-sans uppercase tracking-widest"
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
             >
               <Plus className="h-3.5 w-3.5" />
               New {itemLabel}
-            </button>
+            </Button>
           )}
         </div>
       </div>

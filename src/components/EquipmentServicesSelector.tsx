@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { SERVICE_CATALOG, ServiceCatalogItem, type ServiceCategory } from '@/lib/serviceCatalog';
 import { toCatalogItem, toServiceCatalogItem } from '@/lib/catalog';
+import { SelectCompat } from '@/components/ui/select-compat';
 
 export type QuoteLineItem = {
   id: string;
@@ -325,7 +326,7 @@ export default function EquipmentServicesSelector({
               <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
                 Target Section *
               </label>
-              <select
+              <SelectCompat
                 value={customSection}
                 onChange={(event) => handleSectionChange(event.target.value)}
                 className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
@@ -340,7 +341,7 @@ export default function EquipmentServicesSelector({
                 <option value="C. Travel & Logistics">C. Travel & Logistics</option>
                 <option value="Postproduction (Per output billing)">Postproduction (Per output billing)</option>
                 <option value="Extra costs">Extra costs</option>
-              </select>
+              </SelectCompat>
             </div>
 
             <div>

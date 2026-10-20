@@ -81,7 +81,7 @@ function QuickAction({ href, label, detail, icon, target }: { href: string; labe
 }
 
 function Panel({ title, eyebrow, action, children }: { title: string; eyebrow?: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return <section className="ui-panel"><div className="ui-panel-header"><div>{eyebrow && <p className="ui-eyebrow">{eyebrow}</p>}<h2 className="ui-card-title mt-1">{title}</h2></div>{action}</div>{children}</section>;
+  return <section className="ui-panel"><div className="ui-panel-header"><div>{eyebrow && <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">{eyebrow}</p>}<h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title mt-1">{title}</h2></div>{action}</div>{children}</section>;
 }
 
 function ActivityRow({ item }: { item: DashboardStats['activity'][number] }) {

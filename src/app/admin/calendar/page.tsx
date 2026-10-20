@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, List } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfDay, eachDayOfInterval, differenceInCalendarDays, isSameDay, isSameMonth, isSameWeek, parseISO, addDays, subDays } from 'date-fns';
 
 type CalendarView = 'month' | 'week' | 'agenda';
@@ -184,12 +185,7 @@ export default function CalendarPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button
-              onClick={handlePrev}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50 transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
+            <Button type="button" onClick={handlePrev} variant="outline" size="icon"><ChevronLeft className="h-4 w-4" /></Button>
 
             <div className="flex-1 flex justify-center">
               <span className="text-center text-slate-900 dark:text-white font-medium">
@@ -197,59 +193,16 @@ export default function CalendarPage() {
               </span>
             </div>
 
-            <button
-              onClick={handleNext}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50 transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+            <Button type="button" onClick={handleNext} variant="outline" size="icon"><ChevronRight className="h-4 w-4" /></Button>
 
-            <button
-              onClick={handleToday}
-              className="rounded-lg border border-slate-200 px-3 py-2 text-slate-500 hover:bg-slate-50 transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900"
-            >
-              Today
-            </button>
+            <Button type="button" onClick={handleToday} variant="outline">Today</Button>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="flex gap-2">
-              <button
-                onClick={() => handleViewChange('month')}
-                className={
-                  'rounded-lg px-3 py-2 text-sm font-medium ' +
-                  (state.view === 'month'
-                    ? 'bg-purple-600 text-white'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50') +
-                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900'
-                }
-              >
-                Month
-              </button>
-              <button
-                onClick={() => handleViewChange('week')}
-                className={
-                  'rounded-lg px-3 py-2 text-sm font-medium ' +
-                  (state.view === 'week'
-                    ? 'bg-purple-600 text-white'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50') +
-                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900'
-                }
-              >
-                Week
-              </button>
-              <button
-                onClick={() => handleViewChange('agenda')}
-                className={
-                  'rounded-lg px-3 py-2 text-sm font-medium ' +
-                  (state.view === 'agenda'
-                    ? 'bg-purple-600 text-white'
-                    : 'border border-slate-200 text-slate-500 hover:bg-slate-50') +
-                  ' transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:bg-zinc-900'
-                }
-              >
-                Agenda
-              </button>
+              <Button type="button" onClick={() => handleViewChange('month')} variant={state.view === 'month' ? 'primary' : 'outline'}>Month</Button>
+              <Button type="button" onClick={() => handleViewChange('week')} variant={state.view === 'week' ? 'primary' : 'outline'}>Week</Button>
+              <Button type="button" onClick={() => handleViewChange('agenda')} variant={state.view === 'agenda' ? 'primary' : 'outline'}>Agenda</Button>
             </div>
           </div>
         </div>

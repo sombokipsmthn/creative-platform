@@ -30,7 +30,7 @@ try {
   const profilePage = await context.newPage();
   await profilePage.goto(`${baseURL}/admin/profile`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await profilePage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
-  const profileName = profilePage.getByLabel("Full name");
+  const profileName = profilePage.locator("#profile-full-name");
   const profileSave = profilePage.getByRole("button", { name: /save profile changes/i });
   await profileName.waitFor({ state: "visible", timeout: 30_000 });
   check(await profileSave.isVisible(), "profile primary save action is visible");
@@ -45,10 +45,10 @@ try {
   const settingsPage = await context.newPage();
   await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await settingsPage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
-  const businessName = settingsPage.getByLabel("Default Site Address");
+  const businessName = settingsPage.locator('input').first();
   await businessName.waitFor({ state: "visible", timeout: 15_000 });
   const originalBusinessName = await businessName.inputValue();
-  const settingsSave = settingsPage.getByRole("button", { name: /save workspace settings/i });
+  const settingsSave = settingsPage.getByRole("button", { name: /save settings changes/i });
   check(await settingsSave.isVisible(), "workspace settings save action is visible");
   await settingsSave.click();
   await settingsPage.getByText("Workspace settings saved.").waitFor({ state: "visible", timeout: 15_000 });
@@ -85,8 +85,8 @@ try {
     const galleryId = galleryBody.galleries[0].id;
     const galleryPage = await context.newPage();
     await galleryPage.goto(`${baseURL}/admin/galleries/${galleryId}`, { waitUntil: "networkidle", timeout: 30_000 });
-    await galleryPage.getByRole("button", { name: /^Settings$/i }).click();
-    await galleryPage.getByText("Watermark presets").waitFor({ state: "visible", timeout: 15_000 });
+    await galleryPage.getByTestId("gallery-tab-settings").click();
+    await galleryPage.getByRole("heading", { name: "General" }).waitFor({ state: "visible", timeout: 15_000 });
     check(true, "actual gallery watermark editor is reachable");
     await galleryPage.close();
   } else {

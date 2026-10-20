@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 
 import TableFilterBar from '@/components/admin/TableFilterBar';
+import { SelectCompat } from '@/components/ui/select-compat';
+import { Button } from '@/components/ui/button';
 
 interface GalleryItem {
   id: string;
@@ -567,30 +569,12 @@ export default function AdminGalleryManagerPage() {
 
                           {/* Actions Bar */}
                           <div className="grid grid-cols-2 gap-3 pt-2">
-                            <Link
-                              href={`/admin/galleries/${gal.id}`}
-                              className="ui-button ui-button-primary rounded-xl flex items-center justify-center gap-2 shadow-sm"
-                            >
-                              <Sliders className="w-3.5 h-3.5" />
-                              Manage
-                            </Link>
+                            <Button asChild variant="primary" className="rounded-xl shadow-sm"><Link href={`/admin/galleries/${gal.id}`}><Sliders className="w-3.5 h-3.5" />Manage</Link></Button>
                             
                             <div className="flex gap-2">
-                              <button
-                                onClick={(e) => { e.preventDefault(); copyShareLink(gal.slug || gal.id); }}
-                                className="ui-button ui-button-secondary flex-1 rounded-xl flex items-center justify-center gap-2 transition-colors"
-                                title="Copy Client Link"
-                              >
-                                <Copy className="w-3 h-3" />
-                                Link
-                              </button>
+                              <Button onClick={(e) => { e.preventDefault(); copyShareLink(gal.slug || gal.id); }} variant="secondary" className="flex-1 rounded-xl" title="Copy Client Link"><Copy className="w-3 h-3" />Link</Button>
 
-                              <button
-                                onClick={(e) => { e.preventDefault(); handleDeleteGallery(gal.id, gal.title); }}
-                                className="ui-button ui-button-destructive p-3 rounded-xl transition-all"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <Button onClick={(e) => { e.preventDefault(); handleDeleteGallery(gal.id, gal.title); }} variant="destructive" size="icon" aria-label="Delete gallery"><Trash2 className="w-3.5 h-3.5" /></Button>
                             </div>
                           </div>
                         </div>
@@ -612,14 +596,7 @@ export default function AdminGalleryManagerPage() {
                   <Activity className="w-6 h-6 text-purple-600" />
                   Live Client Interaction
                 </h2>
-                <button 
-                  onClick={() => fetchData(true)}
-                  disabled={isRefreshing}
-                  className="ui-button ui-button-ghost ui-button-sm flex items-center gap-2"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
+                <Button onClick={() => fetchData(true)} disabled={isRefreshing} variant="ghost" size="sm"><RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />Refresh</Button>
               </div>
               <p className="ui-body font-sans">
                 Recent engagement events from all published portals. (Auto-polls every 30s)
@@ -688,12 +665,7 @@ export default function AdminGalleryManagerPage() {
                         </div>
                       )}
 
-                      <Link
-                        href={`/admin/galleries/${act.gallery_id}`}
-                        className="ui-button ui-button-ghost ui-button-icon-sm shrink-0"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Link>
+                      <Button asChild variant="ghost" size="icon-sm" className="shrink-0"><Link href={`/admin/galleries/${act.gallery_id}`} aria-label="Open gallery"><ExternalLink className="w-4 h-4" /></Link></Button>
                     </div>
                   );
                 })}
@@ -739,7 +711,7 @@ export default function AdminGalleryManagerPage() {
                       <label className="ui-label ui-meta uppercase tracking-widest pl-1">
                         Client
                       </label>
-                      <select
+                      <SelectCompat
                         value={clientId}
                         onChange={(e) => setClientId(e.target.value)}
                         className="ui-select h-14 rounded-2xl w-full"
@@ -750,14 +722,14 @@ export default function AdminGalleryManagerPage() {
                             {c.name}
                           </option>
                         ))}
-                      </select>
+                      </SelectCompat>
                     </div>
 
                     <div className="space-y-2">
                       <label className="ui-label ui-meta uppercase tracking-widest pl-1">
                         Category
                       </label>
-                      <select
+                      <SelectCompat
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="ui-select h-14 rounded-2xl w-full"
@@ -767,7 +739,7 @@ export default function AdminGalleryManagerPage() {
                             {cat}
                           </option>
                         ))}
-                      </select>
+                      </SelectCompat>
                     </div>
                   </div>
 
@@ -818,11 +790,7 @@ export default function AdminGalleryManagerPage() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className="ui-button ui-button-primary ui-button-lg w-full h-16 rounded-2xl shadow-xl shadow-purple-500/10"
-                >
+                <Button type="submit" disabled={isCreating} variant="primary" size="lg" className="w-full h-16 rounded-2xl shadow-xl shadow-purple-500/10">
                   {isCreating ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
@@ -834,7 +802,7 @@ export default function AdminGalleryManagerPage() {
                       <span>Create & Launch Gallery Manager</span>
                     </>
                   )}
-                </button>
+                </Button>
               </form>
             </div>
           </div>

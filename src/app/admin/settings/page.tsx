@@ -120,19 +120,19 @@ export default function AdminSettingsPage() {
 
         {/* TAB CONTENTS */}
         <form id="settings-form" onSubmit={handleSaveSettings} className="space-y-8">
-          {saveMessage && <p role="status" className="ui-meta">{saveMessage}</p>}
+          {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
 
           {/* TAB 1: BRANDING */}
           {activeTab === 'branding' && (
             <div className="space-y-6">
-              <div className="ui-card">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Domain & Custom URLs</h2>
-                  <p className="ui-meta">Your client galleries are always available on your default site address.</p>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Domain & Custom URLs</h2>
+                  <p className="text-sm text-muted-foreground">Your client galleries are always available on your default site address.</p>
                 </div>
-                <div className="ui-card-content space-y-4">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Default Site Address</label>
+                    <label className="text-sm font-medium leading-none">Default Site Address</label>
                     <Input
                       type="text"
                       value={domainSlug}
@@ -141,16 +141,16 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Custom Domain</label>
+                    <label className="text-sm font-medium leading-none">Custom Domain</label>
                     <Input
                       type="text"
                       value={customDomain}
                       onChange={(e) => setCustomDomain(e.target.value)}
                     />
-                    <p className="ui-caption">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
+                    <p className="text-xs text-muted-foreground">Use your own domain for client galleries (e.g. kipsmthn.com).</p>
                   </div>
                 </div>
-                <div className="ui-card-footer">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-footer">
                   <div className="flex items-center gap-3">
                     <label className="flex items-center gap-3 text-xs font-sans text-slate-700 dark:text-zinc-300 cursor-pointer">
                       <input
@@ -166,12 +166,12 @@ export default function AdminSettingsPage() {
               </div>
 
               {/* Logo & Favicon Upload Cards */}
-              <div className="ui-card space-y-4">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Logos & Favicon</h2>
-                  <p className="ui-meta">Upload custom brand logos for your client portal header and browser tab icon.</p>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm space-y-4">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Logos & Favicon</h2>
+                  <p className="text-sm text-muted-foreground">Upload custom brand logos for your client portal header and browser tab icon.</p>
                 </div>
-                <div className="ui-card-content grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
                     <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600/20 dark:text-purple-400 font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
@@ -192,38 +192,18 @@ export default function AdminSettingsPage() {
           {activeTab === 'watermark' && (
             <div className="space-y-6">
               {/* Watermark Presets */}
-              <div className="ui-card">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Watermark Presets</h2>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Watermark Presets</h2>
                 </div>
-                <div className="ui-card-content inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
-                  <button
-                    type="button"
-                    onClick={() => setWatermarkPreset('proof')}
-                    className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
-                      watermarkPreset === 'proof'
-                        ? 'ui-button ui-button-primary'
-                        : 'ui-button ui-button-secondary'
-                    }`}
-                  >
-                    Proof
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setWatermarkPreset('brand')}
-                    className={`px-3 py-1.5 text-xs font-sans rounded-lg transition-colors ${
-                      watermarkPreset === 'brand'
-                        ? 'ui-button ui-button-primary'
-                        : 'ui-button ui-button-secondary'
-                    }`}
-                  >
-                    Brand
-                  </button>
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content inline-flex rounded-xl bg-slate-100 dark:bg-zinc-900 p-1">
+                  <Button type="button" onClick={() => setWatermarkPreset('proof')} variant={watermarkPreset === 'proof' ? 'primary' : 'secondary'} size="sm">Proof</Button>
+                  <Button type="button" onClick={() => setWatermarkPreset('brand')} variant={watermarkPreset === 'brand' ? 'primary' : 'secondary'} size="sm">Brand</Button>
                 </div>
               </div>
 
               {/* Watermark Preview Component */}
-              <div className="ui-card">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
                 <WatermarkPreview
                   watermarkText={watermarkText}
                   watermarkOpacity={watermarkOpacity}
@@ -234,14 +214,14 @@ export default function AdminSettingsPage() {
               </div>
 
               {/* Watermark Controls */}
-              <div className="ui-card">
-                <div className="ui-card-header">
-                  <h2 className="ui-card-title">Watermark Details</h2>
-                  <p className="ui-meta">Adjust the watermark text and appearance.</p>
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                  <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Watermark Details</h2>
+                  <p className="text-sm text-muted-foreground">Adjust the watermark text and appearance.</p>
                 </div>
-                <div className="ui-card-content space-y-4">
+                <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Watermark Text</label>
+                    <label className="text-sm font-medium leading-none">Watermark Text</label>
                     <Input
                       type="text"
                       value={watermarkText}
@@ -297,15 +277,15 @@ export default function AdminSettingsPage() {
 
           {/* TAB 3: PRESETS */}
           {activeTab === 'presets' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">Default Gallery Presets</h2>
-                <p className="ui-meta">Pre-fill settings when creating new private client galleries.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Default Gallery Presets</h2>
+                <p className="text-sm text-muted-foreground">Pre-fill settings when creating new private client galleries.</p>
               </div>
-              <div className="ui-card-content">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-1">
-                    <label className="ui-label">Default Photo Selection Limit</label>
+                    <label className="text-sm font-medium leading-none">Default Photo Selection Limit</label>
                     <Input
                       type="number"
                       value={defaultSelectionLimit}
@@ -314,7 +294,7 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Default Expiration (Days)</label>
+                    <label className="text-sm font-medium leading-none">Default Expiration (Days)</label>
                     <Input
                       type="number"
                       value={defaultExpiryDays}
@@ -323,7 +303,7 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Default Master PIN</label>
+                    <label className="text-sm font-medium leading-none">Default Master PIN</label>
                     <Input
                       type="text"
                       value={defaultPin}
@@ -337,14 +317,14 @@ export default function AdminSettingsPage() {
 
           {/* TAB 4: EMAIL TEMPLATES */}
           {activeTab === 'templates' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">Email Invitation Templates</h2>
-                <p className="ui-meta">Customize automated client notification emails.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Email Invitation Templates</h2>
+                <p className="text-sm text-muted-foreground">Customize automated client notification emails.</p>
               </div>
-              <div className="ui-card-content space-y-4">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                 <div className="space-y-1">
-                  <label className="ui-label">Email Subject</label>
+                  <label className="text-sm font-medium leading-none">Email Subject</label>
                   <Input
                     type="text"
                     value={invitationSubject}
@@ -353,7 +333,7 @@ export default function AdminSettingsPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Email Message Body</label>
+                  <label className="text-sm font-medium leading-none">Email Message Body</label>
                   <Textarea
                     rows={6}
                     value={invitationBody}
@@ -366,15 +346,15 @@ export default function AdminSettingsPage() {
 
           {/* TAB 5: PREFERENCES */}
           {activeTab === 'preferences' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">Kenyan Tax & Business Preferences</h2>
-                <p className="ui-meta">Configure KRA PIN, base currency, and WHT rules.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">Kenyan Tax & Business Preferences</h2>
+                <p className="text-sm text-muted-foreground">Configure KRA PIN, base currency, and WHT rules.</p>
               </div>
-              <div className="ui-card-content">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1">
-                    <label className="ui-label">Creator KRA PIN Number</label>
+                    <label className="text-sm font-medium leading-none">Creator KRA PIN Number</label>
                     <Input
                       type="text"
                       value={kraPin}
@@ -383,7 +363,7 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Default Currency</label>
+                    <label className="text-sm font-medium leading-none">Default Currency</label>
                     <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -397,7 +377,7 @@ export default function AdminSettingsPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="ui-label">Withholding Tax (WHT) Rate</label>
+                    <label className="text-sm font-medium leading-none">Withholding Tax (WHT) Rate</label>
                     <Select value={defaultWhtRate} onValueChange={setDefaultWhtRate}>
                       <SelectTrigger className="w-full">
                         <SelectValue />
@@ -416,12 +396,12 @@ export default function AdminSettingsPage() {
 
           {/* TAB 6: INTEGRATIONS */}
           {activeTab === 'integrations' && (
-            <div className="ui-card">
-              <div className="ui-card-header">
-                <h2 className="ui-card-title">API Integrations & Storage</h2>
-                <p className="ui-meta">Manage external services connected to KIPSMTHN.</p>
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-header">
+                <h2 className="rounded-xl border bg-card text-card-foreground shadow-sm-title">API Integrations & Storage</h2>
+                <p className="text-sm text-muted-foreground">Manage external services connected to KIPSMTHN.</p>
               </div>
-              <div className="ui-card-content space-y-4">
+              <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content space-y-4">
                 <div className="p-4 bg-slate-50 dark:bg-zinc-900 border border-slice-200 dark:border-zinc-800 rounded-xl flex justify-between items-center text-xs font-sans">
                   <div>
                     <p className="font-bold text-slate-900 dark:text-white">KRA eTIMS Taxpayer Portal Bridge</p>

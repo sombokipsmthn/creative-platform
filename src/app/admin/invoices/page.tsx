@@ -311,35 +311,35 @@ export default function InvoicesPage() {
         />
 
         {error && !loading && (
-          <div className="ui-card p-4">
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Total Invoices</p>
-            <p className="ui-stat-value">{summary.total}</p>
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
+            <p className="text-2xl font-bold">{summary.total}</p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Draft</p>
-            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Draft</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {summary.draft}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Paid</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Paid</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {summary.paid}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Outstanding</p>
-            <p className="ui-stat-value text-slate-900 dark:text-white">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
+            <p className="text-2xl font-bold text-slate-900 dark:text-white">
               {formatMoney(summary.outstanding, 'KES')}
             </p>
           </div>
@@ -391,7 +391,7 @@ export default function InvoicesPage() {
 
         {hasFilters && (
           <div className="flex items-center justify-between px-2">
-            <p className="ui-meta">Showing filtered results</p>
+            <p className="text-sm text-muted-foreground">Showing filtered results</p>
             <Button
               onClick={resetFilters}
               variant="ghost"
@@ -403,22 +403,22 @@ export default function InvoicesPage() {
         )}
 
         {/* TABLE */}
-        <div className="ui-card">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
-            <div className="ui-loading-state p-12">
+            <div className="flex items-center justify-center p-12">
               <p className="text-xs font-sans uppercase tracking-widest">
                 Loading invoices...
               </p>
             </div>
           ) : filteredInvoices.length === 0 ? (
-            <div className="ui-empty-state p-12">
-              <div className="ui-empty-icon">
+            <div className="rounded-xl border border-dashed p-12 text-center p-12">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <FileText className="h-6 w-6" />
               </div>
 
-              <h2 className="ui-section-title">No invoices found</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">No invoices found</h2>
 
-              <p className="ui-body">
+              <p className="text-sm text-muted-foreground">
                 {hasFilters
                   ? 'Try changing your filters or search terms.'
                   : 'Invoices will appear here once they are created.'}
@@ -435,15 +435,15 @@ export default function InvoicesPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="ui-table">
+              <table className="w-full caption-bottom text-sm">
                 <thead>
                   <tr>
-                    <th className="ui-table-header">Invoice</th>
-                    <th className="ui-table-header">Client</th>
-                    <th className="ui-table-header">Status</th>
-                    <th className="ui-table-header">Issued</th>
-                    <th className="ui-table-header">Total</th>
-                    <th className="ui-table-header" />
+                    <th className="w-full caption-bottom text-sm-header">Invoice</th>
+                    <th className="w-full caption-bottom text-sm-header">Client</th>
+                    <th className="w-full caption-bottom text-sm-header">Status</th>
+                    <th className="w-full caption-bottom text-sm-header">Issued</th>
+                    <th className="w-full caption-bottom text-sm-header">Total</th>
+                    <th className="w-full caption-bottom text-sm-header" />
                   </tr>
                 </thead>
 
@@ -451,10 +451,10 @@ export default function InvoicesPage() {
                   {filteredInvoices.map((invoice) => (
                     <tr
                       key={invoice.id}
-                      className="ui-table-row"
+                      className="w-full caption-bottom text-sm-row"
                     >
                       {/* INVOICE */}
-                      <td className="ui-table-cell">
+                      <td className="w-full caption-bottom text-sm-cell">
                         <div className="space-y-1">
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
                             <FileText className="h-4 w-4" />
@@ -463,7 +463,7 @@ export default function InvoicesPage() {
                             <p className="font-medium text-slate-900 dark:text-white">
                               {invoice.title || 'Untitled Invoice'}
                             </p>
-                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
+                            <p className="text-sm text-muted-foreground text-xs text-slate-500 dark:text-zinc-600">
                               {invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}
                             </p>
                           </div>
@@ -471,14 +471,14 @@ export default function InvoicesPage() {
                       </td>
 
                       {/* CLIENT */}
-                      <td className="ui-table-cell">
+                      <td className="w-full caption-bottom text-sm-cell">
                         <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
                           {getClientName(invoice.client)}
                         </p>
                       </td>
 
                       {/* STATUS */}
-                      <td className="ui-table-cell">
+                      <td className="w-full caption-bottom text-sm-cell">
                         <div className="flex flex-col items-start gap-2">
                           <span
                             className={`${getStatusBadgeClass(invoice.status)}`}
@@ -489,50 +489,38 @@ export default function InvoicesPage() {
                       </td>
 
                       {/* ISSUED */}
-                      <td className="ui-table-cell">
+                      <td className="w-full caption-bottom text-sm-cell">
                         <p className="text-sm text-slate-500 dark:text-zinc-600">
                           {formatDate(invoice.issueDate)}
                         </p>
                       </td>
 
                       {/* TOTAL */}
-                      <td className="ui-table-cell text-right font-medium text-slate-900 dark:text-white">
+                      <td className="w-full caption-bottom text-sm-cell text-right font-medium text-slate-900 dark:text-white">
                         {formatMoney(invoice.total, invoice.currency)}
                       </td>
 
                       {/* ACTION */}
-                      <td className="ui-table-cell text-right">
+                      <td className="w-full caption-bottom text-sm-cell text-right">
                         <div className="flex gap-2">
                           <Link
                             href={`/admin/invoices/${invoice.id}`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
+                            className="text-sm font-sans"
                           >
                             View
                             <ArrowUpRight className="h-3 w-3" />
                           </Link>
-                          <Link
-                            href={`/admin/invoices/${invoice.id}/edit`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
-                          >
-                            Edit
-                            <Plus className="h-3 w-3" />
-                          </Link>
+                          <Button asChild variant="secondary" size="sm"><Link href={`/admin/invoices/${invoice.id}/edit`}>Edit <Plus className="h-3 w-3" /></Link></Button>
                           {invoice.status === 'draft' && (
                             <>
                               <Link
                                 href={`/admin/invoices/${invoice.id}/send`}
-                                className="ui-button ui-button-success text-sm font-sans"
+                                className="text-sm font-sans"
                               >
                                 Send
                                 <CheckCircle2 className="h-3 w-3" />
                               </Link>
-                              <Link
-                                href={`/admin/invoices/${invoice.id}/duplicate`}
-                                className="ui-button ui-button-secondary text-sm font-sans"
-                              >
-                                Duplicate
-                                <FilePlus className="h-3 w-3" />
-                              </Link>
+                              <Button asChild variant="secondary" size="sm"><Link href={`/admin/invoices/${invoice.id}/duplicate`}>Duplicate <FilePlus className="h-3 w-3" /></Link></Button>
                             </>
                           )}
                           <button
@@ -541,7 +529,7 @@ export default function InvoicesPage() {
                               // Delete logic would go here - keeping inline for now
                               window.location.reload(); // Placeholder
                             }}
-                            className="ui-button ui-button-destructive text-sm font-sans"
+                            className="text-sm font-sans"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -558,7 +546,7 @@ export default function InvoicesPage() {
         {/* PAGINATION */}
         {pagination && pagination.totalPages > 0 && (
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between pt-2">
-            <p className="ui-meta">
+            <p className="text-sm text-muted-foreground">
               {pagination.total === 0
                 ? 'No invoices'
                 : `Showing page ${pagination.page} of ${pagination.totalPages}`}

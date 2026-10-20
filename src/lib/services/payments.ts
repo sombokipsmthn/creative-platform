@@ -1,7 +1,7 @@
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, invoices, paymentAuditEvents, payments, projects } from "@/db/schema";
+import { clients, invoices, paymentAuditEvents, paymentSchedules, paymentTermAmendments, payments, projects } from "@/db/schema";
 import { ApiError } from "@/lib/api/route-boundaries";
 
 export const PAYMENT_METHODS = ["mpesa", "bank_transfer", "cash", "card", "cheque", "other"] as const;
@@ -130,6 +130,68 @@ export async function verifyPayment(userId: string, paymentId: string) {
   if (summary.confirmedAmount + payment.amount > summary.invoice.total) throw new ApiError("Payment exceeds the available invoice balance", 409);
   const [updated] = await db.update(payments).set({ status: "confirmed", confirmedAt: new Date(), confirmedBy: userId, updatedAt: new Date() }).where(and(eq(payments.id, paymentId), eq(payments.creatorId, userId))).returning();
   await db.insert(paymentAuditEvents).values({ creatorId: userId, paymentId, eventType: "verified", actorId: userId, metadata: {} });
+  return updated;
+}
+
+export async function listPaymentAudit(userId: string, invoiceId: string) {
+  await getInvoiceContext(userId, invoiceId);
+  return db.select({ audit: paymentAuditEvents, payment: payments })
+    .from(paymentAuditEvents)
+    .innerJoin(payments, eq(paymentAuditEvents.paymentId, payments.id))
+    .where(and(eq(paymentAuditEvents.creatorId, userId), eq(payments.invoiceId, invoiceId)))
+    .orderBy(desc(paymentAuditEvents.createdAt));
+}
+
+export async function listSchedules(userId: string, invoiceId: string) {
+  await getInvoiceContext(userId, invoiceId);
+  return db.select().from(paymentSchedules).where(and(eq(paymentSchedules.creatorId, userId), eq(paymentSchedules.invoiceId, invoiceId))).orderBy(paymentSchedules.dueDate);
+}
+
+export async function saveSchedule(userId: string, invoiceId: string, payload: Record<string, unknown>, scheduleId?: string) {
+  const { invoice, client, project } = await getInvoiceContext(userId, invoiceId);
+  const label = clean(payload.label);
+  const amount = parseAmount(payload.amount);
+  const dueDate = parseDate(payload.dueDate);
+  if (!label || !amount || amount <= 0 || !dueDate) throw new ApiError("Label, positive amount, and valid due date are required", 400);
+  const values = { creatorId: userId, clientId: client!.id, invoiceId, projectId: project?.id ?? null, label, amount, currency: invoice.currency, dueDate, milestone: clean(payload.milestone), status: clean(payload.status) ?? "scheduled", notes: clean(payload.notes), updatedAt: new Date() };
+  if (scheduleId) {
+    const [updated] = await db.update(paymentSchedules).set(values).where(and(eq(paymentSchedules.id, scheduleId), eq(paymentSchedules.creatorId, userId), eq(paymentSchedules.invoiceId, invoiceId))).returning();
+    if (!updated) throw new ApiError("Payment schedule not found", 404);
+    return updated;
+  }
+  const [created] = await db.insert(paymentSchedules).values(values).returning();
+  return created;
+}
+
+export async function deleteSchedule(userId: string, invoiceId: string, scheduleId: string) {
+  await getInvoiceContext(userId, invoiceId);
+  const [deleted] = await db.delete(paymentSchedules).where(and(eq(paymentSchedules.id, scheduleId), eq(paymentSchedules.creatorId, userId), eq(paymentSchedules.invoiceId, invoiceId))).returning();
+  if (!deleted) throw new ApiError("Payment schedule not found", 404);
+  return { deleted: true, id: deleted.id };
+}
+
+export async function listTermAmendments(userId: string, invoiceId: string) {
+  await getInvoiceContext(userId, invoiceId);
+  return db.select().from(paymentTermAmendments).where(and(eq(paymentTermAmendments.creatorId, userId), eq(paymentTermAmendments.invoiceId, invoiceId))).orderBy(desc(paymentTermAmendments.agreementDate));
+}
+
+export async function createTermAmendment(userId: string, invoiceId: string, payload: Record<string, unknown>) {
+  await getInvoiceContext(userId, invoiceId);
+  const newTerms = clean(payload.newTerms);
+  const agreementDate = parseDate(payload.agreementDate);
+  if (!newTerms || !agreementDate) throw new ApiError("New terms and a valid agreement date are required", 400);
+  const [amendment] = await db.insert(paymentTermAmendments).values({ creatorId: userId, invoiceId, previousTerms: clean(payload.previousTerms), newTerms, agreementDate, evidenceReference: clean(payload.evidenceReference), notes: clean(payload.notes) }).returning();
+  return amendment;
+}
+
+export async function refundPayment(userId: string, paymentId: string, reason: string) {
+  const payment = (await db.select().from(payments).where(and(eq(payments.id, paymentId), eq(payments.creatorId, userId))).limit(1))[0];
+  if (!payment) throw new ApiError("Payment not found", 404);
+  if (payment.status !== "confirmed") throw new ApiError("Only confirmed payments can be refunded", 409);
+  const cleanedReason = clean(reason);
+  if (!cleanedReason) throw new ApiError("A refund reason is required", 400);
+  const [updated] = await db.update(payments).set({ status: "refunded", reversalReason: cleanedReason, updatedAt: new Date() }).where(and(eq(payments.id, paymentId), eq(payments.creatorId, userId), eq(payments.status, "confirmed"))).returning();
+  await db.insert(paymentAuditEvents).values({ creatorId: userId, paymentId, eventType: "refunded", actorId: userId, metadata: { reason: cleanedReason, policy: "full_payment_refund_only" } });
   return updated;
 }
 

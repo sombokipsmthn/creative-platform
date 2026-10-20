@@ -50,7 +50,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         )}
       </head>
-      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+      <body className="font-sans antialiased selection:bg-primary selection:text-white">
         <QueryProvider>
           <CreatorProvider>{children}</CreatorProvider>
         </QueryProvider>

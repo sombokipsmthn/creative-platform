@@ -157,7 +157,7 @@ export default function AdminSettingsPage() {
                         type="checkbox"
                         checked={hidePlatformBranding}
                         onChange={(e) => setHidePlatformBranding(e.target.checked)}
-                        className="w-4 h-4 accent-purple-600 rounded"
+                        className="h-4 w-4 rounded accent-primary"
                       />
                       Hide default platform branding from client galleries
                     </label>
@@ -173,13 +173,13 @@ export default function AdminSettingsPage() {
                 </div>
                 <div className="rounded-xl border bg-card text-card-foreground shadow-sm-content grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600/20 dark:text-purple-400 font-sans text-xl">+</div>
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 font-sans text-xl text-primary">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Header Logo</p>
                     <p className="text-[10px] text-slate-500 font-sans">PNG or SVG with transparent background</p>
                   </div>
 
                   <div className="p-6 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-2xl text-center space-y-3 bg-slate-50 dark:bg-zinc-900/30">
-                    <div className="w-12 h-12 mx-auto rounded-xl bg-purple-600/20 flex items-center justify-center text-purple-600/20 dark:text-purple-400 font-sans text-xl">+</div>
+                    <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary/20 dark:text-primary font-sans text-xl">+</div>
                     <p className="text-xs font-sans font-bold text-slate-900 dark:text-white">Upload Favicon Icon</p>
                     <p className="text-[10px] text-slate-500 font-sans">32x32 PNG, ICO or SVG file</p>
                   </div>
@@ -232,7 +232,7 @@ export default function AdminSettingsPage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-sans">
                       <span className="text-slate-700 dark:text-zinc-300">Opacity</span>
-                      <span className="text-purple-600 font-bold">{watermarkOpacity}%</span>
+                      <span className="font-bold text-primary">{watermarkOpacity}%</span>
                     </div>
                     <input
                       type="range"
@@ -240,14 +240,14 @@ export default function AdminSettingsPage() {
                       max={80}
                       value={watermarkOpacity}
                       onChange={(e) => setWatermarkOpacity(parseInt(e.target.value, 10))}
-                      className="w-full accent-purple-600 cursor-pointer"
+                      className="w-full cursor-pointer accent-primary"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-sans">
                       <span className="text-slate-700 dark:text-zinc-300">Size</span>
-                      <span className="text-purple-600 font-bold">{watermarkSize}px</span>
+                      <span className="text-primary font-bold">{watermarkSize}px</span>
                     </div>
                     <input
                       type="range"
@@ -255,7 +255,7 @@ export default function AdminSettingsPage() {
                       max={64}
                       value={watermarkSize}
                       onChange={(e) => setWatermarkSize(parseInt(e.target.value, 10))}
-                      className="w-full accent-purple-600 cursor-pointer"
+                      className="w-full accent-primary cursor-pointer"
                     />
                   </div>
 
@@ -265,7 +265,7 @@ export default function AdminSettingsPage() {
                         type="checkbox"
                         checked={applyWatermarkToProofs}
                         onChange={(e) => setApplyWatermarkToProofs(e.target.checked)}
-                        className="w-4 h-4 accent-purple-600 rounded"
+                        className="h-4 w-4 rounded accent-primary"
                       />
                       Apply watermark to all web-resolution proof images automatically
                     </label>

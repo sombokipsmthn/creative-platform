@@ -53,7 +53,7 @@ export default function EditCreatorProfileModal({
         </button>
 
         <div className="space-y-1 border-b border-slate-200 dark:border-zinc-800 pb-4">
-          <span className="px-2.5 py-0.5 bg-purple-600/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-[10px] font-sans rounded-full uppercase">
+          <span className="px-2.5 py-0.5 bg-primary/10 border border-primary/30 text-primary dark:text-primary text-[10px] font-sans rounded-full uppercase">
             Multi-Creator Account
           </span>
           <h2 className="text-2xl font-light text-slate-900 dark:text-white mt-2">Edit Creator Profile</h2>
@@ -66,7 +66,7 @@ export default function EditCreatorProfileModal({
           
           {/* Avatar Preview & URL */}
           <div className="flex items-center gap-4 p-4 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl">
-            <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-purple-500 shadow-md">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-primary shadow-md">
               <Image
                 src={formData.avatarUrl || 'https://unavatar.io/linkedin/sombo09'}
                 alt={formData.name}
@@ -81,7 +81,7 @@ export default function EditCreatorProfileModal({
                 type="text"
                 value={formData.avatarUrl}
                 onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
-                className="w-full px-3 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-3 py-2 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -93,7 +93,7 @@ export default function EditCreatorProfileModal({
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -103,7 +103,7 @@ export default function EditCreatorProfileModal({
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function EditCreatorProfileModal({
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -125,7 +125,7 @@ export default function EditCreatorProfileModal({
                 type="text"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -137,7 +137,7 @@ export default function EditCreatorProfileModal({
                 type="text"
                 value={formData.kraPin}
                 onChange={(e) => setFormData({ ...formData, kraPin: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -147,7 +147,7 @@ export default function EditCreatorProfileModal({
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
           </div>
@@ -155,22 +155,22 @@ export default function EditCreatorProfileModal({
           {/* Social Handles */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-200 dark:border-zinc-800">
             <div className="space-y-1">
-              <label className="text-[10px] font-sans text-purple-600 dark:text-purple-400 uppercase">LinkedIn Handle</label>
+              <label className="text-[10px] font-sans text-primary dark:text-primary uppercase">LinkedIn Handle</label>
               <input
                 type="text"
                 value={formData.linkedin}
                 onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-[10px] font-sans text-purple-600 dark:text-purple-400 uppercase">Instagram Handle</label>
+              <label className="text-[10px] font-sans text-primary dark:text-primary uppercase">Instagram Handle</label>
               <input
                 type="text"
                 value={formData.instagram}
                 onChange={(e) => setFormData({ ...formData, instagram: e.target.value })}
-                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-2.5 bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-xs font-sans text-slate-900 dark:text-white rounded-lg focus:border-primary focus:outline-none"
               />
             </div>
           </div>

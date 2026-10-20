@@ -60,7 +60,7 @@ type Invoice = {
    CONSTANTS
 ========================================================= */
 
-const PURPLE = '#6D5DFB';
+const PRIMARY = 'hsl(var(--primary))';
 
 const NEXT_STATUS: Record<string, { label: string; value: string; color: string } | null> = {
   draft: { label: 'Mark as Sent', value: 'sent', color: 'bg-blue-600 hover:bg-blue-700' },
@@ -207,7 +207,7 @@ export default function InvoiceDetailPage() {
         <div className="text-center">
           <div
             className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-slate-200"
-            style={{ borderTopColor: PURPLE }}
+            style={{ borderTopColor: PRIMARY }}
           />
           <p className="text-xs font-sans uppercase tracking-widest text-slate-400">Loading invoice…</p>
         </div>
@@ -324,7 +324,7 @@ export default function InvoiceDetailPage() {
           <div className="border-b border-slate-100 px-8 py-8 sm:px-10 print:px-0 print:py-0 print:pb-7">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-3 h-1 w-10 print:hidden" style={{ backgroundColor: PURPLE }} />
+                <div className="mb-3 h-1 w-10 print:hidden" style={{ backgroundColor: PRIMARY }} />
                 <h1 className="text-3xl font-light tracking-tight text-slate-900">{invoice.title}</h1>
                 <p className="mt-1 font-sans text-xs uppercase tracking-widest text-slate-400">
                   {invoice.invoiceNumber || `INV-${invoice.id.slice(0, 8).toUpperCase()}`}
@@ -418,7 +418,7 @@ export default function InvoiceDetailPage() {
               </div>
               <div className="flex justify-between border-t border-slate-200 pt-3 text-base font-semibold text-slate-900">
                 <span>Total</span>
-                <span className="font-sans" style={{ color: PURPLE }}>{fmt(invoice.total ?? 0, currency)}</span>
+                <span className="font-sans" style={{ color: PRIMARY }}>{fmt(invoice.total ?? 0, currency)}</span>
               </div>
             </div>
           </div>

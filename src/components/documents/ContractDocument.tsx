@@ -25,7 +25,7 @@ export default function ContractDocument({ token }: ContractDocumentProps) {
         {/* HEADER */}
         <div className="flex flex-col gap-8 border-b border-slate-200 pb-8 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-purple-600">
+            <p className="text-[10px] font-sans font-semibold uppercase tracking-[0.35em] text-primary">
               Contract
             </p>
             <h1 className="mt-3 text-3xl font-light tracking-tight sm:text-4xl">

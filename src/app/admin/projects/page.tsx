@@ -386,7 +386,7 @@ export default function AdminProjectsPage() {
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
             ['Published', publishedCount, 'text-emerald-600 dark:text-emerald-400'],
-            ['Featured', featuredCount, 'text-purple-600 dark:text-purple-400'],
+            ['Featured', featuredCount, 'text-primary dark:text-primary'],
             ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
             ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
@@ -491,16 +491,16 @@ export default function AdminProjectsPage() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-primary/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary dark:bg-primary/15 dark:text-primary">
                     {getInitials(project)}
                   </div>
 
                   <div className="min-w-0 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
+                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-primary">
                         {project.name}
                       </h3>
                       <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>
@@ -865,7 +865,7 @@ export default function AdminProjectsPage() {
               <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
                 {selectedProject.client && (
                   <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">
+                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full">
                       {selectedProject.client.company}
                     </span>
                     <h2 className="text-2xl font-light">{selectedProject.client.name}</h2>

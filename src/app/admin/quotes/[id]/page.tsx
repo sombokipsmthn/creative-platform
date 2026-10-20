@@ -86,7 +86,7 @@ type InvoiceConflict = {
   existingInvoiceNumber?: string | null;
 };
 
-const PURPLE = '#6D5DFB';
+const PRIMARY = 'hsl(var(--primary))';
 
 const categoryOptions = [
   'Equipment',
@@ -668,7 +668,7 @@ export default function QuoteDetailPage() {
     return (
       <main className="min-h-screen bg-slate-50 px-4 py-8">
         <div className="mx-auto max-w-6xl rounded-2xl border border-slate-200 bg-white px-6 py-24 text-center shadow-sm">
-          <Loader2 className="mx-auto h-7 w-7 animate-spin" style={{ color: PURPLE }} />
+          <Loader2 className="mx-auto h-7 w-7 animate-spin" style={{ color: PRIMARY }} />
           <p className="mt-4 text-[10px] font-sans uppercase tracking-[0.22em] text-slate-400">Loading quote</p>
         </div>
       </main>
@@ -700,7 +700,7 @@ export default function QuoteDetailPage() {
                 <ArrowLeft className="h-3 w-3" /> Quotes
               </Link>
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Quote</p>
+                <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Quote</p>
                 <span className={`inline-flex rounded-full border px-3 py-1 text-[9px] font-sans uppercase tracking-widest ${getStatusClass(quote.status)}`}>
                   {formatStatus(quote.status)}
                 </span>
@@ -717,7 +717,7 @@ export default function QuoteDetailPage() {
                 {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Save
               </button>
               {quote.status === 'accepted' && (
-                <button type="button" onClick={() => void createInvoice()} disabled={actionLoading === 'invoice'} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-sans uppercase tracking-widest text-white shadow-sm disabled:opacity-50" style={{ backgroundColor: PURPLE }}>
+                <button type="button" onClick={() => void createInvoice()} disabled={actionLoading === 'invoice'} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-sans uppercase tracking-widest text-white shadow-sm disabled:opacity-50" style={{ backgroundColor: PRIMARY }}>
                   {actionLoading === 'invoice' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} Generate Invoice
                 </button>
               )}
@@ -752,7 +752,7 @@ export default function QuoteDetailPage() {
             <div className="border-b border-slate-200 p-6 sm:p-8 print:px-12 print:py-10">
               <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>QUOTE</p>
+                  <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>QUOTE</p>
                   <h2 className="mt-2 text-3xl font-light tracking-tight text-slate-950">{quote.title || 'Untitled quote'}</h2>
                   {quote.projectName && <p className="mt-2 text-sm text-slate-500">{quote.projectName}</p>}
                 </div>
@@ -773,7 +773,7 @@ export default function QuoteDetailPage() {
 
             <div className="p-6 sm:p-8 print:px-12 print:py-8">
               <div className="mb-5 flex items-center justify-between">
-                <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Line Items</p><p className="mt-1 text-xs text-slate-400">Equipment, crew and production expenses</p></div>
+                <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Line Items</p><p className="mt-1 text-xs text-slate-400">Equipment, crew and production expenses</p></div>
                 <button type="button" onClick={addItem} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-sans uppercase tracking-widest text-slate-600 print:hidden"><Plus className="h-3 w-3" /> Add Item</button>
               </div>
 
@@ -879,7 +879,7 @@ export default function QuoteDetailPage() {
 
           <section className="grid gap-6 lg:grid-cols-2 print:hidden">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Quote Details</p><p className="mt-1 text-xs text-slate-400">Edit the quote information</p></div>
+              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Quote Details</p><p className="mt-1 text-xs text-slate-400">Edit the quote information</p></div>
               <div className="space-y-5">
                 <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Title</label><Input value={quote.title || ''} onChange={(event) => updateQuoteField('title', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
                 <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Project Name</label><Input value={quote.projectName || ''} onChange={(event) => updateQuoteField('projectName', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
@@ -897,7 +897,7 @@ export default function QuoteDetailPage() {
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Billing</p><p className="mt-1 text-xs text-slate-400">Payment and quote settings</p></div>
+              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Billing</p><p className="mt-1 text-xs text-slate-400">Payment and quote settings</p></div>
               <div className="space-y-5">
                 <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Payment Terms</label><Textarea rows={4} value={quote.paymentTerms || ''} onChange={(event) => updateQuoteField('paymentTerms', event.target.value)} className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-primary" /></div>
                 <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Discount</label><div className="grid grid-cols-2 gap-3"><Select value={quote.discountType || 'none'} onValueChange={(value) => updateQuoteField('discountType', value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">No discount</SelectItem><SelectItem value="percentage">Percentage</SelectItem><SelectItem value="fixed">Fixed amount</SelectItem></SelectContent></Select><Input type="number" min="0" value={quote.discountValue ?? 0} disabled={!quote.discountType || quote.discountType === 'none'} onChange={(event) => updateQuoteField('discountValue', Math.max(0, numberValue(event.target.value)))} className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary disabled:opacity-40" /></div></div>
@@ -910,7 +910,7 @@ export default function QuoteDetailPage() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:hidden">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Quote Status</p><p className="mt-1 text-xs text-slate-400">Move the quote through the approval workflow.</p></div>
+              <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Quote Status</p><p className="mt-1 text-xs text-slate-400">Move the quote through the approval workflow.</p></div>
               <div className="flex flex-wrap gap-2">
                 {statusOptions.map((option) => {
                   const active = quote.status === option.value;
@@ -923,7 +923,7 @@ export default function QuoteDetailPage() {
 
           <div className="flex flex-col gap-3 pb-10 sm:flex-row sm:items-center sm:justify-between print:hidden">
             <Link href="/admin/quotes" className="inline-flex items-center gap-2 text-[10px] font-sans uppercase tracking-widest text-slate-400 hover:text-slate-900"><ArrowLeft className="h-3 w-3" /> Back to quotes</Link>
-            <div className="flex flex-wrap gap-2"><button type="button" onClick={() => window.location.reload()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-slate-500"><RefreshCw className="h-3 w-3" /> Reload</button><button type="button" onClick={saveQuote} disabled={saving} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-white disabled:opacity-50" style={{ backgroundColor: PURPLE }}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save Quote</button></div>
+            <div className="flex flex-wrap gap-2"><button type="button" onClick={() => window.location.reload()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-slate-500"><RefreshCw className="h-3 w-3" /> Reload</button><button type="button" onClick={saveQuote} disabled={saving} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-white disabled:opacity-50" style={{ backgroundColor: PRIMARY }}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save Quote</button></div>
           </div>
         </div>
       </main>

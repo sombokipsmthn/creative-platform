@@ -1,5 +1,7 @@
 # API Reference - Creative Platform
 
+> **Current-contract warning (2026-10-21):** The [Project Handbook](./PROJECT-HANDBOOK.md) is the current decision reference. Treat this file's endpoint lists, response examples, rate limits, and middleware names as documentation examples, not guaranteed live contracts, until checked against the current route handler and tests on `dev`. Better Auth is the active authentication system. Never weaken authorization or ownership checks to make an example match.
+
 ## Overview
 
 The Creative Platform API provides endpoints for managing quotes, invoices, contracts, projects, galleries, and calendar data. All authenticated endpoints require a valid session and are protected by the `withCreatorApi` middleware.

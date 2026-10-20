@@ -73,7 +73,6 @@ try {
   check(true, 'draft save feedback renders');
 
   await page.goto(`${baseURL}/admin/contracts/${created.id}`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
-  const reopenedTitle = page.locator('input').filter({ has: undefined }).first();
   await page.getByText('Contract completion', { exact: true }).waitFor({ state: 'visible', timeout: 30_000 });
   const titleValue = await page.locator('input').first().inputValue();
   check(titleValue === title, 'saved draft reopens with the same title');

@@ -7,7 +7,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     try {
       const { id } = await params;
       const contract = await fetchContract(id);
-      return Response.json(contract);
+      return NextResponse.json({
+        ...contract,
+        status: contract.status || 'draft',
+        title: contract.title || '',
+      });
     } catch (error) {
       if (error instanceof Error && error.message === 'Contract not found') return NextResponse.json({ error: error.message }, { status: 404 });
       console.error('GET /api/contracts/[id] error:', error);

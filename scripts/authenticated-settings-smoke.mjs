@@ -48,11 +48,13 @@ try {
   const originalSiteAddress = await siteAddress.inputValue();
   const settingsSave = settingsPage.getByRole("button", { name: /save settings changes/i });
   check(await settingsSave.isVisible(), "platform settings save action is visible");
-  const settingsAlert = settingsPage.waitForEvent("dialog", { timeout: 15_000 });
+  let settingsConfirmed = false;
+  settingsPage.once("dialog", async (dialog) => {
+    settingsConfirmed = dialog.type() === "alert" && dialog.message().includes("Settings successfully saved");
+    await dialog.accept();
+  });
   await settingsSave.click();
-  const dialog = await settingsAlert;
-  check(dialog.type() === "alert" && dialog.message().includes("Settings successfully saved"), "platform settings save confirmation appears");
-  await dialog.accept();
+  check(settingsConfirmed, "platform settings save confirmation appears");
   check((await siteAddress.inputValue()) === originalSiteAddress, "platform settings value remains available after save");
   await settingsPage.close();
 

@@ -74,7 +74,7 @@ export default function ContractDetailPage({
   }
 
   // If contract is a draft, show the editor
-  if (isDraft) {
+  if (isDraft || contract.status === 'draft' || !contract.status) {
     return (
       <ContractBuilder
         mode="edit"
@@ -239,7 +239,7 @@ function getStatusColor(status: string) {
     case 'viewed':
       return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
     case 'awaiting_signature':
-      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200';
+      return 'bg-muted text-foreground';
     case 'signed':
       return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
     case 'declined':
@@ -253,8 +253,8 @@ function getStatusColor(status: string) {
   }
 }
 
-function formatStatus(status: string) {
-  return status
+function formatStatus(status: string | null | undefined) {
+  return (status || 'draft')
     .split('_')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');

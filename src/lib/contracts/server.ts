@@ -41,7 +41,7 @@ export async function fetchContract(id: string) {
   const creatorId = await userId();
   const [row] = await db.select({ contract: contracts, client: { id: clients.id, name: clients.name, email: clients.email, company: clients.company, phone: clients.phone }, project: { id: projects.id, name: projects.name } }).from(contracts).leftJoin(clients, eq(contracts.clientId, clients.id)).leftJoin(projects, eq(contracts.projectId, projects.id)).where(and(eq(contracts.id, id), eq(contracts.creatorId, creatorId)));
   if (!row) throw new Error('Contract not found');
-  return { ...row.contract, client: row.client, project: row.project };
+  return { ...row.contract, status: row.contract.status || 'draft', client: row.client, project: row.project };
 }
 
 export async function createContract(data: NewContractInput) {

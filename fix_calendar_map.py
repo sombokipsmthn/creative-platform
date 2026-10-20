@@ -31,14 +31,14 @@ if start_idx is not None and end_idx is not None:
               key={index}
               className={`group relative h-24 min-w-0 transition-colors hover:bg-slate-50 dark:hover:bg-zinc-900 ${
                 isTodayDay
-                  ? 'border-2 border-purple-600'
+                  ? 'border-2 border-primary'
                   : isCurrentMonthDay
                     ? 'bg-white dark:bg-zinc-950'
                     : 'bg-slate-50 dark:bg-zinc-900/50'
               }`}
             >
               <div className="flex justify-between items-start p-2">
-                <span className={`text-[10px] font-sans ${isTodayDay ? 'text-purple-600 font-bold' : 'text-slate-400'}`}>
+                <span className={`text-[10px] font-sans ${isTodayDay ? 'text-primary font-bold' : 'text-slate-400'}`}>
                   {format(day, 'd')}
                 </span>
                 <span className="text-xs text-slate-500 dark:text-zinc-400">
@@ -52,7 +52,7 @@ if start_idx is not None and end_idx is not None:
                     key={event.id}
                     className={`truncate rounded-sm px-1 py-0.5 text-[9px] font-medium ${
                       event.isTentative
-                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                        ? 'bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary'
                         : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
                     }`}
                   >

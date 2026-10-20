@@ -239,7 +239,7 @@ function getStatusColor(status: string) {
     case 'viewed':
       return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
     case 'awaiting_signature':
-      return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-200';
+      return 'bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary';
     case 'signed':
       return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
     case 'declined':

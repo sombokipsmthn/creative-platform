@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Copy, Eye, ExternalLink, GripVertical, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AdminPageHeader from "@/components/ui/AdminPageHeader";
+import { AdminPageHeader } from "@/components/ui/AdminPageHeader";
 import { PortfolioRenderer, type PortfolioData } from "@/components/portfolio-renderer";
 
 type ApiData = PortfolioData & { projects: Array<PortfolioData["projects"][number] & { visibility: string; publishedAt: Date | string | null; coverMediaId: string | null }> };

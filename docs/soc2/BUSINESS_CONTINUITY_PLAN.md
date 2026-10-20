@@ -42,7 +42,7 @@ This plan applies to:
 | Resource | Primary Provider | Fallback | Recovery Priority |
 | ---------- | ------------------ | ---------- | ------------------- |
 | **Database** | Neon (Vercel) | Vercel restore | P1 |
-| **Authentication** | Clerk | Manual verification | P1 |
+| **Authentication** | Better Auth | Manual verification | P1 |
 | **Storage** | Vercel Blob | R2 fallback | P2 |
 | **Deployment** | Vercel | Manual deployment | P2 |
 | **Email** | Resend | SendGrid backup | P3 |
@@ -98,7 +98,7 @@ This plan applies to:
 **Owner**: Platform Engineer
 **Dependencies**: Backup availability, Vercel support
 
-### Scenario 3: Authentication Outage (Clerk)
+### Scenario 3: Authentication Outage (Better Auth)
 
 **Impact**:
 
@@ -108,18 +108,18 @@ This plan applies to:
 
 **Immediate Response**:
 
-1. Check Clerk status page
+1. Check Better Auth status page
 2. Implement temporary access for internal team (if needed)
 3. Communicate to customers
 
 **Recovery Strategy**:
 
-1. **Short outage**: Wait for Clerk restoration
+1. **Short outage**: Wait for Better Auth restoration
 2. **Extended outage**: Enable bypass authentication for critical operations (with audit logging)
 3. **Data concern**: Implement manual verification process
 
 **Owner**: Security Lead
-**Dependencies**: Clerk support, security policy approval
+**Dependencies**: Better Auth support, security policy approval
 
 ### Scenario 4: Storage Outage (Vercel Blob)
 

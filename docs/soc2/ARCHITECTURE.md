@@ -8,7 +8,7 @@ The KIPSMTHN Creative Platform follows a modern web application architecture wit
 2. **Backend**: API routes and server actions
 3. **Database**: Neon/Postgres database
 4. **Storage**: Vercel Blob for media storage
-5. **Authentication**: Clerk for user management
+5. **Authentication**: Better Auth for user management
 6. **Third-party Services**: Resend for email, Stripe for payments (planned)
 
 ## Technology Stack
@@ -29,20 +29,20 @@ The platform utilizes the following technologies:
    - Drizzle ORM
    - PostgreSQL (Neon)
    - Vercel Blob
-   - Clerk for authentication
+   - Better Auth for authentication
 
 3. **Infrastructure**:
    - Vercel for hosting and deployments
    - Neon for database hosting
    - Vercel Blob for object storage
-   - Clerk for authentication
+   - Better Authfor authentication
 
 ## Data Flow
 
 The data flow in the platform follows these steps:
 
 1. **User Authentication**:
-   - Users authenticate via Clerk
+   - Users authenticate via Better Auth
    - Session tokens are issued
    - Users are redirected to the appropriate dashboard
 
@@ -65,7 +65,7 @@ The data flow in the platform follows these steps:
 The platform implements the following security measures:
 
 1. **Authentication**:
-   - Clerk for user authentication
+   - Better Auth for user authentication
    - Session management
    - Multi-factor authentication (MFA) for privileged users
 
@@ -89,7 +89,7 @@ The platform implements the following security measures:
 
 The platform integrates with the following third-party services:
 
-1. **Authentication**: Clerk
+1. **Authentication**: Better Auth
 2. **Database**: Neon/Postgres
 3. **Storage**: Vercel Blob
 4. **Email**: Resend

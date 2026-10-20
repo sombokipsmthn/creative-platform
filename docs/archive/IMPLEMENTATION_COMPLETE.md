@@ -506,7 +506,7 @@ Tests include API routes, webhooks, and page rendering. All pass.
 - **Dashboard** - Stats, tour, quick actions
 - **Profile/Settings** - All forms and controls
 - **Navigation** - Sidebar, top nav, badges
-- **Auth** - Clerk integration, sign-out
+- **Auth** - BetterAuth integration, sign-out
 - **API routes** - All endpoints functional
 
 ### ⚠️ Pre-existing Issues (Not from this task)

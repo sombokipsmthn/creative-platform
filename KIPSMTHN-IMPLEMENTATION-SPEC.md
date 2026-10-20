@@ -216,7 +216,7 @@ The correct interpretation of the codebase is:
 - **Platform**: Vercel for hosting and deployments
 - **Database**: Neon for PostgreSQL hosting
 - **Storage**: Vercel Blob for object storage
-- **Authentication**: Clerk for user management
+- **Authentication**: Better Auth for user management
 - **CI/CD**: Vercel's built-in deployment system with preview deployments
 - **Environment Variables**: Managed through Vercel dashboard
 - **Monitoring**: Basic Vercel analytics and error tracking
@@ -336,8 +336,8 @@ The correct interpretation of the codebase is:
 - **File Storage**: Vercel Blob for media assets (images, videos)
 - **Email**: Resend (planned integration)
 - **Payments**: Stripe (planned)
-- **Authentication**: Clerk
-- **Webhook Verification**: Svix for Clerk webhooks
+- **Authentication**: Better Auth
+- **Webhook Verification**: Svix for Better Auth webhooks
 - **Image Processing**: Custom library for watermarking and transformations
 - **Video Processing**: Custom library for video handling
 - **External APIs**: 
@@ -397,7 +397,7 @@ Based on codebase examination:
   - Payment tracking (inferred)
   - Revenue and dashboard analytics
 - **Onboarding**: 
-  - User profile completion after Clerk sign-in
+  - User profile completion after Better Auth sign-in
   - Service offerings configuration
   - Business information setup
   - Handle/username availability checking

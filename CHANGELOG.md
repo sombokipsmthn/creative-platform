@@ -97,5 +97,5 @@ Initial platform release with:
 - Basic CRUD operations for clients, quotes, invoices
 - Client gallery system
 - Equipment management
-- Authentication with Clerk
+- Authentication with Better Auth
 - Database with Drizzle ORM

@@ -18,8 +18,8 @@ export default function GalleryTopNav({
   onTabChange,
 }: GalleryTopNavProps) {
   return (
-    <div className="">
-      <div className="">
+    <div className="border-b border-[var(--color-border-subtle)]">
+      <div className="flex gap-6 overflow-x-auto">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -27,7 +27,7 @@ export default function GalleryTopNav({
               key={tab.id}
               type="button"
               onClick={() => onTabChange(tab.id)}
-              className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all  whitespace-nowrap flex items-center gap-2 ${
+              className={`pb-3 text-xs font-sans uppercase tracking-widest cursor-pointer transition-all border-b-2 whitespace-nowrap flex items-center gap-2 ${
                 isActive
                   ? 'border-[var(--color-accent)] text-[var(--color-accent)] font-bold'
                   : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]'

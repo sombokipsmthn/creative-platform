@@ -10,7 +10,8 @@ The current implementation is in active use via a shared database-backed app lay
 
 For implementation detail and current architecture status, see:
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
-- [docs/00-project/README.md](./docs/00-project/README.md)
+- [Project Handbook](./docs/PROJECT-HANDBOOK.md)
+- [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
 
 ---
 
@@ -207,9 +208,11 @@ Validation completed for the redesign branch includes the production build, Type
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
 - shadcn primitives in `src/components/ui/`
 - [docs/00-project/README.md](./docs/00-project/README.md)
-- [docs/01-specifications/README.md](./docs/01-specifications/README.md)
-- [docs/02-architecture/README.md](./docs/02-architecture/README.md)
-- [docs/04-security-compliance/README.md](./docs/04-security-compliance/README.md)
+- [Project Handbook](./docs/PROJECT-HANDBOOK.md)
+- [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
+- [Demo Account Guide](./docs/demo-account.md)
+- [API Reference](./docs/api-reference.md)
+- [SOC 2 Documentation](./docs/soc2/README.md)
 - [docs/design-system.md](./docs/design-system.md)
 - [docs/audits/styling-shadcn-audit.md](./docs/audits/styling-shadcn-audit.md)
 

@@ -1,7 +1,9 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
@@ -115,7 +117,7 @@ function getInitials(project: Pick<Project, 'name'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export default function AdminProjectsPage() {
+function AdminProjectsPageContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -128,6 +130,7 @@ export default function AdminProjectsPage() {
   const [filterFeatured, setFilterFeatured] = useState<'ALL' | 'true' | 'false'>('ALL');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<{
     name: string;
     description: string;
@@ -147,7 +150,7 @@ export default function AdminProjectsPage() {
     status: ProjectStatus;
     visibility: 'public' | 'private' | 'draft';
     featured: boolean;
-    clientId: string;
+    clientId: string | undefined;
     startDate: string;
     endDate: string;
   }>(() => ({
@@ -255,11 +258,6 @@ export default function AdminProjectsPage() {
       }
     }
 
-    let loading = true;
-    // Initialize loading state
-    const [setLoading, setLoadingInternal] = useReactState(true);
-    // We'll handle loading differently
-
     loadData();
 
     return () => {
@@ -317,7 +315,6 @@ export default function AdminProjectsPage() {
 
   function openCreateModal(clientId?: string) {
     setForm({
-      ...(clientId ? { clientId } : {}),
       name: '',
       description: '',
       shortDescription: '',
@@ -336,6 +333,7 @@ export default function AdminProjectsPage() {
       status: 'draft' as ProjectStatus,
       visibility: 'private' as 'public' | 'private' | 'draft',
       featured: false,
+      clientId: clientId || '',
       startDate: '',
       endDate: '',
     });
@@ -1083,7 +1081,7 @@ export default function AdminProjectsPage() {
                 </div>
 
                 <div className="admin-content-block">
-                  {[
+                  {([
                     'active',
                     'completed',
                     'on hold',
@@ -1141,5 +1139,13 @@ export default function AdminProjectsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function AdminProjectsPage() {
+  return (
+    <Suspense fallback={<div className="admin-empty-state" role="status"><p>Loading projects…</p></div>}>
+      <AdminProjectsPageContent />
+    </Suspense>
   );
 }

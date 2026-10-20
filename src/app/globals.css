@@ -6,8 +6,8 @@
 
 /* ─── 2. Theme: Typography ─────────────────────────── */
 @theme inline {
-  --font-sans: var(--font-outfit, ui-sans-serif, system-ui, sans-serif);
-  --font-mono: var(--font-outfit, ui-sans-serif, system-ui, sans-serif);
+  --font-sans: var(--font-outfit);
+  --font-mono: ui-monospace;
 
   /*
    * Neutral + semantic color scales.

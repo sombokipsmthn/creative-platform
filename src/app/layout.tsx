@@ -9,7 +9,7 @@ import { Analytics } from '@vercel/analytics/next';
 import { Outfit } from "next/font/google";
 import { cn } from "@/lib/utils";
 
-const outfit = Outfit({subsets:['latin'],variable:'--font-sans'});
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
 
 
 validateEnv();

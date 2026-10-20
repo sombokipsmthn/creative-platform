@@ -113,6 +113,9 @@ async function createWatermarkOverlay(
 
     const textHeight = fontSize;
 
+    // Use Outfit for watermark text (same as platform default)
+    // Sharp doesn't support variable fonts directly, so we use the system fallback
+
     const { x, y } = watermarkPosition(
         options.position,
         width,
@@ -138,7 +141,7 @@ async function createWatermarkOverlay(
         y="${y}"
         fill="white"
         fill-opacity="${opacity}"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="ui-sans-serif, system-ui, sans-serif"
         font-size="${fontSize}px"
         font-weight="600"
         letter-spacing="2px"

@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Loader2, AlertCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input, Textarea } from '@/components/ui/input'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface GallerySettingsTabProps {
   galleryId: string
@@ -85,7 +88,7 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
 
   if (loading) {
     return (
-      <div className="ui-card p-6">
+      <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
         <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
           <Loader2 className="w-4 h-4 animate-spin" />
           <span>Loading...</span>
@@ -110,60 +113,33 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
       )}
 
       {/* GENERAL SECTION */}
-      <div className="ui-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold">General</h2>
-
+      <Card><CardHeader><CardTitle>General</CardTitle></CardHeader><CardContent className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-2">Gallery Name</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="gallery-input"
-            placeholder="Gallery title"
-          />
+          <Input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Gallery title" />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-2">Description</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="gallery-input min-h-24"
-            placeholder="Gallery description"
-          />
+          <Textarea value={description} onChange={(e) => setDescription(e.target.value)} className="min-h-24" placeholder="Gallery description" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label className="block text-sm font-medium mb-2">Category</label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="gallery-input"
-              placeholder="e.g. Wedding, Portrait"
-            />
+            <Input type="text" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g. Wedding, Portrait" />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-2">Slug</label>
-            <input
-              type="text"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-              className="gallery-input"
-              placeholder="gallery-slug"
-            />
+            <Input type="text" value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))} placeholder="gallery-slug" />
             <p className="text-xs text-[var(--color-text-muted)] mt-1">Used in the gallery URL</p>
           </div>
         </div>
-      </div>
+      </CardContent></Card>
 
       {/* CLIENT PERMISSIONS SECTION */}
-      <div className="ui-card p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Client Permissions</h2>
-
+      <Card><CardHeader><CardTitle>Client Permissions</CardTitle></CardHeader><CardContent className="space-y-4">
         <div className="space-y-3">
           <label className="flex items-start gap-3 cursor-pointer">
             <input
@@ -210,14 +186,10 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
             </div>
           </label>
         </div>
-      </div>
+      </CardContent></Card>
 
       {/* SAVE BUTTON */}
-      <button
-        onClick={() => void handleSave()}
-        disabled={saving}
-        className="gallery-btn gallery-btn-primary"
-      >
+      <Button onClick={() => void handleSave()} disabled={saving} variant="primary">
         {saving ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -226,7 +198,7 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
         ) : (
           'Save Settings'
         )}
-      </button>
+      </Button>
     </div>
   )
 }

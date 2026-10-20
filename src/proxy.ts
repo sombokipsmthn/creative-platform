@@ -2,7 +2,7 @@ import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 import { NextResponse } from "next/server";
 
 function configuredOrigin(): string | null {
-  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3005";
+  return process.env.BETTER_AUTH_URL || process.env.NEXTAUTH_URL || "http://localhost:3000";
 }
 
 function getAuthOrigin(): string | null {

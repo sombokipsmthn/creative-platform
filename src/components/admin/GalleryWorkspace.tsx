@@ -10,6 +10,7 @@ import GalleryDesignTab from '@/components/gallery/GalleryDesignTab'
 import GallerySettingsTab from '@/components/gallery/GallerySettingsTab'
 import GalleryActivityTab from '@/components/gallery/GalleryActivityTab'
 import PhotoUploader from '@/components/admin/PhotoUploader'
+import { SelectCompat } from '@/components/ui/select-compat';
 
 interface GalleryCollection {
   id: string
@@ -503,7 +504,7 @@ export default function GalleryWorkspacePage() {
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Photos & Videos</h2>
                     <div className="flex items-center gap-2">
-                      <select
+                      <SelectCompat
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                         className="gallery-input text-sm py-2"
@@ -513,7 +514,7 @@ export default function GalleryWorkspacePage() {
                         <option value="filename_desc">Filename Z–A</option>
                         <option value="date_uploaded_new">Uploaded (newest)</option>
                         <option value="date_uploaded_old">Uploaded (oldest)</option>
-                      </select>
+                      </SelectCompat>
                       <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
                         <input
                           type="checkbox"

@@ -10,6 +10,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { authClient } from "@/lib/auth-client";
 import { useCreator } from '@/context/CreatorContext';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 
 export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean }) {
   const { activeCreator } = useCreator();
@@ -73,14 +75,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
       ref={menuRef}
       className="relative"
     >
-      <button
-        type="button"
-        onClick={() => setOpen((value) => !value)}
-        aria-expanded={open}
-        aria-haspopup="menu"
-        aria-label="Open profile menu"
-        className="flex items-center gap-2 rounded-lg px-1.5 py-1 outline-none transition hover:bg-[var(--color-bg-soft)] focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-950"
-      >
+      <Button type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-haspopup="menu" aria-label="Open profile menu" variant="ghost" className="h-auto gap-2 rounded-lg px-1.5 py-1">
         {avatarUrl ? (
           <Image
             src={avatarUrl}
@@ -125,14 +120,10 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
             <path d="m6 9 6 6 6-6" />
           </svg>
         </span>
-      </button>
+      </Button>
 
       {open && (
-        <div
-          role="menu"
-          aria-label="Profile menu"
-          className="absolute right-0 top-[calc(100%+0.75rem)] z-60 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10 dark:border-zinc-800 dark:bg-zinc-950 dark:shadow-black/30"
-        >
+        <Card role="menu" aria-label="Profile menu" className="absolute right-0 top-[calc(100%+0.75rem)] z-60 w-72 overflow-hidden shadow-xl">
           <div className="border-b border-slate-100 px-4 py-4 dark:border-zinc-800">
             <div className="flex items-center gap-3">
               {avatarUrl ? (
@@ -252,12 +243,7 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
           </div>
 
           <div className="border-t border-slate-100 p-2 dark:border-zinc-800">
-            <button
-              type="button"
-              role="menuitem"
-              onClick={handleSignOut}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-            >
+            <Button type="button" role="menuitem" onClick={handleSignOut} variant="ghost" className="w-full justify-start gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-red-600 dark:text-red-400">
               <svg
                 width="17"
                 height="17"
@@ -275,9 +261,9 @@ export default function ProfileMenu({ showLabel = false }: { showLabel?: boolean
               </svg>
 
               <span>Log out</span>
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );

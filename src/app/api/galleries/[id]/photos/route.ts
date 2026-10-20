@@ -197,7 +197,8 @@ async function getWatermarkSettings(
         text,
         position,
         opacity,
-        font_size
+        font_size,
+        image_path
       FROM gallery_watermarks
       WHERE gallery_id = ${galleryId}
       LIMIT 1
@@ -227,6 +228,9 @@ async function getWatermarkSettings(
     fontSize: Number(
       row?.font_size ?? 42,
     ),
+    imageBuffer: row?.image_path
+      ? (await getGalleryStorage().getObject(String(row.image_path)))?.body ?? null
+      : null,
   };
 }
 

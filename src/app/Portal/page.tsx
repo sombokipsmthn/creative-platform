@@ -7,9 +7,10 @@ import Image from 'next/image';
 import ClientLightbox from '@/components/ClientLightbox';
 import DownloadModal from '@/components/DownloadModal';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
 import Footer from '@/components/Footer';
+import { Card } from '@/components/ui/card';
 
 interface GalleryItem {
   id: string;
@@ -104,7 +105,7 @@ export default function ClientGalleryPortal({
   if (!verified) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black p-6">
-        <div className="max-w-md w-full bg-white dark:bg-zinc-900 rounded-xl p-6 text-center space-y-4 border border-slate-200 dark:border-zinc-800">
+        <Card className="max-w-md w-full p-6 text-center space-y-4">
           <p className="text-xs font-sans uppercase text-purple-600 dark:text-purple-400">
             Private Client Gallery
           </p>
@@ -134,19 +135,19 @@ export default function ClientGalleryPortal({
           >
             Access Gallery
           </Button>
-        </div>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="ui-page">
+    <div className="selection:bg-purple-600 selection:text-white transition-colors duration-300">
       <Header />
-      <div className="ui-page-padded">
-        <section className="ui-shell flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="px-6 py-12 max-w-7xl mx-auto">
+        <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="ui-page-title-lg">{gallery.title}</h1>
-            <p className="ui-meta">{gallery.client} • {gallery.date}</p>
+            <h1 className="text-3xl font-light tracking-tight">{gallery.title}</h1>
+            <p className="text-sm text-muted-foreground">{gallery.client} • {gallery.date}</p>
           </div>
           <Button
             onClick={() => setDownload(true)}
@@ -156,22 +157,20 @@ export default function ClientGalleryPortal({
             Download
           </Button>
         </section>
-        <main className="ui-shell grid md:grid-cols-3 gap-6 mt-6">
+        <main className="grid md:grid-cols-3 gap-6 mt-6">
           {gallery.items.map((item, index) => (
-            <div key={item.id} className="ui-card">
+            <Card key={item.id}>
               <div className="relative aspect-square cursor-pointer" onClick={() => setLightbox(index)}>
                 <Image
                   src={item.url}
                   alt={item.title}
                   fill
-                  className="object-cover"
+                  className="object-cover rounded-t-lg"
                 />
               </div>
 
               <div className="p-4 flex justify-between items-center">
-                <span className="text-xs text-slate-900 dark:text-white">
-                  {item.title}
-                </span>
+                <span className="text-xs font-medium">{item.title}</span>
 
                 <Button
                   onClick={() => toggleFavorite(item.id)}
@@ -180,7 +179,7 @@ export default function ClientGalleryPortal({
                   {favorites.includes(item.id) ? '♥' : '♡'}
                 </Button>
               </div>
-            </div>
+            </Card>
           ))}
         </main>
       </div>

@@ -4,7 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowLeft, ArrowUpRight, Eye, Loader2, Save, Star, Trash2, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 const resolveImage = (source?: string | null, fallbackUrl?: string) => {
@@ -443,129 +445,121 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         {activeTab === 'basic' && (
           <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
             <div className="space-y-1">
-              <label className="ui-label">Project Name *</label>
-              <input
+              <label className="text-sm font-medium leading-none">Project Name *</label>
+              <Input
                 required
                 type="text"
                 value={form.name}
                 onChange={(e) => handleChange('name', e.target.value)}
-                className="ui-input"
+
                 placeholder="e.g. 2026 Brand Campaign"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Category</label>
-                <select value={form.category} onChange={(e) => handleChange('category', e.target.value)} className="ui-input">
-                  <option value="">Select category</option>
-                  <option value="Photography">Photography</option>
-                  <option value="Videography">Videography</option>
-                  <option value="Branding">Branding</option>
-                  <option value="UI/UX">UI/UX</option>
-                  <option value="Motion">Motion Graphics</option>
-                  <option value="Other">Other</option>
-                </select>
+                <label className="text-sm font-medium leading-none">Category</label>
+                <Select value={form.category || 'none'} onValueChange={(value) => handleChange('category', value === 'none' ? '' : value)}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
+                  <SelectContent><SelectItem value="none">Select category</SelectItem><SelectItem value="Photography">Photography</SelectItem><SelectItem value="Videography">Videography</SelectItem><SelectItem value="Branding">Branding</SelectItem><SelectItem value="UI/UX">UI/UX</SelectItem><SelectItem value="Motion">Motion Graphics</SelectItem><SelectItem value="Other">Other</SelectItem></SelectContent>
+                </Select>
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Year</label>
-                <input type="text" value={form.year} onChange={(e) => handleChange('year', e.target.value)} className="ui-input" placeholder="e.g. 2026" />
+                <label className="text-sm font-medium leading-none">Year</label>
+                <Input type="text" value={form.year} onChange={(e) => handleChange('year', e.target.value)} placeholder="e.g. 2026" />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Location</label>
-                <input type="text" value={form.location} onChange={(e) => handleChange('location', e.target.value)} className="ui-input" placeholder="e.g. Nairobi, Kenya" />
+                <label className="text-sm font-medium leading-none">Location</label>
+                <Input type="text" value={form.location} onChange={(e) => handleChange('location', e.target.value)} placeholder="e.g. Nairobi, Kenya" />
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Role</label>
-                <input type="text" value={form.role} onChange={(e) => handleChange('role', e.target.value)} className="ui-input" placeholder="e.g. Creative Director" />
+                <label className="text-sm font-medium leading-none">Role</label>
+                <Input type="text" value={form.role} onChange={(e) => handleChange('role', e.target.value)} placeholder="e.g. Creative Director" />
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="ui-label">Short Description</label>
-              <input type="text" value={form.shortDescription} onChange={(e) => handleChange('shortDescription', e.target.value)} className="ui-input" placeholder="One-line summary for portfolio cards" />
+              <label className="text-sm font-medium leading-none">Short Description</label>
+              <Input type="text" value={form.shortDescription} onChange={(e) => handleChange('shortDescription', e.target.value)} placeholder="One-line summary for portfolio cards" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Slug</label>
-                <input type="text" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} className="ui-input" placeholder="Auto-generated from name" />
+                <label className="text-sm font-medium leading-none">Slug</label>
+                <Input type="text" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} placeholder="Auto-generated from name" />
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Client</label>
-                <select value={form.clientId} onChange={(e) => handleChange('clientId', e.target.value)} className="ui-input">
-                  <option value="">No client</option>
-                  {/* Client dropdown would be populated from API */}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="ui-label">Start Date</label>
-                <input type="date" value={form.startDate} onChange={(e) => handleChange('startDate', e.target.value)} className="ui-input" />
-              </div>
-              <div className="space-y-1">
-                <label className="ui-label">End Date</label>
-                <input type="date" value={form.endDate} onChange={(e) => handleChange('endDate', e.target.value)} className="ui-input" />
+                <label className="text-sm font-medium leading-none">Client</label>
+                <Select value={form.clientId || 'none'} onValueChange={(value) => handleChange('clientId', value === 'none' ? '' : value)}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="No client" /></SelectTrigger>
+                  <SelectContent><SelectItem value="none">No client</SelectItem></SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Total Amount</label>
-                <input type="number" value={form.totalAmount} onChange={(e) => handleChange('totalAmount', e.target.value)} className="ui-input" placeholder="0" />
+                <label className="text-sm font-medium leading-none">Start Date</label>
+                <Input type="date" value={form.startDate} onChange={(e) => handleChange('startDate', e.target.value)} />
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Currency</label>
-                <select value={form.currency} onChange={(e) => handleChange('currency', e.target.value)} className="ui-input">
-                  <option value="KES">KES</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="ZAR">ZAR</option>
-                </select>
+                <label className="text-sm font-medium leading-none">End Date</label>
+                <Input type="date" value={form.endDate} onChange={(e) => handleChange('endDate', e.target.value)} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-sm font-medium leading-none">Total Amount</label>
+                <Input type="number" value={form.totalAmount} onChange={(e) => handleChange('totalAmount', e.target.value)} placeholder="0" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium leading-none">Currency</label>
+                <Select value={form.currency} onValueChange={(value) => handleChange('currency', value)}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="KES">KES</SelectItem><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="ZAR">ZAR</SelectItem></SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="ui-label">Description</label>
-              <textarea rows={4} value={form.description} onChange={(e) => handleChange('description', e.target.value)} className="ui-input" placeholder="Full project description..." />
+              <label className="text-sm font-medium leading-none">Description</label>
+              <Textarea rows={4} value={form.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="Full project description..." />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Scope of Work</label>
-                <textarea rows={3} value={form.scopeOfWork} onChange={(e) => handleChange('scopeOfWork', e.target.value)} className="ui-input" placeholder="..." />
+                <label className="text-sm font-medium leading-none">Scope of Work</label>
+                <Textarea rows={3} value={form.scopeOfWork} onChange={(e) => handleChange('scopeOfWork', e.target.value)} placeholder="..." />
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Deliverables</label>
-                <textarea rows={3} value={form.deliverables} onChange={(e) => handleChange('deliverables', e.target.value)} className="ui-input" placeholder="..." />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="ui-label">Payment Terms</label>
-                <input type="text" value={form.paymentTerms} onChange={(e) => handleChange('paymentTerms', e.target.value)} className="ui-input" placeholder="e.g. 50% deposit, 50% on delivery" />
-              </div>
-              <div className="space-y-1">
-                <label className="ui-label">Revisions Policy</label>
-                <input type="text" value={form.revisionsPolicy} onChange={(e) => handleChange('revisionsPolicy', e.target.value)} className="ui-input" placeholder="e.g. 2 rounds of revisions included" />
+                <label className="text-sm font-medium leading-none">Deliverables</label>
+                <Textarea rows={3} value={form.deliverables} onChange={(e) => handleChange('deliverables', e.target.value)} placeholder="..." />
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Licensing Terms</label>
-                <input type="text" value={form.licensingTerms} onChange={(e) => handleChange('licensingTerms', e.target.value)} className="ui-input" placeholder="e.g. Commercial use rights" />
+                <label className="text-sm font-medium leading-none">Payment Terms</label>
+                <Input type="text" value={form.paymentTerms} onChange={(e) => handleChange('paymentTerms', e.target.value)} placeholder="e.g. 50% deposit, 50% on delivery" />
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Notice Period</label>
-                <input type="text" value={form.noticePeriod} onChange={(e) => handleChange('noticePeriod', e.target.value)} className="ui-input" placeholder="e.g. 14 days" />
+                <label className="text-sm font-medium leading-none">Revisions Policy</label>
+                <Input type="text" value={form.revisionsPolicy} onChange={(e) => handleChange('revisionsPolicy', e.target.value)} placeholder="e.g. 2 rounds of revisions included" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-sm font-medium leading-none">Licensing Terms</label>
+                <Input type="text" value={form.licensingTerms} onChange={(e) => handleChange('licensingTerms', e.target.value)} placeholder="e.g. Commercial use rights" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-medium leading-none">Notice Period</label>
+                <Input type="text" value={form.noticePeriod} onChange={(e) => handleChange('noticePeriod', e.target.value)} placeholder="e.g. 14 days" />
               </div>
             </div>
           </div>
@@ -575,24 +569,24 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         {activeTab === 'story' && (
           <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
             <div className="space-y-1">
-              <label className="ui-label">Overview</label>
-              <textarea rows={4} value={form.storyOverview} onChange={(e) => handleChange('storyOverview', e.target.value)} className="ui-input" placeholder="Project overview and context..." />
+              <label className="text-sm font-medium leading-none">Overview</label>
+              <Textarea rows={4} value={form.storyOverview} onChange={(e) => handleChange('storyOverview', e.target.value)} placeholder="Project overview and context..." />
             </div>
             <div className="space-y-1">
-              <label className="ui-label">Challenge / Context</label>
-              <textarea rows={4} value={form.storyChallenge} onChange={(e) => handleChange('storyChallenge', e.target.value)} className="ui-input" placeholder="What was the challenge?" />
+              <label className="text-sm font-medium leading-none">Challenge / Context</label>
+              <Textarea rows={4} value={form.storyChallenge} onChange={(e) => handleChange('storyChallenge', e.target.value)} placeholder="What was the challenge?" />
             </div>
             <div className="space-y-1">
-              <label className="ui-label">Approach</label>
-              <textarea rows={4} value={form.storyApproach} onChange={(e) => handleChange('storyApproach', e.target.value)} className="ui-input" placeholder="How did you approach it?" />
+              <label className="text-sm font-medium leading-none">Approach</label>
+              <Textarea rows={4} value={form.storyApproach} onChange={(e) => handleChange('storyApproach', e.target.value)} placeholder="How did you approach it?" />
             </div>
             <div className="space-y-1">
-              <label className="ui-label">Outcome &amp; Impact</label>
-              <textarea rows={4} value={form.storyOutcome} onChange={(e) => handleChange('storyOutcome', e.target.value)} className="ui-input" placeholder="What was the result?" />
+              <label className="text-sm font-medium leading-none">Outcome &amp; Impact</label>
+              <Textarea rows={4} value={form.storyOutcome} onChange={(e) => handleChange('storyOutcome', e.target.value)} placeholder="What was the result?" />
             </div>
             <div className="space-y-1">
-              <label className="ui-label">Credits</label>
-              <textarea rows={3} value={form.storyCredits} onChange={(e) => handleChange('storyCredits', e.target.value)} className="ui-input" placeholder="Credits and acknowledgments..." />
+              <label className="text-sm font-medium leading-none">Credits</label>
+              <Textarea rows={3} value={form.storyCredits} onChange={(e) => handleChange('storyCredits', e.target.value)} placeholder="Credits and acknowledgments..." />
             </div>
           </div>
         )}
@@ -624,20 +618,20 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                     </div>
                     <div className="p-3 space-y-1">
                       <p className="text-xs font-medium text-slate-900 dark:text-white truncate">{media.filename}</p>
-                      <input
+                      <Input
                         type="text"
                         value={media.altText || ''}
                         onChange={(e) => {
                           /* Alt text update handled in API */
                         }}
-                        className="ui-input text-xs"
+                        className="text-xs"
                         placeholder="Alt text"
                       />
-                      <input
+                      <Input
                         type="text"
                         value={media.caption || ''}
                         onChange={(e) => {}}
-                        className="ui-input text-xs"
+                        className="text-xs"
                         placeholder="Caption"
                       />
                     </div>
@@ -661,28 +655,24 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
           <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="ui-label">Status</label>
-                <select value={form.status} onChange={(e) => handleChange('status', e.target.value)} className="ui-input">
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="completed">Completed</option>
-                  <option value="on hold">On Hold</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
+                <label className="text-sm font-medium leading-none">Status</label>
+                <Select value={form.status} onValueChange={(value) => handleChange('status', value)}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="draft">Draft</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="on hold">On Hold</SelectItem><SelectItem value="cancelled">Cancelled</SelectItem></SelectContent>
+                </Select>
               </div>
               <div className="space-y-1">
-                <label className="ui-label">Visibility</label>
-                <select value={form.visibility} onChange={(e) => handleChange('visibility', e.target.value)} className="ui-input">
-                  <option value="private">Private</option>
-                  <option value="public">Public</option>
-                  <option value="draft">Draft</option>
-                </select>
+                <label className="text-sm font-medium leading-none">Visibility</label>
+                <Select value={form.visibility} onValueChange={(value) => handleChange('visibility', value)}>
+                  <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent><SelectItem value="private">Private</SelectItem><SelectItem value="public">Public</SelectItem><SelectItem value="draft">Draft</SelectItem></SelectContent>
+                </Select>
               </div>
             </div>
 
             <div className="space-y-1">
-              <label className="ui-label">Slug</label>
-              <input type="text" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} className="ui-input" placeholder="Human-readable URL slug" />
+              <label className="text-sm font-medium leading-none">Slug</label>
+              <Input type="text" value={form.slug} onChange={(e) => handleChange('slug', e.target.value)} placeholder="Human-readable URL slug" />
             </div>
 
             <div className="flex items-center gap-3">
@@ -697,8 +687,8 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
 
             <div className="border-t border-slate-200 dark:border-zinc-800 pt-4 space-y-2">
-              <p className="ui-label">Project Status</p>
-              <p className="ui-meta">Published projects are visible to the public at /work/{form.slug || '[slug]'}.</p>
+              <p className="text-sm font-medium leading-none">Project Status</p>
+              <p className="text-sm text-muted-foreground">Published projects are visible to the public at /work/{form.slug || '[slug]'}.</p>
             </div>
 
             {previewUrl && (

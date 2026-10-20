@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { and, count, desc, eq, gte, lt, ne, sql, sum } from "drizzle-orm";
 
 import { db } from "@/db";
-import { clients, galleries, invoices, projects, quotes } from "@/db/schema";
+import { clients, galleries, invoices, payments, projects, quotes } from "@/db/schema";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
 
 function startOfDay(date: Date) {
@@ -87,6 +87,7 @@ export async function GET(request: Request) {
       invoiceStatusRows,
       invoicePeriodValue,
       paidInvoicePeriodValue,
+      receivedPaymentPeriodValue,
       overdueInvoices,
       recentClients,
       projectStats,
@@ -113,6 +114,7 @@ export async function GET(request: Request) {
       db.select({ status: invoices.status, count: count() }).from(invoices).where(eq(invoices.creatorId, creator)).groupBy(invoices.status),
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), gte(invoices.createdAt, periodStart), lt(invoices.createdAt, periodEnd))),
       db.select({ value: sum(invoices.total) }).from(invoices).where(and(eq(invoices.creatorId, creator), eq(invoices.status, "paid"), gte(invoices.updatedAt, periodStart), lt(invoices.updatedAt, periodEnd))),
+      db.select({ value: sum(payments.amount) }).from(payments).where(and(eq(payments.creatorId, creator), eq(payments.status, "confirmed"), gte(payments.paidAt, periodStart), lt(payments.paidAt, periodEnd))),
       db.select({ value: count() }).from(invoices).where(and(eq(invoices.creatorId, creator), lt(invoices.dueDate, now), ne(invoices.status, "paid"), ne(invoices.status, "cancelled"))),
       db.select({ id: clients.id, name: clients.name, createdAt: clients.createdAt }).from(clients).where(eq(clients.creatorId, creator)).orderBy(desc(clients.createdAt)).limit(5),
       db.select({
@@ -178,7 +180,7 @@ export async function GET(request: Request) {
         periodQuotedValue: money(quotePeriodValue[0]?.value),
         acceptedQuoteValue: money(acceptedQuoteValue[0]?.value),
         periodInvoicedValue: money(invoicePeriodValue[0]?.value),
-        periodPaidValue: money(paidInvoicePeriodValue[0]?.value),
+        periodPaidValue: money(receivedPaymentPeriodValue[0]?.value),
         overdueInvoices: Number(overdueInvoices[0]?.value ?? 0),
       },
       quotes: { statuses: quoteStatuses, conversionRate: quoteConversionRate },

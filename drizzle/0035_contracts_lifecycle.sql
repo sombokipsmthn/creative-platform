@@ -1,0 +1,18 @@
+ALTER TABLE "contract_templates" ADD COLUMN IF NOT EXISTS "version" integer NOT NULL DEFAULT 1;
+ALTER TABLE "contract_templates" ADD COLUMN IF NOT EXISTS "review_status" text NOT NULL DEFAULT 'unreviewed';
+ALTER TABLE "contract_templates" ADD COLUMN IF NOT EXISTS "reviewed_at" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "template_version" integer;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "template_snapshot" text;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "contract_type" text;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "effective_at" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "term_start_at" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "term_end_at" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "renewal_at" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "notice_deadline" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "termination_at" timestamp;
+ALTER TABLE "contracts" ADD COLUMN IF NOT EXISTS "signatories" jsonb NOT NULL DEFAULT '[]'::jsonb;
+ALTER TABLE "contract_events" ADD COLUMN IF NOT EXISTS "actor_id" text;
+ALTER TABLE "contract_events" ADD COLUMN IF NOT EXISTS "outcome" text;
+CREATE INDEX IF NOT EXISTS "contracts_term_end_at_idx" ON "contracts"("term_end_at");
+CREATE INDEX IF NOT EXISTS "contracts_contract_type_idx" ON "contracts"("contract_type");
+CREATE INDEX IF NOT EXISTS "contract_templates_version_idx" ON "contract_templates"("id", "version");

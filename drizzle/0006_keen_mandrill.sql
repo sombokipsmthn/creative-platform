@@ -1,0 +1,3 @@
+-- Historical migration placeholder.
+-- The original 0006 migration file is absent from this repository; its schema state
+-- is already represented by the reconciled database baseline.

@@ -4,7 +4,7 @@ type InputVariant = 'default' | 'underlined' | 'filled';
 type InputSize = 'sm' | 'md' | 'lg';
 type InputState = 'default' | 'focus' | 'disabled' | 'error';
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   className?: string;
   asChild?: boolean;
   variant?: InputVariant;

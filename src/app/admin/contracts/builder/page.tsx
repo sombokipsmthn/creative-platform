@@ -1,9 +1,10 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { ContractBuilder } from '@/components/contracts/ContractBuilder';
 
-export default function ContractBuilderPage() {
+function ContractBuilderInner() {
   const searchParams = useSearchParams();
   const templateId = searchParams.get('templateId') || undefined;
 
@@ -12,5 +13,13 @@ export default function ContractBuilderPage() {
       mode="new"
       templateId={templateId}
     />
+  );
+}
+
+export default function ContractBuilderPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ContractBuilderInner />
+    </Suspense>
   );
 }

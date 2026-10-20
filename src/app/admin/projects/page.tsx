@@ -3,7 +3,16 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
@@ -103,25 +112,6 @@ function getInitials(project: Pick<Project, 'name'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-function statusClass(status: string) {
-  if (status === 'active') {
-    return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
-  }
-
-  if (status === 'completed') {
-    return 'bg-blue-500/20 border-blue-500/30 text-blue-700 dark:text-blue-300';
-  }
-
-  if (status === 'on hold') {
-    return 'bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-300';
-  }
-
-  if (status === 'cancelled') {
-    return 'bg-red-500/20 border-red-500/30 text-red-700 dark:text-red-300';
-  }
-
-  return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
-}
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -368,7 +358,7 @@ export default function AdminProjectsPage() {
   */
 
   return (
-    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
+    <div className="min-h-screen max-w-full overflow-x-hidden px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-8">
         <AdminPageHeader
           title="Projects"
@@ -400,35 +390,32 @@ export default function AdminProjectsPage() {
             ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
             ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
-              <p className={`ui-stat-label ${color}`}>{label}</p>
-              <p className="ui-stat-value">{count}</p>
+            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
+              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
+              <p className="text-2xl font-bold">{count}</p>
             </div>
           ))}
         </div>
 
         <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-wrap gap-2 items-center">
-            <input
+            <Input
               type="text"
               placeholder="Search projects by name, description, client..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              className="ui-input w-full md:w-64"
+              className="w-full md:w-64"
             />
 
-            <select
-              value={filterClient ?? ''}
-              onChange={(e) => setFilterClient(e.target.value || null)}
-              className="ui-input w-full md:w-64"
-            >
-              <option value="">All Clients</option>
-              {clients.map((client) => (
-                <option key={client.id} value={client.id}>
-                  {client.name} {client.company ? `(${client.company})` : ''}
-                </option>
-              ))}
-            </select>
+            <Select value={filterClient ?? 'all'} onValueChange={(value) => setFilterClient(value === 'all' ? null : value)}>
+              <SelectTrigger className="w-full md:w-64"><SelectValue placeholder="All Clients" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Clients</SelectItem>
+                {clients.map((client) => (
+                  <SelectItem key={client.id} value={client.id}>{client.name} {client.company ? `(${client.company})` : ''}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex flex-wrap gap-2 text-xs font-sans">
@@ -504,7 +491,7 @@ export default function AdminProjectsPage() {
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
+                className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
@@ -516,9 +503,9 @@ export default function AdminProjectsPage() {
                       <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
                         {project.name}
                       </h3>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(project.status)}`}>
+                      <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>
                         {statusLabel(project.status)}
-                      </span>
+                      </Badge>
                       {project.featured && (
                         <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
                           <Star className="h-3 w-3" />
@@ -648,242 +635,210 @@ export default function AdminProjectsPage() {
               </Button>
 
               <div className="space-y-1">
-                <p className="ui-eyebrow">PROJECTS</p>
-                <h2 className="ui-section-title">New Project</h2>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">PROJECTS</p>
+                <h2 className="text-2xl font-semibold tracking-tight">New Project</h2>
               </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="ui-label">Project Name *</label>
-                  <input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
+                  <label className="text-sm font-medium leading-none">Project Name *</label>
+                  <Input required type="text" placeholder="e.g. 2026 Brand Campaign" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Client</label>
-                  <select
-                    value={form.clientId}
-                    onChange={(e) => setForm({ ...form, clientId: e.target.value })}
-                    className="ui-input w-full"
-                  >
-                    <option value="">Select a client (optional)</option>
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name} {client.company ? `(${client.company})` : ''}
-                      </option>
-                    ))}
-                  </select>
+                  <label className="text-sm font-medium leading-none">Client</label>
+                  <Select value={form.clientId || 'none'} onValueChange={(value) => setForm({ ...form, clientId: value === 'none' ? '' : value })}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a client (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">Select a client (optional)</SelectItem>
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id}>
+                          {client.name} {client.company ? `(${client.company})` : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Description</label>
-                    <textarea
+                    <label className="text-sm font-medium leading-none">Description</label>
+                    <Textarea
                       rows={2}
                       placeholder="Brief project description..."
                       value={form.description}
                       onChange={(event) => setForm({ ...form, description: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Short Description</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Short Description</label>
+                    <Input
                       type="text"
                       placeholder="One-line summary for portfolio cards"
                       value={form.shortDescription}
                       onChange={(event) => setForm({ ...form, shortDescription: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Category</label>
-                    <select
-                      value={form.category}
-                      onChange={(e) => setForm({ ...form, category: e.target.value })}
-                      className="ui-input"
-                    >
-                      <option value="">Select category</option>
-                      <option value="Photography">Photography</option>
-                      <option value="Videography">Videography</option>
-                      <option value="Branding">Branding</option>
-                      <option value="UI/UX">UI/UX</option>
-                      <option value="Motion">Motion Graphics</option>
-                      <option value="Other">Other</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Category</label>
+                    <Select value={form.category || 'none'} onValueChange={(value) => setForm({ ...form, category: value === 'none' ? '' : value })}>
+                      <SelectTrigger className="w-full"><SelectValue placeholder="Select category" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Select category</SelectItem>
+                        <SelectItem value="Photography">Photography</SelectItem>
+                        <SelectItem value="Videography">Videography</SelectItem>
+                        <SelectItem value="Branding">Branding</SelectItem>
+                        <SelectItem value="UI/UX">UI/UX</SelectItem>
+                        <SelectItem value="Motion">Motion Graphics</SelectItem>
+                        <SelectItem value="Other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Year</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Year</label>
+                    <Input
                       type="text"
                       placeholder="e.g. 2026"
                       value={form.year}
                       onChange={(event) => setForm({ ...form, year: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Location</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Location</label>
+                    <Input
                       type="text"
                       placeholder="e.g. Nairobi, Kenya"
                       value={form.location}
                       onChange={(event) => setForm({ ...form, location: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Slug</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Slug</label>
+                    <Input
                       type="text"
                       placeholder="auto-generated from name"
                       value={form.slug}
                       onChange={(event) => setForm({ ...form, slug: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Status</label>
-                    <select
-                      value={form.status}
-                      onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
-                      className="ui-input"
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="active">Active</option>
-                      <option value="completed">Completed</option>
-                      <option value="on hold">On Hold</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Status</label>
+                    <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value as ProjectStatus })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="draft">Draft</SelectItem><SelectItem value="active">Active</SelectItem><SelectItem value="completed">Completed</SelectItem><SelectItem value="on hold">On Hold</SelectItem><SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Visibility</label>
-                    <select
-                      value={form.visibility}
-                      onChange={(e) => setForm({ ...form, visibility: e.target.value as 'public' | 'private' | 'draft' })}
-                      className="ui-input"
-                    >
-                      <option value="private">Private</option>
-                      <option value="public">Public</option>
-                      <option value="draft">Draft</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Visibility</label>
+                    <Select value={form.visibility} onValueChange={(value) => setForm({ ...form, visibility: value as 'public' | 'private' | 'draft' })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="private">Private</SelectItem><SelectItem value="public">Public</SelectItem><SelectItem value="draft">Draft</SelectItem></SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Start Date</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Start Date</label>
+                    <Input
                       type="date"
                       value={form.startDate}
                       onChange={(event) => setForm({ ...form, startDate: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">End Date</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">End Date</label>
+                    <Input
                       type="date"
                       value={form.endDate}
                       onChange={(event) => setForm({ ...form, endDate: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Total Amount</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Total Amount</label>
+                    <Input
                       type="number"
                       placeholder="0"
                       value={form.totalAmount}
                       onChange={(event) => setForm({ ...form, totalAmount: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Currency</label>
-                    <select
-                      value={form.currency}
-                      onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                      className="ui-input"
-                    >
-                      <option value="KES">KES</option>
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
-                      <option value="GBP">GBP</option>
-                      <option value="ZAR">ZAR</option>
-                      <option value="NGN">NGN</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Currency</label>
+                    <Select value={form.currency} onValueChange={(value) => setForm({ ...form, currency: value })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="KES">KES</SelectItem><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="ZAR">ZAR</SelectItem><SelectItem value="NGN">NGN</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Payment Terms</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Payment Terms</label>
+                    <Input
                       type="text"
                       placeholder="e.g. 50% deposit, 50% on delivery"
                       value={form.paymentTerms}
                       onChange={(event) => setForm({ ...form, paymentTerms: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Revisions Policy</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Revisions Policy</label>
+                    <Input
                       type="text"
                       placeholder="e.g. 2 rounds of revisions included"
                       value={form.revisionsPolicy}
                       onChange={(event) => setForm({ ...form, revisionsPolicy: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Licensing Terms</label>
-                    <input
+                    <label className="text-sm font-medium leading-none">Licensing Terms</label>
+                    <Input
                       type="text"
                       placeholder="e.g. Commercial use rights"
                       value={form.licensingTerms}
                       onChange={(event) => setForm({ ...form, licensingTerms: event.target.value })}
-                      className="ui-input"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Featured</label>
-                    <select
-                      value={form.featured ? 'true' : 'false'}
-                      onChange={(e) => setForm({ ...form, featured: e.target.value === 'true' })}
-                      className="ui-input"
-                    >
-                      <option value="false">No</option>
-                      <option value="true">Yes</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Featured</label>
+                    <Select value={form.featured ? 'true' : 'false'} onValueChange={(value) => setForm({ ...form, featured: value === 'true' })}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent><SelectItem value="false">No</SelectItem><SelectItem value="true">Yes</SelectItem></SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Notice Period</label>
-                  <input
+                  <label className="text-sm font-medium leading-none">Notice Period</label>
+                  <Input
                     type="text"
                     placeholder="e.g. 14 days"
                     value={form.noticePeriod}
                     onChange={(event) => setForm({ ...form, noticePeriod: event.target.value })}
-                    className="ui-input"
                   />
                 </div>
 
@@ -932,8 +887,8 @@ export default function AdminProjectsPage() {
 
               <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
                 <div>
-                  <p className="ui-label">Project Status</p>
-                  <p className="ui-meta">Changes are saved directly to the database.</p>
+                  <p className="text-sm font-medium leading-none">Project Status</p>
+                  <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
@@ -958,14 +913,14 @@ export default function AdminProjectsPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="ui-label">Description</p>
+                <p className="text-sm font-medium leading-none">Description</p>
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">
                   {selectedProject.description || 'No description.'}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <p className="ui-label">Details</p>
+                <p className="text-sm font-medium leading-none">Details</p>
                 <div className="grid gap-4 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
                   <div>Client: {selectedProject.client?.name || 'None'}</div>
                   <div>

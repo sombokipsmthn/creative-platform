@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Download, Heart } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { Button } from '@/components/ui/button';
 
 interface EditorialViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -89,7 +90,7 @@ export function GalleryViewerEditorial({
             </div>
             <div className="flex gap-2">
               {allowFavorites && (
-                <button
+                <Button
                   onClick={() => handleFavorite(featured.id)}
                   className="p-2 transition hover:bg-gray-100 rounded"
                 >
@@ -100,15 +101,15 @@ export function GalleryViewerEditorial({
                         : 'text-gray-400'
                     }`}
                   />
-                </button>
+                </Button>
               )}
               {allowDownloads && (
-                <button
+                <Button
                   onClick={() => onPhotoDownload?.(featured.id)}
                   className="p-2 transition hover:bg-gray-100 rounded"
                 >
                   <Download className="h-4 w-4 text-gray-400" />
-                </button>
+                </Button>
               )}
             </div>
           </div>
@@ -145,7 +146,7 @@ export function GalleryViewerEditorial({
                       <p className="text-xs font-light text-white">{photo.filename}</p>
                       <div className="flex gap-2">
                         {allowFavorites && (
-                          <button
+                          <Button
                             onClick={() => handleFavorite(photo.id)}
                             className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
@@ -154,15 +155,15 @@ export function GalleryViewerEditorial({
                                 isFavorite ? 'fill-red-500 text-red-500' : 'text-white'
                               }`}
                             />
-                          </button>
+                          </Button>
                         )}
                         {allowDownloads && (
-                          <button
+                          <Button
                             onClick={() => onPhotoDownload?.(photo.id)}
                             className="rounded-full bg-white/20 p-1.5 backdrop-blur transition hover:bg-white/30"
                           >
                             <Download className="h-4 w-4 text-white" />
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </div>

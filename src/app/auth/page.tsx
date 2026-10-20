@@ -58,10 +58,7 @@ export default async function AuthRedirectPage() {
    * onboarding.
    */
 
-  if (
-    !profile ||
-    localUser.onboardingStatus !== "complete"
-  ) {
+  if (!profile) {
     redirect("/admin/onboarding");
   }
 

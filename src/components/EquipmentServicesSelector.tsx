@@ -427,8 +427,8 @@ export default function EquipmentServicesSelector({
               onClick={() => setSelectedCategory(category.key)}
               className={`whitespace-nowrap rounded-full px-3 py-1 font-sans text-[11px] transition ${
                 selectedCategory === category.key
-                  ? 'bg-purple-600 font-bold text-white'
-                  : 'bg-slate-100 text-slate-600 hover:text-purple-600 dark:bg-zinc-800 dark:text-zinc-400'
+                  ? 'bg-primary font-bold text-white'
+                  : 'bg-slate-100 text-slate-600 hover:text-primary dark:bg-zinc-800 dark:text-zinc-400'
               }`}
             >
               {category.label}

@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -501,8 +502,7 @@ export default function AdminClientsPage() {
                   {saving ? 'Saving Client…' : '+ Add Client to CRM'}
                 </Button>
               </form>
-            </div>
-          </div>
+          </StandardCreationDialog>
         )}
 
         {selectedClient && (

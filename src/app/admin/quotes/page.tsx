@@ -62,6 +62,7 @@ export default function QuotesPage() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;

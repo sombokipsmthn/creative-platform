@@ -18,6 +18,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import TableFilterBar from '@/components/admin/TableFilterBar';
 
 type Client = {
@@ -147,6 +148,7 @@ export default function InvoicesPage() {
   const [currency, setCurrency] = useState('all');
   const [clientId, setClientId] = useState('all');
   const [search, setSearch] = useState('');
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -315,6 +317,18 @@ export default function InvoicesPage() {
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
+
+          <StandardCreationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} title="Start a new invoice" description="Invoices require line items and a client association, so continue to the existing editor to create a valid draft.">
+            <div className="space-y-4 pr-8">
+              <p className="ui-eyebrow">BILLING</p>
+              <h2 className="ui-section-title">Start a new invoice</h2>
+              <p className="text-sm text-muted-foreground">The invoice editor keeps numbering, currency, line items, tax, and totals together so the draft is persisted correctly.</p>
+            </div>
+            <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+              <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+              <Button type="button" onClick={() => window.location.assign('/admin/invoices/new')}>Continue to invoice editor <ArrowRight aria-hidden="true" /></Button>
+            </div>
+          </StandardCreationDialog>
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">

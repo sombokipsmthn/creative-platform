@@ -857,6 +857,7 @@ export default function AdminProjectsPage() {
                     onChange={(event) => setForm({ ...form, noticePeriod: event.target.value })}
                   />
                 </div>
+              </div>
 
                 <Button type="submit" disabled={saving} variant="primary" className="admin-content-block">
                   {saving ? 'Saving Project…' : '+ Create Project'}

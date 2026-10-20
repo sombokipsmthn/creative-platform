@@ -79,7 +79,7 @@ export function EditableField({
         className={`inline-block cursor-pointer px-1 py-0.5 rounded transition-colors ${
           isEmpty
             ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 font-medium'
-            : 'hover:bg-purple-100 dark:hover:bg-purple-900/30 font-semibold text-inherit'
+            : 'hover:bg-primary/10 dark:hover:bg-primary/15 font-semibold text-inherit'
         } ${isInvalid ? 'ring-2 ring-red-500 dark:ring-red-400' : ''}`}
         title={`Click to edit ${field.label.toLowerCase()}`}
       >
@@ -90,7 +90,7 @@ export function EditableField({
 
   // Edit mode - render appropriate input type
   const baseInputClasses =
-    'px-3 py-2 bg-white dark:bg-gray-800 border-2 border-purple-400 dark:border-purple-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400';
+    'px-3 py-2 bg-white dark:bg-gray-800 border-2 border-primary dark:border-primary rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring dark:focus:ring-ring';
 
   const inputContent = (() => {
     switch (field.type) {

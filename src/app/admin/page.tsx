@@ -789,11 +789,11 @@ export default function StudioCommandCenterPage() {
               >
                 <div className="space-y-4">
                   {([
-                    ['Draft', Number(stats.quotes.statuses.draft || 0)],
-                    ['Sent', Number(stats.quotes.statuses.sent || 0)],
-                    ['Accepted', Number(stats.quotes.statuses.accepted || 0)],
-                    ['Rejected', Number(stats.quotes.statuses.rejected || 0)],
-                    ['Invoiced', Number(stats.quotes.statuses.invoiced || 0)],
+                    ['Draft', stats.quotes.statuses.draft || 0],
+                    ['Sent', stats.quotes.statuses.sent || 0],
+                    ['Accepted', stats.quotes.statuses.accepted || 0],
+                    ['Rejected', stats.quotes.statuses.rejected || 0],
+                    ['Invoiced', stats.quotes.statuses.invoiced || 0],
                   ] as Array<[string, number]>).filter(([, v]) => v > 0).map(([label, value]) => {
                     const numValue = Number(value);
                     return (
@@ -826,14 +826,6 @@ export default function StudioCommandCenterPage() {
           <CreatorOnboardingModal
             isOpen={showOnboarding}
             onClose={() => {
-              setShowOnboarding(false);
-              setOnboardingDismissed(true);
-            }}
-            onComplete={() => {
-              setShowOnboarding(false);
-              setOnboardingDismissed(true);
-            }}
-            onDismiss={() => {
               setShowOnboarding(false);
               setOnboardingDismissed(true);
             }}

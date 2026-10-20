@@ -233,8 +233,8 @@ export default function WorkIndexPage() {
                 onClick={() => setSelectedPillar(p.id)}
                 className={`p-6 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-4 ${
                   isActive
-                    ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/40 shadow-lg'
-                    : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-purple-500/50'
+                    ? 'border-primary bg-primary/10 dark:bg-primary/15 shadow-lg'
+                    : 'border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/40 hover:border-primary/50'
                 }`}
               >
                 <div className="">
@@ -310,7 +310,7 @@ export default function WorkIndexPage() {
           {filteredProjects.map((project) => (
             <div
               key={project.id}
-              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-xl overflow-hidden hover:border-purple-600/60 transition-all duration-500 shadow-md dark:shadow-none ${project.featured ? 'md:col-span-2' : ''}`}
+              className={`group relative border border-slate-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/30 rounded-xl overflow-hidden hover:border-primary/60 transition-all duration-500 shadow-md dark:shadow-none ${project.featured ? 'md:col-span-2' : ''}`}
             >
               <div className={`relative w-full ${project.featured ? 'aspect-21/9' : 'aspect-4/3'} overflow-hidden`}>
                 <Image

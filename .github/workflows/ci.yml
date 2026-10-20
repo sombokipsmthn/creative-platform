@@ -32,6 +32,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Design-system guardrails
+        run: npm run design-system:check
+
   test:
     runs-on: ubuntu-latest
     steps:

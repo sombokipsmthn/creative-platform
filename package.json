@@ -9,6 +9,7 @@
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
     "lint": "eslint",
+    "design-system:check": "node scripts/check-design-system.mjs",
     "test": "vitest run",
     "audit:production": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level=high",
     "audit:development": "env -u npm_config_allow_scripts npm audit --audit-level=high || true",

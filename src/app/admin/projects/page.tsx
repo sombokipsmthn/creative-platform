@@ -131,6 +131,9 @@ function AdminProjectsPageContent() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const [form, setForm] = useState<{
     name: string;
     description: string;
@@ -263,7 +266,7 @@ function AdminProjectsPageContent() {
     return () => {
       cancelled = true;
     };
-  }, [filterClient, filterStatus, filterVisibility, filterFeatured, searchQuery]);
+  }, [filterClient, filterStatus, filterVisibility, filterFeatured, searchQuery, searchParams]);
 
   // Compute filtered projects
   const filteredProjects = useMemo(() => {
@@ -479,15 +482,6 @@ function AdminProjectsPageContent() {
       setUpdating(false);
     }
   }
-
-  // Error state
-  const [error, setError] = useState('');
-
-  // Loading state
-  const [loading, setLoading] = useState(true);
-
-  // Update project (for status chip clicks)
-  const [updating, setUpdating] = useState(false);
 
   return (
     <div className="ui-page ui-page-padded">

@@ -279,6 +279,28 @@ export const invoiceItems = pgTable("invoice_items", {
   amount: integer("amount").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull()});
 
+export const studioEvents = pgTable("studio_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  creatorId: text("creator_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  clientId: text("client_id").references(() => clients.id, { onDelete: "set null" }),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "set null" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  eventType: text("event_type").default("client_event").notNull(),
+  status: text("status").default("planned").notNull(),
+  startsAt: timestamp("starts_at").notNull(),
+  endsAt: timestamp("ends_at"),
+  allDay: boolean("all_day").default(false).notNull(),
+  location: text("location"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  creatorIdx: index("studio_events_creator_id_idx").on(table.creatorId),
+  clientIdx: index("studio_events_client_id_idx").on(table.clientId),
+  projectIdx: index("studio_events_project_id_idx").on(table.projectId),
+  startsAtIdx: index("studio_events_starts_at_idx").on(table.startsAt),
+}));
+
 export const equipment = pgTable("equipment", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),

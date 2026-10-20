@@ -232,6 +232,13 @@
       "when": 1792500000000,
       "tag": "0036_add_client_kra_pin",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792600000000,
+      "tag": "0037_reconcile_studio_events",
+      "breakpoints": true
     }
   ]
 }

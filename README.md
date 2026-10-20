@@ -199,7 +199,8 @@ Validation completed for the redesign branch includes the production build, Type
 
 - [KIPSMTHN-IMPLEMENTATION-SPEC.md](./KIPSMTHN-IMPLEMENTATION-SPEC.md)
 - shadcn primitives in `src/components/ui/`
-- [docs/00-project/README.md](./docs/00-project/README.md)
+- [Project Handbook](./docs/PROJECT-HANDBOOK.md)
+- [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
 - [Project Handbook](./docs/PROJECT-HANDBOOK.md)
 - [Documentation Index](./docs/DOCUMENTATION-INDEX.md)
 - [Demo Account Guide](./docs/demo-account.md)

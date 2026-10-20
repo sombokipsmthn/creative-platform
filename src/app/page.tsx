@@ -163,6 +163,57 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* PRICING */}
+        <section id="pricing" className="border-t border-slate-200 dark:border-zinc-800">
+          <div className="mx-auto max-w-4xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Start here</p>
+            <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">
+              Spend less time managing the business. Spend more time making the work.
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-600 dark:text-zinc-400">
+              Explore the platform, create your account, and keep your creator workspace separate from the public-facing experience.
+            </p>
+            <div className="mt-9 flex justify-center gap-3">
+              <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700">
+                Get started<ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+          <div className="hously-hero-image">
+            <Image src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1800&q=90" alt="Warm modern living room with sculptural furniture" fill priority sizes="(max-width: 768px) 100vw, 58vw" className="object-cover" />
+            <div className="hously-image-note"><span>01</span><span>House of Light<br />Karen, Kenya</span></div>
+          </div>
+        </section>
+
+        <section id="studio" className="hously-statement">
+          <p className="hously-kicker">The studio</p>
+          <div>
+            <h2>We design for the way <em>life unfolds.</em></h2>
+            <p>Our work is rooted in a belief that architecture should feel inevitable — grounded in its place, generous in its details, and quietly expressive. From a first sketch to the final joinery, we make spaces that invite you to stay a little longer.</p>
+            <Link href="/about" className="hously-text-link">Discover Hously <ArrowRight className="size-4" /></Link>
+          </div>
+        </section>
+
+        <section id="work" className="hously-work">
+          <div className="flex items-end justify-between gap-4">
+            <div><p className="hously-kicker">Selected work</p><h2>Recent <em>projects.</em></h2></div>
+            <Link href="/work" className="hously-text-link hidden sm:flex">View all work <ArrowRight className="size-4" /></Link>
+          </div>
+          <div className="hously-project-grid">
+            {projects.map((project, index) => (
+              <Link href="/work" key={project.title} className={`hously-project ${index === 0 ? "hously-project-featured" : ""}`}>
+                <div className="relative aspect-[4/5] overflow-hidden"><Image src={project.image} alt={project.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-700 hover:scale-105" /></div>
+                <div className="mt-4 flex items-start justify-between gap-4"><div><h3>{project.title}</h3><p>{project.type}</p></div><span>{project.year}</span></div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section id="approach" className="hously-approach">
+          <div><p className="hously-kicker">Our approach</p><h2>Less noise.<br /><em>More feeling.</em></h2></div>
+          <div className="hously-principles">{principles.map(([number, title, description]) => <div className="hously-principle" key={number}><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div><Plus className="size-4" /></div>)}</div>
+        </section>
+
         <section id="approach" className="hously-approach">
           <div><p className="hously-kicker">Our approach</p><h2>Less noise.<br /><em>More feeling.</em></h2></div>
           <div className="hously-principles">{principles.map(([number, title, description]) => <div className="hously-principle" key={number}><span>{number}</span><div><h3>{title}</h3><p>{description}</p></div><Plus className="size-4" /></div>)}</div>

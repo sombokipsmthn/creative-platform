@@ -45,16 +45,16 @@ try {
   const settingsPage = await context.newPage();
   await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await settingsPage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
-  const businessName = settingsPage.locator('input').first();
-  await businessName.waitFor({ state: "visible", timeout: 15_000 });
-  const originalBusinessName = await businessName.inputValue();
+  const settingsInput = settingsPage.locator('input').first();
+  await settingsInput.waitFor({ state: "visible", timeout: 15_000 });
+  const originalSettingsValue = await settingsInput.inputValue();
   const settingsSave = settingsPage.getByRole("button", { name: /save settings changes/i });
   check(await settingsSave.isVisible(), "workspace settings save action is visible");
   await settingsSave.click();
   await settingsPage.getByText("Workspace settings saved.").waitFor({ state: "visible", timeout: 15_000 });
   await settingsPage.reload({ waitUntil: "networkidle" });
-  await businessName.waitFor({ state: "visible", timeout: 15_000 });
-  check((await businessName.inputValue()) === originalBusinessName, "workspace value persists after reload");
+  await settingsInput.waitFor({ state: "visible", timeout: 15_000 });
+  check((await settingsInput.inputValue()) === originalSettingsValue, "workspace settings remain available after reload");
   await settingsPage.close();
 
   const portfolioPage = await context.newPage();

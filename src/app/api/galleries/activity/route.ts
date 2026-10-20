@@ -1,26 +1,10 @@
-import { NextResponse } from "next/server";
-import { getCurrentSession } from "@/lib/auth";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getOrCreateLocalUser } from "@/lib/auth/get-or-create-local-user";
+import { withCreatorApi } from "@/lib/api/route-boundaries";
 
-async function getCreator() {
-  try {
-    const session = await getCurrentSession();
-    const authUser = session?.user;
-    if (!authUser) return null;
-    return getOrCreateLocalUser(authUser);
-  } catch {
-    return null;
-  }
-}
-
-export async function GET() {
-  try {
-    const creator = await getCreator();
-    if (!creator) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
+export async function GET(request: Request) {
+  return withCreatorApi(request, async (_request, creator) => {
     const result = await db.execute(sql`
       WITH activity_union AS (
         -- Favorites & Selections
@@ -97,9 +81,6 @@ export async function GET() {
       LIMIT 50
     `);
 
-    return NextResponse.json({ activity: result.rows });
-  } catch (error) {
-    console.error("GET /api/galleries/activity error:", error);
-    return NextResponse.json({ error: "Unable to load activity." }, { status: 500 });
-  }
+    return { activity: result.rows };
+  });
 }

@@ -390,7 +390,7 @@ export default function StudioTimelinePlayer() {
           </div>
 
           {/* Track 1: Video A-Roll */}
-          <div className="relative h-9 mb-1.5 rounded-lg bg-gradient-to-r from-primary/60 via-primary/50 to-indigo-900/60 border border-primary/30 flex items-center px-3 overflow-hidden">
+          <div className="relative h-9 mb-1.5 rounded-lg bg-gradient-to-r from-primary/60 via-primary/50 to-primary/60 border border-primary/30 flex items-center px-3 overflow-hidden">
             <span className="text-[10px] font-mono uppercase tracking-wider text-primary z-10 flex items-center gap-1.5">
               <Film className="h-3 w-3" /> V1 · 4K A-Roll Master Cut
             </span>

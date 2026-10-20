@@ -15,6 +15,7 @@ import {
 import TableFilterBar from '@/components/admin/TableFilterBar';
 import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 
 type Contract = {
   id: string;
@@ -61,6 +62,7 @@ export default function ContractsPage() {
     cancelled: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Filter states
@@ -176,6 +178,18 @@ export default function ContractsPage() {
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
+
+        <StandardCreationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} title="Start a new contract" description="Choose the client and template in the existing contract builder before creating a draft.">
+          <div className="space-y-4 pr-8">
+            <p className="ui-eyebrow">LEGAL</p>
+            <h2 className="ui-section-title">Start a new contract</h2>
+            <p className="text-sm text-muted-foreground">The contract builder preserves templates, clauses, associations, and draft status in one supported workflow.</p>
+          </div>
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+            <Button type="button" onClick={() => window.location.assign('/admin/contracts/new')}>Continue to contract builder <ArrowUpRight aria-hidden="true" /></Button>
+          </div>
+        </StandardCreationDialog>
 
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">

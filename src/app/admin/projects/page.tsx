@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import StatusBadge from '@/components/admin/StatusBadge';
+import EmptyState from '@/components/admin/EmptyState';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -128,6 +130,7 @@ export default function AdminProjectsPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
     let cancelled = false;
@@ -204,7 +207,7 @@ export default function AdminProjectsPage() {
     return () => {
       cancelled = true;
     };
-  }, [filterClient, filterStatus]);
+  }, [filterClient, filterStatus, filterVisibility, filterFeatured]);
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -368,20 +371,31 @@ export default function AdminProjectsPage() {
             <Button
               onClick={() => openCreateModal()}
               variant="primary"
-              className="text-xs font-sans uppercase tracking-widest"
+              className="admin-content-block"
             >
               + New Project
             </Button>
           }
+          secondaryActions={[
+            <Button
+              key="view-toggle"
+              variant="ghost"
+              size="icon"
+              onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              aria-label={viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'}
+            >
+              {viewMode === 'grid' ? '✓' : '□'}
+            </Button>
+          ]}
         />
 
         {error && !isAddProjectOpen && !selectedProject && (
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
+          <div className="admin-content-block">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {[
             ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
             ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
@@ -418,7 +432,7 @@ export default function AdminProjectsPage() {
             </Select>
           </div>
 
-          <div className="flex flex-wrap gap-2 text-xs font-sans">
+          <div className="flex flex-wrap items-center gap-2">
             {(
               [
                 ['ALL', projects.length],
@@ -429,154 +443,156 @@ export default function AdminProjectsPage() {
                 ['draft', draftCount],
               ] as const
             ).map(([status, count]) => (
-              <Button
-                key={status}
-                variant={filterStatus === status ? 'primary' : 'secondary'}
-                onClick={() => setFilterStatus(status)}
-                className="text-xs font-sans uppercase tracking-widest"
-              >
+              <Button key={status} variant={filterStatus === status ? 'primary' : 'secondary'} onClick={() => setFilterStatus(status)}>
                 {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
               </Button>
             ))}
-
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Visibility:</span>
-              {(['ALL', 'public', 'private', 'draft'] as const).map((vis) => (
-                <Button
-                  key={vis}
-                  variant={filterVisibility === vis ? 'primary' : 'secondary'}
-                  onClick={() => setFilterVisibility(vis)}
-                  className="text-xs font-sans uppercase tracking-widest"
-                >
-                  {vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}
-                </Button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1">
-              <span className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Featured:</span>
-              {(['ALL', 'true', 'false'] as const).map((feat) => (
-                <Button
-                  key={feat}
-                  variant={filterFeatured === feat ? 'primary' : 'secondary'}
-                  onClick={() => setFilterFeatured(feat)}
-                  className="text-xs font-sans uppercase tracking-widest"
-                >
-                  {feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}
-                </Button>
-              ))}
-            </div>
+            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Visibility:</span>{(['ALL', 'public', 'private', 'draft'] as const).map(vis => <Button key={vis} variant={filterVisibility === vis ? 'primary' : 'secondary'} onClick={() => setFilterVisibility(vis)}>{vis === 'ALL' ? 'All' : vis.charAt(0).toUpperCase() + vis.slice(1)}</Button>)}</div>
+            <div className="flex flex-wrap items-center gap-2"><span className="ui-meta">Featured:</span>{(['ALL', 'true', 'false'] as const).map(feat => <Button key={feat} variant={filterFeatured === feat ? 'primary' : 'secondary'} onClick={() => setFilterFeatured(feat)}>{feat === 'ALL' ? 'All' : feat === 'true' ? 'Yes' : 'No'}</Button>)}</div>
           </div>
-        </div>
+        </section>
 
         {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading projects…</p>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="aspect-w-16 aspect-h-10 rounded-xl border border-dashed animate-pulse">
+                <div className="h-full w-full flex items-center justify-center bg-purple-50 dark:bg-purple-900/20">
+                  <div className="h-12 w-12 rounded-2xl bg-purple-200 dark:bg-purple-800 flex items-center justify-center">
+                    <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">- -</span>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-            <p className="text-sm text-slate-600 dark:text-zinc-400">No projects found.</p>
-            <div className="flex justify-center mt-4">
-              <Button
-                onClick={() => openCreateModal()}
-                variant="primary"
-                className="text-xs font-sans rounded-lg"
-              >
-                Create your first project
-              </Button>
+          <div className="text-center py-12">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-24 w-24 rounded-full border border-dashed animate-pulse bg-purple-50 dark:bg-purple-900/20">
+                <div className="h-12 w-12 rounded-full bg-purple-200 dark:bg-purple-800 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-purple-600 dark:text-purple-400">- -</span>
+                </div>
+              </div>
+              <p className="text-lg font-medium text-slate-600 dark:text-zinc-400">No projects found.</p>
+              <p className="text-sm text-slate-500 dark:text-zinc-500">
+                Create a project or adjust your current search and filters.
+              </p>
+              <div className="mt-6">
+                <Button
+                  onClick={() => openCreateModal()}
+                  variant="primary"
+                  className="px-6 py-3"
+                >
+                  Create your first project
+                </Button>
+              </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="admin-content-block">
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
                 className="rounded-xl border bg-card text-card-foreground shadow-sm rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:border-primary/50 group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-primary/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-semibold text-primary dark:bg-primary/15 dark:text-primary">
-                    {getInitials(project)}
+                  <div className="h-12 w-12 shrink-0 rounded-2xl bg-purple-100">
+                    {project.coverMediaId ? (
+                      <div className="h-full w-full bg-purple-100">
+                        <img
+                          src={`/api/projects/${project.id}/media?cover=true`}
+                          alt={`${project.name} cover`}
+                          className="h-full w-full object-cover rounded-2xl"
+                          onError={(e) => {
+                            e.target.src = '/api/projects/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-purple-700 dark:text-purple-300">
+                        {getInitials(project)}
+                      </div>
+                    )}
                   </div>
 
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-primary dark:text-white dark:group-hover:text-primary">
+                  <div className="admin-content-block">
+                    <div className="admin-content-block">
+                      <h3 className="admin-content-block">
                         {project.name}
                       </h3>
                       <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>
                         {statusLabel(project.status)}
                       </Badge>
                       {project.featured && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
-                          <Star className="h-3 w-3" />
+                        <span className="admin-content-block">
+                          <Star className="admin-content-block" />
                           Featured
                         </span>
                       )}
                       {project.visibility === 'public' && project.publishedAt && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
-                          <Eye className="h-3 w-3" />
+                        <span className="admin-content-block">
+                          <Eye className="admin-content-block" />
                           Published
                         </span>
                       )}
                       {project.visibility === 'private' && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
-                          <EyeOff className="h-3 w-3" />
+                        <span className="admin-content-block">
+                          <EyeOff className="admin-content-block" />
                           Private
                         </span>
                       )}
                       {project.visibility === 'draft' && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-500/30 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                        <span className="admin-content-block">
                           Draft
                         </span>
                       )}
                     </div>
 
-                    <p className="text-sm text-slate-500 dark:text-zinc-400">
+                    <p className="admin-content-block">
                       {project.client?.name || 'No client'}
                     </p>
 
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-zinc-400">
+                    <div className="admin-content-block">
                       {project.client?.email && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Mail className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="admin-content-block">
+                          <Mail className="admin-content-block" />
                           {project.client?.email}
                         </span>
                       )}
                       {project.client?.phone && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Phone className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="admin-content-block">
+                          <Phone className="admin-content-block" />
                           {project.client?.phone}
                         </span>
                       )}
                       {project.client?.location && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="admin-content-block">
+                          <MapPin className="admin-content-block" />
                           {project.client?.location}
                         </span>
                       )}
                     </div>
 
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-600">
+                    <p className="admin-content-block">
                       Added {formatDate(project.createdAt)}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 w-full lg:w-auto lg:justify-end">
+                <div className="admin-content-block">
                   <Button
                     onClick={() => {
                       setError('');
                       setSelectedProject(project);
                     }}
                     variant="secondary"
-                    className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
+                    className="admin-content-block"
                   >
                     View project
-                    <ArrowUpRight className="h-3.5 w-3.5" />
+                    <ArrowUpRight className="admin-content-block" />
                   </Button>
                   <Link
                     href={`/admin/projects/${project.id}`}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-2 text-xs font-sans text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-900 transition"
+                    className="admin-content-block"
                   >
                     Edit
                   </Link>
@@ -585,16 +601,16 @@ export default function AdminProjectsPage() {
                       href={`/work/${project.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-2 text-xs font-sans text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition"
+                      className="admin-content-block"
                     >
-                      <Eye className="h-3.5 w-3.5" />
+                      <Eye className="admin-content-block" />
                       Preview
                     </a>
                   )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-600 dark:text-red-400 hover:bg-red-500/10"
+                    className="admin-content-block"
                     onClick={async () => {
                       if (!confirm('Delete this project? This cannot be undone.')) return;
                       try {
@@ -614,7 +630,7 @@ export default function AdminProjectsPage() {
                     }}
                     aria-label="Delete project"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="admin-content-block" />
                   </Button>
                 </div>
               </div>
@@ -623,13 +639,13 @@ export default function AdminProjectsPage() {
         )}
 
         {isAddProjectOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="admin-content-block">
+            <div className="admin-content-block">
               <Button
                 onClick={closeCreateModal}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
+                className="admin-content-block"
               >
                 ✕
               </Button>
@@ -639,7 +655,7 @@ export default function AdminProjectsPage() {
                 <h2 className="text-2xl font-semibold tracking-tight">New Project</h2>
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="admin-content-block">{error}</div>}
 
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-1">
@@ -841,8 +857,9 @@ export default function AdminProjectsPage() {
                     onChange={(event) => setForm({ ...form, noticePeriod: event.target.value })}
                   />
                 </div>
+              </div>
 
-                <Button type="submit" disabled={saving} variant="primary" className="w-full">
+                <Button type="submit" disabled={saving} variant="primary" className="admin-content-block">
                   {saving ? 'Saving Project…' : '+ Create Project'}
                 </Button>
               </form>
@@ -851,47 +868,47 @@ export default function AdminProjectsPage() {
         )}
 
         {selectedProject && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="admin-content-block">
+            <div className="admin-content-block">
               <Button
                 onClick={() => setSelectedProject(null)}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white"
+                className="admin-content-block"
               >
                 ✕
               </Button>
 
-              <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
+              <div className="admin-content-block">
                 {selectedProject.client && (
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full">
+                  <div className="admin-content-block">
+                    <span className="admin-content-block">
                       {selectedProject.client.company}
                     </span>
-                    <h2 className="text-2xl font-light">{selectedProject.client.name}</h2>
+                    <h2 className="admin-content-block">{selectedProject.client.name}</h2>
                   </div>
                 )}
-                <h2 className="text-2xl font-light">{selectedProject.name}</h2>
-                <p className="text-xs font-sans text-slate-600 dark:text-zinc-400">
+                <h2 className="admin-content-block">{selectedProject.name}</h2>
+                <p className="admin-content-block">
                   {statusLabel(selectedProject.status)} • {formatDate(selectedProject.createdAt)}
                 </p>
                 {selectedProject.description && (
-                  <p className="text-sm text-slate-500 dark:text-zinc-500 mt-2">
+                  <p className="admin-content-block">
                     {selectedProject.description}
                   </p>
                 )}
 
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="admin-content-block">{error}</div>}
 
-              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
+              <div className="admin-content-block">
                 <div>
                   <p className="text-sm font-medium leading-none">Project Status</p>
                   <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+                <div className="admin-content-block">
                   {([
                     'active',
                     'completed',
@@ -904,7 +921,7 @@ export default function AdminProjectsPage() {
                       variant={selectedProject.status === status ? 'primary' : 'secondary'}
                       disabled={updating || selectedProject.status === status}
                       onClick={() => updateProjectStatus(status as ProjectStatus)}
-                      className="text-[10px] font-sans uppercase transition-all disabled:opacity-50"
+                      className="admin-content-block"
                     >
                       {statusLabel(status)}
                     </Button>
@@ -941,9 +958,9 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
+              <div className="admin-content-block">
                 <div>Created {formatDate(selectedProject.createdAt)}</div>
-                <div className="text-right">Updated {formatDate(selectedProject.updatedAt)}</div>
+                <div className="admin-content-block">Updated {formatDate(selectedProject.updatedAt)}</div>
               </div>
             </div>
           </div>

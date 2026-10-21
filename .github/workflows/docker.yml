@@ -51,22 +51,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Trigger Vercel deployment
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          VERCEL_URL=$(curl -X POST https://api.vercel.com/v1/deployments \
-            -H "Authorization: Bearer ${{ secrets.VERCEL_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "creative-platform",
-              "ref": "${{ github.ref_name }}",
-              "gitSource": {
-                "type": "github",
-                "ref": "${{ github.ref_name }}"
-              }
-            }' | jq -r '.url')
-          echo "Vercel deployment URL: $VERCEL_URL"
-
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/create-release@v1
@@ -77,6 +61,6 @@ jobs:
           release_name: Release ${{ github.ref_name }}
           body: |
             Docker image: ${{ steps.meta.outputs.tags }}
-            Deployment triggered for Vercel.
+            Container image published. Vercel deploys from its dedicated workflow.
           draft: false
           prerelease: false

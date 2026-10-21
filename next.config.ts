@@ -7,12 +7,6 @@ const nextConfig: NextConfig = {
   // Disable trailing slash redirects to prevent 308 loops
   trailingSlash: false,
 
-  // Next.js 16.3 + Vercel currently conflicts with standalone output:
-  // Vercel's build adapter expects .next/next-server.js.nft.json, which
-  // Next.js 16.3 no longer emits when the Vercel adapter is active.
-  // Vercel does not need standalone output, so only enable it for non-Vercel builds.
-  output: process.env.VERCEL ? undefined : 'standalone',
-
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'unavatar.io' },

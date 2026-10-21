@@ -425,14 +425,6 @@ export default function AdminGalleryManagerPage() {
                   setFilterStatus('all');
                   setFilterCategory('all');
                 }}
-                primaryAction={{
-                  label: 'New Gallery',
-                  onClick: () => setActiveTab('create'),
-                  variant: 'primary',
-                  size: 'sm',
-                  className: 'text-xs font-sans uppercase tracking-widest',
-                  icon: <Plus className="h-3.5 w-3.5" />,
-                } as AdminToolbarAction}
                 secondaryActions={[
                   {
                     label: '',

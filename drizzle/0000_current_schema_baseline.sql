@@ -1,0 +1,3 @@
+-- Current-schema baseline.
+-- Existing databases are reconciled by scripts/reconcile-drizzle-migrations.ts.
+-- Fresh local databases use drizzle/local/0031_local_init.sql.

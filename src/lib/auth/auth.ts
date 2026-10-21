@@ -5,6 +5,7 @@ import { dash } from "@better-auth/infra";
 import { db } from "@/db";
 import { sendEmail } from "@/lib/email";
 import { users, sessions, accounts, verifications, passkeys } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 const googleProvider = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
@@ -85,6 +86,18 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
     cookieCache: { enabled: true, maxAge: 60 * 5 },
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        after: async (session) => {
+          await db
+            .update(users)
+            .set({ lastLoginAt: new Date() })
+            .where(eq(users.id, session.userId));
+        },
+      },
+    },
   },
   advanced: {
     cookiePrefix: "kipsmthn",

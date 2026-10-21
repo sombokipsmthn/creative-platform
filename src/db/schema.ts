@@ -21,6 +21,7 @@ export const users = pgTable("users", {
   handle: text("handle").unique(),
   onboardingStatus: text("onboarding_status").default("incomplete").notNull(),
   onboardingStep: integer("onboarding_step").default(1).notNull(),
+  lastLoginAt: timestamp("last_login_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()
 }, (table) => ({

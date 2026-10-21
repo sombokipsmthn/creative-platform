@@ -10,7 +10,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./drizzle/0031_local_init.sql:/docker-entrypoint-initdb.d/0031_local_init.sql:ro
+      - ./drizzle/local/0031_local_init.sql:/docker-entrypoint-initdb.d/0031_local_init.sql:ro
     networks:
       - app
     healthcheck:

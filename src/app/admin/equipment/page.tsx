@@ -135,19 +135,13 @@ export default function EquipmentPage() {
             filters={[]}
             onFilterChange={() => {}}
             onClearAll={() => setQuery('')}
-            primaryAction={{
-              label: 'Add equipment',
-              onClick: openCreate,
-              variant: 'primary',
-              icon: <Plus className="mr-2 h-4 w-4" />,
-            } as AdminToolbarAction}
             secondaryActions={[
               {
                 label: 'Refresh',
                 onClick: () => void loadEquipment(true),
-                variant: 'outline',
-                size: 'sm',
-                icon: <RefreshCw aria-hidden="true" className={refreshing ? 'animate-spin h-3.5 w-3.5' : 'h-3.5 w-3.5'} />,
+                variant: 'ghost',
+                size: 'icon',
+                icon: <RefreshCw aria-hidden="true" className={refreshing ? 'animate-spin h-4 w-4' : 'h-4 w-4'} />,
                 disabled: refreshing,
               } as AdminToolbarAction,
             ]}

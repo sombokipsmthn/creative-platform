@@ -23,8 +23,14 @@ import {
   Sparkles,
   LayoutDashboard,
   Image as ImageIcon,
+  FileText as FileTextIcon,
+  Users as UsersIcon,
+  Wallet as WalletIcon,
+  Camera as CameraIcon,
+  Layers as LayersIcon,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import Image from "next/image";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://kipsmthn.com";
 
@@ -58,93 +64,87 @@ const workflowSteps = [
     number: "01",
     title: "Enquiry & Quote",
     description: "A potential client reaches out. Create a professional quote with services, equipment, production costs, deposits, taxes, and payment terms — all branded to your studio.",
-    icon: FileText,
-    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80",
+    icon: FileTextIcon,
   },
   {
     number: "02",
     title: "Project Creation",
     description: "Convert the accepted quote into a project. Associate media, set milestones, assign team members, and track progress from brief to production — all in one place.",
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
     icon: FolderKanban,
-    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   },
   {
     number: "03",
     title: "Production & Collaboration",
     description: "Manage production schedules, equipment, and client feedback. Keep every detail connected — no more scattered spreadsheets, email threads, or lost context.",
-    icon: Layers,
-    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
+    icon: LayersIcon,
   },
   {
     number: "04",
     title: "Gallery Delivery",
     description: "Deliver final work through a private, branded client gallery. Clients review, select favorites, and download — with your watermark, custom domain, and access controls.",
-    icon: Camera,
-    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    image: "https://images.unsplash.com/photo-1492052729918-2c65ce1ab121?auto=format&fit=crop&w=800&q=80",
+    icon: CameraIcon,
   },
   {
     number: "05",
     title: "Invoice & Payment",
     description: "Generate invoices from quotes or projects. Track payments, manage expenses, and stay on top of your business finances with built-in revenue analytics.",
-    icon: Wallet,
-    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+    image: "https://images.unsplash.com/photo-1554224154-26032fffe0de?auto=format&fit=crop&w=800&q=80",
+    icon: WalletIcon,
   },
 ];
 
 const benefits = [
   {
-    icon: RefreshCw,
+    image: "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80",
     title: "Eliminate Administrative Friction",
     description: "Stop copying data between tools. Quotes become projects. Projects become galleries. Galleries become invoices. Every step carries context forward automatically.",
-    visual: "Flow",
   },
   {
-    icon: Target,
+    image: "https://images.unsplash.com/photo-1504384308090-c894fbcc568d?auto=format&fit=crop&w=800&q=80",
     title: "Maintain Project Context",
     description: "Every client conversation, file, decision, and approval lives with the project. No more searching through email threads or disconnected folders to find what you agreed on.",
-    visual: "Context",
   },
   {
-    icon: Users,
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
     title: "Improve Client Handoffs",
     description: "Give clients a professional experience: branded galleries, clear approval workflows, secure downloads. Impress them with how organized your process feels — not just the final work.",
-    visual: "Experience",
   },
   {
-    icon: BarChart3,
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
     title: "See Your Business Clearly",
     description: "Track quote conversion rates, overdue invoices, project velocity, and client engagement from a single dashboard. Make decisions with data, not guesswork.",
-    visual: "Insight",
   },
   {
-    icon: Shield,
+    image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80",
     title: "Built for Local Compliance",
     description: "KRA PIN fields, WHT rates, KES currency defaults, M-Pesa references, eTIMS invoicing — the tax and payment details that matter for creative businesses in Kenya and East Africa.",
-    visual: "Compliance",
   },
   {
-    icon: Sparkles,
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80",
     title: "Scale Without the Chaos",
     description: "Whether you're a solo creative or a growing studio, the platform grows with you. Add team members, manage multiple brands, and handle increasing volume without rebuilding your workflow.",
-    visual: "Scale",
   },
 ];
 
 const audiences = [
   {
-    icon: Briefcase,
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
     title: "Independent Creatives",
     description: "Photographers, filmmakers, designers, and solo practitioners who need professional business tools without enterprise complexity.",
     traits: ["Solo operation", "Client-facing delivery", "Quote-to-invoice workflow", "Portfolio presentation"],
   },
   {
-    icon: Building2,
+    image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80",
     title: "Small Studios & Agencies",
     description: "Growing creative teams managing multiple clients, projects, and team members who need shared context and streamlined collaboration.",
     traits: ["Team collaboration", "Multi-project management", "Shared client database", "Role-based access"],
   },
   {
-    icon: Layers,
+    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80",
     title: "Creative Production Teams",
     description: "In-house creative departments and production companies handling high-volume workflows with complex approval chains and compliance requirements.",
     traits: ["High-volume workflows", "Approval chains", "Equipment planning", "Compliance & reporting"],
@@ -232,30 +232,38 @@ export default function HomePage() {
             </div>
 
             <div className="mt-16">
-              <div className="relative">
-                {/* Connecting line */}
-                <div className="hidden lg:block absolute left-10 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/40 to-primary/20" aria-hidden="true" />
-
-                <div className="space-y-16">
-                  {workflowSteps.map((step, index) => (
-                    <div key={step.number} className="relative lg:pl-28">
-                      <div className="absolute left-0 top-0 flex h-20 w-20 items-center justify-center rounded-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 z-10">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${step.color}`}>
-                          <step.icon className="h-5 w-5 text-white" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <div className="lg:pl-8">
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="text-xs font-semibold tracking-[0.2em] text-primary dark:text-primary">
-                            Step {step.number}
-                          </span>
-                          <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white">{step.title}</h3>
-                        </div>
-                        <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 max-w-2xl">{step.description}</p>
-                      </div>
+              <div className="space-y-16 lg:space-y-24">
+                {workflowSteps.map((step, index) => (
+                  <div
+                    key={step.number}
+                    className="relative grid gap-8 lg:grid-cols-2 lg:gap-12 items-center"
+                  >
+                    <div
+                      className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-slate-200/50 dark:border-zinc-800/50"
+                    >
+                      <Image
+                        src={step.image}
+                        alt={step.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                      />
                     </div>
-                  ))}
-                </div>
+                    <div className="lg:pl-4">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-xs font-semibold tracking-[0.2em] text-primary dark:text-primary">
+                          Step {step.number}
+                        </span>
+                        <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white">
+                          {step.title}
+                        </h3>
+                      </div>
+                      <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 max-w-2xl">
+                        {step.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -281,22 +289,30 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
-                  { icon: LayoutDashboard, title: "Dashboard", description: "See your business at a glance with real-time metrics and key indicators." },
-                  { icon: Users, title: "Client CRM", description: "Keep relationships, contact details, and project history together in one place." },
-                  { icon: FolderKanban, title: "Projects", description: "Organize work from brief to final delivery with progress tracking and milestones." },
-                  { icon: FileText, title: "Quotes & Contracts", description: "Prepare professional documents with branded templates and e-signature support." },
-                  { icon: Wallet, title: "Invoices & Expenses", description: "Track billing, payments, expenses, and revenue with built-in analytics." },
-                  { icon: ImageIcon, title: "Client Galleries", description: "Deliver work through branded, private galleries with selection and download controls." },
-                ].map(({ icon: Icon, title, description }) => (
-                  <Card key={title} className="p-5 transition-colors hover:border-primary/50 border-slate-200/50 dark:border-zinc-800/50">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:text-primary">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
+                  { image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80", title: "Dashboard", description: "See your business at a glance with real-time metrics and key indicators." },
+                  { image: "https://images.unsplash.com/photo-1504384308090-c894fbcc568d?auto=format&fit=crop&w=800&q=80", title: "Client CRM", description: "Keep relationships, contact details, and project history together in one place." },
+                  { image: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80", title: "Projects", description: "Organize work from brief to final delivery with progress tracking and milestones." },
+                  { image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=800&q=80", title: "Quotes & Contracts", description: "Prepare professional documents with branded templates and e-signature support." },
+                  { image: "https://images.unsplash.com/photo-1554224154-26032fffe0de?auto=format&fit=crop&w=800&q=80", title: "Invoices & Expenses", description: "Track billing, payments, expenses, and revenue with built-in analytics." },
+                  { image: "https://images.unsplash.com/photo-1492052729918-2c65ce1ab121?auto=format&fit=crop&w=800&q=80", title: "Client Galleries", description: "Deliver work through branded, private galleries with selection and download controls." },
+                ].map(({ image, title, description }) => (
+                  <article key={title} className="relative overflow-hidden rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50">
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <Image
+                        src={image}
+                        alt={title}
+                        fill
+                        className="object-cover transition-transform duration-300 hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
                     </div>
-                    <h3 className="mt-4 font-medium text-slate-950 dark:text-white">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
-                  </Card>
+                    <div className="p-5">
+                      <h3 className="font-medium text-slate-950 dark:text-white">{title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
+                    </div>
+                  </article>
                 ))}
               </div>
             </div>
@@ -318,17 +334,22 @@ export default function HomePage() {
 
             <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {benefits.map((benefit, index) => (
-                <article key={benefit.title} className="relative p-6 lg:p-8 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50">
-                  <div className="absolute top-6 right-6 text-[10px] font-semibold tracking-[0.2em] text-primary/50 dark:text-primary/50">
-                    {String(index + 1).padStart(2, "0")}
+                <article key={benefit.title} className="relative overflow-hidden rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={benefit.image}
+                      alt={benefit.title}
+                      fill
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
                   </div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:text-primary mb-6">
-                    <benefit.icon className="h-6 w-6" aria-hidden="true" />
-                  </div>
-                  <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white mb-3">{benefit.title}</h3>
-                  <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 mb-6">{benefit.description}</p>
-                  <div className="pt-4 border-t border-slate-200/50 dark:border-zinc-800/50">
-                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-primary dark:text-primary">{benefit.visual}</span>
+                  <div className="p-6 lg:p-8">
+                    <div className="absolute top-4 right-4 text-[10px] font-semibold tracking-[0.2em] text-primary/50 dark:text-primary/50 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-sm px-2 py-1 rounded">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
+                    <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white mb-3">{benefit.title}</h3>
+                    <p className="text-base leading-7 text-slate-600 dark:text-zinc-400">{benefit.description}</p>
                   </div>
                 </article>
               ))}
@@ -351,21 +372,30 @@ export default function HomePage() {
 
             <div className="mt-16 grid gap-8 md:grid-cols-3">
               {audiences.map((audience) => (
-                <Card key={audience.title} className="p-6 lg:p-8 transition-colors hover:border-primary/50 border-slate-200/50 dark:border-zinc-800/50">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:text-primary mb-6">
-                    <audience.icon className="h-6 w-6" aria-hidden="true" />
+                <article key={audience.title} className="relative overflow-hidden rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50">
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <Image
+                      src={audience.image}
+                      alt={audience.title}
+                      fill
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   </div>
-                  <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white mb-2">{audience.title}</h3>
-                  <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 mb-6">{audience.description}</p>
-                  <ul className="space-y-2" role="list">
-                    {audience.traits.map((trait) => (
-                      <li key={trait} className="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-400">
-                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
-                        {trait}
-                      </li>
-                    ))}
-                  </ul>
-                </Card>
+                  <div className="p-6 lg:p-8">
+                    <h3 className="text-xl font-medium tracking-tight text-white mb-2">{audience.title}</h3>
+                    <p className="text-base leading-7 text-slate-300 mb-6">{audience.description}</p>
+                    <ul className="space-y-2" role="list">
+                      {audience.traits.map((trait) => (
+                        <li key={trait} className="flex items-center gap-2 text-sm text-white">
+                          <CheckCircle2 className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                          {trait}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
               ))}
             </div>
           </div>
@@ -385,20 +415,27 @@ export default function HomePage() {
                 </p>
                 <div className="mt-10 grid gap-4 sm:grid-cols-2">
                   {[
-                    { icon: Shield, title: "KRA eTIMS Invoicing", desc: "Official tax-compliant invoices generated automatically." },
-                    { icon: Wallet, title: "Multi-Currency Billing", desc: "KES, USD, EUR support for international clients." },
-                    { icon: Users, title: "WHT & VAT Handling", desc: "Automatic withholding tax and VAT calculations." },
-                    { icon: Zap, title: "M-Pesa References", desc: "Track mobile money payments alongside invoices." },
+                    { image: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=800&q=80", title: "KRA eTIMS Invoicing", desc: "Official tax-compliant invoices generated automatically." },
+                    { image: "https://images.unsplash.com/photo-1554224154-26032fffe0de?auto=format&fit=crop&w=800&q=80", title: "Multi-Currency Billing", desc: "KES, USD, EUR support for international clients." },
+                    { image: "https://images.unsplash.com/photo-1504384308090-c894fbcc568d?auto=format&fit=crop&w=800&q=80", title: "WHT & VAT Handling", desc: "Automatic withholding tax and VAT calculations." },
+                    { image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80", title: "M-Pesa References", desc: "Track mobile money payments alongside invoices." },
                   ].map((item) => (
-                    <div key={item.title} className="flex items-start gap-4 p-4 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/50">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary dark:text-primary flex-shrink-0">
-                        <item.icon className="h-5 w-5" aria-hidden="true" />
+                    <article key={item.title} className="relative overflow-hidden rounded-xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50">
+                      <div className="relative aspect-[4/3] overflow-hidden">
+                        <Image
+                          src={item.image}
+                          alt={item.title}
+                          fill
+                          className="object-cover transition-transform duration-300 hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       </div>
-                      <div>
-                        <h4 className="font-medium text-slate-950 dark:text-white">{item.title}</h4>
-                        <p className="text-sm text-slate-600 dark:text-zinc-400 mt-1">{item.desc}</p>
+                      <div className="p-4">
+                        <h4 className="font-medium text-white">{item.title}</h4>
+                        <p className="text-sm text-slate-300 mt-1">{item.desc}</p>
                       </div>
-                    </div>
+                    </article>
                   ))}
                 </div>
               </div>

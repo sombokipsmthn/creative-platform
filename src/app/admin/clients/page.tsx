@@ -312,20 +312,13 @@ export default function AdminClientsPage() {
             setSearchQuery('');
             setFilterStatus('ALL');
           }}
-          primaryAction={{
-            label: '+ Register New Client',
-            onClick: openCreateModal,
-            variant: 'primary',
-            size: 'sm',
-            className: 'text-xs font-sans uppercase tracking-widest',
-          } as AdminToolbarAction}
           secondaryActions={[
             {
-              label: '',
+              label: 'Refresh',
               onClick: () => void loadClients(true),
-              variant: 'outline',
-              size: 'sm',
-              icon: <RefreshCw className="h-3.5 w-3.5" />,
+              variant: 'ghost',
+              size: 'icon',
+              icon: <RefreshCw className="h-4 w-4" />,
             } as AdminToolbarAction,
           ]}
           resultCount={clients.length}

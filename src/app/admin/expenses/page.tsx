@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2, RefreshCw, Filter, Plus } from 'lucide-react';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 type Expense = { id: string; description: string; supplier: string | null; category: string; amount: number; currency: string; expenseDate: string; paymentMethod: string | null; taxAmount: number; notes: string | null; project?: { id: string; name: string } | null };
 type Form = { description: string; category: string; amount: string; expenseDate: string; supplier: string; paymentMethod: string; taxAmount: string; notes: string };
@@ -124,17 +125,31 @@ export default function AdminExpensesPage() {
     <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl">
         {/* Header */}
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6">
-            <div>
-              <Link href="/admin" className="text-xs font-sans text-primary dark:text-primary hover:underline">← Back to Dashboard</Link>
-              <h1 className="text-3xl font-light text-slate-900 dark:text-white mt-1">KRA Receipt Scanner & Expense Claims</h1>
-            </div>
-
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 border border-primary/30 text-primary dark:text-primary text-xs font-sans rounded-full font-semibold">
-              <span>30% KRA Income Tax Shield Active</span>
-            </div>
-          </div>
+        <AdminPageHeader
+          title="KRA Receipt Scanner & Expense Claims"
+          description="Scan receipts, capture expenses, and track KRA tax claims."
+          breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={
+            <Button
+              onClick={handleSimulateScan}
+              variant="primary"
+              disabled={isScanning}
+              className="text-xs font-sans uppercase tracking-widest"
+            >
+              {isScanning ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-2" />
+                  Scanning...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-3.5 w-3.5 mr-2" />
+                  Scan Receipt
+                </>
+              )}
+            </Button>
+          }
+        />
 
           {/* Metrics Summary Bar */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -279,22 +294,13 @@ export default function AdminExpensesPage() {
           ] as AdminFilterConfig[]}
           onFilterChange={() => {}}
           onClearAll={() => {}}
-          primaryAction={{
-            label: 'Scan Receipt',
-            onClick: handleSimulateScan,
-            variant: 'primary',
-            size: 'sm',
-            className: 'text-xs font-sans uppercase tracking-widest',
-            icon: <Plus className="h-3.5 w-3.5" />,
-            disabled: isScanning,
-          } as AdminToolbarAction}
           secondaryActions={[
             {
               label: 'Refresh',
               onClick: () => {}, // No refresh needed for local state
-              variant: 'outline',
-              size: 'sm',
-              icon: <RefreshCw className="h-3.5 w-3.5" />,
+              variant: 'ghost',
+              size: 'icon',
+              icon: <RefreshCw className="h-4 w-4" />,
             } as AdminToolbarAction,
           ]}
           resultCount={expenses.length}

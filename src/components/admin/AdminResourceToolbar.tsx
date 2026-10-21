@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Search, X, ChevronDown, Filter, SlidersHorizontal, Check } from 'lucide-react';
+import { Search, X, ChevronDown, Filter, Check, LayoutList, LayoutGrid, RefreshCw, Settings, Download, Columns } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -77,6 +77,11 @@ export interface AdminToolbarSelectionState {
 }
 
 /**
+ * View mode for list/grid switching
+ */
+export type ViewMode = 'list' | 'grid';
+
+/**
  * Props for AdminResourceToolbar
  */
 export interface AdminResourceToolbarProps {
@@ -92,9 +97,7 @@ export interface AdminResourceToolbarProps {
   onFilterChange: (id: string, value: FilterValue) => void;
   /** Handler to clear all filters and search */
   onClearAll?: () => void;
-  /** Primary action (typically "New/Create" button) */
-  primaryAction?: AdminToolbarAction;
-  /** Secondary actions (refresh, export, etc.) */
+  /** Secondary actions (refresh, export, etc.) - primary creation actions should live in page header */
   secondaryActions?: AdminToolbarAction[];
   /** Selection/bulk action state */
   selection?: AdminToolbarSelectionState;
@@ -112,6 +115,18 @@ export interface AdminResourceToolbarProps {
   showFilterToggle?: boolean;
   /** Custom filter toggle label */
   filterToggleLabel?: string;
+  /** Current view mode for list/grid toggle */
+  viewMode?: ViewMode;
+  /** Handler for view mode changes */
+  onViewModeChange?: (mode: ViewMode) => void;
+  /** Whether to show the list/grid view toggle */
+  showViewToggle?: boolean;
+  /** Sort options */
+  sortOptions?: Array<{ label: string; value: string }>;
+  /** Current sort value */
+  sortValue?: string;
+  /** Sort change handler */
+  onSortChange?: (value: string) => void;
 }
 
 /**
@@ -137,7 +152,6 @@ export function AdminResourceToolbar({
   filters,
   onFilterChange,
   onClearAll,
-  primaryAction,
   secondaryActions = [],
   selection,
   resultCount,
@@ -147,6 +161,12 @@ export function AdminResourceToolbar({
   className,
   showFilterToggle = true,
   filterToggleLabel = 'Filters',
+  viewMode = 'list',
+  onViewModeChange,
+  showViewToggle = false,
+  sortOptions,
+  sortValue,
+  onSortChange,
 }: AdminResourceToolbarProps) {
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterMenuRef = useRef<HTMLDivElement>(null);
@@ -363,18 +383,75 @@ export function AdminResourceToolbar({
     );
   };
 
+  // Render sort control
+  const renderSortControl = () => {
+    if (!sortOptions || sortOptions.length === 0 || !onSortChange) return null;
+
+    return (
+      <Select
+        value={sortValue || sortOptions[0].value}
+        onValueChange={onSortChange}
+        disabled={loading}
+      >
+        <SelectTrigger className="min-w-[9.5rem] max-w-[14rem]" aria-label="Sort">
+          <SelectValue placeholder="Sort" />
+        </SelectTrigger>
+        <SelectContent>
+          {sortOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    );
+  };
+
+  // Render view mode toggle
+  const renderViewToggle = () => {
+    if (!showViewToggle || !onViewModeChange) return null;
+
+    return (
+      <div className="flex items-center gap-1" role="group" aria-label="View mode">
+        <Button
+          type="button"
+          variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+          size="icon"
+          onClick={() => onViewModeChange('list')}
+          aria-label="List view"
+          aria-pressed={viewMode === 'list'}
+          disabled={loading}
+        >
+          <LayoutList className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+          size="icon"
+          onClick={() => onViewModeChange('grid')}
+          aria-label="Grid view"
+          aria-pressed={viewMode === 'grid'}
+          disabled={loading}
+        >
+          <LayoutGrid className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
   return (
     <div
       ref={filterMenuRef}
       className={cn(
         'admin-filter-bar ui-fade-in flex flex-col gap-4 rounded-2xl border border-border bg-card p-4',
         'md:flex-row md:items-center md:justify-between',
+        'gap-3 md:gap-4',
         className
       )}
       data-admin-toolbar
     >
-      {/* Search Section */}
-      <div className="admin-filter-search relative flex-1 min-w-0 w-full md:max-w-xl">
+      {/* Search Section - flex-1 with min-width for breathing room */}
+      <div className="admin-filter-search relative flex-1 min-w-[280px] w-full md:max-w-[480px]">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
@@ -387,10 +464,10 @@ export function AdminResourceToolbar({
         />
       </div>
 
-      {/* Filter Controls Section */}
-      <div className="admin-filter-controls flex-1 flex flex-wrap items-center gap-2">
-        {/* Desktop: Show all filters inline */}
-        <div className="hidden md:flex flex-wrap items-center gap-2">
+      {/* Filter Controls Section - compact, right-aligned */}
+      <div className="admin-filter-controls flex flex-wrap items-center gap-2 md:gap-3">
+        {/* Filters - inline on desktop, collapsible on mobile */}
+        <div className="flex flex-wrap items-center gap-2">
           {filters.map((filter) => renderFilterControl(filter))}
         </div>
 
@@ -417,12 +494,18 @@ export function AdminResourceToolbar({
           </Button>
         )}
 
+        {/* Sort control */}
+        {renderSortControl()}
+
+        {/* View mode toggle */}
+        {renderViewToggle()}
+
         {/* Result count */}
         {renderResultCount()}
 
         {/* Selection state (bulk actions) */}
         {selection && selection.count > 0 && (
-          <div className="flex items-center gap-2 border-l border-border pl-4 ml-2">
+          <div className="flex items-center gap-2 border-l border-border pl-3 ml-1">
             <span className="text-sm font-medium">
               {selection.count} {selection.itemLabel} selected
             </span>
@@ -456,13 +539,13 @@ export function AdminResourceToolbar({
           </div>
         )}
 
-        {/* Secondary actions */}
+        {/* Secondary actions - icon buttons where appropriate */}
         {secondaryActions.map((action, index) => (
           <Button
             key={index}
             type="button"
-            variant={action.variant || 'secondary'}
-            size={action.size || 'default'}
+            variant={action.variant || (action.icon && !action.label ? 'ghost' : 'secondary')}
+            size={action.size || (action.icon && !action.label ? 'icon' : 'default')}
             onClick={action.onClick}
             className={cn(
               action.destructive && 'text-destructive',
@@ -470,30 +553,14 @@ export function AdminResourceToolbar({
               action.mobileOnly && 'md:hidden'
             )}
             disabled={loading}
+            aria-label={action.label}
           >
             {action.icon}
-            {action.label}
+            {action.label && !action.icon && action.label}
           </Button>
         ))}
 
-        {/* Primary action */}
-        {primaryAction && (
-          <Button
-            type="button"
-            variant={primaryAction.variant || 'primary'}
-            size={primaryAction.size || 'default'}
-            onClick={primaryAction.onClick}
-            className={cn(
-              primaryAction.destructive && 'text-destructive',
-              primaryAction.hideOnMobile && 'hidden md:inline-flex',
-              primaryAction.mobileOnly && 'md:hidden'
-            )}
-            disabled={loading}
-          >
-            {primaryAction.icon}
-            {primaryAction.label}
-          </Button>
-        )}
+        {/* No primary action - it belongs in the page header */}
       </div>
 
       {/* Active filters display */}

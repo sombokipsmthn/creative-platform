@@ -452,20 +452,13 @@ export default function AdminProjectsPage() {
             setFilterFeatured('ALL');
             setFilterClient(null);
           }}
-          primaryAction={{
-            label: '+ New Project',
-            onClick: () => openCreateModal(),
-            variant: 'primary',
-            size: 'sm',
-            className: 'text-xs font-sans uppercase tracking-widest',
-          } as AdminToolbarAction}
           secondaryActions={[
             {
-              label: '',
+              label: 'Refresh',
               onClick: () => void loadData(true),
-              variant: 'outline',
-              size: 'sm',
-              icon: <RefreshCw className="h-3.5 w-3.5" />,
+              variant: 'ghost',
+              size: 'icon',
+              icon: <RefreshCw className="h-4 w-4" />,
             } as AdminToolbarAction,
           ]}
           resultCount={projects.length}

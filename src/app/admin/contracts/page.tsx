@@ -302,21 +302,13 @@ export default function ContractsPage() {
             setStatus('all');
             setClientId('all');
           }}
-          primaryAction={{
-            label: 'New Contract',
-            onClick: () => window.location.assign('/admin/contracts/new'),
-            variant: 'primary',
-            size: 'sm',
-            className: 'text-xs font-sans uppercase tracking-widest',
-            icon: <Plus className="h-3.5 w-3.5" />,
-          } as AdminToolbarAction}
           secondaryActions={[
             {
               label: 'Refresh',
               onClick: () => void loadContracts(true),
-              variant: 'outline',
-              size: 'sm',
-              icon: <RefreshCw className="h-3.5 w-3.5" />,
+              variant: 'ghost',
+              size: 'icon',
+              icon: <RefreshCw className="h-4 w-4" />,
             } as AdminToolbarAction,
           ]}
           resultCount={stats.total}

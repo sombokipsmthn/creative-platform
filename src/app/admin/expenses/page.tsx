@@ -173,7 +173,6 @@ export default function AdminExpensesPage() {
               <p className="text-sm text-muted-foreground">Requires eTIMS PIN confirmation</p>
             </div>
           </div>
-        </div>
 
         {/* SCANNER FORM */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm space-y-6">

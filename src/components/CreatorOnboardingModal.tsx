@@ -295,7 +295,7 @@ export default function CreatorOnboardingModal({
               <aside className="border-b border-gray-100 bg-white px-6 py-8 lg:min-h-[calc(100vh-81px)] lg:border-b-0 lg:border-r lg:px-8 lg:py-12">
                 <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Setup</p>
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">Build your workspace.</h1>
-                <p className="mt-3 text-sm leading-6 text-gray-500">Complete the essentials first, then add the business details when you're ready.</p>
+                <p className="mt-3 text-sm leading-6 text-gray-500">Complete the essentials first, then add the business details when you&apos;re ready.</p>
                 <div className="mt-10 space-y-2">
                   {STEPS.map((step) => (
                     <div key={step.number} className={`flex items-center gap-3 rounded-2xl px-3 py-3 ${step.number === currentStep ? "bg-primary/10" : ""}`}>
@@ -505,7 +505,7 @@ export default function CreatorOnboardingModal({
                           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                             <Check className="h-7 w-7 text-primary" />
                           </div>
-                          <h3 className="mt-6 text-2xl font-semibold">You're ready to go.</h3>
+                          <h3 className="mt-6 text-2xl font-semibold">You&apos;re ready to go.</h3>
                           <p className="mt-3 max-w-md text-sm leading-6 text-gray-500">Your creator profile and services are set up. Continue building your workspace from the dashboard.</p>
                         </div>
                         <div className="space-y-3">

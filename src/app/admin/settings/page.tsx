@@ -39,7 +39,7 @@ const tabConfig: { id: SettingsTab; label: string; icon: React.ReactNode; descri
   {
     id: 'gallery-delivery',
     label: 'Gallery Delivery',
-    icon: <Image className="h-4 w-4" />,
+    icon: <Image className="h-4 w-4" role="img" aria-label="Gallery Delivery" />,
     description: 'Default watermark, gallery presets, and client portal settings.'
   },
   {

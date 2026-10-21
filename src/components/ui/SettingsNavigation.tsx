@@ -145,7 +145,7 @@ export function MobileSettingsTabs({ activeSection, onSectionChange }: MobileSet
                   : 'text-muted-foreground bg-accent hover:bg-accent/80'
               }`}
             >
-              <span className="h-4 w-4" aria-hidden="true">{item.icon}</span>
+              <span className="h-4 w-4" aria-hidden="true" role="img" aria-label={item.label}>{item.icon}</span>
               <span className="text-xs font-medium">{item.label}</span>
             </button>
           );

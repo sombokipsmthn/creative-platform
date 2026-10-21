@@ -300,7 +300,15 @@ export default function InvoicesPage() {
           title="Invoices"
           description="Manage invoices, monitor payments and keep track of client billing."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          /* Primary action removed - belongs in page header */
+          primaryAction={
+            <Button
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              New Invoice
+            </Button>
+          }
         />
 
         {error && !loading && (

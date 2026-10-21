@@ -254,6 +254,15 @@ export default function AdminClientsPage() {
           title="Client CRM"
           description="Database-backed client records and workflow status."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={
+            <Button
+              onClick={openCreateModal}
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
+            >
+              + Register New Client
+            </Button>
+          }
         />
 
         {error && !isAddClientOpen && !selectedClient && (

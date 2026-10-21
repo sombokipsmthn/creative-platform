@@ -122,7 +122,7 @@ export default function EquipmentPage() {
           title="Equipment"
           description="Manage equipment rates used by the quotation catalogue."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          /* Primary action removed - belongs in page header */
+          primaryAction={<Button type="button" onClick={openCreate}><Plus aria-hidden="true" />Add equipment</Button>}
         />
 
         {error && !open && <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300" role="alert">{error}</div>}

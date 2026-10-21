@@ -357,6 +357,15 @@ export default function AdminProjectsPage() {
           title="Projects"
           description="Track all client engagements and creative projects."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
+          primaryAction={
+            <Button
+              onClick={() => openCreateModal()}
+              variant="primary"
+              className="text-xs font-sans uppercase tracking-widest"
+            >
+              + New Project
+            </Button>
+          }
         />
 
         {error && !isAddProjectOpen && !selectedProject && (

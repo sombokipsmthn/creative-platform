@@ -9,11 +9,13 @@ import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 
 interface StoryViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
+  /** When true, renders with sample content for preview purposes */
+  isPreview?: boolean;
 }
 
 /**
  * Story Theme Viewer
- * 
+ *
  * Vertical scrolling storytelling layout.
  * Sequential image progression with captions.
  * Timeline-like narrative experience.
@@ -27,15 +29,69 @@ export function GalleryViewerStory({
   allowFavorites,
   onPhotoDownload,
   onPhotoFavorite,
+  isPreview = false,
 }: StoryViewerProps) {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  if (photos.length === 0) {
+  // Sample content for preview mode
+  const samplePhotos = [
+    {
+      id: 'sample-1',
+      filename: 'Chapter 1: Beginning',
+      displayUrl: '/sample-portrait-1.svg',
+      thumbnailUrl: '/sample-portrait-1-thumb.svg',
+      captureDate: '2024-01-15T10:00:00Z',
+    },
+    {
+      id: 'sample-2',
+      filename: 'Chapter 2: Journey',
+      displayUrl: '/sample-landscape-1.svg',
+      thumbnailUrl: '/sample-landscape-1-thumb.svg',
+      captureDate: '2024-01-16T14:30:00Z',
+    },
+    {
+      id: 'sample-3',
+      filename: 'Chapter 3: Discovery',
+      displayUrl: '/sample-portrait-2.svg',
+      thumbnailUrl: '/sample-portrait-2-thumb.svg',
+      captureDate: '2024-01-17T09:15:00Z',
+    },
+    {
+      id: 'sample-4',
+      filename: 'Chapter 4: Reflection',
+      displayUrl: '/sample-landscape-2.svg',
+      thumbnailUrl: '/sample-landscape-2-thumb.svg',
+      captureDate: '2024-01-18T16:45:00Z',
+    },
+    {
+      id: 'sample-5',
+      filename: 'Chapter 5: Resolution',
+      displayUrl: '/sample-detail-1.svg',
+      thumbnailUrl: '/sample-detail-1-thumb.svg',
+      captureDate: '2024-01-19T11:20:00Z',
+    },
+  ];
+
+  const displayPhotos = (isPreview && photos.length === 0) ? samplePhotos : photos;
+
+  // Type for sample photos with optional isFavorite
+  interface SamplePhoto {
+    id: string;
+    filename: string;
+    displayUrl: string;
+    thumbnailUrl: string;
+    captureDate?: string;
+    isFavorite?: boolean;
+  }
+
+  if (displayPhotos.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#09090b] p-6">
-        <div className="text-center">
-          <p className="text-lg font-light text-slate-400 dark:text-zinc-500">No photos in gallery</p>
+      <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: theme.preset.backgroundColor }}>
+        <div className="text-center p-6">
+          <p className="text-lg font-light" style={{ color: theme.preset.textColor }}>
+            {isPreview ? 'No photos in gallery — this is a preview' : 'No photos in gallery'}
+          </p>
         </div>
       </div>
     );
@@ -67,15 +123,18 @@ export function GalleryViewerStory({
       }}
     >
       {/* Header */}
-      <div className="border-b border-slate-200 dark:border-zinc-800 px-6 py-8 sm:px-10 lg:px-16">
-        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-base text-slate-600 dark:text-zinc-400">{description}</p>}
+      <div className="border-b px-6 py-8 sm:px-10 lg:px-16" style={{ borderColor: theme.preset.textColor + '33' }}>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-base" style={{ color: theme.preset.textColor + '99' }}>{description}</p>}
+        {isPreview && (
+          <p className="mt-2 text-xs text-amber-600">Preview mode — sample content shown</p>
+        )}
 
         {/* Progress Bar */}
-        <div className="mt-6 h-1 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-zinc-800">
+        <div className="mt-6 h-1 w-full overflow-hidden rounded-full" style={{ backgroundColor: theme.preset.textColor + '33' }}>
           <div
-            className="h-full bg-black dark:bg-white transition-all duration-300"
-            style={{ width: `${scrollProgress}%` }}
+            className="h-full transition-all duration-300"
+            style={{ width: `${scrollProgress}%`, backgroundColor: theme.preset.accentColor }}
           />
         </div>
       </div>
@@ -83,22 +142,22 @@ export function GalleryViewerStory({
       {/* Story Timeline */}
       <div className="flex-1 overflow-x-auto" onScroll={handleScroll}>
         <div className="flex w-max gap-8 px-6 py-8 sm:px-10 lg:px-16">
-          {photos.map((photo, idx) => {
-            const isFavorite = favorites.has(photo.id) || photo.isFavorite;
+          {displayPhotos.map((photo, idx) => {
+            const isFavorite = favorites.has(photo.id) || (photo as SamplePhoto).isFavorite;
 
             return (
               <div key={photo.id} className="flex-shrink-0 w-96 scroll-snap-align-start">
                 {/* Chapter Number/Divider */}
                 <div className="mb-4 flex items-center gap-3">
-                  <div className="h-0.5 flex-1 bg-slate-200 dark:bg-zinc-800" />
-                  <span className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-zinc-400">
-                    {idx + 1} of {photos.length}
+                  <div className="h-0.5 flex-1" style={{ backgroundColor: theme.preset.textColor + '33' }} />
+                  <span className="text-xs font-semibold uppercase tracking-widest" style={{ color: theme.preset.textColor + '99' }}>
+                    {idx + 1} of {displayPhotos.length}
                   </span>
-                  <div className="h-0.5 flex-1 bg-slate-200 dark:bg-zinc-800" />
+                  <div className="h-0.5 flex-1" style={{ backgroundColor: theme.preset.textColor + '33' }} />
                 </div>
 
                 {/* Image Container */}
-                <div className="mb-4 overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-900">
+                <div className="mb-4 overflow-hidden rounded-xl" style={{ backgroundColor: theme.preset.backgroundColor }}>
                   <div className="relative aspect-video">
                     <Image
                       src={photo.displayUrl}
@@ -106,15 +165,16 @@ export function GalleryViewerStory({
                       fill
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, 384px"
+                      unoptimized
                     />
                   </div>
                 </div>
 
                 {/* Caption */}
                 <div className="mb-4">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">{photo.filename}</p>
+                  <p className="text-sm font-medium">{photo.filename}</p>
                   {photo.captureDate && (
-                    <p className="mt-1 text-xs text-slate-500 dark:text-zinc-400">
+                    <p className="mt-1 text-xs" style={{ color: theme.preset.textColor + '99' }}>
                       {new Date(photo.captureDate).toLocaleDateString('en-KE', {
                         year: 'numeric',
                         month: 'long',
@@ -125,7 +185,7 @@ export function GalleryViewerStory({
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 border-t border-slate-200 dark:border-zinc-800 pt-4">
+                <div className="flex gap-2 border-t pt-4" style={{ borderColor: theme.preset.textColor + '33' }}>
                   {allowFavorites && (
                     <Button
                       variant="ghost"
@@ -135,8 +195,9 @@ export function GalleryViewerStory({
                     >
                       <Heart
                         className={`h-4 w-4 ${
-                          isFavorite ? 'fill-red-500 text-red-500' : 'text-slate-400 dark:text-zinc-500'
+                          isFavorite ? 'fill-red-500 text-red-500' : ''
                         }`}
+                        style={{ color: isFavorite ? undefined : theme.preset.textColor }}
                       />
                       <span className="text-xs">
                         {isFavorite ? 'Favorited' : 'Favorite'}
@@ -151,7 +212,7 @@ export function GalleryViewerStory({
                       onClick={() => onPhotoDownload?.(photo.id)}
                       className="flex items-center gap-1.5"
                     >
-                      <Download className="h-4 w-4 text-slate-400 dark:text-zinc-500" />
+                      <Download className="h-4 w-4" style={{ color: theme.preset.textColor }} />
                       <span className="text-xs">Download</span>
                     </Button>
                   )}
@@ -163,9 +224,9 @@ export function GalleryViewerStory({
       </div>
 
       {/* Scroll Hint */}
-      <div className="border-t border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-950 px-6 py-6 sm:px-10 lg:px-16">
+      <div className="border-t bg-gray-50 px-6 py-6 sm:px-10 lg:px-16" style={{ borderColor: theme.preset.textColor + '33', backgroundColor: theme.preset.backgroundColor + 'CC' }}>
         <div className="mx-auto max-w-7xl">
-          <p className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+          <p className="flex items-center gap-2 text-xs" style={{ color: theme.preset.textColor + '99' }}>
             <ChevronDown className="h-4 w-4 rotate-90" />
             Scroll to explore the story
           </p>

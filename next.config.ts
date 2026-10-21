@@ -4,6 +4,9 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   turbopack: {},
 
+  // Disable trailing slash redirects to prevent 308 loops
+  trailingSlash: false,
+
   // Next.js 16.3 + Vercel currently conflicts with standalone output:
   // Vercel's build adapter expects .next/next-server.js.nft.json, which
   // Next.js 16.3 no longer emits when the Vercel adapter is active.
@@ -23,21 +26,6 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Redirect uppercase /Portal to lowercase /portal to avoid duplicate route/page conflicts
-  async redirects() {
-    return [
-      {
-        source: '/Portal/:path*',
-        destination: '/portal/:path*',
-        permanent: true,
-      },
-      {
-        source: '/Portal',
-        destination: '/portal',
-        permanent: true,
-      },
-    ];
-  },
 
   webpack: (config, { isServer }) => {
     if (!isServer) {

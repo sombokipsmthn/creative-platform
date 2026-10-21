@@ -232,30 +232,21 @@ export default function HomePage() {
             </div>
 
             <div className="mt-16">
-              <div className="relative">
-                {/* Connecting line */}
-                <div className="hidden lg:block absolute left-10 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/20 via-primary/40 to-primary/20" aria-hidden="true" />
-
-                <div className="space-y-16">
-                  {workflowSteps.map((step, index) => (
-                    <div key={step.number} className="relative lg:pl-28">
-                      <div className="absolute left-0 top-0 flex h-20 w-20 items-center justify-center rounded-full bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 z-10">
-                        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${step.color}`}>
-                          <step.icon className="h-5 w-5 text-white" aria-hidden="true" />
-                        </div>
-                      </div>
-                      <div className="lg:pl-8">
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className="text-xs font-semibold tracking-[0.2em] text-primary dark:text-primary">
-                            Step {step.number}
-                          </span>
-                          <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white">{step.title}</h3>
-                        </div>
-                        <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 max-w-2xl">{step.description}</p>
-                      </div>
+              <div className="space-y-16 lg:space-y-24">
+                {workflowSteps.map((step, index) => (
+                  <div
+                    key={step.number}
+                    className="flex items-center gap-8 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 p-6 lg:p-8 transition-colors hover:border-primary/50"
+                  >
+                    <div className="flex-shrink-0 rounded-xl bg-slate-100 dark:bg-zinc-800 p-3">
+                      <step.icon className="h-6 w-6 text-primary" aria-hidden="true" />
                     </div>
-                  ))}
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-slate-950 dark:text-white">{step.title}</h3>
+                      <p className="text-base leading-7 text-slate-600 dark:text-zinc-400">{step.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -281,22 +272,22 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {[
                   { icon: LayoutDashboard, title: "Dashboard", description: "See your business at a glance with real-time metrics and key indicators." },
                   { icon: Users, title: "Client CRM", description: "Keep relationships, contact details, and project history together in one place." },
                   { icon: FolderKanban, title: "Projects", description: "Organize work from brief to final delivery with progress tracking and milestones." },
                   { icon: FileText, title: "Quotes & Contracts", description: "Prepare professional documents with branded templates and e-signature support." },
                   { icon: Wallet, title: "Invoices & Expenses", description: "Track billing, payments, expenses, and revenue with built-in analytics." },
-                  { icon: ImageIcon, title: "Client Galleries", description: "Deliver work through branded, private galleries with selection and download controls." },
+                  { icon: Camera, title: "Client Galleries", description: "Deliver work through branded, private galleries with selection and download controls." },
                 ].map(({ icon: Icon, title, description }) => (
-                  <Card key={title} className="p-5 transition-colors hover:border-primary/50 border-slate-200/50 dark:border-zinc-800/50">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary dark:text-primary">
+                  <article key={title} className="relative rounded-xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50 p-5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-zinc-800 text-primary dark:text-primary mb-4">
                       <Icon className="h-5 w-5" aria-hidden="true" />
                     </div>
-                    <h3 className="mt-4 font-medium text-slate-950 dark:text-white">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
-                  </Card>
+                    <h3 className="font-medium text-slate-950 dark:text-white">{title}</h3>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
+                  </article>
                 ))}
               </div>
             </div>

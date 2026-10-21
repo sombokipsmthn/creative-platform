@@ -1,12 +1,8 @@
-"use client";
+'use client';
 
-export const dynamic = 'force-dynamic';
-
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Users,
@@ -19,23 +15,23 @@ import {
   FileSignature,
   UserRound,
   Settings2,
-  Menu,
-  LogOut,
   Sparkles,
   ExternalLink,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  Menu,
+} from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
-import ProfileMenu from "@/components/ProfileMenu";
-import ThemeToggle from "@/components/ThemeToggle";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
+import { authClient } from '@/lib/auth-client';
+import ProfileMenu from '@/components/ProfileMenu';
+import ThemeToggle from '@/components/ThemeToggle';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Separator } from '@/components/ui/separator';
 import {
   SplitViewProvider,
   useSplitView,
-} from "@/context/SplitViewContext";
+} from '@/context/SplitViewContext';
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
@@ -62,7 +58,7 @@ const navSections: NavSection[] = [
   {
     label: "Overview",
     items: [
-      { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { name: "Command Center", href: "/admin", icon: LayoutDashboard },
     ],
   },
   {
@@ -74,7 +70,6 @@ const navSections: NavSection[] = [
       { name: "Quotes", href: "/admin/quotes", icon: FileText },
       { name: "Invoices", href: "/admin/invoices", icon: Receipt },
       { name: "Payments", href: "/admin/payments", icon: WalletCards },
-      { name: "Calendar", href: "/admin/calendar", icon: Calendar },
       { name: "Contracts", href: "/admin/contracts", icon: FileSignature },
     ],
   },
@@ -324,7 +319,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <span>/</span>
               <span className="capitalize">
                 {pathname === "/admin"
-                  ? "Dashboard"
+                  ? "Command Center"
                   : pathname.replace("/admin/", "").split("/")[0]}
               </span>
             </div>

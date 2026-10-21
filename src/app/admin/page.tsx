@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import CreatorOnboardingModal from '@/components/CreatorOnboardingModal';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
-import DashboardTour from '@/components/DashboardTour';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -359,7 +358,6 @@ export default function StudioCommandCenterPage() {
   const [error, setError] = useState('');
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingDismissed, setOnboardingDismissed] = useState(false);
-  const [showDashboardTour, setShowDashboardTour] = useState(false);
 
   // Calendar state
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
@@ -445,28 +443,6 @@ export default function StudioCommandCenterPage() {
     return () => { cancelled = true; };
   }, [user, onboardingDismissed]);
 
-  // Add guided dashboard tour after first onboarding dismissal
-  useEffect(() => {
-    if (!onboardingDismissed) return;
-    let cancelled = false;
-
-    async function startTour() {
-      try {
-        // Small delay to let dashboard render first
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        // Show tour steps - this will render overlay tour after dismissal
-        setShowDashboardTour(true);
-      } catch {
-        // Ignore errors
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    void startTour();
-    return () => { cancelled = true; };
-  }, [onboardingDismissed]);
-
   const invoicePaidRate = useMemo(() => {
     if (!stats) return 0;
     const total = Object.values(stats.invoices.statuses).reduce((sum, v) => sum + (v || 0), 0);
@@ -496,9 +472,13 @@ export default function StudioCommandCenterPage() {
   }, [calendarEvents]);
 
   if (!isLoaded) {
-    // Don't replace server-rendered content during hydration
-    // Return null to preserve the SSR output; client will hydrate seamlessly
-    return null;
+    return (
+      <main className="min-h-screen bg-background">
+        <div className="ui-shell py-12">
+          <LoadingSkeleton count={8} />
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -809,12 +789,12 @@ export default function StudioCommandCenterPage() {
               >
                 <div className="space-y-4">
                   {([
-                    ['Draft', stats.quotes.statuses.draft ?? 0],
-                    ['Sent', stats.quotes.statuses.sent ?? 0],
-                    ['Accepted', stats.quotes.statuses.accepted ?? 0],
-                    ['Rejected', stats.quotes.statuses.rejected ?? 0],
-                    ['Invoiced', stats.quotes.statuses.invoiced ?? 0],
-                  ] as const).filter(([, v]) => (v as number) > 0).map(([label, value]) => {
+                    ['Draft', Number(stats.quotes.statuses.draft || 0)],
+                    ['Sent', Number(stats.quotes.statuses.sent || 0)],
+                    ['Accepted', Number(stats.quotes.statuses.accepted || 0)],
+                    ['Rejected', Number(stats.quotes.statuses.rejected || 0)],
+                    ['Invoiced', Number(stats.quotes.statuses.invoiced || 0)],
+                  ] as Array<[string, number]>).filter(([, v]) => v > 0).map(([label, value]) => {
                     const numValue = Number(value);
                     return (
                       <div key={label}>
@@ -849,11 +829,15 @@ export default function StudioCommandCenterPage() {
               setShowOnboarding(false);
               setOnboardingDismissed(true);
             }}
+            onComplete={() => {
+              setShowOnboarding(false);
+              setOnboardingDismissed(true);
+            }}
+            onDismiss={() => {
+              setShowOnboarding(false);
+              setOnboardingDismissed(true);
+            }}
           />
-        )}
-
-        {showDashboardTour && (
-          <DashboardTour onClose={() => setShowDashboardTour(false)} />
         )}
       </div>
     </main>

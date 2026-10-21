@@ -15,6 +15,8 @@ import {
   Eye,
   Heart,
   ImageIcon,
+  LayoutGrid,
+  List,
   MessageSquare,
   Plus,
   RefreshCw,
@@ -435,16 +437,13 @@ export default function AdminGalleryManagerPage() {
                     disabled: isRefreshing,
                   } as AdminToolbarAction,
                   {
-                    label: 'Grid',
-                    onClick: () => changeGalleryView('grid'),
-                    variant: galleryView === 'grid' ? 'primary' : 'secondary',
-                    size: 'sm',
-                  } as AdminToolbarAction,
-                  {
-                    label: 'List',
-                    onClick: () => changeGalleryView('list'),
-                    variant: galleryView === 'list' ? 'primary' : 'secondary',
-                    size: 'sm',
+                    label: galleryView === 'grid' ? 'Switch to list view' : 'Switch to grid view',
+                    onClick: () => changeGalleryView(galleryView === 'grid' ? 'list' : 'grid'),
+                    variant: 'outline',
+                    size: 'icon',
+                    icon: galleryView === 'grid'
+                      ? <List className="h-4 w-4" />
+                      : <LayoutGrid className="h-4 w-4" />,
                   } as AdminToolbarAction,
                 ]}
                 resultCount={galleries.length}

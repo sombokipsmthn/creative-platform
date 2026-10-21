@@ -165,15 +165,6 @@ export default function ContractsPage() {
           title="Contracts"
           description="Create, send and manage agreements with your clients."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          primaryAction={
-            <Button
-              variant="primary"
-              className="text-xs font-sans uppercase tracking-widest"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              New Contract
-            </Button>
-          }
         />
 
         {error && !loading && (

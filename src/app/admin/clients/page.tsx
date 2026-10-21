@@ -391,7 +391,7 @@ export default function AdminClientsPage() {
                           <SelectItem value="+27">🇿🇦 +27 (South Africa)</SelectItem>
                         </SelectContent>
                       </Select>
-                      <Input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="min-w-0 flex-1" />
+                      <Input type="text" placeholder="700 000 000" value={form.phone?.startsWith(form.phoneCountry || '') ? form.phone.slice((form.phoneCountry || '').length).trimStart() : form.phone} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="min-w-0 flex-1" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-sm font-medium leading-none">Location</label>

@@ -496,13 +496,9 @@ export default function StudioCommandCenterPage() {
   }, [calendarEvents]);
 
   if (!isLoaded) {
-    return (
-      <main className="min-h-screen bg-background">
-        <div className="ui-shell py-12">
-          <LoadingSkeleton count={8} />
-        </div>
-      </main>
-    );
+    // Don't replace server-rendered content during hydration
+    // Return null to preserve the SSR output; client will hydrate seamlessly
+    return null;
   }
 
   return (

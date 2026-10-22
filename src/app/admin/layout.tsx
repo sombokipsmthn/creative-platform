@@ -91,26 +91,26 @@ function NavLink({
   isActive,
   badgeCount = 0,
   onClick,
+  disabled = false,
 }: {
   item: NavItem;
   isActive: boolean;
   badgeCount?: number;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   const Icon = item.icon;
-
-  return (
-    <Link
-      href={item.href}
-      onClick={onClick}
-      className={`group relative flex min-h-10 items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-        isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-none before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary"
-          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
-      }`}
-    >
+  const className = `group relative flex min-h-10 items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+    disabled
+      ? "cursor-not-allowed text-sidebar-foreground/35"
+      : isActive
+        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-none before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary"
+        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
+  }`;
+  const content = (
+    <>
       <div className="flex items-center gap-3">
-        <Icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground"}`} />
+        <Icon className={`h-4 w-4 shrink-0 transition-colors ${disabled ? "text-sidebar-foreground/30" : isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground"}`} />
         <span>{item.name}</span>
       </div>
       {badgeCount > 0 && (
@@ -121,6 +121,16 @@ function NavLink({
           {badgeCount}
         </Badge>
       )}
+    </>
+  );
+
+  if (disabled) {
+    return <div className={className} aria-disabled="true">{content}</div>;
+  }
+
+  return (
+    <Link href={item.href} onClick={onClick} className={className}>
+      {content}
     </Link>
   );
 }
@@ -166,11 +176,14 @@ function SidebarContent({
               {section.label}
             </p>
             <div className="space-y-1">
-              {section.items.filter((item) => item.name !== "Public portfolio" || portfolioHref).map((item) => {
-                const resolvedItem = item.name === "Public portfolio" && portfolioHref ? { ...item, href: portfolioHref } : item;
-                const isActive =
+              {section.items.map((item) => {
+                const isPublicPortfolio = item.name === "Public portfolio";
+                const resolvedItem = isPublicPortfolio && portfolioHref ? { ...item, href: portfolioHref } : item;
+                const disabled = isPublicPortfolio && !portfolioHref;
+                const isActive = !disabled && (
                   pathname === resolvedItem.href ||
-                  (resolvedItem.href !== "/admin" && pathname.startsWith(`${resolvedItem.href}/`));
+                  (resolvedItem.href !== "/admin" && pathname.startsWith(`${resolvedItem.href}/`))
+                );
                 const count = badgeCounts[resolvedItem.href] ?? 0;
 
                 return (

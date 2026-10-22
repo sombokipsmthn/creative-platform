@@ -33,9 +33,37 @@ try {
     check(await sidebarLink.isVisible(), "public portfolio sidebar link is visible when content exists");
     check((await sidebarLink.getAttribute("href")) === `/p/${publicHandle}`, "sidebar points to the canonical public portfolio URL");
   } else {
-    check(!(await sidebarLink.isVisible()), "public portfolio sidebar link is hidden when no content exists");
+    const disabledItem = page.getByRole("link", { name: "Public portfolio", exact: true }).or(
+      page.locator('[aria-disabled="true"]').filter({ hasText: "Public portfolio" })
+    );
+    check(await disabledItem.isVisible(), "public portfolio sidebar item remains visible when no content exists");
+    check(await disabledItem.getAttribute("aria-disabled") === "true", "public portfolio sidebar item is disabled when no content exists");
   }
   await page.close();
+
+  const mobilePage = await context.newPage();
+  await mobilePage.setViewportSize({ width: 390, height: 844 });
+  await mobilePage.goto(`${baseURL}/admin`, { waitUntil: "networkidle", timeout: 30_000 });
+  check(await mobilePage.locator("body").evaluate((body) => body.scrollWidth <= window.innerWidth), "mobile admin layout has no horizontal overflow");
+  await mobilePage.getByRole("button", { name: /toggle navigation menu/i }).click();
+  const mobileDisabledItem = mobilePage.locator('[aria-disabled="true"]').filter({ hasText: "Public portfolio" });
+  if (portfolioBody.hasPublishedContent && publicHandle) {
+    const mobilePortfolioLink = mobilePage.getByRole("link", { name: "Public portfolio", exact: true });
+    check(await mobilePortfolioLink.isVisible(), "mobile public portfolio link is visible when content exists");
+  } else {
+    const mobileDisabledState = await mobileDisabledItem.evaluateAll((items) => ({
+      visible: items.some((item) => {
+        const style = window.getComputedStyle(item);
+        return style.display !== "none" && style.visibility !== "hidden";
+      }),
+      disabled: items.every((item) => item.getAttribute("aria-disabled") === "true"),
+      focusable: items.some((item) => item.getAttribute("tabindex") !== null),
+    }));
+    check(mobileDisabledState.visible, "mobile public portfolio item remains visible when no content exists");
+    check(mobileDisabledState.disabled, "mobile public portfolio item is disabled");
+    check(!mobileDisabledState.focusable, "disabled public portfolio item is not keyboard-focusable");
+  }
+  await mobilePage.close();
 
   const galleries = await context.request.get(`${baseURL}/api/galleries`);
   check(galleries.ok(), `gallery API status=${galleries.status()}`);

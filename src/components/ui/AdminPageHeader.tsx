@@ -70,7 +70,9 @@ export function AdminPageHeader({
                 const isDisabled = tab.disabled ?? false;
                 return (
                   <div key={tab.label} className="flex-shrink-0">
-                    {tab.href ? (
+                    {tab.onClick ? (
+                      <Button type="button" onClick={tab.onClick} disabled={isDisabled} variant={isActive ? 'primary' : 'ghost'} size="sm" className="rounded-none border-b-2 text-xs uppercase tracking-widest">{tab.label}</Button>
+                    ) : tab.href ? (
                       isDisabled ? (
                         <span className="px-3 py-1.5 text-xs font-sans uppercase tracking-widest border-transparent text-slate-400 dark:text-zinc-500 cursor-not-allowed">
                           {tab.label}
@@ -87,8 +89,6 @@ export function AdminPageHeader({
                           {tab.label}
                         </Link>
                       )
-                    ) : tab.onClick ? (
-                      <Button type="button" onClick={tab.onClick} disabled={isDisabled} variant={isActive ? 'primary' : 'ghost'} size="sm" className="rounded-none border-b-2 text-xs uppercase tracking-widest">{tab.label}</Button>
                     ) : (
                       <span className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest ${
                         isActive

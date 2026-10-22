@@ -4,7 +4,7 @@
 >
 > Repository: https://github.com/sombokipsmthn/creative-platform/tree/dev  
 > Working branch: `dev`  
-> Last consolidated: 2026-10-21
+> Last consolidated: 2026-10-22
 
 ## 1. How to use this handbook
 
@@ -31,6 +31,7 @@ The product should feel like a coherent creative OS, not a collection of unrelat
 ## 3. Technical baseline
 
 - Framework: Next.js App Router, TypeScript, React.
+- TypeScript: `package.json` range `^5.8.2`; `package-lock.json` resolves `node_modules/typescript` to `5.9.3`. This does not independently verify a local installed version.
 - Styling: Tailwind CSS and the existing shadcn/ui conventions.
 - Global design tokens: `src/app/globals.css`.
 - Shared UI primitives: `src/components/ui/`.

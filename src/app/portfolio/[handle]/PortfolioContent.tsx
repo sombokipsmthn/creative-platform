@@ -6,8 +6,8 @@ import Link from 'next/link';
 import Header from '@/components/header';
 import Footer from '@/components/Footer';
 import ThemeToggle from '@/components/ThemeToggle';
-import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface ProjectData {
   id: string;
@@ -205,28 +205,57 @@ export function PortfolioContent({
           {filteredProjects.map((project) => (
             <Card
               key={project.id}
-              variant="image"
-              imageSrc={project.cover?.displayUrl || '/placeholder-hero-1.svg'}
-              imageAlt={project.cover?.altText || project.name}
-              title={project.name}
-              subtitle={project.category || 'Creative'}
-              className="group"
-            />
+              className="group cursor-pointer transition-shadow hover:shadow-lg"
+              onClick={() => setExpandedProject(project.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setExpandedProject(project.id);
+                }
+              }}
+              role="button"
+              tabIndex={0}
+            >
+              <Image
+                src={project.cover?.displayUrl || '/placeholder-hero-1.svg'}
+                alt={project.cover?.altText || project.name}
+                width={1200}
+                height={800}
+                className="aspect-[3/2] w-full object-cover"
+              />
+              <CardContent className="space-y-1 p-4">
+                <h3 className="font-medium">{project.name}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {project.category || 'Creative'}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
         {/* Expanded Project Detail */}
         {expandedProject && projects.some((p) => p.id === expandedProject) && (
           <div className="mt-12">
-            <Card
-              key={expandedProject}
-              variant="image"
-              imageSrc={projects.find((p) => p.id === expandedProject)!.cover?.displayUrl || '/placeholder-hero-1.svg'}
-              imageAlt={projects.find((p) => p.id === expandedProject)!.cover?.altText || projects.find((p) => p.id === expandedProject)!.name}
-              title={projects.find((p) => p.id === expandedProject)!.name}
-              subtitle={projects.find((p) => p.id === expandedProject)!.category || 'Creative'}
-              className="max-w-4xl mx-auto"
-            />
+            {(() => {
+              const project = projects.find((p) => p.id === expandedProject)!;
+              return (
+                <Card className="max-w-4xl mx-auto">
+                  <Image
+                    src={project.cover?.displayUrl || '/placeholder-hero-1.svg'}
+                    alt={project.cover?.altText || project.name}
+                    width={1200}
+                    height={800}
+                    className="aspect-[3/2] w-full object-cover"
+                  />
+                  <CardContent className="space-y-1 p-4">
+                    <h3 className="text-xl font-medium">{project.name}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {project.category || 'Creative'}
+                    </p>
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </div>
         )}
       </section>

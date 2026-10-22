@@ -13,7 +13,8 @@ async function readPortfolio(userId: string) {
     db.query.creatorProfiles.findFirst({ where: eq(creatorProfiles.userId, userId) }),
     db.query.creatorPortfolios.findFirst({ where: eq(creatorPortfolios.userId, userId) }),
     db.select({ id: projects.id, name: projects.name, slug: projects.slug, visibility: projects.visibility, publishedAt: projects.publishedAt, coverMediaId: projects.coverMediaId })
-      .from(projects).where(eq(projects.creatorId, userId)),
+      .from(projects)
+      .where(and(eq(projects.creatorId, userId), eq(projects.visibility, "public"))),
   ]);
   return { user, profile, portfolio, projects: eligible };
 }

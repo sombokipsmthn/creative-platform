@@ -61,7 +61,7 @@ export function AdminPageHeader({
         </div>
 
         {/* Right side: Actions and Tabs */}
-        <div className="flex flex-col md:flex-row md:items-center md:gap-4">
+        <div className="flex min-w-0 flex-col md:flex-row md:items-center md:gap-4">
           {/* Tabs */}
           {tabs && tabs.length > 0 && (
             <div className="flex gap-2 overflow-x-auto mb-4 md:mb-0">
@@ -108,12 +108,12 @@ export function AdminPageHeader({
           )}
 
           {/* Actions */}
-          <div className="flex flex-wrap gap-2">
+          <div className="flex min-w-0 max-w-full flex-wrap gap-2">
             {primaryAction && (
-              <div className="flex-shrink-0">{primaryAction}</div>
+              <div className="flex w-full min-w-0 max-w-full flex-wrap md:w-auto">{primaryAction}</div>
             )}
             {secondaryActions && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex min-w-0 max-w-full flex-wrap gap-2">
                 {secondaryActions.map((action, index) => (
                   <div key={index} className="flex-shrink-0">
                     {action}

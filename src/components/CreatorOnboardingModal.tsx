@@ -284,10 +284,10 @@ export default function CreatorOnboardingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto p-0">
-        <div className="min-h-screen bg-[#FAFAFA] text-gray-900">
-          <div className="mx-auto min-h-screen w-full max-w-7xl">
-            <header className="border-b border-gray-100 bg-white sticky top-0 z-10">
+      <DialogContent className="inset-2 top-2 left-2 h-[calc(100dvh-1rem)] max-h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-3xl -translate-x-0 -translate-y-0 overflow-hidden p-0 sm:inset-4 sm:top-4 sm:left-1/2 sm:h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:-translate-x-1/2 sm:rounded-2xl">
+        <div className="flex h-full min-h-0 flex-col bg-[#FAFAFA] text-gray-900">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <header className="sticky top-0 z-10 border-b border-gray-100 bg-white">
               <div className="flex items-center justify-between px-6 py-5 sm:px-10 lg:px-12">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-sm font-bold text-white">K</div>
@@ -298,7 +298,7 @@ export default function CreatorOnboardingModal({
             </header>
 
             <div className="grid lg:grid-cols-[300px_1fr]">
-              <aside className="border-b border-gray-100 bg-white px-6 py-8 lg:min-h-[calc(100vh-81px)] lg:border-b-0 lg:border-r lg:px-8 lg:py-12">
+              <aside className="border-b border-gray-100 bg-white px-4 py-6 sm:px-6 sm:py-8 lg:min-h-0 lg:border-b-0 lg:border-r lg:px-8 lg:py-10">
                 <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Setup</p>
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">Build your workspace.</h1>
                 <p className="mt-3 text-sm leading-6 text-gray-500">Complete the essentials first, then add the business details when you&apos;re ready.</p>
@@ -317,7 +317,7 @@ export default function CreatorOnboardingModal({
                 </div>
               </aside>
 
-              <section className="px-6 py-8 sm:px-10 lg:px-16 lg:py-12">
+              <section className="px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
                 <div className="mx-auto max-w-2xl">
                   <div className="mb-8">
                     <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Step {currentStep} of {STEPS.length}</p>
@@ -330,10 +330,10 @@ export default function CreatorOnboardingModal({
                     ))}
                   </div>
 
-                  <form onSubmit={handleSubmit} className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm sm:p-8">
+                  <form onSubmit={handleSubmit} className="rounded-3xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6 lg:p-8">
                     {currentStep === 1 && (
                       <div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-start gap-3 sm:items-center sm:gap-4">
                           <button type="button" onClick={() => fileInputRef.current?.click()} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl bg-primary/10" aria-label="Upload profile photo">
                             {avatarUrl ? <Image src={avatarUrl} alt="Your profile" fill unoptimized className="object-cover" /> : <ImagePlus className="mx-auto h-6 w-6 text-primary" />}
                             <span className="absolute inset-x-0 bottom-0 bg-black/60 py-1 text-[9px] font-medium text-white opacity-0 transition group-hover:opacity-100">Change photo</span>
@@ -402,8 +402,9 @@ export default function CreatorOnboardingModal({
                                   <Input value={service.category} onChange={(e) => updateService(index, "category", e.target.value)} placeholder="Photography" className="mt-2 h-12 w-full rounded-xl border border-gray-200 px-4 text-sm outline-none" />
                                 </label>
                                 <label className="text-sm font-medium">Default rate
+                                  <div className="mt-2 flex min-w-0 flex-col gap-2 xs:flex-row">
                                   <Select value={service.currency} onValueChange={(value) => updateService(index, "currency", value)}>
-                                    <SelectTrigger className="w-24">
+                                    <SelectTrigger className="w-full xs:w-24">
                                       <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -412,7 +413,8 @@ export default function CreatorOnboardingModal({
                                       <SelectItem value="EUR">EUR</SelectItem>
                                     </SelectContent>
                                   </Select>
-                                  <Input type="number" min="0" value={service.defaultRate} onChange={(e) => updateService(index, "defaultRate", e.target.value)} placeholder="25000" className="h-12 min-w-0 flex-1 rounded-xl border border-gray-200 px-4 text-sm" />
+                                  <Input type="number" min="0" value={service.defaultRate} onChange={(e) => updateService(index, "defaultRate", e.target.value)} placeholder="25000" className="h-12 min-w-0 w-full flex-1 rounded-xl border border-gray-200 px-4 text-sm" />
+                                  </div>
                                 </label>
                               </div>
                               <div className="mt-4">
@@ -539,15 +541,15 @@ export default function CreatorOnboardingModal({
                     )}
 
                     {error && <div className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-700">{error}</div>}
-                    <div className="mt-8 flex items-center justify-between gap-3 border-t border-gray-100 pt-6">
+                    <div className="mt-8 flex flex-col-reverse items-stretch justify-between gap-3 border-t border-gray-100 pt-6 sm:flex-row sm:items-center">
                       <div>{currentStep > 1 && <button type="button" onClick={() => { setError(null); setCurrentStep((currentStep - 1) as Step); }} disabled={saving} className="inline-flex h-11 items-center rounded-xl px-4 text-sm font-medium text-gray-600"><ArrowLeft className="mr-2 h-4 w-4" />Back</button>}</div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-3">
                         {currentStep < 4 && (
-                          <button type="button" onClick={dismissOnboarding} disabled={saving} className="inline-flex h-11 items-center rounded-xl border border-gray-300 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50">
+                          <button type="button" onClick={dismissOnboarding} disabled={saving} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-gray-300 px-4 text-sm font-medium text-gray-600 hover:bg-gray-50">
                             Skip for now
                           </button>
                         )}
-                        <button type="submit" disabled={saving || avatarBusy} className="inline-flex h-11 items-center rounded-xl bg-primary px-5 text-sm font-semibold text-white disabled:opacity-60">
+                        <button type="submit" disabled={saving || avatarBusy} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-primary px-5 text-sm font-semibold text-white disabled:opacity-60">
                           {saving ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving...

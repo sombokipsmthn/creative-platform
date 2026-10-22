@@ -36,6 +36,7 @@ interface GalleryPhoto {
   audioCodec: string | null
   sortOrder: number
   isHidden: boolean
+  portfolioSelection?: 'inherit' | 'include' | 'exclude'
   isFavorite: boolean
   isSelected: boolean
   createdAt: string
@@ -49,6 +50,7 @@ interface GalleryData {
   category?: string | null
   slug: string
   status: string
+  portfolioPublishMode?: 'none' | 'all' | 'selected'
   allowDownloads?: boolean
   allowFavorites?: boolean
   allowSelections?: boolean
@@ -68,6 +70,7 @@ const tabs = [
 export default function GalleryWorkspacePage() {
   const { id } = useParams<{ id: string }>()
   const [activeTab, setActiveTab] = useState<string>('photos')
+  const [portfolioMode, setPortfolioMode] = useState<'none' | 'all' | 'selected'>('none')
   const [gallery, setGallery] = useState<GalleryData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -94,6 +97,7 @@ export default function GalleryWorkspacePage() {
       presets: Array.isArray(transformed.presets) ? transformed.presets : [],
       watermark: transformed.watermark || null,
     } as unknown as GalleryData)
+    setPortfolioMode((transformed.gallery?.portfolioPublishMode as 'none' | 'all' | 'selected') || 'none')
   }, [id])
 
   useEffect(() => {
@@ -198,6 +202,12 @@ export default function GalleryWorkspacePage() {
       setCreatingCollection(false)
     }
   }
+  const handlePortfolioSelection = async (photoId: string, selection: 'inherit' | 'include' | 'exclude') => {
+    const response = await fetch(`/api/galleries/${id}/photos`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, portfolioSelection: selection }) })
+    if (!response.ok) setError('Unable to update portfolio selection')
+    else await refreshGallery()
+  }
+
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
     setError(null)
     try {
@@ -599,6 +609,15 @@ export default function GalleryWorkspacePage() {
 
                             {/* HOVER ACTIONS */}
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 z-10">
+                              <select
+                                value={photo.portfolioSelection || 'inherit'}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => void handlePortfolioSelection(photo.id, e.target.value as 'inherit' | 'include' | 'exclude')}
+                                className="absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-black/75 px-1.5 py-1 text-[10px] text-white opacity-0 group-hover:opacity-100"
+                                aria-label={`Portfolio status for ${photo.filename}`}
+                              >
+                                <option value="inherit">Portfolio: follow set</option><option value="include">Portfolio: publish</option><option value="exclude">Portfolio: exclude</option>
+                              </select>
                               <button
                                 type="button"
                                 onClick={(e) => {

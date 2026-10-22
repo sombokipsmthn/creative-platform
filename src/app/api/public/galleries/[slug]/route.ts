@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { getGallerySession, requireGallerySession } from "@/lib/gallery/session";
 import { comparePin } from "@/lib/gallery/pin";
 import { galleries, clients, projects, galleryPhotos, galleryCollections, galleryPhotoActions, galleryApprovals, galleryThemes } from "@/db/schema";
+import { isClientPhotoVisible } from "@/lib/portfolio/gallery-curation";
 
 type Context = {
   params: Promise<{
@@ -119,11 +120,12 @@ export async function GET(
         gallery.id,
       );
 
-    const collectionsResult = await db
+    const collectionsResult = (await db
       .select({
         id: galleryCollections.id,
         title: galleryCollections.title,
         description: galleryCollections.description,
+        clientVisibility: galleryCollections.clientVisibility,
         photoCount: sql<number>`(SELECT COUNT(*)::int FROM gallery_photos p WHERE p.collection_id = ${galleryCollections.id} AND p.is_hidden = false)`,
       })
       .from(galleryCollections)
@@ -131,9 +133,9 @@ export async function GET(
       .orderBy(
         asc(galleryCollections.sortOrder),
         asc(galleryCollections.createdAt)
-      );
+      )).filter((collection) => isClientPhotoVisible(String(collection.clientVisibility ?? "all") as "all" | "authorized" | "guest" | "none", session?.clientId ?? null));
 
-    const photosResult = await db
+    const photosResult = (await db
       .select({
         id: galleryPhotos.id,
         filename: galleryPhotos.filename,
@@ -147,6 +149,7 @@ export async function GET(
         isFavorite: sql<boolean>`COALESCE(${galleryPhotoActions.isFavorite}, ${galleryPhotos.isFavorite})`,
         isSelected: sql<boolean>`COALESCE(${galleryPhotoActions.isSelected}, ${galleryPhotos.isSelected})`,
         collectionTitle: galleryCollections.title,
+        clientVisibility: galleryCollections.clientVisibility,
       })
       .from(galleryPhotos)
       .leftJoin(galleryCollections, eq(galleryPhotos.collectionId, galleryCollections.id))
@@ -160,13 +163,14 @@ export async function GET(
       .where(
         and(
           eq(galleryPhotos.galleryId, galleryId),
-          eq(galleryPhotos.isHidden, false)
+          eq(galleryPhotos.isHidden, false),
+          sql`COALESCE(${galleryCollections.clientVisibility}, 'all') IN ('all', 'authorized', 'guest')`,
         )
       )
       .orderBy(
         asc(galleryPhotos.sortOrder),
         asc(galleryPhotos.createdAt)
-      );
+      )).filter((photo) => isClientPhotoVisible(String(photo.clientVisibility ?? "all") as "all" | "authorized" | "guest" | "none", session?.clientId ?? null));
 
     const [approvalResult] = await db
       .select()

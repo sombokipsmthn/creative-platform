@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Copy, Eye, ExternalLink, GripVertical, Save } from "lucide-react";
+import { Copy, Eye, ExternalLink, GripVertical, Save, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -46,13 +46,14 @@ export default function PortfolioAdminPage() {
     );
   }, [data]);
 
-  // Projects that are both eligible AND already published (for publish validation)
-  const publishedProjects = useMemo(() => {
-    if (!data) return [];
-    return data.projects.filter(
-      (project) => project.visibility === "public" && project.publishedAt != null
-    );
-  }, [data]);
+  const galleryItems = useMemo(
+    () => data?.projects.filter((project) => project.id.startsWith("gallery-")) ?? [],
+    [data],
+  );
+  const projectItems = useMemo(
+    () => eligible.filter((project) => !project.id.startsWith("gallery-")),
+    [eligible],
+  );
 
   async function save(nextPublished = published) {
     setMessage("Saving...");
@@ -115,16 +116,17 @@ export default function PortfolioAdminPage() {
   if (preview) {
     return (
       <div className="min-h-screen p-6">
-        <AdminPageHeader
+        <PortfolioRenderer data={previewData} preview />
+        <div className="fixed right-6 top-6 z-10"><AdminPageHeader
           title="Portfolio preview"
-          description="Review the public presentation of your selected work."
+          description="Gallery-curated media is primary; published projects remain available as a secondary source."
           breadcrumb={{ label: "Portfolio editor", href: "/admin/portfolio" }}
           primaryAction={
             <Button variant="outline" size="sm" onClick={() => setPreview(false)}>
               Back to editor
             </Button>
           }
-        />
+        /></div>
       </div>
     );
   }
@@ -142,6 +144,9 @@ export default function PortfolioAdminPage() {
         }
       />
       <div className="mx-auto w-full max-w-7xl">
+        <section className="mb-6 rounded-xl border bg-muted/30 p-4">
+          <div className="flex items-center gap-3"><Images className="h-4 w-4 text-primary" /><div><p className="text-sm font-medium">Gallery-curated content</p><p className="text-xs text-muted-foreground">Manage primary portfolio media from each gallery workspace. {galleryItems.length} gallery project{galleryItems.length === 1 ? "" : "s"} currently eligible.</p></div></div>
+        </section>
         <section className="rounded-xl border bg-card text-card-foreground shadow-sm">
           <h2 className="text-2xl font-semibold tracking-tight">Profile and presentation</h2>
           <div className="">
@@ -184,13 +189,13 @@ export default function PortfolioAdminPage() {
             <div>
               <h2 className="text-2xl font-semibold tracking-tight">Selected work</h2>
               <p className="text-sm text-muted-foreground">
-                Only public projects are eligible.
+                Secondary workflow for published projects. Gallery selections appear automatically and are managed from galleries.
               </p>
             </div>
             <span className="ui-badge">{selected.length} selected</span>
           </div>
-          <div className="">{eligible.length ? (
-            eligible.map((project) => (
+          <div className="">{projectItems.length ? (
+            projectItems.map((project) => (
               <button
                 type="button"
                 key={project.id}
@@ -204,7 +209,7 @@ export default function PortfolioAdminPage() {
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              Publish a project from Projects before selecting it here.
+              No published projects are available for secondary selection.
             </p>
           )}</div>
         </section>

@@ -444,11 +444,13 @@ export async function POST(
       photoIds.length
         ? await db.execute(
             sql`
-              SELECT *
-              FROM gallery_photos
-              WHERE gallery_id = ${gallery.id}
-                AND is_hidden = false
-                AND id = ANY(${photoIds}::uuid[])
+              SELECT p.*
+              FROM gallery_photos p
+              LEFT JOIN gallery_collections c ON c.id = p.collection_id
+              WHERE p.gallery_id = ${gallery.id}
+                AND p.is_hidden = false
+                AND COALESCE(c.client_visibility, 'all') IN ('all', 'authorized', 'guest')
+                AND p.id = ANY(${photoIds}::uuid[])
               ORDER BY sort_order ASC
             `,
           )
@@ -456,10 +458,12 @@ export async function POST(
             "all"
           ? await db.execute(
               sql`
-                SELECT *
-                FROM gallery_photos
-                WHERE gallery_id = ${gallery.id}
-                  AND is_hidden = false
+                SELECT p.*
+                FROM gallery_photos p
+                LEFT JOIN gallery_collections c ON c.id = p.collection_id
+                WHERE p.gallery_id = ${gallery.id}
+                  AND p.is_hidden = false
+                  AND COALESCE(c.client_visibility, 'all') IN ('all', 'authorized', 'guest')
                 ORDER BY sort_order ASC
               `,
             )

@@ -65,6 +65,7 @@ export async function GET(_request: Request, context: Context) {
         status: galleries.status,
         coverPhotoId: galleries.coverPhotoId,
         publishedAt: galleries.publishedAt,
+        portfolioPublishMode: galleries.portfolioPublishMode,
         createdAt: galleries.createdAt,
         updatedAt: galleries.updatedAt,
         clientName: clients.name,
@@ -99,6 +100,8 @@ export async function GET(_request: Request, context: Context) {
         id: galleryCollections.id,
         title: galleryCollections.title,
         description: galleryCollections.description,
+        portfolioSelection: galleryCollections.portfolioSelection,
+        clientVisibility: galleryCollections.clientVisibility,
         photoCount: sql<number>`(SELECT COUNT(*)::int FROM gallery_photos p WHERE p.collection_id = ${galleryCollections.id})`,
       })
       .from(galleryCollections)
@@ -122,6 +125,7 @@ export async function GET(_request: Request, context: Context) {
         thumbnailUrl: galleryPhotos.thumbnailUrl,
         sortOrder: galleryPhotos.sortOrder,
         isHidden: galleryPhotos.isHidden,
+        portfolioSelection: galleryPhotos.portfolioSelection,
         width: galleryPhotos.width,
         height: galleryPhotos.height,
         altText: galleryPhotos.altText,
@@ -331,6 +335,11 @@ export async function PATCH(
         ? Boolean(body.allowSelections)
         : undefined;
 
+    const portfolioPublishMode =
+      body.portfolioPublishMode === "all" || body.portfolioPublishMode === "selected" || body.portfolioPublishMode === "none"
+        ? body.portfolioPublishMode
+        : undefined;
+
     const expiresAt =
       body.expiresAt === undefined
         ? undefined
@@ -376,6 +385,7 @@ export async function PATCH(
         allowDownloads: allowDownloads ?? undefined,
         allowFavorites: allowFavorites ?? undefined,
         allowSelections: allowSelections ?? undefined,
+        portfolioPublishMode: portfolioPublishMode ?? undefined,
         expiresAt: expiresAt ?? undefined,
         expiryBehavior: expiryBehavior ?? undefined,
         publishedAt: status === "published" ? (publishedAt ?? new Date()) : null,

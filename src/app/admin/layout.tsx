@@ -14,6 +14,7 @@ import {
   Calendar,
   FileSignature,
   Settings2,
+  Sparkles,
   ExternalLink,
   Menu,
 } from 'lucide-react';
@@ -69,6 +70,12 @@ const navSections: NavSection[] = [
       { name: "Invoices", href: "/admin/invoices", icon: Receipt },
       { name: "Payments", href: "/admin/payments", icon: WalletCards },
       { name: "Contracts", href: "/admin/contracts", icon: FileSignature },
+    ],
+  },
+  {
+    label: "Publishing",
+    items: [
+      { name: "Create a portfolio", href: "/admin/portfolio", icon: Sparkles },
     ],
   },
   {

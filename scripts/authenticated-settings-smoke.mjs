@@ -45,17 +45,27 @@ try {
   const settingsPage = await context.newPage();
   await settingsPage.goto(`${baseURL}/admin/settings`, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await settingsPage.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {});
-  const watermarkHeading = settingsPage.getByRole("heading", { name: /watermark style/i });
-  const profileLink = settingsPage.getByRole("link", { name: /creator profile name, handle/i }).first();
-  check(await watermarkHeading.isVisible(), "working watermark settings are visible");
-  check(await profileLink.isVisible(), "profile settings destination is visible");
-  const watermarkText = settingsPage.locator("#watermark-text");
-  await watermarkText.waitFor({ state: "visible", timeout: 15_000 });
-  const originalSettingsValue = await watermarkText.inputValue();
-  await watermarkText.fill(originalSettingsValue);
-  const settingsSave = settingsPage.getByRole("button", { name: /save changes/i });
-  check(await settingsSave.isVisible(), "watermark save action is visible");
-  check(await settingsPage.getByText(/gallery delivery/i).count() > 0, "gallery delivery section is present");
+  const settingsTabs = [
+    "Account & Profile",
+    "Workspace Branding",
+    "Gallery Delivery",
+    "Email Templates",
+    "Business Preferences",
+    "Integrations",
+    "Security",
+    "Creator Portfolio",
+  ];
+  for (const tab of settingsTabs) {
+    check(await settingsPage.getByRole("button", { name: tab, exact: true }).isVisible(), `${tab} tab is visible`);
+  }
+  await settingsPage.getByRole("button", { name: "Gallery Delivery", exact: true }).click();
+  await settingsPage.getByRole("heading", { name: /watermark style/i }).waitFor({ state: "visible", timeout: 15_000 });
+  check(await settingsPage.locator("#watermark-text").isVisible(), "working watermark settings are visible");
+  const gallerySave = settingsPage.getByRole("button", { name: /save gallery defaults/i });
+  check(await gallerySave.isVisible(), "gallery defaults save action is visible");
+  await settingsPage.getByRole("button", { name: "Creator Portfolio", exact: true }).click();
+  await settingsPage.getByRole("heading", { name: /portfolio settings/i }).waitFor({ state: "visible", timeout: 15_000 });
+  check(new URL(settingsPage.url()).searchParams.get("tab") === "creator-portfolio", "settings tab URL is synchronized");
   await settingsPage.close();
 
   const portfolioPage = await context.newPage();

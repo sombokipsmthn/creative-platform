@@ -1,10 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Mail, MapPin, Phone } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ArrowUpRight, Mail, MapPin, Phone, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input, Textarea } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -63,17 +74,6 @@ function getInitials(client: Pick<Client, 'name' | 'company'>) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-function statusClass(status: string) {
-  if (status === 'active') {
-    return 'bg-emerald-500/20 border-emerald-500/30 text-emerald-700 dark:text-emerald-300';
-  }
-
-  if (status === 'archived') {
-    return 'bg-slate-100 dark:bg-zinc-800 border-slate-300 dark:border-zinc-700 text-slate-600 dark:text-zinc-400';
-  }
-
-  return 'bg-amber-500/20 border-amber-500/30 text-amber-700 dark:text-amber-300';
-}
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -86,44 +86,35 @@ export default function AdminClientsPage() {
   const [saving, setSaving] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadClients = useCallback(async (silent = false) => {
+    try {
+      if (silent) setRefreshing(true);
+      else setLoading(true);
+      setError('');
+
+      const response = await fetch('/api/clients', { cache: 'no-store' });
+
+      if (!response.ok) {
+        throw new Error('Failed to load clients');
+      }
+
+      const data = await response.json();
+
+      setClients(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load clients:', err);
+      setError('Unable to load clients. Please try again.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadClients() {
-      try {
-        setLoading(true);
-        setError('');
-
-        const response = await fetch('/api/clients', { cache: 'no-store' });
-
-        if (!response.ok) {
-          throw new Error('Failed to load clients');
-        }
-
-        const data = await response.json();
-
-        if (!cancelled) {
-          setClients(Array.isArray(data) ? data : []);
-        }
-      } catch (err) {
-        console.error('Failed to load clients:', err);
-        if (!cancelled) {
-          setError('Unable to load clients. Please try again.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadClients();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void loadClients();
+  }, [loadClients]);
 
   const filteredClients = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -287,111 +278,74 @@ export default function AdminClientsPage() {
             ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
             ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
           ].map(([label, count, color]) => (
-            <div key={String(label)} className="ui-stat-card min-h-[6.5rem]">
-              <p className={`ui-stat-label ${color}`}>{label}</p>
-              <p className="ui-stat-value">{count}</p>
+            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
+              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
+              <p className="text-2xl font-bold">{count}</p>
             </div>
           ))}
         </div>
 
-        <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
-          <input
-            type="text"
-            placeholder="Search clients by name, company, email, phone..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="ui-input w-full md:w-96"
-          />
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
+          search={searchQuery}
+          onSearchChange={setSearchQuery}
+          searchPlaceholder="Search clients by name, company, email, phone…"
+          filters={[
+            {
+              id: 'status',
+              label: 'Status',
+              value: filterStatus.toLowerCase(),
+              options: [
+                { label: 'All', value: 'all' },
+                { label: 'Active', value: 'active' },
+                { label: 'Inactive', value: 'inactive' },
+                { label: 'Archived', value: 'archived' },
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            if (id === 'status') {
+              setFilterStatus(value === 'all' ? 'ALL' : (value as ClientStatus));
+            }
+          }}
+          onClearAll={() => {
+            setSearchQuery('');
+            setFilterStatus('ALL');
+          }}
+          secondaryActions={[
+            {
+              label: 'Refresh',
+              onClick: () => void loadClients(true),
+              variant: 'ghost',
+              size: 'icon',
+              icon: <RefreshCw className="h-4 w-4" />,
+            } as AdminToolbarAction,
+          ]}
+          resultCount={clients.length}
+          filteredCount={filteredClients.length}
+          resultLabel="Clients"
+          loading={loading}
+        />
 
-          <div className="flex flex-wrap gap-2 text-xs font-sans">
-            {(
-              [
-                ['ALL', clients.length],
-                ['active', activeCount],
-                ['inactive', inactiveCount],
-                ['archived', archivedCount],
-              ] as const
-            ).map(([status, count]) => (
-              <Button
-                key={status}
-                variant={filterStatus === status ? 'primary' : 'secondary'}
-                onClick={() => setFilterStatus(status)}
-                className="text-xs font-sans uppercase tracking-widest"
-              >
-                {status === 'ALL' ? 'All' : statusLabel(status)} ({count})
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="p-12 text-center border border-slate-200 dark:border-zinc-800 rounded-xl bg-white dark:bg-zinc-950/40">
-            <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading clients…</p>
-          </div>
-        ) : filteredClients.length === 0 ? (
-          <div className="p-12 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-            <p className="text-sm text-slate-600 dark:text-zinc-400">No clients found.</p>
-            <Button
-              onClick={openCreateModal}
-              variant="primary"
-              className="text-xs font-sans rounded-lg"
-            >
-              Register your first client
-            </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {filteredClients.map((client) => (
-              <div
-                key={client.id}
-                className="ui-card ui-card-interactive group flex flex-col gap-5 p-5 shadow-sm transition-all hover:border-purple-600/50 dark:shadow-none sm:p-6 lg:flex-row lg:items-center lg:justify-between"
-              >
-                <div className="flex min-w-0 items-start gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-950/50 dark:text-purple-300">
-                    {getInitials(client)}
-                  </div>
-
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="truncate text-lg font-semibold text-slate-900 transition-colors group-hover:text-purple-600 dark:text-white dark:group-hover:text-purple-400">
-                        {client.name}
-                      </h3>
-                      <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] ${statusClass(client.status)}`}>
-                        {statusLabel(client.status)}
-                      </span>
-                    </div>
-
-                    <p className="text-sm text-slate-500 dark:text-zinc-400">
-                      {client.company || 'Independent client'}
-                    </p>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-600 dark:text-zinc-400">
-                      {client.email && <span className="inline-flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-slate-400" />{client.email}</span>}
-                      {client.phone && <span className="inline-flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-slate-400" />{client.phone}</span>}
-                      {client.location && <span className="inline-flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-slate-400" />{client.location}</span>}
-                    </div>
-
-                    <p className="text-[10px] uppercase tracking-[0.14em] text-slate-400 dark:text-zinc-600">
-                      Added {formatDate(client.createdAt)}
-                    </p>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => {
-                    setError('');
-                    setSelectedClient(client);
-                  }}
-                  variant="secondary"
-                  className="w-full shrink-0 rounded-xl text-xs font-sans lg:w-auto"
-                >
-                  View client
-                  <ArrowUpRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        )}
+        <AdminDataTable
+          rows={filteredClients}
+          loading={loading}
+          error={error && !isAddClientOpen && !selectedClient ? error : null}
+          emptyTitle="No clients found"
+          emptyDescription="Register your first client to begin managing relationships."
+          emptyAction={<Button type="button" onClick={openCreateModal}>Register your first client</Button>}
+          selectable
+          getRowLabel={(client) => client.name}
+          onRowClick={(client) => { setError(''); setSelectedClient(client); }}
+          mobileCard={(client, actions) => <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium">{client.name}</p><p className="text-sm text-muted-foreground">{client.company || 'Independent client'}</p><p className="mt-2 text-xs text-muted-foreground">{client.email || client.phone || client.location || 'No contact details'}</p><div className="mt-2"><Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>{statusLabel(client.status)}</Badge></div></div>{actions}</div>}
+          columns={[
+            { id: 'client', header: 'Client', cell: (client) => <div className="flex items-center gap-3"><span className="ui-avatar ui-avatar-sm">{getInitials(client)}</span><div><p className="font-medium">{client.name}</p><p className="text-xs text-muted-foreground">{client.company || 'Independent client'}</p></div></div>, accessor: (client) => client.name, sortable: true },
+            { id: 'contact', header: 'Contact', cell: (client) => <div><p>{client.email || '—'}</p><p className="text-xs text-muted-foreground">{client.phone || client.location || ''}</p></div>, hideOnMobile: true },
+            { id: 'status', header: 'Status', cell: (client) => <Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>{statusLabel(client.status)}</Badge>, accessor: (client) => client.status },
+            { id: 'created', header: 'Added', cell: (client) => formatDate(client.createdAt), accessor: (client) => client.createdAt, hideOnMobile: true },
+          ]}
+          rowActions={[{ label: 'View client', onSelect: (client) => { setError(''); setSelectedClient(client); } }]}
+        />
 
         {isAddClientOpen && (
           <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
@@ -406,50 +360,54 @@ export default function AdminClientsPage() {
               </Button>
 
               <div className="space-y-1">
-                <p className="ui-eyebrow">CRM</p>
-                <h2 className="ui-section-title">Register New Client</h2>
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">CRM</p>
+                <h2 className="text-2xl font-semibold tracking-tight">Register New Client</h2>
               </div>
 
               {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
 
               <form onSubmit={handleCreateClient} className="space-y-4">
                 <div className="space-y-1">
-                  <label className="ui-label">Contact Name *</label>
-                  <input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} className="ui-input" />
+                  <label className="text-sm font-medium leading-none">Contact Name *</label>
+                  <Input required type="text" placeholder="e.g. Jane Wanjiku" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Email</label>
-                    <input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} className="ui-input" />
+                    <label className="text-sm font-medium leading-none">Email</label>
+                    <Input type="email" placeholder="jane@company.com" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Phone</label>
+                    <label className="text-sm font-medium leading-none">Phone</label>
                     <div className="flex items-center gap-2">
-                      <select value={form.phoneCountry} onChange={(e) => handlePhoneCountryChange(e.target.value)} className="ui-select">
-                        <option value="+254">🇰🇪 +254 (Kenya)</option>
-                        <option value="+1">🇺🇸 +1 (USA)</option>
-                        <option value="+44">🇬🇧 +44 (UK)</option>
-                        <option value="+27">🇿🇦 +27 (South Africa)</option>
-                        <option value="+254">Other</option>
-                      </select>
-                      <input type="text" placeholder="700 000 000" value={form.phone?.replace(new RegExp('^' + (form.phoneCountry || '') + '\\s*'), '')} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="ui-input" />
+                      <Select value={form.phoneCountry} onValueChange={handlePhoneCountryChange}>
+                        <SelectTrigger className="w-auto max-w-[9rem] shrink-0">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="+254">🇰🇪 +254 (Kenya)</SelectItem>
+                          <SelectItem value="+1">🇺🇸 +1 (USA)</SelectItem>
+                          <SelectItem value="+44">🇬🇧 +44 (UK)</SelectItem>
+                          <SelectItem value="+27">🇿🇦 +27 (South Africa)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input type="text" placeholder="700 000 000" value={form.phone?.startsWith(form.phoneCountry || '') ? form.phone.slice((form.phoneCountry || '').length).trimStart() : form.phone} onChange={(event) => setForm({ ...form, phone: (form.phoneCountry || '') + ' ' + event.target.value })} className="min-w-0 flex-1" />
                     </div>
                     <div className="space-y-1">
-                      <label className="ui-label">Location</label>
-                      <input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} className="ui-input" />
+                      <label className="text-sm font-medium leading-none">Location</label>
+                      <Input type="text" placeholder="e.g. Nairobi, Kenya" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} />
                     </div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">Company / Organization</label>
-                    <input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} className="ui-input" />
+                    <label className="text-sm font-medium leading-none">Company / Organization</label>
+                    <Input type="text" placeholder="e.g. Safaricom" value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Website</label>
-                    <input 
+                    <label className="text-sm font-medium leading-none">Website</label>
+                    <Input 
                       type="url" 
                       placeholder="https://company.com" 
                       value={form.website} 
@@ -466,29 +424,33 @@ export default function AdminClientsPage() {
                           setForm({ ...form, website: val });
                         }
                       }}
-                      className="ui-input"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <label className="ui-label">KRA PIN</label>
-                    <input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} className="ui-input" />
+                    <label className="text-sm font-medium leading-none">KRA PIN</label>
+                    <Input type="text" placeholder="e.g. A000000000Z" value={form.kraPin} onChange={(event) => setForm({ ...form, kraPin: event.target.value })} />
                   </div>
                   <div className="space-y-1">
-                    <label className="ui-label">Status</label>
-                    <select value={form.status} onChange={(event) => setForm({ ...form, status: event.target.value as ClientStatus })} className="ui-select">
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="archived">Archived</option>
-                    </select>
+                    <label className="text-sm font-medium leading-none">Status</label>
+                    <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value as ClientStatus })}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                        <SelectItem value="archived">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="ui-label">Internal Notes</label>
-                  <textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} className="ui-textarea" />
+                  <label className="text-sm font-medium leading-none">Internal Notes</label>
+                  <Textarea rows={3} placeholder="Project, billing, or relationship notes..." value={form.notes} onChange={(event) => setForm({ ...form, notes: event.target.value })} />
                 </div>
 
                 <Button type="submit" disabled={saving} variant="primary" className="w-full">
@@ -512,7 +474,7 @@ export default function AdminClientsPage() {
               </Button>
 
               <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
-                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-purple-600/20 text-purple-700 dark:text-purple-300 rounded-full">{selectedClient.company}</span>}
+                {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full">{selectedClient.company}</span>}
                 <h2 className="text-2xl font-light">{selectedClient.name}</h2>
                 <p className="text-xs font-sans text-slate-600 dark:text-zinc-400 break-words">
                   {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}
@@ -529,8 +491,8 @@ export default function AdminClientsPage() {
 
               <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
                 <div>
-                  <p className="ui-label">Client Status</p>
-                  <p className="ui-meta">Changes are saved directly to the database.</p>
+                  <p className="text-sm font-medium leading-none">Client Status</p>
+                  <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -549,7 +511,7 @@ export default function AdminClientsPage() {
               </div>
 
               <div className="space-y-2">
-                <p className="ui-label">Internal Notes</p>
+                <p className="text-sm font-medium leading-none">Internal Notes</p>
                 <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
               </div>
 

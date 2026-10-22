@@ -4,11 +4,8 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   turbopack: {},
 
-  // Next.js 16.3 + Vercel currently conflicts with standalone output:
-  // Vercel's build adapter expects .next/next-server.js.nft.json, which
-  // Next.js 16.3 no longer emits when the Vercel adapter is active.
-  // Vercel does not need standalone output, so only enable it for non-Vercel builds.
-  output: process.env.VERCEL ? undefined : 'standalone',
+  // Disable trailing slash redirects to prevent 308 loops
+  trailingSlash: false,
 
   images: {
     remotePatterns: [
@@ -20,24 +17,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
       { protocol: 'https', hostname: '*.googleusercontent.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },
 
-  // Redirect uppercase /Portal to lowercase /portal to avoid duplicate route/page conflicts
-  async redirects() {
-    return [
-      {
-        source: '/Portal/:path*',
-        destination: '/portal/:path*',
-        permanent: true,
-      },
-      {
-        source: '/Portal',
-        destination: '/portal',
-        permanent: true,
-      },
-    ];
-  },
 
   webpack: (config, { isServer }) => {
     if (!isServer) {

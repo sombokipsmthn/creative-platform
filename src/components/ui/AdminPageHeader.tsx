@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 interface AdminPageHeaderTab {
   label: string;
@@ -37,14 +38,14 @@ export function AdminPageHeader({
   const router = useRouter();
 
   return (
-    <div className={`border-b border-slate-200 dark:border-zinc-800/80 pb-6 mb-8 ${className}`}>
+    <div className={`border-b border-border pb-6 mb-8 ${className}`}>
       <div className="flex flex-col md:flex-row md:items-start md:justify-between">
         {/* Left side: Breadcrumb and Title/Description */}
         <div className="flex-1 min-w-0 mb-4 md:mb-0">
           {breadcrumb && (
             <Link
               href={breadcrumb.href}
-              className="text-xs font-sans text-purple-600 dark:text-purple-400 hover:underline mb-1"
+              className="text-xs font-sans text-primary dark:text-primary hover:underline mb-1"
             >
               ← {breadcrumb.label}
             </Link>
@@ -79,7 +80,7 @@ export function AdminPageHeader({
                           href={tab.href}
                           className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
                             isActive
-                              ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
+                              ? 'border-primary text-primary dark:text-primary font-bold'
                               : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                           }`}
                         >
@@ -87,23 +88,11 @@ export function AdminPageHeader({
                         </Link>
                       )
                     ) : tab.onClick ? (
-                      <button
-                        onClick={tab.onClick}
-                        disabled={isDisabled}
-                        className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
-                          isActive
-                            ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold'
-                            : isDisabled
-                              ? 'border-transparent text-slate-400 dark:text-zinc-500 cursor-not-allowed'
-                              : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
+                      <Button type="button" onClick={tab.onClick} disabled={isDisabled} variant={isActive ? 'primary' : 'ghost'} size="sm" className="rounded-none border-b-2 text-xs uppercase tracking-widest">{tab.label}</Button>
                     ) : (
                       <span className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest ${
                         isActive
-                          ? 'border-purple-600 text-purple-600 dark:text-purple-400 font-bold border-b-2'
+                          ? 'border-primary text-primary dark:text-primary font-bold border-b-2'
                           : isDisabled
                             ? 'text-slate-400 dark:text-zinc-500'
                             : 'text-slate-500 dark:text-zinc-400'

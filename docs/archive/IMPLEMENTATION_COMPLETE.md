@@ -1,3 +1,5 @@
+> **Historical archive notice (2026-10-21):** The title and completion checkboxes describe a past implementation snapshot, not the current completion state. Verify current code, tests, and environment before relying on any claim. The current source of truth is [Project Handbook](../PROJECT-HANDBOOK.md).
+
 # Admin UX/Visual Hierarchy Consistency Pass - Final Report
 
 ## Executive Summary
@@ -224,7 +226,7 @@ The existing Client CRM page (`/admin/clients`) serves as the visual reference a
    - Pill-shaped (9999px radius)
 
 6. **Buttons:**
-   - Primary (purple) for main action
+   - Primary (primary) for main action
    - Secondary (soft) for alternatives
    - Consistent height (2.625rem default)
    - Modest rounded (0.75rem)
@@ -445,7 +447,7 @@ All colors use CSS variables from `globals.css`:
 
 **Accents:**
 
-- `--color-accent` - Purple (#7c3aed light, #8b5cf6 dark)
+- `--color-accent` - primary (`--primary` light, `--primary` dark)
 - `--color-success` - Green (#10b981)
 - `--color-warning` - Yellow (#f59e0b)
 - `--color-danger` - Red (#ef4444)
@@ -506,7 +508,7 @@ Tests include API routes, webhooks, and page rendering. All pass.
 - **Dashboard** - Stats, tour, quick actions
 - **Profile/Settings** - All forms and controls
 - **Navigation** - Sidebar, top nav, badges
-- **Auth** - Clerk integration, sign-out
+- **Auth** - BetterAuth integration, sign-out
 - **API routes** - All endpoints functional
 
 ### ⚠️ Pre-existing Issues (Not from this task)

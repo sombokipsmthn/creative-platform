@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { GALLERY_THEMES, type GalleryThemePreset, type GalleryThemeId } from '@/lib/gallery/themes'
 import { ChevronRight } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface ThemeEditorProps {
   galleryId: string
@@ -149,7 +150,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             onClick={() => setActiveSection(section.id)}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition ${
               activeSection === section.id
-                ? 'border-purple-600 text-purple-600'
+                ? 'border-primary text-primary'
                 : 'border-transparent text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-zinc-200'
             }`}
           >
@@ -178,7 +179,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                 onClick={() => applyThemePreset(theme.id)}
                 className={`p-4 rounded-xl border-2 text-left transition-all ${
                   currentThemeId === theme.id
-                    ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/20'
+                    ? 'border-primary bg-primary/10 dark:bg-primary/10'
                     : 'border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
                 }`}
               >
@@ -187,7 +188,7 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
                     {theme.label}
                   </h4>
                   {currentThemeId === theme.id && (
-                    <span className="text-purple-600 text-xs font-semibold">
+                    <span className="text-primary text-xs font-semibold">
                       ✓ Active
                     </span>
                   )}
@@ -222,20 +223,10 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Cover Style
             </label>
-            <select
-              value={savedTheme.coverStyle}
-              onChange={(e) =>
-                updateTheme({ coverStyle: e.target.value })
-              }
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="image">Image (Full Cover)</option>
-              <option value="split">Split (Image + Text)</option>
-              <option value="centered">Centered (Image Only)</option>
-              <option value="minimal">Minimal (Text Only)</option>
-              <option value="immersive">Immersive (Full Bleed)</option>
-              <option value="none">None</option>
-            </select>
+            <Select value={savedTheme.coverStyle} onValueChange={(value) => updateTheme({coverStyle: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="image">Image (Full Cover)</SelectItem><SelectItem value="split">Split (Image + Text)</SelectItem><SelectItem value="centered">Centered (Image Only)</SelectItem><SelectItem value="minimal">Minimal (Text Only)</SelectItem><SelectItem value="immersive">Immersive (Full Bleed)</SelectItem><SelectItem value="none">None</SelectItem></SelectContent>
+            </Select>
           </div>
 
           {['image', 'split', 'centered', 'immersive'].includes(savedTheme.coverStyle) && (
@@ -336,16 +327,10 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Font Family
             </label>
-            <select
-              value={savedTheme.fontFamily}
-              onChange={(e) => updateTheme({ fontFamily: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="sans">Sans Serif (Modern)</option>
-              <option value="serif">Serif (Editorial)</option>
-              <option value="modern">Modern (Geometric)</option>
-              <option value="editorial">Editorial (Story)</option>
-            </select>
+            <Select value={savedTheme.fontFamily} onValueChange={(value) => updateTheme({fontFamily: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="sans">Sans Serif (Modern)</SelectItem><SelectItem value="serif">Serif (Editorial)</SelectItem><SelectItem value="modern">Modern (Geometric)</SelectItem><SelectItem value="editorial">Editorial (Story)</SelectItem></SelectContent>
+            </Select>
           </div>
 
           <div className="p-4 rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900/50">
@@ -450,63 +435,40 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Grid Style
             </label>
-            <select
-              value={savedTheme.gridStyle}
-              onChange={(e) => updateTheme({ gridStyle: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="masonry">Masonry (Varied Heights)</option>
-              <option value="vertical">Vertical (Column Stack)</option>
-              <option value="horizontal">Horizontal (Row Stack)</option>
-              <option value="uniform">Uniform (Equal Sizes)</option>
-            </select>
+            <Select value={savedTheme.gridStyle} onValueChange={(value) => updateTheme({gridStyle: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="masonry">Masonry (Varied Heights)</SelectItem><SelectItem value="vertical">Vertical (Column Stack)</SelectItem><SelectItem value="horizontal">Horizontal (Row Stack)</SelectItem><SelectItem value="uniform">Uniform (Equal Sizes)</SelectItem></SelectContent>
+            </Select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Thumbnail Size
             </label>
-            <select
-              value={savedTheme.thumbnailSize}
-              onChange={(e) => updateTheme({ thumbnailSize: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="small">Small (Compact View)</option>
-              <option value="regular">Regular (Balanced)</option>
-              <option value="large">Large (Spacious)</option>
-            </select>
+            <Select value={savedTheme.thumbnailSize} onValueChange={(value) => updateTheme({thumbnailSize: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="small">Small (Compact View)</SelectItem><SelectItem value="regular">Regular (Balanced)</SelectItem><SelectItem value="large">Large (Spacious)</SelectItem></SelectContent>
+            </Select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Grid Spacing
             </label>
-            <select
-              value={savedTheme.gridSpacing}
-              onChange={(e) => updateTheme({ gridSpacing: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="tight">Tight (Minimal Gap)</option>
-              <option value="regular">Regular (Balanced Gap)</option>
-              <option value="wide">Wide (Spacious Gap)</option>
-            </select>
+            <Select value={savedTheme.gridSpacing} onValueChange={(value) => updateTheme({gridSpacing: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="tight">Tight (Minimal Gap)</SelectItem><SelectItem value="regular">Regular (Balanced Gap)</SelectItem><SelectItem value="wide">Wide (Spacious Gap)</SelectItem></SelectContent>
+            </Select>
           </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Aspect Ratio
             </label>
-            <select
-              value={savedTheme.aspectRatio}
-              onChange={(e) => updateTheme({ aspectRatio: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="auto">Auto (Original Proportions)</option>
-              <option value="1:1">Square (1:1)</option>
-              <option value="16:9">Widescreen (16:9)</option>
-              <option value="4:3">Standard (4:3)</option>
-              <option value="3:2">Classic (3:2)</option>
-            </select>
+            <Select value={savedTheme.aspectRatio} onValueChange={(value) => updateTheme({aspectRatio: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="auto">Auto (Original Proportions)</SelectItem><SelectItem value="1:1">Square (1:1)</SelectItem><SelectItem value="16:9">Widescreen (16:9)</SelectItem><SelectItem value="4:3">Standard (4:3)</SelectItem><SelectItem value="3:2">Classic (3:2)</SelectItem></SelectContent>
+            </Select>
           </div>
 
           {savedTheme.gridStyle === 'masonry' && (
@@ -538,14 +500,10 @@ export default function ThemeEditor({ galleryId, onThemeChange }: ThemeEditorPro
             <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-2">
               Navigation Style
             </label>
-            <select
-              value={savedTheme.navigationStyle}
-              onChange={(e) => updateTheme({ navigationStyle: e.target.value })}
-              className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
-            >
-              <option value="icons-and-text">Icons with Text</option>
-              <option value="icons-only">Icons Only</option>
-            </select>
+            <Select value={savedTheme.navigationStyle} onValueChange={(value) => updateTheme({navigationStyle: value})}>
+              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="icons-and-text">Icons with Text</SelectItem><SelectItem value="icons-only">Icons Only</SelectItem></SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-3 border-t border-slate-200 dark:border-zinc-800 pt-4">

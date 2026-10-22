@@ -1,3 +1,5 @@
+> **Historical archive notice (2026-10-21):** This archived readiness specification is planning/history, not proof of SOC 2 certification or current control operation. Revalidate controls and evidence against the active implementation. Current authentication is Better Auth; older Clerk assumptions are historical unless separately verified. See [Project Handbook](../PROJECT-HANDBOOK.md) and [SOC 2 index](../soc2/README.md).
+
 # KIPSMTHN Creative Platform --- SOC 2 Readiness & Implementation Specification
 
 **Document:** `SOC2_READINESS_SPEC.md`\
@@ -192,7 +194,6 @@ Audit and document:
 - Vercel
 - Neon/Postgres
 - Cloudflare R2
-- Clerk
 - GitHub
 - DNS/domain provider
 - Email provider
@@ -409,7 +410,7 @@ Implement least-privilege access and secure identity management.
 
 Audit:
 
-- Clerk configuration
+- Better Auth configuration
 - Sign-in
 - Sign-up
 - Session handling
@@ -461,7 +462,7 @@ Implement/document:
 - GitHub access
 - Vercel access
 - Cloudflare access
-- Clerk access
+- Better Auth access
 - Emergency access
 - Offboarding
 
@@ -474,7 +475,7 @@ Create an access review process covering:
 - Vercel
 - Neon
 - Cloudflare
-- Clerk
+- Better Auth
 - Email
 - Other critical vendors
 
@@ -1042,7 +1043,7 @@ Special attention should be given to:
 - Vercel
 - Neon
 - Cloudflare
-- Clerk
+- Better Auth
 - GitHub
 - Email provider
 - Payment provider

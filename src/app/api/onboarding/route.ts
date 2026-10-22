@@ -76,20 +76,12 @@ async function getAuthenticatedContext(request: Request) {
       where: eq(users.id, session.user.id),
     });
 
+    // For GET requests, do not auto-create a local user.
+    // Only return existing local user data.
     if (!localUser) {
-      const [created] = await db.insert(users).values({
-        id: session.user.id,
-        email: session.user.email.toLowerCase(),
-        name: session.user.name || session.user.email.split("@")[0] || "Creator",
-        emailVerified: session.user.emailVerified,
-        image: session.user.image,
-        onboardingStatus: "incomplete",
-        onboardingStep: 1,
-      }).onConflictDoNothing({ target: users.id }).returning();
-
-      const provisioned = created ?? await db.query.users.findFirst({ where: eq(users.id, session.user.id) });
-      if (provisioned) return { session, localUser: provisioned };
-      return { error: NextResponse.json({ error: "Unable to provision your creator account." }, { status: 500 }) };
+      // User exists in Better Auth but has no local record yet.
+      // Return a "not provisioned" state so the frontend can handle it appropriately.
+      return { session, localUser: null, needsProvisioning: true };
     }
 
     return { session, localUser };
@@ -117,7 +109,25 @@ export async function GET(request: Request) {
       return context.error;
     }
 
-    const { localUser } = context;
+    const { session, localUser, needsProvisioning } = context;
+
+    // If user needs provisioning (no local record yet), return minimal data
+    // so frontend knows onboarding is needed but doesn't mark them as "incomplete"
+    if (needsProvisioning || !localUser) {
+      return NextResponse.json({
+        user: {
+          id: session?.user?.id,
+          name: session?.user?.name,
+          email: session?.user?.email,
+          onboardingStatus: "incomplete", // Will be set complete after onboarding
+          onboardingStep: 1,
+        },
+        profile: null,
+        services: [],
+        business: null,
+      });
+    }
+
     const url = new URL(request.url);
     const requestedHandle = url.searchParams.get("handle");
 
@@ -173,6 +183,9 @@ export async function POST(request: Request) {
     }
 
     const { session, localUser } = context;
+    // localUser is guaranteed to exist after the error check above
+    if (!localUser) return NextResponse.json({ error: "Local user not found." }, { status: 500 });
+
     const body = (await request.json()) as OnboardingBody;
     const section = body.section;
 
@@ -181,7 +194,7 @@ export async function POST(request: Request) {
     }
 
     if (section === "profile") {
-      const email = session?.user?.email || localUser.email;
+      const email = session?.user?.email || localUser!.email;
       const name = cleanString(body.name) || localUser.name;
       const handle = normaliseHandle(body.handle);
       const avatarUrl = body.avatarUrl === null ? null : cleanString(body.avatarUrl) || null;

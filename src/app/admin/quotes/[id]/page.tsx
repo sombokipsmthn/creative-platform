@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
+import { Input, Textarea } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   ArrowLeft,
   ArrowRight,
@@ -84,7 +86,7 @@ type InvoiceConflict = {
   existingInvoiceNumber?: string | null;
 };
 
-const PURPLE = '#6D5DFB';
+const PRIMARY = 'hsl(var(--primary))';
 
 const categoryOptions = [
   'Equipment',
@@ -179,7 +181,7 @@ function getStatusClass(value?: string | null) {
     case 'sent':
       return 'border-blue-200 bg-blue-50 text-blue-700';
     case 'invoiced':
-      return 'border-violet-200 bg-violet-50 text-violet-700';
+      return 'border-primary bg-primary/10 text-primary';
     default:
       return 'border-amber-200 bg-amber-50 text-amber-700';
   }
@@ -666,7 +668,7 @@ export default function QuoteDetailPage() {
     return (
       <main className="min-h-screen bg-slate-50 px-4 py-8">
         <div className="mx-auto max-w-6xl rounded-2xl border border-slate-200 bg-white px-6 py-24 text-center shadow-sm">
-          <Loader2 className="mx-auto h-7 w-7 animate-spin" style={{ color: PURPLE }} />
+          <Loader2 className="mx-auto h-7 w-7 animate-spin" style={{ color: PRIMARY }} />
           <p className="mt-4 text-[10px] font-sans uppercase tracking-[0.22em] text-slate-400">Loading quote</p>
         </div>
       </main>
@@ -698,7 +700,7 @@ export default function QuoteDetailPage() {
                 <ArrowLeft className="h-3 w-3" /> Quotes
               </Link>
               <div className="flex flex-wrap items-center gap-3">
-                <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Quote</p>
+                <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Quote</p>
                 <span className={`inline-flex rounded-full border px-3 py-1 text-[9px] font-sans uppercase tracking-widest ${getStatusClass(quote.status)}`}>
                   {formatStatus(quote.status)}
                 </span>
@@ -715,7 +717,7 @@ export default function QuoteDetailPage() {
                 {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Save
               </button>
               {quote.status === 'accepted' && (
-                <button type="button" onClick={() => void createInvoice()} disabled={actionLoading === 'invoice'} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-sans uppercase tracking-widest text-white shadow-sm disabled:opacity-50" style={{ backgroundColor: PURPLE }}>
+                <button type="button" onClick={() => void createInvoice()} disabled={actionLoading === 'invoice'} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-sans uppercase tracking-widest text-white shadow-sm disabled:opacity-50" style={{ backgroundColor: PRIMARY }}>
                   {actionLoading === 'invoice' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />} Generate Invoice
                 </button>
               )}
@@ -750,7 +752,7 @@ export default function QuoteDetailPage() {
             <div className="border-b border-slate-200 p-6 sm:p-8 print:px-12 print:py-10">
               <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>QUOTE</p>
+                  <p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>QUOTE</p>
                   <h2 className="mt-2 text-3xl font-light tracking-tight text-slate-950">{quote.title || 'Untitled quote'}</h2>
                   {quote.projectName && <p className="mt-2 text-sm text-slate-500">{quote.projectName}</p>}
                 </div>
@@ -771,7 +773,7 @@ export default function QuoteDetailPage() {
 
             <div className="p-6 sm:p-8 print:px-12 print:py-8">
               <div className="mb-5 flex items-center justify-between">
-                <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Line Items</p><p className="mt-1 text-xs text-slate-400">Equipment, crew and production expenses</p></div>
+                <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Line Items</p><p className="mt-1 text-xs text-slate-400">Equipment, crew and production expenses</p></div>
                 <button type="button" onClick={addItem} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-sans uppercase tracking-widest text-slate-600 print:hidden"><Plus className="h-3 w-3" /> Add Item</button>
               </div>
 
@@ -783,16 +785,17 @@ export default function QuoteDetailPage() {
                 <div className="divide-y divide-slate-100">
                   {(quote.items || []).map((item) => (
                     <div key={item.id} className="grid grid-cols-[1.2fr_2.5fr_0.7fr_0.9fr_1.2fr_32px] items-center gap-3 py-4">
-                      <select value={item.category || 'Other'} onChange={(event) => changeCategory(item.id, event.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-700 outline-none focus:border-purple-400 print:border-0 print:bg-transparent">
-                        {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-                      </select>
+                      <Select value={item.category || 'Other'} onValueChange={(value) => changeCategory(item.id, value)}>
+                        <SelectTrigger className="w-full text-xs print:border-0 print:bg-transparent"><SelectValue /></SelectTrigger>
+                        <SelectContent>{categoryOptions.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
+                      </Select>
 
                       <div className="relative">
-                        <input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-purple-400 print:border-0 print:bg-transparent" />
+                        <Input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-primary print:border-0 print:bg-transparent" />
 
                         {openItemId === item.id && (
                           <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[360px] rounded-xl border border-slate-200 bg-white p-2 shadow-xl print:hidden">
-                            <input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-purple-400" />
+                            <Input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-primary" />
                             <div className="max-h-60 overflow-y-auto">
                               {catalogLoading && <div className="flex items-center justify-center gap-2 px-3 py-5 text-xs text-slate-400"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading catalog</div>}
                               {!catalogLoading && filteredCatalog.length === 0 && <div className="px-3 py-5 text-center text-xs text-slate-400">No {item.category || ''} items found.</div>}
@@ -807,15 +810,15 @@ export default function QuoteDetailPage() {
                         )}
                       </div>
 
-                      <input type="number" min="1" value={item.quantity ?? 1} onChange={(event) => updateItem(item.id, 'quantity', Math.max(1, numberValue(event.target.value) || 1))} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-purple-400 print:border-0 print:bg-transparent" />
-                      <input value={item.unit || 'unit'} onChange={(event) => updateItem(item.id, 'unit', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-purple-400 print:border-0 print:bg-transparent" />
+                      <Input type="number" min="1" value={item.quantity ?? 1} onChange={(event) => updateItem(item.id, 'quantity', Math.max(1, numberValue(event.target.value) || 1))} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary print:border-0 print:bg-transparent" />
+                      <Input value={item.unit || 'unit'} onChange={(event) => updateItem(item.id, 'unit', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none focus:border-primary print:border-0 print:bg-transparent" />
 
                       <div className="relative">
                         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 font-sans text-xs text-slate-400">{quote.currency}</span>
-                        <input type="number" min="0" value={Math.round(numberValue(item.amount))} onChange={(event) => updateItem(item.id, 'amount', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-12 pr-3 text-right font-sans text-sm font-medium text-slate-900 outline-none focus:border-purple-400 print:border-0 print:bg-transparent" />
+                        <Input type="number" min="0" value={Math.round(numberValue(item.amount))} onChange={(event) => updateItem(item.id, 'amount', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2.5 pl-12 pr-3 text-right font-sans text-sm font-medium text-slate-900 outline-none focus:border-primary print:border-0 print:bg-transparent" />
                       </div>
 
-                      <button type="button" onClick={() => removeItem(item.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-500 print:hidden" aria-label="Remove item"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button type="button" onClick={() => removeItem(item.id)} className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-muted hover:text-foreground print:hidden" aria-label="Remove item"><Trash2 className="h-3.5 w-3.5" /></button>
                     </div>
                   ))}
                 </div>
@@ -827,19 +830,20 @@ export default function QuoteDetailPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Category</label>
-                        <select value={item.category || 'Other'} onChange={(event) => changeCategory(item.id, event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none">
-                          {categoryOptions.map((category) => <option key={category} value={category}>{category}</option>)}
-                        </select>
+                        <Select value={item.category || 'Other'} onValueChange={(value) => changeCategory(item.id, value)}>
+                          <SelectTrigger className="w-full text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>{categoryOptions.map((category) => <SelectItem key={category} value={category}>{category}</SelectItem>)}</SelectContent>
+                        </Select>
                       </div>
-                      <button type="button" onClick={() => removeItem(item.id)} className="mt-6 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                      <button type="button" onClick={() => removeItem(item.id)} className="mt-6 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:bg-muted hover:text-foreground"><Trash2 className="h-4 w-4" /></button>
                     </div>
 
                     <div className="relative mt-4">
                       <label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Description</label>
-                      <input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-purple-400" />
+                      <Input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary" />
                       {openItemId === item.id && (
                         <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-                          <input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none" />
+                          <Input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none" />
                           <div className="max-h-52 overflow-y-auto">
                             {filteredCatalog.map((option) => <button key={option.id} type="button" onClick={() => selectCatalogItem(item.id, option)} className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-slate-50"><div><p className="text-xs font-medium text-slate-800">{option.name}</p><p className="text-[10px] text-slate-400">{option.source === 'service' ? displayServiceCategory(option.category) : option.category}</p></div><span className="font-sans text-xs text-slate-600">{formatAmount(option.rate, quote.currency)}</span></button>)}
                             {!catalogLoading && filteredCatalog.length === 0 && <div className="px-3 py-4 text-center text-xs text-slate-400">No {item.category || ''} items found.</div>}
@@ -849,9 +853,9 @@ export default function QuoteDetailPage() {
                     </div>
 
                     <div className="mt-4 grid grid-cols-3 gap-3">
-                      <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Qty</label><input type="number" min="1" value={item.quantity ?? 1} onChange={(event) => updateItem(item.id, 'quantity', Math.max(1, numberValue(event.target.value) || 1))} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none" /></div>
-                      <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Unit</label><input value={item.unit || 'unit'} onChange={(event) => updateItem(item.id, 'unit', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none" /></div>
-                      <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Amount</label><input type="number" min="0" value={Math.round(numberValue(item.amount))} onChange={(event) => updateItem(item.id, 'amount', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none" /></div>
+                      <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Qty</label><Input type="number" min="1" value={item.quantity ?? 1} onChange={(event) => updateItem(item.id, 'quantity', Math.max(1, numberValue(event.target.value) || 1))} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none" /></div>
+                      <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Unit</label><Input value={item.unit || 'unit'} onChange={(event) => updateItem(item.id, 'unit', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none" /></div>
+                      <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Amount</label><Input type="number" min="0" value={Math.round(numberValue(item.amount))} onChange={(event) => updateItem(item.id, 'amount', event.target.value)} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none" /></div>
                     </div>
                   </div>
                 ))}
@@ -875,38 +879,38 @@ export default function QuoteDetailPage() {
 
           <section className="grid gap-6 lg:grid-cols-2 print:hidden">
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Quote Details</p><p className="mt-1 text-xs text-slate-400">Edit the quote information</p></div>
+              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Quote Details</p><p className="mt-1 text-xs text-slate-400">Edit the quote information</p></div>
               <div className="space-y-5">
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Title</label><input value={quote.title || ''} onChange={(event) => updateQuoteField('title', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Project Name</label><input value={quote.projectName || ''} onChange={(event) => updateQuoteField('projectName', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Title</label><Input value={quote.title || ''} onChange={(event) => updateQuoteField('title', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Project Name</label><Input value={quote.projectName || ''} onChange={(event) => updateQuoteField('projectName', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Quote Number</label><input value={quote.quoteNumber || ''} onChange={(event) => updateQuoteField('quoteNumber', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 font-sans text-sm outline-none focus:border-purple-400" /></div>
-                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Currency</label><select value={quote.currency || 'KES'} onChange={(event) => updateQuoteField('currency', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400">{currencyOptions.map((currency) => <option key={currency.value} value={currency.value}>{currency.label}</option>)}</select></div>
+                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Quote Number</label><Input value={quote.quoteNumber || ''} onChange={(event) => updateQuoteField('quoteNumber', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 font-sans text-sm outline-none focus:border-primary" /></div>
+                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Currency</label><Select value={quote.currency || 'KES'} onValueChange={(value) => updateQuoteField('currency', value)}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{currencyOptions.map((currency) => <SelectItem key={currency.value} value={currency.value}>{currency.label}</SelectItem>)}</SelectContent></Select></div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Valid Until</label><input type="date" value={toDateInputValue(quote.validUntil)} onChange={(event) => updateQuoteField('validUntil', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
-                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Production Days</label><input type="number" min="1" value={quote.productionDays ?? 1} onChange={(event) => updateQuoteField('productionDays', Math.max(1, numberValue(event.target.value) || 1))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
+                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Valid Until</label><Input type="date" value={toDateInputValue(quote.validUntil)} onChange={(event) => updateQuoteField('validUntil', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
+                  <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Production Days</label><Input type="number" min="1" value={quote.productionDays ?? 1} onChange={(event) => updateQuoteField('productionDays', Math.max(1, numberValue(event.target.value) || 1))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
                 </div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Location</label><input value={quote.location || ''} onChange={(event) => updateQuoteField('location', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Client Contact</label><input value={quote.clientContact || ''} onChange={(event) => updateQuoteField('clientContact', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Location</label><Input value={quote.location || ''} onChange={(event) => updateQuoteField('location', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Client Contact</label><Input value={quote.clientContact || ''} onChange={(event) => updateQuoteField('clientContact', event.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
               </div>
             </div>
 
             <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Billing</p><p className="mt-1 text-xs text-slate-400">Payment and quote settings</p></div>
+              <div className="mb-6"><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Billing</p><p className="mt-1 text-xs text-slate-400">Payment and quote settings</p></div>
               <div className="space-y-5">
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Payment Terms</label><textarea rows={4} value={quote.paymentTerms || ''} onChange={(event) => updateQuoteField('paymentTerms', event.target.value)} className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-purple-400" /></div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Discount</label><div className="grid grid-cols-2 gap-3"><select value={quote.discountType || 'none'} onChange={(event) => updateQuoteField('discountType', event.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400"><option value="none">No discount</option><option value="percentage">Percentage</option><option value="fixed">Fixed amount</option></select><input type="number" min="0" value={quote.discountValue ?? 0} disabled={!quote.discountType || quote.discountType === 'none'} onChange={(event) => updateQuoteField('discountValue', Math.max(0, numberValue(event.target.value)))} className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400 disabled:opacity-40" /></div></div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Tax</label><input type="number" min="0" value={quote.tax ?? 0} onChange={(event) => updateQuoteField('tax', Math.max(0, numberValue(event.target.value)))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-purple-400" /></div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Deposit Percentage</label><div className="relative"><input type="number" min="0" max="100" value={quote.depositPercentage ?? 0} onChange={(event) => updateQuoteField('depositPercentage', Math.min(100, Math.max(0, numberValue(event.target.value))))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 pr-10 text-sm outline-none focus:border-purple-400" /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span></div></div>
-                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Notes</label><textarea rows={5} value={quote.notes || ''} onChange={(event) => updateQuoteField('notes', event.target.value)} className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-purple-400" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Payment Terms</label><Textarea rows={4} value={quote.paymentTerms || ''} onChange={(event) => updateQuoteField('paymentTerms', event.target.value)} className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-primary" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Discount</label><div className="grid grid-cols-2 gap-3"><Select value={quote.discountType || 'none'} onValueChange={(value) => updateQuoteField('discountType', value)}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="none">No discount</SelectItem><SelectItem value="percentage">Percentage</SelectItem><SelectItem value="fixed">Fixed amount</SelectItem></SelectContent></Select><Input type="number" min="0" value={quote.discountValue ?? 0} disabled={!quote.discountType || quote.discountType === 'none'} onChange={(event) => updateQuoteField('discountValue', Math.max(0, numberValue(event.target.value)))} className="rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary disabled:opacity-40" /></div></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Tax</label><Input type="number" min="0" value={quote.tax ?? 0} onChange={(event) => updateQuoteField('tax', Math.max(0, numberValue(event.target.value)))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm outline-none focus:border-primary" /></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Deposit Percentage</label><div className="relative"><Input type="number" min="0" max="100" value={quote.depositPercentage ?? 0} onChange={(event) => updateQuoteField('depositPercentage', Math.min(100, Math.max(0, numberValue(event.target.value))))} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 pr-10 text-sm outline-none focus:border-primary" /><span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span></div></div>
+                <div><label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Notes</label><Textarea rows={5} value={quote.notes || ''} onChange={(event) => updateQuoteField('notes', event.target.value)} className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm leading-6 outline-none focus:border-primary" /></div>
               </div>
             </div>
           </section>
 
           <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm print:hidden">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-              <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PURPLE }}>Quote Status</p><p className="mt-1 text-xs text-slate-400">Move the quote through the approval workflow.</p></div>
+              <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Quote Status</p><p className="mt-1 text-xs text-slate-400">Move the quote through the approval workflow.</p></div>
               <div className="flex flex-wrap gap-2">
                 {statusOptions.map((option) => {
                   const active = quote.status === option.value;
@@ -919,7 +923,7 @@ export default function QuoteDetailPage() {
 
           <div className="flex flex-col gap-3 pb-10 sm:flex-row sm:items-center sm:justify-between print:hidden">
             <Link href="/admin/quotes" className="inline-flex items-center gap-2 text-[10px] font-sans uppercase tracking-widest text-slate-400 hover:text-slate-900"><ArrowLeft className="h-3 w-3" /> Back to quotes</Link>
-            <div className="flex flex-wrap gap-2"><button type="button" onClick={() => window.location.reload()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-slate-500"><RefreshCw className="h-3 w-3" /> Reload</button><button type="button" onClick={saveQuote} disabled={saving} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-white disabled:opacity-50" style={{ backgroundColor: PURPLE }}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save Quote</button></div>
+            <div className="flex flex-wrap gap-2"><button type="button" onClick={() => window.location.reload()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-slate-500"><RefreshCw className="h-3 w-3" /> Reload</button><button type="button" onClick={saveQuote} disabled={saving} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[10px] font-sans uppercase tracking-widest text-white disabled:opacity-50" style={{ backgroundColor: PRIMARY }}>{saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save Quote</button></div>
           </div>
         </div>
       </main>

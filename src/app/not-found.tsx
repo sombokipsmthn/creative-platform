@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Metadata } from 'next';
 
@@ -20,15 +20,11 @@ export default function NotFound() {
           We couldn&apos;t find the page you are looking for. It may have been removed, had its name changed, or is temporarily unavailable.
         </p>
         <div className="mt-8 flex justify-center gap-4 flex-wrap">
-          <Button asChild>
-            <Link href="/" className="Button--primary">
-              Return to homepage
-            </Link>
+          <Button asChild variant="default">
+            <Link href="/">Return to homepage</Link>
           </Button>
-          <Button asChild>
-            <Link href="/contact" className="Button--secondary">
-              Contact us
-            </Link>
+          <Button asChild variant="secondary">
+            <Link href="/contact">Contact us</Link>
           </Button>
         </div>
       </div>

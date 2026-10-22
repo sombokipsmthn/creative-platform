@@ -69,7 +69,7 @@ for part in parts:
 # Replace the Week button className block:
 # From: className={`rounded-lg px-3 py-2 text-sm font-medium ${
 #   state.view === 'week'
-#     ? 'bg-purple-600 text-white'
+#     ? 'bg-primary text-white'
 #     : 'border border-slate-200 text-slate-500 hover:bg-slate-50'
 # } transition-colors dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-900`}
 // To: (we want to keep exactly that, which is already HEAD? Actually the file currently has the conflict markers.

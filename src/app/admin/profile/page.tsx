@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 
 interface ProfileForm {
@@ -34,7 +35,7 @@ const emptyProfile: ProfileForm = {
 };
 
 export default function AdminProfilePage() {
-  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user ?? null;
   const [profile, setProfile] = useState<ProfileForm>(emptyProfile);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,7 +57,7 @@ export default function AdminProfilePage() {
   }
 
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (isPending || !user) return;
 
     const sessionUser = user;
     let ignore = false;
@@ -102,7 +103,7 @@ export default function AdminProfilePage() {
     return () => {
       ignore = true;
     };
-  }, [isLoaded, user]);
+  }, [isPending, user]);
 
   const handleSave = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -150,12 +151,12 @@ export default function AdminProfilePage() {
     }
   };
 
-  if (!isLoaded || isLoading) {
+  if (isPending || isLoading) {
     return (
-      <main className="ui-page flex min-h-[70vh] items-center justify-center">
+      <main className="min-h-screen flex min-h-[70vh] items-center justify-center">
         <div className="os-pulse flex items-center gap-3">
           <span className="os-icon-box h-9 w-9" />
-          <p className="ui-meta uppercase">
+          <p className="text-sm text-muted-foreground uppercase">
             Loading creator profile
           </p>
         </div>
@@ -182,19 +183,19 @@ export default function AdminProfilePage() {
   };
 
   return (
-    <main className="ui-page min-h-screen">
-      <div className="ui-shell py-8 sm:py-10">
+    <main className="min-h-screen min-h-screen">
+      <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
         <div className="mb-8 flex flex-col gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
               href="/admin"
-              className="ui-eyebrow hover:underline"
+              className="text-xs font-medium uppercase tracking-widest text-muted-foreground hover:underline"
             >
               ← Back to Dashboard
             </Link>
-            <p className="ui-eyebrow mt-3">Account</p>
-            <h1 className="ui-page-title">Creator Settings</h1>
-            <p className="ui-meta">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mt-3">Account</p>
+            <h1 className="text-3xl font-semibold tracking-tight">Creator Settings</h1>
+            <p className="text-sm text-muted-foreground">
               Manage your identity, public profile, and business details.
             </p>
           </div>
@@ -206,7 +207,7 @@ export default function AdminProfilePage() {
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
-          <section className="ui-card p-5 sm:p-7">
+          <section className="rounded-xl border bg-card text-card-foreground shadow-sm p-5 sm:p-7">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-900">
                 {avatar ? (
@@ -225,15 +226,15 @@ export default function AdminProfilePage() {
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="ui-eyebrow">Current account</p>
-                <h2 className="mt-1 truncate ui-section-title">
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Current account</p>
+                <h2 className="mt-1 truncate text-2xl font-semibold tracking-tight">
                   {displayName}
                 </h2>
-                <p className="ui-meta">
+                <p className="text-sm text-muted-foreground">
                   {profile.email || user.email || 'No email available'}
                 </p>
                 {profile.handle && (
-                  <p className="ui-eyebrow mt-1">
+                  <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground mt-1">
                     @{profile.handle}
                   </p>
                 )}
@@ -241,25 +242,26 @@ export default function AdminProfilePage() {
             </div>
           </section>
 
-          <section className="ui-card p-5 sm:p-7">
-            <p className="ui-eyebrow">Account security</p>
-            <h2 className="ui-section-title">Passkeys</h2>
-            <p className="ui-meta mt-2">Register this device or a security key for passwordless sign-in.</p>
+          <section className="rounded-xl border bg-card text-card-foreground shadow-sm p-5 sm:p-7">
+            <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Account security</p>
+            <h2 className="text-2xl font-semibold tracking-tight">Passkeys</h2>
+            <p className="text-sm text-muted-foreground mt-2">Register this device or a security key for passwordless sign-in.</p>
             <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-              <input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} placeholder="Passkey name (optional)" className="ui-input flex-1" disabled={passkeyLoading} />
-              <button type="button" onClick={() => void registerPasskey()} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50">{passkeyLoading ? "Registering…" : "Register passkey"}</button>
+              <Input value={passkeyName} onChange={(event) => setPasskeyName(event.target.value)} placeholder="Passkey name (optional)" className="flex-1" disabled={passkeyLoading} />
+              <Button type="button" onClick={() => void registerPasskey()} disabled={passkeyLoading || typeof window !== "undefined" && !window.PublicKeyCredential} variant="primary">{passkeyLoading ? "Registering…" : "Register passkey"}</Button>
             </div>
           </section>
-          <section className="ui-card">
+          <section className="rounded-xl border bg-card text-card-foreground shadow-sm">
             <div className="border-b border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
-              <p className="ui-eyebrow">Identity</p>
-              <h2 className="ui-section-title">Creator details</h2>
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Identity</p>
+              <h2 className="text-2xl font-semibold tracking-tight">Creator details</h2>
             </div>
 
             <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-7">
-              <label className="space-y-1.5">
-                <span className="ui-label">Full name</span>
+              <label htmlFor="profile-full-name" className="space-y-1.5">
+                <span className="text-sm font-medium leading-none">Full name</span>
                 <input
+                  id="profile-full-name"
                   type="text"
                   value={profile.name}
                   onChange={(event) => update('name', event.target.value)}
@@ -268,9 +270,10 @@ export default function AdminProfilePage() {
                 />
               </label>
 
-              <label className="space-y-1.5">
-                <span className="ui-label">Creator handle</span>
+              <label htmlFor="profile-handle" className="space-y-1.5">
+                <span className="text-sm font-medium leading-none">Creator handle</span>
                 <input
+                  id="profile-handle"
                   type="text"
                   value={profile.handle}
                   onChange={(event) => update('handle', event.target.value)}
@@ -280,20 +283,20 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5">
-                <span className="ui-label">Email address</span>
+                <span className="text-sm font-medium leading-none">Email address</span>
                 <input
                   type="email"
                   value={profile.email}
                   readOnly
                   className="ui-input cursor-not-allowed opacity-70"
                 />
-                <span className="ui-meta">
+                <span className="text-sm text-muted-foreground">
                   Managed by Better Auth.
                 </span>
               </label>
 
               <label className="space-y-1.5">
-                <span className="ui-label">Phone number</span>
+                <span className="text-sm font-medium leading-none">Phone number</span>
                 <input
                   type="text"
                   value={profile.phone}
@@ -304,7 +307,7 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5">
-                <span className="ui-label">Business name</span>
+                <span className="text-sm font-medium leading-none">Business name</span>
                 <input
                   type="text"
                   value={profile.businessName}
@@ -315,7 +318,7 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5">
-                <span className="ui-label">KRA PIN</span>
+                <span className="text-sm font-medium leading-none">KRA PIN</span>
                 <input
                   type="text"
                   value={profile.kraPin}
@@ -326,7 +329,7 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="ui-label">Location</span>
+                <span className="text-sm font-medium leading-none">Location</span>
                 <input
                   type="text"
                   value={profile.location}
@@ -337,7 +340,7 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="ui-label">Profile avatar URL</span>
+                <span className="text-sm font-medium leading-none">Profile avatar URL</span>
                 <input
                   type="url"
                   value={profile.avatarUrl}
@@ -348,7 +351,7 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="ui-label">Website</span>
+                <span className="text-sm font-medium leading-none">Website</span>
                 <input
                   type="url"
                   value={profile.website}
@@ -359,7 +362,7 @@ export default function AdminProfilePage() {
               </label>
 
               <label className="space-y-1.5 sm:col-span-2">
-                <span className="ui-label">Public bio</span>
+                <span className="text-sm font-medium leading-none">Public bio</span>
                 <textarea
                   rows={5}
                   value={profile.bio}
@@ -373,9 +376,9 @@ export default function AdminProfilePage() {
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             {message ? (
-              <p className="ui-meta">{message}</p>
+              <p className="text-sm text-muted-foreground">{message}</p>
             ) : (
-              <p className="ui-meta">
+              <p className="text-sm text-muted-foreground">
                 Changes are saved to your authenticated creator account.
               </p>
             )}

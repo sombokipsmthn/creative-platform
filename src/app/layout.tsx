@@ -6,6 +6,11 @@ import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
 import { validateEnv } from '@/lib/env';
 import { Analytics } from '@vercel/analytics/next';
+import { Outfit } from "next/font/google";
+import { cn } from "@/lib/utils";
+
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-sans' });
+
 
 validateEnv();
 
@@ -36,7 +41,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={cn("dark", "font-sans", outfit.variable)} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <ThemeScript />
         {process.env.NEXT_PUBLIC_GA_ID && (
@@ -50,7 +55,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           </>
         )}
       </head>
-      <body className="font-sans antialiased selection:bg-purple-600 selection:text-white">
+      <body className="font-sans antialiased selection:bg-primary selection:text-white">
         <QueryProvider>
           <CreatorProvider>{children}</CreatorProvider>
         </QueryProvider>

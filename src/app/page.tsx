@@ -1,173 +1,292 @@
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Check, FileText, FolderKanban, Images, LayoutDashboard, Users, Wallet } from "lucide-react";
+import type { Metadata } from "next";
+import PublicLandingHeader from "@/components/PublicLandingHeader";
+import ProductPreview from "@/components/ProductPreview";
+import Footer from "@/components/Footer";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Users,
+  FolderKanban,
+  FileText,
+  Wallet,
+  Camera,
+  Zap,
+  Globe,
+  BarChart3,
+  Shield,
+  Target,
+  Building2,
+  Briefcase,
+  Layers,
+  RefreshCw,
+  Sparkles,
+  LayoutDashboard,
+  Image as ImageIcon,
+} from "lucide-react";
+import { Card } from "@/components/ui/card";
 
-import Header from "@/components/header";
-import ThemeToggle from "@/components/ThemeToggle";
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://kipsmthn.com";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: {
     template: "%s | KIPSMTHN",
-    default: "KIPSMTHN - Creative Business Platform",
+    default: "KIPSMTHN — Creative Business Platform",
   },
-  description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
+  description: "The operating system for your creative business. Bring clients, projects, quotes, invoices, and delivery into one connected workspace — built for photographers, filmmakers, studios, and creative teams.",
   openGraph: {
-    title: "KIPSMTHN - Creative Business Platform",
-    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
-    url: process.env.NEXT_PUBLIC_APP_URL || 'https://kipsmthn.com',
+    title: "KIPSMTHN — Creative Business Platform",
+    description: "Bring your creative business into one connected workspace. Clients, projects, quotes, invoices, and delivery — all connected.",
+    url: appUrl,
     siteName: "KIPSMTHN",
     locale: "en_US",
     type: "website",
     images: [
-      {
-        url: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80",
-        width: 1200,
-        height: 800,
-        alt: "Creative business platform with workspace and tools",
-      },
-      {
-        url: "/og-image.svg",
-        width: 1200,
-        height: 630,
-        alt: "KIPSMTHN Creative Business Platform",
-      },
+      { url: "/og-image.svg", width: 1200, height: 630, alt: "KIPSMTHN Creative Business Platform" },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KIPSMTHN - Creative Business Platform",
-    description: "KIPSMTHN is the operating system for your creative business. Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.",
-    images: ["https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"],
-  },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
-  },
-  keywords: [
-    "creative business platform",
-    "photography business software",
-    "filmmaker workflow management",
-    "studio management software",
-    "creative freelancer tools",
-    "client project management",
-    "creative invoicing software",
-    "private gallery delivery",
-    "creative quotes and estimates",
-    "photographer business tools"
-  ],
-  authors: [
-    {
-      name: "KIPSMTHN",
-      url: "https://kipsmthn.com",
-    },
-  ],
-  creator: "KIPSMTHN",
-  publisher: "KIPSMTHN",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
+    title: "KIPSMTHN — Creative Business Platform",
+    description: "Bring your creative business into one connected workspace. Clients, projects, quotes, invoices, and delivery — all connected.",
+    images: ["/og-image.svg"],
   },
 };
 
-const platformFeatures = [
-  { number: "01", title: "Build your creative presence", description: "Create a polished portfolio that gives your work a professional home and makes it easier for the right clients to discover you." },
-  { number: "02", title: "Manage clients in one place", description: "Keep client information, projects, quotes, invoices, and production details connected instead of scattered across different tools." },
-  { number: "03", title: "Create professional quotes", description: "Build clean, branded quotations with equipment, services, production costs, deposits, discounts, tax, and payment terms." },
-  { number: "04", title: "Deliver private galleries", description: "Give clients a simple private destination for reviewing, selecting, commenting on, and accessing their creative work." },
-  { number: "05", title: "Keep your workflow moving", description: "Move from enquiry to project, quotation, production, delivery, and payment without rebuilding the same information every time." },
-  { number: "06", title: "Stay in control", description: "Your creative business deserves a system designed around how you actually work — flexible, visual, and straightforward." },
+const workflowSteps = [
+  {
+    number: "01",
+    title: "Enquiry & Quote",
+    description: "A potential client reaches out. Create a professional quote with services, equipment, production costs, deposits, taxes, and payment terms — all branded to your studio.",
+    icon: FileText,
+    color: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  },
+  {
+    number: "02",
+    title: "Project Creation",
+    description: "Convert the accepted quote into a project. Associate media, set milestones, assign team members, and track progress from brief to production — all in one place.",
+    icon: FolderKanban,
+    color: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+  },
+  {
+    number: "03",
+    title: "Production & Collaboration",
+    description: "Manage production schedules, equipment, and client feedback. Keep every detail connected — no more scattered spreadsheets, email threads, or lost context.",
+    icon: Layers,
+    color: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400",
+  },
+  {
+    number: "04",
+    title: "Gallery Delivery",
+    description: "Deliver final work through a private, branded client gallery. Clients review, select favorites, and download — with your watermark, custom domain, and access controls.",
+    icon: Camera,
+    color: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  },
+  {
+    number: "05",
+    title: "Invoice & Payment",
+    description: "Generate invoices from quotes or projects. Track payments, manage expenses, and stay on top of your business finances with built-in revenue analytics.",
+    icon: Wallet,
+    color: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+  },
 ];
 
-const workflow = [
-  { step: "01", title: "Create", text: "Build your profile and showcase the work you want clients to see." },
-  { step: "02", title: "Connect", text: "Manage clients and turn enquiries into organized projects." },
-  { step: "03", title: "Quote", text: "Create professional quotations using your own services and equipment." },
-  { step: "04", title: "Deliver", text: "Give clients a private, polished place to receive their work." },
+const benefits = [
+  {
+    icon: RefreshCw,
+    title: "Eliminate Administrative Friction",
+    description: "Stop copying data between tools. Quotes become projects. Projects become galleries. Galleries become invoices. Every step carries context forward automatically.",
+    visual: "Flow",
+  },
+  {
+    icon: Target,
+    title: "Maintain Project Context",
+    description: "Every client conversation, file, decision, and approval lives with the project. No more searching through email threads or disconnected folders to find what you agreed on.",
+    visual: "Context",
+  },
+  {
+    icon: Users,
+    title: "Improve Client Handoffs",
+    description: "Give clients a professional experience: branded galleries, clear approval workflows, secure downloads. Impress them with how organized your process feels — not just the final work.",
+    visual: "Experience",
+  },
+  {
+    icon: BarChart3,
+    title: "See Your Business Clearly",
+    description: "Track quote conversion rates, overdue invoices, project velocity, and client engagement from a single dashboard. Make decisions with data, not guesswork.",
+    visual: "Insight",
+  },
+  {
+    icon: Shield,
+    title: "Built for Local Compliance",
+    description: "KRA PIN fields, WHT rates, KES currency defaults, M-Pesa references, eTIMS invoicing — the tax and payment details that matter for creative businesses in Kenya and East Africa.",
+    visual: "Compliance",
+  },
+  {
+    icon: Sparkles,
+    title: "Scale Without the Chaos",
+    description: "Whether you're a solo creative or a growing studio, the platform grows with you. Add team members, manage multiple brands, and handle increasing volume without rebuilding your workflow.",
+    visual: "Scale",
+  },
 ];
 
-const workspaceModules = [
-  { icon: Users, title: "Clients", text: "CRM and client records" },
-  { icon: FolderKanban, title: "Projects", text: "Projects, portfolios and production" },
-  { icon: FileText, title: "Quotes", text: "Professional production quotations" },
-  { icon: Wallet, title: "Invoices", text: "Billing and payment tracking" },
-  { icon: Images, title: "Galleries", text: "Private client delivery" },
-  { icon: LayoutDashboard, title: "Dashboard", text: "One view across the business" },
+const audiences = [
+  {
+    icon: Briefcase,
+    title: "Independent Creatives",
+    description: "Photographers, filmmakers, designers, and solo practitioners who need professional business tools without enterprise complexity.",
+    traits: ["Solo operation", "Client-facing delivery", "Quote-to-invoice workflow", "Portfolio presentation"],
+  },
+  {
+    icon: Building2,
+    title: "Small Studios & Agencies",
+    description: "Growing creative teams managing multiple clients, projects, and team members who need shared context and streamlined collaboration.",
+    traits: ["Team collaboration", "Multi-project management", "Shared client database", "Role-based access"],
+  },
+  {
+    icon: Layers,
+    title: "Creative Production Teams",
+    description: "In-house creative departments and production companies handling high-volume workflows with complex approval chains and compliance requirements.",
+    traits: ["High-volume workflows", "Approval chains", "Equipment planning", "Compliance & reporting"],
+  },
 ];
 
 export default function HomePage() {
   return (
-    <div className="ui-page selection:bg-purple-600 selection:text-white transition-colors duration-300">
-      <Header />
-      <main>
+    <div className="min-h-screen selection:bg-primary selection:text-white">
+      <PublicLandingHeader />
+      <main id="main">
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0">
-            <div className="absolute left-1/2 top-20 h-[520px] w-[760px] -translate-x-1/2 rounded-full bg-purple-600/10 blur-3xl" />
-            <div className="absolute -right-40 top-80 h-[360px] w-[360px] rounded-full bg-fuchsia-500/5 blur-3xl" />
+        <section className="relative overflow-hidden pt-20 lg:pt-28 pb-20 lg:pb-28">
+          <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div className="absolute left-1/2 top-20 h-[500px] w-[800px] -translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+            <div className="absolute right-0 top-1/3 h-[300px] w-[300px] translate-x-1/2 translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
+            <div className="absolute left-0 bottom-0 h-[200px] w-[200px] -translate-x-1/2 translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
           </div>
 
-          <div className="relative mx-auto max-w-7xl">
-            <div className="max-w-5xl">
-              <p className="ui-eyebrow text-purple-600 dark:text-purple-400">
-                Creative Business Platform
+          <div className="relative mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="max-w-4xl mx-auto text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary dark:text-primary">
+                The creative business platform
               </p>
-              <h1 className="mt-7 max-w-5xl text-5xl font-light leading-[0.94] tracking-tight text-slate-950 dark:text-white md:text-7xl lg:text-[6.5rem]">
-                The operating system for your creative business.
+              <h1 className="mt-6 text-4xl font-light leading-[0.95] tracking-tight text-slate-950 dark:text-white sm:text-5xl md:text-6xl lg:text-[5.5rem] xl:text-[6rem]">
+                The operating system for your
+                <br />
+                <span className="font-medium">creative business.</span>
               </h1>
-              <p className="mt-8 max-w-2xl text-base leading-8 text-slate-600 dark:text-zinc-400 md:text-lg">
-                Bring your creative presence, clients, projects, quotes, invoices and delivery into one connected workspace — built for photographers, filmmakers, studios and creative teams.
+              <p className="mt-8 max-w-2xl mx-auto text-base leading-8 text-slate-600 dark:text-zinc-400 md:text-lg">
+                Bring clients, projects, quotes, invoices, and delivery into one connected workspace — built for photographers, filmmakers, studios, and creative teams.
               </p>
-              <div className="relative mt-10 h-48 w-full overflow-hidden rounded-2xl border border-slate-200 dark:border-zinc-800 md:h-64">
-                <Image
-                  src="https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80"
-                  alt="Creative business platform with workspace and tools"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-                  className="object-cover"
-                />
-              </div>
-              <div className="mt-10 flex flex-wrap gap-3">
-                <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700">
-                  Get started<ArrowRight className="h-4 w-4" />
+              <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  Get started <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
-                <Link href="#platform" className="inline-flex items-center rounded-full border border-slate-200 px-7 py-4 text-sm font-medium transition hover:border-purple-400 hover:text-purple-600 dark:border-zinc-800 dark:hover:border-purple-800 dark:hover:text-purple-400">
+                <Link
+                  href="#platform"
+                  className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-8 py-4 text-sm font-medium text-slate-700 dark:border-zinc-800 dark:text-zinc-300 transition-colors hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
                   Explore the platform
                 </Link>
               </div>
+              <p className="mt-6 text-sm text-slate-500 dark:text-zinc-500">
+                No credit card required · 14-day free trial · Cancel anytime
+              </p>
             </div>
 
-            {/* FEATURES */}
-            <div className="mt-20 grid gap-4 md:grid-cols-3">
-              {[["01", "One workspace", "Stop stitching together disconnected tools."], ["02", "One workflow", "Move from client enquiry to delivery without losing context."], ["03", "One business", "Keep the creative and commercial sides of your work connected."]].map(([number, title, text]) => (
-                <div key={number} className="ui-card ui-card-interactive p-6">
-                  <span className="font-sans text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">{number}</span>
-                  <h2 className="mt-6 text-xl font-medium tracking-tight">{title}</h2>
-                  <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-zinc-500">{text}</p>
-                </div>
+            <div className="relative mt-16">
+              <ProductPreview className="max-w-7xl mx-auto" />
+            </div>
+
+            <div className="mt-10 grid gap-6 sm:grid-cols-3 max-w-4xl mx-auto text-center">
+              {[
+                ["One workspace", "Stop stitching together disconnected tools."],
+                ["One workflow", "Move from client enquiry to delivery with full context."],
+                ["One business", "Keep creative work and business operations connected."],
+              ].map(([title, description], index) => (
+                <Card key={title} className="p-6 transition-colors hover:border-primary/50 border-slate-200/50 dark:border-zinc-800/50">
+                  <span className="text-[10px] font-semibold tracking-[0.2em] text-primary dark:text-primary">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h2 className="mt-4 text-lg font-medium tracking-tight text-slate-950 dark:text-white">{title}</h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
+                </Card>
               ))}
             </div>
           </div>
         </section>
 
-        {/* PLATFORM */}
-        <section id="platform" className="border-t border-slate-200 dark:border-zinc-800">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">The platform</p>
-                <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">Everything your creative business needs.</h2>
-                <p className="mt-6 max-w-md text-base leading-8 text-slate-600 dark:text-zinc-400">
-                  KIPSMTHN brings the systems behind your creative work into a single place, so your tools support the way you work instead of getting in the way.
-                </p>
+        {/* WORKFLOW EXPLANATION */}
+        <section id="workflow" className="border-y border-slate-200/50 dark:border-zinc-800/50 py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary dark:text-primary">How it works</p>
+              <h2 className="mt-5 text-3xl font-light tracking-tight text-slate-950 dark:text-white sm:text-4xl md:text-5xl">
+                Your creative workflow, connected end to end.
+              </h2>
+              <p className="mt-5 leading-7 text-slate-600 dark:text-zinc-400">
+                Spend less time moving information between tools and more time doing the work your clients came to you for.
+              </p>
+            </div>
+
+            <div className="mt-16">
+              <div className="space-y-16 lg:space-y-24">
+                {workflowSteps.map((step, index) => (
+                  <div
+                    key={step.number}
+                    className="flex items-center gap-8 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 p-6 lg:p-8 transition-colors hover:border-primary/50"
+                  >
+                    <div className="flex-shrink-0 rounded-xl bg-slate-100 dark:bg-zinc-800 p-3">
+                      <step.icon className="h-6 w-6 text-primary" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-slate-950 dark:text-white">{step.title}</h3>
+                      <p className="text-base leading-7 text-slate-600 dark:text-zinc-400">{step.description}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {platformFeatures.map((feature) => (
-                  <article key={feature.number} className="group rounded-[1.5rem] border border-slate-200 p-7 transition hover:-translate-y-0.5 hover:border-purple-300 hover:shadow-xl hover:shadow-purple-600/5 dark:border-zinc-800 dark:hover:border-purple-900">
-                    <span className="font-sans text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">{feature.number}</span>
-                    <h3 className="mt-8 text-2xl font-light tracking-tight">{feature.title}</h3>
-                    <p className="mt-4 text-sm leading-7 text-slate-500 dark:text-zinc-400">{feature.description}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* PRODUCT PREVIEW / PLATFORM SECTION */}
+        <section id="platform" className="py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20 items-start">
+              <div className="sticky top-24">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary dark:text-primary">Built around your workflow</p>
+                <h2 className="mt-5 text-3xl font-light tracking-tight text-slate-950 dark:text-white sm:text-4xl md:text-5xl">
+                  Less admin. More room for the work.
+                </h2>
+                <p className="mt-5 max-w-xl leading-7 text-slate-600 dark:text-zinc-400">
+                  The tools you need to run a creative business, designed to work together instead of in isolation.
+                </p>
+                <Link
+                  href="/sign-up"
+                  className="mt-10 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  Start your workspace <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  { icon: LayoutDashboard, title: "Dashboard", description: "See your business at a glance with real-time metrics and key indicators." },
+                  { icon: Users, title: "Client CRM", description: "Keep relationships, contact details, and project history together in one place." },
+                  { icon: FolderKanban, title: "Projects", description: "Organize work from brief to final delivery with progress tracking and milestones." },
+                  { icon: FileText, title: "Quotes & Contracts", description: "Prepare professional documents with branded templates and e-signature support." },
+                  { icon: Wallet, title: "Invoices & Expenses", description: "Track billing, payments, expenses, and revenue with built-in analytics." },
+                  { icon: Camera, title: "Client Galleries", description: "Deliver work through branded, private galleries with selection and download controls." },
+                ].map(({ icon: Icon, title, description }) => (
+                  <article key={title} className="relative rounded-xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50 p-5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-zinc-800 text-primary dark:text-primary mb-4">
+                      <Icon className="h-5 w-5" aria-hidden="true" />
+                    </div>
+                    <h3 className="font-medium text-slate-950 dark:text-white">{title}</h3>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-zinc-400">{description}</p>
                   </article>
                 ))}
               </div>
@@ -175,157 +294,173 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* WORKFLOW */}
-        <section id="workflow" className="px-6 py-24 md:py-32">
-          <div className="mx-auto max-w-7xl">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Workflow</p>
-              <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">From first contact to final delivery.</h2>
+        {/* PRODUCT BENEFITS */}
+        <section id="benefits" className="border-y border-slate-200/50 dark:border-zinc-800/50 py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary dark:text-primary">Why teams choose KIPSMTHN</p>
+              <h2 className="mt-5 text-3xl font-light tracking-tight text-slate-950 dark:text-white sm:text-4xl md:text-5xl">
+                Meaningful outcomes, not just features.
+              </h2>
+              <p className="mt-5 leading-7 text-slate-600 dark:text-zinc-400">
+                We focus on what changes for your business when the admin work disappears.
+              </p>
             </div>
-            <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {workflow.map((item) => (
-                <article key={item.step} className="relative rounded-[1.5rem] border border-slate-200 p-7 dark:border-zinc-800">
-                  <span className="font-sans text-[10px] font-semibold tracking-[0.2em] text-purple-600 dark:text-purple-400">{item.step}</span>
-                  <h3 className="mt-8 text-2xl font-light tracking-tight">{item.title}</h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-500 dark:text-zinc-400">{item.text}</p>
+
+            <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {benefits.map((benefit, index) => (
+                <article key={benefit.title} className="relative p-6 lg:p-8 rounded-2xl border border-slate-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 transition-colors hover:border-primary/50">
+                  <div className="absolute top-6 right-6 text-[10px] font-semibold tracking-[0.2em] text-primary/50 dark:text-primary/50">
+                    {String(index + 1).padStart(2, "0")}
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:text-primary mb-6">
+                    <benefit.icon className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white mb-3">{benefit.title}</h3>
+                  <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 mb-6">{benefit.description}</p>
+                  <div className="pt-4 border-t border-slate-200/50 dark:border-zinc-800/50">
+                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-primary dark:text-primary">{benefit.visual}</span>
+                  </div>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        {/* WORK */}
-        <section id="work" className="border-y border-slate-200 dark:border-zinc-800">
-          <div className="mx-auto max-w-7xl">
-            <div className="grid gap-12 lg:grid-cols-[0.7fr_1.3fr] lg:gap-20">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Your workspace</p>
-                <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">One place for the work behind the work.</h2>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {workspaceModules.map((module) => {
-                  const Icon = module.icon;
-                  return (
-                    <div key={module.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 dark:border-zinc-800 dark:bg-zinc-950">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-purple-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-purple-400">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <h3 className="mt-5 text-sm font-semibold">{module.title}</h3>
-                      <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-zinc-500">{module.text}</p>
-                    </div>
-                  );
-                })}
-              </div>
+        {/* AUDIENCE & USE CASES */}
+        <section id="audience" className="py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="text-center max-w-3xl mx-auto">
+              <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary dark:text-primary">Who it&apos;s for</p>
+              <h2 className="mt-5 text-3xl font-light tracking-tight text-slate-950 dark:text-white sm:text-4xl md:text-5xl">
+                Built for creative businesses of every size.
+              </h2>
+              <p className="mt-5 leading-7 text-slate-600 dark:text-zinc-400">
+                Whether you&apos;re a solo creative or a growing studio, the platform adapts to how you work.
+              </p>
+            </div>
+
+            <div className="mt-16 grid gap-8 md:grid-cols-3">
+              {audiences.map((audience) => (
+                <Card key={audience.title} className="p-6 lg:p-8 transition-colors hover:border-primary/50 border-slate-200/50 dark:border-zinc-800/50">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary dark:text-primary mb-6">
+                    <audience.icon className="h-6 w-6" aria-hidden="true" />
+                  </div>
+                  <h3 className="text-xl font-medium tracking-tight text-slate-950 dark:text-white mb-2">{audience.title}</h3>
+                  <p className="text-base leading-7 text-slate-600 dark:text-zinc-400 mb-6">{audience.description}</p>
+                  <ul className="space-y-2" role="list">
+                    {audience.traits.map((trait) => (
+                      <li key={trait} className="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-400">
+                        <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" aria-hidden="true" />
+                        {trait}
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* CALL TO ACTION */}
-        <section className="px-6 py-24 md:py-32">
-          <div className="mx-auto max-w-7xl">
-            <div className="rounded-[2rem] bg-purple-600 p-8 text-white md:p-14">
-              <div className="grid gap-10 lg:grid-cols-[1fr_0.7fr] lg:items-end">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-200">For creators</p>
-                  <h2 className="mt-5 max-w-3xl text-4xl font-light tracking-tight md:text-6xl">
-                    Your workspace is private. Your business stays yours.
-                  </h2>
-                  <p className="mt-6 max-w-2xl text-base leading-8 text-purple-100">
-                    Once you sign in, your creator workspace becomes the place where your clients, projects, financial records and production workflow live. It is separate from this public platform homepage.
-                  </p>
-                </div>
-                <div className="space-y-3 rounded-2xl bg-white/10 p-5 backdrop-blur">
-                  {["Private creator dashboard", "Your clients and projects", "Your quotes and invoices", "Your galleries and delivery workflow"].map((item) => (
-                    <div key={item} className="flex items-center gap-3 text-sm text-purple-50">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/15">
-                        <Check className="h-3.5 w-3.5" />
-                      </span>
-                      {item}
+        {/* TRUST / COMPLIANCE SECTION */}
+        <section className="border-y border-slate-200/50 dark:border-zinc-800/50 py-20 lg:py-28">
+          <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10">
+            <div className="grid gap-8 lg:grid-cols-2 lg:gap-20 items-center">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary dark:text-primary">Built for creative businesses in Africa</p>
+                <h2 className="mt-5 text-3xl font-light tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+                  Local compliance, global standards.
+                </h2>
+                <p className="mt-5 max-w-xl leading-7 text-slate-600 dark:text-zinc-400">
+                  KIPSMTHN includes the tax and payment details that matter for creative businesses operating in Kenya and across East Africa — so you can focus on the work, not the paperwork.
+                </p>
+                <div className="mt-10 grid gap-4 sm:grid-cols-2">
+                  {[
+                    { icon: Shield, title: "KRA eTIMS Invoicing", desc: "Official tax-compliant invoices generated automatically." },
+                    { icon: Wallet, title: "Multi-Currency Billing", desc: "KES, USD, EUR support for international clients." },
+                    { icon: Users, title: "WHT & VAT Handling", desc: "Automatic withholding tax and VAT calculations." },
+                    { icon: Zap, title: "M-Pesa References", desc: "Track mobile money payments alongside invoices." },
+                  ].map((item) => (
+                    <div key={item.title} className="flex items-start gap-4 p-4 rounded-xl border border-slate-200/50 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/50">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary dark:text-primary flex-shrink-0">
+                        <item.icon className="h-5 w-5" aria-hidden="true" />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-slate-950 dark:text-white">{item.title}</h4>
+                        <p className="text-sm text-slate-600 dark:text-zinc-400 mt-1">{item.desc}</p>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="mt-10 flex flex-wrap gap-3">
-                  <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-semibold text-purple-700 transition hover:bg-purple-50">
-                    Create your workspace<ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link href="/sign-in" className="inline-flex items-center rounded-full border border-white/30 px-7 py-3.5 text-sm font-medium text-white transition hover:bg-white/10">
-                    Sign in
-                  </Link>
+              </div>
+
+              <div className="relative">
+                <div className="aspect-square max-w-md mx-auto rounded-2xl border border-slate-200 bg-slate-100 dark:border-zinc-800 dark:bg-zinc-950 overflow-hidden relative">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-center p-8">
+                      <div className="mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
+                        <Globe className="h-12 w-12 text-primary" aria-hidden="true" />
+                      </div>
+                      <h3 className="text-xl font-medium text-slate-950 dark:text-white mb-2">Kenya-First Design</h3>
+                      <p className="text-slate-600 dark:text-zinc-400">
+                        Built by Kenyan creatives, for Kenyan creatives — with the compliance features that actually matter.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" aria-hidden="true" />
+                  <div className="absolute bottom-4 left-4 right-4 flex flex-wrap justify-center gap-2" aria-hidden="true">
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/20 backdrop-blur text-white border border-white/30">KRA eTIMS</span>
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/20 backdrop-blur text-white border border-white/30">WHT / VAT</span>
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/20 backdrop-blur text-white border border-white/30">M-Pesa</span>
+                    <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/20 backdrop-blur text-white border border-white/30">Multi-Currency</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </section>
 
-        {/* PRICING */}
-        <section id="pricing" className="border-t border-slate-200 dark:border-zinc-800">
-          <div className="mx-auto max-w-4xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-purple-600 dark:text-purple-400">Start here</p>
-            <h2 className="mt-5 text-4xl font-light tracking-tight md:text-6xl">
-              Spend less time managing the business. Spend more time making the work.
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-600 dark:text-zinc-400">
-              Explore the platform, create your account, and keep your creator workspace separate from the public-facing experience.
-            </p>
-            <div className="mt-9 flex justify-center gap-3">
-              <Link href="/sign-up" className="inline-flex items-center gap-2 rounded-full bg-purple-600 px-7 py-4 text-sm font-semibold text-white shadow-lg shadow-purple-600/20 transition hover:bg-purple-700">
-                Get started<ArrowRight className="h-4 w-4" />
-              </Link>
+        {/* FINAL CTA SECTION */}
+        <section className="px-5 pb-20 sm:px-8 lg:px-10 lg:pb-28">
+          <div className="mx-auto max-w-7xl">
+            <div className="relative overflow-hidden rounded-3xl bg-slate-950 px-6 py-12 text-white dark:bg-zinc-900 sm:px-10 sm:py-16 lg:px-16 lg:py-20">
+              <div className="absolute inset-0" aria-hidden="true">
+                <div className="absolute -top-20 -right-20 h-[300px] w-[300px] rounded-full bg-primary/10 blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-[200px] w-[200px] rounded-full bg-primary/10 blur-3xl" />
+              </div>
+              <div className="relative max-w-3xl z-10">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-primary">Ready to simplify your creative business?</p>
+                <h2 className="mt-5 text-3xl font-light tracking-tight sm:text-4xl md:text-5xl lg:text-6xl">
+                  Your business deserves a workflow that works as hard as you do.
+                </h2>
+                <p className="mt-5 max-w-2xl leading-7 text-slate-300">
+                  Bring your clients, projects, documents, and delivery into one place — and get back to creating.
+                </p>
+                <div className="mt-10 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <Link
+                    href="/sign-up"
+                    className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-semibold text-slate-950 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                  >
+                    Get started free <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                  </Link>
+                  <Link
+                    href="/sign-in"
+                    className="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-4 text-sm font-medium text-white transition-colors hover:border-white/40 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+                  >
+                    Sign in to your workspace
+                  </Link>
+                </div>
+                <p className="mt-6 text-sm text-slate-400">
+                  14-day free trial · No credit card required · Cancel anytime
+                </p>
+              </div>
             </div>
           </div>
         </section>
-      </main>
 
-      <footer className="border-t border-slate-200 bg-slate-50/70 px-6 pb-8 pt-16 dark:border-zinc-800 dark:bg-zinc-950/70">
-        <div className="mx-auto max-w-7xl">
-          <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
-            <div className="max-w-sm">
-              <Link href="/" className="inline-block text-xl font-medium tracking-[0.2em]">
-                KIPSMTHN<span className="text-purple-600">.</span>
-              </Link>
-              <p className="mt-4 text-sm leading-7 text-slate-500 dark:text-zinc-400">
-                Creative infrastructure for photographers, filmmakers, studios, and creative teams — from first enquiry to final delivery.
-              </p>
-              <Link href="/sign-up" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-purple-600 transition hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300">
-                Create your workspace<ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-zinc-100">Platform</h2>
-              <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
-                <Link href="#platform" className="transition hover:text-purple-600 dark:hover:text-purple-400">Features</Link>
-                <Link href="#workflow" className="transition hover:text-purple-600 dark:hover:text-purple-400">Workflow</Link>
-                <Link href="#work" className="transition hover:text-purple-600 dark:hover:text-purple-400">Workspace</Link>
-                <Link href="#pricing" className="transition hover:text-purple-600 dark:hover:text-purple-400">Get started</Link>
-              </nav>
-            </div>
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-zinc-100">Company</h2>
-              <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
-                <Link href="/about" className="transition hover:text-purple-600 dark:hover:text-purple-400">About</Link>
-                <Link href="/services" className="transition hover:text-purple-600 dark:hover:text-purple-400">Services</Link>
-                <Link href="/work" className="transition hover:text-purple-600 dark:hover:text-purple-400">Work</Link>
-                <Link href="/contact" className="transition hover:text-purple-600 dark:hover:text-purple-400">Contact</Link>
-              </nav>
-            </div>
-            <div>
-              <h2 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-900 dark:text-zinc-100">Account</h2>
-              <nav className="mt-5 flex flex-col items-start gap-3 text-sm text-slate-500 dark:text-zinc-400">
-                <Link href="/sign-in" className="transition hover:text-purple-600 dark:hover:text-purple-400">Sign in</Link>
-                <Link href="/sign-up" className="transition hover:text-purple-600 dark:hover:text-purple-400">Create account</Link>
-              </nav>
-            </div>
-          </div>
-          <div className="mt-14 flex flex-col gap-5 border-t border-slate-200 pt-6 text-xs text-slate-500 dark:border-zinc-800 dark:text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} KIPSMTHN. All rights reserved.</p>
-            <div className="flex items-center gap-5">
-              <Link href="/privacy" className="transition hover:text-purple-600 dark:hover:text-purple-400">Privacy</Link>
-              <span>Creative Business Platform</span>
-              <ThemeToggle />
-            </div>
-          </div>
-        </div>
-      </footer>
+        {/* FOOTER */}
+        <Footer />
+      </main>
     </div>
   );
 }

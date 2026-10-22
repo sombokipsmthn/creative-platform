@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Check, X, Calendar, ChevronDown } from 'lucide-react';
 import type { FieldMetadata, FieldType } from '@/lib/contracts/fieldMetadata';
 import type { Client, Project } from '@/lib/types/contracts';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface EditableFieldProps {
   field: FieldMetadata;
@@ -81,7 +83,7 @@ export function EditableField({
         className={`inline-block cursor-pointer px-1 py-0.5 rounded transition-colors ${
           isEmpty
             ? 'bg-amber-50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 font-medium'
-            : 'hover:bg-purple-100 dark:hover:bg-purple-900/30 font-semibold text-inherit'
+            : 'hover:bg-primary/10 dark:hover:bg-primary/15 font-semibold text-inherit'
         } ${isInvalid ? 'ring-2 ring-red-500 dark:ring-red-400' : ''}`}
         title={`Click to edit ${field.label.toLowerCase()}`}
       >
@@ -92,7 +94,7 @@ export function EditableField({
 
   // Edit mode - render appropriate input type
   const baseInputClasses =
-    'px-3 py-2 bg-white dark:bg-gray-800 border-2 border-purple-400 dark:border-purple-500 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400';
+    'px-3 py-2 bg-white dark:bg-gray-800 border-2 border-primary dark:border-primary rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring dark:focus:ring-ring';
 
   const inputContent = (() => {
     switch (field.type) {
@@ -197,58 +199,19 @@ export function EditableField({
 
       case 'client':
         return (
-          <select
-            ref={inputRef as React.Ref<HTMLSelectElement>}
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className={`${baseInputClasses} w-64`}
-          >
-            <option value="">Select a client...</option>
-            {clients?.map((client) => (
-              <option key={client.id} value={client.id}>
-                {client.name} {client.company ? `(${client.company})` : ''}
-              </option>
-            ))}
-          </select>
+          <Select value={tempValue || 'none'} onValueChange={(value) => setTempValue(value === 'none' ? '' : value)}><SelectTrigger className={`${baseInputClasses} w-64`}><SelectValue placeholder="Select a client..." /></SelectTrigger><SelectContent><SelectItem value="none">Select a client...</SelectItem>{clients?.map((client) => <SelectItem key={client.id} value={client.id}>{client.name} {client.company ? `(${client.company})` : ''}</SelectItem>)}</SelectContent></Select>
         );
 
       case 'project':
         return (
-          <select
-            ref={inputRef as React.Ref<HTMLSelectElement>}
-            value={tempValue}
-            onChange={(e) => setTempValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className={`${baseInputClasses} w-64`}
-          >
-            <option value="">Select a project...</option>
-            {projects?.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-              </option>
-            ))}
-          </select>
+          <Select value={tempValue || 'none'} onValueChange={(value) => setTempValue(value === 'none' ? '' : value)}><SelectTrigger className={`${baseInputClasses} w-64`}><SelectValue placeholder="Select a project..." /></SelectTrigger><SelectContent><SelectItem value="none">Select a project...</SelectItem>{projects?.map((project) => <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>)}</SelectContent></Select>
         );
 
       case 'select':
         // For currency select
         if (field.key === 'currency') {
           return (
-            <select
-              ref={inputRef as React.Ref<HTMLSelectElement>}
-              value={tempValue}
-              onChange={(e) => setTempValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className={`${baseInputClasses} w-32`}
-            >
-              <option value="KES">KES</option>
-              <option value="USD">USD</option>
-              <option value="EUR">EUR</option>
-              <option value="GBP">GBP</option>
-              <option value="ZAR">ZAR</option>
-              <option value="NGN">NGN</option>
-            </select>
+            <Select value={tempValue} onValueChange={setTempValue}><SelectTrigger className={`${baseInputClasses} w-32`}><SelectValue /></SelectTrigger><SelectContent><SelectItem value="KES">KES</SelectItem><SelectItem value="USD">USD</SelectItem><SelectItem value="EUR">EUR</SelectItem><SelectItem value="GBP">GBP</SelectItem><SelectItem value="ZAR">ZAR</SelectItem><SelectItem value="NGN">NGN</SelectItem></SelectContent></Select>
           );
         }
         // Default text input
@@ -284,21 +247,8 @@ export function EditableField({
     <div className="inline-flex items-center gap-2 align-top">
       {inputContent}
       <div className="flex gap-1">
-        <button
-          onClick={handleSave}
-          disabled={isRequired && !tempValue.trim()}
-          className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Save"
-        >
-          <Check className="h-4 w-4" />
-        </button>
-        <button
-          onClick={onCancel}
-          className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded"
-          title="Cancel"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <Button variant="ghost" size="icon-sm" onClick={handleSave} disabled={isRequired && !tempValue.trim()} className="text-green-600" title="Save"><Check className="h-4 w-4" /></Button>
+        <Button variant="ghost" size="icon-sm" onClick={onCancel} className="text-red-600" title="Cancel"><X className="h-4 w-4" /></Button>
       </div>
     </div>
   );

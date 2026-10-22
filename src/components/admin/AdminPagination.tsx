@@ -1,5 +1,7 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+
 interface AdminPaginationProps {
   currentPage: number;
   totalPages: number;
@@ -25,39 +27,42 @@ export default function AdminPagination({
       </div>
 
       <div className="admin-pagination-pages">
-        <button
+        <Button
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="ui-button ui-button-secondary ui-button-sm"
+          variant="secondary"
+          size="sm"
           aria-label="Previous page"
         >
           ← Previous
-        </button>
+        </Button>
 
         {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
           const page = currentPage > 3 ? currentPage - 2 + i : i + 1;
           if (page > totalPages) return null;
           return (
-            <button
+            <Button
               key={page}
               onClick={() => onPageChange(page)}
-              className={page === currentPage ? 'admin-pagination-current' : 'ui-button ui-button-secondary ui-button-sm'}
+              variant={page === currentPage ? 'primary' : 'secondary'}
+              size="sm"
               aria-current={page === currentPage ? 'page' : undefined}
               aria-label={`Go to page ${page}`}
             >
               {page}
-            </button>
+            </Button>
           );
         })}
 
-        <button
+        <Button
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="ui-button ui-button-secondary ui-button-sm"
+          variant="secondary"
+          size="sm"
           aria-label="Next page"
         >
           Next →
-        </button>
+        </Button>
       </div>
     </div>
   );

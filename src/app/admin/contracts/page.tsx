@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   ArrowUpRight,
   CheckCircle2,
@@ -9,12 +9,15 @@ import {
   FileSignature,
   Loader2,
   Plus,
+  RefreshCw,
   Trash2,
 } from 'lucide-react';
 
-import TableFilterBar from '@/components/admin/TableFilterBar';
-import { Button } from '@/components/ui/Button';
+import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 type Contract = {
   id: string;
@@ -61,6 +64,7 @@ export default function ContractsPage() {
     cancelled: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Filter states
@@ -84,44 +88,45 @@ export default function ContractsPage() {
   }, []);
 
   // Fetch contracts, stats, and templates (we only need contracts and stats here)
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+  const loadContracts = useCallback(async (silent = false) => {
+    try {
+      if (!silent) setLoading(true);
       setError(null);
-      try {
-        const params = new URLSearchParams();
-        params.set('search', search);
-        params.set('status', status);
-        if (clientId !== 'all') params.set('clientId', clientId);
+      const params = new URLSearchParams();
+      params.set('search', search);
+      params.set('status', status);
+      if (clientId !== 'all') params.set('clientId', clientId);
 
-        const res = await fetch(`/api/contracts?${params.toString()}`, {
-          cache: 'no-store',
-        });
-        if (res.status === 401) {
-          throw new Error('Please sign in to view your contracts.');
-        }
-        if (!res.ok) throw new Error('Failed to fetch contracts data');
-        const data = await res.json();
-        setContracts(data.contracts || []);
-        setStats(data.stats || {
-          total: 0,
-          draft: 0,
-          sent: 0,
-          viewed: 0,
-          awaiting_signature: 0,
-          signed: 0,
-          declined: 0,
-          expired: 0,
-          cancelled: 0,
-        });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+      const res = await fetch(`/api/contracts?${params.toString()}`, {
+        cache: 'no-store',
+      });
+      if (res.status === 401) {
+        throw new Error('Please sign in to view your contracts.');
       }
-    };
-    fetchData();
+      if (!res.ok) throw new Error('Failed to fetch contracts data');
+      const data = await res.json();
+      setContracts(data.contracts || []);
+      setStats(data.stats || {
+        total: 0,
+        draft: 0,
+        sent: 0,
+        viewed: 0,
+        awaiting_signature: 0,
+        signed: 0,
+        declined: 0,
+        expired: 0,
+        cancelled: 0,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+    } finally {
+      setLoading(false);
+    }
   }, [search, status, clientId]);
+
+  useEffect(() => {
+    void loadContracts();
+  }, [loadContracts]);
 
   function formatStatus(status: string) {
     return status
@@ -172,92 +177,97 @@ export default function ContractsPage() {
         />
 
         {error && !loading && (
-          <div className="ui-card p-4">
+          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
             <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
         )}
 
+        <StandardCreationDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} title="Start a new contract" description="Choose the client and template in the existing contract builder before creating a draft.">
+          <div className="space-y-4 pr-8">
+            <p className="ui-eyebrow">LEGAL</p>
+            <h2 className="ui-section-title">Start a new contract</h2>
+            <p className="text-sm text-muted-foreground">The contract builder preserves templates, clauses, associations, and draft status in one supported workflow.</p>
+          </div>
+          <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
+            <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+            <Button type="button" onClick={() => window.location.assign('/admin/contracts/new')}>Continue to contract builder <ArrowUpRight aria-hidden="true" /></Button>
+          </div>
+        </StandardCreationDialog>
+
         {/* SUMMARY */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Total Contracts</p>
-            <p className="ui-stat-value">{stats.total}</p>
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Total Contracts</p>
+            <p className="text-2xl font-bold">{stats.total}</p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Drafts</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Drafts</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {stats.draft}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Sent</p>
-            <p className="ui-stat-value text-blue-600 dark:text-blue-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Sent</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
               {stats.sent}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Viewed</p>
-            <p className="ui-stat-value text-yellow-600 dark:text-yellow-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Viewed</p>
+            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
               {stats.viewed}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Awaiting Signature</p>
-            <p className="ui-stat-value text-purple-600 dark:text-purple-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Awaiting Signature</p>
+            <p className="text-2xl font-bold text-primary dark:text-primary">
               {stats.awaiting_signature}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Signed</p>
-            <p className="ui-stat-value text-emerald-600 dark:text-emerald-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Signed</p>
+            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {stats.signed}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Declined</p>
-            <p className="ui-stat-value text-red-600 dark:text-red-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Declined</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
               {stats.declined}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Expired</p>
-            <p className="ui-stat-value text-amber-600 dark:text-amber-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Expired</p>
+            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {stats.expired}
             </p>
           </div>
 
-          <div className="ui-stat-card">
-            <p className="ui-stat-label">Cancelled</p>
-            <p className="ui-stat-value text-red-600 dark:text-red-400">
+          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
+            <p className="text-sm font-medium text-muted-foreground">Cancelled</p>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
               {stats.cancelled}
             </p>
           </div>
         </div>
 
-        {/* Table Filter Bar */}
-        <TableFilterBar
+        {/* Admin Resource Toolbar */}
+        <AdminResourceToolbar
           search={search}
           onSearchChange={setSearch}
-          filters={{ status, clientId }}
-          onFiltersChange={(filters) => {
-            setSearch(filters.search ?? '');
-            setStatus(filters.status ?? 'all');
-            setClientId(filters.clientId ?? 'all');
-          }}
-          onAddItem={() => {
-            // We'll handle the "New Contract" button in the header
-          }}
-          filterOptions={ [
+          searchPlaceholder="Search contracts by title, client, number…"
+          filters={[
             {
+              id: 'status',
               label: 'Status',
-              value: 'status',
+              value: status,
               options: [
                 { label: 'All Statuses', value: 'all' },
                 { label: 'Draft', value: 'draft' },
@@ -268,40 +278,62 @@ export default function ContractsPage() {
                 { label: 'Declined', value: 'declined' },
                 { label: 'Expired', value: 'expired' },
                 { label: 'Cancelled', value: 'cancelled' },
-              ]
+              ],
             },
             {
+              id: 'clientId',
               label: 'Client',
-              value: 'clientId',
+              value: clientId,
               options: [
                 { label: 'All Clients', value: 'all' },
-                ...clients.map(client => ({
+                ...clients.map((client) => ({
                   label: client.name + (client.company ? ` (${client.company})` : ''),
                   value: client.id,
                 })),
-              ]
-            }
-          ] }
-          itemLabel="Contract"
+              ],
+            },
+          ] as AdminFilterConfig[]}
+          onFilterChange={(id, value) => {
+            if (id === 'status') setStatus(value ?? 'all');
+            if (id === 'clientId') setClientId(value ?? 'all');
+          }}
+          onClearAll={() => {
+            setSearch('');
+            setStatus('all');
+            setClientId('all');
+          }}
+          secondaryActions={[
+            {
+              label: 'Refresh',
+              onClick: () => void loadContracts(true),
+              variant: 'ghost',
+              size: 'icon',
+              icon: <RefreshCw className="h-4 w-4" />,
+            } as AdminToolbarAction,
+          ]}
+          resultCount={stats.total}
+          filteredCount={contracts.length}
+          resultLabel="Contracts"
+          loading={loading}
         />
 
         {/* TABLE */}
-        <div className="ui-card">
+        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
-            <div className="ui-loading-state p-12">
+            <div className="flex items-center justify-center p-12">
               <p className="text-xs font-sans uppercase tracking-widest">
                 Loading contracts…
               </p>
             </div>
           ) : contracts.length === 0 ? (
-            <div className="ui-empty-state p-12">
-              <div className="ui-empty-icon">
+            <div className="rounded-xl border border-dashed p-12 text-center p-12">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <FilePlus className="h-6 w-6" />
               </div>
 
-              <h2 className="ui-section-title">No contracts yet</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">No contracts yet</h2>
 
-              <p className="ui-body">
+              <p className="text-sm text-muted-foreground">
                 Create your first contract or browse templates.
               </p>
 
@@ -315,145 +347,25 @@ export default function ContractsPage() {
               </div>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="ui-table">
-                <thead>
-                  <tr>
-                    <th className="ui-table-header">Contract</th>
-                    <th className="ui-table-header">Client</th>
-                    <th className="ui-table-header">Project</th>
-                    <th className="ui-table-header">Status</th>
-                    <th className="ui-table-header">Created</th>
-                    <th className="ui-table-header">Sent</th>
-                    <th className="ui-table-header">Signed</th>
-                    <th className="ui-table-header" />
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {contracts.map((contract) => (
-                    <tr
-                      key={contract.id}
-                      className="ui-table-row"
-                    >
-                      {/* CONTRACT */}
-                      <td className="ui-table-cell">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/40 dark:text-purple-300">
-                            <FileSignature className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 space-y-1">
-                            <p className="font-medium text-slate-900 dark:text-white">
-                              {contract.title}
-                            </p>
-                            <p className="ui-meta text-xs text-slate-500 dark:text-zinc-600">
-                              #{contract.contractNumber}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* CLIENT */}
-                      <td className="ui-table-cell">
-                        <p className="text-sm font-medium text-slate-700 dark:text-zinc-300">
-                          {contract.clientName}
-                        </p>
-                      </td>
-
-                      {/* PROJECT */}
-                      <td className="ui-table-cell">
-                        {contract.projectName ?? (
-                          <span className="ui-caption text-xs text-slate-500 dark:text-zinc-600 italic">
-                            None
-                          </span>
-                        )}
-                      </td>
-
-                      {/* STATUS */}
-                      <td className="ui-table-cell">
-                        <div className="flex flex-col items-start gap-2">
-                          <span
-                            className={`${getStatusBadgeClass(contract.status)}`}
-                          >
-                            {formatStatus(contract.status)}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* CREATED */}
-                      <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {new Date(contract.createdAt).toLocaleDateString()}
-                        </p>
-                      </td>
-
-                      {/* SENT */}
-                      <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {contract.sentAt ? new Date(contract.sentAt).toLocaleDateString() : '-'}
-                        </p>
-                      </td>
-
-                      {/* SIGNED */}
-                      <td className="ui-table-cell">
-                        <p className="text-sm text-slate-500 dark:text-zinc-600">
-                          {contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '-'}
-                        </p>
-                      </td>
-
-                      {/* ACTION */}
-                      <td className="ui-table-cell text-right">
-                        <div className="flex gap-2">
-                          <Link
-                            href={`/admin/contracts/${contract.id}`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
-                          >
-                            View
-                            <ArrowUpRight className="h-3 w-3" />
-                          </Link>
-                          <Link
-                            href={`/admin/contracts/${contract.id}/edit`}
-                            className="ui-button ui-button-secondary text-sm font-sans"
-                          >
-                            Edit
-                            <Plus className="h-3 w-3" />
-                          </Link>
-                          {contract.status === 'draft' && (
-                            <>
-                              <Link
-                                href={`/admin/contracts/${contract.id}/send`}
-                                className="ui-button ui-button-success text-sm font-sans"
-                              >
-                                Send
-                                <CheckCircle2 className="h-3 w-3" />
-                              </Link>
-                              <Link
-                                href={`/admin/contracts/${contract.id}/duplicate`}
-                                className="ui-button ui-button-secondary text-sm font-sans"
-                              >
-                                Duplicate
-                                <FilePlus className="h-3 w-3" />
-                              </Link>
-                            </>
-                          )}
-                          <button
-                            onClick={() => {
-                              if (!window.confirm('Delete this contract?')) return;
-                              // Note: Delete logic would go here - keeping inline for now as it's complex to extract
-                              // In a real refactor, this would be moved to a service function
-                              window.location.reload(); // Placeholder - actual delete would fetch API
-                            }}
-                            className="ui-button ui-button-destructive text-sm font-sans"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <AdminDataTable
+              rows={contracts}
+              getRowLabel={(contract) => contract.title}
+              columns={[
+                { id: 'contract', header: 'Contract', cell: (contract) => <div><p className="font-medium">{contract.title}</p><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></div>, accessor: (contract) => contract.title, sortable: true },
+                { id: 'client', header: 'Client', accessor: (contract) => contract.clientName },
+                { id: 'project', header: 'Project', accessor: (contract) => contract.projectName || 'None', hideOnMobile: true },
+                { id: 'status', header: 'Status', cell: (contract) => <span className={getStatusBadgeClass(contract.status)}>{formatStatus(contract.status)}</span>, accessor: (contract) => contract.status },
+                { id: 'created', header: 'Created', cell: (contract) => new Date(contract.createdAt).toLocaleDateString(), accessor: (contract) => contract.createdAt, hideOnMobile: true },
+                { id: 'signed', header: 'Signed', cell: (contract) => contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '—', accessor: (contract) => contract.signedAt, hideOnMobile: true },
+              ]}
+              rowActions={[
+                { label: 'View', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}`) },
+                { label: 'Edit', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/edit`) },
+                { label: 'Send', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/send`) },
+                { label: 'Duplicate', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/duplicate`) },
+                { label: 'Delete', destructive: true, onSelect: () => window.location.reload() },
+              ]}
+            />
           )}
         </div>
       </div>

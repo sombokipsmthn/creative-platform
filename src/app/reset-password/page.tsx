@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
@@ -30,11 +32,11 @@ function ResetPasswordForm() {
   }
 
   return <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-    <input type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} disabled={isLoading || !token} placeholder="New password" className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900" />
-    <input type="password" required minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} disabled={isLoading || !token} placeholder="Confirm new password" className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm dark:border-zinc-800 dark:bg-zinc-900" />
+    <Input type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} disabled={isLoading || !token} placeholder="New password" />
+    <Input type="password" required minLength={8} value={confirmation} onChange={(event) => setConfirmation(event.target.value)} disabled={isLoading || !token} placeholder="Confirm new password" />
     {message && <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">{message}</p>}
     {error && <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
-    <button type="submit" disabled={isLoading || !token} className="w-full rounded-xl bg-purple-600 px-4 py-3 text-sm font-medium text-white disabled:opacity-50">{isLoading ? "Resetting..." : "Reset password"}</button>
+    <Button type="submit" disabled={isLoading || !token} variant="primary" className="w-full">{isLoading ? "Resetting..." : "Reset password"}</Button>
   </form>;
 }
 

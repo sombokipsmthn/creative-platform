@@ -5,6 +5,8 @@ import {
   useState,
 } from "react";
 import Image from "next/image";
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 import {
   ChevronLeft,
@@ -282,31 +284,9 @@ export default function ClientGalleryPage({
             continue.
           </p>
 
-          <input
-            value={pin}
-            onChange={(event) =>
-              setPin(event.target.value)
-            }
-            onKeyDown={(event) => {
-              if (
-                event.key === "Enter"
-              ) {
-                unlock();
-              }
-            }}
-            type="password"
-            inputMode="numeric"
-            maxLength={8}
-            placeholder="PIN"
-            className="mt-8 w-full text-center tracking-[0.4em] px-4 py-4 rounded-xl bg-white/5 border border-white/10 outline-none"
-          />
+          <Input value={pin} onChange={(event) => setPin(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") unlock() }} type="password" inputMode="numeric" maxLength={8} placeholder="PIN" className="mt-8 w-full text-center tracking-[0.4em]" />
 
-          <button
-            onClick={unlock}
-            className="mt-3 w-full py-3.5 rounded-xl bg-white text-black text-sm font-medium"
-          >
-            Enter Gallery
-          </button>
+          <Button onClick={unlock} variant="secondary" className="mt-3 w-full py-3.5">Enter Gallery</Button>
         </div>
       </main>
     );
@@ -328,15 +308,13 @@ export default function ClientGalleryPage({
               </p>
             </div>
 
-            <button className="px-4 py-2 rounded-lg border border-white/10 text-xs">
-              Share
-            </button>
+            <Button type="button" variant="outline" size="sm">Share</Button>
           </div>
 
           {collections.length >
             0 && (
             <div className="mt-5 flex gap-2 overflow-x-auto pb-1">
-              <button
+              <Button type="button"
                 onClick={() =>
                   setActiveCollection(
                     "all"
@@ -350,11 +328,11 @@ export default function ClientGalleryPage({
                 }`}
               >
                 All Photos
-              </button>
+              </Button>
 
               {collections.map(
                 (collection) => (
-                  <button
+                  <Button
                     key={
                       collection.id
                     }
@@ -373,7 +351,7 @@ export default function ClientGalleryPage({
                     {
                       collection.title
                     }
-                  </button>
+                  </Button>
                 )
               )}
             </div>
@@ -389,7 +367,7 @@ export default function ClientGalleryPage({
                 key={photo.id}
                 className="relative mb-3 md:mb-5 break-inside-avoid group"
               >
-                <button
+                <Button
                   onClick={() =>
                     setViewerIndex(
                       index
@@ -408,11 +386,11 @@ export default function ClientGalleryPage({
                     height={1200}
                     className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.01]"
                   />
-                </button>
+                </Button>
 
                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {gallery.allow_favorites && (
-                    <button
+                    <Button
                       onClick={() =>
                         toggleFavorite(
                           photo
@@ -432,11 +410,11 @@ export default function ClientGalleryPage({
                             : "none"
                         }
                       />
-                    </button>
+                    </Button>
                   )}
 
                   {gallery.allow_selections && (
-                    <button
+                    <Button
                       onClick={() =>
                         toggleSelection(
                           photo
@@ -449,7 +427,7 @@ export default function ClientGalleryPage({
                       }`}
                     >
                       ✓
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -464,7 +442,7 @@ export default function ClientGalleryPage({
           viewerIndex
         ] && (
           <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
-            <button
+            <Button type="button"
               onClick={() =>
                 setViewerIndex(
                   null
@@ -473,9 +451,9 @@ export default function ClientGalleryPage({
               className="absolute top-5 right-5 z-10 w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"
             >
               <X className="w-5 h-5" />
-            </button>
+            </Button>
 
-            <button
+            <Button type="button"
               onClick={() =>
                 setViewerIndex(
                   Math.max(
@@ -487,7 +465,7 @@ export default function ClientGalleryPage({
               className="absolute left-4 md:left-8 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"
             >
               <ChevronLeft />
-            </button>
+            </Button>
 
             <div className="relative w-[90vw] h-[90vh]">
               <Image
@@ -507,7 +485,7 @@ export default function ClientGalleryPage({
               />
             </div>
 
-            <button
+            <Button type="button"
               onClick={() =>
                 setViewerIndex(
                   Math.min(
@@ -520,7 +498,7 @@ export default function ClientGalleryPage({
               className="absolute right-4 md:right-8 w-12 h-12 rounded-full bg-white/10 flex items-center justify-center"
             >
               <ChevronRight />
-            </button>
+            </Button>
 
             {gallery.allow_downloads && (
               <a

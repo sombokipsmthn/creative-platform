@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { SERVICE_CATALOG, ServiceCatalogItem, type ServiceCategory } from '@/lib/serviceCatalog';
 import { toCatalogItem, toServiceCatalogItem } from '@/lib/catalog';
+import { SelectCompat } from '@/components/ui/select-compat';
 
 export type QuoteLineItem = {
   id: string;
@@ -274,7 +275,7 @@ export default function EquipmentServicesSelector({
       <div className="flex flex-col justify-between gap-3 border-b border-slate-100 pb-4 sm:flex-row sm:items-center dark:border-zinc-800">
         <div>
           <h3 className="flex items-center gap-2 text-base font-semibold text-slate-900 dark:text-white">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-purple-600" />
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-primary" />
             Equipment & Services Catalog
           </h3>
           <p className="font-sans text-xs text-slate-500 dark:text-zinc-400">
@@ -285,7 +286,7 @@ export default function EquipmentServicesSelector({
         <button
           type="button"
           onClick={() => setShowCustomForm((previous) => !previous)}
-          className="rounded-full border border-purple-500/50 bg-purple-50 px-3 py-1.5 font-sans text-xs font-semibold uppercase text-purple-700 transition hover:bg-purple-600 hover:text-white dark:bg-purple-950/40 dark:text-purple-300"
+          className="rounded-full border border-primary/50 bg-primary/10 px-3 py-1.5 font-sans text-xs font-semibold uppercase text-primary transition hover:bg-primary hover:text-white dark:bg-primary/15 dark:text-primary"
         >
           {showCustomForm ? '✕ Close Custom' : '+ Add Custom Gear/Service'}
         </button>
@@ -300,9 +301,9 @@ export default function EquipmentServicesSelector({
       {showCustomForm && (
         <form
           onSubmit={handleAddCustomItem}
-          className="space-y-4 rounded-xl border border-purple-200 bg-slate-50 p-4 dark:border-purple-900/50 dark:bg-zinc-950"
+          className="space-y-4 rounded-xl border border-primary bg-slate-50 p-4 dark:border-primary/50 dark:bg-zinc-950"
         >
-          <div className="font-sans text-xs font-bold uppercase text-purple-700 dark:text-purple-400">
+          <div className="font-sans text-xs font-bold uppercase text-primary dark:text-primary">
             Create Custom Line Item
           </div>
 
@@ -316,7 +317,7 @@ export default function EquipmentServicesSelector({
                 value={customName}
                 onChange={(event) => setCustomName(event.target.value)}
                 placeholder="e.g. Teleprompter Kit + Operator"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-primary dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 required
               />
             </div>
@@ -325,10 +326,10 @@ export default function EquipmentServicesSelector({
               <label className="mb-1 block font-sans text-[10px] uppercase text-slate-600 dark:text-zinc-400">
                 Target Section *
               </label>
-              <select
+              <SelectCompat
                 value={customSection}
                 onChange={(event) => handleSectionChange(event.target.value)}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-primary dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
               >
                 <option value="A. Professional Fees (Core)">A. Professional Fees (Core)</option>
                 <option value="Camera Package">Camera Package</option>
@@ -340,7 +341,7 @@ export default function EquipmentServicesSelector({
                 <option value="C. Travel & Logistics">C. Travel & Logistics</option>
                 <option value="Postproduction (Per output billing)">Postproduction (Per output billing)</option>
                 <option value="Extra costs">Extra costs</option>
-              </select>
+              </SelectCompat>
             </div>
 
             <div>
@@ -352,7 +353,7 @@ export default function EquipmentServicesSelector({
                 min="0"
                 value={customRate}
                 onChange={(event) => setCustomRate(event.target.value === '' ? '' : Number(event.target.value))}
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-sans text-xs text-slate-900 outline-none focus:border-primary dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
                 required
               />
             </div>
@@ -386,7 +387,7 @@ export default function EquipmentServicesSelector({
                 value={customNotes}
                 onChange={(event) => setCustomNotes(event.target.value)}
                 placeholder="e.g. Dual wireless audio & field monitor included"
-                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-900 outline-none focus:border-primary dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
               />
             </div>
           </div>
@@ -395,7 +396,7 @@ export default function EquipmentServicesSelector({
             <button type="button" onClick={() => setShowCustomForm(false)} className="px-3 py-1 text-xs font-sans text-slate-500 hover:text-slate-700 dark:text-zinc-400">
               Cancel
             </button>
-            <button type="submit" className="rounded-full bg-purple-600 px-4 py-1.5 font-sans text-xs font-semibold uppercase text-white transition hover:bg-purple-700">
+            <button type="submit" className="rounded-full bg-primary px-4 py-1.5 font-sans text-xs font-semibold uppercase text-white transition hover:bg-primary">
               Insert Line Item →
             </button>
           </div>
@@ -409,7 +410,7 @@ export default function EquipmentServicesSelector({
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Search equipment or service..."
-            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 pl-10 text-xs text-slate-900 outline-none transition focus:border-purple-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2.5 pl-10 text-xs text-slate-900 outline-none transition focus:border-primary dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
           />
           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">🔍</span>
           {searchTerm && (
@@ -427,8 +428,8 @@ export default function EquipmentServicesSelector({
               onClick={() => setSelectedCategory(category.key)}
               className={`whitespace-nowrap rounded-full px-3 py-1 font-sans text-[11px] transition ${
                 selectedCategory === category.key
-                  ? 'bg-purple-600 font-bold text-white'
-                  : 'bg-slate-100 text-slate-600 hover:text-purple-600 dark:bg-zinc-800 dark:text-zinc-400'
+                  ? 'bg-primary font-bold text-white'
+                  : 'bg-slate-100 text-slate-600 hover:text-primary dark:bg-zinc-800 dark:text-zinc-400'
               }`}
             >
               {category.label}
@@ -450,14 +451,14 @@ export default function EquipmentServicesSelector({
           return (
             <div
               key={item.id}
-              className="flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition hover:border-purple-400 dark:border-zinc-800/80 dark:bg-zinc-950/40 dark:hover:border-purple-600/60"
+              className="flex flex-col justify-between gap-2.5 rounded-xl border border-slate-200 bg-slate-50/50 p-3 transition hover:border-primary dark:border-zinc-800/80 dark:bg-zinc-950/40 dark:hover:border-primary/60"
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <span className="line-clamp-2 text-xs font-semibold text-slate-900 dark:text-zinc-200">{item.name}</span>
                 </div>
                 <div className="mt-0.5 flex items-center gap-2">
-                  <span className="font-sans text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                  <span className="font-sans text-[10px] font-bold text-primary dark:text-primary">
                     {currency} {Number(item.defaultRate).toLocaleString()}
                   </span>
                   <span className="font-sans text-[10px] text-slate-400">/{item.defaultUnit}</span>
@@ -490,7 +491,7 @@ export default function EquipmentServicesSelector({
                 <button
                   type="button"
                   onClick={() => handleAddCatalogItem(item)}
-                  className="rounded-lg bg-purple-600 px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition hover:bg-purple-700"
+                  className="rounded-lg bg-primary px-3 py-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm transition hover:bg-primary"
                 >
                   + Add
                 </button>

@@ -15,6 +15,8 @@ import {
   Eye,
   Heart,
   ImageIcon,
+  LayoutGrid,
+  List,
   MessageSquare,
   Plus,
   RefreshCw,
@@ -26,7 +28,11 @@ import {
   Users,
 } from 'lucide-react';
 
-import TableFilterBar from '@/components/admin/TableFilterBar';
+import AdminDataTable from '@/components/admin/AdminDataTable';
+import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
+import { SelectCompat } from '@/components/ui/select-compat';
+import { Button } from '@/components/ui/button';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 
 interface GalleryItem {
   id: string;
@@ -93,6 +99,17 @@ export default function AdminGalleryManagerPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'published'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [galleryView, setGalleryView] = useState<'grid' | 'list'>('grid');
+
+  useEffect(() => {
+    const savedView = window.localStorage.getItem('kipsmthn-gallery-view');
+    if (savedView === 'grid' || savedView === 'list') setGalleryView(savedView);
+  }, []);
+
+  function changeGalleryView(view: 'grid' | 'list') {
+    setGalleryView(view);
+    window.localStorage.setItem('kipsmthn-gallery-view', view);
+  }
 
   // Form states for creating new gallery
   const [title, setTitle] = useState('');
@@ -120,9 +137,9 @@ export default function AdminGalleryManagerPage() {
       else setIsRefreshing(true);
 
       const [galRes, clientRes, activityRes] = await Promise.all([
-        fetch('/api/galleries', { cache: 'no-store' }),
-        fetch('/api/clients', { cache: 'no-store' }),
-        fetch('/api/galleries/activity', { cache: 'no-store' }),
+        fetch('/api/galleries', { cache: 'no-store', credentials: 'same-origin' }),
+        fetch('/api/clients', { cache: 'no-store', credentials: 'same-origin' }),
+        fetch('/api/galleries/activity', { cache: 'no-store', credentials: 'same-origin' }),
       ]);
 
       if (galRes.ok) {
@@ -204,7 +221,7 @@ export default function AdminGalleryManagerPage() {
           title: title.trim(),
           clientId: clientId || null,
           category,
-          accessPin: pin.trim() || '4821',
+          accessPin: pin.trim() || null,
           allowDownloads,
           allowFavorites,
           allowSelections,
@@ -297,7 +314,7 @@ export default function AdminGalleryManagerPage() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-xl shadow-2xl text-[11px] font-sans flex items-center gap-3 animate-fade-in border border-white/10 dark:border-zinc-200">
-          <Sparkles className="w-4 h-4 text-purple-500" />
+          <Sparkles className="w-4 h-4 text-primary" />
           <span className="font-medium">{toastMessage}</span>
         </div>
       )}
@@ -319,7 +336,7 @@ export default function AdminGalleryManagerPage() {
                 Galleries
               </h1>
               {isRefreshing && (
-                <RefreshCw className="w-4 h-4 text-purple-500 animate-spin opacity-50" />
+                <RefreshCw className="w-4 h-4 text-primary animate-spin opacity-50" />
               )}
             </div>
 
@@ -345,7 +362,7 @@ export default function AdminGalleryManagerPage() {
               <Activity className="w-3.5 h-3.5" />
               Activity
               {activities.length > 0 && activeTab !== 'activity' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full animate-pulse" />
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
               )}
             </button>
 
@@ -373,43 +390,67 @@ export default function AdminGalleryManagerPage() {
         {activeTab === 'all' && (
           <>
             <div className="space-y-6">
-              <TableFilterBar
+              <AdminResourceToolbar
                 search={searchQuery}
                 onSearchChange={setSearchQuery}
-                filters={{ status: filterStatus, category: filterCategory }}
-                onFiltersChange={(filters) => {
-                  const nextStatus = filters.status;
-                  if (nextStatus === 'all' || nextStatus === 'draft' || nextStatus === 'published') {
-                    setFilterStatus(nextStatus);
-                  }
-                  setFilterCategory(filters.category ?? 'all');
-                }}
-                onAddItem={() => {
-                  setActiveTab('create');
-                }}
-                filterOptions={ [
+                searchPlaceholder="Search galleries by title, client, category…"
+                filters={[
                   {
+                    id: 'status',
                     label: 'Status',
-                    value: 'status',
+                    value: filterStatus,
                     options: [
                       { label: 'All Statuses', value: 'all' },
                       { label: 'Draft', value: 'draft' },
                       { label: 'Published', value: 'published' },
-                    ]
+                    ],
                   },
                   {
+                    id: 'category',
                     label: 'Category',
-                    value: 'category',
+                    value: filterCategory,
                     options: [
                       { label: 'All Categories', value: 'all' },
                       ...CATEGORY_OPTIONS.map((cat) => ({
                         label: cat,
                         value: cat,
-                      }))
-                    ]
-                  }
+                      })),
+                    ],
+                  },
+                ] as AdminFilterConfig[]}
+                onFilterChange={(id, value) => {
+                  if (id === 'status') setFilterStatus(value as 'all' | 'draft' | 'published');
+                  if (id === 'category') setFilterCategory(value ?? 'all');
+                }}
+                onClearAll={() => {
+                  setSearchQuery('');
+                  setFilterStatus('all');
+                  setFilterCategory('all');
+                }}
+                secondaryActions={[
+                  {
+                    label: '',
+                    onClick: () => fetchData(true),
+                    variant: 'outline',
+                    size: 'sm',
+                    icon: <RefreshCw className={isRefreshing ? 'h-3.5 w-3.5 animate-spin' : 'h-3.5 w-3.5'} />,
+                    disabled: isRefreshing,
+                  } as AdminToolbarAction,
+                  {
+                    label: galleryView === 'grid' ? 'Switch to list view' : 'Switch to grid view',
+                    onClick: () => changeGalleryView(galleryView === 'grid' ? 'list' : 'grid'),
+                    variant: 'outline',
+                    size: 'icon',
+                    icon: galleryView === 'grid'
+                      ? <List className="h-4 w-4" />
+                      : <LayoutGrid className="h-4 w-4" />,
+                  } as AdminToolbarAction,
                 ]}
-                itemLabel="Gallery" />
+                resultCount={galleries.length}
+                filteredCount={filteredGalleries.length}
+                resultLabel="Galleries"
+                loading={isLoading}
+              />
 
               {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -444,8 +485,24 @@ export default function AdminGalleryManagerPage() {
                     </p>
                   </div>
                 </div>
+              ) : galleryView === 'list' ? (
+                <AdminDataTable
+                  rows={filteredGalleries}
+                  getRowLabel={(gallery) => gallery.title}
+                  columns={[
+                    { id: 'gallery', header: 'Gallery', cell: (gallery) => <div className="flex items-center gap-3"><div className="relative h-10 w-14 overflow-hidden rounded-lg bg-muted">{gallery.cover_url && <Image src={gallery.cover_url} alt="" fill className="object-cover" unoptimized />}</div><div><p className="font-medium">{gallery.title}</p><p className="text-xs text-muted-foreground">{gallery.client_name || 'Individual Client'}</p></div></div>, accessor: (gallery) => gallery.title, sortable: true },
+                    { id: 'photos', header: 'Photos', accessor: (gallery) => gallery.photo_count, align: 'right' },
+                    { id: 'status', header: 'Status', cell: (gallery) => <span className="ui-badge">{gallery.status}</span>, accessor: (gallery) => gallery.status },
+                    { id: 'updated', header: 'Updated', cell: (gallery) => new Date(gallery.last_activity_at || gallery.created_at).toLocaleDateString('en-KE'), accessor: (gallery) => gallery.last_activity_at || gallery.created_at, hideOnMobile: true },
+                  ]}
+                  rowActions={[
+                    { label: 'Manage', onSelect: (gallery) => router.push(`/admin/galleries/${gallery.id}`) },
+                    { label: 'Copy share link', onSelect: (gallery) => copyShareLink(gallery.slug) },
+                    { label: 'Delete', destructive: true, onSelect: (gallery) => void handleDeleteGallery(gallery.id, gallery.title) },
+                  ]}
+                />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
                   {filteredGalleries.map((gal) => {
                     const fallbackCover =
                       'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1000&q=80';
@@ -454,10 +511,10 @@ export default function AdminGalleryManagerPage() {
                     return (
                       <div
                         key={gal.id}
-                        className="group ui-card ui-card-interactive flex flex-col overflow-hidden"
+                        className="group ui-card ui-card-interactive flex flex-col overflow-hidden bg-card border-border"
                       >
                         {/* Cover Photo */}
-                        <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden ">
                           <Image
                             src={coverSrc}
                             alt={gal.title}
@@ -513,7 +570,7 @@ export default function AdminGalleryManagerPage() {
                           <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                             <div className="space-y-1">
                               <p className="ui-meta text-white/80 flex items-center gap-2">
-                                <Users className="w-3 h-3 text-purple-400" />
+                                <Users className="w-3 h-3 text-primary" />
                                 {gal.client_name || 'Individual Client'}
                               </p>
                               <h3 className="text-lg font-medium text-white leading-tight drop-shadow-md">
@@ -538,7 +595,7 @@ export default function AdminGalleryManagerPage() {
                               <span className="ui-meta text-[8px] uppercase">Faves</span>
                             </div>
                             <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl flex flex-col items-center gap-1">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />
+                              <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
                               <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{gal.selections_count || 0}</span>
                               <span className="ui-meta text-[8px] uppercase">Proofs</span>
                             </div>
@@ -567,30 +624,12 @@ export default function AdminGalleryManagerPage() {
 
                           {/* Actions Bar */}
                           <div className="grid grid-cols-2 gap-3 pt-2">
-                            <Link
-                              href={`/admin/galleries/${gal.id}`}
-                              className="ui-button ui-button-primary rounded-xl flex items-center justify-center gap-2 shadow-sm"
-                            >
-                              <Sliders className="w-3.5 h-3.5" />
-                              Manage
-                            </Link>
+                            <Button asChild variant="primary" className="rounded-xl shadow-sm"><Link href={`/admin/galleries/${gal.id}`}><Sliders className="w-3.5 h-3.5" />Manage</Link></Button>
                             
                             <div className="flex gap-2">
-                              <button
-                                onClick={(e) => { e.preventDefault(); copyShareLink(gal.slug || gal.id); }}
-                                className="ui-button ui-button-secondary flex-1 rounded-xl flex items-center justify-center gap-2 transition-colors"
-                                title="Copy Client Link"
-                              >
-                                <Copy className="w-3 h-3" />
-                                Link
-                              </button>
+                              <Button onClick={(e) => { e.preventDefault(); copyShareLink(gal.slug || gal.id); }} variant="secondary" className="flex-1 rounded-xl" title="Copy Client Link"><Copy className="w-3 h-3" />Link</Button>
 
-                              <button
-                                onClick={(e) => { e.preventDefault(); handleDeleteGallery(gal.id, gal.title); }}
-                                className="ui-button ui-button-destructive p-3 rounded-xl transition-all"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <Button onClick={(e) => { e.preventDefault(); handleDeleteGallery(gal.id, gal.title); }} variant="ghost" size="icon" className="text-muted-foreground hover:bg-muted hover:text-foreground" aria-label="Delete gallery"><Trash2 className="w-3.5 h-3.5" /></Button>
                             </div>
                           </div>
                         </div>
@@ -609,17 +648,10 @@ export default function AdminGalleryManagerPage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <h2 className="ui-section-title text-2xl flex items-center gap-3">
-                  <Activity className="w-6 h-6 text-purple-600" />
+                  <Activity className="w-6 h-6 text-primary" />
                   Live Client Interaction
                 </h2>
-                <button 
-                  onClick={() => fetchData(true)}
-                  disabled={isRefreshing}
-                  className="ui-button ui-button-ghost ui-button-sm flex items-center gap-2"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
+                <Button onClick={() => fetchData(true)} disabled={isRefreshing} variant="ghost" size="sm"><RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />Refresh</Button>
               </div>
               <p className="ui-body font-sans">
                 Recent engagement events from all published portals. (Auto-polls every 30s)
@@ -641,8 +673,8 @@ export default function AdminGalleryManagerPage() {
                 {activities.map((act, idx) => {
                   const typeStyles = {
                     favorite: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-500/10', label: 'Favorited a photo' },
-                    selection: { icon: CheckCircle2, color: 'text-purple-500', bg: 'bg-purple-500/10', label: 'Selected for proofing' },
-                    selection_and_favorite: { icon: Sparkles, color: 'text-indigo-500', bg: 'bg-indigo-500/10', label: 'Selected & Favorited' },
+                    selection: { icon: CheckCircle2, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected for proofing' },
+                    selection_and_favorite: { icon: Sparkles, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected & Favorited' },
                     comment: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Left a comment' },
                     download: { icon: Download, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Downloaded a photo' },
                     view: { icon: Eye, color: 'text-slate-500', bg: 'bg-slate-500/10', label: 'Viewed the gallery' },
@@ -655,7 +687,7 @@ export default function AdminGalleryManagerPage() {
                   return (
                     <div
                       key={act.id + idx}
-                      className="ui-card p-5 flex items-center gap-6 hover:border-purple-500/40 transition-all shadow-sm ui-fade-in"
+                      className="ui-card p-5 flex items-center gap-6 hover:border-primary/40 transition-all shadow-sm ui-fade-in"
                     >
                       <div className={`w-12 h-12 rounded-2xl ${config.bg} flex items-center justify-center shrink-0`}>
                         <Icon className={`w-6 h-6 ${config.color}`} />
@@ -666,17 +698,17 @@ export default function AdminGalleryManagerPage() {
                           <Clock className="w-3 h-3" />
                           <span>{new Date(act.created_at).toLocaleString()}</span>
                           <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-zinc-800" />
-                          <span className="text-purple-500 font-bold">{act.gallery_title}</span>
+                          <span className="text-primary font-bold">{act.gallery_title}</span>
                         </div>
 
                         <h4 className="ui-card-title text-sm truncate">
-                          <span className="text-purple-600 dark:text-purple-400">{act.client_name || 'A Client'}</span>
+                          <span className="text-primary dark:text-primary">{act.client_name || 'A Client'}</span>
                           {' '}{config.label}
                         </h4>
                       </div>
 
                       {act.photo_url && (
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950 shrink-0 border border-slate-100 dark:border-zinc-800 shadow-sm">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden  shrink-0 border border-slate-100 dark:border-zinc-800 shadow-sm">
                           <Image
                             src={act.photo_url}
                             alt="Activity Photo"
@@ -688,12 +720,7 @@ export default function AdminGalleryManagerPage() {
                         </div>
                       )}
 
-                      <Link
-                        href={`/admin/galleries/${act.gallery_id}`}
-                        className="ui-button ui-button-ghost ui-button-icon-sm shrink-0"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                      </Link>
+                      <Button asChild variant="ghost" size="icon-sm" className="shrink-0"><Link href={`/admin/galleries/${act.gallery_id}`} aria-label="Open gallery"><ExternalLink className="w-4 h-4" /></Link></Button>
                     </div>
                   );
                 })}
@@ -704,8 +731,13 @@ export default function AdminGalleryManagerPage() {
 
         {/* TAB 3: CREATE GALLERY FORM */}
         {activeTab === 'create' && (
-          <div className="max-w-2xl mx-auto">
-            <div className="ui-card rounded-[40px] p-8 md:p-12 shadow-2xl space-y-10">
+          <StandardCreationDialog
+            open
+            onOpenChange={(open) => { if (!open) setActiveTab('all'); }}
+            title="Create a new gallery"
+            description="Create a private draft gallery, then continue in the gallery manager to upload and configure delivery."
+            className="max-w-3xl"
+          >
               <div className="space-y-3 text-center">
                 <div className="ui-icon-box ui-icon-box-lg mx-auto">
                   <Plus className="w-6 h-6" />
@@ -721,10 +753,11 @@ export default function AdminGalleryManagerPage() {
               <form onSubmit={handleCreateGallery} className="space-y-8">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <label className="ui-label ui-meta uppercase tracking-widest pl-1">
+                    <label htmlFor="gallery-title" className="ui-label ui-meta uppercase tracking-widest pl-1">
                       Gallery Title
                     </label>
                     <input
+                      id="gallery-title"
                       type="text"
                       required
                       placeholder="e.g. Safaricom Spark Accelerator 2026"
@@ -739,7 +772,7 @@ export default function AdminGalleryManagerPage() {
                       <label className="ui-label ui-meta uppercase tracking-widest pl-1">
                         Client
                       </label>
-                      <select
+                      <SelectCompat
                         value={clientId}
                         onChange={(e) => setClientId(e.target.value)}
                         className="ui-select h-14 rounded-2xl w-full"
@@ -750,14 +783,14 @@ export default function AdminGalleryManagerPage() {
                             {c.name}
                           </option>
                         ))}
-                      </select>
+                      </SelectCompat>
                     </div>
 
                     <div className="space-y-2">
                       <label className="ui-label ui-meta uppercase tracking-widest pl-1">
                         Category
                       </label>
-                      <select
+                      <SelectCompat
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
                         className="ui-select h-14 rounded-2xl w-full"
@@ -767,7 +800,7 @@ export default function AdminGalleryManagerPage() {
                             {cat}
                           </option>
                         ))}
-                      </select>
+                      </SelectCompat>
                     </div>
                   </div>
 
@@ -792,7 +825,7 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Downloads</p>
                       <p className="ui-caption font-sans">Allow full-resolution & ZIP delivery</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowDownloads ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
@@ -802,7 +835,7 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Favorites</p>
                       <p className="ui-caption font-sans">Allow hearting / liking photos</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowFavorites ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
@@ -812,17 +845,13 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Proofing</p>
                       <p className="ui-caption font-sans">Enable client selection for delivery</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-purple-600' : 'bg-slate-200 dark:bg-zinc-700'}`}>
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
                       <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowSelections ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className="ui-button ui-button-primary ui-button-lg w-full h-16 rounded-2xl shadow-xl shadow-purple-500/10"
-                >
+                <Button type="submit" disabled={isCreating} variant="primary" size="lg" className="w-full h-16 rounded-2xl shadow-xl shadow-primary/10">
                   {isCreating ? (
                     <>
                       <RefreshCw className="w-4 h-4 animate-spin" />
@@ -834,10 +863,9 @@ export default function AdminGalleryManagerPage() {
                       <span>Create & Launch Gallery Manager</span>
                     </>
                   )}
-                </button>
+                </Button>
               </form>
-            </div>
-          </div>
+          </StandardCreationDialog>
         )}
       </div>
     </div>

@@ -5,7 +5,9 @@ This document describes the live implementation of the KIPSMTHN Creative Platfor
 
 Historical references to older auth and architecture decisions remain in archive and compliance materials for traceability, but they do not supersede the current implementation.
 
-_Last Updated: 2026-10-10_
+_Last Updated: 2026-10-21_
+
+> **Status and precedence update — 2026-10-21:** The consolidated source for current decisions is [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md); use [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md) to navigate related material. This implementation spec is not a substitute for checking current source files and runtime behavior. Treat any stale route inventories, version numbers, storage-provider claims, feature checkboxes, or completion statements below as unverified until checked against the current `dev` branch. Do not mark requested authentication providers or workflows complete without runtime validation.
 
 ---
 
@@ -142,22 +144,43 @@ The repository should keep these categories distinct:
 
 - `README.md` — project overview and active implementation summary
 - `KIPSMTHN-IMPLEMENTATION-SPEC.md` — current implementation reference
-- `docs/00-project/` — product/project context
-- `docs/01-specifications/` — active feature and system expectations
-- `docs/02-architecture/` — system architecture and design details
-- `docs/03-design-system/` — UI and styling system guidance
-- `docs/04-security-compliance/` — active security/compliance guidance
-- `docs/05-development-operations/` — operational workflows
-- `docs/06-decisions/` — design and architecture decisions
-- `docs/07-audits/` — current audit and review material
-- `docs/08-history/` — migration and historical notes
-- `docs/archive/` and `docs/soc2/` — retained historical records and archival evidence
+- `docs/PROJECT-HANDBOOK.md` — canonical consolidated project decisions and requirements
+- `docs/DOCUMENTATION-INDEX.md` — verified map of active and historical documentation
+- `docs/design-system.md`, `docs/api-reference.md`, and `docs/demo-account.md` — active specialist guides
+- `docs/audits/`, `docs/reports/`, and `docs/studio-command-center-implementation.md` — dated audits, verification reports, and feature history
+- `docs/archive/` and `docs/soc2/` — retained historical records, plans, and evidence
 
 This structure preserves the repo’s memory without letting legacy materials overwrite the current implementation.
 
 ---
 
-## 7. Implementation summary
+## 7. UX and presentation implementation
+
+### Verified redesign state
+- Public homepage `/` presents the creative-business platform to visitors; authenticated creator operations remain under `/admin`.
+- `/admin/settings` was reorganized around working capabilities: creator profile, public portfolio, gallery delivery, and authentication guidance.
+- Unsupported non-persistent controls for custom domains, platform-brand removal, email templates, unsupported integrations, and hardcoded tax preferences were removed from the settings UI rather than presented as working features.
+- The persisted `WatermarkStudio` remains the gallery-delivery control and uses the existing watermark preset APIs, image upload flow, save/revert feedback, and gallery-specific inheritance behavior.
+- Shared admin headers and navigation use semantic shadcn tokens and responsive layouts.
+- Live onboarding, dashboard loading, and gallery theme defaults no longer use legacy purple literals; historical backup files remain unchanged for audit evidence.
+- The repository contains no verifiable Shade CN preset identifier or `bJMXaQi0` reference. The verified project configuration remains `radix-nova`, stone base, and CSS variables in `components.json`.
+
+### Route inventory reviewed
+- Public: `/`, `/about`, `/services`, `/work`, `/contact`, `/privacy`, `/p/[handle]`, and `/work/[slug]`.
+- Authentication: `/sign-in`, `/sign-up`, `/auth`, `/forgot-password`, `/reset-password`, and `/thanks`.
+- Creator workspace: `/admin`, `/admin/calendar`, `/admin/clients`, `/admin/projects`, `/admin/galleries`, `/admin/quotes`, `/admin/invoices`, `/admin/payments`, `/admin/contracts`, `/admin/expenses`, `/admin/equipment`, `/admin/profile`, `/admin/portfolio`, `/admin/settings`, and onboarding.
+- Client delivery: `/Portal`, `/Portal/g/[secretToken]`, `/Portal/g/[secretToken]/[slug]`, and `/contract/[token]`.
+- API contracts and database behavior were preserved during presentation changes.
+
+### Validation record
+- Production build: passed.
+- TypeScript check: passed.
+- Design-system guardrails: passed.
+- Vitest suite: 15 files and 73 tests passed in the last completed run.
+- ESLint: zero errors with seven existing React hook warnings outside the redesign scope.
+- Browser visual checks: public homepage passed at mobile and desktop sizes with primary actions and no horizontal overflow. Settings shell, profile destination, and portfolio destination rendered at both sizes. Watermark API returned HTTP 500 in the local environment, blocking complete settings interaction verification. Repeated authenticated smoke traffic eventually caused the development server to reset, so the full authenticated smoke suite is not reported as passing.
+
+## 8. Implementation summary
 
 The current app is a Better Auth + Drizzle + Next.js platform with creator-scoped ownership rules and a database-backed business workflow. The live implementation is authoritative; older documentation that assumes Clerk or a different auth architecture should be treated as historical context until explicitly rewritten or archived.
 
@@ -216,7 +239,7 @@ The correct interpretation of the codebase is:
 - **Platform**: Vercel for hosting and deployments
 - **Database**: Neon for PostgreSQL hosting
 - **Storage**: Vercel Blob for object storage
-- **Authentication**: Clerk for user management
+- **Authentication**: Better Auth for user management
 - **CI/CD**: Vercel's built-in deployment system with preview deployments
 - **Environment Variables**: Managed through Vercel dashboard
 - **Monitoring**: Basic Vercel analytics and error tracking
@@ -336,8 +359,8 @@ The correct interpretation of the codebase is:
 - **File Storage**: Vercel Blob for media assets (images, videos)
 - **Email**: Resend (planned integration)
 - **Payments**: Stripe (planned)
-- **Authentication**: Clerk
-- **Webhook Verification**: Svix for Clerk webhooks
+- **Authentication**: Better Auth
+- **Webhook Verification**: Svix for Better Auth webhooks
 - **Image Processing**: Custom library for watermarking and transformations
 - **Video Processing**: Custom library for video handling
 - **External APIs**: 
@@ -397,7 +420,7 @@ Based on codebase examination:
   - Payment tracking (inferred)
   - Revenue and dashboard analytics
 - **Onboarding**: 
-  - User profile completion after Clerk sign-in
+  - User profile completion after Better Auth sign-in
   - Service offerings configuration
   - Business information setup
   - Handle/username availability checking
@@ -730,3 +753,16 @@ This implementation specification has been reviewed and approved by:
 
 ---
 *This document is the single source of truth for the KIPSMTHN Creative Platform implementation. All development, testing, and deployment activities should align with this specification.*
+
+## Current implementation notes and required behavior (2026-10-21)
+
+- Better Auth is the active authentication system; do not reintroduce Clerk runtime dependencies or middleware assumptions.
+- The intended authentication experience combines available sign-in methods, local user resolution, and onboarding. Google OAuth and passkeys require actual configuration and runtime verification. Demo login must target the dedicated demo database and seeded account.
+- Preserve calendar functionality and existing workflows while repairing auth/dashboard regressions or applying styling changes.
+- Keep the public homepage separate from the authenticated creator workspace.
+- Use the canonical shadcn/ui primitives and semantic tokens. Shared global styling belongs in `src/app/globals.css`; typography, sizing, spacing, radii, buttons, inputs, and admin headers should remain consistent. Avoid monospace product UI and unsupported hardcoded theme colors.
+- Admin Search/Status/Category filters and New/Create controls may receive styling-only changes when requested; their existing data and business logic must not change.
+- Requested local development convention is Next.js on port 3000, with all other resources on separate ports. Verify scripts and local services before reporting completion.
+- For schema errors such as a missing table, verify the database target and Drizzle migration state; fix the underlying schema/database mismatch instead of masking the failure.
+- Development data cleanup must preserve the equipment catalogue and valid migration history, remove only confirmed creator-owned records and their positively identified uploaded objects, and never affect production.
+- For status reporting, distinguish implemented/verified, partial, requested/planned, and blocked/unverified. A successful build does not prove authenticated runtime workflows work.

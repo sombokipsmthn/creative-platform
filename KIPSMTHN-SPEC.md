@@ -1,8 +1,10 @@
 # KIPSMTHN Creative Platform — Single Source of Truth Specification
 
-**Last Updated:** 2026-10-16
+**Last Updated:** 2026-10-21
 
 > This document is the authoritative specification for the KIPSMTHN Creative Platform. It consolidates information from the existing codebase, `KIPSMTHN-IMPLEMENTATION-SPEC.md`, and active documentation. Historical and archived materials are maintained for reference only and do not override the live implementation.
+
+> **Current-document precedence (2026-10-21):** Use [the Project Handbook](./docs/PROJECT-HANDBOOK.md) and [Documentation Index](./docs/DOCUMENTATION-INDEX.md) as the consolidated reference for decisions and status. This spec describes product scope; it does not certify that each feature is implemented. Better Auth remains active; preserve the calendar and existing business behavior during auth/UI fixes. The current code and tests take precedence over stale route lists, package versions, or historical completion claims below.
 
 ---
 
@@ -54,7 +56,7 @@ KIPSMTHN Creative Platform is a Next.js App Router application for managing a cr
 | Layer | Technology | Details |
 | ------- | ----------- | --------- |
 | **Framework** | Next.js 16.x | App Router mode |
-| **Language** | TypeScript 6.x | Strict typing |
+| **Language** | TypeScript 5.9.3 (lockfile-resolved) | Strict typing; `package.json` range is `^5.8.2` |
 | **UI Library** | React 19 | Function components with hooks |
 | **Styling** | Tailwind CSS 4 | CSS custom properties in `src/app/globals.css` |
 | **ORM/Database** | Drizzle ORM | PostgreSQL via Neon serverless |
@@ -332,7 +334,7 @@ All environment variables are managed through Vercel dashboard or `.env.local` f
 | Variable | Type | Required | Description |
 | ---------- | ------ | ---------- | ------------- |
 | `BETTER_AUTH_SECRET` | sensitive | Yes | Secret for encrypting cookies and signing tokens |
-| `BETTER_AUTH_URL` | system | Yes (production) | Production URL; in development, system uses `http://localhost:3005` regardless |
+| `BETTER_AUTH_URL` | system | Yes (production) | Production URL; in development, system uses `http://localhost:3000` regardless |
 | `NEXT_PUBLIC_APP_URL` | system | Optional | Public-facing app URL |
 | `GOOGLE_CLIENT_ID` | system | Optional (if using Google OAuth) | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | sensitive | Optional (if using Google OAuth) | Google OAuth client secret |
@@ -349,7 +351,7 @@ All environment variables are managed through Vercel dashboard or `.env.local` f
 
 - Run `npm install` to install dependencies
 - Ensure `.env.local` has required variables (see `AI-AGENT-GUARDRAILS.md` for baseline)
-- Development server on port 3005 (`npm run dev`)
+- Development server on port 3000 (`npm run dev`)
 - Type check with `npm run typecheck` or `npx tsc --noEmit`
 - Lint with `npm run lint`
 - Test suite with `npm test`
@@ -363,7 +365,7 @@ All environment variables are managed through Vercel dashboard or `.env.local` f
 ```bash
 npm install
 # Ensure .env.local has required variables
-npm run dev          # Development server on port 3005
+npm run dev          # Development server on port 3000
 npm run build        # Production build
 npm test             # Vitest test suite
 npm run lint         ESLint
@@ -371,7 +373,7 @@ npm run lint         ESLint
 
 ### Available npm Scripts
 
-- `npm run dev` — Development server (port 3005)
+- `npm run dev` — Development server (port 3000)
 - `npm run build` — Production Next.js build
 - `npm test` — Vitest test suite
 - `npm run lint` — ESLint
@@ -563,3 +565,17 @@ After any material change to the implementation:
 - ✅ No lockfiles, migrations, assets, or scripts were removed as part of documentation cleanup
 - ✅ No production data was modified
 - ✅ All unique necessary information has been migrated to the specification
+
+
+## 14. Consolidated decisions added 2026-10-21
+
+- Keep the public marketing site separate from the authenticated creator workspace.
+- Treat Better Auth, local user resolution, and creator ownership checks as the active identity model. Google and passkeys must be tested in their real configuration; do not mark them complete from configuration alone.
+- Treat Google sign-in, passkey sign-in, and onboarding as one coherent journey. New users should reach onboarding; returning users should reach the workspace; sign-out must remain accessible. Onboarding should be skippable where requested, with profile completion available later.
+- Preserve calendar functionality during authentication, dashboard, and styling work.
+- Centralize UI tokens in `src/app/globals.css` and reuse existing shadcn/ui primitives. Maintain consistent typography and avoid monospace UI styling, unsupported theme colors, duplicate primitives, and page-level token systems.
+- Standardize admin headers through reusable components. When the task is explicitly styling-only, preserve Search/Status/Category filter behavior and New/Create action logic.
+- Keep equipment out of primary navigation/dashboard where that is the current product decision, while preserving the equipment catalogue for quoting and production workflows.
+- Requested local port convention: Next.js app on port 3000 by default; other local resources use distinct documented ports. Verify configuration before claiming this is implemented.
+- Development data reset: never target production; verify actual database identity; preserve the equipment catalogue and migration history; delete only media objects positively linked to deleted records; require explicit approval for destructive execution.
+- Use `docs/PROJECT-HANDBOOK.md` as the canonical reference for these decisions and `docs/DOCUMENTATION-INDEX.md` to locate specialist documentation.

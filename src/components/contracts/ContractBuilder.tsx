@@ -16,6 +16,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { Contract, ContractTemplate, Client, Project } from '@/lib/types/contracts';
 import { createContract, updateContract, fetchClients, fetchProjects } from '@/lib/api/contracts';
 import { EditableContractDocument } from './EditableContractDocument';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SelectCompat } from '@/components/ui/select-compat';
 import {
   getFieldMetadata,
   getRequiredFields,
@@ -381,7 +384,7 @@ export function ContractBuilder({
     return (
       <div className="ui-page min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
         </div>
       </div>
@@ -395,9 +398,7 @@ export function ContractBuilder({
           <>
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
-              <button onClick={() => router.back()} className="ui-button ui-button-ghost">
-                <ArrowLeft className="h-4 w-4" /> Back
-              </button>
+              <Button onClick={() => router.back()} variant="ghost"><ArrowLeft className="h-4 w-4" /> Back</Button>
               <div className="flex items-center gap-4">
                 {saveStatus === 'saving' && (
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -461,7 +462,7 @@ export function ContractBuilder({
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                     Client
                   </label>
-                  <select
+                  <SelectCompat
                     value={selectedClient?.id ?? ''}
                     onChange={(e) => {
                       const client = clientsQuery.data?.find((c) => c.id === e.target.value) ?? null;
@@ -477,7 +478,7 @@ export function ContractBuilder({
                         {client.company ? ` (${client.company})` : ''}
                       </option>
                     ))}
-                  </select>
+                  </SelectCompat>
                 </div>
 
                 <div>
@@ -493,7 +494,7 @@ export function ContractBuilder({
                         placeholder="Project name"
                         className="ui-input w-full text-sm"
                       />
-                      <select
+                      <SelectCompat
                         value={newProject.status}
                         onChange={(e) => setNewProject({...newProject, status: e.target.value})}
                         className="ui-input w-full text-sm"
@@ -503,7 +504,7 @@ export function ContractBuilder({
                         <option value="completed">Completed</option>
                         <option value="on hold">On Hold</option>
                         <option value="cancelled">Cancelled</option>
-                      </select>
+                      </SelectCompat>
                       <div className="grid gap-2 grid-cols-2">
                         <input
                           type="date"
@@ -526,23 +527,12 @@ export function ContractBuilder({
                         className="ui-input w-full text-sm"
                       />
                       <div className="flex justify-end mt-2">
-                        <button
-                          onClick={() => setIsCreatingProject(false)}
-                          className="ui-button ui-button-ghost"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleCreateProject}
-                          className="ui-button ui-button-primary"
-                        >
-                          Create Project
-                        </button>
+                        <Button onClick={() => setIsCreatingProject(false)} variant="ghost">Cancel</Button><Button onClick={handleCreateProject} variant="primary">Create Project</Button>
                       </div>
                     </div>
                   ) : (
                     <>
-                      <select
+                      <SelectCompat
                         value={selectedProject?.id ?? ''}
                         onChange={(e) => {
                           const project = projectsQuery.data?.find((p) => p.id === e.target.value) ?? null;
@@ -560,14 +550,9 @@ export function ContractBuilder({
                               </option>
                             ))
                         ) : []}
-                      </select>
+                      </SelectCompat>
                       {selectedClient && !projectsQuery.data?.some(p => p.clientId === selectedClient.id) && (
-                        <button
-                          onClick={() => setIsCreatingProject(true)}
-                          className="mt-2 ui-button ui-button-secondary w-full"
-                        >
-                          Create New Project
-                        </button>
+                        <Button onClick={() => setIsCreatingProject(true)} variant="secondary" className="mt-2 w-full">Create New Project</Button>
                       )}
                     </>
                   )}
@@ -586,7 +571,7 @@ export function ContractBuilder({
                 </div>
                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
                   <div
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-primary h-2 rounded-full transition-all duration-300"
                     style={{ width: `${completionStats.percentage}%` }}
                   />
                 </div>
@@ -624,11 +609,7 @@ export function ContractBuilder({
                 Editing {mode === 'new' ? 'new contract' : 'draft'}
               </p>
               <div className="flex gap-3">
-                <button
-                  onClick={handleSaveDraft}
-                  disabled={saveMutation.isPending || saveStatus === 'saving'}
-                  className="ui-button ui-button-secondary"
-                >
+                <Button onClick={handleSaveDraft} disabled={saveMutation.isPending || saveStatus === 'saving'} variant="secondary">
                   {saveStatus === 'saving' ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" /> Saving…
@@ -638,24 +619,16 @@ export function ContractBuilder({
                       <Save className="h-4 w-4" /> Save Draft
                     </>
                   )}
-                </button>
+                </Button>
 
                 {mode === 'edit' ? (
-                  <button
-                    onClick={handleValidateAndSend}
-                    className="ui-button ui-button-primary"
-                    disabled={saveMutation.isPending}
-                  >
+                  <Button onClick={handleValidateAndSend} variant="primary" disabled={saveMutation.isPending}>
                     <Send className="h-4 w-4" /> Send Contract
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    onClick={handleNext}
-                    className="ui-button ui-button-primary"
-                    disabled={saveMutation.isPending}
-                  >
+                  <Button onClick={handleNext} variant="primary" disabled={saveMutation.isPending}>
                     <Send className="h-4 w-4" /> Next
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -664,9 +637,7 @@ export function ContractBuilder({
           <>
             {/* Header */}
             <div className="mb-6 flex items-center justify-between">
-              <button onClick={() => setStep(1)} className="ui-button ui-button-ghost">
-                <ArrowLeft className="h-4 w-4" /> Back to Edit
-              </button>
+              <Button onClick={() => setStep(1)} variant="ghost"><ArrowLeft className="h-4 w-4" /> Back to Edit</Button>
               <div className="flex items-center gap-4">
                 {saveStatus === 'saving' && (
                   <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
@@ -749,21 +720,9 @@ export function ContractBuilder({
               </p>
               <div className="flex gap-3">
                 {selectedProject ? null : (
-                  <button
-                    onClick={() => {
-                      setStep(1);
-                      setIsCreatingProject(true);
-                    }}
-                    className="ui-button ui-button-secondary"
-                  >
-                    Create New Project
-                  </button>
+                  <Button onClick={() => { setStep(1); setIsCreatingProject(true); }} variant="secondary">Create New Project</Button>
                 )}
-                <button
-                  onClick={handleSaveAndContinue}
-                  disabled={saveMutation.isPending || saveStatus === 'saving'}
-                  className="ui-button ui-button-primary"
-                >
+                <Button onClick={handleSaveAndContinue} disabled={saveMutation.isPending || saveStatus === 'saving'} variant="primary">
                   {saveStatus === 'saving' ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" /> Saving…
@@ -773,7 +732,7 @@ export function ContractBuilder({
                       <Save className="h-4 w-4" /> Save & Continue
                     </>
                   )}
-                </button>
+                </Button>
               </div>
             </div>
           </>

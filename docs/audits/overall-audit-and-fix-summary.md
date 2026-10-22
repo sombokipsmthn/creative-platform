@@ -1,3 +1,5 @@
+> **Historical snapshot notice (2026-10-21):** Findings and completion statements in this report reflect the original audit date and may be stale. Revalidate against current `dev` code before acting on them. Current decisions and documentation precedence are in [Project Handbook](../PROJECT-HANDBOOK.md); use [Documentation Index](../DOCUMENTATION-INDEX.md) to find active references.
+
 # Milestone 1: Baseline and Repository Audit - Summary
 
 **Starting Commit:** 116e56b1d909af80b91f6d16402328c1e0d0f6ca

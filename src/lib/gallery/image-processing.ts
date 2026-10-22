@@ -1,4 +1,5 @@
-import sharp from "sharp";
+import Sharp from "sharp";
+const sharp = Sharp as any;
 
 export type WatermarkOptions = {
     enabled: boolean;
@@ -11,6 +12,7 @@ export type WatermarkOptions = {
     | "center";
     opacity: number;
     fontSize: number;
+    imageBuffer?: Buffer | null;
 };
 
 export type ProcessedImage = {
@@ -111,6 +113,9 @@ async function createWatermarkOverlay(
 
     const textHeight = fontSize;
 
+    // Use Outfit for watermark text (same as platform default)
+    // Sharp doesn't support variable fonts directly, so we use the system fallback
+
     const { x, y } = watermarkPosition(
         options.position,
         width,
@@ -136,7 +141,7 @@ async function createWatermarkOverlay(
         y="${y}"
         fill="white"
         fill-opacity="${opacity}"
-        font-family="Arial, Helvetica, sans-serif"
+        font-family="ui-sans-serif, system-ui, sans-serif"
         font-size="${fontSize}px"
         font-weight="600"
         letter-spacing="2px"
@@ -188,39 +193,39 @@ export async function processImage(
 
     let watermark = display;
 
-    if (
-        watermarkOptions.enabled &&
-        watermarkOptions.text.trim()
-    ) {
-        const displayMeta = await sharp(
-            display,
-        ).metadata();
+    if (watermarkOptions.enabled && (watermarkOptions.text.trim() || watermarkOptions.imageBuffer)) {
+        const displayMeta = await sharp(display).metadata();
+        const watermarkWidth = displayMeta.width || 2400;
+        const watermarkHeight = displayMeta.height || 2400;
+        const composites: any[] = [];
 
-        const watermarkWidth =
-            displayMeta.width || 2400;
+        if (watermarkOptions.text.trim()) {
+            composites.push({
+                input: await createWatermarkOverlay(watermarkWidth, watermarkHeight, watermarkOptions),
+                blend: "over",
+            });
+        }
 
-        const watermarkHeight =
-            displayMeta.height || 2400;
+        if (watermarkOptions.imageBuffer) {
+            const image = sharp(watermarkOptions.imageBuffer, { failOn: "none" });
+            const imageMeta = await image.metadata();
+            const targetWidth = Math.max(80, Math.min(watermarkWidth * 0.32, imageMeta.width || watermarkWidth * 0.32));
+            const resizedImage = await image.resize({ width: Math.round(targetWidth), withoutEnlargement: true }).png().toBuffer();
+            const resizedMeta = await sharp(resizedImage).metadata();
+            const imageWidth = resizedMeta.width || targetWidth;
+            const imageHeight = resizedMeta.height || targetWidth;
+            const padding = Math.max(24, Math.round(watermarkWidth * 0.025));
+            const coordinates = {
+                'top-left': { left: padding, top: padding },
+                'top-right': { left: Math.max(padding, watermarkWidth - padding - imageWidth), top: padding },
+                center: { left: Math.max(0, Math.round((watermarkWidth - imageWidth) / 2)), top: Math.max(0, Math.round((watermarkHeight - imageHeight) / 2)) },
+                'bottom-left': { left: padding, top: Math.max(padding, watermarkHeight - padding - imageHeight) },
+                'bottom-right': { left: Math.max(padding, watermarkWidth - padding - imageWidth), top: Math.max(padding, watermarkHeight - padding - imageHeight) },
+            }[watermarkOptions.position];
+            composites.push({ input: resizedImage, left: coordinates.left, top: coordinates.top, blend: "over", opacity: Math.max(0, Math.min(100, watermarkOptions.opacity)) / 100 });
+        }
 
-        const overlay =
-            await createWatermarkOverlay(
-                watermarkWidth,
-                watermarkHeight,
-                watermarkOptions,
-            );
-
-        watermark = await sharp(display)
-            .composite([
-                {
-                    input: overlay,
-                    blend: "over",
-                },
-            ])
-            .jpeg({
-                quality: 88,
-                mozjpeg: true,
-            })
-            .toBuffer();
+        watermark = await sharp(display).composite(composites).jpeg({ quality: 88, mozjpeg: true }).toBuffer();
     }
 
     return {

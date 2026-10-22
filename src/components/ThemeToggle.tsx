@@ -3,6 +3,7 @@
 
 import { useSyncExternalStore } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function subscribe(callback: () => void) {
   window.addEventListener('storage', callback);
@@ -37,17 +38,17 @@ export default function ThemeToggle({ compact = false }: { compact?: boolean }) 
   };
 
   return (
-    <button
+    <Button
       onClick={toggleTheme}
       type="button"
+      variant={compact ? 'ghost' : 'secondary'}
+      size={compact ? 'icon' : 'default'}
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
       title={`Switch to ${isDark ? 'light' : 'dark'} mode`}
-      className={compact
-        ? 'inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)] transition hover:border-[var(--color-border-strong)] hover:bg-[var(--color-bg-soft)] hover:text-[var(--color-text-primary)]'
-        : 'ui-button ui-button-secondary'}
+      className={compact ? 'border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] text-[var(--color-text-muted)]' : undefined}
     >
       {isDark ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
       {!compact && <span>{isDark ? 'Light mode' : 'Dark mode'}</span>}
-    </button>
+    </Button>
   );
 }

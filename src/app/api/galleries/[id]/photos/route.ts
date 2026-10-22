@@ -556,6 +556,14 @@ export async function PATCH(
       );
     }
 
+    if (["inherit", "include", "exclude"].includes(body.portfolioSelection)) {
+      await db.execute(sql`
+        UPDATE gallery_photos
+        SET portfolio_selection = ${body.portfolioSelection}, updated_at = now()
+        WHERE id = ${photoId} AND gallery_id = ${galleryId}
+      `);
+    }
+
     if (
       body.collectionId !==
       undefined

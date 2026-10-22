@@ -12,6 +12,7 @@
     "test:responsive-admin": "node scripts/responsive-admin-smoke.mjs",
     "test:authenticated-settings": "node scripts/authenticated-settings-smoke.mjs",
     "test:gallery-watermark": "node scripts/gallery-watermark-smoke.mjs",
+    "test:portfolio-gallery": "node scripts/portfolio-gallery-smoke.mjs",
     "audit:production": "env -u npm_config_allow_scripts npm audit --omit=dev --audit-level=high",
     "audit:development": "env -u npm_config_allow_scripts npm audit --audit-level=high || true",
     "db:generate": "drizzle-kit generate",

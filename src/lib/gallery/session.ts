@@ -11,6 +11,7 @@ const SESSION_DAYS = 90;
 export type GallerySession = {
   id: string;
   token: string;
+  clientId: string | null;
   isNew: boolean;
 };
 
@@ -60,6 +61,7 @@ export async function createGallerySession(
   return {
     id: String(result.id),
     token,
+    clientId: clientId ?? null,
     isNew: true,
   };
 }
@@ -77,7 +79,7 @@ export async function getGallerySession(
     const tokenHash = hashToken(token);
 
     const [result] = await db
-      .select({ id: galleryAccessSessions.id })
+      .select({ id: galleryAccessSessions.id, clientId: galleryAccessSessions.clientId })
       .from(galleryAccessSessions)
       .where(
         and(
@@ -105,6 +107,7 @@ export async function getGallerySession(
       return {
         id: sessionId,
         token,
+        clientId: result.clientId ? String(result.clientId) : null,
         isNew: false,
       };
     }

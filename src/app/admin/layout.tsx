@@ -75,7 +75,7 @@ const navSections: NavSection[] = [
   {
     label: "Publishing",
     items: [
-      { name: "Create a portfolio", href: "/admin/portfolio", icon: Sparkles },
+      { name: "Public portfolio", href: "/p", icon: Sparkles },
     ],
   },
   {
@@ -129,10 +129,12 @@ function SidebarContent({
   pathname,
   badgeCounts,
   onNavigate,
+  portfolioHref,
 }: {
   pathname: string;
   badgeCounts: Record<string, number>;
   onNavigate?: () => void;
+  portfolioHref?: string | null;
 }) {
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -164,16 +166,17 @@ function SidebarContent({
               {section.label}
             </p>
             <div className="space-y-1">
-              {section.items.map((item) => {
+              {section.items.filter((item) => item.name !== "Public portfolio" || portfolioHref).map((item) => {
+                const resolvedItem = item.name === "Public portfolio" && portfolioHref ? { ...item, href: portfolioHref } : item;
                 const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
-                const count = badgeCounts[item.href] ?? 0;
+                  pathname === resolvedItem.href ||
+                  (resolvedItem.href !== "/admin" && pathname.startsWith(`${resolvedItem.href}/`));
+                const count = badgeCounts[resolvedItem.href] ?? 0;
 
                 return (
                   <NavLink
                     key={item.href}
-                    item={item}
+                    item={resolvedItem}
                     isActive={isActive}
                     badgeCount={count}
                     onClick={onNavigate}
@@ -208,6 +211,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { content: splitViewContent } = useSplitView();
   const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
+  const [portfolioHref, setPortfolioHref] = useState<string | null>(null);
   const bootstrapStarted = useRef(false);
 
   // Keep local development bypass support
@@ -272,6 +276,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     fetchBadgeCounts().then((counts) => {
       if (!cancelled) setBadgeCounts(counts);
     });
+    fetch("/api/portfolio", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((value) => {
+      if (!cancelled && value?.hasPublishedContent && value.user?.handle) setPortfolioHref(`/p/${value.user.handle}`);
+      else if (!cancelled) setPortfolioHref(null);
+    }).catch(() => { if (!cancelled) setPortfolioHref(null); });
 
     return () => {
       cancelled = true;
@@ -282,7 +290,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <SidebarContent pathname={pathname} badgeCounts={badgeCounts} />
+        <SidebarContent pathname={pathname} badgeCounts={badgeCounts} portfolioHref={portfolioHref} />
       </aside>
 
       {/* Main Workspace Area */}
@@ -312,6 +320,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   pathname={pathname}
                   badgeCounts={badgeCounts}
                   onNavigate={() => setMobileOpen(false)}
+                  portfolioHref={portfolioHref}
                 />
               </SheetContent>
             </Sheet>

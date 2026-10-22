@@ -209,10 +209,13 @@ export async function POST(
 
     if (photoId) {
       const photo = await db.execute(sql`
-        SELECT id
-        FROM gallery_photos
-        WHERE id = ${photoId}
-          AND gallery_id = ${gallery.id}
+        SELECT p.id
+        FROM gallery_photos p
+        LEFT JOIN gallery_collections c ON c.id = p.collection_id
+        WHERE p.id = ${photoId}
+          AND p.gallery_id = ${gallery.id}
+          AND p.is_hidden = false
+          AND COALESCE(c.client_visibility, 'all') IN ('all', 'authorized', 'guest')
         LIMIT 1
       `);
 

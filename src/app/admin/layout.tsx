@@ -13,9 +13,7 @@ import {
   WalletCards,
   Calendar,
   FileSignature,
-  UserRound,
   Settings2,
-  Sparkles,
   ExternalLink,
   Menu,
 } from 'lucide-react';
@@ -76,9 +74,7 @@ const navSections: NavSection[] = [
   {
     label: "Settings",
     items: [
-      { name: "Account & Profile", href: "/admin/profile", icon: UserRound },
-      { name: "Creator Portfolio", href: "/admin/portfolio", icon: Sparkles },
-      { name: "Platform Settings", href: "/admin/settings", icon: Settings2 },
+      { name: "Settings", href: "/admin/settings", icon: Settings2 },
     ],
   },
 ];

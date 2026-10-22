@@ -60,7 +60,8 @@
       "Bash(rm *)",
       "WebFetch(domain:vercel.com)",
       "Bash(pkill -f \"next dev\")",
-      "Bash(pkill -f \"next start\")"
+      "Bash(pkill -f \"next start\")",
+      "Bash(npx next *)"
     ]
   },
   "skillOverrides": {}

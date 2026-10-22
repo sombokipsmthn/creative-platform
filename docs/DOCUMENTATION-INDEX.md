@@ -7,6 +7,8 @@
 
 ## Read these first
 
+- [Agent Completion Contract](./AGENT-COMPLETION-CONTRACT.md) — objective phase gates, verification requirements, handoffs, and approval boundaries.
+
 1. [Project Handbook](./PROJECT-HANDBOOK.md) — **canonical consolidated reference** for product decisions, current architecture, security/data safeguards, UX requirements, agent workflow, and document precedence.
 2. [KIPSMTHN Specification](../KIPSMTHN-SPEC.md) — product scope and functional requirements.
 3. [Implementation Specification](../KIPSMTHN-IMPLEMENTATION-SPEC.md) — current technical implementation, status, and unresolved work.

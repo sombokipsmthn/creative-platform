@@ -7,10 +7,23 @@ import { sendEmail } from "@/lib/email";
 import { users, sessions, accounts, verifications, passkeys } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
-const appUrl = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const googleProvider = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-  ? { clientId: process.env.GOOGLE_CLIENT_ID, clientSecret: process.env.GOOGLE_CLIENT_SECRET }
-  : undefined;
+// Keep local OAuth callbacks pinned to the project's actual development port.
+// BETTER_AUTH_URL may still be set to an old port or a deployed URL in .env.local.
+const baseURL =
+  process.env.NODE_ENV === "development"
+    ? "http://localhost:3000"
+    : process.env.BETTER_AUTH_URL ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      "http://localhost:3000";
+
+const googleProvider =
+  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+    ? {
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      }
+    : undefined;
+
 const appleProvider =
   process.env.APPLE_CLIENT_ID &&
   process.env.APPLE_CLIENT_SECRET &&
@@ -31,8 +44,6 @@ const socialProviders = {
   ...(googleProvider ? { google: googleProvider } : {}),
   ...(appleProvider ? { apple: appleProvider } : {}),
 };
-
-const baseURL = process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const auth = betterAuth({
   appName: "KIPSMTHN Creative Platform",
@@ -111,7 +122,8 @@ export const auth = betterAuth({
   },
   trustedOrigins: [baseURL],
   plugins: [
-    dash({ apiKey: process.env.BETTER_AUTH_API_KEY }),
+    // dash() reads BETTER_AUTH_API_KEY from the server environment.
+    dash(),
     passkey({
       rpID: new URL(baseURL).hostname,
       rpName: "KIPSMTHN Creative Platform",

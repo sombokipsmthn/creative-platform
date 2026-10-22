@@ -431,11 +431,16 @@ export default function StudioCommandCenterPage() {
       try {
         const res = await fetch("/api/onboarding", { cache: "no-store" });
         const data = await res.json();
-        if (!cancelled && data.user?.onboardingStatus !== "complete") {
-          setShowOnboarding(true);
+        if (!cancelled) {
+          // Only show onboarding if status is explicitly "incomplete" AND user has an established account
+          // Don't show if user is newly provisioned (no local record yet)
+          const status = data.user?.onboardingStatus;
+          if (status === "incomplete" && data.user?.id) {
+            setShowOnboarding(true);
+          }
         }
       } catch {
-        // Ignore errors
+        // Ignore errors - don't blank the dashboard
       } finally {
         if (!cancelled) setLoading(false);
       }

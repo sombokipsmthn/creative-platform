@@ -522,6 +522,20 @@ export const galleryDownloads = pgTable("gallery_downloads", {
     photoCreatedIdx: index("gallery_downloads_photo_created_idx").on(table.photoId, table.createdAt),
   }));
 
+export const creatorPortfolios = pgTable("creator_portfolios", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  headline: text("headline"),
+  contactEmail: text("contact_email"),
+  socialLinks: jsonb("social_links").default({}).notNull(),
+  selectedProjectIds: jsonb("selected_project_ids").default([]).notNull(),
+  layout: text("layout").default("editorial").notNull(),
+  isPublished: boolean("is_published").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const contractTemplates = pgTable("contract_templates", {
   id: uuid("id").defaultRandom().primaryKey(),
   creatorId: text("creator_id").references(() => users.id, { onDelete: "cascade" }),

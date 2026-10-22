@@ -502,7 +502,7 @@ export default function AdminGalleryManagerPage() {
                   ]}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
                   {filteredGalleries.map((gal) => {
                     const fallbackCover =
                       'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1000&q=80';
@@ -511,10 +511,10 @@ export default function AdminGalleryManagerPage() {
                     return (
                       <div
                         key={gal.id}
-                        className="group ui-card ui-card-interactive flex flex-col overflow-hidden"
+                        className="group ui-card ui-card-interactive flex flex-col overflow-hidden bg-card border-border"
                       >
                         {/* Cover Photo */}
-                        <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100 dark:bg-zinc-950">
+                        <div className="relative aspect-[4/3] w-full overflow-hidden ">
                           <Image
                             src={coverSrc}
                             alt={gal.title}
@@ -708,7 +708,7 @@ export default function AdminGalleryManagerPage() {
                       </div>
 
                       {act.photo_url && (
-                        <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950 shrink-0 border border-slate-100 dark:border-zinc-800 shadow-sm">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden  shrink-0 border border-slate-100 dark:border-zinc-800 shadow-sm">
                           <Image
                             src={act.photo_url}
                             alt="Activity Photo"

@@ -184,8 +184,10 @@ export async function GET(
 
     const theme = themeResult ?? null;
 
+    const { accessPin: _accessPin, ...publicGallery } = gallery;
+
     return NextResponse.json({
-      gallery,
+      gallery: publicGallery,
       collections: collectionsResult,
       photos: photosResult,
       approval,

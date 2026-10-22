@@ -89,6 +89,23 @@ export async function GET(
       .searchParams
       .get("photoId");
 
+    if (photoId) {
+      const photo = await db.execute(sql`
+        SELECT id
+        FROM gallery_photos
+        WHERE id = ${photoId}
+          AND gallery_id = ${gallery.id}
+        LIMIT 1
+      `);
+
+      if (!photo.rows[0]) {
+        return NextResponse.json(
+          { error: "Photo not found." },
+          { status: 404 },
+        );
+      }
+    }
+
     const comments = await db.execute(sql`
       SELECT
         id,

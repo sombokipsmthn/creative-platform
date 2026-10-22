@@ -137,10 +137,11 @@ export async function updateContract(id: string, data: ContractInput) {
     updatedAt: new Date(),
   }).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
 
-  // Log event
+  if (!updatedContract) throw new Error('Contract not found or unauthorized');
+
   await db.insert(contractEvents).values({
     id: uuidv4(),
-    contractId: id,
+    contractId: updatedContract.id,
     eventType: 'updated',
     metadata: { ...data },
     createdAt: new Date(),
@@ -157,10 +158,11 @@ export async function deleteContract(id: string) {
 
   const [deletedContract] = await db.delete(contracts).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
 
-  // Log event
+  if (!deletedContract) throw new Error('Contract not found or unauthorized');
+
   await db.insert(contractEvents).values({
     id: uuidv4(),
-    contractId: id,
+    contractId: deletedContract.id,
     eventType: 'deleted',
     metadata: { id: deletedContract.id },
     createdAt: new Date(),
@@ -181,10 +183,11 @@ export async function sendContract(id: string) {
     updatedAt: new Date(),
   }).where(and(eq(contracts.id, id), eq(contracts.creatorId, userId))).returning();
 
-  // Log event
+  if (!updatedContract) throw new Error('Contract not found or unauthorized');
+
   await db.insert(contractEvents).values({
     id: uuidv4(),
-    contractId: id,
+    contractId: updatedContract.id,
     eventType: 'sent',
     metadata: {},
     createdAt: new Date(),
@@ -427,6 +430,9 @@ export async function signPublicContract(token: string, signatureData: unknown) 
   if (!['sent', 'viewed', 'awaiting_signature'].includes(existingContract.status)) {
     throw new Error(`Contract cannot be signed while ${existingContract.status}`);
   }
+  if (existingContract.expiresAt && new Date(existingContract.expiresAt).getTime() <= Date.now()) {
+    throw new Error('Contract has expired');
+  }
 
   const signedAt = new Date();
   const signature = typeof signatureData === 'object' && signatureData !== null
@@ -442,7 +448,8 @@ export async function signPublicContract(token: string, signatureData: unknown) 
     updatedAt: signedAt,
   }).where(and(eq(contracts.token, token), eq(contracts.status, existingContract.status))).returning();
 
-  // Log event
+  if (!contract) throw new Error('Contract was not updated');
+
   await db.insert(contractEvents).values({
     id: uuidv4(),
     contractId: contract.id,
@@ -460,6 +467,9 @@ export async function declinePublicContract(token: string, signatureData: unknow
   if (!['sent', 'viewed', 'awaiting_signature'].includes(existingContract.status)) {
     throw new Error(`Contract cannot be declined while ${existingContract.status}`);
   }
+  if (existingContract.expiresAt && new Date(existingContract.expiresAt).getTime() <= Date.now()) {
+    throw new Error('Contract has expired');
+  }
 
   const declinedAt = new Date();
   const signature = typeof signatureData === 'object' && signatureData !== null
@@ -474,6 +484,8 @@ export async function declinePublicContract(token: string, signatureData: unknow
     declinedAt,
     updatedAt: declinedAt,
   }).where(and(eq(contracts.token, token), eq(contracts.status, existingContract.status))).returning();
+
+  if (!contract) throw new Error('Contract was not updated');
 
   await db.insert(contractEvents).values({
     id: uuidv4(),

@@ -15,10 +15,25 @@ export async function GET(
     if (!contract) {
       return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
     }
-    const safeContract = Object.fromEntries(
-      Object.entries(contract).filter(([key]) => key !== 'token'),
-    );
-    return NextResponse.json(safeContract);
+    const publicContract = {
+      title: contract.title,
+      contractNumber: contract.contractNumber,
+      status: contract.status,
+      content: contract.content,
+      currency: contract.currency,
+      totalAmount: contract.totalAmount,
+      expiresAt: contract.expiresAt,
+      sentAt: contract.sentAt,
+      viewedAt: contract.viewedAt,
+      signedAt: contract.signedAt,
+      signerName: contract.signerName,
+      signerEmail: contract.signerEmail,
+      declinedAt: contract.declinedAt,
+      cancelledAt: contract.cancelledAt,
+      createdAt: contract.createdAt,
+      updatedAt: contract.updatedAt,
+    };
+    return NextResponse.json(publicContract);
   } catch (error) {
     console.error('GET /api/public/contracts/[token] error:', error);
     return NextResponse.json({ error: 'Failed to fetch contract' }, { status: 500 });

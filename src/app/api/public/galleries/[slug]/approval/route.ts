@@ -204,8 +204,25 @@ export async function POST(
       );
     }
 
-    const body =
-      await request.json();
+    const body = await request.json();
+    const photoId = typeof body.photoId === "string" ? body.photoId : null;
+
+    if (photoId) {
+      const photo = await db.execute(sql`
+        SELECT id
+        FROM gallery_photos
+        WHERE id = ${photoId}
+          AND gallery_id = ${gallery.id}
+        LIMIT 1
+      `);
+
+      if (!photo.rows[0]) {
+        return NextResponse.json(
+          { error: "Photo not found." },
+          { status: 404 },
+        );
+      }
+    }
 
     const status =
       body.status ===

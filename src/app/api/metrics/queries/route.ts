@@ -1,5 +1,20 @@
 import { NextResponse, NextRequest } from "next/server";
 import { getDatabaseMetrics, queryMonitor } from "@/lib/db-monitoring";
+import { getCurrentUserFromRequest } from "@/lib/auth/get-current-user";
+
+async function isAdmin(request: NextRequest) {
+  const configuredKey = process.env.ADMIN_METRICS_KEY?.trim();
+  const headerKey = request.headers.get("x-admin-key");
+  const hasValidKey = Boolean(configuredKey && headerKey && headerKey === configuredKey);
+
+  const user = await getCurrentUserFromRequest(request);
+  const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+  const hasAuthenticatedAdmin = Boolean(
+    user && adminEmail && user.email.toLowerCase() === adminEmail,
+  );
+
+  return hasValidKey || hasAuthenticatedAdmin;
+}
 
 /**
  * GET /api/metrics/queries
@@ -9,11 +24,7 @@ import { getDatabaseMetrics, queryMonitor } from "@/lib/db-monitoring";
  * and restrict access to admins only
  */
 export async function GET(request: NextRequest) {
-  // Security check: Verify admin authorization
-  // TODO: Replace with your actual auth check
-  const isAdmin = request.headers.get("x-admin-key") === process.env.ADMIN_METRICS_KEY;
-  
-  if (!isAdmin && process.env.NODE_ENV === "production") {
+  if (!(await isAdmin(request))) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 403 }
@@ -28,9 +39,7 @@ export async function GET(request: NextRequest) {
  * Resets query metrics (useful for testing)
  */
 export async function POST(request: NextRequest) {
-  const isAdmin = request.headers.get("x-admin-key") === process.env.ADMIN_METRICS_KEY;
-  
-  if (!isAdmin && process.env.NODE_ENV === "production") {
+  if (!(await isAdmin(request))) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 403 }

@@ -76,7 +76,7 @@ export default function PaymentsPage() {
     catch (cause) { setFormError(cause instanceof Error ? cause.message : 'Payment could not be recorded.'); } finally { setSaving(false); }
   }
 
-  return <div className="ui-page ui-page-padded"><div className="ui-shell">
+  return <div className="ui-page"><div className="ui-shell">
     <AdminPageHeader title="Payments" description="Track incoming payments, monitor outstanding balances and keep every client transaction organized." breadcrumb={{ label: 'Dashboard', href: '/admin' }} primaryAction={<Button type="button" onClick={openForm}><Plus className="mr-2 h-4 w-4" />Record payment</Button>} />
     <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Metric icon={<Wallet className="h-4 w-4" />} label="Received this month" values={currencies.map((currency) => money(summary?.receivedThisMonth?.[currency] ?? 0, currency))} />

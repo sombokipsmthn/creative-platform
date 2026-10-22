@@ -58,7 +58,9 @@
       "Bash(neon branch *)",
       "Bash(cp *)",
       "Bash(rm *)",
-      "WebFetch(domain:vercel.com)"
+      "WebFetch(domain:vercel.com)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(pkill -f \"next start\")"
     ]
   },
   "skillOverrides": {}

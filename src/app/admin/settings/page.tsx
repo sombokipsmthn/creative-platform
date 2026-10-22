@@ -68,8 +68,23 @@ const tabConfig: { id: SettingsTab; label: string; icon: React.ReactNode; descri
   },
 ];
 
+const initialActiveTab = typeof window !== 'undefined'
+  ? (new URLSearchParams(window.location.search).get('tab') as SettingsTab | null) || 'account-profile'
+  : 'account-profile';
+
 export default function AdminSettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('account-profile');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialActiveTab);
+
+  // Sync URL param on tab change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentParams = new URLSearchParams(window.location.search);
+      currentParams.delete('tab');
+      currentParams.append('tab', activeTab);
+      const newUrl = window.location.pathname + '?' + currentParams.toString();
+      window.history.replaceState({ path: newUrl }, '', newUrl);
+    }
+  }, [activeTab]);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
 

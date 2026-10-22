@@ -115,11 +115,12 @@ export async function GET(request: Request) {
     // so frontend knows onboarding is needed but doesn't mark them as "incomplete"
     if (needsProvisioning || !localUser) {
       return NextResponse.json({
+        eligible: true,
         user: {
           id: session?.user?.id,
           name: session?.user?.name,
           email: session?.user?.email,
-          onboardingStatus: "incomplete", // Will be set complete after onboarding
+          onboardingStatus: "incomplete",
           onboardingStep: 1,
         },
         profile: null,
@@ -148,12 +149,29 @@ export async function GET(request: Request) {
     }
 
     const [profileRows, serviceRows, businessRows] = await Promise.all([
-      db.select().from(creatorProfiles).where(eq(creatorProfiles.userId, localUser.id)).limit(1),
-      db.select().from(creatorServices).where(eq(creatorServices.creatorId, localUser.id)),
-      db.select().from(creatorBusinessProfiles).where(eq(creatorBusinessProfiles.userId, localUser.id)).limit(1),
+      db.select().from(creatorProfiles).where(eq(creatorProfiles.userId, localUser.id)).limit(1)
+        .catch((error) => {
+          console.warn("Onboarding profile metadata unavailable:", error);
+          return [];
+        }),
+      db.select().from(creatorServices).where(eq(creatorServices.creatorId, localUser.id))
+        .catch((error) => {
+          console.warn("Onboarding service metadata unavailable:", error);
+          return [];
+        }),
+      db.select().from(creatorBusinessProfiles).where(eq(creatorBusinessProfiles.userId, localUser.id)).limit(1)
+        .catch((error) => {
+          console.warn("Onboarding business metadata unavailable:", error);
+          return [];
+        }),
     ]);
 
+    const hasEstablishedCreatorData = Boolean(profileRows[0] || serviceRows.length > 0 || businessRows[0]);
+    const eligible = localUser.onboardingStatus === "incomplete" &&
+      (localUser.onboardingStep > 1 || !hasEstablishedCreatorData);
+
     return NextResponse.json({
+      eligible,
       user: {
         id: localUser.id,
         name: localUser.name,

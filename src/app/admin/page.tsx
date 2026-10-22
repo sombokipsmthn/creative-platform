@@ -112,6 +112,22 @@ function formatTime(value: string) {
   return new Intl.DateTimeFormat('en-KE', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
 }
 
+function localDateKey(value: Date | string) {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function eventHref(event: CalendarEvent) {
+  switch (event.sourceType) {
+    case 'project': return `/admin/projects/${event.sourceId}`;
+    case 'quote': return `/admin/quotes/${event.sourceId}`;
+    case 'invoice': return `/admin/invoices/${event.sourceId}`;
+    case 'gallery': return `/admin/galleries/${event.sourceId}`;
+    case 'contract': return `/admin/contracts/${event.sourceId}`;
+    default: return '/admin/calendar';
+  }
+}
+
 function isToday(dateString: string) {
   const today = new Date();
   const date = new Date(dateString);
@@ -291,9 +307,9 @@ function DateStrip({ selectedDate, onDateChange, eventsByDay }: { selectedDate: 
   return (
     <div className="flex gap-1 overflow-x-auto pb-2 -mx-5 px-5" role="tablist" aria-label="Upcoming days">
       {days.map((date) => {
-        const key = date.toISOString().split('T')[0];
+        const key = localDateKey(date);
         const dayEvents = eventsByDay.get(key) ?? [];
-        const isSelected = selectedDate.toISOString().split('T')[0] === key;
+        const isSelected = localDateKey(selectedDate) === key;
         const isToday = date.toDateString() === today.toDateString();
 
         return (
@@ -350,7 +366,7 @@ function EmptyState({ icon: Icon, title, description, action }: { icon: typeof C
 
 // Main Dashboard Page
 export default function StudioCommandCenterPage() {
-  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user ?? null;
   const { activeCreator } = useCreator();
   const [range, setRange] = useState<'7d' | '30d' | '90d' | '12m' | 'all'>('30d');
@@ -373,7 +389,7 @@ export default function StudioCommandCenterPage() {
 
   // Fetch dashboard stats
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (isPending || !user) return;
     const loadStats = async () => {
       setLoading(true);
       setError('');
@@ -389,7 +405,7 @@ export default function StudioCommandCenterPage() {
       }
     };
     void loadStats();
-  }, [isLoaded, user, range]);
+  }, [isPending, user, range]);
 
   // Fetch calendar events for next 7 days
   useEffect(() => {
@@ -440,9 +456,7 @@ export default function StudioCommandCenterPage() {
           }
         }
       } catch {
-        // Ignore errors - don't blank the dashboard
-      } finally {
-        if (!cancelled) setLoading(false);
+        // Onboarding eligibility is non-blocking; keep dashboard data visible.
       }
     }
 
@@ -462,9 +476,7 @@ export default function StudioCommandCenterPage() {
         // Show tour steps - this will render overlay tour after dismissal
         setShowDashboardTour(true);
       } catch {
-        // Ignore errors
-      } finally {
-        if (!cancelled) setLoading(false);
+        // Ignore tour errors.
       }
     }
 
@@ -485,14 +497,14 @@ export default function StudioCommandCenterPage() {
     calendarEvents.forEach(event => {
       const date = new Date(event.startDate);
       if (isNaN(date.getTime())) return;
-      const key = date.toISOString().split('T')[0];
+      const key = localDateKey(date);
       grouped.set(key, [...(grouped.get(key) ?? []), event]);
     });
     return grouped;
   }, [calendarEvents]);
 
   const selectedDayEvents = useMemo(() => {
-    const key = selectedDate.toISOString().split('T')[0];
+    const key = localDateKey(selectedDate);
     return eventsByDay.get(key) ?? [];
   }, [eventsByDay, selectedDate]);
 
@@ -500,7 +512,7 @@ export default function StudioCommandCenterPage() {
     return [...calendarEvents].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   }, [calendarEvents]);
 
-  if (!isLoaded) {
+  if (isPending) {
     // Don't replace server-rendered content during hydration
     // Return null to preserve the SSR output; client will hydrate seamlessly
     return null;
@@ -758,7 +770,7 @@ export default function StudioCommandCenterPage() {
                         </p>
                         <div className="mt-2 space-y-2">
                           {selectedDayEvents.map(event => (
-                            <CalendarEventItem key={event.id} event={event} />
+                            <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />
                           ))}
                         </div>
                       </div>
@@ -770,7 +782,7 @@ export default function StudioCommandCenterPage() {
                         </p>
                         <div className="mt-2 space-y-2">
                           {allUpcomingEvents.slice(0, 5).map(event => (
-                            <CalendarEventItem key={event.id} event={event} />
+                            <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />
                           ))}
                         </div>
                         {allUpcomingEvents.length > 5 && (

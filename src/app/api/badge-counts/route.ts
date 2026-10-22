@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { and, count, eq } from 'drizzle-orm';
+import { and, count, eq, isNull, ne } from 'drizzle-orm';
 
 import { db } from '@/db';
 import { clients, contracts, galleries, invoices, projects, quotes } from '@/db/schema';
@@ -17,18 +17,24 @@ export async function GET(req: Request) {
       [clientCount],
       [projectCount],
     ] = await Promise.all([
+      // Badges represent the creator's actual active records, not only drafts
+      // or supporting/template records. Every query is scoped to this creator.
       db.select({ count: count() }).from(galleries)
-        .where(eq(galleries.creatorId, creatorId)),
+        .where(and(eq(galleries.creatorId, creatorId), ne(galleries.status, 'archived'))),
       db.select({ count: count() }).from(quotes)
-        .where(and(eq(quotes.creatorId, creatorId), eq(quotes.status, 'draft'))),
+        .where(and(eq(quotes.creatorId, creatorId), isNull(quotes.archivedAt))),
       db.select({ count: count() }).from(invoices)
-        .where(and(eq(invoices.creatorId, creatorId), eq(invoices.status, 'draft'))),
+        .where(and(
+          eq(invoices.creatorId, creatorId),
+          ne(invoices.status, 'cancelled'),
+          ne(invoices.status, 'void'),
+        )),
       db.select({ count: count() }).from(contracts)
-        .where(and(eq(contracts.creatorId, creatorId), eq(contracts.status, 'draft'))),
+        .where(eq(contracts.creatorId, creatorId)),
       db.select({ count: count() }).from(clients)
-        .where(and(eq(clients.creatorId, creatorId), eq(clients.status, 'active'))),
+        .where(and(eq(clients.creatorId, creatorId), ne(clients.status, 'archived'))),
       db.select({ count: count() }).from(projects)
-        .where(and(eq(projects.creatorId, creatorId), eq(projects.status, 'draft'))),
+        .where(and(eq(projects.creatorId, creatorId), ne(projects.status, 'archived'))),
     ]);
 
     const counts = {

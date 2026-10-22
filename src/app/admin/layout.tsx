@@ -191,6 +191,7 @@ function SidebarContent({
                     key={item.href}
                     item={resolvedItem}
                     isActive={isActive}
+                    disabled={disabled}
                     badgeCount={count}
                     onClick={onNavigate}
                   />
@@ -286,9 +287,15 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated) return;
     let cancelled = false;
 
-    fetchBadgeCounts().then((counts) => {
-      if (!cancelled) setBadgeCounts(counts);
-    });
+    const refreshBadgeCounts = () => {
+      fetchBadgeCounts().then((counts) => {
+        if (!cancelled) setBadgeCounts(counts);
+      });
+    };
+
+    refreshBadgeCounts();
+    window.addEventListener('focus', refreshBadgeCounts);
+    window.addEventListener('pageshow', refreshBadgeCounts);
     fetch("/api/portfolio", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((value) => {
       if (!cancelled && value?.hasPublishedContent && value.user?.handle) setPortfolioHref(`/p/${value.user.handle}`);
       else if (!cancelled) setPortfolioHref(null);
@@ -296,8 +303,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
     return () => {
       cancelled = true;
+      window.removeEventListener('focus', refreshBadgeCounts);
+      window.removeEventListener('pageshow', refreshBadgeCounts);
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, pathname]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">

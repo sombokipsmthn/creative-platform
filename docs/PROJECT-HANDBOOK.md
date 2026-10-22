@@ -153,8 +153,10 @@ For every item, update status only after inspecting the implementation and recor
 
 ## 13. Agent workflow
 
+Use the shared [Agent Completion Contract](./AGENT-COMPLETION-CONTRACT.md) for phase entry criteria, required deliverables, test gates, blocker handling, cross-agent handoffs, approval boundaries, and final reporting. This contract supplements the workflow below and does not authorize destructive database operations, production changes, or releases by itself.
+
 Before implementation:
-1. Read this handbook, [Documentation Index](./DOCUMENTATION-INDEX.md), and the relevant specialist doc.
+1. Read this handbook, [Documentation Index](./DOCUMENTATION-INDEX.md), [Agent Completion Contract](./AGENT-COMPLETION-CONTRACT.md), and the relevant specialist doc.
 2. Inspect the current `dev` branch files, callers, schemas, tests, environment variable names, and current diffs. Do not ask the user to paste repository code that can be inspected.
 3. Summarize the feature/bug in 3–5 bullets and name the files expected to change.
 4. Stay strictly within the current task. Make reasonable assumptions; ask only questions that block safe progress.

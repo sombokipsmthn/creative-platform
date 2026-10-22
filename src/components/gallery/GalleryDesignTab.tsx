@@ -197,6 +197,11 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   const photos = (gallery.photos as GalleryPhoto[] | undefined) || []
 
+  // Derive current theme ID from saved theme name/type more robustly
+  const currentThemeId = GALLERY_THEMES.find(
+    t => t.label === savedTheme?.name && savedTheme?.type === 'preset'
+  )?.id ?? null
+
   // Load saved theme on mount
   useEffect(() => {
     const loadTheme = async () => {
@@ -319,7 +324,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
       navigationStyle: preset.navigationStyle,
     } as Partial<SavedTheme>)
     setShowResetDialog(false)
-  }, [updateTheme])
+  }, [currentThemeId, updateTheme])
 
   const handleSetCover = useCallback(async (photoId: string) => {
     setIsSaving(true)
@@ -358,6 +363,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     }
   }, [focalPoint, galleryId, onRefresh])
 
+  // Theme preview adapter must run before the loading guard to preserve hook ordering.
+  const { previewPhotos, previewTitle, previewCollections, sampleGallery } =
+    useThemePreviewAdapter(currentThemeId, savedTheme, photos)
+
   if (loading || !savedTheme) {
     return (
       <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
@@ -369,19 +378,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     )
   }
 
-  // Derive current theme ID from saved theme name/type more robustly
-  const currentThemeId = GALLERY_THEMES.find(
-    t => t.label === savedTheme.name && savedTheme.type === 'preset'
-  )?.id ?? null
-
   const currentCover = photos.find(p => p.id === coverPhotoId)
 
   // Compute theme-aware styles for the preview
   const theme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
-
-  // Theme preview adapter - provides sample content for empty galleries
-  const { previewPhotos, previewTitle, previewCollections, sampleGallery } =
-    useThemePreviewAdapter(currentThemeId, savedTheme, photos)
   const bgStyle = theme
     ? {
         backgroundColor: theme.preset.backgroundColor,
@@ -463,7 +463,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
           <DialogHeader>
             <DialogTitle>Reset to Theme Defaults?</DialogTitle>
             <DialogDescription>
-              This will discard all your custom changes and restore the original "{currentThemeId ? getGalleryTheme(currentThemeId).label : 'theme'}" preset settings. This action cannot be undone.
+              This will discard all your custom changes and restore the original &quot;{currentThemeId ? getGalleryTheme(currentThemeId).label : 'theme'}&quot; preset settings. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">

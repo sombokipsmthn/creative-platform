@@ -3,17 +3,16 @@
 > Start here. Use the handbook and the two top-level specifications instead of reading every historical document for each task.
 >
 > Repository/branch: https://github.com/sombokipsmthn/creative-platform/tree/dev  
-> Updated: 2026-10-21
+> Updated: 2026-10-22
 
 ## Read these first
-
-- [Agent Completion Contract](./AGENT-COMPLETION-CONTRACT.md) — objective phase gates, verification requirements, handoffs, and approval boundaries.
 
 1. [Project Handbook](./PROJECT-HANDBOOK.md) — **canonical consolidated reference** for product decisions, current architecture, security/data safeguards, UX requirements, agent workflow, and document precedence.
 2. [KIPSMTHN Specification](../KIPSMTHN-SPEC.md) — product scope and functional requirements.
 3. [Implementation Specification](../KIPSMTHN-IMPLEMENTATION-SPEC.md) — current technical implementation, status, and unresolved work.
 4. [Root README](../README.md) — overview, local setup, validation, and deployment entry points.
 5. [Agent Rules](../AGENTS.md) and [AI Agent Guardrails](../AI-AGENT-GUARDRAILS.md) — mandatory rules for repository changes.
+6. [Agent Completion Contract](./AGENT-COMPLETION-CONTRACT.md) — objective phase gates, verification requirements, handoffs, and approval boundaries.
 
 ## Specialist documents
 

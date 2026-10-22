@@ -8,7 +8,7 @@
 
 ## Canonical consolidated reference
 
-Before non-trivial work, read [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md) and [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md). They consolidate the product decisions and documentation precedence. Better Auth remains active; preserve the calendar and existing workflows during auth/UI fixes; keep global styling in the existing shadcn/token system; do not claim Google/passkey/onboarding flows work without runtime verification. Verify database identity before any database write and preserve equipment/migration history during approved development resets. The requested local port policy is app on 3000 and other resources on distinct ports, subject to checking actual configuration.
+Before non-trivial work, read [docs/PROJECT-HANDBOOK.md](./docs/PROJECT-HANDBOOK.md), [docs/DOCUMENTATION-INDEX.md](./docs/DOCUMENTATION-INDEX.md), and the [Agent Completion Contract](./docs/AGENT-COMPLETION-CONTRACT.md). They consolidate product decisions, documentation precedence, and objective phase/completion gates. Better Auth remains active; preserve the calendar and existing workflows during auth/UI fixes; keep global styling in the existing shadcn/token system; do not claim Google/passkey/onboarding flows work without runtime verification. Verify database identity before any database write and preserve equipment/migration history during approved development resets. The requested local port policy is app on 3000 and other resources on distinct ports, subject to checking actual configuration.
 
 ## 1. Non-negotiable rules
 
@@ -41,7 +41,7 @@ The following baseline is verified from the `dev` branch's `package.json`, `tsco
 | Deployment model | Existing Vercel-compatible Next.js application |
 | Runtime | Node.js 22.x, as specified in `package.json` |
 | Package manager | npm; preserve the existing lockfile and package configuration |
-| Local development port | 3005 (`npm run dev`) |
+| Local development port | 3000 (`npm run dev` in `package.json`) |
 | TypeScript imports | Existing `@/*` alias maps to `src/*` |
 | Tests | Existing Vitest setup and project scripts; inspect current test conventions before adding tests |
 
@@ -189,7 +189,7 @@ Do not end with only “done,” “checking,” or an acknowledgment.
 ## 10. Current known context and caveats
 
 - The current repository README says authentication is Better Auth-based and points to `src/lib/auth/auth.ts`; the current auth file configures Better Auth with a Drizzle adapter, email/password verification, optional Google/Apple providers, and passkeys.
-- The current `package.json` specifies Next.js 16.x, React 19, TypeScript 6.x, Drizzle ORM, PostgreSQL support, Tailwind CSS 4, and Node.js 22.x. Always verify actual installed versions and build output before diagnosing version-specific issues.
+- The current `package.json` specifies TypeScript `^5.8.2`; `package-lock.json` resolves `node_modules/typescript` to `5.9.3`. This is the lockfile-resolved version, not proof of a local installed version. Check `npx tsc --version` in the working environment before documenting the installed version. The project also uses Next.js 16.x, React 19, Drizzle ORM, PostgreSQL support, Tailwind CSS 4, and Node.js 22.x.
 - The README describes the project as being in a migration/consolidation phase. Treat incomplete features and stale documentation as possibilities to verify, not facts to repeat without checking.
 - An older uploaded spec sheet documents Clerk and historical issues. It is useful as historical context only and must not override the active Better Auth implementation.
 - This document was prepared by checking the `dev` branch's package manifest, TypeScript configuration, README, and Better Auth configuration. It is **not a claim that every file, route, database relationship, deployment setting, or language occurrence has been exhaustively audited**. A full audit should be a separate, evidence-based task.

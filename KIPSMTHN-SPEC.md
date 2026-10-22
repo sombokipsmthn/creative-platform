@@ -56,7 +56,7 @@ KIPSMTHN Creative Platform is a Next.js App Router application for managing a cr
 | Layer | Technology | Details |
 | ------- | ----------- | --------- |
 | **Framework** | Next.js 16.x | App Router mode |
-| **Language** | TypeScript 6.x | Strict typing |
+| **Language** | TypeScript 5.9.3 (lockfile-resolved) | Strict typing; `package.json` range is `^5.8.2` |
 | **UI Library** | React 19 | Function components with hooks |
 | **Styling** | Tailwind CSS 4 | CSS custom properties in `src/app/globals.css` |
 | **ORM/Database** | Drizzle ORM | PostgreSQL via Neon serverless |
@@ -334,7 +334,7 @@ All environment variables are managed through Vercel dashboard or `.env.local` f
 | Variable | Type | Required | Description |
 | ---------- | ------ | ---------- | ------------- |
 | `BETTER_AUTH_SECRET` | sensitive | Yes | Secret for encrypting cookies and signing tokens |
-| `BETTER_AUTH_URL` | system | Yes (production) | Production URL; in development, system uses `http://localhost:3005` regardless |
+| `BETTER_AUTH_URL` | system | Yes (production) | Production URL; in development, system uses `http://localhost:3000` regardless |
 | `NEXT_PUBLIC_APP_URL` | system | Optional | Public-facing app URL |
 | `GOOGLE_CLIENT_ID` | system | Optional (if using Google OAuth) | Google OAuth client ID |
 | `GOOGLE_CLIENT_SECRET` | sensitive | Optional (if using Google OAuth) | Google OAuth client secret |
@@ -351,7 +351,7 @@ All environment variables are managed through Vercel dashboard or `.env.local` f
 
 - Run `npm install` to install dependencies
 - Ensure `.env.local` has required variables (see `AI-AGENT-GUARDRAILS.md` for baseline)
-- Development server on port 3005 (`npm run dev`)
+- Development server on port 3000 (`npm run dev`)
 - Type check with `npm run typecheck` or `npx tsc --noEmit`
 - Lint with `npm run lint`
 - Test suite with `npm test`
@@ -365,7 +365,7 @@ All environment variables are managed through Vercel dashboard or `.env.local` f
 ```bash
 npm install
 # Ensure .env.local has required variables
-npm run dev          # Development server on port 3005
+npm run dev          # Development server on port 3000
 npm run build        # Production build
 npm test             # Vitest test suite
 npm run lint         ESLint
@@ -373,7 +373,7 @@ npm run lint         ESLint
 
 ### Available npm Scripts
 
-- `npm run dev` — Development server (port 3005)
+- `npm run dev` — Development server (port 3000)
 - `npm run build` — Production Next.js build
 - `npm test` — Vitest test suite
 - `npm run lint` — ESLint

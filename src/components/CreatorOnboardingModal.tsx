@@ -220,8 +220,13 @@ export default function CreatorOnboardingModal({
     setCurrentStep(4);
   };
 
-  const dismissOnboarding = () => {
-    onClose();
+  const dismissOnboarding = async () => {
+    try {
+      await fetch("/api/onboarding/dismiss", { method: "POST" });
+    } finally {
+      onDismiss?.();
+      onClose();
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -229,7 +234,7 @@ export default function CreatorOnboardingModal({
     setError(null);
     setSaving(true);
     try {
-      await Promise.all([
+      const responses = await Promise.all([
         fetch("/api/profile", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -255,6 +260,7 @@ export default function CreatorOnboardingModal({
           body: JSON.stringify({ section: "business", business: { businessName: business.businessName, phone: business.phone, kraPin: business.kraPin, vatRegistered: business.vatRegistered, vatNumber: business.vatNumber, currency: business.currency, depositPercentage: business.depositPercentage, whtRate: business.whtRate } }),
         }),
       ].filter(Boolean));
+      if (responses.some((response) => response && !response.ok)) throw new Error("Unable to save onboarding");
       if (currentStep < 4) setCurrentStep((s) => (s + 1) as Step);
       else { onComplete?.(); onClose(); }
     } catch {

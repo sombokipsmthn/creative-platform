@@ -27,8 +27,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { CommandPalette } from '@/components/ui/CommandPalette';
-import { KeyboardShortcuts } from '@/components/ui/KeyboardShortcuts';
+import { CommandPalette } from '@/components/ui/command-palette';
+import { KeyboardShortcuts } from '@/components/ui/keyboard-shortcuts';
 import {
   SplitViewProvider,
   useSplitView,

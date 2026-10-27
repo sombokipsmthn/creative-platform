@@ -137,18 +137,36 @@ export default function AdminProjectsPage() {
 
   // Saved views state
   const [savedViews, setSavedViews] = useState<SavedView<Project>[]>([
-    { id: 'active-projects', name: 'Active Projects', filters: { status: 'active' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isDefault: true },
-    { id: 'featured-projects', name: 'Featured Projects', filters: { featured: 'true' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'public-projects', name: 'Public Projects', filters: { visibility: 'public' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'draft-projects', name: 'Draft Projects', filters: { status: 'draft' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'active-projects', name: 'Active Projects', filters: { status: 'active' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z', isDefault: true },
+    { id: 'featured-projects', name: 'Featured Projects', filters: { featured: 'true' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'public-projects', name: 'Public Projects', filters: { visibility: 'public' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'draft-projects', name: 'Draft Projects', filters: { status: 'draft' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
   ]);
+  const [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
   const [activeViewId, setActiveViewId] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('creative-platform:projects:saved-views');
+      if (stored) setSavedViews(JSON.parse(stored) as SavedView<Project>[]);
+    } catch {
+      window.localStorage.removeItem('creative-platform:projects:saved-views');
+    } finally {
+      setSavedViewsLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (savedViewsLoaded) window.localStorage.setItem('creative-platform:projects:saved-views', JSON.stringify(savedViews));
+  }, [savedViews, savedViewsLoaded]);
 
   function handleSaveView(view: Omit<SavedView<Project>, 'id'>) {
     const newView: SavedView<Project> = {
       ...view,
       id: `view-${Date.now()}`,
       filters: { status: filterStatus, client: filterClient, visibility: filterVisibility, featured: filterFeatured, search: searchQuery },
+      sort: view.sort,
+      columnVisibility: view.columnVisibility,
     };
     setSavedViews(prev => [...prev, newView]);
     setActiveViewId(newView.id);
@@ -163,11 +181,11 @@ export default function AdminProjectsPage() {
     setActiveViewId(viewId);
     const view = savedViews.find(v => v.id === viewId);
     if (view) {
-      if (view.filters.status) setFilterStatus(view.filters.status as 'ALL' | ProjectStatus);
-      if (view.filters.client) setFilterClient(view.filters.client);
-      if (view.filters.visibility) setFilterVisibility(view.filters.visibility as 'ALL' | 'public' | 'private' | 'draft');
-      if (view.filters.featured) setFilterFeatured(view.filters.featured as 'ALL' | 'true' | 'false');
-      if (view.filters.search) setSearchQuery(view.filters.search);
+      setFilterStatus((view.filters.status as 'ALL' | ProjectStatus | undefined) ?? 'ALL');
+      setFilterClient((view.filters.client as string | null | undefined) ?? null);
+      setFilterVisibility((view.filters.visibility as 'ALL' | 'public' | 'private' | 'draft' | undefined) ?? 'ALL');
+      setFilterFeatured((view.filters.featured as 'ALL' | 'true' | 'false' | undefined) ?? 'ALL');
+      setSearchQuery((view.filters.search as string | undefined) ?? '');
     } else {
       // Default view - clear filters
       setFilterStatus('ALL');
@@ -244,6 +262,12 @@ export default function AdminProjectsPage() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') !== 'true') return;
+    openCreateModal();
+    window.history.replaceState({}, '', window.location.pathname);
+  }, []);
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();

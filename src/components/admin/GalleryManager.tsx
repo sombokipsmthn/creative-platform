@@ -100,15 +100,53 @@ export default function AdminGalleryManagerPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'published'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [galleryView, setGalleryView] = useState<'grid' | 'list'>('grid');
+  const [savedViews, setSavedViews] = useState<Array<{ id: string; name: string; search: string; status: 'all' | 'draft' | 'published'; category: string }>>([]);
+  const [activeSavedViewId, setActiveSavedViewId] = useState('');
 
   useEffect(() => {
     const savedView = window.localStorage.getItem('kipsmthn-gallery-view');
     if (savedView === 'grid' || savedView === 'list') setGalleryView(savedView);
+    try {
+      const storedFilters = window.localStorage.getItem('creative-platform:galleries:saved-filters');
+      if (storedFilters) setSavedViews(JSON.parse(storedFilters));
+    } catch {
+      window.localStorage.removeItem('creative-platform:galleries:saved-filters');
+    }
+
+    if (new URLSearchParams(window.location.search).get('new') === 'true') {
+      setActiveTab('create');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   function changeGalleryView(view: 'grid' | 'list') {
     setGalleryView(view);
     window.localStorage.setItem('kipsmthn-gallery-view', view);
+  }
+
+  function saveCurrentFilter() {
+    const name = window.prompt('Name this gallery filter');
+    if (!name?.trim()) return;
+    const view = { id: `gallery-filter-${Date.now()}`, name: name.trim(), search: searchQuery, status: filterStatus, category: filterCategory };
+    const next = [...savedViews, view];
+    setSavedViews(next);
+    setActiveSavedViewId(view.id);
+    window.localStorage.setItem('creative-platform:galleries:saved-filters', JSON.stringify(next));
+  }
+
+  function applySavedFilter(id: string) {
+    setActiveSavedViewId(id);
+    const view = savedViews.find((item) => item.id === id);
+    setSearchQuery(view?.search ?? '');
+    setFilterStatus(view?.status ?? 'all');
+    setFilterCategory(view?.category ?? 'all');
+  }
+
+  function deleteSavedFilter(id: string) {
+    const next = savedViews.filter((item) => item.id !== id);
+    setSavedViews(next);
+    if (activeSavedViewId === id) setActiveSavedViewId('');
+    window.localStorage.setItem('creative-platform:galleries:saved-filters', JSON.stringify(next));
   }
 
   // Form states for creating new gallery
@@ -408,8 +446,18 @@ export default function AdminGalleryManagerPage() {
                 loading={isLoading}
               />
 
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="sr-only" htmlFor="gallery-saved-filter">Saved gallery filters</label>
+                <select id="gallery-saved-filter" value={activeSavedViewId} onChange={(event) => applySavedFilter(event.target.value)} className="ui-select h-9 min-w-40 max-w-full text-sm">
+                  <option value="">Current filters</option>
+                  {savedViews.map((view) => <option key={view.id} value={view.id}>{view.name}</option>)}
+                </select>
+                <Button type="button" variant="outline" size="sm" onClick={saveCurrentFilter}>Save filters</Button>
+                {activeSavedViewId && <Button type="button" variant="ghost" size="sm" onClick={() => deleteSavedFilter(activeSavedViewId)}>Delete saved filter</Button>}
+              </div>
+
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={i}
@@ -458,7 +506,7 @@ export default function AdminGalleryManagerPage() {
                   ]}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
+                <div className="grid grid-cols-2 gap-3 pb-16 sm:gap-5 lg:grid-cols-3 lg:gap-6">
                   {filteredGalleries.map((gal) => {
                     const coverSrc = gal.cover_url || '/og-image.svg';
 

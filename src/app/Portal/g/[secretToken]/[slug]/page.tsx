@@ -5,6 +5,7 @@ import {
   useState,
 } from "react";
 import Image from "next/image";
+import VideoPlayer from "@/components/ui/VideoPlayer";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
@@ -23,6 +24,7 @@ type Photo = {
   filename: string;
   display_url: string;
   thumbnail_url: string;
+  mime_type?: string | null;
   is_hidden: boolean;
   is_favorite: boolean;
   is_selected: boolean;
@@ -367,26 +369,18 @@ export default function ClientGalleryPage({
                 key={photo.id}
                 className="relative mb-3 md:mb-5 break-inside-avoid group"
               >
-                <Button
-                  onClick={() =>
-                    setViewerIndex(
-                      index
-                    )
-                  }
-                  className="block w-full text-left"
-                >
-                  <Image
-                    src={
-                      photo.display_url
-                    }
-                    alt={
-                      photo.filename
-                    }
-                    width={1800}
-                    height={1200}
-                    className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.01]"
-                  />
-                </Button>
+                <div className="block w-full text-left">
+                  {photo.mime_type?.startsWith("video/") ? (
+                    <div className="relative cursor-pointer" onClick={() => setViewerIndex(index)}>
+                      <Image src={photo.thumbnail_url} alt={photo.filename} width={1800} height={1200} className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.01]" />
+                      <span className="absolute inset-0 grid place-items-center bg-black/25 text-white" aria-label="Play video">▶</span>
+                    </div>
+                  ) : (
+                    <Button onClick={() => setViewerIndex(index)} className="block w-full text-left">
+                      <Image src={photo.display_url} alt={photo.filename} width={1800} height={1200} className="w-full h-auto transition-transform duration-500 group-hover:scale-[1.01]" />
+                    </Button>
+                  )}
+                </div>
 
                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   {gallery.allow_favorites && (
@@ -467,22 +461,12 @@ export default function ClientGalleryPage({
               <ChevronLeft />
             </Button>
 
-            <div className="relative w-[90vw] h-[90vh]">
-              <Image
-                src={
-                  visiblePhotos[
-                    viewerIndex
-                  ].display_url
-                }
-                alt={
-                  visiblePhotos[
-                    viewerIndex
-                  ].filename
-                }
-                fill
-                sizes="90vw"
-                className="object-contain"
-              />
+            <div className="relative flex w-[90vw] h-[90vh] items-center justify-center">
+              {visiblePhotos[viewerIndex].mime_type?.startsWith("video/") ? (
+                <VideoPlayer src={visiblePhotos[viewerIndex].display_url} poster={visiblePhotos[viewerIndex].thumbnail_url} className="max-h-full max-w-full" />
+              ) : (
+                <Image src={visiblePhotos[viewerIndex].display_url} alt={visiblePhotos[viewerIndex].filename} fill sizes="90vw" className="object-contain" />
+              )}
             </div>
 
             <Button type="button"

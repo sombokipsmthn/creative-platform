@@ -93,19 +93,33 @@ export default function AdminClientsPage() {
 
   // Saved views state
   const [savedViews, setSavedViews] = useState<SavedView<Client>[]>([
-    { id: 'active-clients', name: 'Active Clients', filters: { status: 'active' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isDefault: true },
-    { id: 'inactive-clients', name: 'Inactive Clients', filters: { status: 'inactive' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-    { id: 'archived-clients', name: 'Archived Clients', filters: { status: 'archived' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'active-clients', name: 'Active Clients', filters: { status: 'active' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z', isDefault: true },
+    { id: 'inactive-clients', name: 'Inactive Clients', filters: { status: 'inactive' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'archived-clients', name: 'Archived Clients', filters: { status: 'archived' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
   ]);
+  const [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
   const [activeViewId, setActiveViewId] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('creative-platform:clients:saved-views');
+      if (stored) setSavedViews(JSON.parse(stored) as SavedView<Client>[]);
+    } catch {
+      window.localStorage.removeItem('creative-platform:clients:saved-views');
+    } finally {
+      setSavedViewsLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (savedViewsLoaded) window.localStorage.setItem('creative-platform:clients:saved-views', JSON.stringify(savedViews));
+  }, [savedViews, savedViewsLoaded]);
 
   function handleSaveView(view: Omit<SavedView<Client>, 'id'>) {
     const newView: SavedView<Client> = {
       ...view,
       id: `view-${Date.now()}`,
       filters: { status: filterStatus, search: searchQuery },
-      sort: undefined,
-      columnVisibility: undefined,
     };
     setSavedViews(prev => [...prev, newView]);
     setActiveViewId(newView.id);
@@ -120,8 +134,8 @@ export default function AdminClientsPage() {
     setActiveViewId(viewId);
     const view = savedViews.find(v => v.id === viewId);
     if (view) {
-      if (view.filters.status) setFilterStatus(view.filters.status as 'ALL' | ClientStatus);
-      if (view.filters.search) setSearchQuery(view.filters.search);
+      setFilterStatus((view.filters.status as 'ALL' | ClientStatus | undefined) ?? 'ALL');
+      setSearchQuery((view.filters.search as string | undefined) ?? '');
     } else {
       // Default view - clear filters
       setFilterStatus('ALL');
@@ -156,6 +170,12 @@ export default function AdminClientsPage() {
   useEffect(() => {
     void loadClients();
   }, [loadClients]);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') !== 'true') return;
+    openCreateModal();
+    window.history.replaceState({}, '', window.location.pathname);
+  }, []);
 
   const filteredClients = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();

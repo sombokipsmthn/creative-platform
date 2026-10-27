@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 import StatusBadge from '@/components/admin/StatusBadge';
@@ -249,10 +250,9 @@ export default function QuotesPage() {
         {/* TABLE */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
-            <div className="px-6 py-16 text-center">
-              <p className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
-                Loading quotes...
-              </p>
+            <div className="space-y-4 p-6" role="status" aria-label="Loading quotes">
+              <span className="sr-only">Loading quotes…</span>
+              {[0, 1, 2, 3, 4].map((row) => <div key={row} className="flex gap-4">{[0, 1, 2, 3, 4].map((column) => <Skeleton key={column} className="h-8 flex-1" />)}</div>)}
             </div>
           ) : filteredQuotes.length === 0 ? (
             <div className="rounded-xl border border-dashed p-12 text-center">
@@ -298,6 +298,22 @@ export default function QuotesPage() {
                 { label: 'View', onSelect: (quote) => router.push(`/admin/quotes/${quote.id}`) },
                 { label: 'View invoice', hidden: (quote) => !quote.invoiceId, onSelect: (quote) => router.push(`/admin/invoices/${quote.invoiceId}`) },
               ]}
+              mobileCard={(quote, actions) => (
+                <div className="min-w-0 space-y-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{quote.title || 'Untitled Quote'}</p>
+                      <p className="break-all text-xs text-muted-foreground">{quote.quoteNumber || quote.id.slice(0, 8).toUpperCase()}</p>
+                    </div>
+                    {actions}
+                  </div>
+                  <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm">
+                    <span className="min-w-0 break-words">{quote.client?.name || 'No client'}</span>
+                    <StatusBadge status={quote.status} />
+                  </div>
+                  <p className="break-words text-right text-sm font-semibold tabular-nums">{formatAmount(quote.total, quote.currency)}</p>
+                </div>
+              )}
             />
           )}
         </div>

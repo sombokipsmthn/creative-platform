@@ -197,7 +197,7 @@ function MetricCard({ label, value, detail, href, icon, trend }: { label: string
           <ArrowUpRight className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
         </div>
         <p className="mt-4 text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
-        <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 break-words text-2xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]">{value}</p>
         <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
         {trend && (
           <p className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -561,7 +561,7 @@ export default function StudioCommandCenterPage() {
             <h2 className="text-2xl font-semibold tracking-tight">Quick actions</h2>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <QuickAction href="/admin/clients/new" label="Add Client" icon={<Users className="h-4 w-4" />} detail="Create new client record" />
+            <QuickAction href="/admin/clients?new=true" label="Add Client" icon={<Users className="h-4 w-4" />} detail="Create new client record" />
             <QuickAction href="/admin/quotes/new" label="Create Quote" icon={<FileText className="h-4 w-4" />} detail="Build a production quote" />
             <QuickAction href="/admin/invoices/new" label="New Invoice" icon={<Receipt className="h-4 w-4" />} detail="Bill for completed work" />
             <QuickAction href="/admin/calendar" label="Schedule Event" icon={<CalendarDays className="h-4 w-4" />} detail="Add to studio calendar" />
@@ -586,7 +586,21 @@ export default function StudioCommandCenterPage() {
                     </Link>
                   }
                 >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <MetricCard
+                      label="Quoted in period"
+                      value={formatCurrency(stats.finance.periodQuotedValue)}
+                      detail="Value of quotes created in this range"
+                      href="/admin/quotes"
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Invoiced in period"
+                      value={formatCurrency(stats.finance.periodInvoicedValue)}
+                      detail={`${stats.overview.newInvoices} invoices created in this range`}
+                      href="/admin/invoices"
+                      icon={<Receipt className="h-4 w-4" />}
+                    />
                     <MetricCard
                       label="Collected revenue"
                       value={formatCurrency(stats.finance.periodPaidValue)}
@@ -610,12 +624,11 @@ export default function StudioCommandCenterPage() {
                       icon={<CheckCircle2 className="h-4 w-4" />}
                     />
                     <MetricCard
-                      label="Outstanding"
+                      label="Overdue invoices"
                       value={formatNumber(stats.finance.overdueInvoices)}
-                      detail="Overdue invoices"
+                      detail="Invoices past their due date"
                       href="/admin/invoices"
                       icon={<Clock3 className="h-4 w-4" />}
-                      trend={{ value: -stats.finance.overdueInvoices, label: 'overdue' }}
                     />
                   </div>
                 </Panel>

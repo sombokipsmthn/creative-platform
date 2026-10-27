@@ -232,7 +232,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [params]);
 
   const handleChange = (field: keyof FormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));

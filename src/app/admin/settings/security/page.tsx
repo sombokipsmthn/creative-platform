@@ -79,8 +79,8 @@ export default function AdminSecurityPage() {
   if (isPending || isLoading) {
     return (
       <main className="min-h-screen flex min-h-[70vh] items-center justify-center">
-        <div className="os-pulse flex items-center gap-3">
-          <span className="os-icon-box h-9 w-9" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 animate-pulse" />
           <p className="text-sm text-muted-foreground uppercase">Loading security settings</p>
         </div>
       </main>
@@ -105,21 +105,18 @@ export default function AdminSecurityPage() {
   const otherSessions = sessionsData?.sessions?.filter((s: any) => !s.current) || [];
 
   return (
-    <main className="min-h-screen min-h-screen">
+    <main className="min-h-screen">
       <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
         <AdminPageHeader
           title="Sign-in & Sessions"
           description="View and manage your authenticated sessions and sign-in methods."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           tabs={[
-            { label: 'Account & Profile', href: '/admin/settings/profile', active: false },
-            { label: 'Workspace Branding', href: '/admin/settings/branding', active: false },
-            { label: 'Business Preferences', href: '/admin/settings/business', active: false },
-            { label: 'Gallery Defaults', href: '/admin/settings/gallery-defaults', active: false },
-            { label: 'Watermark Studio', href: '/admin/settings/watermark', active: false },
-            { label: 'Documents & Email Templates', href: '/admin/settings/documents', active: false },
-            { label: 'Notifications', href: '/admin/settings/notifications', active: false },
-            { label: 'Integrations', href: '/admin/settings/integrations', active: false },
+            { label: 'Account & Profile', href: '/admin/settings?tab=account-profile', active: false },
+            { label: 'Business Preferences', href: '/admin/settings?tab=business-preferences', active: false },
+            { label: 'Gallery Defaults', href: '/admin/settings?tab=gallery-delivery', active: false },
+            { label: 'Notifications', href: '/admin/settings?tab=notifications', active: false },
+            { label: 'Integrations', href: '/admin/settings?tab=integrations', active: false },
             { label: 'Sign-in & Sessions', href: '/admin/settings/security', active: true },
           ]}
         />

@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     `);
 
     const defaultPreset = await db.execute(sql`
-      SELECT enabled, type, text, position, opacity, font_size, image_url, image_path, image_filename, image_mime_type
+      SELECT enabled, text, position, opacity, font_size
       FROM gallery_watermark_presets
       WHERE creator_id = ${creator.id}
       ORDER BY updated_at DESC, created_at ASC
@@ -107,8 +107,8 @@ export async function POST(request: Request) {
     `);
     const watermark = defaultPreset.rows[0];
     await db.execute(sql`
-      INSERT INTO gallery_watermarks (gallery_id, enabled, type, text, position, opacity, font_size, image_url, image_path, image_filename, image_mime_type)
-      VALUES (${gallery.id}, ${watermark?.enabled !== false}, ${watermark?.type === "image" ? "image" : "text"}, ${String(watermark?.text || "KIPSMTHN")}, ${String(watermark?.position || "bottom-right")}, ${Number(watermark?.opacity ?? 55)}, ${Number(watermark?.font_size ?? 42)}, ${watermark?.image_url ? String(watermark.image_url) : null}, ${watermark?.image_path ? String(watermark.image_path) : null}, ${watermark?.image_filename ? String(watermark.image_filename) : null}, ${watermark?.image_mime_type === "image/png" ? "image/png" : null})
+      INSERT INTO gallery_watermarks (gallery_id, enabled, text, position, opacity, font_size)
+      VALUES (${gallery.id}, ${watermark?.enabled !== false}, ${String(watermark?.text || "KIPSMTHN")}, ${String(watermark?.position || "bottom-right")}, ${Number(watermark?.opacity ?? 55)}, ${Number(watermark?.font_size ?? 42)})
       ON CONFLICT (gallery_id) DO NOTHING
     `);
 

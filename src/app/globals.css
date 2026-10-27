@@ -129,10 +129,10 @@
   --color-text-faint: #D1D5DB;
   --color-text-inverse: #FFFFFF;
 
-  /* shadcn primary accent: neutral in both themes */
-  --color-accent: #111827;
-  --color-accent-soft: rgba(17, 24, 39, 0.08);
-  --color-accent-hover: #000000;
+  /* shadcn primary accent: restrained brand accent (orange) */
+  --color-accent: #ea580c;
+  --color-accent-soft: rgba(234, 88, 12, 0.08);
+  --color-accent-hover: #c2410c;
 
   /* Status colors - used minimally */
   --color-success: #10B981;
@@ -199,8 +199,8 @@
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-accent: #ea580c;
+  --sidebar-accent-foreground: #111827;
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 }
@@ -208,6 +208,8 @@
 /* Dark mode overrides */
 html.dark {
   --primary-foreground: #111827;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #111827;
   --color-bg-page: #0A0A0A;
   --color-bg-card: #18181B;
   --color-bg-elevated: #222223;

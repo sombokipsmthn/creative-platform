@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth/auth";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { isLocalAuthBypassEnabled } from "@/lib/auth/local-bypass";
 
 const DEV_EMAIL = "dev-admin@localhost.test";
 
@@ -14,12 +15,13 @@ export async function getCurrentUser() {
 }
 
 export async function getCurrentUserFromRequest(request: Request) {
-  // In development with local auth bypass enabled, check for bypass cookie
-  const cookies = request.headers.get("cookie") || "";
-  const isDevBypass = cookies.includes("local-auth-bypass=1") &&
-    process.env.NODE_ENV === "development";
+  // Honor the bypass cookie only when the shared gate confirms local development,
+  // the explicit flag is enabled, and the request hostname is loopback.
+  const hasBypassCookie = (request.headers.get("cookie") || "")
+    .split(";")
+    .some((cookie) => cookie.trim() === "local-auth-bypass=1");
 
-  if (isDevBypass) {
+  if (hasBypassCookie && isLocalAuthBypassEnabled(request)) {
     const devUser = await db.query.users.findFirst({
       where: eq(users.email, DEV_EMAIL)
     });

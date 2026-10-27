@@ -5,9 +5,9 @@ interface StatCardsProps {
     label: string;
     value: string | number;
     detail?: string;
-    color?: 'default' | 'success' | 'warning' | 'danger';
+    color?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
   }>;
-  columns?: 2 | 3 | 4;
+  columns?: 2 | 3 | 4 | 8;
 }
 
 export default function StatCards({ stats, columns = 4 }: StatCardsProps) {
@@ -15,13 +15,16 @@ export default function StatCards({ stats, columns = 4 }: StatCardsProps) {
     2: 'lg:grid-cols-2',
     3: 'lg:grid-cols-3',
     4: 'lg:grid-cols-4',
-  }[columns];
+    8: 'lg:grid-cols-8',
+  }[columns ?? 4];
 
   const colorClasses = {
     default: 'text-[var(--color-text-muted)]',
     success: 'text-emerald-600 dark:text-emerald-400',
     warning: 'text-amber-600 dark:text-amber-400',
     danger: 'text-red-600 dark:text-red-400',
+    info: 'text-blue-600 dark:text-blue-400',
+    accent: 'text-orange-600 dark:text-orange-400',
   };
 
   return (

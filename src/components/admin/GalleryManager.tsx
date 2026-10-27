@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   Activity,
-  Archive,
   CheckCircle2,
   Clock,
   Copy,
@@ -29,6 +28,7 @@ import {
 } from 'lucide-react';
 
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import { SelectCompat } from '@/components/ui/select-compat';
 import { Button } from '@/components/ui/button';
@@ -320,61 +320,17 @@ export default function AdminGalleryManagerPage() {
       )}
 
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Bar */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 pb-2">
-          <div className="space-y-1">
-            <Link
-              href="/admin"
-              className="ui-meta uppercase tracking-widest text-slate-400 hover:text-[var(--color-accent)] transition-colors flex items-center gap-2"
-            >
-              <Archive className="w-3 h-3" />
-              <span>Back to Studio</span>
-            </Link>
-
-            <div className="flex items-center gap-4">
-              <h1 className="ui-page-title text-4xl">
-                Galleries
-              </h1>
-              {isRefreshing && (
-                <RefreshCw className="w-4 h-4 text-primary animate-spin opacity-50" />
-              )}
-            </div>
-
-            <p className="ui-body font-sans text-xs">
-              Manage client delivery, proofing & digital delivery portals.
-            </p>
-          </div>
-
-          {/* Tab Navigation Buttons */}
-          <div className="ui-tab-pills">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`ui-tab-pill flex items-center gap-2 ${activeTab === 'all' ? 'ui-tab-pill-active' : ''}`}
-            >
-              <ImageIcon className="w-3.5 h-3.5" />
-              All Galleries
-            </button>
-
-            <button
-              onClick={() => setActiveTab('activity')}
-              className={`ui-tab-pill flex items-center gap-2 relative ${activeTab === 'activity' ? 'ui-tab-pill-active' : ''}`}
-            >
-              <Activity className="w-3.5 h-3.5" />
-              Activity
-              {activities.length > 0 && activeTab !== 'activity' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab('create')}
-              className={`ui-tab-pill flex items-center gap-2 ${activeTab === 'create' ? 'ui-tab-pill-active' : ''}`}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              New Gallery
-            </button>
-          </div>
-        </div>
+        <AdminPageHeader
+          title="Galleries"
+          description="Manage client delivery, proofing & digital delivery portals."
+          breadcrumb={{ label: 'Back to Studio', href: '/admin' }}
+          className="mb-8"
+          tabs={[
+            { label: 'All Galleries', active: activeTab === 'all', onClick: () => setActiveTab('all') },
+            { label: 'Activity', active: activeTab === 'activity', onClick: () => setActiveTab('activity') },
+            { label: 'New Gallery', active: activeTab === 'create', onClick: () => setActiveTab('create') },
+          ]}
+        />
 
         {errorMessage && (
           <div className="ui-alert ui-alert-error">
@@ -504,9 +460,7 @@ export default function AdminGalleryManagerPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
                   {filteredGalleries.map((gal) => {
-                    const fallbackCover =
-                      'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1000&q=80';
-                    const coverSrc = gal.cover_url || fallbackCover;
+                    const coverSrc = gal.cover_url || '/og-image.svg';
 
                     return (
                       <div

@@ -45,3 +45,26 @@ export function generateContractNumber(): string {
 
   return `KIP-CON-${datePart}-${randomPart}`;
 }
+
+/**
+ * Formats a date string to a localized date format.
+ * Defaults to en-KE format (dd MMM yyyy).
+ *
+ * @param value - The date string to format
+ * @param locale - The locale to use (default: en-KE)
+ * @returns The formatted date string or '—' if invalid
+ */
+export function formatDate(
+  value: string | null | undefined,
+  locale: string = 'en-KE',
+): string {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+
+  return date.toLocaleDateString(locale, {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}

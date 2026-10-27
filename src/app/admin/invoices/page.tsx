@@ -20,6 +20,8 @@ import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import StatusBadge from '@/components/admin/StatusBadge';
+import StatCards from '@/components/admin/StatCards';
 
 type Client = {
   id: string;
@@ -318,32 +320,16 @@ export default function InvoicesPage() {
         )}
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Total Invoices</p>
-            <p className="text-2xl font-bold">{summary.total}</p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Draft</p>
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              {summary.draft}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Paid</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {summary.paid}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Outstanding</p>
-            <p className="text-2xl font-bold text-slate-900 dark:text-white">
-              {formatMoney(summary.outstanding, 'KES')}
-            </p>
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          <StatCards
+            stats={[
+              { label: 'Total Invoices', value: String(summary.total), detail: '', color: 'default' },
+              { label: 'Draft', value: String(summary.draft), detail: '', color: 'default' },
+              { label: 'Paid', value: String(summary.paid), detail: '', color: 'success' },
+              { label: 'Outstanding', value: formatMoney(summary.outstanding, 'KES'), detail: '', color: 'warning' },
+            ]}
+            columns={4}
+          />
         </div>
 
         {/* Admin Resource Toolbar */}
@@ -442,7 +428,7 @@ export default function InvoicesPage() {
               columns={[
                 { id: 'invoice', header: 'Invoice', cell: (invoice) => <div><p className="font-medium">{invoice.title || 'Untitled Invoice'}</p><p className="text-xs text-muted-foreground">{invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}</p></div>, accessor: (invoice) => invoice.title, sortable: true },
                 { id: 'client', header: 'Client', accessor: (invoice) => getClientName(invoice.client) },
-                { id: 'status', header: 'Status', cell: (invoice) => <span className={getStatusBadgeClass(invoice.status)}>{getStatusLabel(invoice.status)}</span>, accessor: (invoice) => invoice.status },
+                { id: 'status', header: 'Status', cell: (invoice) => <StatusBadge status={invoice.status} />, accessor: (invoice) => invoice.status },
                 { id: 'issued', header: 'Issued', cell: (invoice) => formatDate(invoice.issueDate), accessor: (invoice) => invoice.issueDate, hideOnMobile: true },
                 { id: 'due', header: 'Due', cell: (invoice) => formatDate(invoice.dueDate), accessor: (invoice) => invoice.dueDate, hideOnMobile: true },
                 { id: 'total', header: 'Total', align: 'right', cell: (invoice) => formatMoney(invoice.total, invoice.currency), accessor: (invoice) => invoice.total },

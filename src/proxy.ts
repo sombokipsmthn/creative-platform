@@ -1,4 +1,4 @@
-import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
+import { getLocalAuthBypassState } from "./lib/auth/local-bypass";
 import { NextResponse } from "next/server";
 
 async function hasAuthenticatedSession(request: Request): Promise<boolean> {

@@ -27,6 +27,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { CommandPalette } from '@/components/ui/CommandPalette';
+import { KeyboardShortcuts } from '@/components/ui/KeyboardShortcuts';
 import {
   SplitViewProvider,
   useSplitView,
@@ -311,9 +313,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex border-sidebar-border/80">
         <SidebarContent pathname={pathname} badgeCounts={badgeCounts} portfolioHref={portfolioHref} />
       </aside>
+
+      {/* Command Palette */}
+      <CommandPalette />
 
       {/* Main Workspace Area */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
@@ -361,6 +366,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-2">
+            <KeyboardShortcuts />
             <ThemeToggle compact />
             <Separator orientation="vertical" className="h-5 mx-1" />
             <ProfileMenu showLabel />

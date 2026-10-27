@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Upload, X, Check, Loader2, Trash2, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { upload } from '@vercel/blob/client';
 
 interface UploadItem {
   id: string;
@@ -116,31 +115,27 @@ export default function PhotoUploader({
       );
 
       try {
-        // Upload to Vercel Blob
-        await upload(
-          `galleries/${galleryId}/${item.file.name}`,
-          item.file,
-          {
-            access: 'public',
-            handleUploadUrl: '/api/galleries/upload',
-            clientPayload: JSON.stringify({ galleryId }),
-          }
-        );
-
-        // Simulate progress updates since the upload API does not expose
-        // real-time byte progress.
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress = Math.min(progress + 10, 90);
-          setUploadItems((prev) =>
-            prev.map((i) =>
-              i.id === item.id ? { ...i, progress } : i
-            )
-          );
-        }, 100);
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        clearInterval(interval);
+        await new Promise<void>((resolve, reject) => {
+          const request = new XMLHttpRequest();
+          request.open('POST', '/api/galleries/upload');
+          request.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: Math.round((event.loaded / event.total) * 100) } : i));
+            }
+          };
+          request.onload = () => {
+            if (request.status >= 200 && request.status < 300) resolve();
+            else {
+              try { reject(new Error(JSON.parse(request.responseText).error || 'Upload failed.')); }
+              catch { reject(new Error('Upload failed.')); }
+            }
+          };
+          request.onerror = () => reject(new Error('Network error while uploading.'));
+          const form = new FormData();
+          form.append('galleryId', galleryId);
+          form.append('file', item.file);
+          request.send(form);
+        });
 
         setUploadItems((prev) =>
           prev.map((i) =>

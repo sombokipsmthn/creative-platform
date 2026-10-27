@@ -101,8 +101,8 @@ export default function AdminGalleryDefaultsPage() {
   if (isPending || isLoading) {
     return (
       <main className="min-h-screen flex min-h-[70vh] items-center justify-center">
-        <div className="os-pulse flex items-center gap-3">
-          <span className="os-icon-box h-9 w-9" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 animate-pulse" />
           <p className="text-sm text-muted-foreground uppercase">Loading gallery defaults</p>
         </div>
       </main>
@@ -124,17 +124,19 @@ export default function AdminGalleryDefaultsPage() {
   }
 
   return (
-    <main className="min-h-screen min-h-screen">
+    <main className="min-h-screen">
       <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
         <AdminPageHeader
           title="Gallery Defaults"
           description="Pre-fill settings when creating new private client galleries. These are workspace-level defaults; per-gallery overrides remain independent."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           tabs={[
-            { label: 'Account & Profile', href: '/admin/settings/profile', active: false },
-            { label: 'Workspace Branding', href: '/admin/settings/branding', active: false },
+            { label: 'Account & Profile', href: '/admin/settings?tab=account-profile', active: false },
             { label: 'Business Preferences', href: '/admin/settings/business', active: false },
             { label: 'Gallery Defaults', href: '/admin/settings/gallery-defaults', active: true },
+            { label: 'Notifications', href: '/admin/settings/notifications', active: false },
+            { label: 'Integrations', href: '/admin/settings/integrations', active: false },
+            { label: 'Sign-in & Sessions', href: '/admin/settings/security', active: false },
           ]}
         />
 
@@ -181,41 +183,53 @@ export default function AdminGalleryDefaultsPage() {
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium leading-none">Allow Downloads</label>
-                <Input
-                  type="checkbox"
-                  checked={galleryDefaults.defaultAllowDownloads}
-                  onChange={(e) => update('defaultAllowDownloads', e.target.checked)}
-                />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={galleryDefaults.defaultAllowDownloads}
+                    onChange={(e) => update('defaultAllowDownloads', e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  Allow Downloads
+                </label>
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium leading-none">Allow Favorites</label>
-                <Input
-                  type="checkbox"
-                  checked={galleryDefaults.defaultAllowFavorites}
-                  onChange={(e) => update('defaultAllowFavorites', e.target.checked)}
-                />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={galleryDefaults.defaultAllowFavorites}
+                    onChange={(e) => update('defaultAllowFavorites', e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  Allow Favorites
+                </label>
               </div>
 
               <div className="space-y-1">
-                <label className="text-sm font-medium leading-none">Allow Selections/Proofing</label>
-                <Input
-                  type="checkbox"
-                  checked={galleryDefaults.defaultAllowSelections}
-                  onChange={(e) => update('defaultAllowSelections', e.target.checked)}
-                />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={galleryDefaults.defaultAllowSelections}
+                    onChange={(e) => update('defaultAllowSelections', e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  Allow Selections/Proofing
+                </label>
               </div>
             </div>
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1">
-                <label className="text-sm font-medium leading-none">Require PIN for Access</label>
-                <Input
-                  type="checkbox"
-                  checked={galleryDefaults.defaultRequirePin}
-                  onChange={(e) => update('defaultRequirePin', e.target.checked)}
-                />
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={galleryDefaults.defaultRequirePin}
+                    onChange={(e) => update('defaultRequirePin', e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                  Require PIN for Access
+                </label>
               </div>
             </div>
           </section>

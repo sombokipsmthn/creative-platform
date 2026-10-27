@@ -5,6 +5,7 @@ import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
+import { cn } from '@/lib/utils'
 import GalleryTopNav from '@/components/ui/GalleryTopNav'
 import GalleryDesignTab from '@/components/gallery/GalleryDesignTab'
 import GallerySettingsTab from '@/components/gallery/GallerySettingsTab'
@@ -369,7 +370,7 @@ export default function GalleryWorkspacePage() {
                   {publishing && <Loader2 className="w-4 h-4 animate-spin" />}
                   {gallery.status === 'published' ? 'Unpublish' : 'Publish'}
                 </button>
-                <span className="text-xs text-[var(--color-text-muted)]">
+                <span className="ui-meta">
                   {gallery.status} · {gallery.photos?.length || 0} items
                 </span>
               </div>
@@ -385,13 +386,13 @@ export default function GalleryWorkspacePage() {
 
           {/* ERROR ALERT */}
           {error && (
-            <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <div className="mt-6 ui-alert ui-alert-error flex items-start gap-3">
               <div className="flex-1">
-                <p className="text-sm text-red-800">{error}</p>
+                <p className="text-sm">{error}</p>
               </div>
               <button
                 onClick={() => setError(null)}
-                className="text-red-600 hover:text-red-800"
+                className="text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -412,7 +413,7 @@ export default function GalleryWorkspacePage() {
 
                 {/* SELECTION TOOLBAR */}
                 {selectedPhotos.size > 0 && (
-                  <div className="sticky top-0 z-10 bg-[var(--color-bg)] border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center justify-between gap-4">
+                  <div className="sticky top-0 z-10 ui-card border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center justify-between gap-4">
                     <span className="text-sm font-medium">
                       {selectedPhotos.size} item{selectedPhotos.size !== 1 ? 's' : ''} selected
                     </span>
@@ -429,7 +430,7 @@ export default function GalleryWorkspacePage() {
                       </button>
                       <button
                         onClick={() => void handleDeletePhotos()}
-                        className="gallery-btn gallery-btn-secondary gap-2 text-red-600 hover:text-red-700"
+                        className="gallery-btn gallery-btn-secondary gap-2 text-destructive hover:text-destructive"
                       >
                         <Trash2 className="w-4 h-4" />
                         Delete
@@ -446,8 +447,8 @@ export default function GalleryWorkspacePage() {
 
                 {/* MOVE DIALOG */}
                 {showCollectionPicker && selectedPhotos.size > 0 && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 w-full max-w-md">
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-bg-overlay)]">
+                    <div className="ui-modal bg-[var(--color-bg-card)] rounded-2xl p-6 w-full max-w-md">
                       <div className="mb-4">
                         <p className="font-medium">
                           Move {selectedPhotos.size} selected item{selectedPhotos.size !== 1 ? 's' : ''} to:
@@ -461,7 +462,7 @@ export default function GalleryWorkspacePage() {
                             value="null"
                             checked={moveDestination === null}
                             onChange={() => setMoveDestination(null)}
-                            className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border-subtle)]"
+                            className="w-4 h-4 accent-[var(--color-accent)] border-[var(--color-border-subtle)]"
                           />
                           <span>All Photos (no collection)</span>
                         </label>
@@ -473,12 +474,12 @@ export default function GalleryWorkspacePage() {
                               value={coll.id}
                               checked={moveDestination === coll.id}
                               onChange={() => setMoveDestination(coll.id)}
-                              className="w-4 h-4 text-[var(--color-accent)] border-[var(--color-border-subtle)]"
+                              className="w-4 h-4 accent-[var(--color-accent)] border-[var(--color-border-subtle)]"
                             />
                             <span className="flex-1">
                               {coll.title}
                             </span>
-                            <span className="text-xs text-[var(--color-text-muted)]">
+                            <span className="ui-meta">
                               {coll.photo_count || 0} items
                             </span>
                           </label>
@@ -490,7 +491,7 @@ export default function GalleryWorkspacePage() {
                             setShowCollectionPicker(false)
                             setMoveDestination(null)
                           }}
-                          className="px-4 py-2 bg-white dark:bg-zinc-700 border border-[var(--color-border-subtle)] rounded-md hover:bg-[var(--color-bg-soft)] dark:hover:bg-zinc-600"
+                          className="px-4 py-2 ui-button ui-button-secondary"
                         >
                           Cancel
                         </button>
@@ -500,7 +501,7 @@ export default function GalleryWorkspacePage() {
                             setShowCollectionPicker(false)
                             setMoveDestination(null)
                           }}
-                          className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-md hover:bg-[var(--color-accent)/80]"
+                          className="px-4 py-2 ui-button ui-button-primary"
                         >
                           Move items
                         </button>
@@ -543,20 +544,35 @@ export default function GalleryWorkspacePage() {
                   </div>
 
                   {filteredPhotos.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                       {filteredPhotos.map((photo) => {
                         const mediaType = getMediaType(photo)
                         
+                        const isSelected = selectedPhotos.has(photo.id)
+
                         return (
                           <div
                             key={photo.id}
-                            className="group relative aspect-square overflow-hidden rounded-lg border border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] cursor-pointer"
+                            className={cn(
+                              'group relative aspect-square overflow-hidden rounded-lg border transition-colors cursor-pointer',
+                              isSelected
+                                ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg)]'
+                                : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent)]'
+                            )}
                             onClick={() => handlePhotoToggle(photo.id)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePhotoToggle(photo.id); } }}
+                            tabIndex={0}
+                            role="button"
+                            aria-label={`Toggle selection for ${photo.filename}`}
+                            aria-pressed={isSelected}
                           >
-                            {/* CHECKBOX */}
-                            <div className="absolute top-2 left-2 z-10 w-5 h-5 rounded border-2 border-white bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                              {selectedPhotos.has(photo.id) && (
-                                <div className="w-3 h-3 rounded-sm bg-white" />
+                            {/* SELECTION INDICATOR - always visible on mobile, hover on desktop */}
+                            <div className={cn(
+                              'absolute top-2 left-2 z-10 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center transition-opacity',
+                              'md:opacity-0 md:group-hover:opacity-100'
+                            )}>
+                              {isSelected && (
+                                <div className="w-3.5 h-3.5 rounded-full bg-[var(--color-accent)] border-2 border-white" />
                               )}
                             </div>
 
@@ -581,39 +597,45 @@ export default function GalleryWorkspacePage() {
                                 </div>
                                 {/* Duration Badge */}
                                 {photo.duration && (
-                                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-2 py-1 rounded">
+                                  <div className="absolute bottom-2 right-2 bg-[var(--color-bg-overlay)] text-white text-[10px] px-2 py-1 rounded">
                                     {formatDuration(photo.duration)}
                                   </div>
                                 )}
                               </div>
                             ) : (
                               <Image
-                                src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl || '/placeholder.jpg'}
+                                src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl || '/og-image.svg'}
                                 alt={photo.filename}
                                 fill
                                 unoptimized
                                 className={`object-cover transition duration-300 ${selectedPhotos.has(photo.id) ? 'brightness-75' : 'group-hover:brightness-90'}`}
                                 onError={(e) => {
                                   const target = e.target as HTMLImageElement
-                                  target.src = '/placeholder.jpg'
+                                  target.src = '/og-image.svg'
                                 }}
                               />
                             )}
 
-                            {/* FILENAME OVERLAY */}
-                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 opacity-0 group-hover:opacity-100 transition">
+                            {/* FILENAME OVERLAY - show on mobile, hover on desktop */}
+                            <div className={cn(
+                              'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 transition-opacity',
+                              'md:opacity-0 md:group-hover:opacity-100'
+                            )}>
                               <p className="truncate text-[10px] font-medium text-white">
                                 {photo.filename.split('.').slice(0, -1).join('.')}
                               </p>
                             </div>
 
-                            {/* HOVER ACTIONS */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 z-10">
+                            {/* ACTIONS - always visible on mobile, hover on desktop */}
+                            <div className={cn(
+                              'absolute inset-0 bg-black/0 transition flex items-center justify-center gap-2 z-10',
+                              'md:opacity-0 md:group-hover:opacity-100'
+                            )}>
                               <select
                                 value={photo.portfolioSelection || 'inherit'}
                                 onClick={(e) => e.stopPropagation()}
                                 onChange={(e) => void handlePortfolioSelection(photo.id, e.target.value as 'inherit' | 'include' | 'exclude')}
-                                className="absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-black/75 px-1.5 py-1 text-[10px] text-white opacity-0 group-hover:opacity-100"
+                                className="absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-[var(--color-bg-overlay)] px-1.5 py-1 text-[10px] text-white"
                                 aria-label={`Portfolio status for ${photo.filename}`}
                               >
                                 <option value="inherit">Portfolio: follow set</option><option value="include">Portfolio: publish</option><option value="exclude">Portfolio: exclude</option>
@@ -624,8 +646,9 @@ export default function GalleryWorkspacePage() {
                                   e.stopPropagation()
                                   void handleToggleHidden(photo.id, photo.isHidden)
                                 }}
-                                className="w-8 h-8 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
+                                className="w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
                                 title={photo.isHidden ? 'Show' : 'Hide'}
+                                aria-label={photo.isHidden ? 'Show photo' : 'Hide photo'}
                               >
                                 {photo.isHidden ? (
                                   <EyeOff className="w-4 h-4 text-black" />
@@ -688,7 +711,7 @@ export default function GalleryWorkspacePage() {
                         onClick={() => setActiveCollection(null)}
                         className={`w-full text-left p-3 rounded-lg border transition ${
                           activeCollection === null
-                            ? 'bg-[var(--color-accent-light)] border-[var(--color-accent)] text-[var(--color-accent)]'
+                            ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
                             : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
                         }`}
                       >
@@ -703,7 +726,7 @@ export default function GalleryWorkspacePage() {
                           onClick={() => setActiveCollection(collection.id)}
                           className={`w-full text-left p-3 rounded-lg border transition ${
                             activeCollection === collection.id
-                              ? 'bg-[var(--color-accent-light)] border-[var(--color-accent)] text-[var(--color-accent)]'
+                              ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
                               : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
                           }`}
                         >
@@ -715,7 +738,7 @@ export default function GalleryWorkspacePage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-[var(--color-text-muted)]">No collections yet. Create one to organize your photos and videos.</p>
+                    <p className="ui-body">No collections yet. Create one to organize your photos and videos.</p>
                   )}
                 </div>
               </section>

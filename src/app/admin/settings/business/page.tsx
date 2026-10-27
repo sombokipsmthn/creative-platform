@@ -99,8 +99,8 @@ export default function AdminBusinessPreferencesPage() {
   if (isPending || isLoading) {
     return (
       <main className="min-h-screen flex min-h-[70vh] items-center justify-center">
-        <div className="os-pulse flex items-center gap-3">
-          <span className="os-icon-box h-9 w-9" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 animate-pulse" />
           <p className="text-sm text-muted-foreground uppercase">Loading business preferences</p>
         </div>
       </main>
@@ -122,16 +122,19 @@ export default function AdminBusinessPreferencesPage() {
   }
 
   return (
-    <main className="min-h-screen min-h-screen">
+    <main className="min-h-screen">
       <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
         <AdminPageHeader
           title="Business Preferences"
           description="Configure currency, tax settings, KRA PIN, and document numbering defaults."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           tabs={[
-            { label: 'Account & Profile', href: '/admin/settings/profile', active: false },
-            { label: 'Workspace Branding', href: '/admin/settings/branding', active: false },
+            { label: 'Account & Profile', href: '/admin/settings?tab=account-profile', active: false },
             { label: 'Business Preferences', href: '/admin/settings/business', active: true },
+            { label: 'Gallery Defaults', href: '/admin/settings/gallery-defaults', active: false },
+            { label: 'Notifications', href: '/admin/settings/notifications', active: false },
+            { label: 'Integrations', href: '/admin/settings/integrations', active: false },
+            { label: 'Sign-in & Sessions', href: '/admin/settings/security', active: false },
           ]}
         />
 

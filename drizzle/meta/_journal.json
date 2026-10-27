@@ -29,6 +29,13 @@
       "when": 1792882136622,
       "tag": "0042_fix_schema_drift",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792882136623,
+      "tag": "0044_repair_missing_schema",
+      "breakpoints": true
     }
   ]
 }

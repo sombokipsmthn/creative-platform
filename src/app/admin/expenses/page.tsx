@@ -9,6 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, RefreshCw, Filter, Plus } from 'lucide-react';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import StatusBadge from '@/components/admin/StatusBadge';
+import StatCards from '@/components/admin/StatCards';
 
 type Expense = { id: string; description: string; supplier: string | null; category: string; amount: number; currency: string; expenseDate: string; paymentMethod: string | null; taxAmount: number; notes: string | null; project?: { id: string; name: string } | null };
 type Form = { description: string; category: string; amount: string; expenseDate: string; supplier: string; paymentMethod: string; taxAmount: string; notes: string };
@@ -152,27 +154,16 @@ export default function AdminExpensesPage() {
         />
 
           {/* Metrics Summary Bar */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-              <p className="text-sm font-medium text-muted-foreground">Total Claimable Expenses</p>
-              <p className="text-2xl font-bold">KES {totalClaimable.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">eTIMS & ETR Verified Receipts</p>
-            </div>
-
-            <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-              <p className="text-sm font-medium text-muted-foreground">Est. KRA Tax Savings</p>
-              <p className="text-2xl font-bold">KES {estimatedTaxShield.toLocaleString()}</p>
-              <p className="text-sm text-muted-foreground">Tax Deductible at 30% Corporate Rate</p>
-            </div>
-
-            <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-              <p className="text-sm font-medium text-muted-foreground">Pending Verification</p>
-              <p className="text-2xl font-bold">
-                {expenses.filter((e) => e.status === 'PENDING_VERIFICATION').length} Receipts
-              </p>
-              <p className="text-sm text-muted-foreground">Requires eTIMS PIN confirmation</p>
-            </div>
-          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          <StatCards
+            stats={[
+              { label: 'Total Claimable', value: 'KES ' + totalClaimable.toLocaleString(), detail: '', color: 'success' },
+              { label: 'Est. Tax Savings', value: 'KES ' + estimatedTaxShield.toLocaleString(), detail: 'at 30% corporate rate', color: 'info' },
+              { label: 'Pending Verification', value: String(expenses.filter((e) => e.status === 'PENDING_VERIFICATION').length) + ' receipts', detail: 'Requires eTIMS PIN confirmation', color: 'warning' },
+            ]}
+            columns={4}
+          />
+        </div>
 
         {/* SCANNER FORM */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm space-y-6">

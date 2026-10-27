@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth";
+import { getCurrentUserFromRequest } from "@/lib/auth/get-current-user";
 import { sql, eq, and, asc, desc } from "drizzle-orm";
 
 import { db } from "@/db";
@@ -11,25 +12,17 @@ type Context = {
   params: Promise<{ id: string }>;
 };
 
-async function getCreator() {
+async function getCreator(request?: Request) {
+  if (request) return getCurrentUserFromRequest(request);
   const session = await getCurrentSession();
-    const userId = session?.user?.id ?? null;
-
-  if (!userId) {
-    return null;
-  }
-
-  try {
-    return await getLocalUser(userId);
-  } catch (e) {
-    console.error("Creator not found for this route:", e);
-    return null;
-  }
+  const userId = session?.user?.id ?? null;
+  if (!userId) return null;
+  try { return await getLocalUser(userId); } catch { return null; }
 }
 
-export async function GET(_request: Request, context: Context) {
+export async function GET(request: Request, context: Context) {
   try {
-    const creator = await getCreator();
+    const creator = await getCreator(request);
 
     if (!creator) {
       return NextResponse.json(
@@ -236,7 +229,7 @@ export async function PATCH(
   context: Context
 ) {
   try {
-    const creator = await getCreator();
+    const creator = await getCreator(request);
 
     if (!creator) {
       return NextResponse.json(
@@ -413,11 +406,11 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   context: Context
 ) {
   try {
-    const creator = await getCreator();
+    const creator = await getCreator(request);
 
     if (!creator) {
       return NextResponse.json(

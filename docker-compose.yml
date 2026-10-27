@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.local}
       POSTGRES_DB: ${POSTGRES_DB:-kipsmthn}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./drizzle/local/0031_local_init.sql:/docker-entrypoint-initdb.d/0031_local_init.sql:ro
@@ -24,11 +24,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      target: builder
     container_name: creative-platform
+    command: npm run dev
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
+      LOCAL_AUTH_BYPASS: ${LOCAL_AUTH_BYPASS:-true}
       NEXT_TELEMETRY_DISABLED: 1
       DATABASE_URL: postgresql://${POSTGRES_USER:-kipsmthn}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.local}@postgres:5432/${POSTGRES_DB:-kipsmthn}?sslmode=disable
       BETTER_AUTH_URL: http://localhost:3000
@@ -41,6 +44,26 @@ services:
     volumes:
       - ./src:/app/src
       - ./public:/app/public
+      - ./tsconfig.json:/app/tsconfig.json:ro
+      - /app/node_modules
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
+          initial_sync: true
+          ignore:
+            - node_modules/
+        - action: sync
+          path: ./public
+          target: /app/public
+          initial_sync: true
+        - action: rebuild
+          path: package.json
+        - action: rebuild
+          path: package-lock.json
+        - action: rebuild
+          path: Dockerfile
     depends_on:
       postgres:
         condition: service_healthy

@@ -18,6 +18,8 @@ import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import StatusBadge from '@/components/admin/StatusBadge';
+import StatCards from '@/components/admin/StatCards';
 
 type Contract = {
   id: string;
@@ -195,67 +197,16 @@ export default function ContractsPage() {
         </StandardCreationDialog>
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Total Contracts</p>
-            <p className="text-2xl font-bold">{stats.total}</p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Drafts</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {stats.draft}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Sent</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {stats.sent}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Viewed</p>
-            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-              {stats.viewed}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Awaiting Signature</p>
-            <p className="text-2xl font-bold text-primary dark:text-primary">
-              {stats.awaiting_signature}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Signed</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {stats.signed}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Declined</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {stats.declined}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Expired</p>
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              {stats.expired}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Cancelled</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {stats.cancelled}
-            </p>
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          <StatCards
+            stats={[
+              { label: 'Total Contracts', value: String(stats.total), detail: '', color: 'default' },
+              { label: 'Drafts', value: String(stats.draft), detail: '', color: 'default' },
+              { label: 'Sent', value: String(stats.sent), detail: '', color: 'accent' },
+              { label: 'Awaiting Signature', value: String(stats.awaiting_signature), detail: '', color: 'info' },
+            ]}
+            columns={4}
+          />
         </div>
 
         {/* Admin Resource Toolbar */}
@@ -354,7 +305,7 @@ export default function ContractsPage() {
                 { id: 'contract', header: 'Contract', cell: (contract) => <div><p className="font-medium">{contract.title}</p><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></div>, accessor: (contract) => contract.title, sortable: true },
                 { id: 'client', header: 'Client', accessor: (contract) => contract.clientName },
                 { id: 'project', header: 'Project', accessor: (contract) => contract.projectName || 'None', hideOnMobile: true },
-                { id: 'status', header: 'Status', cell: (contract) => <span className={getStatusBadgeClass(contract.status)}>{formatStatus(contract.status)}</span>, accessor: (contract) => contract.status },
+                { id: 'status', header: 'Status', cell: (contract) => <StatusBadge status={contract.status} />, accessor: (contract) => contract.status },
                 { id: 'created', header: 'Created', cell: (contract) => new Date(contract.createdAt).toLocaleDateString(), accessor: (contract) => contract.createdAt, hideOnMobile: true },
                 { id: 'signed', header: 'Signed', cell: (contract) => contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '—', accessor: (contract) => contract.signedAt, hideOnMobile: true },
               ]}

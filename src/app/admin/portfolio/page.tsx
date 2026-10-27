@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AdminPageHeader } from "@/components/ui/AdminPageHeader";
 import { PortfolioRenderer, type PortfolioData } from "@/components/portfolio-renderer";
+import StatusBadge from '@/components/admin/StatusBadge';
 
 type ProjectWithVisibility = PortfolioData["projects"][number] & { visibility: string };
 type ApiData = PortfolioData & { projects: ProjectWithVisibility[] };
@@ -143,9 +144,7 @@ export default function PortfolioAdminPage() {
           description="Choose public projects, arrange the story and publish when ready."
           breadcrumb={{ label: "Dashboard", href: "/admin" }}
           primaryAction={
-            <span className={`ui-badge ${published ? "ui-badge-success" : ""}`}>
-              {published ? "Published" : "Draft"}
-            </span>
+            <StatusBadge status={published ? 'published' : 'unpublished'} />
           }
         />
 

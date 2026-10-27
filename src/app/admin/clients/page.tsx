@@ -15,7 +15,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import StatusBadge from '@/components/admin/StatusBadge';
+import StatCards from '@/components/admin/StatCards';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import type { SavedView } from '@/components/admin/AdminDataTable';
 
 type ClientStatus = 'active' | 'inactive' | 'archived';
 
@@ -87,6 +90,44 @@ export default function AdminClientsPage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+
+  // Saved views state
+  const [savedViews, setSavedViews] = useState<SavedView<Client>[]>([
+    { id: 'active-clients', name: 'Active Clients', filters: { status: 'active' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), isDefault: true },
+    { id: 'inactive-clients', name: 'Inactive Clients', filters: { status: 'inactive' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: 'archived-clients', name: 'Archived Clients', filters: { status: 'archived' }, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  ]);
+  const [activeViewId, setActiveViewId] = useState<string>('');
+
+  function handleSaveView(view: Omit<SavedView<Client>, 'id'>) {
+    const newView: SavedView<Client> = {
+      ...view,
+      id: `view-${Date.now()}`,
+      filters: { status: filterStatus, search: searchQuery },
+      sort: undefined,
+      columnVisibility: undefined,
+    };
+    setSavedViews(prev => [...prev, newView]);
+    setActiveViewId(newView.id);
+  }
+
+  function handleDeleteView(viewId: string) {
+    setSavedViews(prev => prev.filter(v => v.id !== viewId));
+    if (activeViewId === viewId) setActiveViewId('');
+  }
+
+  function handleSetActiveView(viewId: string) {
+    setActiveViewId(viewId);
+    const view = savedViews.find(v => v.id === viewId);
+    if (view) {
+      if (view.filters.status) setFilterStatus(view.filters.status as 'ALL' | ClientStatus);
+      if (view.filters.search) setSearchQuery(view.filters.search);
+    } else {
+      // Default view - clear filters
+      setFilterStatus('ALL');
+      setSearchQuery('');
+    }
+  }
 
   const loadClients = useCallback(async (silent = false) => {
     try {
@@ -271,18 +312,16 @@ export default function AdminClientsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {[
-            ['Total Clients', clients.length, 'text-slate-500 dark:text-zinc-400'],
-            ['Active', activeCount, 'text-emerald-600 dark:text-emerald-400'],
-            ['Inactive', inactiveCount, 'text-amber-600 dark:text-amber-400'],
-            ['Archived', archivedCount, 'text-slate-500 dark:text-zinc-400'],
-          ].map(([label, count, color]) => (
-            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
-              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
-              <p className="text-2xl font-bold">{count}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          <StatCards
+            stats={[
+              { label: 'Total Clients', value: String(clients.length), detail: 'New this period: 0', color: 'default' },
+              { label: 'Active', value: String(activeCount), detail: 'Of ' + String(clients.length), color: 'success' },
+              { label: 'Inactive', value: String(inactiveCount), detail: '', color: 'warning' },
+              { label: 'Archived', value: String(archivedCount), detail: '', color: 'default' },
+            ]}
+            columns={4}
+          />
         </div>
 
         {/* Admin Resource Toolbar */}
@@ -341,10 +380,16 @@ export default function AdminClientsPage() {
           columns={[
             { id: 'client', header: 'Client', cell: (client) => <div className="flex items-center gap-3"><span className="ui-avatar ui-avatar-sm">{getInitials(client)}</span><div><p className="font-medium">{client.name}</p><p className="text-xs text-muted-foreground">{client.company || 'Independent client'}</p></div></div>, accessor: (client) => client.name, sortable: true },
             { id: 'contact', header: 'Contact', cell: (client) => <div><p>{client.email || '—'}</p><p className="text-xs text-muted-foreground">{client.phone || client.location || ''}</p></div>, hideOnMobile: true },
-            { id: 'status', header: 'Status', cell: (client) => <Badge variant={client.status === 'active' ? 'success' : client.status === 'archived' ? 'secondary' : 'warning'}>{statusLabel(client.status)}</Badge>, accessor: (client) => client.status },
+            { id: 'status', header: 'Status', cell: (client) => <StatusBadge status={client.status} />, accessor: (client) => client.status },
             { id: 'created', header: 'Added', cell: (client) => formatDate(client.createdAt), accessor: (client) => client.createdAt, hideOnMobile: true },
           ]}
           rowActions={[{ label: 'View client', onSelect: (client) => { setError(''); setSelectedClient(client); } }]}
+          savedViews={savedViews}
+          activeViewId={activeViewId}
+          onSaveView={handleSaveView}
+          onDeleteView={handleDeleteView}
+          onSetActiveView={handleSetActiveView}
+          viewName="Client View"
         />
 
         {isAddClientOpen && (

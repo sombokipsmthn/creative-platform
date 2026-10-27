@@ -87,7 +87,6 @@ export function ContractBuilder({
   useEffect(() => {
     if (templateId && templatesQuery.data && !template) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (found) setTemplate(found);
     }
   }, [templateId, templatesQuery.data, template]);
@@ -165,9 +164,8 @@ export function ContractBuilder({
       newValues.effective_date = new Date().toISOString().slice(0, 10);
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setValues(newValues);
-  }, [template, selectedClient, selectedProject]);
+  }, [template, selectedClient, selectedProject, values]);
 
   // Get required fields for this template
   const requiredFields = useMemo(() => {

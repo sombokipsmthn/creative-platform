@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { GalleryMedia } from './media';
 import { Download, Heart } from 'lucide-react';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
@@ -74,8 +74,10 @@ export function GalleryViewerEditorial({
       <div className="px-6 py-8 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-5xl">
           <div className="relative aspect-video overflow-hidden bg-gray-100">
-            <Image
+            <GalleryMedia
               src={featured.displayUrl}
+              poster={featured.thumbnailUrl}
+              mimeType={featured.mimeType}
               alt={featured.filename}
               fill
               className="object-cover"
@@ -132,8 +134,10 @@ export function GalleryViewerEditorial({
                   <div key={photo.id} className="group relative overflow-hidden bg-gray-100">
                     {/* Image */}
                     <div className="relative aspect-square">
-                      <Image
+                      <GalleryMedia
                         src={photo.displayUrl}
+                        poster={photo.thumbnailUrl}
+                        mimeType={photo.mimeType}
                         alt={photo.filename}
                         fill
                         className="object-cover transition group-hover:scale-105"

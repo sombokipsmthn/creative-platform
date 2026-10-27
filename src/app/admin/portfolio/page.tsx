@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Copy, Eye, ExternalLink, GripVertical, Save, Images } from "lucide-react";
+import { Copy, Eye, ExternalLink, GripVertical, Loader2, Save, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -19,11 +19,16 @@ export default function PortfolioAdminPage() {
   const [layout, setLayout] = useState("editorial");
   const [published, setPublished] = useState(false);
   const [message, setMessage] = useState("");
+  const [loadError, setLoadError] = useState("");
+  const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState(false);
 
   useEffect(() => {
     fetch("/api/portfolio", { cache: "no-store" })
-      .then((r) => r.json())
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Could not load portfolio settings. Please try again.");
+        return response.json() as Promise<ApiData>;
+      })
       .then((value: ApiData) => {
         setData(value);
         setSelected(
@@ -36,7 +41,7 @@ export default function PortfolioAdminPage() {
         setLayout(value.portfolio?.layout || "editorial");
         setPublished(Boolean(value.portfolio?.isPublished));
       })
-      .catch(() => setMessage("Could not load portfolio settings."));
+      .catch((cause: unknown) => setLoadError(cause instanceof Error ? cause.message : "Could not load portfolio settings."));
   }, []);
 
   // Projects eligible for selection (visibility = "public" and published)
@@ -57,27 +62,40 @@ export default function PortfolioAdminPage() {
   );
 
   async function save(nextPublished = published) {
-    setMessage("Saving...");
-    const response = await fetch("/api/portfolio", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        headline,
-        contactEmail,
-        layout,
-        selectedProjectIds: selected,
-        isPublished: nextPublished,
-      }),
-    });
-    const body = await response.json();
-    if (!response.ok) {
-      setMessage(body.error || "Could not save portfolio.");
-      return;
+    if (saving) return;
+    setSaving(true);
+    setMessage("Saving portfolio…");
+    try {
+      const response = await fetch("/api/portfolio", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          headline,
+          contactEmail,
+          layout,
+          selectedProjectIds: selected,
+          isPublished: nextPublished,
+        }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Could not save portfolio.");
+      setPublished(nextPublished);
+      setMessage(nextPublished ? "Portfolio published." : "Portfolio saved as draft.");
+    } catch (cause) {
+      setMessage(cause instanceof Error ? cause.message : "Could not save portfolio.");
+    } finally {
+      setSaving(false);
     }
-    setPublished(nextPublished);
-    setMessage(
-      nextPublished ? "Portfolio published." : "Portfolio saved as draft."
-    );
+  }
+
+  async function copyPublicUrl() {
+    if (!data?.user.handle) return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/p/${data.user.handle}`);
+      setMessage("Public portfolio URL copied.");
+    } catch {
+      setMessage("Could not copy the public URL. Open the published portfolio link instead.");
+    }
   }
 
   function toggle(id: string) {
@@ -86,8 +104,22 @@ export default function PortfolioAdminPage() {
 
   if (!data) {
     return (
-      <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
-        <div className="mx-auto w-full max-w-7xl">Loading portfolio settings...</div>
+      <div className="min-h-screen px-4 py-6 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
+        <div className="mx-auto w-full max-w-7xl">
+          {loadError ? (
+            <section className="rounded-xl border border-destructive/30 bg-destructive/5 p-5 sm:p-6" role="alert">
+              <h1 className="text-lg font-semibold">Portfolio settings unavailable</h1>
+              <p className="mt-2 text-sm text-muted-foreground">{loadError}</p>
+              <Button type="button" variant="outline" className="mt-4" onClick={() => window.location.reload()}>Retry</Button>
+            </section>
+          ) : (
+            <section className="space-y-4" role="status" aria-live="polite" aria-label="Loading portfolio settings">
+              <div className="h-8 w-56 animate-pulse rounded bg-muted" />
+              <div className="h-4 w-80 max-w-full animate-pulse rounded bg-muted" />
+              <div className="h-48 rounded-xl border bg-card" />
+            </section>
+          )}
+        </div>
       </div>
     );
   }
@@ -216,10 +248,10 @@ export default function PortfolioAdminPage() {
 
         <section className="flex flex-col gap-3 rounded-xl border bg-card p-5 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:p-7">
           <div className="flex flex-wrap gap-2">
-            <Button variant="primary" onClick={() => save()}><Save className="h-4 w-4" />Save draft</Button>
-            <Button variant="outline" onClick={() => setPreview(true)}><Eye className="h-4 w-4" />Preview</Button>
-            {published ? <Button variant="outline" onClick={() => save(false)}>Unpublish</Button> : <Button variant="secondary" onClick={() => save(true)}>Publish portfolio</Button>}
-            {data.user.handle && published && <Button variant="ghost" onClick={() => navigator.clipboard.writeText(`${window.location.origin}/p/${data.user.handle}`)}><Copy className="h-4 w-4" />Copy public URL</Button>}
+            <Button type="button" variant="primary" disabled={saving} onClick={() => void save()}>{saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="h-4 w-4" aria-hidden="true" />}{saving ? 'Saving…' : 'Save draft'}</Button>
+            <Button type="button" variant="outline" onClick={() => setPreview(true)}><Eye className="h-4 w-4" aria-hidden="true" />Preview</Button>
+            {published ? <Button type="button" variant="outline" disabled={saving} onClick={() => void save(false)}>Unpublish</Button> : <Button type="button" variant="secondary" disabled={saving} onClick={() => void save(true)}>Publish portfolio</Button>}
+            {data.user.handle && published && <Button type="button" variant="ghost" onClick={() => void copyPublicUrl()}><Copy className="h-4 w-4" aria-hidden="true" />Copy public URL</Button>}
           </div>
           {message && <span className="text-sm text-muted-foreground">{message}</span>}
         </section>

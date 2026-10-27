@@ -24,7 +24,7 @@ for (const name of canonical) {
   if (!existsSync(join(uiDir, `${name}.tsx`))) errors.push(`Missing canonical UI component ${name}.tsx`);
 }
 
-const domainSpecific = new Set(["AdminPageHeader.tsx", "GalleryTopNav.tsx", "ImageCard.tsx", "MediaCard.tsx", "VideoPlayer.tsx"]);
+const domainSpecific = new Set(["AdminPageHeader.tsx", "GalleryTopNav.tsx", "ImageCard.tsx", "MediaCard.tsx", "SettingsNavigation.tsx", "VideoPlayer.tsx"]);
 for (const file of readdirSync(uiDir).filter((name) => /^[A-Z].*\.tsx$/.test(name) && !domainSpecific.has(name))) {
   const source = readFileSync(join(uiDir, file), "utf8");
   if (!source.includes("Compatibility export")) {

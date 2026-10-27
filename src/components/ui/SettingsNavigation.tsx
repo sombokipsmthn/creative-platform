@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import {
   Building2,
-  Image,
+  Image as ImageIcon,
   Droplet,
   FileText,
   Bell,
@@ -28,7 +28,7 @@ const navigationItems: SettingsNavigationItem[] = [
   {
     id: 'gallery-delivery',
     label: 'Gallery Delivery',
-    icon: <Image className="h-4 w-4" />,
+    icon: <ImageIcon className="h-4 w-4" />,
     description: 'Default selection limits, expiration, download settings',
   },
   {

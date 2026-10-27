@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
+import { GalleryMedia } from './media';
 import { Download, Heart, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { GalleryViewerProps } from './wrapper';
@@ -82,6 +82,7 @@ export function GalleryViewerStory({
     displayUrl: string;
     thumbnailUrl: string;
     captureDate?: string;
+    mimeType?: string | null;
     isFavorite?: boolean;
   }
 
@@ -159,8 +160,10 @@ export function GalleryViewerStory({
                 {/* Image Container */}
                 <div className="mb-4 overflow-hidden rounded-xl" style={{ backgroundColor: theme.preset.backgroundColor }}>
                   <div className="relative aspect-video">
-                    <Image
+                    <GalleryMedia
                       src={photo.displayUrl}
+                      poster={photo.thumbnailUrl}
+                      mimeType={'mimeType' in photo ? photo.mimeType : null}
                       alt={photo.filename}
                       fill
                       className="object-cover"

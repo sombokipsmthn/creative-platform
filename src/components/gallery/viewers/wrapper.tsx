@@ -13,6 +13,7 @@ export interface GalleryPhoto {
   filename: string;
   displayUrl: string;
   thumbnailUrl: string;
+  mimeType?: string | null;
   width?: number;
   height?: number;
   captureDate?: string;

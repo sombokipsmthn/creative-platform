@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   ArrowUpRight,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
@@ -142,6 +144,7 @@ function getInitials(client?: Client | null) {
 }
 
 export default function InvoicesPage() {
+  const router = useRouter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [pagination, setPagination] = useState<Pagination | null>(null);
 
@@ -304,6 +307,8 @@ export default function InvoicesPage() {
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
+              type="button"
+              onClick={() => router.push('/admin/invoices/new')}
               variant="primary"
               className="text-xs font-sans uppercase tracking-widest"
             >
@@ -393,10 +398,9 @@ export default function InvoicesPage() {
         {/* TABLE */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
-            <div className="flex items-center justify-center p-12">
-              <p className="text-xs font-sans uppercase tracking-widest">
-                Loading invoices...
-              </p>
+            <div className="space-y-4 p-6" role="status" aria-label="Loading invoices">
+              <span className="sr-only">Loading invoices…</span>
+              {[0, 1, 2, 3, 4].map((row) => <div key={row} className="flex gap-4">{[0, 1, 2, 3, 4].map((column) => <Skeleton key={column} className="h-8 flex-1" />)}</div>)}
             </div>
           ) : filteredInvoices.length === 0 ? (
             <div className="rounded-xl border border-dashed p-12 text-center p-12">
@@ -440,6 +444,22 @@ export default function InvoicesPage() {
                 { label: 'Duplicate', hidden: (invoice) => invoice.status !== 'draft', onSelect: (invoice) => window.location.assign(`/admin/invoices/${invoice.id}/duplicate`) },
                 { label: 'Delete', destructive: true, onSelect: () => window.location.reload() },
               ]}
+              mobileCard={(invoice, actions) => (
+                <div className="min-w-0 space-y-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{invoice.title || 'Untitled Invoice'}</p>
+                      <p className="break-all text-xs text-muted-foreground">{invoice.invoiceNumber || invoice.id.slice(0, 8).toUpperCase()}</p>
+                    </div>
+                    {actions}
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm">
+                    <span className="min-w-0 break-words text-muted-foreground">{getClientName(invoice.client)}</span>
+                    <StatusBadge status={invoice.status} />
+                  </div>
+                  <p className="break-words text-right text-sm font-semibold tabular-nums">{formatMoney(invoice.total, invoice.currency)}</p>
+                </div>
+              )}
             />
           )}
         </div>

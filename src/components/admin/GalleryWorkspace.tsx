@@ -288,10 +288,15 @@ export default function GalleryWorkspacePage() {
     return (
       <div className="min-h-screen">
         <main className="p-4 md:p-6 lg:p-8">
-          <div className="ui-card p-6">
-            <div className="h-3 w-20 animate-pulse rounded-full bg-[var(--color-bg-soft)]" />
-            <div className="mt-4 h-7 w-64 animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
-            <div className="mt-2 h-4 w-96 max-w-full animate-pulse rounded-lg bg-[var(--color-bg-soft)]" />
+          <div role="status" aria-label="Loading gallery" className="space-y-6">
+            <span className="sr-only">Loading gallery…</span>
+            <div className="ui-card p-6">
+              <div className="h-3 w-20 animate-pulse rounded-full bg-muted" />
+              <div className="mt-4 h-7 w-64 max-w-full animate-pulse rounded-lg bg-muted" />
+              <div className="mt-2 h-4 w-96 max-w-full animate-pulse rounded-lg bg-muted" />
+            </div>
+            <div className="flex gap-2 border-b pb-3">{[0, 1, 2, 3].map((item) => <div key={item} className="h-10 w-24 animate-pulse rounded-lg bg-muted" />)}</div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => <div key={item} className="aspect-square animate-pulse rounded-xl bg-muted" />)}</div>
           </div>
         </main>
       </div>
@@ -554,27 +559,26 @@ export default function GalleryWorkspacePage() {
                           <div
                             key={photo.id}
                             className={cn(
-                              'group relative aspect-square overflow-hidden rounded-lg border transition-colors cursor-pointer',
+                              'group relative aspect-square overflow-hidden rounded-lg border transition-colors',
                               isSelected
                                 ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg)]'
                                 : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent)]'
                             )}
-                            onClick={() => handlePhotoToggle(photo.id)}
-                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handlePhotoToggle(photo.id); } }}
-                            tabIndex={0}
-                            role="button"
-                            aria-label={`Toggle selection for ${photo.filename}`}
-                            aria-pressed={isSelected}
                           >
                             {/* SELECTION INDICATOR - always visible on mobile, hover on desktop */}
-                            <div className={cn(
-                              'absolute top-2 left-2 z-10 w-6 h-6 rounded-full bg-black/50 flex items-center justify-center transition-opacity',
-                              'md:opacity-0 md:group-hover:opacity-100'
-                            )}>
-                              {isSelected && (
-                                <div className="w-3.5 h-3.5 rounded-full bg-[var(--color-accent)] border-2 border-white" />
+                            <button
+                              type="button"
+                              onClick={() => handlePhotoToggle(photo.id)}
+                              aria-label={`${isSelected ? 'Deselect' : 'Select'} ${photo.filename}`}
+                              aria-pressed={isSelected}
+                              className={cn(
+                                'absolute left-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black',
+                                'md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100',
+                                isSelected && 'opacity-100'
                               )}
-                            </div>
+                            >
+                              <span className={cn('h-4 w-4 rounded-full border-2 border-white', isSelected && 'bg-[var(--color-accent)]')} />
+                            </button>
 
                             {/* HIDDEN INDICATOR */}
                             {photo.isHidden && (
@@ -587,17 +591,20 @@ export default function GalleryWorkspacePage() {
                             {mediaType === 'video' ? (
                               <div className="relative w-full h-full">
                                 <video
-                                  src={photo.thumbnailUrl || photo.displayUrl || photo.originalUrl}
-                                  className="object-cover w-full h-full"
+                                  src={photo.displayUrl || photo.originalUrl}
+                                  className="h-full w-full object-contain"
+                                  poster={photo.thumbnailUrl || undefined}
+                                  controls
                                   preload="metadata"
+                                  onClick={(event) => event.stopPropagation()}
                                 />
                                 {/* Video Icon Overlay */}
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
                                   <Video className="w-8 h-8 text-white" />
                                 </div>
                                 {/* Duration Badge */}
                                 {photo.duration && (
-                                  <div className="absolute bottom-2 right-2 bg-[var(--color-bg-overlay)] text-white text-[10px] px-2 py-1 rounded">
+                                  <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-[var(--color-bg-overlay)] px-2 py-1 text-[10px] text-white">
                                     {formatDuration(photo.duration)}
                                   </div>
                                 )}
@@ -618,7 +625,7 @@ export default function GalleryWorkspacePage() {
 
                             {/* FILENAME OVERLAY - show on mobile, hover on desktop */}
                             <div className={cn(
-                              'absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 transition-opacity',
+                              'pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-3 pb-2.5 pt-8 transition-opacity',
                               'md:opacity-0 md:group-hover:opacity-100'
                             )}>
                               <p className="truncate text-[10px] font-medium text-white">
@@ -628,14 +635,14 @@ export default function GalleryWorkspacePage() {
 
                             {/* ACTIONS - always visible on mobile, hover on desktop */}
                             <div className={cn(
-                              'absolute inset-0 bg-black/0 transition flex items-center justify-center gap-2 z-10',
+                              'pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/0 transition',
                               'md:opacity-0 md:group-hover:opacity-100'
                             )}>
                               <select
                                 value={photo.portfolioSelection || 'inherit'}
                                 onClick={(e) => e.stopPropagation()}
                                 onChange={(e) => void handlePortfolioSelection(photo.id, e.target.value as 'inherit' | 'include' | 'exclude')}
-                                className="absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-[var(--color-bg-overlay)] px-1.5 py-1 text-[10px] text-white"
+                                className="pointer-events-auto absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-[var(--color-bg-overlay)] px-1.5 py-1 text-[10px] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 aria-label={`Portfolio status for ${photo.filename}`}
                               >
                                 <option value="inherit">Portfolio: follow set</option><option value="include">Portfolio: publish</option><option value="exclude">Portfolio: exclude</option>
@@ -646,7 +653,7 @@ export default function GalleryWorkspacePage() {
                                   e.stopPropagation()
                                   void handleToggleHidden(photo.id, photo.isHidden)
                                 }}
-                                className="w-9 h-9 rounded-full bg-white/90 hover:bg-white flex items-center justify-center transition"
+                                className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/90 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                                 title={photo.isHidden ? 'Show' : 'Hide'}
                                 aria-label={photo.isHidden ? 'Show photo' : 'Hide photo'}
                               >

@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "docker compose --env-file .env.local stop app && docker compose --env-file .env.local up -d --wait postgres",
     "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
@@ -28,7 +27,8 @@
     "dev:vinext": "vite dev --port 3001",
     "build:vinext": "vite build",
     "start:vinext": "vite preview",
-    "deploy:vinext": "vinext-cloudflare deploy"
+    "deploy:vinext": "vinext-cloudflare deploy",
+    "dev:db": "brew services start postgresql@16"
   },
   "engines": {
     "node": "22.x",

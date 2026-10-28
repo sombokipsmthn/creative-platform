@@ -419,13 +419,14 @@ export default function NewQuotePage() {
     }
 
     /*
-     * Equipment and Camera intentionally both point
-     * to camera equipment.
+     * Equipment is the full catalogue. Camera is a
+     * narrower category that only shows camera gear.
      */
-    if (
-      selected === "equipment" ||
-      selected === "camera"
-    ) {
+    if (selected === "equipment") {
+      return true;
+    }
+
+    if (selected === "camera") {
       return (
         dbCategory === "cameras" ||
         dbCategory === "camera" ||

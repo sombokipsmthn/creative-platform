@@ -1,6 +1,6 @@
 import readXlsxFile from "read-excel-file/node";
 import path from "node:path";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "./index";
 import { equipment } from "./schema";
 
@@ -51,6 +51,9 @@ async function seed() {
   const categories = new Set<string>();
 
   await db.transaction(async (tx) => {
+    // Ensure existing local databases have image storage without running a schema migration.
+    await tx.execute(sql`ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "image_url" text`);
+
     for (const row of rows.slice(1)) {
       const name = clean(valueAt(row, "Equipment"));
       const category = clean(valueAt(row, "Category"));

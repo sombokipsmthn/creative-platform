@@ -444,8 +444,7 @@ export default function AdminProjectsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8">
-          <StatCards
+        <StatCards
             stats={[
               { label: 'Total Projects', value: String(projects.length), detail: 'Active: ' + String(activeCount), color: 'default' },
               { label: 'Draft', value: String(draftCount), detail: '', color: 'default' },
@@ -456,7 +455,6 @@ export default function AdminProjectsPage() {
             ]}
             columns={4}
           />
-        </div>
 
         {/* Admin Resource Toolbar */}
         <AdminResourceToolbar

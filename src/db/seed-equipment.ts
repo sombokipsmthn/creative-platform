@@ -1,5 +1,8 @@
 import readXlsxFile from "read-excel-file/node";
+import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
+import { strFromU8, strToU8, unzipSync, zipSync } from "fflate";
 import { eq, sql } from "drizzle-orm";
 import { db } from "./index";
 import { equipment } from "./schema";
@@ -20,6 +23,34 @@ function numberValue(value: unknown): number {
 }
 
 /**
+ * Some spreadsheet writers emit empty inline-string cells as <c ...></c>.
+ * read-excel-file expects an <is> child for inline strings, so normalize only
+ * those empty cells in a temporary copy before parsing the workbook.
+ */
+async function getReadableWorkbookPath(sourcePath: string): Promise<{ path: string; cleanup: () => Promise<void> }> {
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), "equipment-import-"));
+  const tempPath = path.join(tempDir, "equipment.xlsx");
+
+  try {
+    const archive = unzipSync(new Uint8Array(await readFile(sourcePath)));
+    for (const [name, contents] of Object.entries(archive)) {
+      if (!/^xl\/worksheets\/[^/]+\.xml$/.test(name)) continue;
+      let xml = strFromU8(contents);
+      xml = xml.replace(
+        /<c\b([^>]*\bt="inlineStr"[^>]*)\s*><\/c>/g,
+        "<c$1><is><t></t></is></c>"
+      );
+      archive[name] = strToU8(xml);
+    }
+    await writeFile(tempPath, zipSync(archive));
+    return { path: tempPath, cleanup: () => rm(tempDir, { recursive: true, force: true }) };
+  } catch (error) {
+    await rm(tempDir, { recursive: true, force: true });
+    throw error;
+  }
+}
+
+/**
  * One-time catalogue import.
  *
  * This script is never used by the application at runtime. Once imported,
@@ -32,7 +63,14 @@ async function seed() {
     throw new Error("DATABASE_URL is required to seed equipment.");
   }
 
-  const rows = await readXlsxFile(workbookPath, { sheet: "Equipment" });
+  const normalizedWorkbook = await getReadableWorkbookPath(workbookPath);
+  let rows;
+  try {
+    rows = await readXlsxFile(normalizedWorkbook.path, { sheet: "Equipment" });
+  } finally {
+    await normalizedWorkbook.cleanup();
+  }
+
   if (rows.length < 2) throw new Error("The Equipment sheet is empty.");
 
   const headers = new Map<string, number>();
@@ -67,9 +105,7 @@ async function seed() {
         .where(eq(equipment.name, name))
         .limit(1);
 
-      const imageUrl =
-        clean(valueAt(row, "Image Search")) ||
-        clean(valueAt(row, "Image"));
+      const imageUrl = clean(valueAt(row, "Image Search")) || clean(valueAt(row, "Image"));
 
       if (existing) {
         // Backfill only a missing image URL; preserve all user-edited fields.

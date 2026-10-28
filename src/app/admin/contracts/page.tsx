@@ -164,8 +164,7 @@ export default function ContractsPage() {
         </StandardCreationDialog>
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <StatCards
+        <StatCards
             stats={[
               { label: 'Total Contracts', value: String(stats.total), detail: '', color: 'default' },
               { label: 'Drafts', value: String(stats.draft), detail: '', color: 'default' },
@@ -174,7 +173,6 @@ export default function ContractsPage() {
             ]}
             columns={4}
           />
-        </div>
 
         {/* Admin Resource Toolbar */}
         <AdminResourceToolbar

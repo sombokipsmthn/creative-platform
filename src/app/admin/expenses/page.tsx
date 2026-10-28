@@ -188,8 +188,8 @@ export default function AdminExpensesPage() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-6 font-sans transition-colors duration-300 sm:px-6 sm:py-8 lg:px-10 lg:py-10">
-      <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
+    <div className="admin-data-page font-sans transition-colors duration-300">
+      <div className="admin-data-page__content space-y-6">
         <AdminPageHeader
           title="Expenses & receipt claims"
           description="Record and review creator-owned expense entries. Receipt files and verification status are not part of the current expense record model."

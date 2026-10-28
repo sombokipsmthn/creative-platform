@@ -421,8 +421,8 @@ export default function AdminProjectsPage() {
   */
 
   return (
-    <div className="min-h-screen max-w-full overflow-x-hidden px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="admin-data-page font-sans transition-colors duration-300">
+      <div className="admin-data-page__content space-y-6">
         <AdminPageHeader
           title="Projects"
           description="Track all client engagements and creative projects."

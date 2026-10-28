@@ -54,6 +54,61 @@ async function safeGalleryStats(creator: string, periodStart: Date, periodEnd: D
   }
 }
 
+function startOfMonth(date: Date) {
+  const value = new Date(date);
+  value.setDate(1);
+  value.setHours(0, 0, 0, 0);
+  return value;
+}
+
+function subMonths(date: Date, months: number) {
+  const value = new Date(date);
+  value.setMonth(value.getMonth() - months);
+  return value;
+}
+
+async function getRevenueTrend(creator: string, months: number = 12) {
+  const end = startOfMonth(new Date());
+  const start = subMonths(end, months - 1);
+
+  const paidInvoices = await db
+    .select({
+      paidAt: payments.paidAt,
+      amount: payments.amount,
+    })
+    .from(payments)
+    .where(
+      and(
+        eq(payments.creatorId, creator),
+        eq(payments.status, "confirmed"),
+        gte(payments.paidAt, start),
+        lt(payments.paidAt, addDays(end, 1))
+      )
+    );
+
+  // Aggregate by month
+  const monthlyMap = new Map<string, number>();
+  for (let i = 0; i < months; i++) {
+    const monthDate = new Date(start);
+    monthDate.setMonth(start.getMonth() + i);
+    const key = `${monthDate.getFullYear()}-${String(monthDate.getMonth() + 1).padStart(2, '0')}`;
+    monthlyMap.set(key, 0);
+  }
+
+  paidInvoices.forEach(({ paidAt, amount }) => {
+    if (!paidAt) return;
+    const date = new Date(paidAt);
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const current = monthlyMap.get(key) ?? 0;
+    monthlyMap.set(key, current + Number(amount ?? 0));
+  });
+
+  return Array.from(monthlyMap.entries()).map(([month, value]) => ({
+    month,
+    value,
+  }));
+}
+
 export async function GET(request: Request) {
   return withCreatorApi(request, async (_request, user) => {
     const creator = user.id;
@@ -63,13 +118,18 @@ export async function GET(request: Request) {
     const range = ["7d", "30d", "90d", "12m", "all"].includes(requestedRange)
       ? requestedRange
       : "30d";
+    const includeTrend = searchParams.get("trend") === "true";
 
     const now = new Date();
     const periodStart = startOfPeriod(now, range);
     const periodEnd = addDays(startOfDay(now), 1);
     const galleryStats = await safeGalleryStats(creator, periodStart, periodEnd);
 
+    // Fetch trend data if requested
+    const revenueTrendPromise = includeTrend ? getRevenueTrend(creator, 12) : Promise.resolve(null);
+
     const [
+      revenueTrend,
       clientLifetime,
       clientPeriod,
       activeClients,
@@ -97,6 +157,7 @@ export async function GET(request: Request) {
       invoiceStats,
       recentInvoices,
     ] = await Promise.all([
+      revenueTrendPromise,
       db.select({ value: count() }).from(clients).where(eq(clients.creatorId, creator)),
       db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), gte(clients.createdAt, periodStart), lt(clients.createdAt, periodEnd))),
       db.select({ value: count() }).from(clients).where(and(eq(clients.creatorId, creator), eq(clients.status, "active"))),
@@ -193,6 +254,7 @@ export async function GET(request: Request) {
         activeGalleries: (galleryStatuses.active ?? 0) + (galleryStatuses.published ?? 0),
       },
       activity,
+      revenueTrend,
     });
   });
 }

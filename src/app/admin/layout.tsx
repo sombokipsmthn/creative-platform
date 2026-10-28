@@ -19,6 +19,7 @@ import {
   SplitViewProvider,
   useSplitView,
 } from '@/context/SplitViewContext';
+import './admin.css';
 
 async function fetchBadgeCounts(): Promise<Record<string, number>> {
   try {
@@ -157,7 +158,7 @@ function SidebarContent({
       </div>
 
       {/* Nav List */}
-      <div className="flex-1 overflow-y-auto px-3 py-6 flex flex-col gap-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-3 py-6 flex flex-col gap-6">
         {navSections.map((section) => (
           <div key={section.label} className="space-y-2">
             <p className="px-3 text-[10px] font-semibold tracking-[0.12em] uppercase text-sidebar-foreground/45">
@@ -297,7 +298,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, pathname]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
+    <div className="admin-app-shell flex min-h-dvh bg-background text-foreground selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex border-sidebar-border/80">
         <SidebarContent pathname={pathname} badgeCounts={badgeCounts} portfolioHref={portfolioHref} />

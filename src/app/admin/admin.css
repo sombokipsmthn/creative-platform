@@ -6,14 +6,20 @@
  */
 
 :root {
-  --admin-content-max: 87.5rem;
-  --admin-page-gutter: 2rem;
-  --admin-section-gap: 2rem;
+  --admin-content-max: none;
+  --admin-page-gutter: clamp(1.5rem, 2.5vw, 2.5rem);
+  --admin-section-gap: 1.5rem;
   --admin-control-height: 2.625rem;
   --admin-panel-radius: 1rem;
 }
 
 @media (max-width: 1023px) {
+  :root {
+    --admin-page-gutter: 1.25rem;
+  }
+}
+
+@media (max-width: 639px) {
   :root {
     --admin-page-gutter: 1rem;
   }
@@ -31,9 +37,61 @@
 
 [data-admin-content] .ui-shell,
 [data-admin-content] .os-shell {
-  width: min(100%, var(--admin-content-max));
+  width: 100%;
+  max-width: none;
   margin-inline: auto;
+  padding-inline: var(--admin-page-gutter);
 }
+
+/* Admin routes share a gutter; data-heavy workspaces use all available width. */
+[data-admin-content] > .admin-data-page,
+[data-admin-content] > main.admin-data-page {
+  min-height: auto;
+  padding: 1.5rem var(--admin-page-gutter) 2rem;
+}
+
+[data-admin-content] .admin-data-page > .admin-data-page__content {
+  width: 100%;
+  max-width: none;
+  margin-inline: 0;
+}
+
+[data-admin-content] .admin-data-page__content > .admin-data-page__section {
+  min-width: 0;
+}
+
+.admin-app-shell {
+  min-width: 0;
+}
+
+.admin-app-shell [data-admin-content] {
+  min-width: 0;
+}
+
+.admin-app-shell [data-admin-content] > .min-h-screen,
+.admin-app-shell [data-admin-content] > main.min-h-screen,
+.admin-app-shell [data-admin-content] > .admin-dashboard-page,
+.admin-app-shell [data-admin-content] > main.admin-dashboard-page,
+.admin-app-shell [data-admin-content] > .admin-calendar-page,
+.admin-app-shell [data-admin-content] > main.admin-calendar-page {
+  min-height: auto;
+}
+
+.admin-app-shell [data-admin-content] > .admin-data-page > .admin-data-page__content,
+.admin-app-shell [data-admin-content] > main.admin-data-page > .admin-data-page__content {
+  display: grid;
+  align-content: start;
+  gap: var(--admin-section-gap);
+}
+
+.admin-app-shell [data-admin-content] table {
+  max-width: 100%;
+}
+
+.admin-app-shell [data-admin-content] .overflow-x-auto {
+  min-width: 0;
+}
+
 
 [data-admin-content] .ui-page-title,
 [data-admin-content] h1 {

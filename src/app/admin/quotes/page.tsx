@@ -160,8 +160,8 @@ export default function QuotesPage() {
   );
 
   return (
-    <div className="min-h-screen px-6 py-10">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="admin-data-page">
+      <div className="admin-data-page__content space-y-6">
         {/* HEADER */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>

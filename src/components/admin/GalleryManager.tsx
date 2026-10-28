@@ -327,7 +327,7 @@ export default function AdminGalleryManagerPage() {
   });
 
   return (
-    <div className="ui-page p-4 md:p-8 lg:p-12 transition-colors duration-300">
+    <div className="ui-page admin-data-page transition-colors duration-300">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-xl shadow-2xl text-[11px] font-sans flex items-center gap-3 animate-fade-in border border-white/10 dark:border-zinc-200">
@@ -336,7 +336,7 @@ export default function AdminGalleryManagerPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="admin-data-page__content space-y-6">
         <AdminPageHeader
           title="Galleries"
           description="Manage client delivery, proofing & digital delivery portals."

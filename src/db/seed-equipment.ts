@@ -1,12 +1,11 @@
 import readXlsxFile from "read-excel-file/node";
 import path from "node:path";
-import { sql, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "./index";
 import { equipment } from "./schema";
 
-const workbookPath = path.join(
-  process.cwd(),
-  "africa_grips_equipment_with_images(1).xlsx"
+const workbookPath = path.resolve(
+  process.argv[2] || path.join(process.cwd(), "africa_grips_equipment_with_images(1).xlsx")
 );
 
 function clean(value: unknown): string | null {
@@ -20,6 +19,14 @@ function numberValue(value: unknown): number {
   return Number.isFinite(number) ? Math.max(0, Math.round(number)) : 0;
 }
 
+/**
+ * One-time catalogue import.
+ *
+ * This script is never used by the application at runtime. Once imported,
+ * PostgreSQL is the source of truth. Existing equipment is deliberately
+ * skipped so rerunning this script cannot overwrite rates, descriptions,
+ * categories, or images that have since been edited in the platform.
+ */
 async function seed() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is required to seed equipment.");
@@ -40,7 +47,8 @@ async function seed() {
   };
 
   let imported = 0;
-  let updated = 0;
+  let skipped = 0;
+  const categories = new Set<string>();
 
   await db.transaction(async (tx) => {
     for (const row of rows.slice(1)) {
@@ -48,37 +56,46 @@ async function seed() {
       const category = clean(valueAt(row, "Category"));
       if (!name || !category) continue;
 
-      const data = {
-        name,
-        dailyRate: numberValue(valueAt(row, "Cost (KES)")),
-        category,
-        subcategory: clean(valueAt(row, "Subcategory")),
-        brand: clean(valueAt(row, "Brand")),
-        specs: clean(valueAt(row, "Key Features / Specs")),
-      };
+      categories.add(category);
 
       const [existing] = await tx
         .select({ id: equipment.id })
         .from(equipment)
         .where(eq(equipment.name, name))
         .limit(1);
-      const imageUrl = clean(valueAt(row, "Image Search"));
 
       if (existing) {
-        await tx.update(equipment).set({ ...data, updatedAt: new Date() }).where(eq(equipment.id, existing.id));
-        await tx.execute(sql`UPDATE equipment SET image_url = ${imageUrl} WHERE id = ${existing.id}`);
-        updated += 1;
-      } else {
-        const [created] = await tx.insert(equipment).values(data).returning({ id: equipment.id });
-        if (created) {
-          await tx.execute(sql`UPDATE equipment SET image_url = ${imageUrl} WHERE id = ${created.id}`);
-          imported += 1;
-        }
+        skipped += 1;
+        continue;
       }
+
+      const imageUrl =
+        clean(valueAt(row, "Image Search")) ||
+        clean(valueAt(row, "Image"));
+
+      await tx.insert(equipment).values({
+        name,
+        dailyRate: numberValue(valueAt(row, "Cost (KES)")),
+        category,
+        subcategory: clean(valueAt(row, "Subcategory")),
+        brand: clean(valueAt(row, "Brand")),
+        specs: clean(valueAt(row, "Key Features / Specs")),
+        imageUrl,
+      });
+
+      imported += 1;
     }
   });
 
-  console.log(`Equipment import complete: ${imported} added, ${updated} updated, ${rows.length - 1} source rows processed.`);
+  console.log(
+    [
+      "Equipment catalogue import complete.",
+      `Added: ${imported}`,
+      `Skipped existing records: ${skipped}`,
+      `Categories found in workbook: ${categories.size}`,
+      `Source rows processed: ${rows.length - 1}`,
+    ].join("\n")
+  );
 }
 
 seed().catch((error) => {

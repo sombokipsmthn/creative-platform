@@ -35,7 +35,7 @@
   "dependencies": {
     "@better-auth/drizzle-adapter": "^1.7.10",
     "@better-auth/infra": "^0.4.22",
-    "@better-auth/passkey": "^1.7.10",
+    "@better-auth/passkey": "^1.7.12",
     "@libsql/client": "^0.18.0",
     "@neondatabase/serverless": "^1.2.0",
     "@radix-ui/react-slot": "^1.5.0",

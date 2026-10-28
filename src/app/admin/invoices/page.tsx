@@ -313,8 +313,7 @@ export default function InvoicesPage() {
         )}
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <StatCards
+        <StatCards
             stats={[
               { label: 'Total Invoices', value: String(summary.total), detail: '', color: 'default' },
               { label: 'Draft', value: String(summary.draft), detail: '', color: 'default' },
@@ -323,7 +322,6 @@ export default function InvoicesPage() {
             ]}
             columns={4}
           />
-        </div>
 
         {/* Admin Resource Toolbar */}
         <AdminResourceToolbar

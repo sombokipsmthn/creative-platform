@@ -36,6 +36,13 @@
       "when": 1792882136623,
       "tag": "0044_repair_missing_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793220000000,
+      "tag": "0045_equipment_image_url",
+      "breakpoints": true
     }
   ]
 }

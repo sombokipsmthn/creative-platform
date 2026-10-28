@@ -332,8 +332,7 @@ export default function AdminClientsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <StatCards
+        <StatCards
             stats={[
               { label: 'Total Clients', value: String(clients.length), detail: 'New this period: 0', color: 'default' },
               { label: 'Active', value: String(activeCount), detail: 'Of ' + String(clients.length), color: 'success' },
@@ -342,7 +341,6 @@ export default function AdminClientsPage() {
             ]}
             columns={4}
           />
-        </div>
 
         {/* Admin Resource Toolbar */}
         <AdminResourceToolbar

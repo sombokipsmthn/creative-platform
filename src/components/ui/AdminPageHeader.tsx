@@ -64,42 +64,48 @@ export function AdminPageHeader({
               {tabs.map((tab) => {
                 const isActive = tab.active ?? false;
                 const isDisabled = tab.disabled ?? false;
+                const tabClassName = isActive
+                  ? 'ui-tab-active'
+                  : 'ui-tab';
                 return (
                   <div key={tab.label} className="shrink-0">
                     {tab.onClick ? (
-                      <Button type="button" onClick={tab.onClick} disabled={isDisabled} variant={isActive ? 'primary' : 'ghost'} size="sm" className="rounded-none border-b-2 text-xs uppercase tracking-widest">{tab.label}</Button>
+                      <Button
+                        type="button"
+                        onClick={tab.onClick}
+                        disabled={isDisabled}
+                        variant={isActive ? 'primary' : 'ghost'}
+                        size="sm"
+                        className="rounded-none border-b-2 text-xs uppercase tracking-widest"
+                      >
+                        {tab.label}
+                      </Button>
                     ) : tab.href ? (
                       isDisabled ? (
-                        <span className="px-3 py-1.5 text-xs font-sans uppercase tracking-widest border-transparent text-slate-400 dark:text-zinc-500 cursor-not-allowed">
+                        <span
+                          className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest text-muted-foreground/50 cursor-not-allowed whitespace-nowrap`}
+                        >
                           {tab.label}
                         </span>
                       ) : (
                         <Link
                           href={tab.href}
-                          className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest transition-all border-b-2 whitespace-nowrap ${
-                            isActive
-                              ? 'border-primary text-primary dark:text-primary font-bold'
-                              : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                          }`}
+                          className={tabClassName}
                         >
                           {tab.label}
                         </Link>
                       )
                     ) : (
-                      <span className={`px-3 py-1.5 text-xs font-sans uppercase tracking-widest ${
-                        isActive
-                          ? 'border-primary text-primary dark:text-primary font-bold border-b-2'
-                          : isDisabled
-                            ? 'text-slate-400 dark:text-zinc-500'
-                            : 'text-slate-500 dark:text-zinc-400'
-                      }`}
-                        >
-                          {tab.label}
-                        </span>
+                      <span
+                        className={tabClassName}
+                        aria-current={isActive ? 'true' : 'false'}
+                      >
+                        {tab.label}
+                      </span>
                     )}
                   </div>
-                )}
-              )}
+                );
+              })}
             </div>
           )}
 

@@ -330,7 +330,7 @@ export default function AdminGalleryManagerPage() {
     <div className="ui-page admin-data-page transition-colors duration-300">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-5 py-3 rounded-xl shadow-2xl text-[11px] font-sans flex items-center gap-3 animate-fade-in border border-white/10 dark:border-zinc-200">
+        <div className="fixed bottom-6 right-6 z-50 bg-card dark:bg-card text-foreground dark:text-foreground px-5 py-3 rounded-xl shadow-2xl text-[11px] font-sans flex items-center gap-3 animate-fade-in border border-border">
           <Sparkles className="w-4 h-4 text-primary" />
           <span className="font-medium">{toastMessage}</span>
         </div>
@@ -442,20 +442,20 @@ export default function AdminGalleryManagerPage() {
                       key={i}
                       className="ui-card rounded-3xl overflow-hidden animate-pulse"
                     >
-                      <div className="aspect-[4/3] bg-slate-100 dark:bg-zinc-800" />
+                      <div className="aspect-[4/3] bg-muted" />
                       <div className="p-6 space-y-4">
-                        <div className="h-4 w-1/3 bg-slate-100 dark:bg-zinc-800 rounded" />
-                        <div className="h-6 w-3/4 bg-slate-100 dark:bg-zinc-800 rounded" />
+                        <div className="h-4 w-1/3 bg-muted rounded" />
+                        <div className="h-6 w-3/4 bg-muted rounded" />
                         <div className="flex gap-2">
-                          <div className="h-4 w-12 bg-slate-100 dark:bg-zinc-800 rounded" />
-                          <div className="h-4 w-12 bg-slate-100 dark:bg-zinc-800 rounded" />
+                          <div className="h-4 w-12 bg-muted rounded" />
+                          <div className="h-4 w-12 bg-muted rounded" />
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : filteredGalleries.length === 0 ? (
-                <div className="ui-empty-state border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl p-20 flex flex-col items-center gap-6">
+                <div className="ui-empty-state border border-dashed border-border rounded-3xl p-20 flex flex-col items-center gap-6">
                   <div className="ui-empty-icon">
                     <ImageIcon className="w-8 h-8" />
                   </div>
@@ -512,18 +512,18 @@ export default function AdminGalleryManagerPage() {
                             <span
                               className={`ui-badge px-3 py-1.5 backdrop-blur-md shadow-sm border-none ${
                                 gal.status === 'published'
-                                  ? 'bg-emerald-500/20 text-emerald-300'
-                                  : 'bg-amber-500/20 text-amber-300'
+                                  ? 'bg-success/25 text-success-foreground'
+                                  : 'bg-warning/25 text-warning-foreground'
                               }`}
                             >
                               <span className="flex items-center gap-1.5">
-                                <span className={`ui-badge-dot ${gal.status === 'published' ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                                <span className={`ui-badge-dot ${gal.status === 'published' ? 'bg-success' : 'bg-warning'}`} />
                                 {gal.status}
                               </span>
                             </span>
 
                             {gal.allow_downloads && (
-                              <span className="ui-badge px-3 py-1.5 bg-black/40 backdrop-blur-md border-none text-white flex items-center gap-1.5">
+                              <span className="ui-badge px-3 py-1.5 bg-foreground/40 backdrop-blur-md border-none text-background flex items-center gap-1.5">
                                 <Download className="w-2.5 h-2.5" />
                                 DL ON
                               </span>
@@ -535,13 +535,13 @@ export default function AdminGalleryManagerPage() {
                             <button 
                               onClick={(e) => { e.preventDefault(); copyPin(gal.access_pin); }}
                               title="Copy Access PIN"
-                              className="p-2.5 bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-[var(--color-accent)] rounded-full transition-all"
+                              className="p-2.5 bg-foreground/60 backdrop-blur-md border border-background/10 text-background hover:bg-primary rounded-full transition-all"
                             >
                               <Share2 className="w-3.5 h-3.5" />
                             </button>
                             <button 
                               onClick={(e) => { e.preventDefault(); router.push(`/admin/galleries/${gal.id}`); }}
-                              className="p-2.5 bg-black/60 backdrop-blur-md border border-white/10 text-white hover:bg-[var(--color-accent)] rounded-full transition-all"
+                              className="p-2.5 bg-foreground/60 backdrop-blur-md border border-background/10 text-background hover:bg-primary rounded-full transition-all"
                             >
                               <Settings className="w-3.5 h-3.5" />
                             </button>
@@ -550,11 +550,11 @@ export default function AdminGalleryManagerPage() {
                           {/* Bottom Info */}
                           <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
                             <div className="space-y-1">
-                              <p className="ui-meta text-white/80 flex items-center gap-2">
+                              <p className="ui-meta text-foreground/80 flex items-center gap-2">
                                 <Users className="w-3 h-3 text-primary" />
                                 {gal.client_name || 'Individual Client'}
                               </p>
-                              <h3 className="text-lg font-medium text-white leading-tight drop-shadow-md">
+                              <h3 className="text-lg font-medium text-foreground leading-tight">
                                 {gal.title}
                               </h3>
                             </div>
@@ -565,30 +565,30 @@ export default function AdminGalleryManagerPage() {
                         <div className="p-6 flex-1 flex flex-col justify-between space-y-6">
                           {/* Grid Stats */}
                           <div className="grid grid-cols-4 gap-2">
-                            <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl flex flex-col items-center gap-1">
-                              <ImageIcon className="w-3.5 h-3.5 text-slate-400" />
-                              <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{gal.photo_count}</span>
+                            <div className="p-3 bg-muted rounded-2xl flex flex-col items-center gap-1">
+                              <ImageIcon className="w-3.5 h-3.5 text-muted-foreground" />
+                              <span className="text-[11px] font-bold text-foreground">{gal.photo_count}</span>
                               <span className="ui-meta text-[8px] uppercase">Photos</span>
                             </div>
-                            <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl flex flex-col items-center gap-1">
+                            <div className="p-3 bg-muted rounded-2xl flex flex-col items-center gap-1">
                               <Heart className="w-3.5 h-3.5 text-pink-500" />
-                              <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{gal.favorites_count || 0}</span>
+                              <span className="text-[11px] font-bold text-foreground">{gal.favorites_count || 0}</span>
                               <span className="ui-meta text-[8px] uppercase">Faves</span>
                             </div>
-                            <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl flex flex-col items-center gap-1">
+                            <div className="p-3 bg-muted rounded-2xl flex flex-col items-center gap-1">
                               <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                              <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{gal.selections_count || 0}</span>
+                              <span className="text-[11px] font-bold text-foreground">{gal.selections_count || 0}</span>
                               <span className="ui-meta text-[8px] uppercase">Proofs</span>
                             </div>
-                            <div className="p-3 bg-slate-50 dark:bg-zinc-800/40 rounded-2xl flex flex-col items-center gap-1">
+                            <div className="p-3 bg-muted rounded-2xl flex flex-col items-center gap-1">
                               <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
-                              <span className="text-[11px] font-bold text-slate-700 dark:text-zinc-300">{gal.comments_count || 0}</span>
+                              <span className="text-[11px] font-bold text-foreground">{gal.comments_count || 0}</span>
                               <span className="ui-meta text-[8px] uppercase">Chat</span>
                             </div>
                           </div>
 
                           {/* Operational Metadata */}
-                          <div className="flex items-center justify-between border-t border-slate-100 dark:border-zinc-800/60 pt-4">
+                          <div className="flex items-center justify-between border-t border-border/60 pt-4">
                             <div className="flex flex-col">
                               <span className="ui-meta tracking-tighter">Engagement</span>
                               <span className="ui-caption">{gal.views_count || 0} views • {gal.downloads_count || 0} downloads</span>
@@ -646,20 +646,20 @@ export default function AdminGalleryManagerPage() {
                   ))}
                </div>
             ) : activities.length === 0 ? (
-              <div className="ui-empty-state border border-dashed border-slate-200 dark:border-zinc-800 rounded-3xl p-20 font-sans text-xs text-slate-500">
+              <div className="ui-empty-state border border-dashed border-border rounded-3xl p-20 font-sans text-xs text-muted-foreground">
                 No client activity recorded yet.
               </div>
             ) : (
               <div className="space-y-4">
                 {activities.map((act, idx) => {
                   const typeStyles = {
-                    favorite: { icon: Heart, color: 'text-pink-500', bg: 'bg-pink-500/10', label: 'Favorited a photo' },
+                    favorite: { icon: Heart, color: 'text-[var(--color-danger)]', bg: 'bg-[var(--color-danger)]/10', label: 'Favorited a photo' },
                     selection: { icon: CheckCircle2, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected for proofing' },
                     selection_and_favorite: { icon: Sparkles, color: 'text-primary', bg: 'bg-primary/10', label: 'Selected & Favorited' },
-                    comment: { icon: MessageSquare, color: 'text-blue-500', bg: 'bg-blue-500/10', label: 'Left a comment' },
-                    download: { icon: Download, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Downloaded a photo' },
-                    view: { icon: Eye, color: 'text-slate-500', bg: 'bg-slate-500/10', label: 'Viewed the gallery' },
-                    update: { icon: RefreshCw, color: 'text-amber-500', bg: 'bg-amber-500/10', label: 'Updated access' },
+                    comment: { icon: MessageSquare, color: 'text-[var(--color-info)]', bg: 'bg-[var(--color-info)]/10', label: 'Left a comment' },
+                    download: { icon: Download, color: 'text-[var(--color-success)]', bg: 'bg-[var(--color-success)]/10', label: 'Downloaded a photo' },
+                    view: { icon: Eye, color: 'text-muted-foreground', bg: 'bg-muted', label: 'Viewed the gallery' },
+                    update: { icon: RefreshCw, color: 'text-[var(--color-warning)]', bg: 'bg-[var(--color-warning)]/10', label: 'Updated access' },
                   };
 
                   const config = typeStyles[act.activity_type] || typeStyles.update;
@@ -678,18 +678,18 @@ export default function AdminGalleryManagerPage() {
                         <div className="flex items-center gap-2 ui-meta">
                           <Clock className="w-3 h-3" />
                           <span>{new Date(act.created_at).toLocaleString()}</span>
-                          <span className="w-1 h-1 rounded-full bg-slate-200 dark:bg-zinc-800" />
+                          <span className="w-1 h-1 rounded-full bg-border" />
                           <span className="text-primary font-bold">{act.gallery_title}</span>
                         </div>
 
                         <h4 className="ui-card-title text-sm truncate">
-                          <span className="text-primary dark:text-primary">{act.client_name || 'A Client'}</span>
+                          <span className="text-primary">{act.client_name || 'A Client'}</span>
                           {' '}{config.label}
                         </h4>
                       </div>
 
                       {act.photo_url && (
-                        <div className="w-16 h-16 rounded-xl overflow-hidden  shrink-0 border border-slate-100 dark:border-zinc-800 shadow-sm">
+                        <div className="w-16 h-16 rounded-xl overflow-hidden  shrink-0 border border-border shadow-sm">
                           <Image
                             src={act.photo_url}
                             alt="Activity Photo"
@@ -800,14 +800,14 @@ export default function AdminGalleryManagerPage() {
                   </div>
                 </div>
 
-                <div className="p-6 bg-slate-50 dark:bg-zinc-800/30 rounded-3xl space-y-4">
+                <div className="p-6 bg-muted/60 rounded-3xl space-y-4">
                   <div className="flex items-center justify-between group cursor-pointer" onClick={() => setAllowDownloads(!allowDownloads)}>
                     <div className="space-y-0.5">
                       <p className="ui-card-title">Downloads</p>
                       <p className="ui-caption font-sans">Allow full-resolution & ZIP delivery</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowDownloads ? 'left-5' : 'left-1'}`} />
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowDownloads ? 'bg-primary' : 'bg-muted'}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-background transition-all ${allowDownloads ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
                   
@@ -816,8 +816,8 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Favorites</p>
                       <p className="ui-caption font-sans">Allow hearting / liking photos</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowFavorites ? 'left-5' : 'left-1'}`} />
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowFavorites ? 'bg-primary' : 'bg-muted'}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-background transition-all ${allowFavorites ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
 
@@ -826,8 +826,8 @@ export default function AdminGalleryManagerPage() {
                       <p className="ui-card-title">Proofing</p>
                       <p className="ui-caption font-sans">Enable client selection for delivery</p>
                     </div>
-                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-primary' : 'bg-slate-200 dark:bg-zinc-700'}`}>
-                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${allowSelections ? 'left-5' : 'left-1'}`} />
+                    <div className={`w-10 h-6 rounded-full transition-all relative ${allowSelections ? 'bg-primary' : 'bg-muted'}`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-background transition-all ${allowSelections ? 'left-5' : 'left-1'}`} />
                     </div>
                   </div>
                 </div>

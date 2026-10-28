@@ -32,6 +32,7 @@ for (const file of readdirSync(uiDir).filter((name) => /^[A-Z].*\.tsx$/.test(nam
   }
 }
 
+// Detect competing UI libraries
 const sourceFiles = [];
 function walk(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -46,6 +47,59 @@ for (const path of sourceFiles) {
   const source = readFileSync(path, "utf8");
   if (/from ["'](?:@mui|@chakra-ui|antd|bootstrap)["']/.test(source)) {
     errors.push(`Competing UI library import in ${path}`);
+  }
+}
+
+// Detect hardcoded theme colors in admin/shared components (slate/zinc direct usage)
+const forbiddenHardcoded = [
+  "bg-slate-", "text-slate-", "border-slate-", "dark:bg-slate-", "dark:text-slate-", "dark:border-slate-",
+  "bg-zinc-", "text-zinc-", "border-zinc-", "dark:bg-zinc-", "dark:text-zinc-", "dark:border-zinc-",
+  "bg-emerald-", "text-emerald-", "border-emerald-", "dark:bg-emerald-", "dark:text-emerald-", "dark:border-emerald-",
+  "bg-amber-", "text-amber-", "border-amber-", "dark:bg-amber-", "dark:text-amber-", "dark:border-amber-",
+  "bg-red-", "text-red-", "border-red-", "dark:bg-red-", "dark:text-red-", "dark:border-red-",
+];
+const adminPaths = ["src/app/admin", "src/components/admin", "src/components/ui/AdminPageHeader.tsx"];
+for (const path of sourceFiles) {
+  if (!adminPaths.some(p => path.startsWith(join(root, p)))) continue;
+  const rel = path.replace(root + "/", "");
+  const source = readFileSync(path, "utf8");
+  for (const pattern of forbiddenHardcoded) {
+    if (source.includes(pattern)) {
+      errors.push(`Hardcoded theme color "${pattern}" in ${rel} — use semantic tokens instead`);
+      break;
+    }
+  }
+}
+
+// Detect legacy component class usage in admin
+const legacyClasses = [
+  /\bButton\b(?!.*components\/ui\/button)/,
+  /\bui-card\b/, /\bui-panel\b/, /\bui-stat-card\b/, /\bui-badge\b/,
+  /\badmin-filter-bar\b/, /\badmin-filter-search\b/, /\badmin-filter-controls\b/,
+  /\badmin-tabs\b/, /\badmin-tab\b/,
+];
+for (const path of sourceFiles) {
+  if (!path.includes("/admin/") && !path.includes("AdminPageHeader.tsx")) continue;
+  const source = readFileSync(path, "utf8");
+  for (const pattern of legacyClasses) {
+    if (pattern.test(source)) {
+      errors.push(`Legacy class pattern "${pattern}" found in ${path.replace(root + "/", "")}`);
+      break;
+    }
+  }
+}
+
+// Detect duplicate primitive files (case-insensitive duplicates)
+const uiFiles = readdirSync(uiDir).filter((name) => name.endsWith(".tsx"));
+const lowerMap = new Map();
+for (const f of uiFiles) {
+  const lower = f.toLowerCase();
+  if (!lowerMap.has(lower)) lowerMap.set(lower, []);
+  lowerMap.get(lower).push(f);
+}
+for (const [lower, files] of lowerMap) {
+  if (files.length > 1 && !domainSpecific.has(files[0])) {
+    errors.push(`Case-insensitive duplicate UI primitives: ${files.join(", ")}`);
   }
 }
 

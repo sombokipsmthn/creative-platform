@@ -1,17 +1,19 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
+
 interface StatusBadgeProps {
   status: string;
   variant?: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'accent';
 }
 
-const variantMap = {
-  default: 'ui-badge',
-  success: 'ui-badge ui-badge-success',
-  warning: 'ui-badge ui-badge-warning',
-  danger: 'ui-badge ui-badge-danger',
-  info: 'ui-badge ui-badge-info',
-  accent: 'ui-badge ui-badge-accent',
+const variantMap: Record<NonNullable<StatusBadgeProps['variant']>, React.ComponentProps<typeof Badge>['variant']> = {
+  default: 'secondary',
+  success: 'success',
+  warning: 'warning',
+  danger: 'destructive',
+  info: 'secondary',
+  accent: 'default',
 };
 
 const statusVariantMap: Record<string, StatusBadgeProps['variant']> = {
@@ -39,9 +41,8 @@ export default function StatusBadge({
   const displayLabel = status.replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim();
 
   return (
-    <span className={variantMap[displayVariant]}>
-      <span className="ui-badge-dot" />
+    <Badge variant={variantMap[displayVariant] ?? 'secondary'}>
       {displayLabel}
-    </span>
+    </Badge>
   );
 }

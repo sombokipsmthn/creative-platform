@@ -191,12 +191,12 @@ export default function AdminIntegrationsPage() {
   const getStatusConfig = (status: string) => {
     switch (status) {
       case 'active':
-        return { badge: 'Active', color: 'text-emerald-600 dark:text-emerald-400', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30', borderColor: 'border-emerald-200 dark:border-emerald-900/50' };
+        return { badge: 'Active', color: 'text-success-foreground dark:text-success-foreground', bgColor: 'bg-success/5 dark:bg-success/5', borderColor: 'border-success/20 dark:border-success/20' };
       case 'configured':
-        return { badge: 'Configured', color: 'text-primary dark:text-primary', bgColor: 'bg-primary/10 dark:bg-primary/10', borderColor: 'border-primary/20 dark:border-primary/20' };
+        return { badge: 'Configured', color: 'text-primary-foreground dark:text-primary-foreground', bgColor: 'bg-primary/10 dark:bg-primary/10', borderColor: 'border-primary/20 dark:border-primary/20' };
       case 'inactive':
       default:
-        return { badge: 'Not Connected', color: 'text-muted-foreground', bgColor: 'bg-slate-100 dark:bg-zinc-800', borderColor: 'border-slate-200 dark:border-zinc-700' };
+        return { badge: 'Not Connected', color: 'text-muted-foreground', bgColor: 'bg-muted dark:bg-muted', borderColor: 'border-border dark:border-border' };
     }
   };
 
@@ -229,7 +229,7 @@ export default function AdminIntegrationsPage() {
     return (
       <main className="min-h-screen">
         <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300">
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive dark:border-destructive/20 dark:bg-destructive/5 dark:text-destructive-foreground">
             <Button variant="outline" size="sm" onClick={() => refetch()} className="mt-2">
               Try again
             </Button>
@@ -565,7 +565,7 @@ export default function AdminIntegrationsPage() {
 
           {message && (
             <div
-              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${message.includes('error') ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300' : 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-300'}`}
+              className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${message.includes('error') ? 'border-destructive/20 bg-destructive/5 text-destructive dark:border-destructive/20 dark:bg-destructive/5 dark:text-destructive-foreground' : 'border-success/20 bg-success/5 text-success-foreground dark:border-success/20 dark:bg-success/5 dark:text-success-foreground'}`}
             >
               {message}
             </div>

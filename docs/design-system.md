@@ -1,6 +1,6 @@
 # KIPSMTHN Design System
 
-The permanent visual reference is the repository's verified shadcn/ui configuration in `components.json` (`radix-nova`, stone base, CSS variables) together with the official [shadcn/ui component documentation](https://ui.shadcn.com/docs/components). No separate Shade CN preset identifier is present in the repository; do not invent or substitute one. KIPSMTHN keeps its brand content and media treatments, but shared product UI follows shadcn/ui's component language.
+The permanent visual reference is the repository's verified shadcn/ui configuration in `components.json` (`maia`, stone base, CSS variables) together with the official [shadcn/ui component documentation](https://ui.shadcn.com/docs/components). No separate Shade CN preset identifier is present in the repository; do not invent or substitute one. KIPSMTHN keeps its brand content and media treatments, but shared product UI follows shadcn/ui's component language.
 
 ## Sources of truth
 
@@ -35,8 +35,7 @@ Use `@/components/ui/<lowercase-name>` in new code. Do not create case-only dupl
 
 ## Automated versus review checks
 
-`npm run design-system:check` verifies the token declarations, canonical lowercase component set, uppercase compatibility exports, duplicate primitive files, competing UI package imports, and obsolete global stylesheet imports. ESLint, TypeScript, tests, and the build catch implementation regressions. Reviewers must still inspect representative marketing, dashboard, admin, and client portal screens in light and dark themes, including keyboard focus and responsive layouts; the repository does not claim automated visual protection.
-
+`npm run design-system:check` verifies the token declarations, canonical lowercase component set, uppercase compatibility exports, duplicate primitive files, competing UI package imports, obsolete global stylesheet imports, hardcoded theme colors in admin/shared components, and legacy class usage in admin. ESLint, TypeScript, tests, and the build catch implementation regressions. Reviewers must still inspect representative marketing, dashboard, admin, and client portal screens in light and dark themes, including keyboard focus and responsive layouts; the repository does not claim automated visual protection.
 
 ## Product typography and consistency
 

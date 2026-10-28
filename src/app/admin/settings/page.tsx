@@ -577,24 +577,24 @@ export default function AdminSettingsPage() {
               <CardContent>
                 <div className="space-y-4">
                   {profile.onboardingStatus === "complete" && (
-                    <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-900 dark:bg-emerald-950/30">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-900 dark:text-emerald-400">
+                    <div className="flex items-center gap-3 rounded-xl border border-success/20 bg-success/5 p-4 dark:border-success/20 dark:bg-success/5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-success/20 text-success dark:bg-success/20 dark:text-success-foreground">
                         <Check className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="font-medium text-emerald-800 dark:text-emerald-200">Setup complete</p>
-                        <p className="mt-1 text-sm text-emerald-600 dark:text-emerald-400">Your creator profile and services are fully configured.</p>
+                        <p className="font-medium text-success-foreground dark:text-success-foreground">Setup complete</p>
+                        <p className="mt-1 text-sm text-success-foreground dark:text-success-foreground">Your creator profile and services are fully configured.</p>
                       </div>
                     </div>
                   )}
                   {profile.onboardingStatus === "skipped" && (
-                    <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-400">
+                    <div className="flex items-center gap-3 rounded-xl border border-warning/20 bg-warning/5 p-4 dark:border-warning/20 dark:bg-warning/5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-warning/20 text-warning dark:bg-warning/20 dark:text-warning-foreground">
                         <X className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-amber-800 dark:text-amber-200">Setup was skipped</p>
-                        <p className="mt-1 text-sm text-amber-600 dark:text-amber-400">You chose to explore the dashboard first. Resume setup anytime to complete your profile and services.</p>
+                        <p className="font-medium text-warning-foreground dark:text-warning-foreground">Setup was skipped</p>
+                        <p className="mt-1 text-sm text-warning-foreground dark:text-warning-foreground">You chose to explore the dashboard first. Resume setup anytime to complete your profile and services.</p>
                       </div>
                       <Button
                         type="button"
@@ -607,13 +607,13 @@ export default function AdminSettingsPage() {
                     </div>
                   )}
                   {profile.onboardingStatus === "incomplete" && (
-                    <div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 dark:border-primary/20 dark:bg-primary/10">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary">
+                    <div className="flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 dark:border-primary/20 dark:bg-primary/5">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary-foreground">
                         <BriefcaseBusiness className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-primary dark:text-primary">Setup in progress</p>
-                        <p className="mt-1 text-sm text-primary/80 dark:text-primary/80">Complete your creator profile, services, and business details.</p>
+                        <p className="mt-1 text-sm text-primary-foreground/80 dark:text-primary-foreground/80">Complete your creator profile, services, and business details.</p>
                       </div>
                       <Button
                         type="button"
@@ -626,8 +626,8 @@ export default function AdminSettingsPage() {
                     </div>
                   )}
                   {(!profile.onboardingStatus || profile.onboardingStatus === "pending") && (
-                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-zinc-800 dark:bg-zinc-900">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400">
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-muted p-4 dark:border-border dark:bg-muted">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-muted-foreground dark:bg-muted dark:text-muted-foreground">
                         <BriefcaseBusiness className="h-5 w-5" />
                       </div>
                       <div className="flex-1">
@@ -876,7 +876,7 @@ export default function AdminSettingsPage() {
                     return (
                       <div
                         key={project.id}
-                        className="group ui-card ui-card-interactive border border-slate-700 bg-slate-950 rounded-xl p-4 flex flex-col justify-between"
+                        className="group ui-card ui-card-interactive border border-border bg-card rounded-xl p-4 flex flex-col justify-between"
                       >
                         <div className="relative h-48 w-full overflow-hidden rounded-xl mb-4">
                           {project.cover_url ? (
@@ -889,7 +889,7 @@ export default function AdminSettingsPage() {
                             </div>
                           ) : (
                             <div
-                              className="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-zinc-800"
+                              className="absolute inset-0 flex items-center justify-center bg-muted dark:bg-muted"
                             >
                               <ImageIcon className="h-8 w-8 opacity-70" />
                             </div>
@@ -897,7 +897,7 @@ export default function AdminSettingsPage() {
                         </div>
                         <div className="flex flex-col flex-1">
                           <p className="font-medium truncate">{project.title}</p>
-                          <p className="text-xs text-slate-500 truncate">
+                          <p className="text-xs text-muted-foreground truncate">
                             {project.id}
                           </p>
                         </div>
@@ -923,7 +923,7 @@ export default function AdminSettingsPage() {
                           >
                             {isSelected ? <Check className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                           </Button>
-                          <span className="text-[10px] text-slate-500">{project.visibility}</span>
+                          <span className="text-[10px] text-muted-foreground">{project.visibility}</span>
                         </div>
                       </div>
                     );
@@ -1371,8 +1371,8 @@ function PasskeySection() {
 
 function IntegrationCard({ name, description, status, action }: { name: string; description: string; status: 'active' | 'configured' | 'inactive'; action: React.ReactNode }) {
   const statusConfig = {
-    active: { badge: <Badge variant="success">Active</Badge>, color: 'text-emerald-600 dark:text-emerald-400' },
-    configured: { badge: <Badge variant="secondary">Configured</Badge>, color: 'text-primary dark:text-primary' },
+    active: { badge: <Badge variant="success">Active</Badge>, color: 'text-success-foreground dark:text-success-foreground' },
+    configured: { badge: <Badge variant="secondary">Configured</Badge>, color: 'text-primary-foreground dark:text-primary-foreground' },
     inactive: { badge: <Badge variant="outline">Not Connected</Badge>, color: 'text-muted-foreground' },
   };
   const config = statusConfig[status];

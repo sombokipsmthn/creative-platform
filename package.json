@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev -p 3000 -H 0.0.0.0",
+    "dev:db": "brew services start postgresql@16",
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
     "lint": "eslint",

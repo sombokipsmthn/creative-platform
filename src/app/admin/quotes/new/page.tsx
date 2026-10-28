@@ -1990,21 +1990,33 @@ export default function NewQuotePage() {
                                 onChange={(
                                   event
                                 ) => {
+                                  const description =
+                                    event.target.value;
+
+                                  // Keep the typed description on the quote item
+                                  // immediately so custom crew, transport, and
+                                  // other line items pass required-description validation.
+                                  setItems((current) =>
+                                    current.map((currentItem) =>
+                                      currentItem.id === item.id
+                                        ? {
+                                            ...currentItem,
+                                            description,
+                                            type: "custom",
+                                            equipmentId: "",
+                                          }
+                                        : currentItem
+                                    )
+                                  );
+
                                   setDescriptionSearch(
-                                    (
-                                      current
-                                    ) => ({
+                                    (current) => ({
                                       ...current,
-                                      [item.id]:
-                                        event
-                                          .target
-                                          .value,
+                                      [item.id]: description,
                                     })
                                   );
 
-                                  setOpenDescriptionSearch(
-                                    item.id
-                                  );
+                                  setOpenDescriptionSearch(item.id);
                                 }}
                                 disabled={
                                   !item.category

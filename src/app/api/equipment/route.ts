@@ -5,12 +5,13 @@ import { equipment } from "@/db/schema";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
 import crypto from "node:crypto";
 
-function normalizeEquipment(body: Record<string, unknown>, userId: string) {
+function normalizeEquipment(body: Record<string, unknown>) {
   const name = String(body.name ?? "").trim();
   const category = String(body.category ?? "").trim();
   const subcategory = String(body.subcategory ?? "").trim();
   const brand = String(body.brand ?? "").trim();
   const specs = String(body.specs ?? "").trim();
+  const imageUrl = String(body.imageUrl ?? "").trim();
 
   const dailyRate = Math.max(
     0,
@@ -19,13 +20,13 @@ function normalizeEquipment(body: Record<string, unknown>, userId: string) {
 
   return {
     id: crypto.randomUUID(),
-    creatorId: userId,
     name,
     dailyRate,
     category,
     subcategory: subcategory || null,
     brand: brand || null,
     specs: specs || null,
+    imageUrl: imageUrl || null,
   };
 }
 
@@ -64,6 +65,7 @@ export async function GET(req: Request) {
           subcategory: equipment.subcategory,
           brand: equipment.brand,
           specs: equipment.specs,
+          imageUrl: equipment.imageUrl,
         })
         .from(equipment)
         .where(
@@ -101,7 +103,7 @@ export async function POST(req: Request) {
     async (_request, user) => {
       try {
         const body = await req.json();
-        const normalized = normalizeEquipment(body, user.id);
+        const normalized = normalizeEquipment(body);
 
         if (!normalized.name) {
           return NextResponse.json(

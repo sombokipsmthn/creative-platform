@@ -59,19 +59,26 @@ async function seed() {
       categories.add(category);
 
       const [existing] = await tx
-        .select({ id: equipment.id })
+        .select({ id: equipment.id, imageUrl: equipment.imageUrl })
         .from(equipment)
         .where(eq(equipment.name, name))
         .limit(1);
 
-      if (existing) {
-        skipped += 1;
-        continue;
-      }
-
       const imageUrl =
         clean(valueAt(row, "Image Search")) ||
         clean(valueAt(row, "Image"));
+
+      if (existing) {
+        // Backfill only a missing image URL; preserve all user-edited fields.
+        if (!existing.imageUrl && imageUrl) {
+          await tx
+            .update(equipment)
+            .set({ imageUrl, updatedAt: new Date() })
+            .where(eq(equipment.id, existing.id));
+        }
+        skipped += 1;
+        continue;
+      }
 
       await tx.insert(equipment).values({
         name,

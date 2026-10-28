@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Upload, X, Check, Loader2, Trash2, RefreshCw } from 'lucide-react';
+import { Upload, X, Check, CircleNotch as Loader2, Trash as Trash2, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 
 interface UploadItem {

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { AlertCircle, Loader2, Plus, RefreshCw } from 'lucide-react';
+import { WarningCircle as AlertCircle, CircleNotch as Loader2, Plus, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react";
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import StatusBadge from '@/components/admin/StatusBadge';

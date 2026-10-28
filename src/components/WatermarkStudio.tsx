@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertCircle, Check, Image as ImageIcon, Loader2, RotateCcw, Type } from 'lucide-react';
+import { WarningCircle as AlertCircle, Check, Image as ImageIcon, CircleNotch as Loader2, ArrowCounterClockwise as RotateCcw, TextT as Type } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 

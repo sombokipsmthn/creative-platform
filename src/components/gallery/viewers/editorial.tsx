@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { GalleryMedia } from './media';
-import { Download, Heart } from 'lucide-react';
+import { Download, Heart } from "@phosphor-icons/react";
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 import { Button } from '@/components/ui/button';

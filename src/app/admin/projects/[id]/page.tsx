@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ArrowUpRight, Eye, Loader2, Save, Star, Trash2, Upload } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Eye, CircleNotch as Loader2, FloppyDisk as Save, Star, Trash as Trash2, Upload } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

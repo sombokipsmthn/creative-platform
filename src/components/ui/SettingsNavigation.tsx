@@ -1,15 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import {
-  Building2,
-  Image as ImageIcon,
-  Droplet,
-  FileText,
-  Bell,
-  Plug2,
-  Shield,
-} from 'lucide-react';
+import { Buildings as Building2, Image as ImageIcon, Drop as Droplet, FileText, Bell, Plug as Plug2, Shield } from "@phosphor-icons/react";
 
 interface SettingsNavigationItem {
   id: string;

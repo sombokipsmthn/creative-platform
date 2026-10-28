@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ArrowDown, ArrowUp, ArrowUpDown, MoreHorizontal, Settings2, Save, Bookmark, ChevronDown } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowsDownUp as ArrowUpDown, DotsThree as MoreHorizontal, SlidersHorizontal as Settings2, FloppyDisk as Save, Bookmark, CaretDown as ChevronDown } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';

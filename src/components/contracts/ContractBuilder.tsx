@@ -2,15 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  ArrowLeft,
-  Check,
-  Loader2,
-  AlertCircle,
-  Save,
-  Send,
-  Copy,
-} from 'lucide-react';
+import { ArrowLeft, Check, CircleNotch as Loader2, WarningCircle as AlertCircle, FloppyDisk as Save, PaperPlaneTilt as Send, Copy } from "@phosphor-icons/react";
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { Contract, ContractTemplate, Client, Project } from '@/lib/types/contracts';

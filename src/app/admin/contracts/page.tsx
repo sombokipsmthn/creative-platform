@@ -3,16 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  FilePlus,
-  FileSignature,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Trash2,
-} from 'lucide-react';
+import { ArrowUpRight, CheckCircle as CheckCircle2, FilePlus, Signature as FileSignature, CircleNotch as Loader2, Plus, ArrowsClockwise as RefreshCw, Trash as Trash2 } from "@phosphor-icons/react";
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';

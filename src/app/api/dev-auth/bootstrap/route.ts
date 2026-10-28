@@ -5,8 +5,8 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { getLocalAuthBypassState } from "@/lib/auth/local-bypass";
 
-const DEV_EMAIL = "dev-admin@localhost.test";
-const DEV_PASSWORD = "local-development-only-password";
+const LOCAL_EMAIL = (process.env.DEMO_CREATOR_EMAIL || "dev-admin@localhost.test").trim().toLowerCase();
+const LOCAL_PASSWORD = process.env.DEMO_CREATOR_PASSWORD || "local-development-only-password";
 
 export async function POST(request: Request) {
   const bypassState = getLocalAuthBypassState(request);
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 
   try {
     const existingUser = await db.query.users.findFirst({
-      where: eq(users.email, DEV_EMAIL),
+      where: eq(users.email, LOCAL_EMAIL),
     });
 
     if (existingUser && !existingUser.emailVerified) {
@@ -38,8 +38,8 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify(
         existingUser
-          ? { email: DEV_EMAIL, password: DEV_PASSWORD, rememberMe: true }
-          : { name: "Local Development Admin", email: DEV_EMAIL, password: DEV_PASSWORD, rememberMe: true },
+          ? { email: LOCAL_EMAIL, password: LOCAL_PASSWORD, rememberMe: true }
+          : { name: "Local Development Admin", email: LOCAL_EMAIL, password: LOCAL_PASSWORD, rememberMe: true },
       ),
     });
 

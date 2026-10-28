@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Check, X, Calendar, ChevronDown } from 'lucide-react';
+import { Check, X, Calendar, CaretDown as ChevronDown } from "@phosphor-icons/react";
 import type { FieldMetadata, FieldType } from '@/lib/contracts/fieldMetadata';
 import type { Client, Project } from '@/lib/types/contracts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';

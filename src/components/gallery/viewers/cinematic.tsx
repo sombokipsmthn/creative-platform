@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { GalleryMedia } from './media';
-import { Download, Heart, ChevronDown } from 'lucide-react';
+import { Download, Heart, CaretDown as ChevronDown } from "@phosphor-icons/react";
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 import { Button } from '@/components/ui/button';

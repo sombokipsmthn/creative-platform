@@ -9,14 +9,7 @@ import VideoPlayer from "@/components/ui/VideoPlayer";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Heart,
-  Lock,
-  X,
-} from "lucide-react";
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Download, Heart, Lock, X } from "@phosphor-icons/react";
 
 type Photo = {
   original_url: string | undefined;

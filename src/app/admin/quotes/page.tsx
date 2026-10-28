@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, ArrowRight, RefreshCw } from 'lucide-react';
+import { Plus, ArrowRight, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import AdminDataTable from '@/components/admin/AdminDataTable';

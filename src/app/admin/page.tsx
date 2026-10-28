@@ -5,11 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import {
-  AlertCircle, ArrowUpRight, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd,
-  LayoutDashboard, Receipt, Users, Wallet, CalendarDays, ChevronLeft, ChevronRight,
-  ExternalLink, TrendingUp
-} from 'lucide-react';
+import { WarningCircle as AlertCircle, ArrowUpRight, CheckCircle as CheckCircle2, Clock as Clock3, FileText, Images as GalleryHorizontalEnd, SquaresFour as LayoutDashboard, Receipt, Users, Wallet, CalendarDots as CalendarDays, CaretLeft as ChevronLeft, CaretRight as ChevronRight, ArrowSquareOut as ExternalLink, TrendUp as TrendingUp } from "@phosphor-icons/react";
 
 import { useCreator } from '@/context/CreatorContext';
 import { Button } from '@/components/ui/button';

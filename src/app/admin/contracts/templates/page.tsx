@@ -3,12 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  FilePlus,
-  Loader2,
-  Search,
-  ArrowRight,
-} from 'lucide-react';
+import { FilePlus, CircleNotch as Loader2, MagnifyingGlass as Search, ArrowRight } from "@phosphor-icons/react";
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

@@ -1,28 +1,6 @@
 "use client";
 
-import {
-  Users,
-  FileText,
-  Camera,
-  Wallet,
-  FolderKanban,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  MoreHorizontal,
-  Search,
-  Filter,
-  Plus,
-  Settings,
-  ChevronDown,
-  ChevronRight,
-  Mail,
-  Phone,
-  MapPin,
-  DollarSign,
-  Image as ImageIcon,
-  LayoutDashboard
-} from "lucide-react";
+import { Users, FileText, Camera, Wallet, FolderSimple as FolderKanban, CheckCircle as CheckCircle2, Clock, WarningCircle as AlertCircle, DotsThree as MoreHorizontal, MagnifyingGlass as Search, Funnel as Filter, Plus, Gear as Settings, CaretDown as ChevronDown, CaretRight as ChevronRight, Envelope as Mail, Phone, MapPin, CurrencyDollar as DollarSign, Image as ImageIcon, SquaresFour as LayoutDashboard } from "@phosphor-icons/react";
 
 interface Project {
   id: string;

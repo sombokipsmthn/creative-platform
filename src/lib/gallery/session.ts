@@ -100,7 +100,7 @@ export async function getGallerySession(
         .update(galleryAccessSessions)
         .set({
           lastSeenAt: new Date(),
-          clientId: clientId ?? null,
+          ...(clientId !== undefined ? { clientId: clientId ?? null } : {}),
         })
         .where(eq(galleryAccessSessions.id, sessionId));
 

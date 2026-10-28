@@ -4,28 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import {
-  Activity,
-  CheckCircle2,
-  Clock,
-  Copy,
-  Download,
-  ExternalLink,
-  Eye,
-  Heart,
-  ImageIcon,
-  LayoutGrid,
-  List,
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Settings,
-  Share2,
-  Sliders,
-  Sparkles,
-  Trash2,
-  Users,
-} from 'lucide-react';
+import { ActivityIcon as Activity, CheckCircle as CheckCircle2, Clock, Copy, Download, ArrowSquareOut as ExternalLink, Eye, Heart, Image as ImageIcon, GridFour as LayoutGrid, List, ChatText as MessageSquare, Plus, ArrowsClockwise as RefreshCw, Gear as Settings, ShareNetwork as Share2, Sliders, Sparkle as Sparkles, Trash as Trash2, Users } from "@phosphor-icons/react";
 
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';

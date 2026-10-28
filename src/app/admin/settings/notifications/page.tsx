@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authClient } from '@/lib/auth-client';
-import { Mail, MessageSquare, Bell, FileText, CreditCard } from 'lucide-react';
+import { Envelope as Mail, ChatText as MessageSquare, Bell, FileText, CreditCard } from "@phosphor-icons/react";
 
 interface NotificationPreferences {
   gallerySelections: boolean;

@@ -1,25 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  ArrowRight,
-  Bell,
-  CreditCard,
-  FileSignature,
-  FileText,
-  FolderKanban,
-  Keyboard,
-  GalleryHorizontalEnd,
-  Image as ImageIcon,
-  LayoutDashboard,
-  Plus,
-  Receipt,
-  Search,
-  Settings,
-  ShieldCheck,
-  Sparkles,
-  Users,
-} from 'lucide-react';
+import { ArrowRight, Bell, CreditCard, Signature as FileSignature, FileText, FolderSimple as FolderKanban, Keyboard, Images as GalleryHorizontalEnd, Image as ImageIcon, SquaresFour as LayoutDashboard, Plus, Receipt, MagnifyingGlass as Search, Gear as Settings, ShieldCheck, Sparkle as Sparkles, Users } from "@phosphor-icons/react";
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';

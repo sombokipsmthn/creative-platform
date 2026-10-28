@@ -18,6 +18,7 @@ type Equipment = {
   subcategory?: string | null;
   brand?: string | null;
   specs?: string | null;
+  imageUrl?: string | null;
 };
 
 type EquipmentForm = {
@@ -160,7 +161,7 @@ export default function EquipmentPage() {
               rows={filteredEquipment}
               getRowLabel={(item) => item.name}
               columns={[
-                { id: 'equipment', header: 'Equipment', cell: (item) => <div><p className="font-medium">{item.name}</p>{item.specs && <p className="mt-1 max-w-md text-xs text-muted-foreground">{item.specs}</p>}</div>, sortable: true, accessor: (item) => item.name },
+                { id: 'equipment', header: 'Equipment', cell: (item) => <div className="flex min-w-0 items-start gap-3">{item.imageUrl ? <img src={item.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-12 w-12 shrink-0 rounded-md border object-contain bg-white" /> : <div className="h-12 w-12 shrink-0 rounded-md border bg-muted flex items-center justify-center text-xs text-muted-foreground">—</div>}<div className="min-w-0"><p className="font-medium">{item.name}</p>{item.specs && <p className="mt-1 max-w-md text-xs text-muted-foreground">{item.specs}</p>}</div></div>, sortable: true, accessor: (item) => item.name },
                 { id: 'category', header: 'Category', cell: (item) => <div>{item.category}{item.subcategory && <span className="block text-xs text-muted-foreground">{item.subcategory}</span>}</div>, sortable: true, accessor: (item) => item.category },
                 { id: 'brand', header: 'Brand', accessor: (item) => item.brand || '—', hideOnMobile: true },
                 { id: 'dailyRate', header: 'Daily rate', align: 'right', cell: (item) => `KES ${Number(item.dailyRate || 0).toLocaleString('en-KE')}`, accessor: (item) => item.dailyRate },

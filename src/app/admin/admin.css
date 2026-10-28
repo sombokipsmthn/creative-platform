@@ -179,11 +179,34 @@
 }
 
 [data-admin-content] .ui-stat-card {
+  min-width: 0;
+  max-width: 100%;
   min-height: 7rem;
   padding: 1.125rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: stretch;
+  overflow-wrap: anywhere;
+}
+
+[data-admin-content] .ui-stat-card > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+[data-admin-content] .ui-stat-card .ui-stat-value {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  line-height: 1.15;
+}
+
+[data-admin-content] .ui-stat-card .ui-stat-label,
+[data-admin-content] .ui-stat-card .ui-stat-detail {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 [data-admin-content] .ui-stat-label {

@@ -287,8 +287,8 @@ export default function InvoicesPage() {
     clientId !== 'all';
 
   return (
-    <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
-      <div className="mx-auto max-w-7xl space-y-8">
+    <div className="admin-data-page font-sans transition-colors duration-300">
+      <div className="admin-data-page__content space-y-6">
         <AdminPageHeader
           title="Invoices"
           description="Manage invoices, monitor payments and keep track of client billing."

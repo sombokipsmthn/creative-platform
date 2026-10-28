@@ -2,10 +2,9 @@
 
 import { authClient } from '@/lib/auth-client';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useMemo, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { WarningCircle as AlertCircle, ArrowUpRight, CheckCircle as CheckCircle2, Clock as Clock3, FileText, Images as GalleryHorizontalEnd, SquaresFour as LayoutDashboard, Receipt, Users, Wallet, CalendarDots as CalendarDays, CaretLeft as ChevronLeft, CaretRight as ChevronRight, ArrowSquareOut as ExternalLink, TrendUp as TrendingUp } from "@phosphor-icons/react";
+import { WarningCircle as AlertCircle, ArrowUpRight, CheckCircle as CheckCircle2, Clock as Clock3, FileText, Images as GalleryHorizontalEnd, SquaresFour as LayoutDashboard, Receipt, Users, Wallet, CalendarDots as CalendarDays, ArrowSquareOut as ExternalLink, TrendUp as TrendingUp } from "@phosphor-icons/react";
 
 import { useCreator } from '@/context/CreatorContext';
 import { Button } from '@/components/ui/button';
@@ -13,11 +12,9 @@ import { formatCurrency } from '@/lib/utils';
 import CreatorOnboardingModal from '@/components/CreatorOnboardingModal';
 import DashboardTour from '@/components/DashboardTour';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import StatusBadge from '@/components/admin/StatusBadge';
+import { RevenueTrendChart, type TrendDataPoint } from '@/components/ui/chart';
 
 // Types
 interface DashboardStats {
@@ -54,6 +51,7 @@ interface DashboardStats {
     activeGalleries: number;
   };
   activity: Array<{ id: string; type: 'client' | 'project' | 'quote' | 'invoice' | 'gallery'; title: string; description: string; date: string }>;
+  revenueTrend?: TrendDataPoint[] | null;
 }
 
 interface CalendarEvent {
@@ -124,23 +122,6 @@ function eventHref(event: CalendarEvent) {
   }
 }
 
-function isToday(dateString: string) {
-  const today = new Date();
-  const date = new Date(dateString);
-  return date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
-}
-
-function isTomorrow(dateString: string) {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const date = new Date(dateString);
-  return date.getDate() === tomorrow.getDate() &&
-    date.getMonth() === tomorrow.getMonth() &&
-    date.getFullYear() === tomorrow.getFullYear();
-}
-
 // Components
 function Panel({ eyebrow, title, action, children, className = '' }: { eyebrow?: string; title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
@@ -158,26 +139,6 @@ function Panel({ eyebrow, title, action, children, className = '' }: { eyebrow?:
       </div>
       <div className="min-w-0 p-4 sm:p-5">{children}</div>
     </section>
-  );
-}
-
-function QuickAction({ href, label, icon, detail }: { href: string; label: string; icon: React.ReactNode; detail?: string }) {
-  return (
-    <Link
-      href={href}
-      className="group flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
-    >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/15 dark:text-primary">
-        {icon}
-      </span>
-      <span className="flex-1 min-w-0">
-        <span className="block text-sm font-medium text-foreground">{label}</span>
-        {detail && <span className="block truncate text-xs text-muted-foreground">{detail}</span>}
-      </span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary">
-        <path d="M5 12h14M12 5l7 7-7 7" />
-      </svg>
-    </Link>
   );
 }
 
@@ -380,9 +341,6 @@ export default function StudioCommandCenterPage() {
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
   const name = activeCreator?.name || user?.name || 'Creator';
-  const email = activeCreator?.email || user?.email || '';
-  const avatar = activeCreator?.profile?.avatarUrl || user?.image || '';
-
   // Fetch dashboard stats
   useEffect(() => {
     if (isPending || !user) return;
@@ -390,7 +348,8 @@ export default function StudioCommandCenterPage() {
       setLoading(true);
       setError('');
       try {
-        const res = await fetch(`/api/dashboard/stats?range=${range}`, { cache: 'no-store' });
+        const includeTrend = ['30d', '90d', '12m'].includes(range);
+        const res = await fetch(`/api/dashboard/stats?range=${range}&trend=${includeTrend}`, { cache: 'no-store' });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load dashboard data.');
         setStats(data);
@@ -514,380 +473,44 @@ export default function StudioCommandCenterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="ui-shell py-6">
-          <AdminPageHeader
-            title="Studio Command Center"
-            description={`Welcome back, ${name.split(' ')[0]}. Here's what's happening across your studio.`}
-            breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-            primaryAction={
-              <div className="flex flex-wrap items-center gap-2">
-                {ranges.map((opt) => (
-                  <Button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setRange(opt.value)}
-                    variant={range === opt.value ? 'primary' : 'secondary'}
-                    size="sm"
-                  >
-                    {opt.label}
-                  </Button>
-                ))}
-              </div>
-            }
-          />
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="ui-shell py-8">
-        {error && (
-          <div className="mb-6 flex items-center gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Welcome & Quick Actions */}
-        <section className="mb-8">
-          <div className="mb-4">
-            <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground">Start here</p>
-            <h2 className="text-2xl font-semibold tracking-tight">Quick actions</h2>
-          </div>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <QuickAction href="/admin/clients?new=true" label="Add Client" icon={<Users className="h-4 w-4" />} detail="Create new client record" />
-            <QuickAction href="/admin/quotes/new" label="Create Quote" icon={<FileText className="h-4 w-4" />} detail="Build a production quote" />
-            <QuickAction href="/admin/invoices/new" label="New Invoice" icon={<Receipt className="h-4 w-4" />} detail="Bill for completed work" />
-            <QuickAction href="/admin/calendar" label="Schedule Event" icon={<CalendarDays className="h-4 w-4" />} detail="Add to studio calendar" />
-          </div>
-        </section>
-
-        {/* Loading Skeleton */}
-        {loading && !stats && <LoadingSkeleton count={8} />}
-
-        {stats && (
-          <>
-            {/* Top Row: Business Pulse + Attention Queue */}
-            <div className="mb-8 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
-              {/* Business Pulse - Left Column */}
-              <div className="space-y-6">
-                <Panel
-                  eyebrow="Business pulse"
-                  title={`Performance ${rangeLabels[range]}`}
-                  action={
-                    <Link href="/admin/invoices" className="text-sm text-primary hover:underline flex items-center gap-1">
-                      View all <ExternalLink className="h-3 w-3" />
-                    </Link>
-                  }
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <MetricCard
-                      label="Quoted in period"
-                      value={formatCurrency(stats.finance.periodQuotedValue)}
-                      detail="Value of quotes created in this range"
-                      href="/admin/quotes"
-                      icon={<FileText className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Invoiced in period"
-                      value={formatCurrency(stats.finance.periodInvoicedValue)}
-                      detail={`${stats.overview.newInvoices} invoices created in this range`}
-                      href="/admin/invoices"
-                      icon={<Receipt className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Collected revenue"
-                      value={formatCurrency(stats.finance.periodPaidValue)}
-                      detail={`${stats.overview.newInvoices} invoices in period`}
-                      href="/admin/invoices"
-                      icon={<Wallet className="h-4 w-4" />}
-                      trend={{ value: invoicePaidRate, label: 'paid rate' }}
-                    />
-                    <MetricCard
-                      label="Active projects"
-                      value={formatNumber(stats.overview.activeProjects)}
-                      detail={`${stats.overview.completedProjects} completed`}
-                      href="/admin/projects"
-                      icon={<LayoutDashboard className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Quote pipeline"
-                      value={formatCurrency(stats.finance.acceptedQuoteValue)}
-                      detail={`${stats.quotes.conversionRate}% conversion rate`}
-                      href="/admin/quotes"
-                      icon={<CheckCircle2 className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Overdue invoices"
-                      value={formatNumber(stats.finance.overdueInvoices)}
-                      detail="Invoices past their due date"
-                      href="/admin/invoices"
-                      icon={<Clock3 className="h-4 w-4" />}
-                    />
-                  </div>
-                </Panel>
-
-                {/* Entity Counts */}
-                <Panel
-                  eyebrow="Studio overview"
-                  title="Entity counts"
-                  action={
-                    <Link href="/admin/clients" className="text-sm text-primary hover:underline flex items-center gap-1">
-                      View all <ExternalLink className="h-3 w-3" />
-                    </Link>
-                  }
-                >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <MetricCard
-                      label="Clients"
-                      value={formatNumber(stats.overview.clients)}
-                      detail={`${stats.overview.activeClients} active · ${stats.overview.newClients} new`}
-                      href="/admin/clients"
-                      icon={<Users className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Projects"
-                      value={formatNumber(stats.overview.projects)}
-                      detail={`${stats.overview.activeProjects} active · ${stats.overview.completedProjects} done`}
-                      href="/admin/projects"
-                      icon={<LayoutDashboard className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Quotes"
-                      value={formatNumber(stats.overview.quotes)}
-                      detail={`${stats.overview.newQuotes} new · ${stats.quotes.statuses.sent || 0} sent`}
-                      href="/admin/quotes"
-                      icon={<FileText className="h-4 w-4" />}
-                    />
-                    <MetricCard
-                      label="Galleries"
-                      value={formatNumber(stats.overview.galleries)}
-                      detail={`${stats.attention.activeGalleries} active`}
-                      href="/admin/galleries"
-                      icon={<GalleryHorizontalEnd className="h-4 w-4" />}
-                    />
-                  </div>
-                </Panel>
-              </div>
-
-              {/* Needs Your Attention - Right Column (Prominent) */}
-              <Panel
-                eyebrow="Priority queue"
-                title="Needs your attention"
-                className="lg:sticky lg:top-24 lg:self-start"
-              >
-                <div className="divide-y divide-border">
-                  {stats.attention.overdueInvoices > 0 && (
-                    <AttentionItem
-                      urgent
-                      icon={<Receipt className="h-4 w-4" />}
-                      title="Overdue invoices"
-                      detail={`${stats.finance.overdueInvoices} invoice${stats.finance.overdueInvoices !== 1 ? 's' : ''} past due — follow up on payments`}
-                      count={stats.finance.overdueInvoices}
-                      href="/admin/invoices?status=overdue"
-                    />
-                  )}
-                  {((stats.quotes.statuses.sent || 0) + (stats.quotes.statuses.draft || 0)) > 0 && (
-                    <AttentionItem
-                      icon={<FileText className="h-4 w-4" />}
-                      title="Quotes awaiting action"
-                      detail={`${stats.quotes.statuses.draft || 0} draft${stats.quotes.statuses.draft !== 1 ? 's' : ''}, ${stats.quotes.statuses.sent || 0} sent — review and follow up`}
-                      count={(stats.quotes.statuses.sent || 0) + (stats.quotes.statuses.draft || 0)}
-                      href="/admin/quotes"
-                    />
-                  )}
-                  {stats.attention.activeProjects > 0 && (
-                    <AttentionItem
-                      icon={<LayoutDashboard className="h-4 w-4" />}
-                      title="Active projects"
-                      detail={`${stats.attention.activeProjects} project${stats.attention.activeProjects !== 1 ? 's' : ''} in production — monitor progress`}
-                      count={stats.attention.activeProjects}
-                      href="/admin/projects?status=active"
-                    />
-                  )}
-                  {stats.attention.activeGalleries > 0 && (
-                    <AttentionItem
-                      icon={<GalleryHorizontalEnd className="h-4 w-4" />}
-                      title="Active galleries"
-                      detail={`${stats.attention.activeGalleries} gallery${stats.attention.activeGalleries !== 1 ? 'ies' : 'y'} live — check client delivery`}
-                      count={stats.attention.activeGalleries}
-                      href="/admin/galleries"
-                    />
-                  )}
-                  {stats.attention.overdueInvoices === 0 &&
-                    (stats.quotes.statuses.sent || 0) + (stats.quotes.statuses.draft || 0) === 0 &&
-                    stats.attention.activeProjects === 0 &&
-                    stats.attention.activeGalleries === 0 && (
-                      <div className="px-5 py-8 text-center">
-                        <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-500" />
-                        <p className="mt-3 text-sm font-medium text-foreground">All caught up</p>
-                        <p className="mt-1 text-sm text-muted-foreground">No items require immediate attention.</p>
-                      </div>
-                    )}
+    <main className="admin-dashboard-page bg-background">
+      <header className="border-b border-border"><div className="ui-shell py-4 sm:py-5"><AdminPageHeader title="Studio Command Center" description={`${format(new Date(), 'EEEE, MMMM d')} · Welcome back, ${name.split(' ')[0]}.`} breadcrumb={{ label: 'Dashboard', href: '/admin' }} primaryAction={<div className="flex flex-wrap gap-2"><Link href="/admin/calendar"><Button><CalendarDays className="mr-2 h-4 w-4" />New Studio Event</Button></Link><div className="flex flex-wrap gap-1">{ranges.map(opt => <Button key={opt.value} type="button" onClick={() => setRange(opt.value)} variant={range === opt.value ? 'secondary' : 'ghost'} size="sm">{opt.label}</Button>)}</div></div>} /></div></header>
+      <div className="ui-shell admin-dashboard-content py-4 sm:py-5">
+        {error && <div role="alert" className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300"><AlertCircle className="h-4 w-4 shrink-0" /><span>{error}</span></div>}
+        {loading && !stats && <LoadingSkeleton count={6} />}
+        {stats && <>
+          <div className="mb-6 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(18rem,0.8fr)] 2xl:gap-6">
+            <Panel eyebrow="Schedule" title="Next 7 days" className="min-w-0" action={<Link href="/admin/calendar" className="flex items-center gap-1 text-sm text-primary hover:underline">Full calendar <ExternalLink className="h-3 w-3" /></Link>}>
+              {calendarLoading ? <div className="space-y-3">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-14 animate-pulse rounded-lg border border-border" />)}</div> : calendarError ? <EmptyState icon={AlertCircle} title="Calendar unavailable" description={calendarError} action={<Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>} /> : <>
+                <DateStrip selectedDate={selectedDate} onDateChange={setSelectedDate} eventsByDay={eventsByDay} />
+                <div className="mt-4 space-y-2">{selectedDayEvents.length ? <p className="text-sm font-medium">{selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? 's' : ''} · {formatDateShort(selectedDate.toISOString())}</p> : <p className="text-sm text-muted-foreground">No events on {formatDateShort(selectedDate.toISOString())}{allUpcomingEvents.length ? ` · Next ${Math.min(5, allUpcomingEvents.length)} upcoming` : ''}</p>}
+                  {(selectedDayEvents.length ? selectedDayEvents : allUpcomingEvents.slice(0, 5)).map(event => <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />)}
+                  {!allUpcomingEvents.length && <EmptyState icon={CalendarDays} title="No upcoming events" description="Add studio dates or connect a project milestone to your schedule." action={<Link href="/admin/calendar"><Button variant="outline">Schedule something</Button></Link>} />}
                 </div>
-              </Panel>
-            </div>
-
-            {/* Upcoming Schedule - Full Width */}
-            <Panel
-              eyebrow="Upcoming schedule"
-              title="Next 7 days"
-              action={
-                <Link href="/admin/calendar" className="text-sm text-primary hover:underline flex items-center gap-1">
-                  Open full calendar <ExternalLink className="h-3 w-3" />
-                </Link>
-              }
-            >
-              {calendarLoading ? (
-                <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-16 animate-pulse rounded-xl border border-border bg-card" />
-                  ))}
-                </div>
-              ) : calendarError ? (
-                <EmptyState
-                  icon={AlertCircle}
-                  title="Calendar unavailable"
-                  description={calendarError}
-                  action={<Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>}
-                />
-              ) : allUpcomingEvents.length === 0 ? (
-                <EmptyState
-                  icon={CalendarDays}
-                  title="No upcoming events"
-                  description="No events scheduled for the next 7 days. Events from projects, quotes, invoices, galleries, and contracts will appear here."
-                  action={<Link href="/admin/calendar"><Button>Open calendar</Button></Link>}
-                />
-              ) : (
-                <>
-                  {/* Date Strip */}
-                  <DateStrip
-                    selectedDate={selectedDate}
-                    onDateChange={setSelectedDate}
-                    eventsByDay={eventsByDay}
-                  />
-
-                  {/* Selected Day Events or Upcoming List */}
-                  <div className="mt-4">
-                    {selectedDayEvents.length > 0 ? (
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-foreground">
-                          {selectedDayEvents.length} event{selectedDayEvents.length !== 1 ? 's' : ''} on {formatDateShort(selectedDate.toISOString())}
-                        </p>
-                        <div className="mt-2 space-y-2">
-                          {selectedDayEvents.map(event => (
-                            <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />
-                          ))}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        <p className="text-sm text-muted-foreground">No events on {formatDateShort(selectedDate.toISOString())}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Showing next {Math.min(allUpcomingEvents.length, 5)} upcoming event{allUpcomingEvents.length !== 1 ? 's' : ''}:
-                        </p>
-                        <div className="mt-2 space-y-2">
-                          {allUpcomingEvents.slice(0, 5).map(event => (
-                            <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />
-                          ))}
-                        </div>
-                        {allUpcomingEvents.length > 5 && (
-                          <Link href="/admin/calendar" className="mt-3 block text-center text-sm text-primary hover:underline">
-                            View all {allUpcomingEvents.length} upcoming events
-                          </Link>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+              </>}
             </Panel>
-
-            {/* Bottom Row: Recent Activity + Quote Pipeline */}
-            <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">
-              <Panel
-                eyebrow="Workspace"
-                title="Recent activity"
-                action={
-                  <span className="text-[9px] font-sans uppercase tracking-widest text-muted-foreground">
-                    Live from your account
-                  </span>
-                }
-              >
-                <div className="divide-y divide-border">
-                  {stats.activity.length === 0 ? (
-                    <div className="px-5 py-10 text-center">
-                      <p className="text-sm font-medium text-foreground">No activity yet</p>
-                      <p className="text-sm text-muted-foreground">Create a client, project or quote to get started.</p>
-                    </div>
-                  ) : (
-                    stats.activity.map((item) => <ActivityRow key={item.id} {...item} />)
-                  )}
-                </div>
-              </Panel>
-
-              <Panel
-                eyebrow="Commercial health"
-                title="Quote pipeline"
-              >
-                <div className="space-y-4">
-                  {([
-                    ['Draft', Number(stats.quotes.statuses.draft || 0)],
-                    ['Sent', Number(stats.quotes.statuses.sent || 0)],
-                    ['Accepted', Number(stats.quotes.statuses.accepted || 0)],
-                    ['Rejected', Number(stats.quotes.statuses.rejected || 0)],
-                    ['Invoiced', Number(stats.quotes.statuses.invoiced || 0)],
-                  ] as Array<[string, number]>).filter(([, v]) => v > 0).map(([label, value]) => {
-                    const numValue = Number(value);
-                    return (
-                      <div key={label}>
-                        <div className="mb-1.5 flex items-center justify-between gap-3 text-xs">
-                          <span className="text-muted-foreground">{label}</span>
-                          <span className="font-semibold text-foreground">{formatNumber(numValue)}</span>
-                        </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full bg-primary transition-all"
-                            style={{ width: `${Math.min(100, Math.round((numValue / Math.max(stats.overview.quotes, 1)) * 100))}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <div className="pt-4 border-t border-border">
-                    <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground">Conversion</p>
-                    <p className="mt-1 text-2xl font-semibold text-foreground">{stats.quotes.conversionRate}%</p>
-                    <p className="text-sm text-muted-foreground">Accepted vs. decided quotes.</p>
-                  </div>
-                </div>
-              </Panel>
-            </div>
-          </>
-        )}
-
-        {showOnboarding && (
-          <CreatorOnboardingModal
-            isOpen={showOnboarding}
-            onClose={() => {
-              setShowOnboarding(false);
-              setOnboardingDismissed(true);
-            }}
-            onComplete={() => {
-              setShowOnboarding(false);
-              setOnboardingDismissed(true);
-            }}
-            onDismiss={() => {
-              setShowOnboarding(false);
-              setOnboardingDismissed(true);
-            }}
-          />
-        )}
-
-        {showDashboardTour && (
-          <DashboardTour onClose={() => setShowDashboardTour(false)} />
-        )}
+            <Panel eyebrow="Priority queue" title="Needs your attention" className="xl:sticky xl:top-20 xl:self-start"><div className="divide-y divide-border/50">
+              {stats.attention.overdueInvoices > 0 && <AttentionItem urgent icon={<Receipt className="h-4 w-4" />} title="Overdue invoices" detail={`${stats.attention.overdueInvoices} past due · follow up`} count={stats.attention.overdueInvoices} href="/admin/invoices?status=overdue" />}
+              {(stats.quotes.statuses.draft || 0) + (stats.quotes.statuses.sent || 0) > 0 && <AttentionItem icon={<FileText className="h-4 w-4" />} title="Quotes awaiting action" detail={`${stats.quotes.statuses.draft || 0} draft · ${stats.quotes.statuses.sent || 0} sent`} count={(stats.quotes.statuses.draft || 0) + (stats.quotes.statuses.sent || 0)} href="/admin/quotes" />}
+              {stats.attention.activeProjects > 0 && <AttentionItem icon={<LayoutDashboard className="h-4 w-4" />} title="Active projects" detail="Projects in production" count={stats.attention.activeProjects} href="/admin/projects?status=active" />}
+              {stats.attention.activeGalleries > 0 && <AttentionItem icon={<GalleryHorizontalEnd className="h-4 w-4" />} title="Active galleries" detail="Galleries live for clients" count={stats.attention.activeGalleries} href="/admin/galleries" />}
+              {!stats.attention.overdueInvoices && !stats.attention.pendingQuotes && !stats.attention.activeProjects && !stats.attention.activeGalleries && <div className="px-4 py-8 text-center"><CheckCircle2 className="mx-auto h-9 w-9 text-emerald-600" /><p className="mt-3 text-sm font-medium">All caught up</p><p className="mt-1 text-sm text-muted-foreground">Nothing needs your attention now.</p></div>}
+            </div></Panel>
+          </div>
+          <Panel className="mb-6" eyebrow="Business pulse" title={`Performance ${rangeLabels[range]}`}><div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 gap-3">
+            <MetricCard label="Quoted" value={formatCurrency(stats.finance.periodQuotedValue)} detail="In selected period" href="/admin/quotes" icon={<FileText className="h-4 w-4" />} />
+            <MetricCard label="Invoiced" value={formatCurrency(stats.finance.periodInvoicedValue)} detail={`${stats.overview.newInvoices} new invoices`} href="/admin/invoices" icon={<Receipt className="h-4 w-4" />} />
+            <MetricCard label="Collected" value={formatCurrency(stats.finance.periodPaidValue)} detail="Payments received" href="/admin/invoices" icon={<Wallet className="h-4 w-4" />} trend={{ value: invoicePaidRate, label: 'paid rate' }} />
+            <MetricCard label="Active projects" value={formatNumber(stats.overview.activeProjects)} detail="In production" href="/admin/projects" icon={<LayoutDashboard className="h-4 w-4" />} />
+            <MetricCard label="Quote pipeline" value={formatCurrency(stats.finance.acceptedQuoteValue)} detail={`${stats.quotes.conversionRate}% conversion`} href="/admin/quotes" icon={<CheckCircle2 className="h-4 w-4" />} />
+            <MetricCard label="Overdue invoices" value={formatNumber(stats.finance.overdueInvoices)} detail="Past due" href="/admin/invoices?status=overdue" icon={<Clock3 className="h-4 w-4" />} />
+          </div></Panel>
+          {['30d', '90d', '12m'].includes(range) && <Panel className="mb-6" eyebrow="Collected revenue" title="Revenue trend · 12 months"><RevenueTrendChart data={stats.revenueTrend ?? []} /></Panel>}
+          <div className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(18rem,0.65fr)] 2xl:gap-6"><Panel eyebrow="Workspace" title="Recent activity"><div className="divide-y divide-border/50">{stats.activity.length ? stats.activity.map(item => <ActivityRow key={item.id} {...item} />) : <div className="py-8 text-center text-sm text-muted-foreground">No activity yet. Create a client, project, or quote to get started.</div>}</div></Panel>
+            <Panel eyebrow="Commercial health" title="Quote pipeline"><div className="space-y-4">{([['Draft', Number(stats.quotes.statuses.draft || 0)], ['Sent', Number(stats.quotes.statuses.sent || 0)], ['Accepted', Number(stats.quotes.statuses.accepted || 0)], ['Rejected', Number(stats.quotes.statuses.rejected || 0)], ['Invoiced', Number(stats.quotes.statuses.invoiced || 0)]] as Array<[string, number]>).filter(([, value]) => value > 0).map(([label, value]) => <div key={label}><div className="mb-1.5 flex justify-between text-xs"><span className="text-muted-foreground">{label}</span><span className="font-semibold">{formatNumber(value)}</span></div><div className="h-1.5 overflow-hidden rounded-full bg-muted"><div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, Math.round(value / Math.max(stats.overview.quotes, 1) * 100))}%` }} /></div></div>)}<Separator /><p className="text-xs text-muted-foreground">Conversion</p><p className="text-2xl font-semibold">{stats.quotes.conversionRate}%</p><p className="text-sm text-muted-foreground">Accepted vs. decided quotes.</p></div></Panel></div>
+        </>}
+        {showOnboarding && <CreatorOnboardingModal isOpen={showOnboarding} onClose={() => { setShowOnboarding(false); setOnboardingDismissed(true); }} onComplete={() => { setShowOnboarding(false); setOnboardingDismissed(true); }} onDismiss={() => { setShowOnboarding(false); setOnboardingDismissed(true); }} />}
+        {showDashboardTour && <DashboardTour onClose={() => setShowDashboardTour(false)} />}
       </div>
     </main>
   );

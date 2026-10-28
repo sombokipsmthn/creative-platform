@@ -5,19 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Input, Textarea } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  FileText,
-  Loader2,
-  Plus,
-  Printer,
-  RefreshCw,
-  Save,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, FileText, CircleNotch as Loader2, Plus, Printer, ArrowsClockwise as RefreshCw, FloppyDisk as Save, Trash as Trash2, X } from "@phosphor-icons/react";
 
 type Client = {
   id: string;

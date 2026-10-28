@@ -4,18 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BriefcaseBusiness,
-  Check,
-  ImagePlus,
-  Loader2,
-  Plus,
-  Trash2,
-  UserRound,
-  X,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Briefcase as BriefcaseBusiness, Check, ImageSquare as ImagePlus, CircleNotch as Loader2, Plus, Trash as Trash2, UserCircle as UserRound, X } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

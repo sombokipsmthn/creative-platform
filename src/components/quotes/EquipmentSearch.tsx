@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Loader2 } from 'lucide-react';
+import { MagnifyingGlass as Search, X, CircleNotch as Loader2 } from "@phosphor-icons/react";
 
 type Equipment = {
   id: string;

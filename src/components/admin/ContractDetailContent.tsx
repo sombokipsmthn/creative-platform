@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import {
-  FilePlus,
-  Loader2,
-} from 'lucide-react';
+import { FilePlus, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
 import { formatCurrency } from '@/lib/utils';
 import type { Contract, ContractEvent } from '@/lib/types/contracts';

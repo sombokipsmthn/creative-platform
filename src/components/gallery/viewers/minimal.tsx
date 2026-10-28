@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Download, Heart } from 'lucide-react';
+import { GalleryMedia } from './media';
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Download, Heart } from "@phosphor-icons/react";
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 import { Button } from '@/components/ui/button';
@@ -86,8 +86,10 @@ export function GalleryViewerMinimal({
         <div className="mb-8 flex items-center justify-center">
           <div className="relative w-full max-w-2xl">
             <div className="relative aspect-auto overflow-hidden bg-gray-100">
-              <Image
+              <GalleryMedia
                 src={currentPhoto.displayUrl}
+                poster={currentPhoto.thumbnailUrl}
+                mimeType={currentPhoto.mimeType}
                 alt={currentPhoto.filename}
                 width={currentPhoto.width || 1200}
                 height={currentPhoto.height || 800}
@@ -168,8 +170,9 @@ export function GalleryViewerMinimal({
                   idx === currentIndex ? 'ring-2 ring-black' : 'opacity-60 hover:opacity-100'
                 }`}
               >
-                <Image
+                <GalleryMedia
                   src={photo.thumbnailUrl}
+                  mimeType={photo.mimeType?.startsWith('video/') ? 'image/jpeg' : photo.mimeType}
                   alt={`Thumbnail ${idx + 1}`}
                   fill
                   className="object-cover"

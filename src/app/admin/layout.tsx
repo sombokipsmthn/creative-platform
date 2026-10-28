@@ -3,22 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Users,
-  FolderKanban,
-  GalleryHorizontalEnd,
-  FileText,
-  Receipt,
-  WalletCards,
-  Calendar,
-  FileSignature,
-  Settings2,
-  Sparkles,
-  ExternalLink,
-  Menu,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { SquaresFour as LayoutDashboard, Users, FolderSimple as FolderKanban, Images as GalleryHorizontalEnd, FileText, Receipt, Wallet as WalletCards, Calendar, Signature as FileSignature, SlidersHorizontal as Settings2, Sparkle as Sparkles, ArrowSquareOut as ExternalLink, List as Menu } from "@phosphor-icons/react";
+import type { Icon } from '@phosphor-icons/react';
 
 import { authClient } from '@/lib/auth-client';
 import ProfileMenu from '@/components/ProfileMenu';
@@ -27,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { CommandPalette } from '@/components/ui/command-palette';
+import { KeyboardShortcuts } from '@/components/ui/keyboard-shortcuts';
 import {
   SplitViewProvider,
   useSplitView,
@@ -45,7 +33,7 @@ async function fetchBadgeCounts(): Promise<Record<string, number>> {
 interface NavItem {
   name: string;
   href: string;
-  icon: LucideIcon;
+  icon: Icon;
 }
 
 interface NavSection {
@@ -311,9 +299,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex border-sidebar-border/80">
         <SidebarContent pathname={pathname} badgeCounts={badgeCounts} portfolioHref={portfolioHref} />
       </aside>
+
+      {/* Command Palette */}
+      <CommandPalette />
 
       {/* Main Workspace Area */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
@@ -361,6 +352,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-2">
+            <KeyboardShortcuts />
             <ThemeToggle compact />
             <Separator orientation="vertical" className="h-5 mx-1" />
             <ProfileMenu showLabel />

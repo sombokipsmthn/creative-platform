@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, ArrowRight, MapPin } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MapPin } from "@phosphor-icons/react";
 import Header from '@/components/header';
 import ThemeToggle from '@/components/ThemeToggle';
 

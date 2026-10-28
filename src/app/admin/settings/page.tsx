@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowRight, ExternalLink, UserRound, BriefcaseBusiness, ShieldCheck, Settings, Image, Globe, CreditCard, Bell, Key, Mail, Smartphone, Loader2, X, Check, Plus, ImageIcon, Sparkles } from 'lucide-react';
+import { ArrowRight, ArrowSquareOut as ExternalLink, UserCircle as UserRound, Briefcase as BriefcaseBusiness, ShieldCheck, Gear as Settings, Image, Globe, CreditCard, Bell, Key, Envelope as Mail, DeviceMobile as Smartphone, CircleNotch as Loader2, X, Check, Plus, Image as ImageIcon, Sparkle as Sparkles } from "@phosphor-icons/react";
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

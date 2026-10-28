@@ -2,22 +2,17 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  ArrowUpRight,
-  CheckCircle2,
-  FilePlus,
-  FileSignature,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Trash2,
-} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowUpRight, CheckCircle as CheckCircle2, FilePlus, Signature as FileSignature, CircleNotch as Loader2, Plus, ArrowsClockwise as RefreshCw, Trash as Trash2 } from "@phosphor-icons/react";
 
 import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import StatusBadge from '@/components/admin/StatusBadge';
+import StatCards from '@/components/admin/StatCards';
 
 type Contract = {
   id: string;
@@ -50,6 +45,7 @@ type Stats = {
 };
 
 export default function ContractsPage() {
+  const router = useRouter();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [stats, setStats] = useState<Stats>({
@@ -128,36 +124,6 @@ export default function ContractsPage() {
     void loadContracts();
   }, [loadContracts]);
 
-  function formatStatus(status: string) {
-    return status
-      .split('_')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-  }
-
-  function getStatusBadgeClass(status: string) {
-    switch (status) {
-      case 'draft':
-        return 'ui-badge';
-      case 'sent':
-        return 'ui-badge ui-badge-accent';
-      case 'viewed':
-        return 'ui-badge ui-badge-accent';
-      case 'awaiting_signature':
-        return 'ui-badge ui-badge-info';
-      case 'signed':
-        return 'ui-badge ui-badge-success';
-      case 'declined':
-        return 'ui-badge ui-badge-danger';
-      case 'expired':
-        return 'ui-badge ui-badge-warning';
-      case 'cancelled':
-        return 'ui-badge ui-badge-danger';
-      default:
-        return 'ui-badge';
-    }
-  }
-
   return (
     <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -167,7 +133,9 @@ export default function ContractsPage() {
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           primaryAction={
             <Button
+              type="button"
               variant="primary"
+              onClick={() => setIsCreateOpen(true)}
               className="text-xs font-sans uppercase tracking-widest"
             >
               <Plus className="h-3.5 w-3.5" />
@@ -177,8 +145,9 @@ export default function ContractsPage() {
         />
 
         {error && !loading && (
-          <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+          <div className="flex flex-col gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 sm:flex-row sm:items-center sm:justify-between" role="alert">
+            <p className="text-sm text-destructive">{error}</p>
+            <Button type="button" variant="outline" size="sm" onClick={() => void loadContracts()}>Retry</Button>
           </div>
         )}
 
@@ -190,72 +159,21 @@ export default function ContractsPage() {
           </div>
           <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
             <Button type="button" variant="secondary" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-            <Button type="button" onClick={() => window.location.assign('/admin/contracts/new')}>Continue to contract builder <ArrowUpRight aria-hidden="true" /></Button>
+            <Button type="button" onClick={() => router.push('/admin/contracts/builder')}>Continue to contract builder <ArrowUpRight aria-hidden="true" /></Button>
           </div>
         </StandardCreationDialog>
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Total Contracts</p>
-            <p className="text-2xl font-bold">{stats.total}</p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Drafts</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {stats.draft}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Sent</p>
-            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-              {stats.sent}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Viewed</p>
-            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
-              {stats.viewed}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Awaiting Signature</p>
-            <p className="text-2xl font-bold text-primary dark:text-primary">
-              {stats.awaiting_signature}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Signed</p>
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              {stats.signed}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Declined</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {stats.declined}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Expired</p>
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-              {stats.expired}
-            </p>
-          </div>
-
-          <div className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Cancelled</p>
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-              {stats.cancelled}
-            </p>
-          </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
+          <StatCards
+            stats={[
+              { label: 'Total Contracts', value: String(stats.total), detail: '', color: 'default' },
+              { label: 'Drafts', value: String(stats.draft), detail: '', color: 'default' },
+              { label: 'Sent', value: String(stats.sent), detail: '', color: 'accent' },
+              { label: 'Awaiting Signature', value: String(stats.awaiting_signature), detail: '', color: 'info' },
+            ]}
+            columns={4}
+          />
         </div>
 
         {/* Admin Resource Toolbar */}
@@ -320,41 +238,66 @@ export default function ContractsPage() {
         {/* TABLE */}
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           {loading ? (
-            <div className="flex items-center justify-center p-12">
-              <p className="text-xs font-sans uppercase tracking-widest">
-                Loading contracts…
-              </p>
+            <div className="space-y-4 p-6" role="status" aria-label="Loading contracts">
+              <span className="sr-only">Loading contracts…</span>
+              {[0, 1, 2, 3, 4].map((row) => <div key={row} className="flex gap-4">{[0, 1, 2, 3, 4].map((column) => <Skeleton key={column} className="h-8 flex-1" />)}</div>)}
             </div>
           ) : contracts.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-12 text-center p-12">
+            <div className="rounded-xl border border-dashed p-8 text-center sm:p-12">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <FilePlus className="h-6 w-6" />
               </div>
 
-              <h2 className="text-2xl font-semibold tracking-tight">No contracts yet</h2>
+              <h2 className="mt-4 text-xl font-semibold tracking-tight">{Number(stats.total) === 0 ? 'No contracts yet' : 'No matching contracts'}</h2>
 
-              <p className="text-sm text-muted-foreground">
-                Create your first contract or browse templates.
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                {Number(stats.total) === 0
+                  ? 'Create a contract or browse templates to get started.'
+                  : 'Try changing your search or filters to find a contract.'}
               </p>
 
-              <div className="flex justify-center mt-4">
-                <Button
-                  variant="primary"
-                  className="mt-6"
-                >
-                  Create First Contract
-                </Button>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                {Number(stats.total) === 0 ? (
+                  <>
+                    <Button type="button" variant="primary" onClick={() => setIsCreateOpen(true)}>
+                      Create first contract
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => window.location.assign('/admin/contracts/templates')}>
+                      Browse templates
+                    </Button>
+                  </>
+                ) : (
+                  <Button type="button" variant="outline" onClick={() => { setSearch(''); setStatus('all'); setClientId('all'); }}>
+                    Clear filters
+                  </Button>
+                )}
               </div>
             </div>
           ) : (
             <AdminDataTable
               rows={contracts}
               getRowLabel={(contract) => contract.title}
+              mobileCard={(contract, actions) => (
+                <div className="min-w-0 space-y-3">
+                  <div className="flex min-w-0 items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-medium">{contract.title}</p>
+                      <p className="break-all text-xs text-muted-foreground">#{contract.contractNumber}</p>
+                    </div>
+                    {actions}
+                  </div>
+                  <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm">
+                    <span className="min-w-0 break-words">{contract.clientName}</span>
+                    <StatusBadge status={contract.status} />
+                  </div>
+                  {contract.projectName && <p className="break-words text-xs text-muted-foreground">{contract.projectName}</p>}
+                </div>
+              )}
               columns={[
                 { id: 'contract', header: 'Contract', cell: (contract) => <div><p className="font-medium">{contract.title}</p><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></div>, accessor: (contract) => contract.title, sortable: true },
                 { id: 'client', header: 'Client', accessor: (contract) => contract.clientName },
                 { id: 'project', header: 'Project', accessor: (contract) => contract.projectName || 'None', hideOnMobile: true },
-                { id: 'status', header: 'Status', cell: (contract) => <span className={getStatusBadgeClass(contract.status)}>{formatStatus(contract.status)}</span>, accessor: (contract) => contract.status },
+                { id: 'status', header: 'Status', cell: (contract) => <StatusBadge status={contract.status} />, accessor: (contract) => contract.status },
                 { id: 'created', header: 'Created', cell: (contract) => new Date(contract.createdAt).toLocaleDateString(), accessor: (contract) => contract.createdAt, hideOnMobile: true },
                 { id: 'signed', header: 'Signed', cell: (contract) => contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '—', accessor: (contract) => contract.signedAt, hideOnMobile: true },
               ]}

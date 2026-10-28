@@ -1,6 +1,6 @@
 'use client'
 
-import { Layers, Sliders, Star, Settings, Heart, Palette } from 'lucide-react'
+import { Stack as Layers, Sliders, Star, Gear as Settings, Heart, Palette } from "@phosphor-icons/react"
 
 interface SidebarTab {
   type: string

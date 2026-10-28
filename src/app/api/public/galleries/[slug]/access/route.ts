@@ -30,7 +30,8 @@ export async function POST(
         id,
         client_id,
         access_pin,
-        expires_at
+        expires_at,
+        status
       FROM galleries
       WHERE (slug = ${slug} OR id::text = ${slug})
       LIMIT 1
@@ -56,6 +57,10 @@ export async function POST(
         },
         { status: 410 },
       );
+    }
+
+    if (gallery.status !== "published") {
+      return NextResponse.json({ error: "Gallery is not published." }, { status: 404 });
     }
 
     const configuredPin =

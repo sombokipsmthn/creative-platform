@@ -4,31 +4,10 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import {
-  Activity,
-  Archive,
-  CheckCircle2,
-  Clock,
-  Copy,
-  Download,
-  ExternalLink,
-  Eye,
-  Heart,
-  ImageIcon,
-  LayoutGrid,
-  List,
-  MessageSquare,
-  Plus,
-  RefreshCw,
-  Settings,
-  Share2,
-  Sliders,
-  Sparkles,
-  Trash2,
-  Users,
-} from 'lucide-react';
+import { ActivityIcon as Activity, CheckCircle as CheckCircle2, Clock, Copy, Download, ArrowSquareOut as ExternalLink, Eye, Heart, Image as ImageIcon, GridFour as LayoutGrid, List, ChatText as MessageSquare, Plus, ArrowsClockwise as RefreshCw, Gear as Settings, ShareNetwork as Share2, Sliders, Sparkle as Sparkles, Trash as Trash2, Users } from "@phosphor-icons/react";
 
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { StandardCreationDialog } from '@/components/admin/StandardCreationDialog';
 import { SelectCompat } from '@/components/ui/select-compat';
 import { Button } from '@/components/ui/button';
@@ -100,15 +79,53 @@ export default function AdminGalleryManagerPage() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'draft' | 'published'>('all');
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [galleryView, setGalleryView] = useState<'grid' | 'list'>('grid');
+  const [savedViews, setSavedViews] = useState<Array<{ id: string; name: string; search: string; status: 'all' | 'draft' | 'published'; category: string }>>([]);
+  const [activeSavedViewId, setActiveSavedViewId] = useState('');
 
   useEffect(() => {
     const savedView = window.localStorage.getItem('kipsmthn-gallery-view');
     if (savedView === 'grid' || savedView === 'list') setGalleryView(savedView);
+    try {
+      const storedFilters = window.localStorage.getItem('creative-platform:galleries:saved-filters');
+      if (storedFilters) setSavedViews(JSON.parse(storedFilters));
+    } catch {
+      window.localStorage.removeItem('creative-platform:galleries:saved-filters');
+    }
+
+    if (new URLSearchParams(window.location.search).get('new') === 'true') {
+      setActiveTab('create');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
   }, []);
 
   function changeGalleryView(view: 'grid' | 'list') {
     setGalleryView(view);
     window.localStorage.setItem('kipsmthn-gallery-view', view);
+  }
+
+  function saveCurrentFilter() {
+    const name = window.prompt('Name this gallery filter');
+    if (!name?.trim()) return;
+    const view = { id: `gallery-filter-${Date.now()}`, name: name.trim(), search: searchQuery, status: filterStatus, category: filterCategory };
+    const next = [...savedViews, view];
+    setSavedViews(next);
+    setActiveSavedViewId(view.id);
+    window.localStorage.setItem('creative-platform:galleries:saved-filters', JSON.stringify(next));
+  }
+
+  function applySavedFilter(id: string) {
+    setActiveSavedViewId(id);
+    const view = savedViews.find((item) => item.id === id);
+    setSearchQuery(view?.search ?? '');
+    setFilterStatus(view?.status ?? 'all');
+    setFilterCategory(view?.category ?? 'all');
+  }
+
+  function deleteSavedFilter(id: string) {
+    const next = savedViews.filter((item) => item.id !== id);
+    setSavedViews(next);
+    if (activeSavedViewId === id) setActiveSavedViewId('');
+    window.localStorage.setItem('creative-platform:galleries:saved-filters', JSON.stringify(next));
   }
 
   // Form states for creating new gallery
@@ -320,61 +337,17 @@ export default function AdminGalleryManagerPage() {
       )}
 
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* Header Bar */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 pb-2">
-          <div className="space-y-1">
-            <Link
-              href="/admin"
-              className="ui-meta uppercase tracking-widest text-slate-400 hover:text-[var(--color-accent)] transition-colors flex items-center gap-2"
-            >
-              <Archive className="w-3 h-3" />
-              <span>Back to Studio</span>
-            </Link>
-
-            <div className="flex items-center gap-4">
-              <h1 className="ui-page-title text-4xl">
-                Galleries
-              </h1>
-              {isRefreshing && (
-                <RefreshCw className="w-4 h-4 text-primary animate-spin opacity-50" />
-              )}
-            </div>
-
-            <p className="ui-body font-sans text-xs">
-              Manage client delivery, proofing & digital delivery portals.
-            </p>
-          </div>
-
-          {/* Tab Navigation Buttons */}
-          <div className="ui-tab-pills">
-            <button
-              onClick={() => setActiveTab('all')}
-              className={`ui-tab-pill flex items-center gap-2 ${activeTab === 'all' ? 'ui-tab-pill-active' : ''}`}
-            >
-              <ImageIcon className="w-3.5 h-3.5" />
-              All Galleries
-            </button>
-
-            <button
-              onClick={() => setActiveTab('activity')}
-              className={`ui-tab-pill flex items-center gap-2 relative ${activeTab === 'activity' ? 'ui-tab-pill-active' : ''}`}
-            >
-              <Activity className="w-3.5 h-3.5" />
-              Activity
-              {activities.length > 0 && activeTab !== 'activity' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse" />
-              )}
-            </button>
-
-            <button
-              onClick={() => setActiveTab('create')}
-              className={`ui-tab-pill flex items-center gap-2 ${activeTab === 'create' ? 'ui-tab-pill-active' : ''}`}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              New Gallery
-            </button>
-          </div>
-        </div>
+        <AdminPageHeader
+          title="Galleries"
+          description="Manage client delivery, proofing & digital delivery portals."
+          breadcrumb={{ label: 'Back to Studio', href: '/admin' }}
+          className="mb-8"
+          tabs={[
+            { label: 'All Galleries', active: activeTab === 'all', onClick: () => setActiveTab('all') },
+            { label: 'Activity', active: activeTab === 'activity', onClick: () => setActiveTab('activity') },
+            { label: 'New Gallery', active: activeTab === 'create', onClick: () => setActiveTab('create') },
+          ]}
+        />
 
         {errorMessage && (
           <div className="ui-alert ui-alert-error">
@@ -452,8 +425,18 @@ export default function AdminGalleryManagerPage() {
                 loading={isLoading}
               />
 
+              <div className="flex flex-wrap items-center gap-2">
+                <label className="sr-only" htmlFor="gallery-saved-filter">Saved gallery filters</label>
+                <select id="gallery-saved-filter" value={activeSavedViewId} onChange={(event) => applySavedFilter(event.target.value)} className="ui-select h-9 min-w-40 max-w-full text-sm">
+                  <option value="">Current filters</option>
+                  {savedViews.map((view) => <option key={view.id} value={view.id}>{view.name}</option>)}
+                </select>
+                <Button type="button" variant="outline" size="sm" onClick={saveCurrentFilter}>Save filters</Button>
+                {activeSavedViewId && <Button type="button" variant="ghost" size="sm" onClick={() => deleteSavedFilter(activeSavedViewId)}>Delete saved filter</Button>}
+              </div>
+
               {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
                   {[1, 2, 3, 4, 5, 6].map((i) => (
                     <div
                       key={i}
@@ -502,11 +485,9 @@ export default function AdminGalleryManagerPage() {
                   ]}
                 />
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-16">
+                <div className="grid grid-cols-2 gap-3 pb-16 sm:gap-5 lg:grid-cols-3 lg:gap-6">
                   {filteredGalleries.map((gal) => {
-                    const fallbackCover =
-                      'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1000&q=80';
-                    const coverSrc = gal.cover_url || fallbackCover;
+                    const coverSrc = gal.cover_url || '/og-image.svg';
 
                     return (
                       <div

@@ -2,15 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  ArrowLeft,
-  Check,
-  Loader2,
-  AlertCircle,
-  Save,
-  Send,
-  Copy,
-} from 'lucide-react';
+import { ArrowLeft, Check, CircleNotch as Loader2, WarningCircle as AlertCircle, FloppyDisk as Save, PaperPlaneTilt as Send, Copy } from "@phosphor-icons/react";
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 import type { Contract, ContractTemplate, Client, Project } from '@/lib/types/contracts';
@@ -87,7 +79,6 @@ export function ContractBuilder({
   useEffect(() => {
     if (templateId && templatesQuery.data && !template) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (found) setTemplate(found);
     }
   }, [templateId, templatesQuery.data, template]);
@@ -165,9 +156,8 @@ export function ContractBuilder({
       newValues.effective_date = new Date().toISOString().slice(0, 10);
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setValues(newValues);
-  }, [template, selectedClient, selectedProject]);
+  }, [template, selectedClient, selectedProject, values]);
 
   // Get required fields for this template
   const requiredFields = useMemo(() => {

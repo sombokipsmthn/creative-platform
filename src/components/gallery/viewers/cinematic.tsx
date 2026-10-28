@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Download, Heart, ChevronDown } from 'lucide-react';
+import { GalleryMedia } from './media';
+import { Download, Heart, CaretDown as ChevronDown } from "@phosphor-icons/react";
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
 import { Button } from '@/components/ui/button';
@@ -96,8 +96,10 @@ export function GalleryViewerCinematic({
     <div className="relative min-h-screen overflow-hidden bg-black">
       {/* Full-screen Image */}
       <div className="absolute inset-0">
-        <Image
+        <GalleryMedia
           src={currentPhoto.displayUrl}
+          poster={currentPhoto.thumbnailUrl}
+          mimeType={currentPhoto.mimeType}
           alt={currentPhoto.filename}
           fill
           className="object-cover transition-opacity duration-1000"

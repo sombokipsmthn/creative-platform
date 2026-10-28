@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Loader2, PackagePlus, Plus, RefreshCw, Search } from 'lucide-react';
+import { CircleNotch as Loader2, Package as PackagePlus, Plus, ArrowsClockwise as RefreshCw, MagnifyingGlass as Search } from "@phosphor-icons/react";
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

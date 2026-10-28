@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
-import { Search, X, ChevronDown, Filter, Check, LayoutList, LayoutGrid, RefreshCw, Settings, Download, Columns } from 'lucide-react';
+import { MagnifyingGlass as Search, X, CaretDown as ChevronDown, Funnel as Filter, Check, ListBullets as LayoutList, GridFour as LayoutGrid, ArrowsClockwise as RefreshCw, Gear as Settings, Download, Columns } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {

@@ -392,6 +392,7 @@ export const equipment = pgTable("equipment", {
   subcategory: text("subcategory"),
   brand: text("brand"),
   specs: text("specs"),
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
 

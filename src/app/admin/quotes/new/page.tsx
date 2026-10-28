@@ -1990,21 +1990,33 @@ export default function NewQuotePage() {
                                 onChange={(
                                   event
                                 ) => {
+                                  const description =
+                                    event.target.value;
+
+                                  // Keep the typed description on the quote item
+                                  // immediately so custom crew, transport, and
+                                  // other line items pass required-description validation.
+                                  setItems((current) =>
+                                    current.map((currentItem) =>
+                                      currentItem.id === item.id
+                                        ? {
+                                            ...currentItem,
+                                            description,
+                                            type: "custom",
+                                            equipmentId: "",
+                                          }
+                                        : currentItem
+                                    )
+                                  );
+
                                   setDescriptionSearch(
-                                    (
-                                      current
-                                    ) => ({
+                                    (current) => ({
                                       ...current,
-                                      [item.id]:
-                                        event
-                                          .target
-                                          .value,
+                                      [item.id]: description,
                                     })
                                   );
 
-                                  setOpenDescriptionSearch(
-                                    item.id
-                                  );
+                                  setOpenDescriptionSearch(item.id);
                                 }}
                                 disabled={
                                   !item.category
@@ -2040,6 +2052,47 @@ export default function NewQuotePage() {
                                         found
                                       </span>
                                     </div>
+
+                                    {searchValue.trim() && (
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const description = searchValue.trim();
+
+                                          setItems((current) =>
+                                            current.map((currentItem) =>
+                                              currentItem.id === item.id
+                                                ? {
+                                                    ...currentItem,
+                                                    description,
+                                                    type: "custom",
+                                                    equipmentId: "",
+                                                  }
+                                                : currentItem
+                                            )
+                                          );
+
+                                          setDescriptionSearch((current) => ({
+                                            ...current,
+                                            [item.id]: description,
+                                          }));
+                                          setOpenDescriptionSearch(null);
+                                        }}
+                                        className="flex w-full items-center justify-between gap-3 border-b border-slate-100 bg-primary/5 px-4 py-3 text-left transition hover:bg-primary/10 dark:border-zinc-900"
+                                      >
+                                        <span className="min-w-0">
+                                          <span className="block text-xs font-medium text-slate-900 dark:text-white">
+                                            Use custom description
+                                          </span>
+                                          <span className="mt-1 block truncate text-xs text-slate-500 dark:text-zinc-400">
+                                            {searchValue.trim()}
+                                          </span>
+                                        </span>
+                                        <span className="shrink-0 text-[10px] font-medium uppercase tracking-wider text-primary">
+                                          Use text
+                                        </span>
+                                      </button>
+                                    )}
 
                                     <div className="max-h-80 overflow-y-auto">
                                       {options.length ===

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { GALLERY_THEMES, type GalleryThemePreset, type GalleryThemeId } from '@/lib/gallery/themes'
-import { ChevronRight } from 'lucide-react'
+import { CaretRight as ChevronRight } from "@phosphor-icons/react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 interface ThemeEditorProps {

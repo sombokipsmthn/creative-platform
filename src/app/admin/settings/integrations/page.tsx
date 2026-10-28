@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authClient } from '@/lib/auth-client';
-import { Plug2, Loader2, Key, Globe, Database, CreditCard, MessageCircle } from 'lucide-react';
+import { Plug as Plug2, CircleNotch as Loader2, Key, Globe, Database, CreditCard, ChatCircle as MessageCircle } from "@phosphor-icons/react";
 
 interface Integration {
   integrationKey: string;

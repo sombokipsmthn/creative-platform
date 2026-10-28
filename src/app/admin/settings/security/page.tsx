@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authClient } from '@/lib/auth-client';
-import { Smartphone, Monitor, Key, Loader2 } from 'lucide-react';
+import { DeviceMobile as Smartphone, Monitor, Key, CircleNotch as Loader2 } from "@phosphor-icons/react";
 
 export default function AdminSecurityPage() {
   const queryClient = useQueryClient();

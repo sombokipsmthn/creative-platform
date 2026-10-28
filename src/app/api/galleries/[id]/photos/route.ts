@@ -743,6 +743,7 @@ export async function DELETE(
       const result =
         await db.execute(sql`
           SELECT
+            storage_path,
             original_path,
             display_path,
             thumbnail_path,
@@ -760,12 +761,13 @@ export async function DELETE(
         continue;
       }
 
-      for (const path of [
+      for (const path of new Set([
+        photo.storage_path,
         photo.original_path,
         photo.display_path,
         photo.thumbnail_path,
         photo.watermark_path,
-      ]) {
+      ].filter(Boolean).map(String))) {
         if (path) {
           try {
             await storage.deleteObject(

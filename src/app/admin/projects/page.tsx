@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, RefreshCw, Star, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Eye, EyeSlash as EyeOff, Envelope as Mail, MapPin, Phone, ArrowsClockwise as RefreshCw, Star, Trash as Trash2 } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { Loader2Icon } from 'lucide-react';
+import { CircleNotch as Loader2Icon } from "@phosphor-icons/react";
 import { fetchContractEvents } from '@/lib/api/contracts';
 
 type ContractEventsProps = {

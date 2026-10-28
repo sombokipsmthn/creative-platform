@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Loader2, AlertCircle, Check, RotateCcw, X } from 'lucide-react'
+import { CircleNotch as Loader2, WarningCircle as AlertCircle, Check, ArrowCounterClockwise as RotateCcw, X } from "@phosphor-icons/react"
 import Image from 'next/image'
 import { GALLERY_THEMES, type GalleryThemeId, getGalleryTheme } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'

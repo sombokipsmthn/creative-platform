@@ -5,7 +5,7 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { isLocalAuthBypassEnabled } from "@/lib/auth/local-bypass";
 
-const DEV_EMAIL = "dev-admin@localhost.test";
+const LOCAL_EMAIL = (process.env.DEMO_CREATOR_EMAIL || "dev-admin@localhost.test").trim().toLowerCase();
 
 export async function getCurrentUser() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -23,7 +23,7 @@ export async function getCurrentUserFromRequest(request: Request) {
 
   if (hasBypassCookie && isLocalAuthBypassEnabled(request)) {
     const devUser = await db.query.users.findFirst({
-      where: eq(users.email, DEV_EMAIL)
+      where: eq(users.email, LOCAL_EMAIL)
     });
     return devUser ?? null;
   }

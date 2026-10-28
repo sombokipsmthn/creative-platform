@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
-import { LogIn, LogOut } from "lucide-react";
+import { SignIn as LogIn, SignOut as LogOut } from "@phosphor-icons/react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 

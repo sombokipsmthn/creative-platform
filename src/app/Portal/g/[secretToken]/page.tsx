@@ -3,7 +3,7 @@
 
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Lock } from 'lucide-react'
+import { Lock } from "@phosphor-icons/react"
 import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/components/gallery/viewers/wrapper'
 import { isValidThemeId } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'

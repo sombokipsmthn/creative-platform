@@ -3,19 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  FilePlus,
-  FileText,
-  Loader2,
-  Plus,
-  RefreshCw,
-  Trash2,
-} from 'lucide-react';
+import { ArrowRight, ArrowUpRight, CaretLeft as ChevronLeft, CaretRight as ChevronRight, CheckCircle as CheckCircle2, FilePlus, FileText, CircleNotch as Loader2, Plus, ArrowsClockwise as RefreshCw, Trash as Trash2 } from "@phosphor-icons/react";
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';

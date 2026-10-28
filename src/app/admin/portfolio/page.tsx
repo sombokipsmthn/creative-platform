@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { Copy, Eye, ExternalLink, GripVertical, Loader2, Save, Images } from "lucide-react";
+import { Copy, Eye, ArrowSquareOut as ExternalLink, DotsSixVertical as GripVertical, CircleNotch as Loader2, FloppyDisk as Save, Images } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

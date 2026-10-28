@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, AlertCircle, RefreshCw } from 'lucide-react'
+import { CircleNotch as Loader2, WarningCircle as AlertCircle, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react"
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Layers, Loader2, Palette, Plus, Settings, Upload, X, Copy, Trash2, Eye, EyeOff, Video } from 'lucide-react'
+import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Eye, EyeSlash as EyeOff, Video } from "@phosphor-icons/react"
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'

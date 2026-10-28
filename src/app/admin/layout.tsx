@@ -3,22 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Users,
-  FolderKanban,
-  GalleryHorizontalEnd,
-  FileText,
-  Receipt,
-  WalletCards,
-  Calendar,
-  FileSignature,
-  Settings2,
-  Sparkles,
-  ExternalLink,
-  Menu,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { SquaresFour as LayoutDashboard, Users, FolderSimple as FolderKanban, Images as GalleryHorizontalEnd, FileText, Receipt, Wallet as WalletCards, Calendar, Signature as FileSignature, SlidersHorizontal as Settings2, Sparkle as Sparkles, ArrowSquareOut as ExternalLink, List as Menu } from "@phosphor-icons/react";
+import type { Icon } from '@phosphor-icons/react';
 
 import { authClient } from '@/lib/auth-client';
 import ProfileMenu from '@/components/ProfileMenu';
@@ -47,7 +33,7 @@ async function fetchBadgeCounts(): Promise<Record<string, number>> {
 interface NavItem {
   name: string;
   href: string;
-  icon: LucideIcon;
+  icon: Icon;
 }
 
 interface NavSection {

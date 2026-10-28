@@ -3,11 +3,7 @@
 import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {
-  FilePlus,
-  Loader2,
-  AlertCircle,
-} from 'lucide-react';
+import { FilePlus, CircleNotch as Loader2, WarningCircle as AlertCircle } from "@phosphor-icons/react";
 
 import { formatCurrency } from '@/lib/utils';
 import type { Contract, ContractEvent } from '@/lib/types/contracts';

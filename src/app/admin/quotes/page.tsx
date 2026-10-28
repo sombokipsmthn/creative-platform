@@ -184,8 +184,7 @@ export default function QuotesPage() {
         </div>
 
         {/* SUMMARY */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
-          <StatCards
+        <StatCards
             stats={[
               { label: 'Total Quotes', value: String(quotes.length), detail: 'New this period: 0', color: 'default' },
               { label: 'Accepted', value: String(acceptedQuotes), detail: '', color: 'success' },
@@ -194,7 +193,6 @@ export default function QuotesPage() {
             ]}
             columns={4}
           />
-        </div>
 
         {/* Admin Resource Toolbar */}
         <AdminResourceToolbar

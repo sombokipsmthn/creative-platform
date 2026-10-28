@@ -17,6 +17,7 @@ type Equipment = {
   subcategory?: string | null;
   brand?: string | null;
   specs?: string | null;
+  imageUrl?: string | null;
 };
 
 type DescriptionOption = {
@@ -27,6 +28,7 @@ type DescriptionOption = {
   category: string;
   subcategory?: string | null;
   brand?: string | null;
+  imageUrl?: string | null;
   rate: number;
   unit: string;
 };
@@ -584,6 +586,8 @@ export default function NewQuotePage() {
               equipmentItem.subcategory,
             brand:
               equipmentItem.brand,
+            imageUrl:
+              equipmentItem.imageUrl,
             rate:
               Number(
                 equipmentItem.dailyRate
@@ -2070,7 +2074,9 @@ export default function NewQuotePage() {
                                               className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900 border-b border-slate-100 dark:border-zinc-900 last:border-b-0 transition"
                                             >
                                               <div className="flex items-start justify-between gap-3">
-                                                <div className="min-w-0">
+                                                <div className="flex min-w-0 items-start gap-3">
+                                                  {option.type === "equipment" && (option.imageUrl ? <img src={option.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-10 w-10 shrink-0 rounded-md border border-slate-200 dark:border-zinc-800 bg-white object-contain" /> : <div className="h-10 w-10 shrink-0 rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900" />)}
+                                                  <div className="min-w-0">
                                                   <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                                                     {
                                                       option.label
@@ -2089,6 +2095,7 @@ export default function NewQuotePage() {
                                                       }`
                                                       : option.category}
                                                   </p>
+                                                  </div>
                                                 </div>
 
                                                 {option.rate >

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ArrowSquareOut as ExternalLink, UserCircle as UserRound, Briefcase as BriefcaseBusiness, ShieldCheck, Gear as Settings, Image, Globe, CreditCard, Bell, Key, Envelope as Mail, DeviceMobile as Smartphone, CircleNotch as Loader2, X, Check, Plus, Image as ImageIcon, Sparkle as Sparkles } from "@phosphor-icons/react";
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1303,23 +1304,43 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full min-w-0 max-w-7xl">
         <AdminPageHeader
           title="Settings"
           description="Configure your workspace, gallery delivery, client communications, and business preferences."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
-          tabs={tabConfig.map(tab => ({
-            label: tab.label,
-            active: activeTab === tab.id,
-            onClick: () => setActiveTab(tab.id),
-            icon: tab.icon,
-          }))}
+          className="w-full min-w-0"
         />
 
-        <form className="space-y-8">
-          {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
-          {renderTabContent()}
-        </form>
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(getSettingsTab(value))}
+          className="w-full min-w-0 gap-6"
+        >
+          <TabsList
+            variant="line"
+            aria-label="Settings sections"
+            className="admin-settings-tabs-list w-full min-w-0 justify-start overflow-x-auto rounded-none border-b border-border bg-transparent p-0"
+          >
+            {tabConfig.map((tab) => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="admin-settings-tab min-h-11 shrink-0 gap-2 rounded-none px-3 py-3 text-xs font-semibold uppercase tracking-wider"
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <form className="w-full min-w-0 space-y-8">
+            {saveMessage && <p role="status" className="text-sm text-muted-foreground">{saveMessage}</p>}
+            <TabsContent value={activeTab} className="mt-0 w-full min-w-0">
+              {renderTabContent()}
+            </TabsContent>
+          </form>
+        </Tabs>
       </div>
 
       {showOnboarding && (

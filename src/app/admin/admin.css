@@ -201,6 +201,82 @@
   height: var(--admin-control-height);
 }
 
+.admin-tabs {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--color-border-subtle);
+  scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* Settings uses the shared shadcn Tabs primitive with a full-width line variant. */
+[data-admin-content] .admin-settings-tabs-list {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 1.25rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  border-bottom: 1px solid var(--color-border-subtle);
+  scrollbar-width: none;
+}
+
+[data-admin-content] .admin-settings-tabs-list::-webkit-scrollbar {
+  display: none;
+}
+
+[data-admin-content] .admin-settings-tab {
+  flex: 0 0 auto;
+  min-height: 2.875rem;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+[data-admin-content] .admin-settings-tab:hover {
+  color: var(--color-text-primary);
+}
+
+[data-admin-content] .admin-settings-tab[data-active="true"],
+[data-admin-content] .admin-settings-tab[data-state="active"] {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.admin-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 0.125rem;
+  margin-bottom: -1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.admin-tab:hover {
+  color: var(--color-text-primary);
+}
+
+.admin-tab[data-active="true"] {
+  border-bottom-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 [data-admin-content] .ui-table-header {
   padding-top: 0.875rem;
   padding-bottom: 0.875rem;

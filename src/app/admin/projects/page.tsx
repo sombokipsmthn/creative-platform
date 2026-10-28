@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowUpRight, Eye, EyeOff, Mail, MapPin, Phone, RefreshCw, Star, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Eye, EyeSlash as EyeOff, Envelope as Mail, MapPin, Phone, ArrowsClockwise as RefreshCw, Star, Trash as Trash2 } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import {
@@ -15,7 +15,10 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import StatusBadge from '@/components/admin/StatusBadge';
+import StatCards from '@/components/admin/StatCards';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import type { SavedView } from '@/components/admin/AdminDataTable';
 
 type ProjectStatus = 'active' | 'completed' | 'on hold' | 'cancelled' | 'draft';
 
@@ -132,6 +135,67 @@ export default function AdminProjectsPage() {
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
+  // Saved views state
+  const [savedViews, setSavedViews] = useState<SavedView<Project>[]>([
+    { id: 'active-projects', name: 'Active Projects', filters: { status: 'active' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z', isDefault: true },
+    { id: 'featured-projects', name: 'Featured Projects', filters: { featured: 'true' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'public-projects', name: 'Public Projects', filters: { visibility: 'public' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+    { id: 'draft-projects', name: 'Draft Projects', filters: { status: 'draft' }, createdAt: '2026-01-01T00:00:00.000Z', updatedAt: '2026-01-01T00:00:00.000Z' },
+  ]);
+  const [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
+  const [activeViewId, setActiveViewId] = useState<string>('');
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem('creative-platform:projects:saved-views');
+      if (stored) setSavedViews(JSON.parse(stored) as SavedView<Project>[]);
+    } catch {
+      window.localStorage.removeItem('creative-platform:projects:saved-views');
+    } finally {
+      setSavedViewsLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (savedViewsLoaded) window.localStorage.setItem('creative-platform:projects:saved-views', JSON.stringify(savedViews));
+  }, [savedViews, savedViewsLoaded]);
+
+  function handleSaveView(view: Omit<SavedView<Project>, 'id'>) {
+    const newView: SavedView<Project> = {
+      ...view,
+      id: `view-${Date.now()}`,
+      filters: { status: filterStatus, client: filterClient, visibility: filterVisibility, featured: filterFeatured, search: searchQuery },
+      sort: view.sort,
+      columnVisibility: view.columnVisibility,
+    };
+    setSavedViews(prev => [...prev, newView]);
+    setActiveViewId(newView.id);
+  }
+
+  function handleDeleteView(viewId: string) {
+    setSavedViews(prev => prev.filter(v => v.id !== viewId));
+    if (activeViewId === viewId) setActiveViewId('');
+  }
+
+  function handleSetActiveView(viewId: string) {
+    setActiveViewId(viewId);
+    const view = savedViews.find(v => v.id === viewId);
+    if (view) {
+      setFilterStatus((view.filters.status as 'ALL' | ProjectStatus | undefined) ?? 'ALL');
+      setFilterClient((view.filters.client as string | null | undefined) ?? null);
+      setFilterVisibility((view.filters.visibility as 'ALL' | 'public' | 'private' | 'draft' | undefined) ?? 'ALL');
+      setFilterFeatured((view.filters.featured as 'ALL' | 'true' | 'false' | undefined) ?? 'ALL');
+      setSearchQuery((view.filters.search as string | undefined) ?? '');
+    } else {
+      // Default view - clear filters
+      setFilterStatus('ALL');
+      setFilterClient(null);
+      setFilterVisibility('ALL');
+      setFilterFeatured('ALL');
+      setSearchQuery('');
+    }
+  }
+
   const loadData = useCallback(async (silent = false) => {
     try {
       if (silent) setRefreshing(true);
@@ -198,6 +262,12 @@ export default function AdminProjectsPage() {
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('new') !== 'true') return;
+    openCreateModal();
+    window.history.replaceState({}, '', window.location.pathname);
+  }, []);
 
   const filteredProjects = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -374,20 +444,18 @@ export default function AdminProjectsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-6">
-          {[
-            ['Total Projects', projects.length, 'text-slate-500 dark:text-zinc-400'],
-            ['Draft', draftCount, 'text-amber-600 dark:text-amber-400'],
-            ['Published', publishedCount, 'text-emerald-600 dark:text-emerald-400'],
-            ['Featured', featuredCount, 'text-primary dark:text-primary'],
-            ['Active', activeCount, 'text-blue-600 dark:text-blue-400'],
-            ['Completed', completedCount, 'text-slate-500 dark:text-zinc-400'],
-          ].map(([label, count, color]) => (
-            <div key={String(label)} className="rounded-xl border bg-card text-card-foreground p-6 shadow-sm min-h-[6.5rem]">
-              <p className={`text-sm font-medium text-muted-foreground ${color}`}>{label}</p>
-              <p className="text-2xl font-bold">{count}</p>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-8">
+          <StatCards
+            stats={[
+              { label: 'Total Projects', value: String(projects.length), detail: 'Active: ' + String(activeCount), color: 'default' },
+              { label: 'Draft', value: String(draftCount), detail: '', color: 'default' },
+              { label: 'Published', value: String(publishedCount), detail: '', color: 'success' },
+              { label: 'Featured', value: String(featuredCount), detail: '', color: 'warning' },
+              { label: 'Active', value: String(activeCount), detail: '', color: 'success' },
+              { label: 'Completed', value: String(completedCount), detail: '', color: 'default' },
+            ]}
+            columns={4}
+          />
         </div>
 
         {/* Admin Resource Toolbar */}
@@ -479,7 +547,7 @@ export default function AdminProjectsPage() {
           mobileCard={(project, actions) => <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="font-medium">{project.name}</p><p className="text-sm text-muted-foreground">{project.client?.name || 'No client'}</p><div className="mt-2 flex flex-wrap gap-2"><Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>{statusLabel(project.status)}</Badge>{project.featured && <Badge variant="warning"><Star className="mr-1 h-3 w-3" />Featured</Badge>}{project.visibility === 'public' && <Badge variant="success"><Eye className="mr-1 h-3 w-3" />Public</Badge>}</div></div>{actions}</div>}
           columns={[
             { id: 'project', header: 'Project', cell: (project) => <div><p className="font-medium">{project.name}</p><p className="text-xs text-muted-foreground">{project.client?.name || 'No client'}</p></div>, accessor: (project) => project.name, sortable: true },
-            { id: 'status', header: 'Status', cell: (project) => <Badge variant={project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : project.status === 'on hold' ? 'warning' : project.status === 'cancelled' ? 'destructive' : 'secondary'}>{statusLabel(project.status)}</Badge>, accessor: (project) => project.status },
+            { id: 'status', header: 'Status', cell: (project) => <StatusBadge status={project.status} />, accessor: (project) => project.status },
             { id: 'visibility', header: 'Visibility', cell: (project) => <div className="flex flex-wrap gap-1">{project.visibility === 'public' && <Badge variant="success"><Eye className="mr-1 h-3 w-3" />Public</Badge>}{project.visibility === 'private' && <Badge variant="secondary"><EyeOff className="mr-1 h-3 w-3" />Private</Badge>}{project.visibility === 'draft' && <Badge variant="warning">Draft</Badge>}{project.featured && <Badge variant="warning"><Star className="mr-1 h-3 w-3" />Featured</Badge>}</div>, hideOnMobile: true },
             { id: 'dates', header: 'Timeline', cell: (project) => <div><p>{project.startDate || project.endDate ? `${formatDate(project.startDate)} – ${formatDate(project.endDate)}` : '—'}</p><p className="text-xs text-muted-foreground">Added {formatDate(project.createdAt)}</p></div>, hideOnMobile: true },
           ]}
@@ -489,6 +557,12 @@ export default function AdminProjectsPage() {
             { label: 'Preview', hidden: (project) => !project.slug || project.visibility !== 'public', onSelect: (project) => window.open(`/work/${project.slug}`, '_blank', 'noopener,noreferrer') },
             { label: 'Delete', destructive: true, onSelect: async (project) => { if (!confirm('Delete this project? This cannot be undone.')) return; const response = await fetch(`/api/projects/${project.id}`, { method: 'DELETE' }); if (response.ok) setProjects((current) => current.filter((item) => item.id !== project.id)); else setError('Failed to delete project.'); } },
           ]}
+          savedViews={savedViews}
+          activeViewId={activeViewId}
+          onSaveView={handleSaveView}
+          onDeleteView={handleDeleteView}
+          onSetActiveView={handleSetActiveView}
+          viewName="Project View"
         />
 
         {isAddProjectOpen && (

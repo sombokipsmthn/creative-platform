@@ -126,11 +126,13 @@ export async function PATCH(
 
     const photo =
       await db.execute(sql`
-        SELECT id
-        FROM gallery_photos
-        WHERE id = ${photoId}
-          AND gallery_id = ${galleryRow.id}
-          AND is_hidden = false
+        SELECT p.id
+        FROM gallery_photos p
+        LEFT JOIN gallery_collections c ON c.id = p.collection_id
+        WHERE p.id = ${photoId}
+          AND p.gallery_id = ${galleryRow.id}
+          AND p.is_hidden = false
+          AND COALESCE(c.client_visibility, 'all') IN ('all', 'authorized', 'guest')
         LIMIT 1
       `);
 

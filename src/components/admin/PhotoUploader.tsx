@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Upload, X, Check, Loader2, Trash2, RefreshCw } from 'lucide-react';
+import { Upload, X, Check, CircleNotch as Loader2, Trash as Trash2, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
-import { upload } from '@vercel/blob/client';
 
 interface UploadItem {
   id: string;
@@ -27,20 +26,25 @@ export default function PhotoUploader({
   const [isUploading, setIsUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrlsRef = useRef(new Set<string>());
 
   const generateId = () => Math.random().toString(36).substring(2, 9);
 
   const addFiles = (files: FileList | File[] | null) => {
     if (!files?.length) return;
 
-    const newItems: UploadItem[] = Array.from(files).map((file) => ({
+    const newItems: UploadItem[] = Array.from(files).map((file) => {
+      const previewUrl = URL.createObjectURL(file);
+      previewUrlsRef.current.add(previewUrl);
+      return {
       id: generateId(),
       file,
-      previewUrl: URL.createObjectURL(file),
+      previewUrl,
       status: 'queued',
       progress: 0,
       error: null,
-    }));
+    };
+    });
 
     setUploadItems((prev) => [...prev, ...newItems]);
 
@@ -63,6 +67,7 @@ export default function PhotoUploader({
       const target = prev.find((item) => item.id === id);
       if (target) {
         URL.revokeObjectURL(target.previewUrl);
+        previewUrlsRef.current.delete(target.previewUrl);
       }
       return prev.filter((item) => item.id !== id);
     });
@@ -87,7 +92,10 @@ export default function PhotoUploader({
         (item) =>
           item.status === 'uploaded' || item.status === 'failed'
       );
-      completed.forEach((item) => URL.revokeObjectURL(item.previewUrl));
+      completed.forEach((item) => {
+        URL.revokeObjectURL(item.previewUrl);
+        previewUrlsRef.current.delete(item.previewUrl);
+      });
       return prev.filter(
         (item) => item.status === 'queued' || item.status === 'uploading'
       );
@@ -116,31 +124,27 @@ export default function PhotoUploader({
       );
 
       try {
-        // Upload to Vercel Blob
-        await upload(
-          `galleries/${galleryId}/${item.file.name}`,
-          item.file,
-          {
-            access: 'public',
-            handleUploadUrl: '/api/galleries/upload',
-            clientPayload: JSON.stringify({ galleryId }),
-          }
-        );
-
-        // Simulate progress updates since the upload API does not expose
-        // real-time byte progress.
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress = Math.min(progress + 10, 90);
-          setUploadItems((prev) =>
-            prev.map((i) =>
-              i.id === item.id ? { ...i, progress } : i
-            )
-          );
-        }, 100);
-
-        await new Promise((resolve) => setTimeout(resolve, 500));
-        clearInterval(interval);
+        await new Promise<void>((resolve, reject) => {
+          const request = new XMLHttpRequest();
+          request.open('POST', '/api/galleries/upload');
+          request.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: Math.round((event.loaded / event.total) * 100) } : i));
+            }
+          };
+          request.onload = () => {
+            if (request.status >= 200 && request.status < 300) resolve();
+            else {
+              try { reject(new Error(JSON.parse(request.responseText).error || 'Upload failed.')); }
+              catch { reject(new Error('Upload failed.')); }
+            }
+          };
+          request.onerror = () => reject(new Error('Network error while uploading.'));
+          const form = new FormData();
+          form.append('galleryId', galleryId);
+          form.append('file', item.file);
+          request.send(form);
+        });
 
         setUploadItems((prev) =>
           prev.map((i) =>
@@ -170,12 +174,11 @@ export default function PhotoUploader({
     onUploadComplete();
   };
 
-  // Clean up object URLs on unmount
-  useEffect(() => {
-    return () => {
-      uploadItems.forEach((item) => URL.revokeObjectURL(item.previewUrl));
-    };
-  }, [uploadItems]);
+  // Keep previews alive while the queue updates; release them when each item clears or this uploader unmounts.
+  useEffect(() => () => {
+    previewUrlsRef.current.forEach((previewUrl) => URL.revokeObjectURL(previewUrl));
+    previewUrlsRef.current.clear();
+  }, []);
 
   const handleDragEnter = (e: React.DragEvent) => {
     e.preventDefault();
@@ -218,7 +221,7 @@ export default function PhotoUploader({
         accept="image/jpeg,image/png,image/webp,image/heic,image/heif,video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm,video/x-flv,video/x-ms-wmv"
         className="hidden"
         onChange={handleFileInputChange}
-        aria-label="Select photos to upload"
+        aria-label="Select gallery photos and videos to upload"
       />
 
       {/* Drop Zone */}
@@ -236,7 +239,7 @@ export default function PhotoUploader({
             fileInputRef.current?.click();
           }
         }}
-        aria-label="Upload photos: drag and drop or press Enter to browse files"
+        aria-label="Upload gallery media: drag and drop or press Enter to browse files"
         className={`relative flex min-h-[9rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
           isDragging
             ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
@@ -258,7 +261,7 @@ export default function PhotoUploader({
           <span className="font-medium text-[var(--color-accent)]">
             browse files
           </span>{' '}
-          &mdash; JPEG, PNG, WebP, HEIC, HEIF, MP4 (max 100MB each)
+          &mdash; JPEG, PNG, WebP, HEIC, HEIF, MP4, MOV, AVI, MKV, WebM, FLV, WMV (max 100MB each)
         </p>
       </div>
 
@@ -266,12 +269,11 @@ export default function PhotoUploader({
       {uploadItems.length > 0 && (
         <div className="space-y-3">
           {/* Summary Row */}
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-[var(--color-text-muted)]">
-              Uploading
-              {isUploading && ' ·'}
-              {' '}
-              {uploadedCount} of {uploadItems.length} photos
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-xs font-medium text-[var(--color-text-muted)]" role="status" aria-live="polite">
+              {isUploading ? 'Uploading' : failedCount > 0 ? 'Upload finished with errors' : 'Uploads complete'}
+              {' · '}
+              {uploadedCount} of {uploadItems.length} files
               {failedCount > 0 && (
                 <span className="ml-2 text-[var(--color-danger)]">
                   {failedCount} failed
@@ -279,7 +281,7 @@ export default function PhotoUploader({
               )}
             </span>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button
                 variant="secondary"
                 size="sm"
@@ -309,15 +311,15 @@ export default function PhotoUploader({
             {uploadItems.map((item) => (
               <li
                 key={item.id}
-                className="flex items-center gap-3 p-3"
+                className="flex min-w-0 items-center gap-3 p-3"
               >
                 {/* Thumbnail */}
                 <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-[var(--color-bg-soft)]">
-                  <img
-                    src={item.previewUrl}
-                    alt={item.file.name}
-                    className="h-full w-full object-cover"
-                  />
+                  {item.file.type.startsWith('video/') ? (
+                    <video src={item.previewUrl} aria-label={`Preview of ${item.file.name}`} className="h-full w-full object-cover" />
+                  ) : (
+                    <img src={item.previewUrl} alt={item.file.name} className="h-full w-full object-cover" />
+                  )}
                 </div>
 
                 {/* File Info */}
@@ -336,7 +338,7 @@ export default function PhotoUploader({
                 </div>
 
                 {/* Status */}
-                <div className="flex w-28 flex-shrink-0 items-center justify-end gap-1.5 text-xs">
+                <div className="flex shrink-0 items-center justify-end gap-1.5 text-xs sm:w-28">
                   {item.status === 'queued' && (
                     <>
                       <span className="text-[var(--color-text-muted)]">
@@ -356,7 +358,7 @@ export default function PhotoUploader({
                   {item.status === 'uploading' && (
                     <>
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-[var(--color-accent)]" />
-                      <span>{item.progress}%</span>
+                      <span aria-label={`Uploading ${item.file.name}: ${item.progress}%`}>{item.progress}%</span>
                     </>
                   )}
 

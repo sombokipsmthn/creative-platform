@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Calendar as CalendarIcon } from "@phosphor-icons/react";
 import { format, addMonths, subMonths, startOfMonth, endOfMonth, startOfDay, endOfDay, isSameDay, isWithinInterval, eachDayOfInterval } from 'date-fns';
 
 type Project = {

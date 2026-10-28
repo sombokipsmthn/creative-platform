@@ -3,6 +3,7 @@ import {
   isPathSafe,
   sanitizeFilename,
   validateMimeTypeByExtension,
+  validateGalleryMedia,
 } from "./security";
 
 describe('Upload Security', () => {
@@ -51,11 +52,30 @@ describe('Upload Security', () => {
     });
   });
 
+  describe('validateGalleryMedia', () => {
+    it('allows supported video uploads under the 100MB limit', () => {
+      expect(validateGalleryMedia('clip.mp4', 'video/mp4', 1024)).toEqual({ valid: true });
+      expect(validateGalleryMedia('clip.mov', 'video/quicktime', 100 * 1024 * 1024)).toEqual({ valid: true });
+    });
+
+    it('rejects unsupported types and files over 100MB', () => {
+      expect(validateGalleryMedia('file.exe', 'application/octet-stream', 1024)).toMatchObject({ valid: false, status: 415 });
+      expect(validateGalleryMedia('clip.mp4', 'video/mp4', 100 * 1024 * 1024 + 1)).toMatchObject({ valid: false, status: 413 });
+      expect(validateGalleryMedia('empty.jpg', 'image/jpeg', 0)).toMatchObject({ valid: false, status: 413 });
+    });
+  });
+
   describe('validateMimeTypeByExtension', () => {
-    it('should allow matching MIME types', () => {
+    it('should allow matching MIME types, including the preserved gallery video formats', () => {
       expect(validateMimeTypeByExtension('photo.jpg', 'image/jpeg')).toBe(true);
       expect(validateMimeTypeByExtension('image.png', 'image/png')).toBe(true);
       expect(validateMimeTypeByExtension('video.mp4', 'video/mp4')).toBe(true);
+      expect(validateMimeTypeByExtension('video.mov', 'video/quicktime')).toBe(true);
+      expect(validateMimeTypeByExtension('video.avi', 'video/x-msvideo')).toBe(true);
+      expect(validateMimeTypeByExtension('video.mkv', 'video/x-matroska')).toBe(true);
+      expect(validateMimeTypeByExtension('video.webm', 'video/webm')).toBe(true);
+      expect(validateMimeTypeByExtension('video.flv', 'video/x-flv')).toBe(true);
+      expect(validateMimeTypeByExtension('video.wmv', 'video/x-ms-wmv')).toBe(true);
     });
 
     it('should reject mismatched MIME types', () => {

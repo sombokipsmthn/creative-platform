@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { CircleNotch as Loader2, WarningCircle as AlertCircle } from "@phosphor-icons/react"
 import { Button } from '@/components/ui/button'
 import { Input, Textarea } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,6 +18,8 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [slug, setSlug] = useState('')
+  const [portfolioPublishMode, setPortfolioPublishMode] = useState<'none' | 'all' | 'selected'>('none')
+  const [collections, setCollections] = useState<Array<{ id: string; title: string; portfolioSelection?: string; clientVisibility?: string }>>([])
 
   // Permissions
   const [allowDownloads, setAllowDownloads] = useState(true)
@@ -41,6 +43,8 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
           setDescription(String(g.description || ''))
           setCategory(String(g.category || ''))
           setSlug(String(g.slug || ''))
+          setPortfolioPublishMode((g.portfolioPublishMode as 'none' | 'all' | 'selected') || 'none')
+          setCollections((data as { collections?: typeof collections }).collections || [])
           setAllowDownloads(Boolean(g.allow_downloads ?? true))
           setAllowFavorites(Boolean(g.allow_favorites ?? true))
           setAllowSelections(Boolean(g.allow_selections ?? true))
@@ -70,6 +74,7 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
           allowDownloads,
           allowFavorites,
           allowSelections,
+          portfolioPublishMode,
         }),
       })
       if (!response.ok) {
@@ -136,6 +141,16 @@ export default function GallerySettingsTab({ galleryId, gallery, onRefresh }: Ga
             <p className="text-xs text-[var(--color-text-muted)] mt-1">Used in the gallery URL</p>
           </div>
         </div>
+      </CardContent></Card>
+
+      <Card><CardHeader><CardTitle>Creator portfolio</CardTitle></CardHeader><CardContent className="space-y-4">
+        <p className="text-sm text-muted-foreground">Gallery access, client permissions, and portfolio publication are independent.</p>
+        <select value={portfolioPublishMode} onChange={(e) => setPortfolioPublishMode(e.target.value as typeof portfolioPublishMode)} className="ui-select w-full rounded-md border px-3 py-2">
+          <option value="none">Unpublished</option>
+          <option value="selected">Selected sets and individual media</option>
+          <option value="all">Publish entire gallery</option>
+        </select>
+        {collections.length > 0 && <div className="space-y-2">{collections.map((collection) => <div key={collection.id} className="grid gap-2 rounded-md border p-3 sm:grid-cols-3 sm:items-center"><span className="text-sm font-medium">{collection.title}</span><select value={collection.portfolioSelection || 'inherit'} onChange={async (e) => { const value = e.target.value; setCollections((current) => current.map((item) => item.id === collection.id ? { ...item, portfolioSelection: value } : item)); await fetch(`/api/galleries/${galleryId}/collections`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collectionId: collection.id, portfolioSelection: value }) }) }} className="ui-select rounded-md border px-2 py-1 text-sm"><option value="inherit">Follow gallery</option><option value="include">Publish set</option><option value="exclude">Exclude set</option></select><select value={collection.clientVisibility || 'all'} onChange={async (e) => { const value = e.target.value; setCollections((current) => current.map((item) => item.id === collection.id ? { ...item, clientVisibility: value } : item)); await fetch(`/api/galleries/${galleryId}/collections`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collectionId: collection.id, clientVisibility: value }) }) }} className="ui-select rounded-md border px-2 py-1 text-sm"><option value="all">All visitors</option><option value="authorized">Authorized clients</option><option value="guest">Guests only</option><option value="none">Hidden from clients</option></select></div>)}</div>}
       </CardContent></Card>
 
       {/* CLIENT PERMISSIONS SECTION */}

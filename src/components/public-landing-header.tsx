@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Layers3, LogIn, LogOut, Menu, X } from "lucide-react";
+import { ArrowRight, Stack as Layers3, SignIn as LogIn, SignOut as LogOut, List as Menu, X } from "@phosphor-icons/react";
 import { authClient } from "@/lib/auth-client";
 
 const navigation = [

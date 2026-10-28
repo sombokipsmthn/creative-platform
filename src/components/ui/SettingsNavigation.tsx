@@ -1,15 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import {
-  Building2,
-  Image,
-  Droplet,
-  FileText,
-  Bell,
-  Plug2,
-  Shield,
-} from 'lucide-react';
+import { Buildings as Building2, Image as ImageIcon, Drop as Droplet, FileText, Bell, Plug as Plug2, Shield } from "@phosphor-icons/react";
 
 interface SettingsNavigationItem {
   id: string;
@@ -28,7 +20,7 @@ const navigationItems: SettingsNavigationItem[] = [
   {
     id: 'gallery-delivery',
     label: 'Gallery Delivery',
-    icon: <Image className="h-4 w-4" />,
+    icon: <ImageIcon className="h-4 w-4" />,
     description: 'Default selection limits, expiration, download settings',
   },
   {

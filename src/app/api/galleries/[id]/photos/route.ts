@@ -556,6 +556,14 @@ export async function PATCH(
       );
     }
 
+    if (["inherit", "include", "exclude"].includes(body.portfolioSelection)) {
+      await db.execute(sql`
+        UPDATE gallery_photos
+        SET portfolio_selection = ${body.portfolioSelection}, updated_at = now()
+        WHERE id = ${photoId} AND gallery_id = ${galleryId}
+      `);
+    }
+
     if (
       body.collectionId !==
       undefined
@@ -735,6 +743,7 @@ export async function DELETE(
       const result =
         await db.execute(sql`
           SELECT
+            storage_path,
             original_path,
             display_path,
             thumbnail_path,
@@ -752,12 +761,13 @@ export async function DELETE(
         continue;
       }
 
-      for (const path of [
+      for (const path of new Set([
+        photo.storage_path,
         photo.original_path,
         photo.display_path,
         photo.thumbnail_path,
         photo.watermark_path,
-      ]) {
+      ].filter(Boolean).map(String))) {
         if (path) {
           try {
             await storage.deleteObject(

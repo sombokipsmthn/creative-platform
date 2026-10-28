@@ -3,27 +3,7 @@ import type { Metadata } from "next";
 import PublicLandingHeader from "@/components/PublicLandingHeader";
 import ProductPreview from "@/components/ProductPreview";
 import Footer from "@/components/Footer";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Users,
-  FolderKanban,
-  FileText,
-  Wallet,
-  Camera,
-  Zap,
-  Globe,
-  BarChart3,
-  Shield,
-  Target,
-  Building2,
-  Briefcase,
-  Layers,
-  RefreshCw,
-  Sparkles,
-  LayoutDashboard,
-  Image as ImageIcon,
-} from "lucide-react";
+import { ArrowRight, CheckCircle as CheckCircle2, Users, FolderSimple as FolderKanban, FileText, Wallet, Camera, Lightning as Zap, Globe, ChartBar as BarChart3, Shield, Target, Buildings as Building2, Briefcase, Stack as Layers, ArrowsClockwise as RefreshCw, Sparkle as Sparkles, SquaresFour as LayoutDashboard, Image as ImageIcon } from "@phosphor-icons/react/ssr";
 import { Card } from "@/components/ui/card";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://kipsmthn.com";

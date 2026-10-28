@@ -3,21 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Users,
-  FolderKanban,
-  GalleryHorizontalEnd,
-  FileText,
-  Receipt,
-  WalletCards,
-  Calendar,
-  FileSignature,
-  Settings2,
-  ExternalLink,
-  Menu,
-} from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { SquaresFour as LayoutDashboard, Users, FolderSimple as FolderKanban, Images as GalleryHorizontalEnd, FileText, Receipt, Wallet as WalletCards, Calendar, Signature as FileSignature, SlidersHorizontal as Settings2, Sparkle as Sparkles, ArrowSquareOut as ExternalLink, List as Menu } from "@phosphor-icons/react";
+import type { Icon } from '@phosphor-icons/react';
 
 import { authClient } from '@/lib/auth-client';
 import ProfileMenu from '@/components/ProfileMenu';
@@ -26,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { CommandPalette } from '@/components/ui/command-palette';
+import { KeyboardShortcuts } from '@/components/ui/keyboard-shortcuts';
 import {
   SplitViewProvider,
   useSplitView,
@@ -44,7 +33,7 @@ async function fetchBadgeCounts(): Promise<Record<string, number>> {
 interface NavItem {
   name: string;
   href: string;
-  icon: LucideIcon;
+  icon: Icon;
 }
 
 interface NavSection {
@@ -72,6 +61,12 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    label: "Publishing",
+    items: [
+      { name: "Public portfolio", href: "/p", icon: Sparkles },
+    ],
+  },
+  {
     label: "Settings",
     items: [
       { name: "Settings", href: "/admin/settings", icon: Settings2 },
@@ -84,26 +79,26 @@ function NavLink({
   isActive,
   badgeCount = 0,
   onClick,
+  disabled = false,
 }: {
   item: NavItem;
   isActive: boolean;
   badgeCount?: number;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   const Icon = item.icon;
-
-  return (
-    <Link
-      href={item.href}
-      onClick={onClick}
-      className={`group relative flex min-h-10 items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
-        isActive
-          ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-none before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary"
-          : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
-      }`}
-    >
+  const className = `group relative flex min-h-10 items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+    disabled
+      ? "cursor-not-allowed text-sidebar-foreground/35"
+      : isActive
+        ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-none before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:rounded-full before:bg-sidebar-primary"
+        : "text-sidebar-foreground/75 hover:bg-sidebar-accent/70 hover:text-sidebar-accent-foreground"
+  }`;
+  const content = (
+    <>
       <div className="flex items-center gap-3">
-        <Icon className={`h-4 w-4 shrink-0 transition-colors ${isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground"}`} />
+        <Icon className={`h-4 w-4 shrink-0 transition-colors ${disabled ? "text-sidebar-foreground/30" : isActive ? "text-sidebar-primary" : "text-sidebar-foreground/60 group-hover:text-sidebar-accent-foreground"}`} />
         <span>{item.name}</span>
       </div>
       {badgeCount > 0 && (
@@ -114,6 +109,16 @@ function NavLink({
           {badgeCount}
         </Badge>
       )}
+    </>
+  );
+
+  if (disabled) {
+    return <div className={className} aria-disabled="true">{content}</div>;
+  }
+
+  return (
+    <Link href={item.href} onClick={onClick} className={className}>
+      {content}
     </Link>
   );
 }
@@ -122,10 +127,12 @@ function SidebarContent({
   pathname,
   badgeCounts,
   onNavigate,
+  portfolioHref,
 }: {
   pathname: string;
   badgeCounts: Record<string, number>;
   onNavigate?: () => void;
+  portfolioHref?: string | null;
 }) {
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
@@ -158,16 +165,21 @@ function SidebarContent({
             </p>
             <div className="space-y-1">
               {section.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(`${item.href}/`));
-                const count = badgeCounts[item.href] ?? 0;
+                const isPublicPortfolio = item.name === "Public portfolio";
+                const resolvedItem = isPublicPortfolio && portfolioHref ? { ...item, href: portfolioHref } : item;
+                const disabled = isPublicPortfolio && !portfolioHref;
+                const isActive = !disabled && (
+                  pathname === resolvedItem.href ||
+                  (resolvedItem.href !== "/admin" && pathname.startsWith(`${resolvedItem.href}/`))
+                );
+                const count = badgeCounts[resolvedItem.href] ?? 0;
 
                 return (
                   <NavLink
                     key={item.href}
-                    item={item}
+                    item={resolvedItem}
                     isActive={isActive}
+                    disabled={disabled}
                     badgeCount={count}
                     onClick={onNavigate}
                   />
@@ -201,6 +213,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { content: splitViewContent } = useSplitView();
   const { data: session, isPending: authPending } = authClient.useSession();
   const [badgeCounts, setBadgeCounts] = useState<Record<string, number>>({});
+  const [portfolioHref, setPortfolioHref] = useState<string | null>(null);
   const bootstrapStarted = useRef(false);
 
   // Keep local development bypass support
@@ -262,21 +275,36 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     if (!isAuthenticated) return;
     let cancelled = false;
 
-    fetchBadgeCounts().then((counts) => {
-      if (!cancelled) setBadgeCounts(counts);
-    });
+    const refreshBadgeCounts = () => {
+      fetchBadgeCounts().then((counts) => {
+        if (!cancelled) setBadgeCounts(counts);
+      });
+    };
+
+    refreshBadgeCounts();
+    window.addEventListener('focus', refreshBadgeCounts);
+    window.addEventListener('pageshow', refreshBadgeCounts);
+    fetch("/api/portfolio", { cache: "no-store" }).then((response) => response.ok ? response.json() : null).then((value) => {
+      if (!cancelled && value?.hasPublishedContent && value.user?.handle) setPortfolioHref(`/p/${value.user.handle}`);
+      else if (!cancelled) setPortfolioHref(null);
+    }).catch(() => { if (!cancelled) setPortfolioHref(null); });
 
     return () => {
       cancelled = true;
+      window.removeEventListener('focus', refreshBadgeCounts);
+      window.removeEventListener('pageshow', refreshBadgeCounts);
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, pathname]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex selection:bg-primary/20">
       {/* Desktop Fixed Sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <SidebarContent pathname={pathname} badgeCounts={badgeCounts} />
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[260px] flex-col border-r border-sidebar-border bg-sidebar lg:flex border-sidebar-border/80">
+        <SidebarContent pathname={pathname} badgeCounts={badgeCounts} portfolioHref={portfolioHref} />
       </aside>
+
+      {/* Command Palette */}
+      <CommandPalette />
 
       {/* Main Workspace Area */}
       <div className="flex min-w-0 flex-1 flex-col lg:pl-[260px]">
@@ -305,6 +333,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   pathname={pathname}
                   badgeCounts={badgeCounts}
                   onNavigate={() => setMobileOpen(false)}
+                  portfolioHref={portfolioHref}
                 />
               </SheetContent>
             </Sheet>
@@ -323,6 +352,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
           {/* Right Header Actions */}
           <div className="flex items-center gap-2">
+            <KeyboardShortcuts />
             <ThemeToggle compact />
             <Separator orientation="vertical" className="h-5 mx-1" />
             <ProfileMenu showLabel />

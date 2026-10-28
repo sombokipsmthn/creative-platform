@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { getCurrentSession } from "@/lib/auth";
+import { getCurrentUserFromRequest } from "@/lib/auth/get-current-user";
 import { sql } from "drizzle-orm";
 
 import { db } from "@/db";
-import { getLocalUser } from "@/lib/auth/get-local-user";
 
 type Context = {
   params: Promise<{
@@ -16,22 +15,13 @@ export async function POST(
   context: Context
 ) {
   try {
-    const session = await getCurrentSession();
-    const userId = session?.user?.id ?? null;
+    const creator = await getCurrentUserFromRequest(request);
 
-    if (!userId) {
+    if (!creator) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
-    }
-
-    let creator;
-    try {
-      creator = await getLocalUser(userId);
-    } catch (e) {
-      console.error("Creator not found for publish route:", e);
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await context.params;

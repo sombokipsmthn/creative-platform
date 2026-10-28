@@ -5,11 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useMemo, useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import {
-  AlertCircle, ArrowUpRight, CheckCircle2, Clock3, FileText, GalleryHorizontalEnd,
-  LayoutDashboard, Receipt, Users, Wallet, CalendarDays, ChevronLeft, ChevronRight,
-  ExternalLink, TrendingUp
-} from 'lucide-react';
+import { WarningCircle as AlertCircle, ArrowUpRight, CheckCircle as CheckCircle2, Clock as Clock3, FileText, Images as GalleryHorizontalEnd, SquaresFour as LayoutDashboard, Receipt, Users, Wallet, CalendarDots as CalendarDays, CaretLeft as ChevronLeft, CaretRight as ChevronRight, ArrowSquareOut as ExternalLink, TrendUp as TrendingUp } from "@phosphor-icons/react";
 
 import { useCreator } from '@/context/CreatorContext';
 import { Button } from '@/components/ui/button';
@@ -112,6 +108,22 @@ function formatTime(value: string) {
   return new Intl.DateTimeFormat('en-KE', { hour: 'numeric', minute: '2-digit' }).format(new Date(value));
 }
 
+function localDateKey(value: Date | string) {
+  const date = typeof value === 'string' ? new Date(value) : value;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function eventHref(event: CalendarEvent) {
+  switch (event.sourceType) {
+    case 'project': return `/admin/projects/${event.sourceId}`;
+    case 'quote': return `/admin/quotes/${event.sourceId}`;
+    case 'invoice': return `/admin/invoices/${event.sourceId}`;
+    case 'gallery': return `/admin/galleries/${event.sourceId}`;
+    case 'contract': return `/admin/contracts/${event.sourceId}`;
+    default: return '/admin/calendar';
+  }
+}
+
 function isToday(dateString: string) {
   const today = new Date();
   const date = new Date(dateString);
@@ -132,7 +144,7 @@ function isTomorrow(dateString: string) {
 // Components
 function Panel({ eyebrow, title, action, children, className = '' }: { eyebrow?: string; title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl border bg-card shadow-sm ${className}`}>
+    <section className={`min-w-0 overflow-hidden rounded-2xl border bg-card shadow-sm ${className}`}>
       <div className="flex items-center justify-between gap-4 border-b border-border px-5 py-4">
         <div>
           {eyebrow && (
@@ -144,7 +156,7 @@ function Panel({ eyebrow, title, action, children, className = '' }: { eyebrow?:
         </div>
         {action}
       </div>
-      <div className="p-5">{children}</div>
+      <div className="min-w-0 p-4 sm:p-5">{children}</div>
     </section>
   );
 }
@@ -181,7 +193,7 @@ function MetricCard({ label, value, detail, href, icon, trend }: { label: string
           <ArrowUpRight className="h-4 w-4 text-muted-foreground transition group-hover:text-primary" />
         </div>
         <p className="mt-4 text-[10px] font-sans uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
-        <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">{value}</p>
+        <p className="mt-1 break-words text-2xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]">{value}</p>
         <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
         {trend && (
           <p className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -198,18 +210,18 @@ function AttentionItem({ icon, title, detail, count, href, urgent }: { icon: Rea
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-4 px-5 py-4 transition hover:bg-muted/50"
+      className="flex min-w-0 items-center justify-between gap-3 px-4 py-4 transition hover:bg-muted/50 sm:gap-4 sm:px-5"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${urgent ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300'}`}>
           {icon}
         </span>
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-medium">{title}</p>
-          <p className="text-sm text-muted-foreground">{detail}</p>
+          <p className="break-words text-sm text-muted-foreground">{detail}</p>
         </div>
       </div>
-      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${urgent ? 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'}`}>
+      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${urgent ? 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'}`}>
         {count}
       </span>
     </Link>
@@ -256,14 +268,14 @@ function CalendarEventItem({ event, onClick }: { event: CalendarEvent; onClick?:
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-start gap-3 p-3 rounded-xl border border-transparent hover:border-border hover:bg-muted/50 transition"
+      className="group flex w-full min-w-0 items-start gap-2 rounded-xl border border-transparent p-3 transition hover:border-border hover:bg-muted/50 sm:gap-3"
     >
       <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${meta.tone}`}>
         <Icon className="h-4 w-4" aria-hidden="true" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-foreground truncate">{event.title}</p>
-        <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+        <p className="line-clamp-2 break-words text-left text-sm font-medium text-foreground">{event.title}</p>
+        <p className="mt-0.5 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-left text-xs text-muted-foreground">
           <span>{event.category}</span>
           <span>·</span>
           <span>{isAllDay ? 'All day' : formatTime(event.startDate)}</span>
@@ -289,11 +301,11 @@ function DateStrip({ selectedDate, onDateChange, eventsByDay }: { selectedDate: 
   });
 
   return (
-    <div className="flex gap-1 overflow-x-auto pb-2 -mx-5 px-5" role="tablist" aria-label="Upcoming days">
+    <div className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-2 sm:-mx-5 sm:px-5" role="tablist" aria-label="Upcoming days">
       {days.map((date) => {
-        const key = date.toISOString().split('T')[0];
+        const key = localDateKey(date);
         const dayEvents = eventsByDay.get(key) ?? [];
-        const isSelected = selectedDate.toISOString().split('T')[0] === key;
+        const isSelected = localDateKey(selectedDate) === key;
         const isToday = date.toDateString() === today.toDateString();
 
         return (
@@ -303,7 +315,7 @@ function DateStrip({ selectedDate, onDateChange, eventsByDay }: { selectedDate: 
             role="tab"
             aria-selected={isSelected}
             onClick={() => onDateChange(date)}
-            className={`flex flex-col items-center gap-1.5 rounded-xl px-4 py-3 min-w-[64px] transition ${isSelected ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-foreground'}`}
+            className={`flex min-w-[64px] shrink-0 flex-col items-center gap-1.5 rounded-xl px-3 py-3 transition sm:px-4 ${isSelected ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted text-foreground'}`}
           >
             <span className={`text-[10px] font-sans uppercase tracking-widest ${isToday && !isSelected ? 'text-primary' : isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
               {isToday ? 'Today' : format(date, 'EEE')}
@@ -350,7 +362,7 @@ function EmptyState({ icon: Icon, title, description, action }: { icon: typeof C
 
 // Main Dashboard Page
 export default function StudioCommandCenterPage() {
-  const { data: session, isPending: isLoaded } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
   const user = session?.user ?? null;
   const { activeCreator } = useCreator();
   const [range, setRange] = useState<'7d' | '30d' | '90d' | '12m' | 'all'>('30d');
@@ -373,7 +385,7 @@ export default function StudioCommandCenterPage() {
 
   // Fetch dashboard stats
   useEffect(() => {
-    if (!isLoaded || !user) return;
+    if (isPending || !user) return;
     const loadStats = async () => {
       setLoading(true);
       setError('');
@@ -389,7 +401,7 @@ export default function StudioCommandCenterPage() {
       }
     };
     void loadStats();
-  }, [isLoaded, user, range]);
+  }, [isPending, user, range]);
 
   // Fetch calendar events for next 7 days
   useEffect(() => {
@@ -434,15 +446,12 @@ export default function StudioCommandCenterPage() {
         if (!cancelled) {
           // Only show onboarding if status is explicitly "incomplete" AND user has an established account
           // Don't show if user is newly provisioned (no local record yet)
-          const status = data.user?.onboardingStatus;
-          if (status === "incomplete" && data.user?.id) {
+          if (data.eligible === true && data.user?.id) {
             setShowOnboarding(true);
           }
         }
       } catch {
-        // Ignore errors - don't blank the dashboard
-      } finally {
-        if (!cancelled) setLoading(false);
+        // Onboarding eligibility is non-blocking; keep dashboard data visible.
       }
     }
 
@@ -462,9 +471,7 @@ export default function StudioCommandCenterPage() {
         // Show tour steps - this will render overlay tour after dismissal
         setShowDashboardTour(true);
       } catch {
-        // Ignore errors
-      } finally {
-        if (!cancelled) setLoading(false);
+        // Ignore tour errors.
       }
     }
 
@@ -485,14 +492,14 @@ export default function StudioCommandCenterPage() {
     calendarEvents.forEach(event => {
       const date = new Date(event.startDate);
       if (isNaN(date.getTime())) return;
-      const key = date.toISOString().split('T')[0];
+      const key = localDateKey(date);
       grouped.set(key, [...(grouped.get(key) ?? []), event]);
     });
     return grouped;
   }, [calendarEvents]);
 
   const selectedDayEvents = useMemo(() => {
-    const key = selectedDate.toISOString().split('T')[0];
+    const key = localDateKey(selectedDate);
     return eventsByDay.get(key) ?? [];
   }, [eventsByDay, selectedDate]);
 
@@ -500,7 +507,7 @@ export default function StudioCommandCenterPage() {
     return [...calendarEvents].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
   }, [calendarEvents]);
 
-  if (!isLoaded) {
+  if (isPending) {
     // Don't replace server-rendered content during hydration
     // Return null to preserve the SSR output; client will hydrate seamlessly
     return null;
@@ -550,7 +557,7 @@ export default function StudioCommandCenterPage() {
             <h2 className="text-2xl font-semibold tracking-tight">Quick actions</h2>
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <QuickAction href="/admin/clients/new" label="Add Client" icon={<Users className="h-4 w-4" />} detail="Create new client record" />
+            <QuickAction href="/admin/clients?new=true" label="Add Client" icon={<Users className="h-4 w-4" />} detail="Create new client record" />
             <QuickAction href="/admin/quotes/new" label="Create Quote" icon={<FileText className="h-4 w-4" />} detail="Build a production quote" />
             <QuickAction href="/admin/invoices/new" label="New Invoice" icon={<Receipt className="h-4 w-4" />} detail="Bill for completed work" />
             <QuickAction href="/admin/calendar" label="Schedule Event" icon={<CalendarDays className="h-4 w-4" />} detail="Add to studio calendar" />
@@ -563,7 +570,7 @@ export default function StudioCommandCenterPage() {
         {stats && (
           <>
             {/* Top Row: Business Pulse + Attention Queue */}
-            <div className="grid gap-6 lg:grid-cols-[1fr_420px] mb-8">
+            <div className="mb-8 grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)]">
               {/* Business Pulse - Left Column */}
               <div className="space-y-6">
                 <Panel
@@ -575,7 +582,21 @@ export default function StudioCommandCenterPage() {
                     </Link>
                   }
                 >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <MetricCard
+                      label="Quoted in period"
+                      value={formatCurrency(stats.finance.periodQuotedValue)}
+                      detail="Value of quotes created in this range"
+                      href="/admin/quotes"
+                      icon={<FileText className="h-4 w-4" />}
+                    />
+                    <MetricCard
+                      label="Invoiced in period"
+                      value={formatCurrency(stats.finance.periodInvoicedValue)}
+                      detail={`${stats.overview.newInvoices} invoices created in this range`}
+                      href="/admin/invoices"
+                      icon={<Receipt className="h-4 w-4" />}
+                    />
                     <MetricCard
                       label="Collected revenue"
                       value={formatCurrency(stats.finance.periodPaidValue)}
@@ -599,12 +620,11 @@ export default function StudioCommandCenterPage() {
                       icon={<CheckCircle2 className="h-4 w-4" />}
                     />
                     <MetricCard
-                      label="Outstanding"
+                      label="Overdue invoices"
                       value={formatNumber(stats.finance.overdueInvoices)}
-                      detail="Overdue invoices"
+                      detail="Invoices past their due date"
                       href="/admin/invoices"
                       icon={<Clock3 className="h-4 w-4" />}
-                      trend={{ value: -stats.finance.overdueInvoices, label: 'overdue' }}
                     />
                   </div>
                 </Panel>
@@ -758,7 +778,7 @@ export default function StudioCommandCenterPage() {
                         </p>
                         <div className="mt-2 space-y-2">
                           {selectedDayEvents.map(event => (
-                            <CalendarEventItem key={event.id} event={event} />
+                            <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />
                           ))}
                         </div>
                       </div>
@@ -770,7 +790,7 @@ export default function StudioCommandCenterPage() {
                         </p>
                         <div className="mt-2 space-y-2">
                           {allUpcomingEvents.slice(0, 5).map(event => (
-                            <CalendarEventItem key={event.id} event={event} />
+                            <CalendarEventItem key={event.id} event={event} onClick={() => { window.location.href = eventHref(event); }} />
                           ))}
                         </div>
                         {allUpcomingEvents.length > 5 && (
@@ -786,7 +806,7 @@ export default function StudioCommandCenterPage() {
             </Panel>
 
             {/* Bottom Row: Recent Activity + Quote Pipeline */}
-            <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+            <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">
               <Panel
                 eyebrow="Workspace"
                 title="Recent activity"

@@ -212,6 +212,13 @@ export async function PATCH(
     const description =
       body.description !== undefined ? body.description : undefined;
 
+    const portfolioSelection = ["inherit", "include", "exclude"].includes(body.portfolioSelection)
+      ? body.portfolioSelection
+      : undefined;
+    const clientVisibility = ["all", "authorized", "guest", "none"].includes(body.clientVisibility)
+      ? body.clientVisibility
+      : undefined;
+
     const sortOrder =
       typeof body.sortOrder === "number" ? body.sortOrder : undefined;
 
@@ -220,6 +227,8 @@ export async function PATCH(
       SET
         title = COALESCE(${title ?? null}, title),
         description = ${description !== undefined ? description : sql`description`},
+        portfolio_selection = COALESCE(${portfolioSelection ?? null}, portfolio_selection),
+        client_visibility = COALESCE(${clientVisibility ?? null}, client_visibility),
         sort_order = COALESCE(${sortOrder ?? null}, sort_order),
         updated_at = now()
       WHERE id = ${collectionId}

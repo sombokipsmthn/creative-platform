@@ -2,17 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import {
-  Camera,
-  Clapperboard,
-  Lightbulb,
-  Mic,
-  Move,
-  Plane,
-  Search,
-  User,
-  X,
-} from "lucide-react";
+import { Camera, FilmSlate as Clapperboard, Lightbulb, Microphone as Mic, ArrowsOutCardinal as Move, Airplane as Plane, MagnifyingGlass as Search, User, X } from "@phosphor-icons/react";
 
 export type CatalogEquipment = {
   id: string;

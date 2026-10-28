@@ -3,6 +3,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { creatorPortfolios, creatorProfiles, projectMedia, projects, users } from "@/db/schema";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
+import { getCuratedGalleryMedia } from "@/lib/portfolio/gallery-curation";
 
 const clean = (value: unknown, max: number) => typeof value === "string" ? value.trim().slice(0, max) : null;
 const ids = (value: unknown) => Array.isArray(value) ? [...new Set(value.filter((id): id is string => typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id)))].slice(0, 24) : [];
@@ -16,7 +17,14 @@ async function readPortfolio(userId: string) {
       .from(projects)
       .where(and(eq(projects.creatorId, userId), eq(projects.visibility, "public"))),
   ]);
-  return { user, profile, portfolio, projects: eligible };
+  const galleryMedia = await getCuratedGalleryMedia(userId);
+  const selectedProjectIds = Array.isArray(portfolio?.selectedProjectIds)
+    ? portfolio.selectedProjectIds.filter((id): id is string => typeof id === "string")
+    : [];
+  const hasSelectedPublishedProject = eligible.some((project) =>
+    selectedProjectIds.includes(project.id) && project.publishedAt != null,
+  );
+  return { user, profile, portfolio, projects: eligible, hasPublishedContent: galleryMedia.length > 0 || hasSelectedPublishedProject };
 }
 
 export async function GET(request: Request) {
@@ -32,7 +40,8 @@ export async function PATCH(request: Request) {
     const invalid = selectedProjectIds.some((id) => !eligibleIds.has(id));
     if (invalid) return NextResponse.json({ error: "Only your public projects can be selected." }, { status: 400 });
     const isPublished = body?.isPublished === true;
-    if (isPublished && selectedProjectIds.length === 0) return NextResponse.json({ error: "Select at least one public project before publishing." }, { status: 400 });
+    const galleryMedia = await getCuratedGalleryMedia(user.id);
+    if (isPublished && selectedProjectIds.length === 0 && galleryMedia.length === 0) return NextResponse.json({ error: "Select gallery content or a public project before publishing." }, { status: 400 });
     const values = {
       userId: user.id,
       headline: clean(body?.headline, 160),

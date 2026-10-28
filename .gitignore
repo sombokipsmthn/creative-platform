@@ -42,7 +42,9 @@ yarn-error.log*
 next-env.d.ts
 
 # application configuration
+/.local-storage/
 
 # agent worktrees
 .claude/worktrees/
 .neon
+/my-neon-app/node_modules

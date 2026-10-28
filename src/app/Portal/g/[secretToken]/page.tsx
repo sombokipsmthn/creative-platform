@@ -3,7 +3,7 @@
 
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Lock } from 'lucide-react'
+import { Lock } from "@phosphor-icons/react"
 import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/components/gallery/viewers/wrapper'
 import { isValidThemeId } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'
@@ -50,6 +50,7 @@ interface RawPhoto {
   display_url: string
   original_url: string
   thumbnail_url: string
+  mime_type?: string | null
   sort_order: number
   is_hidden: boolean
   is_favorite: boolean
@@ -144,6 +145,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             filename: p.filename,
             displayUrl: p.display_url,
             thumbnailUrl: p.thumbnail_url,
+            mimeType: p.mime_type || null,
             width: p.width,
             height: p.height,
             sortOrder: p.sort_order,

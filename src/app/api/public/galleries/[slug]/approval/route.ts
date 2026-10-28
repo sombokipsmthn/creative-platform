@@ -204,8 +204,28 @@ export async function POST(
       );
     }
 
-    const body =
-      await request.json();
+    const body = await request.json();
+    const photoId = typeof body.photoId === "string" ? body.photoId : null;
+
+    if (photoId) {
+      const photo = await db.execute(sql`
+        SELECT p.id
+        FROM gallery_photos p
+        LEFT JOIN gallery_collections c ON c.id = p.collection_id
+        WHERE p.id = ${photoId}
+          AND p.gallery_id = ${gallery.id}
+          AND p.is_hidden = false
+          AND COALESCE(c.client_visibility, 'all') IN ('all', 'authorized', 'guest')
+        LIMIT 1
+      `);
+
+      if (!photo.rows[0]) {
+        return NextResponse.json(
+          { error: "Photo not found." },
+          { status: 404 },
+        );
+      }
+    }
 
     const status =
       body.status ===

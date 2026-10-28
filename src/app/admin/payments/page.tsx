@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarDays, CheckCircle2, CreditCard, Filter, Loader2, Plus, Search, Wallet, X } from 'lucide-react';
+import { CalendarDots as CalendarDays, CheckCircle as CheckCircle2, CreditCard, Funnel as Filter, CircleNotch as Loader2, Plus, MagnifyingGlass as Search, Wallet, X } from "@phosphor-icons/react";
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

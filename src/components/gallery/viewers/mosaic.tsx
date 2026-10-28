@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import Image from 'next/image';
-import { Download, Heart } from 'lucide-react';
+import { GalleryMedia } from './media';
+import { Download, Heart } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import type { GalleryViewerProps } from './wrapper';
 import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
@@ -92,8 +92,10 @@ export function GalleryViewerMosaic({
                   className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-105"
                 >
                   <div className={`${heightClass} relative group`}>
-                    <Image
+                    <GalleryMedia
                       src={photo.displayUrl}
+                      poster={photo.thumbnailUrl}
+                      mimeType={photo.mimeType}
                       alt={photo.filename}
                       fill
                       className="object-cover"

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authClient } from '@/lib/auth-client';
-import { Plug2, Loader2, Key, Globe, Database, CreditCard, MessageCircle } from 'lucide-react';
+import { Plug as Plug2, CircleNotch as Loader2, Key, Globe, Database, CreditCard, ChatCircle as MessageCircle } from "@phosphor-icons/react";
 
 interface Integration {
   integrationKey: string;
@@ -217,8 +217,8 @@ export default function AdminIntegrationsPage() {
   if (isPending || isLoading) {
     return (
       <main className="min-h-screen flex min-h-[70vh] items-center justify-center">
-        <div className="os-pulse flex items-center gap-3">
-          <span className="os-icon-box h-9 w-9" />
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-lg bg-primary/10 animate-pulse" />
           <p className="text-sm text-muted-foreground uppercase">Loading integrations</p>
         </div>
       </main>
@@ -242,21 +242,19 @@ export default function AdminIntegrationsPage() {
   const integrations = integrationsData?.integrations || [];
 
   return (
-    <main className="min-h-screen min-h-screen">
+    <main className="min-h-screen">
       <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
         <AdminPageHeader
           title="Integrations"
           description="Manage connected services, storage, and API integrations for your workspace."
           breadcrumb={{ label: 'Dashboard', href: '/admin' }}
           tabs={[
-            { label: 'Account & Profile', href: '/admin/settings/profile', active: false },
-            { label: 'Workspace Branding', href: '/admin/settings/branding', active: false },
+            { label: 'Account & Profile', href: '/admin/settings?tab=account-profile', active: false },
             { label: 'Business Preferences', href: '/admin/settings/business', active: false },
             { label: 'Gallery Defaults', href: '/admin/settings/gallery-defaults', active: false },
-            { label: 'Watermark Studio', href: '/admin/settings/watermark', active: false },
-            { label: 'Documents & Email Templates', href: '/admin/settings/documents', active: false },
             { label: 'Notifications', href: '/admin/settings/notifications', active: false },
             { label: 'Integrations', href: '/admin/settings/integrations', active: true },
+            { label: 'Sign-in & Sessions', href: '/admin/settings/security', active: false },
           ]}
         />
 

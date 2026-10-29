@@ -46,19 +46,51 @@ async function readPortfolio(userId: string) {
   }));
 
   const galleryMedia = await getCuratedGalleryMedia(userId);
-  const gallerySelections = Array.from(
-    galleryMedia.reduce((groups, entry) => {
-      const current = groups.get(entry.gallery.id) ?? {
-        id: entry.gallery.id,
-        title: entry.gallery.title,
-        category: entry.gallery.category,
-        mediaCount: 0,
-      };
-      current.mediaCount += 1;
-      groups.set(entry.gallery.id, current);
-      return groups;
-    }, new Map<string, { id: string; title: string; category: string | null; mediaCount: number }>()),
-  ).map(([, gallery]) => gallery);
+  const galleryGroups = galleryMedia.reduce((groups, entry) => {
+    const current = groups.get(entry.gallery.id) ?? {
+      id: `gallery-${entry.gallery.id}`,
+      name: entry.gallery.title,
+      description: entry.gallery.description,
+      shortDescription: entry.gallery.description,
+      category: entry.gallery.category,
+      year: null,
+      location: null,
+      visibility: "public",
+      publishedAt: new Date(),
+      media: [] as Array<Record<string, unknown>>,
+      galleryId: entry.gallery.id,
+      mediaCount: 0,
+    };
+    current.mediaCount += 1;
+    current.media.push({
+      ...entry.photo,
+      projectId: current.id,
+      isHidden: false,
+      isCover: false,
+    });
+    groups.set(entry.gallery.id, current);
+    return groups;
+  }, new Map<string, {
+    id: string;
+    name: string;
+    description: string | null;
+    shortDescription: string | null;
+    category: string | null;
+    year: null;
+    location: null;
+    visibility: string;
+    publishedAt: Date;
+    media: Array<Record<string, unknown>>;
+    galleryId: string;
+    mediaCount: number;
+  }>());
+  const galleryPreviewProjects = Array.from(galleryGroups.values()).map(({ mediaCount: _mediaCount, galleryId: _galleryId, ...project }) => project);
+  const gallerySelections = Array.from(galleryGroups.values()).map((gallery) => ({
+    id: gallery.galleryId,
+    title: gallery.name,
+    category: gallery.category,
+    mediaCount: gallery.mediaCount,
+  }));
 
   const selectedProjectIds = Array.isArray(portfolio?.selectedProjectIds)
     ? portfolio.selectedProjectIds.filter((id): id is string => typeof id === "string")
@@ -73,6 +105,7 @@ async function readPortfolio(userId: string) {
     portfolio,
     projects: projectsWithMedia,
     gallerySelections,
+    galleryPreviewProjects,
     hasPublishedContent: galleryMedia.length > 0 || hasSelectedPublishedProject,
   };
 }

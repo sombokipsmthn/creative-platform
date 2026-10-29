@@ -264,6 +264,13 @@ export default function InvoiceDetailPage() {
     setItemSearch('');
   }
 
+  function addCustomDraftItem() {
+    const id = `new-custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setDraftItems((current) => [...current, { id, description: '', quantity: 1, unitPrice: 0, amount: 0, category: 'Other' }]);
+    setOpenItemId(id);
+    setItemSearch('');
+  }
+
   function selectInvoiceCatalogItem(itemId: string, option: InvoiceCatalogOption) {
     setDraftItems((current) => current.map((item) => item.id === itemId
       ? { ...item, description: option.name, unitPrice: option.rate, amount: Math.max(1, Number(item.quantity) || 1) * option.rate }
@@ -563,7 +570,8 @@ export default function InvoiceDetailPage() {
                 <button type="button" onClick={beginEditingItems} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-700 print:hidden">Edit items</button>
               ) : (
                 <div className="flex flex-wrap gap-2 print:hidden">
-                  <button type="button" onClick={addDraftItem} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-700">+ Add item</button>
+                  <button type="button" onClick={addDraftItem} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-700">+ Catalogue item</button>
+                  <button type="button" onClick={addCustomDraftItem} className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs font-semibold uppercase tracking-widest text-primary">+ Custom item</button>
                   <button type="button" onClick={() => { setEditingItems(false); setDraftItems([]); setOpenItemId(null); setError(''); }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs uppercase tracking-widest text-slate-500">Cancel</button>
                   <button type="button" onClick={() => void saveInvoiceItems()} disabled={itemsSaving} className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white disabled:opacity-50">{itemsSaving ? 'Saving…' : 'Save items'}</button>
                 </div>

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { BUILT_IN_SERVICE_OPTIONS } from '@/lib/production-service-options';
 
 /* =========================================================
    TYPES
@@ -24,6 +25,17 @@ type InvoiceItem = {
   quantity: number;
   unitPrice: number;
   amount: number;
+  category?: string;
+};
+
+type InvoiceCatalogOption = {
+  id: string;
+  name: string;
+  category: string;
+  subcategory?: string | null;
+  brand?: string | null;
+  specs?: string | null;
+  rate: number;
 };
 
 type Schedule = { id: string; label: string; amount: number; currency: string; dueDate: string; milestone?: string | null; status: string; notes?: string | null };
@@ -62,6 +74,11 @@ type Invoice = {
 ========================================================= */
 
 const PRIMARY = 'hsl(var(--primary))';
+
+const INVOICE_CATEGORIES = [
+  'Equipment', 'Camera', 'Audio', 'Lighting', 'Grip',
+  'Crew', 'Production', 'Post Production', 'Transport', 'Other',
+];
 
 const NEXT_STATUS: Record<string, { label: string; value: string; color: string } | null> = {
   draft: { label: 'Mark as Sent', value: 'sent', color: 'bg-blue-600 hover:bg-blue-700' },
@@ -123,6 +140,13 @@ export default function InvoiceDetailPage() {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [amendments, setAmendments] = useState<TermAmendment[]>([]);
   const [auditItems, setAuditItems] = useState<AuditItem[]>([]);
+  const [catalog, setCatalog] = useState<InvoiceCatalogOption[]>([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [editingItems, setEditingItems] = useState(false);
+  const [draftItems, setDraftItems] = useState<InvoiceItem[]>([]);
+  const [itemSearch, setItemSearch] = useState('');
+  const [openItemId, setOpenItemId] = useState<string | null>(null);
+  const [itemsSaving, setItemsSaving] = useState(false);
 
   useEffect(() => {
     if (!invoiceId) return;
@@ -158,6 +182,161 @@ export default function InvoiceDetailPage() {
     void load();
     return () => { cancelled = true; };
   }, [invoiceId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadCatalog() {
+      try {
+        setCatalogLoading(true);
+        const [equipmentResponse, servicesResponse] = await Promise.all([
+          fetch('/api/equipment', { cache: 'no-store' }),
+          fetch('/api/services', { cache: 'no-store' }),
+        ]);
+        const equipmentData = await equipmentResponse.json().catch(() => null);
+        const servicesData = await servicesResponse.json().catch(() => null);
+        const equipmentRows = Array.isArray(equipmentData)
+          ? equipmentData
+          : Array.isArray(equipmentData?.equipment) ? equipmentData.equipment : [];
+        const serviceRows = Array.isArray(servicesData)
+          ? servicesData
+          : Array.isArray(servicesData?.services) ? servicesData.services : [];
+        const equipmentOptions: InvoiceCatalogOption[] = equipmentRows
+          .filter((item: any) => item && typeof item.id === 'string' && typeof item.name === 'string')
+          .map((item: any) => ({
+            id: `equipment-${item.id}`,
+            name: item.name,
+            category: String(item.category || 'Equipment'),
+            subcategory: item.subcategory || null,
+            brand: item.brand || null,
+            specs: item.specs || null,
+            rate: Math.max(0, Number(item.dailyRate) || 0),
+          }));
+        const savedServices: InvoiceCatalogOption[] = serviceRows
+          .filter((item: any) => item && typeof item.id === 'string' && typeof (item.name || item.label) === 'string')
+          .map((item: any) => ({
+            id: `service-${item.id}`,
+            name: String(item.name || item.label),
+            category: String(item.category || 'Other'),
+            subcategory: item.description || null,
+            rate: Math.max(0, Number(item.defaultRate ?? item.rate) || 0),
+          }));
+        const builtInServices: InvoiceCatalogOption[] = BUILT_IN_SERVICE_OPTIONS.map((item, index) => ({
+          id: `suggested-${item.category.toLowerCase().replace(/\\s+/g, '-')}-${index}`,
+          name: item.label,
+          category: item.category,
+          subcategory: item.category,
+          rate: 0,
+        }));
+        if (!cancelled) setCatalog([...equipmentOptions, ...savedServices, ...builtInServices]);
+      } catch (err) {
+        console.error('Failed to load invoice item suggestions:', err);
+        if (!cancelled) setCatalog([]);
+      } finally {
+        if (!cancelled) setCatalogLoading(false);
+      }
+    }
+    void loadCatalog();
+    return () => { cancelled = true; };
+  }, []);
+
+  function beginEditingItems() {
+    setDraftItems((invoice?.items || []).map((item) => ({ ...item, category: item.category || 'Equipment' })));
+    setEditingItems(true);
+    setError('');
+    setSuccess('');
+  }
+
+  function updateDraftItem(itemId: string, field: keyof InvoiceItem, value: string | number) {
+    setDraftItems((current) => current.map((item) => {
+      if (item.id !== itemId) return item;
+      const next = { ...item, [field]: value };
+      if (field === 'quantity' || field === 'unitPrice') {
+        next.amount = Math.max(1, Number(next.quantity) || 1) * Math.max(0, Number(next.unitPrice) || 0);
+      }
+      return next;
+    }));
+  }
+
+  function addDraftItem() {
+    const id = `new-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    setDraftItems((current) => [...current, { id, description: '', quantity: 1, unitPrice: 0, amount: 0, category: 'Equipment' }]);
+    setOpenItemId(id);
+    setItemSearch('');
+  }
+
+  function selectInvoiceCatalogItem(itemId: string, option: InvoiceCatalogOption) {
+    setDraftItems((current) => current.map((item) => item.id === itemId
+      ? { ...item, description: option.name, unitPrice: option.rate, amount: Math.max(1, Number(item.quantity) || 1) * option.rate }
+      : item));
+    setOpenItemId(null);
+    setItemSearch('');
+  }
+
+  function categoryForSuggestion(category: string) {
+    const value = category.trim().toLowerCase().replace(/[_-]+/g, ' ');
+    if (['professional', 'professional fees', 'crew'].includes(value)) return 'Crew';
+    if (['logistics', 'travel', 'travel logistics', 'transport'].includes(value)) return 'Transport';
+    if (['editing', 'postproduction', 'post production'].includes(value)) return 'Post Production';
+    if (['camera', 'cameras'].includes(value)) return 'Camera';
+    if (['audio', 'sound'].includes(value)) return 'Audio';
+    if (value === 'lighting') return 'Lighting';
+    if (['grip', 'motion'].includes(value)) return 'Grip';
+    return category;
+  }
+
+  function invoiceCategoryMatches(option: InvoiceCatalogOption, category: string) {
+    const wanted = category.toLowerCase();
+    const values = [option.category, option.subcategory, option.name, option.brand, option.specs]
+      .filter(Boolean).map((value) => String(value).toLowerCase());
+    if (wanted === 'equipment') return !['crew', 'production', 'post production', 'transport', 'other'].includes(categoryForSuggestion(option.category).toLowerCase());
+    if (['crew', 'production', 'post production', 'transport', 'other'].includes(wanted)) {
+      return categoryForSuggestion(option.category).toLowerCase() === wanted;
+    }
+    if (wanted === 'camera') return values.some((value) => value.includes('camera'));
+    if (wanted === 'audio') return values.some((value) => value.includes('audio') || value.includes('sound') || value.includes('microphone'));
+    if (wanted === 'lighting') return values.some((value) => value.includes('light') || value.includes('led'));
+    if (wanted === 'grip') return values.some((value) => value.includes('grip') || value.includes('tripod') || value.includes('gimbal') || value.includes('dolly') || value.includes('stand'));
+    return values.some((value) => value.includes(wanted));
+  }
+
+  async function saveInvoiceItems() {
+    if (!invoice) return;
+    if (draftItems.length === 0) {
+      setError('Add at least one invoice item before saving.');
+      return;
+    }
+    if (draftItems.some((item) => !item.description.trim())) {
+      setError('Every invoice item needs a description. Use the custom description option if needed.');
+      return;
+    }
+    try {
+      setItemsSaving(true);
+      setError('');
+      setSuccess('');
+      const response = await fetch(`/api/invoices/${invoice.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: draftItems.map((item) => ({
+            description: item.description.trim(),
+            quantity: Math.max(1, Number(item.quantity) || 1),
+            unitPrice: Math.max(0, Number(item.unitPrice) || 0),
+          })),
+        }),
+      });
+      const data = await response.json().catch(() => null);
+      if (!response.ok) throw new Error(data?.error || 'Unable to save invoice items.');
+      setInvoice(data);
+      setDraftItems([]);
+      setEditingItems(false);
+      setOpenItemId(null);
+      setSuccess('Invoice line items saved.');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to save invoice items.');
+    } finally {
+      setItemsSaving(false);
+    }
+  }
 
   async function recordPayment(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -375,8 +554,63 @@ export default function InvoiceDetailPage() {
 
           {/* LINE ITEMS */}
           <div className="px-8 py-6 sm:px-10 print:px-0">
-            <p className="mb-4 text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">Line Items</p>
-            {items.length === 0 ? (
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-[10px] font-sans uppercase tracking-[0.2em] text-slate-400">Line Items</p>
+                <p className="mt-1 text-xs text-slate-500">Edit descriptions, specifications or dimensions, quantities and prices.</p>
+              </div>
+              {!editingItems ? (
+                <button type="button" onClick={beginEditingItems} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-widest text-slate-700 print:hidden">Edit items</button>
+              ) : (
+                <div className="flex flex-wrap gap-2 print:hidden">
+                  <button type="button" onClick={addDraftItem} className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-widest text-slate-700">+ Add item</button>
+                  <button type="button" onClick={() => { setEditingItems(false); setDraftItems([]); setOpenItemId(null); setError(''); }} className="rounded-xl border border-slate-200 px-3 py-2 text-xs uppercase tracking-widest text-slate-500">Cancel</button>
+                  <button type="button" onClick={() => void saveInvoiceItems()} disabled={itemsSaving} className="rounded-xl bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white disabled:opacity-50">{itemsSaving ? 'Saving…' : 'Save items'}</button>
+                </div>
+              )}
+            </div>
+            {editingItems ? (
+              <div className="space-y-4 print:hidden">
+                {draftItems.map((item) => {
+                  const query = itemSearch.trim().toLowerCase();
+                  const suggestions = catalog.filter((option) => invoiceCategoryMatches(option, item.category || 'Equipment'))
+                    .filter((option) => !query || [option.name, option.category, option.subcategory, option.brand, option.specs].filter(Boolean).some((value) => String(value).toLowerCase().includes(query)))
+                    .slice(0, 60);
+                  return (
+                    <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                      <div className="grid gap-3 md:grid-cols-[180px_minmax(0,1fr)_100px_140px_40px] md:items-start">
+                        <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                          Category
+                          <select value={item.category || 'Equipment'} onChange={(event) => updateDraftItem(item.id, 'category', event.target.value)} className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-normal normal-case tracking-normal text-slate-800">
+                            {INVOICE_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}
+                          </select>
+                        </label>
+                        <div className="relative grid gap-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                          Description / specifications
+                          <input value={item.description || ''} onChange={(event) => updateDraftItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setItemSearch(''); }} placeholder="Edit description, dimensions or specifications" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800" />
+                          {openItemId === item.id && (
+                            <div className="absolute left-0 top-full z-50 mt-1 w-full min-w-[280px] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+                              <input value={itemSearch} onChange={(event) => setItemSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-normal normal-case tracking-normal text-slate-800" />
+                              {itemSearch.trim() && <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => { updateDraftItem(item.id, 'description', itemSearch.trim()); updateDraftItem(item.id, 'unitPrice', 0); setOpenItemId(null); setItemSearch(''); }} className="mb-2 w-full rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-left text-xs font-medium normal-case tracking-normal text-slate-800">Use custom description: {itemSearch.trim()}</button>}
+                              <div className="max-h-56 overflow-y-auto">
+                                {catalogLoading && <p className="px-3 py-4 text-xs font-normal normal-case tracking-normal text-slate-400">Loading catalogue…</p>}
+                                {!catalogLoading && suggestions.map((option) => <button key={option.id} type="button" onMouseDown={(event) => event.preventDefault()} onClick={() => selectInvoiceCatalogItem(item.id, option)} className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-left hover:bg-slate-50"><span className="min-w-0"><span className="block truncate text-xs font-medium normal-case tracking-normal text-slate-800">{option.name}</span><span className="block text-[10px] font-normal normal-case tracking-normal text-slate-400">{option.category}{option.subcategory ? ` · ${option.subcategory}` : ''}</span></span><span className="shrink-0 text-xs font-normal normal-case tracking-normal text-slate-600">{fmt(option.rate, currency)}</span></button>)}
+                                {!catalogLoading && suggestions.length === 0 && <p className="px-3 py-4 text-center text-xs font-normal normal-case tracking-normal text-slate-400">No matches. Use custom description above.</p>}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                        <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Qty<input type="number" min="1" value={item.quantity ?? 1} onChange={(event) => updateDraftItem(item.id, 'quantity', Math.max(1, Number(event.target.value) || 1))} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800" /></label>
+                        <label className="grid gap-1 text-[10px] font-semibold uppercase tracking-widest text-slate-400">Unit price<input type="number" min="0" value={item.unitPrice ?? 0} onChange={(event) => updateDraftItem(item.id, 'unitPrice', Math.max(0, Number(event.target.value) || 0))} className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-800" /></label>
+                        <button type="button" onClick={() => setDraftItems((current) => current.filter((candidate) => candidate.id !== item.id))} aria-label="Remove invoice item" className="mt-5 rounded-lg px-2 py-2 text-lg text-slate-400 hover:bg-red-50 hover:text-red-600">×</button>
+                      </div>
+                      <p className="mt-3 text-right text-xs text-slate-500">Line total: <span className="font-semibold text-slate-800">{fmt(Math.max(1, Number(item.quantity) || 1) * Math.max(0, Number(item.unitPrice) || 0), currency)}</span></p>
+                    </div>
+                  );
+                })}
+                {draftItems.length === 0 && <p className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">No items yet. Add a catalogue item or a custom line.</p>}
+              </div>
+            ) : items.length === 0 ? (
               <p className="py-8 text-center italic text-sm text-slate-400">No line items on this invoice.</p>
             ) : (
               <AdminDataTable

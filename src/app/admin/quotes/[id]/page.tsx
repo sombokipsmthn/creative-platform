@@ -809,12 +809,12 @@ export default function QuoteDetailPage() {
                       </Select>
 
                       <div className="relative">
-                        <Input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-primary print:border-0 print:bg-transparent" />
+                        <Input value={openItemId === item.id ? equipmentSearch : item.description || ''} onChange={(event) => { setEquipmentSearch(event.target.value); updateItem(item.id, 'description', event.target.value); }} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search equipment or enter a description..." className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-primary print:border-0 print:bg-transparent" />
                         <Input value={item.notes || ''} onChange={(event) => updateItem(item.id, 'notes', event.target.value)} placeholder="Dimensions, specifications or notes (optional)" className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 outline-none focus:border-primary print:hidden" />
 
                         {openItemId === item.id && (
                           <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[360px] rounded-xl border border-slate-200 bg-white p-2 shadow-xl print:hidden">
-                            <Input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-primary" />
+                            
                             {equipmentSearch.trim() && (
                               <button
                                 type="button"
@@ -878,11 +878,11 @@ export default function QuoteDetailPage() {
 
                     <div className="relative mt-4">
                       <label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Description</label>
-                      <Input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary" />
+                      <Input value={openItemId === item.id ? equipmentSearch : item.description || ''} onChange={(event) => { setEquipmentSearch(event.target.value); updateItem(item.id, 'description', event.target.value); }} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search equipment or enter a description..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary" />
                       <Input value={item.notes || ''} onChange={(event) => updateItem(item.id, 'notes', event.target.value)} placeholder="Dimensions, specifications or notes (optional)" className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-primary" />
                       {openItemId === item.id && (
                         <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
-                          <Input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none" />
+                          
                           {equipmentSearch.trim() && (
                             <button
                               type="button"

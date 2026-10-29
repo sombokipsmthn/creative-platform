@@ -822,8 +822,6 @@ export default function QuoteDetailPage() {
                                 onClick={() => {
                                   const description = equipmentSearch.trim();
                                   updateItem(item.id, 'description', description);
-                                  updateItem(item.id, 'rate', 0);
-                                  updateItem(item.id, 'amount', 0);
                                   setOpenItemId(null);
                                   setEquipmentSearch('');
                                 }}

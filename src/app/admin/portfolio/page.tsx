@@ -28,6 +28,7 @@ type GallerySelection = {
 type ApiData = Omit<PortfolioData, "projects"> & {
   projects: PortfolioProject[];
   gallerySelections: GallerySelection[];
+  galleryPreviewProjects: PortfolioData["projects"];
   hasPublishedContent: boolean;
 };
 
@@ -148,7 +149,7 @@ export default function PortfolioAdminPage() {
       selectedProjectIds: selected,
       isPublished: published,
     },
-    projects: selectedProjects,
+    projects: [...data.galleryPreviewProjects, ...selectedProjects],
   };
 
   if (preview) {
@@ -191,7 +192,7 @@ export default function PortfolioAdminPage() {
                 <span className="text-sm font-medium">{data.gallerySelections.length} curated {data.gallerySelections.length === 1 ? "gallery" : "galleries"}</span>
                 <span className="text-muted-foreground">·</span>
                 <span className="text-sm font-medium">{data.gallerySelections.reduce((total, gallery) => total + gallery.mediaCount, 0)} selected media items</span>
-                <Button asChild={false} type="button" size="sm" variant="outline" onClick={() => { window.location.href = "/admin/galleries"; }}>
+                <Button type="button" size="sm" variant="outline" onClick={() => { window.location.href = "/admin/galleries"; }}>
                   Manage galleries <ExternalLink className="h-4 w-4" />
                 </Button>
               </div>

@@ -329,7 +329,7 @@ export default function QuoteDetailPage() {
           ...equipmentRows.map(equipmentFromApi).filter((item): item is CatalogOption => item !== null),
           ...serviceRows.map(serviceFromApi).filter((item): item is CatalogOption => item !== null),
           ...BUILT_IN_SERVICE_OPTIONS.map((service, index): CatalogOption => ({
-            id: `suggested-${service.category.toLowerCase().replace(/\\s+/g, '-')}-${index}`,
+            id: `suggested-${service.category.toLowerCase().replace(/\s+/g, '-')}-${index}`,
             name: service.label,
             category: service.category,
             subcategory: service.category,

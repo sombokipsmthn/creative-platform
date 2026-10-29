@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from "@/db";
-import { creatorPortfolios, creatorProfiles, projects, users } from "@/db/schema";
+import { creatorPortfolios, creatorProfiles, projectMedia, projects, users } from "@/db/schema";
 import { withCreatorApi } from "@/lib/api/route-boundaries";
 import { getCuratedGalleryMedia } from "@/lib/portfolio/gallery-curation";
 
@@ -14,22 +14,36 @@ const ids = (value: unknown) =>
     : [];
 
 async function readPortfolio(userId: string) {
-  const [user, profile, portfolio, eligible] = await Promise.all([
+  const [user, profile, portfolio, eligibleProjects] = await Promise.all([
     db.query.users.findFirst({ where: eq(users.id, userId) }),
     db.query.creatorProfiles.findFirst({ where: eq(creatorProfiles.userId, userId) }),
     db.query.creatorPortfolios.findFirst({ where: eq(creatorPortfolios.userId, userId) }),
-    db
-      .select({
-        id: projects.id,
-        name: projects.name,
-        slug: projects.slug,
-        visibility: projects.visibility,
-        publishedAt: projects.publishedAt,
-        coverMediaId: projects.coverMediaId,
-      })
-      .from(projects)
-      .where(and(eq(projects.creatorId, userId), eq(projects.visibility, "public"))),
+    db.select().from(projects).where(and(
+      eq(projects.creatorId, userId),
+      eq(projects.visibility, "public"),
+      eq(projects.status, "published"),
+      isNotNull(projects.publishedAt),
+    )),
   ]);
+
+  const projectIds = eligibleProjects.map((project) => project.id);
+  const media = projectIds.length
+    ? await db.select().from(projectMedia)
+        .where(and(
+          eq(projectMedia.creatorId, userId),
+          inArray(projectMedia.projectId, projectIds),
+          eq(projectMedia.isHidden, false),
+        ))
+        .orderBy(asc(projectMedia.sortOrder), asc(projectMedia.createdAt))
+    : [];
+  const mediaByProject = new Map<string, typeof media>();
+  for (const item of media) {
+    mediaByProject.set(item.projectId, [...(mediaByProject.get(item.projectId) ?? []), item]);
+  }
+  const projectsWithMedia = eligibleProjects.map((project) => ({
+    ...project,
+    media: mediaByProject.get(project.id) ?? [],
+  }));
 
   const galleryMedia = await getCuratedGalleryMedia(userId);
   const gallerySelections = Array.from(
@@ -49,15 +63,15 @@ async function readPortfolio(userId: string) {
   const selectedProjectIds = Array.isArray(portfolio?.selectedProjectIds)
     ? portfolio.selectedProjectIds.filter((id): id is string => typeof id === "string")
     : [];
-  const hasSelectedPublishedProject = eligible.some(
-    (project) => selectedProjectIds.includes(project.id) && project.publishedAt != null,
+  const hasSelectedPublishedProject = projectsWithMedia.some(
+    (project) => selectedProjectIds.includes(project.id),
   );
 
   return {
     user,
     profile,
     portfolio,
-    projects: eligible,
+    projects: projectsWithMedia,
     gallerySelections,
     hasPublishedContent: galleryMedia.length > 0 || hasSelectedPublishedProject,
   };
@@ -76,13 +90,18 @@ export async function PATCH(request: Request) {
     const eligible = await db
       .select({ id: projects.id })
       .from(projects)
-      .where(and(eq(projects.creatorId, user.id), eq(projects.visibility, "public")));
+      .where(and(
+        eq(projects.creatorId, user.id),
+        eq(projects.visibility, "public"),
+        eq(projects.status, "published"),
+        isNotNull(projects.publishedAt),
+      ));
     const eligibleIds = new Set(eligible.map((project) => project.id));
     const invalid = selectedProjectIds.some((id) => !eligibleIds.has(id));
 
     if (invalid) {
       return NextResponse.json(
-        { error: "Only your public projects can be selected." },
+        { error: "Only your published public projects can be selected." },
         { status: 400 },
       );
     }
@@ -92,7 +111,7 @@ export async function PATCH(request: Request) {
 
     if (isPublished && selectedProjectIds.length === 0 && galleryMedia.length === 0) {
       return NextResponse.json(
-        { error: "Select gallery content or a public project before publishing." },
+        { error: "Select gallery content or a published public project before publishing." },
         { status: 400 },
       );
     }

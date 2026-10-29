@@ -240,7 +240,7 @@ export default function InvoiceDetailPage() {
   }, []);
 
   function beginEditingItems() {
-    setDraftItems((invoice?.items || []).map((item) => ({ ...item, category: item.category || 'Equipment' })));
+    setDraftItems((invoice?.items || []).map((item) => ({ ...item, unitPrice: Math.max(0, Number(item.amount) || 0) / Math.max(1, Number(item.quantity) || 1), category: item.category || 'Equipment' })));
     setEditingItems(true);
     setError('');
     setSuccess('');

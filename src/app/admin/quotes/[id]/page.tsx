@@ -193,7 +193,7 @@ function displayServiceCategory(value?: string | null) {
 }
 
 function categoryMatches(option: CatalogOption, selectedCategory: string) {
-  if (selectedCategory === 'Equipment') return true;
+  if (selectedCategory === 'Equipment') return option.source === 'equipment';
 
   const wanted = normalize(selectedCategory);
   const values = [

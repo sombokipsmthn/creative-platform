@@ -2,6 +2,7 @@ import { withCreatorApi } from "@/lib/api/route-boundaries";
 import {
   getInvoiceForCreator,
   updateInvoiceStatusForCreator,
+  updateInvoiceItemsForCreator,
 } from "@/lib/services/invoices";
 
 type RouteContext = {
@@ -49,6 +50,14 @@ export async function PATCH(
   return withCreatorApi(req, async (request, user) => {
     const { id } = await context.params;
     const body = await request.json();
+
+    if (Array.isArray(body?.items)) {
+      return updateInvoiceItemsForCreator({
+        userId: user.id,
+        invoiceId: id,
+        items: body.items,
+      });
+    }
 
     return updateInvoiceStatusForCreator({
       userId: user.id,

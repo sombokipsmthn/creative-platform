@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { Input, Textarea } from '@/components/ui/input';
+import { BUILT_IN_SERVICE_OPTIONS } from '@/lib/production-service-options';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, Check, FileText, CircleNotch as Loader2, Plus, Printer, ArrowsClockwise as RefreshCw, FloppyDisk as Save, Trash as Trash2, X } from "@phosphor-icons/react";
 
@@ -192,7 +193,7 @@ function displayServiceCategory(value?: string | null) {
 }
 
 function categoryMatches(option: CatalogOption, selectedCategory: string) {
-  if (selectedCategory === 'Equipment') return true;
+  if (selectedCategory === 'Equipment') return option.source === 'equipment';
 
   const wanted = normalize(selectedCategory);
   const values = [
@@ -327,6 +328,15 @@ export default function QuoteDetailPage() {
         const nextCatalog = [
           ...equipmentRows.map(equipmentFromApi).filter((item): item is CatalogOption => item !== null),
           ...serviceRows.map(serviceFromApi).filter((item): item is CatalogOption => item !== null),
+          ...BUILT_IN_SERVICE_OPTIONS.map((service, index): CatalogOption => ({
+            id: `suggested-${service.category.toLowerCase().replace(/\s+/g, '-')}-${index}`,
+            name: service.label,
+            category: service.category,
+            subcategory: service.category,
+            unit: service.unit,
+            rate: 0,
+            source: 'service',
+          })),
         ];
 
         if (!cancelled) setCatalog(nextCatalog);
@@ -446,6 +456,25 @@ export default function QuoteDetailPage() {
           }
         : current
     );
+  }
+
+  function addCustomItem() {
+    const id = `new-${Date.now()}`;
+    setQuote((current) => current ? {
+      ...current,
+      items: [...(current.items || []), {
+        id,
+        category: 'Other',
+        description: '',
+        quantity: 1,
+        unit: 'project',
+        rate: 0,
+        amount: 0,
+        notes: '',
+      }],
+    } : current);
+    setOpenItemId(id);
+    setEquipmentSearch('');
   }
 
   function removeItem(itemId: string) {
@@ -763,6 +792,7 @@ export default function QuoteDetailPage() {
               <div className="mb-5 flex items-center justify-between">
                 <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Line Items</p><p className="mt-1 text-xs text-slate-400">Equipment, crew and production expenses</p></div>
                 <button type="button" onClick={addItem} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-sans uppercase tracking-widest text-slate-600 print:hidden"><Plus className="h-3 w-3" /> Add Item</button>
+                <button type="button" onClick={addCustomItem} className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-[10px] font-sans uppercase tracking-widest text-primary print:hidden"><Plus className="h-3 w-3" /> Custom Item</button>
               </div>
 
               <div className="hidden overflow-visible md:block">
@@ -780,10 +810,30 @@ export default function QuoteDetailPage() {
 
                       <div className="relative">
                         <Input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-primary print:border-0 print:bg-transparent" />
+                        <Input value={item.notes || ''} onChange={(event) => updateItem(item.id, 'notes', event.target.value)} placeholder="Dimensions, specifications or notes (optional)" className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600 outline-none focus:border-primary print:hidden" />
 
                         {openItemId === item.id && (
                           <div className="absolute left-0 top-full z-50 mt-2 w-full min-w-[360px] rounded-xl border border-slate-200 bg-white p-2 shadow-xl print:hidden">
                             <Input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none focus:border-primary" />
+                            {equipmentSearch.trim() && (
+                              <button
+                                type="button"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                  const description = equipmentSearch.trim();
+                                  updateItem(item.id, 'description', description);
+                                  setOpenItemId(null);
+                                  setEquipmentSearch('');
+                                }}
+                                className="mb-2 flex w-full items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 text-left hover:bg-primary/10"
+                              >
+                                <span className="min-w-0">
+                                  <span className="block text-xs font-medium text-slate-800">Use custom description</span>
+                                  <span className="mt-0.5 block truncate text-[10px] text-slate-500">{equipmentSearch.trim()}</span>
+                                </span>
+                                <span className="shrink-0 text-[10px] uppercase tracking-widest text-primary">Custom</span>
+                              </button>
+                            )}
                             <div className="max-h-60 overflow-y-auto">
                               {catalogLoading && <div className="flex items-center justify-center gap-2 px-3 py-5 text-xs text-slate-400"><Loader2 className="h-3.5 w-3.5 animate-spin" /> Loading catalog</div>}
                               {!catalogLoading && filteredCatalog.length === 0 && <div className="px-3 py-5 text-center text-xs text-slate-400">No {item.category || ''} items found.</div>}
@@ -829,9 +879,28 @@ export default function QuoteDetailPage() {
                     <div className="relative mt-4">
                       <label className="mb-2 block text-[9px] font-sans uppercase tracking-widest text-slate-400">Description</label>
                       <Input value={item.description || ''} onChange={(event) => updateItem(item.id, 'description', event.target.value)} onFocus={() => { setOpenItemId(item.id); setEquipmentSearch(''); }} placeholder="Search item in selected category..." className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary" />
+                      <Input value={item.notes || ''} onChange={(event) => updateItem(item.id, 'notes', event.target.value)} placeholder="Dimensions, specifications or notes (optional)" className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-primary" />
                       {openItemId === item.id && (
                         <div className="absolute left-0 top-full z-50 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
                           <Input autoFocus value={equipmentSearch} onChange={(event) => setEquipmentSearch(event.target.value)} placeholder={`Search ${item.category || 'items'}...`} className="mb-2 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none" />
+                          {equipmentSearch.trim() && (
+                            <button
+                              type="button"
+                              onMouseDown={(event) => event.preventDefault()}
+                              onClick={() => {
+                                const description = equipmentSearch.trim();
+                                updateItem(item.id, 'description', description);
+                                updateItem(item.id, 'rate', 0);
+                                updateItem(item.id, 'amount', 0);
+                                setOpenItemId(null);
+                                setEquipmentSearch('');
+                              }}
+                              className="mb-2 flex w-full items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 text-left"
+                            >
+                              <span className="min-w-0"><span className="block text-xs font-medium text-slate-800">Use custom description</span><span className="block truncate text-[10px] text-slate-500">{equipmentSearch.trim()}</span></span>
+                              <span className="shrink-0 text-[10px] uppercase tracking-widest text-primary">Custom</span>
+                            </button>
+                          )}
                           <div className="max-h-52 overflow-y-auto">
                             {filteredCatalog.map((option) => <button key={option.id} type="button" onClick={() => selectCatalogItem(item.id, option)} className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left hover:bg-slate-50"><div><p className="text-xs font-medium text-slate-800">{option.name}</p><p className="text-[10px] text-slate-400">{option.source === 'service' ? displayServiceCategory(option.category) : option.category}</p></div><span className="font-sans text-xs text-slate-600">{formatAmount(option.rate, quote.currency)}</span></button>)}
                             {!catalogLoading && filteredCatalog.length === 0 && <div className="px-3 py-4 text-center text-xs text-slate-400">No {item.category || ''} items found.</div>}

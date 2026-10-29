@@ -332,6 +332,77 @@ export async function updateInvoiceStatusForCreator({
   };
 }
 
+export async function updateInvoiceItemsForCreator({
+  userId,
+  invoiceId,
+  items,
+}: {
+  userId: string;
+  invoiceId: string;
+  items: unknown;
+}) {
+  const id = normalizeOptionalString(invoiceId);
+  if (!id) throw new ApiError("Invoice id is required", 400);
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new ApiError("At least one invoice item is required", 400);
+  }
+
+  const existing = await db
+    .select({ invoice: invoices, client: clients })
+    .from(invoices)
+    .leftJoin(clients, eq(invoices.clientId, clients.id))
+    .where(and(eq(invoices.id, id), eq(invoices.creatorId, userId)))
+    .limit(1);
+
+  const record = existing[0];
+  if (!record) throw new ApiError("Invoice not found", 404);
+
+  const normalizedItems = normalizeManualItems(items);
+  if (normalizedItems.some((item) => !item.description)) {
+    throw new ApiError("Every invoice item needs a description", 400);
+  }
+
+  const totals = calculateManualTotals({
+    items: normalizedItems,
+    tax: record.invoice.tax,
+  });
+
+  return db.transaction(async (tx) => {
+    await tx.delete(invoiceItems).where(eq(invoiceItems.invoiceId, id));
+
+    const createdItems = await tx
+      .insert(invoiceItems)
+      .values(normalizedItems.map((item) => ({
+        invoiceId: id,
+        description: item.description,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        amount: item.amount,
+        createdAt: new Date(),
+      })))
+      .returning();
+
+    const [updatedInvoice] = await tx
+      .update(invoices)
+      .set({
+        subtotal: totals.subtotal,
+        tax: totals.tax,
+        total: totals.total,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(invoices.id, id), eq(invoices.creatorId, userId)))
+      .returning();
+
+    if (!updatedInvoice) throw new ApiError("Invoice could not be updated", 500);
+
+    return {
+      ...updatedInvoice,
+      client: record.client,
+      items: createdItems,
+    };
+  });
+}
+
 export async function createInvoiceForCreator({
   userId,
   payload,

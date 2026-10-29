@@ -458,6 +458,25 @@ export default function QuoteDetailPage() {
     );
   }
 
+  function addCustomItem() {
+    const id = `new-${Date.now()}`;
+    setQuote((current) => current ? {
+      ...current,
+      items: [...(current.items || []), {
+        id,
+        category: 'Other',
+        description: '',
+        quantity: 1,
+        unit: 'project',
+        rate: 0,
+        amount: 0,
+        notes: '',
+      }],
+    } : current);
+    setOpenItemId(id);
+    setEquipmentSearch('');
+  }
+
   function removeItem(itemId: string) {
     setQuote((current) =>
       current
@@ -773,6 +792,7 @@ export default function QuoteDetailPage() {
               <div className="mb-5 flex items-center justify-between">
                 <div><p className="text-[10px] font-sans uppercase tracking-[0.25em]" style={{ color: PRIMARY }}>Line Items</p><p className="mt-1 text-xs text-slate-400">Equipment, crew and production expenses</p></div>
                 <button type="button" onClick={addItem} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-[10px] font-sans uppercase tracking-widest text-slate-600 print:hidden"><Plus className="h-3 w-3" /> Add Item</button>
+                <button type="button" onClick={addCustomItem} className="inline-flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-[10px] font-sans uppercase tracking-widest text-primary print:hidden"><Plus className="h-3 w-3" /> Custom Item</button>
               </div>
 
               <div className="hidden overflow-visible md:block">

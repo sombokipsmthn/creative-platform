@@ -80,6 +80,147 @@ const QUOTE_CATEGORIES = [
 ] as const;
 
 /* =========================================================
+   BUILT-IN PRODUCTION SERVICE SUGGESTIONS
+
+   These are quote line-item suggestions, not equipment records.
+   Creators can still type any description they need.
+========================================================= */
+
+const BUILT_IN_SERVICE_OPTIONS: Array<{
+  label: string;
+  category: string;
+  unit: string;
+}> = [
+  ...[
+    "Director",
+    "Producer",
+    "Executive Producer",
+    "Line Producer",
+    "Production Manager",
+    "Production Coordinator",
+    "Production Assistant / Runner",
+    "1st Assistant Director",
+    "2nd Assistant Director",
+    "Script Supervisor / Continuity",
+    "Director of Photography (DOP)",
+    "Camera Operator",
+    "1st Assistant Camera / Focus Puller",
+    "2nd Assistant Camera / Clapper Loader",
+    "Digital Imaging Technician (DIT)",
+    "Video Assist Operator",
+    "Drone Pilot",
+    "Unit Stills Photographer",
+    "Production Sound Mixer",
+    "Boom Operator",
+    "Sound Utility",
+    "Gaffer",
+    "Best Boy Electric",
+    "Lighting Technician / Electrician",
+    "Key Grip",
+    "Best Boy Grip",
+    "Grip",
+    "Dolly Grip",
+    "Art Director",
+    "Production Designer",
+    "Set Designer",
+    "Props Master",
+    "Set Dresser",
+    "Costume Designer / Wardrobe",
+    "Hair and Makeup Artist",
+    "Casting Director",
+    "Talent / Presenter",
+    "Actor / Featured Talent",
+    "Location Manager",
+    "Location Scout",
+    "Health and Safety Officer",
+    "Security Personnel",
+  ].map((label) => ({ label, category: "Crew", unit: "day" })),
+  ...[
+    "Art Direction and Set Dressing",
+    "Set Construction / Fabrication",
+    "Props Sourcing and Hire",
+    "Costume Sourcing and Hire",
+    "Location Scouting",
+    "Location Hire / Permit Coordination",
+    "Casting and Talent Coordination",
+    "Extras / Background Talent",
+    "Production Office and Coordination",
+    "Production Planning and Scheduling",
+    "Production Management",
+    "Production Design",
+    "Catering / Craft Services",
+    "Crew Meals and Refreshments",
+    "Accommodation",
+    "Location Fees and Permits",
+    "Generator and Power Support",
+    "Production Consumables / Expendables",
+    "Health, Safety and Security",
+    "Studio / Stage Hire",
+    "Set Build Materials",
+    "Talent Usage / Buyout",
+  ].map((label) => ({ label, category: "Production", unit: "project" })),
+  ...[
+    "Offline Editing",
+    "Assistant Editing / Media Organisation",
+    "Online Editing / Finishing",
+    "Colour Grading",
+    "Sound Editing",
+    "Dialogue Cleanup and Repair",
+    "Sound Design",
+    "Foley Recording",
+    "Audio Mixing / Mastering",
+    "Original Music Composition",
+    "Music Licensing",
+    "Voice-over Recording",
+    "Visual Effects (VFX)",
+    "Motion Graphics",
+    "2D / 3D Animation",
+    "Titles and End Credits",
+    "Subtitles and Captions",
+    "Transcription",
+    "Social Media Cut-downs",
+    "Versioning and Aspect-Ratio Deliverables",
+    "Broadcast / Platform QC",
+    "Mastering and Delivery",
+    "Media Backup and Archive",
+    "DCP Creation",
+  ].map((label) => ({ label, category: "Post Production", unit: "project" })),
+  ...[
+    "Crew Transport",
+    "Cast / Talent Transport",
+    "Equipment / Gear Transport",
+    "Production Truck / Lorry Hire",
+    "Production Van Hire",
+    "4x4 / Location Vehicle Hire",
+    "Passenger Van / Minibus Hire",
+    "Airport Transfers",
+    "Location Shuttle",
+    "Inter-location Transfers",
+    "Equipment Pickup and Return",
+    "Courier / Same-day Delivery",
+    "Freight and Cargo Handling",
+    "Cross-border Equipment Logistics",
+    "Driver",
+    "Transport Coordinator",
+    "Fuel",
+    "Parking and Road Tolls",
+    "Vehicle Loading / Offloading",
+    "Transport Standby / Overtime",
+  ].map((label) => ({ label, category: "Transport", unit: "trip" })),
+  ...[
+    "Studio / Location Scouting",
+    "Venue Hire",
+    "Equipment Insurance",
+    "Production Insurance",
+    "Data / Internet Connectivity",
+    "Translation / Interpretation",
+    "Research",
+    "Creative Consultation",
+    "Contingency / Miscellaneous Production Cost",
+  ].map((label) => ({ label, category: "Other", unit: "project" })),
+];
+
+/* =========================================================
    HELPERS
 ========================================================= */
 
@@ -286,28 +427,42 @@ export default function NewQuotePage() {
 
     async function loadServices() {
       try {
-        // Load all service categories
-        const categories = ["crew", "production", "post production", "transport", "other"];
-        const allServices: typeof services = [];
+        // The services API returns { services: [...] } and filters by creator,
+        // so fetch once and normalize its records instead of spreading the response object.
+        const response = await fetch("/api/services", { cache: "no-store" });
 
-        for (const category of categories) {
-          const response = await fetch(
-            `/api/services?category=${encodeURIComponent(category)}`,
-            { cache: "no-store" }
-          );
-
-          if (response.ok) {
-            const categoryServices = await response.json();
-            allServices.push(...categoryServices);
-          }
+        if (!response.ok) {
+          throw new Error("Failed to load saved services");
         }
+
+        const data = await response.json();
+        const records = Array.isArray(data)
+          ? data
+          : Array.isArray(data.services)
+            ? data.services
+            : [];
+
+        const savedServices = records.map((service: {
+          id: string;
+          name?: string | null;
+          label?: string | null;
+          category?: string | null;
+          defaultRate?: number | null;
+          rate?: number | null;
+          unit?: string | null;
+        }) => ({
+          id: service.id,
+          label: String(service.name ?? service.label ?? "").trim(),
+          category: String(service.category ?? "Other").trim() || "Other",
+          unit: String(service.unit ?? "project").trim() || "project",
+          rate: Math.max(0, Number(service.defaultRate ?? service.rate) || 0),
+        })).filter((service: { label: string }) => service.label);
 
         if (!cancelled) {
-          setServices(allServices);
+          setServices(savedServices);
         }
       } catch (err) {
-        console.error("Failed to load services:", err);
-        // Services are optional, fall back to empty
+        console.error("Failed to load saved services:", err);
         if (!cancelled) {
           setServices([]);
         }
@@ -621,46 +776,44 @@ export default function NewQuotePage() {
     ]);
 
     if (serviceCategories.has(selectedCategory)) {
-      services.forEach((service) => {
-        if (
-          normalize(service.category) !==
-          selectedCategory
-        ) {
-          return;
-        }
+      const builtInOptions = BUILT_IN_SERVICE_OPTIONS
+        .filter((service) => normalize(service.category) === selectedCategory)
+        .map((service, index): DescriptionOption => ({
+          id: `suggested-${selectedCategory.replace(/\\s+/g, "-")}-${index}`,
+          label: service.label,
+          type: "service",
+          category: service.category,
+          subcategory: service.category,
+          rate: 0,
+          unit: service.unit,
+        }));
 
-        if (
-          search &&
-          !(
-            normalize(service.label).includes(
-              search
-            ) ||
-            normalize(
-              service.category
-            ).includes(search)
-          )
-        ) {
-          return;
-        }
-
-        options.push({
+      const savedOptions = services
+        .filter((service) => normalize(service.category) === selectedCategory)
+        .map((service): DescriptionOption => ({
           id: service.id,
           label: service.label,
           type: "service",
           category: service.category,
-          subcategory:
-            service.category,
+          subcategory: service.category,
           rate: service.rate,
           unit: service.unit,
-        });
+        }));
+
+      const uniqueOptions = new Map<string, DescriptionOption>();
+      [...builtInOptions, ...savedOptions].forEach((option) => {
+        if (
+          !search ||
+          normalize(option.label).includes(search) ||
+          normalize(option.category).includes(search)
+        ) {
+          uniqueOptions.set(normalize(option.label), option);
+        }
       });
 
-      return options
-        .sort((a, b) =>
-          a.label.localeCompare(
-            b.label
-          )
-        );
+      return [...uniqueOptions.values()].sort((a, b) =>
+        a.label.localeCompare(b.label)
+      );
     }
 
     return options;
@@ -1990,29 +2143,13 @@ export default function NewQuotePage() {
                                 onChange={(
                                   event
                                 ) => {
-                                  const description =
-                                    event.target.value;
-
-                                  // Keep the typed description on the quote item
-                                  // immediately so custom crew, transport, and
-                                  // other line items pass required-description validation.
-                                  setItems((current) =>
-                                    current.map((currentItem) =>
-                                      currentItem.id === item.id
-                                        ? {
-                                            ...currentItem,
-                                            description,
-                                            type: "custom",
-                                            equipmentId: "",
-                                          }
-                                        : currentItem
-                                    )
-                                  );
-
+                                  // Typing searches the catalogue without changing
+                                  // the selected line item. Custom text is committed
+                                  // only when the user chooses "Use custom description".
                                   setDescriptionSearch(
                                     (current) => ({
                                       ...current,
-                                      [item.id]: description,
+                                      [item.id]: event.target.value,
                                     })
                                   );
 

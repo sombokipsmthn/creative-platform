@@ -779,7 +779,7 @@ export default function NewQuotePage() {
       const builtInOptions = BUILT_IN_SERVICE_OPTIONS
         .filter((service) => normalize(service.category) === selectedCategory)
         .map((service, index): DescriptionOption => ({
-          id: `suggested-${selectedCategory.replace(/\\s+/g, "-")}-${index}`,
+          id: `suggested-${selectedCategory.replace(/\s+/g, "-")}-${index}`,
           label: service.label,
           type: "service",
           category: service.category,

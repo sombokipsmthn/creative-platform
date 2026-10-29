@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "predev": "docker compose --env-file .env.local stop app && docker compose --env-file .env.local up -d --wait postgres",
     "dev": "next dev -p 3000 -H 0.0.0.0",
     "build": "next build --turbopack",
     "start": "next start -p 3000 -H 0.0.0.0",
@@ -101,10 +100,8 @@
     "@vitejs/plugin-react": "^6.1.2",
     "@vitejs/plugin-rsc": "^0.5.38",
     "axe-core": "^4.14.0",
-    "cf": "^1.0.0-beta.20",
     "drizzle-kit": "^0.31.4",
     "eslint": "^10.13.0",
-    "eslint-config-next": "^16.4.2",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",

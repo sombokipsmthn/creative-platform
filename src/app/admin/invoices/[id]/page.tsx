@@ -221,7 +221,7 @@ export default function InvoiceDetailPage() {
             rate: Math.max(0, Number(item.defaultRate ?? item.rate) || 0),
           }));
         const builtInServices: InvoiceCatalogOption[] = BUILT_IN_SERVICE_OPTIONS.map((item, index) => ({
-          id: `suggested-${item.category.toLowerCase().replace(/\\s+/g, '-')}-${index}`,
+          id: `suggested-${item.category.toLowerCase().replace(/\s+/g, '-')}-${index}`,
           name: item.label,
           category: item.category,
           subcategory: item.category,

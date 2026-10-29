@@ -36,6 +36,7 @@ type InvoiceCatalogOption = {
   brand?: string | null;
   specs?: string | null;
   rate: number;
+  source?: 'equipment' | 'service';
 };
 
 type Schedule = { id: string; label: string; amount: number; currency: string; dueDate: string; milestone?: string | null; status: string; notes?: string | null };
@@ -210,6 +211,7 @@ export default function InvoiceDetailPage() {
             brand: item.brand || null,
             specs: item.specs || null,
             rate: Math.max(0, Number(item.dailyRate) || 0),
+            source: 'equipment',
           }));
         const savedServices: InvoiceCatalogOption[] = serviceRows
           .filter((item: any) => item && typeof item.id === 'string' && typeof (item.name || item.label) === 'string')
@@ -219,6 +221,7 @@ export default function InvoiceDetailPage() {
             category: String(item.category || 'Other'),
             subcategory: item.description || null,
             rate: Math.max(0, Number(item.defaultRate ?? item.rate) || 0),
+            source: 'service',
           }));
         const builtInServices: InvoiceCatalogOption[] = BUILT_IN_SERVICE_OPTIONS.map((item, index) => ({
           id: `suggested-${item.category.toLowerCase().replace(/\s+/g, '-')}-${index}`,
@@ -226,6 +229,7 @@ export default function InvoiceDetailPage() {
           category: item.category,
           subcategory: item.category,
           rate: 0,
+          source: 'service',
         }));
         if (!cancelled) setCatalog([...equipmentOptions, ...savedServices, ...builtInServices]);
       } catch (err) {
@@ -295,7 +299,7 @@ export default function InvoiceDetailPage() {
     const wanted = category.toLowerCase();
     const values = [option.category, option.subcategory, option.name, option.brand, option.specs]
       .filter(Boolean).map((value) => String(value).toLowerCase());
-    if (wanted === 'equipment') return !['crew', 'production', 'post production', 'transport', 'other'].includes(categoryForSuggestion(option.category).toLowerCase());
+    if (wanted === 'equipment') return option.source !== 'service';
     if (['crew', 'production', 'post production', 'transport', 'other'].includes(wanted)) {
       return categoryForSuggestion(option.category).toLowerCase() === wanted;
     }

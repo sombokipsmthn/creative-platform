@@ -1,233 +1,60 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import Image from 'next/image'
-
-interface GalleryPhoto {
-  id: string
-  filename: string
-  displayUrl: string
-  thumbnailUrl: string
-  mimeType?: string | null
-  width?: number
-  height?: number
-  captureDate?: string
-  sortOrder: number
-  isHidden: boolean
-  isFavorite: boolean
-  isSelected: boolean
-  downloadCount: number
-}
-
-interface GalleryCollection {
-  id: string
-  title: string
-  description?: string
-  photos: GalleryPhoto[]
-}
 
 interface GalleryThemeSelectorProps {
-  galleryId: string
+  galleryId?: string
   onThemeChange: (themeId: GalleryThemeId | null, customThemeName: string) => void
   currentThemeId: GalleryThemeId | null
   isSaving: boolean
-  previewPhotos?: GalleryPhoto[]
-  previewCollections?: GalleryCollection[]
+  previewPhotos?: unknown[]
+  previewCollections?: unknown[]
 }
 
-/**
- * Gets the local thumbnail asset for a theme.
- */
-function getThemeThumbnail(themeId: GalleryThemeId): string {
-  const thumbnails: Record<GalleryThemeId, string> = {
-    minimal: '/theme-thumb-minimal.svg',
-    editorial: '/theme-thumb-editorial.svg',
-    cinematic: '/theme-thumb-cinematic.svg',
-    mosaic: '/theme-thumb-mosaic.svg',
-    story: '/theme-thumb-story.svg',
-  }
-  return thumbnails[themeId]
+const swatches: Record<GalleryThemeId, string[]> = {
+  minimal: ['#FFFFFF', '#EDEDE9', '#171717'],
+  editorial: ['#F7F5F1', '#D8CFC1', '#292521'],
+  cinematic: ['#080808', '#242424', '#FFFFFF'],
+  mosaic: ['#FFFFFF', '#DCE4E8', '#17212B'],
+  story: ['#FAFAFA', '#E9E3D9', '#292722'],
 }
 
-export default function GalleryThemeSelector({
-  onThemeChange,
-  currentThemeId,
-  isSaving,
-}: GalleryThemeSelectorProps) {
-  const [customThemeName, setCustomThemeName] = useState('')
-  const [focusedIndex, setFocusedIndex] = useState(0)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
-
-  const handleThemeSelect = useCallback(
-    (themeId: GalleryThemeId | null) => {
-      onThemeChange(themeId, customThemeName)
-    },
-    [customThemeName, onThemeChange]
-  )
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle keys when container is focused or has focus within
-      if (!containerRef.current?.contains(document.activeElement)) return
-
-      switch (e.key) {
-        case 'ArrowRight':
-          e.preventDefault()
-          setFocusedIndex(prev => Math.min(prev + 1, GALLERY_THEMES.length - 1))
-          break
-        case 'ArrowLeft':
-          e.preventDefault()
-          setFocusedIndex(prev => Math.max(prev - 1, 0))
-          break
-        case 'ArrowDown':
-          e.preventDefault()
-          setFocusedIndex(prev => Math.min(prev + 1, GALLERY_THEMES.length - 1))
-          break
-        case 'ArrowUp':
-          e.preventDefault()
-          setFocusedIndex(prev => Math.max(prev - 1, 0))
-          break
-        case 'Enter':
-        case ' ':
-          e.preventDefault()
-          const theme = GALLERY_THEMES[focusedIndex]
-          if (theme) handleThemeSelect(theme.id)
-          break
-        case 'Escape':
-          e.preventDefault()
-          handleThemeSelect(null)
-          break
-        case 'Home':
-          e.preventDefault()
-          setFocusedIndex(0)
-          break
-        case 'End':
-          e.preventDefault()
-          setFocusedIndex(GALLERY_THEMES.length - 1)
-          break
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [focusedIndex, handleThemeSelect])
-
-  // Focus the selected button when focusedIndex changes
-  useEffect(() => {
-    if (buttonRefs.current[focusedIndex]) {
-      buttonRefs.current[focusedIndex]?.focus()
-    }
-  }, [focusedIndex])
-
+export default function GalleryThemeSelector({ onThemeChange, currentThemeId, isSaving }: GalleryThemeSelectorProps) {
   return (
-    <div
-      ref={containerRef}
-      className="space-y-4"
-      tabIndex={0}
-      role="listbox"
-      aria-label="Gallery themes"
-    >
+    <section className="space-y-4">
       <div>
-        <h3 className="text-sm font-medium text-[var(--color-text-primary)] mb-2">
-          Select a Gallery Theme
-        </h3>
-        <p className="text-xs text-[var(--color-text-muted)] mb-4">
-          Choose from professionally designed themes. Each provides a unique visual presentation for your gallery.
-          <span className="sr-only">
-            Use arrow keys to navigate, Enter to select, Escape to deselect.
-          </span>
-        </p>
+        <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Choose a starting point</h3>
+        <p className="mt-1 text-xs leading-relaxed text-[var(--color-text-muted)]">Every theme can be customised. Select one to load its design into the live preview.</p>
       </div>
-
-      {/* Theme list - single column, compact cards with thumbnails */}
-      <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1" role="presentation">
-        {GALLERY_THEMES.map((theme, index) => {
-          const isCurrent = currentThemeId === theme.id
-          const isFocused = focusedIndex === index
-
-          const setRef = (el: HTMLButtonElement | null) => {
-            buttonRefs.current[index] = el
-          }
-
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 2xl:grid-cols-2">
+        {GALLERY_THEMES.map((theme) => {
+          const selected = currentThemeId === theme.id
+          const colors = swatches[theme.id]
           return (
-            <div key={theme.id} className="relative group" role="presentation">
-              <Button
-                ref={setRef}
-                type="button"
-                onClick={() => handleThemeSelect(theme.id)}
-                disabled={isSaving}
-                variant={isCurrent ? 'primary' : 'outline'}
-                className={`w-full justify-start px-2.5 py-2 text-left transition-all duration-200 gap-2.5 ${
-                  isFocused ? 'ring-2 ring-[var(--color-accent)] ring-offset-2' : ''
-                }`}
-                role="option"
-                aria-selected={isCurrent}
-                aria-label={theme.label}
-              >
-                {/* Thumbnail */}
-                <div className="relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
-                  <Image
-                    src={getThemeThumbnail(theme.id)}
-                    alt={`${theme.label} theme preview`}
-                    fill
-                    className="object-cover"
-                    unoptimized
-                    sizes="64px"
-                  />
-                  {isCurrent && (
-                    <div className="absolute inset-0 bg-[var(--color-accent)]/20 flex items-center justify-center">
-                      <span className="text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent-foreground)] px-1.5 py-0.5 rounded">
-                        ✓
-                      </span>
-                    </div>
-                  )}
+            <button key={theme.id} type="button" disabled={isSaving} onClick={() => onThemeChange(theme.id, '')}
+              aria-pressed={selected}
+              className={`group overflow-hidden rounded-xl border text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] ${selected ? 'border-[var(--color-accent)] ring-2 ring-[var(--color-accent)]/15' : 'border-[var(--color-border-subtle)] hover:border-[var(--color-text-muted)]'}`}>
+              <div className="relative h-28 overflow-hidden p-3" style={{ background: colors[0] }}>
+                <div className="absolute inset-x-3 top-3 flex items-center justify-between">
+                  <span className="h-1.5 w-10 rounded-full" style={{ background: colors[2], opacity: .7 }} />
+                  <span className="flex gap-1">{colors.map((color) => <i key={color} className="h-2.5 w-2.5 rounded-full border border-black/10" style={{ background: color }} />)}</span>
                 </div>
-
-                {/* Theme info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-xs text-[var(--color-text-primary)] truncate">
-                      {theme.label}
-                    </h4>
-                    {isCurrent && (
-                      <span className="text-xs font-semibold text-[var(--color-accent)] ml-2 whitespace-nowrap">
-                        Selected
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[var(--color-text-muted)] truncate mt-0.5">
-                    {theme.description}
-                  </p>
+                <div className="absolute inset-x-3 bottom-3 grid grid-cols-3 gap-1.5">
+                  {Array.from({ length: 6 }).map((_, index) => <span key={index} className={`block rounded-sm ${theme.id === 'editorial' && index === 0 ? 'col-span-2 row-span-2 h-12' : 'h-5'}`} style={{ background: index % 2 ? colors[1] : colors[2], opacity: index % 3 === 0 ? .88 : .48 }} />)}
                 </div>
-              </Button>
-            </div>
+                {selected && <span className="absolute right-3 top-8 rounded-full bg-black px-2 py-1 text-[9px] font-semibold uppercase tracking-wider text-white">Selected</span>}
+              </div>
+              <div className="flex items-start justify-between gap-3 p-3">
+                <span className="min-w-0">
+                  <span className="block text-sm font-semibold text-[var(--color-text-primary)]">{theme.label}</span>
+                  <span className="mt-1 block text-xs leading-relaxed text-[var(--color-text-muted)]">{theme.description}</span>
+                </span>
+                <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border text-[10px] ${selected ? 'border-[var(--color-accent)] bg-[var(--color-accent)] text-white' : 'border-[var(--color-border-subtle)] text-transparent'}`}>✓</span>
+              </div>
+            </button>
           )
         })}
       </div>
-
-      {/* Custom theme name input */}
-      <div className="border-t border-[var(--color-border-subtle)] pt-4">
-        <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-          Save as Custom Theme (Optional)
-        </label>
-        <Input
-          type="text"
-          value={customThemeName}
-          onChange={(e) => setCustomThemeName(e.target.value)}
-          placeholder="My Custom Theme"
-          disabled={isSaving}
-        />
-        {customThemeName && (
-          <p className="text-xs text-[var(--color-text-muted)] mt-1">
-            Will be saved as a custom theme when you select a theme above.
-          </p>
-        )}
-      </div>
-    </div>
+    </section>
   )
 }

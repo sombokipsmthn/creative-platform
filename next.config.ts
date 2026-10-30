@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
 
   images: {
+    // Gallery media is served through a same-origin API route with a
+    // dynamic ?key= query parameter. Omitting "search" allows that query.
+    localPatterns: [
+      {
+        pathname: '/api/public/galleries/media',
+      },
+    ],
     remotePatterns: [
       { protocol: 'https', hostname: 'unavatar.io' },
       { protocol: 'https', hostname: 'github.com' },
@@ -20,7 +27,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },
-
 
   webpack: (config, { isServer }) => {
     if (!isServer) {

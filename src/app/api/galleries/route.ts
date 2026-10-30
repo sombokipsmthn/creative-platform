@@ -37,7 +37,34 @@ export async function GET(request: Request) {
         updatedAt: galleries.updatedAt,
         clientName: clients.name,
         clientCompany: clients.company,
-        coverUrl: sql<string>`(SELECT p.display_url FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`,
+        coverUrl: sql<string | null>`(
+          SELECT
+            CASE
+              WHEN COALESCE(p.display_path, p.storage_path) LIKE 'http%'
+                THEN COALESCE(p.display_path, p.storage_path, p.display_url)
+              ELSE '/api/public/galleries/media?key=' || COALESCE(p.display_path, p.storage_path)
+            END
+          FROM gallery_photos p
+          WHERE p.gallery_id = ${galleries.id}
+            AND p.id = COALESCE(
+              (
+                SELECT selected.id
+                FROM gallery_photos selected
+                WHERE selected.gallery_id = ${galleries.id}
+                  AND selected.id = ${galleries.coverPhotoId}
+                LIMIT 1
+              ),
+              (
+                SELECT fallback.id
+                FROM gallery_photos fallback
+                WHERE fallback.gallery_id = ${galleries.id}
+                  AND fallback.is_hidden = false
+                ORDER BY fallback.sort_order ASC, fallback.created_at ASC
+                LIMIT 1
+              )
+            )
+          LIMIT 1
+        )`,
         photoCount: sql<number>`(SELECT COUNT(*) FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false)`,
         collectionsCount: sql<number>`(SELECT COUNT(*) FROM gallery_collections col WHERE col.gallery_id = ${galleries.id})`,
         favoritesCount: sql<number>`(SELECT COUNT(*) FROM gallery_photo_actions a WHERE a.gallery_id = ${galleries.id} AND a.is_favorite = true)`,

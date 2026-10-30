@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
 import Image from 'next/image'
 
 interface GalleryPhoto {
@@ -54,7 +53,6 @@ function getThemeThumbnail(themeId: GalleryThemeId): string {
 }
 
 export default function GalleryThemeSelector({
-  galleryId,
   onThemeChange,
   currentThemeId,
   isSaving,

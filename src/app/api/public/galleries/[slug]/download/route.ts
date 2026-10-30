@@ -522,8 +522,7 @@ export async function POST(
       let output =
         source.body;
 
-      let extension =
-        "jpg";
+      let extension = preset.variant === "original" && source.contentType === "image/png" ? "png" : preset.variant === "original" && source.contentType === "image/webp" ? "webp" : "jpg";
 
       const needsTransform =
         preset.variant !==
@@ -666,14 +665,7 @@ export async function POST(
         {
           status: 200,
           headers: {
-            "Content-Type":
-              preset.format ===
-              "png"
-                ? "image/png"
-                : preset.format ===
-                    "webp"
-                  ? "image/webp"
-                  : "image/jpeg",
+            "Content-Type": preset.variant === "original" && preset.max_width === null && !preset.include_watermark ? (item.name.endsWith(".png") ? "image/png" : item.name.endsWith(".webp") ? "image/webp" : "image/jpeg") : preset.format === "png" ? "image/png" : preset.format === "webp" ? "image/webp" : "image/jpeg",
             "Content-Disposition":
               `attachment; filename="${item.name}"`,
             "Content-Length":

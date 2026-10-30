@@ -348,7 +348,7 @@ export default function GalleryWorkspacePage() {
               <div className="flex flex-wrap items-center gap-2">
                 {gallery.slug && (
                   <a
-                    href={`/portal/g/${gallery.id}`}
+                    href={`/Portal/g/${gallery.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="gallery-btn gallery-btn-secondary"

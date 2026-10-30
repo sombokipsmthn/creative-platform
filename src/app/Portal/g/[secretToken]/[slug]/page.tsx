@@ -263,7 +263,9 @@ export default function ClientGalleryPage({
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = resolution === "original" ? photo.filename : photo.filename.replace(/\\.[^.]+$/, "") + (resolution === "high" ? "-high-res.jpg" : "-web.jpg");
+      const filenameDot = photo.filename.lastIndexOf(".");
+      const baseFilename = filenameDot > 0 ? photo.filename.slice(0, filenameDot) : photo.filename;
+      link.download = resolution === "original" ? photo.filename : baseFilename + (resolution === "high" ? "-high-res.jpg" : "-web.jpg");
       document.body.appendChild(link);
       link.click();
       link.remove();

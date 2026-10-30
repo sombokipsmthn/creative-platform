@@ -536,7 +536,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
           {/* Theme-aware cover preview */}
           <div className="space-y-3">
             {/* Theme-colored cover placeholder */}
-            <div className="aspect-video rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
               {/* Show sample gallery when no real cover photo, or real photos otherwise */}
               {previewImageUrl ? (
                 <GalleryMedia

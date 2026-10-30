@@ -1,4 +1,7 @@
+"use client";
 import type { creatorPortfolios, creatorProfiles, projectMedia, projects, users } from "@/db/schema";
+import { useEffect, useRef } from "react";
+import { trackPortfolioView, trackProjectClick, trackContactClick, trackWebsiteClick, trackVideoPlay, useScrollDepthTracking } from "@/lib/portfolio/analytics";
 
 export type PortfolioData = {
   user: typeof users.$inferSelect;
@@ -10,15 +13,23 @@ export type PortfolioData = {
 function MediaItem({
   item,
   projectName,
+  projectId,
+  handle,
   index,
 }: {
   item: PortfolioData["projects"][number]["media"][number];
   projectName: string;
+  projectId: string;
+  handle: string;
   index: number;
 }) {
   const src = item.displayUrl || item.thumbnailUrl || item.originalUrl;
   const alt = item.altText || item.caption || `${projectName} — image ${index + 1}`;
   const isVideo = item.mimeType?.startsWith("video/");
+
+  const handleVideoPlay = () => {
+    trackVideoPlay(handle, projectId, projectName);
+  };
 
   return (
     <figure className="group relative m-0 overflow-hidden rounded-xl bg-neutral-100 dark:bg-neutral-900">
@@ -31,6 +42,7 @@ function MediaItem({
           playsInline
           className="block h-auto max-h-[720px] w-full object-contain"
           aria-label={alt}
+          onPlay={handleVideoPlay}
         />
       ) : (
         // Gallery media can be served through the platform's protected media proxy,
@@ -61,6 +73,23 @@ export function PortfolioRenderer({
   const { user, profile, portfolio, projects: work } = data;
   const contactEmail = portfolio.contactEmail || user.email;
   const isGrid = portfolio.layout === "grid";
+  const isCustomDomain = typeof window !== 'undefined' &&
+    !window.location.hostname.includes('localhost') &&
+    !window.location.hostname.includes('.vercel.app') &&
+    !window.location.hostname.includes('kipsmthn.com');
+
+  const handleForTracking = user.handle || "";
+
+  // Track page view on mount
+  useEffect(() => {
+    if (!preview) {
+      trackPortfolioView(handleForTracking, isCustomDomain);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preview]);
+
+  // Track scroll depth
+  useScrollDepthTracking(handleForTracking);
 
   return (
     <main className="min-h-screen bg-[#faf9f6] text-[#191919] dark:bg-[#111110] dark:text-[#f4f1eb]">
@@ -142,12 +171,12 @@ export function PortfolioRenderer({
 
               <div className={isGrid ? "space-y-3" : "min-w-0 space-y-3 sm:space-y-4"}>
                 {cover && (
-                  <MediaItem item={cover} projectName={project.name} index={0} />
+                  <MediaItem item={cover} projectName={project.name} projectId={project.id} handle={user.handle || ""} index={0} />
                 )}
                 {media.length > 1 && (
                   <div className={isGrid ? "grid grid-cols-2 gap-3" : "grid grid-cols-2 gap-3 sm:gap-4"}>
                     {media.slice(1, isGrid ? 5 : 7).map((item, mediaIndex) => (
-                      <MediaItem key={item.id} item={item} projectName={project.name} index={mediaIndex + 1} />
+                      <MediaItem key={item.id} item={item} projectName={project.name} projectId={project.id} handle={user.handle || ""} index={mediaIndex + 1} />
                     ))}
                   </div>
                 )}

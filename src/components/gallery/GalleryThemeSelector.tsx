@@ -1,17 +1,43 @@
 'use client'
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react'
 import { GALLERY_THEMES, type GalleryThemeId } from '@/lib/gallery/themes'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import Image from 'next/image'
+import { GalleryViewer } from '@/components/gallery/viewers/wrapper'
+
+interface GalleryPhoto {
+  id: string
+  filename: string
+  displayUrl: string
+  thumbnailUrl: string
+  mimeType?: string | null
+  width?: number
+  height?: number
+  captureDate?: string
+  sortOrder: number
+  isHidden: boolean
+  isFavorite: boolean
+  isSelected: boolean
+  downloadCount: number
+}
+
+interface GalleryCollection {
+  id: string
+  title: string
+  description?: string
+  photos: GalleryPhoto[]
+}
 
 interface GalleryThemeSelectorProps {
   galleryId: string
   onThemeChange: (themeId: GalleryThemeId | null, customThemeName: string) => void
   currentThemeId: GalleryThemeId | null
   isSaving: boolean
+  previewPhotos?: GalleryPhoto[]
+  previewCollections?: GalleryCollection[]
 }
 
 /**
@@ -33,12 +59,17 @@ export default function GalleryThemeSelector({
   onThemeChange,
   currentThemeId,
   isSaving,
+  previewPhotos = [],
+  previewCollections = [],
 }: GalleryThemeSelectorProps) {
   const [hoveredTheme, setHoveredTheme] = useState<GalleryThemeId | null>(null)
   const [customThemeName, setCustomThemeName] = useState('')
   const [focusedIndex, setFocusedIndex] = useState(0)
+  const [previewMode, setPreviewMode] = useState<GalleryThemeId | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([])
+
+  const hasPreviewContent = previewPhotos.length > 0
 
   const handleThemeSelect = useCallback(
     (themeId: GalleryThemeId | null) => {
@@ -46,6 +77,10 @@ export default function GalleryThemeSelector({
     },
     [customThemeName, onThemeChange]
   )
+
+  const handlePreviewTheme = useCallback((themeId: GalleryThemeId) => {
+    setPreviewMode(themeId)
+  }, [])
 
   // Keyboard navigation
   useEffect(() => {
@@ -122,12 +157,52 @@ export default function GalleryThemeSelector({
         </p>
       </div>
 
+      {hasPreviewContent && previewMode && (
+        <div className="border border-[var(--color-border-subtle)] rounded-xl overflow-hidden bg-[var(--color-bg-card)] mb-4">
+          <div className="p-3 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
+            <span className="text-xs font-medium text-[var(--color-text-primary)] uppercase tracking-wider">
+              Theme Preview
+            </span>
+            <span className="text-xs text-[var(--color-text-muted)]">
+              {GALLERY_THEMES.find(t => t.id === previewMode)?.label} theme
+            </span>
+          </div>
+          <div className="relative min-h-[40vh] max-h-[60vh] overflow-auto">
+            <GalleryViewer
+              id={galleryId}
+              title="Preview Gallery"
+              themeId={previewMode}
+              photos={previewPhotos}
+              collections={previewCollections}
+              allowDownloads={false}
+              allowFavorites={false}
+              allowSelections={false}
+              allowComments={false}
+              isClient={true}
+              onPhotoSelect={() => {}}
+              onPhotoFavorite={() => {}}
+              onPhotoComment={() => {}}
+              onPhotoDownload={() => {}}
+            />
+          </div>
+          <div className="p-3 border-t border-[var(--color-border-subtle)] bg-amber-50">
+            <div className="flex items-center gap-2 text-xs text-amber-800">
+              <span className="w-4 h-4 flex-shrink-0">ℹ</span>
+              <span>
+                Preview uses your actual gallery photos. Select a theme above to see it applied to your content.
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Theme list - single column, compact cards with thumbnails */}
       <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1" role="presentation">
         {GALLERY_THEMES.map((theme, index) => {
           const isCurrent = currentThemeId === theme.id
           const isHovered = hoveredTheme === theme.id
           const isFocused = focusedIndex === index
+          const isPreviewing = previewMode === theme.id
 
           const setRef = (el: HTMLButtonElement | null) => {
             buttonRefs.current[index] = el
@@ -140,15 +215,15 @@ export default function GalleryThemeSelector({
                 type="button"
                 onClick={() => handleThemeSelect(theme.id)}
                 disabled={isSaving}
-                variant={isCurrent ? 'primary' : 'outline'}
+                variant={isCurrent ? 'primary' : isPreviewing ? 'secondary' : 'outline'}
                 className={`w-full justify-start px-2.5 py-2 text-left transition-all duration-200 gap-2.5 ${
                   isFocused ? 'ring-2 ring-[var(--color-accent)] ring-offset-2' : ''
-                }`}
+                } ${isPreviewing ? 'bg-[var(--color-accent)]/5 border-[var(--color-accent)]/30' : ''}`}
                 role="option"
                 aria-selected={isCurrent}
                 aria-label={theme.label}
-                onMouseEnter={() => setHoveredTheme(theme.id)}
-                onMouseLeave={() => setHoveredTheme(null)}
+                onMouseEnter={() => { setHoveredTheme(theme.id); if (hasPreviewContent) handlePreviewTheme(theme.id); }}
+                onMouseLeave={() => { setHoveredTheme(null); if (hasPreviewContent && !isCurrent) setPreviewMode(null); }}
               >
                 {/* Thumbnail */}
                 <div className="relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
@@ -167,6 +242,13 @@ export default function GalleryThemeSelector({
                       </span>
                     </div>
                   )}
+                  {isPreviewing && !isCurrent && (
+                    <div className="absolute inset-0 bg-[var(--color-accent)]/10 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent-foreground)] px-1.5 py-0.5 rounded">
+                        Preview
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Theme info */}
@@ -178,6 +260,11 @@ export default function GalleryThemeSelector({
                     {isCurrent && (
                       <span className="text-xs font-semibold text-[var(--color-accent)] ml-2 whitespace-nowrap">
                         Selected
+                      </span>
+                    )}
+                    {isPreviewing && !isCurrent && (
+                      <span className="text-xs font-semibold text-[var(--color-accent)] ml-2 whitespace-nowrap">
+                        Previewing
                       </span>
                     )}
                   </div>

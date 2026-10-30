@@ -499,18 +499,9 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 onThemeChange={applyThemePreset}
                 currentThemeId={currentThemeId}
                 isSaving={isSaving}
+                previewPhotos={previewPhotos}
+                previewCollections={previewCollections}
               />
-              <div className="border-t border-[var(--color-border-subtle)] pt-4">
-                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                  Custom Theme Name (Optional)
-                </label>
-                <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
-                {customThemeName && (
-                  <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                    Will be saved as a custom theme when you select a theme above.
-                  </p>
-                )}
-              </div>
             </div>
           )}
 

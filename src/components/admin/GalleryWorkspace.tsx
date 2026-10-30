@@ -85,7 +85,6 @@ export default function GalleryWorkspacePage() {
   const [photoFilter, setPhotoFilter] = useState<'all' | 'included' | 'not-included' | 'published'>('all')
   const [previewPhotoId, setPreviewPhotoId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'custom' | 'filename_asc' | 'filename_desc' | 'date_taken_new' | 'date_taken_old' | 'date_uploaded_new' | 'date_uploaded_old' | 'random'>('custom')
-  const [activeCollection, setActiveCollection] = useState<string | null>(null)
   const [showCollectionPicker, setShowCollectionPicker] = useState(false)
   const [moveDestination, setMoveDestination] = useState<string | null>(null)
   const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null)
@@ -354,9 +353,7 @@ export default function GalleryWorkspacePage() {
     return `${seconds}s`
   }
 
-  const collectionPhotos = activeCollection
-    ? gallery?.photos?.filter(p => p.collectionId === activeCollection) || []
-    : gallery?.photos || []
+  const collectionPhotos = gallery?.photos || []
 
   const filteredPhotos = collectionPhotos.filter((photo) => {
     if (photoFilter === 'included') return isPortfolioIncluded(photo)
@@ -370,9 +367,14 @@ export default function GalleryWorkspacePage() {
     if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
     return true
   })
-  const photoGroups = activeCollection
-    ? [{ id: activeCollection, title: gallery?.collections.find((item) => item.id === activeCollection)?.title || 'Set', photos: filterPhotos(collectionPhotos) }]
-    : [{ id: '__unassigned__', title: 'Unassigned', photos: filterPhotos(gallery?.photos.filter((photo) => !photo.collectionId) || []) }, ...(gallery?.collections || []).map((item) => ({ id: item.id, title: item.title, photos: filterPhotos(gallery?.photos.filter((photo) => photo.collectionId === item.id) || []) }))]
+  const photoGroups = [
+    { id: '__unassigned__', title: 'Unassigned', photos: filterPhotos(gallery?.photos.filter((photo) => !photo.collectionId) || []) },
+    ...(gallery?.collections || []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      photos: filterPhotos(gallery?.photos.filter((photo) => photo.collectionId === item.id) || []),
+    })),
+  ]
 
   const selectedPhotoRecords = (gallery?.photos || []).filter((photo) => selectedPhotos.has(photo.id))
   const allSelectedHidden = selectedPhotoRecords.length > 0 && selectedPhotoRecords.every((photo) => photo.isHidden)

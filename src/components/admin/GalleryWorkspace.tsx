@@ -970,41 +970,7 @@ export default function GalleryWorkspacePage() {
                     </button>
                   </div>
 
-                  {gallery.collections && gallery.collections.length > 0 ? (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setActiveCollection(null)}
-                        className={`w-full text-left p-3 rounded-lg border transition ${
-                          activeCollection === null
-                            ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
-                            : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
-                        }`}
-                      >
-                        <span className="font-medium">All Photos & Videos</span>
-                        <span className="text-xs ml-2 opacity-70">
-                          {gallery.photos?.length || 0} items
-                        </span>
-                      </button>
-                      {gallery.collections.map((collection) => (
-                        <button
-                          key={collection.id}
-                          onClick={() => setActiveCollection(collection.id)}
-                          className={`w-full text-left p-3 rounded-lg border transition ${
-                            activeCollection === collection.id
-                              ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
-                              : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
-                          }`}
-                        >
-                          <span className="font-medium">{collection.title}</span>
-                          <span className="text-xs ml-2 opacity-70">
-                            {collection.photo_count || 0} items
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="ui-body">No collections yet. Create one to organize your photos and videos.</p>
-                  )}
+                  <p className="text-xs text-[var(--color-text-muted)]">Your sets and their photos are organised in the grids above. Drag any image into another set to move it.</p>
                 </div>
               </section>
             )}

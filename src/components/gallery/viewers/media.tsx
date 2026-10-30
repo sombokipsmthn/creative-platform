@@ -83,6 +83,11 @@ export function GalleryMedia({
     );
   }
 
+  // Next Image optimization fetches protected gallery URLs on the server,
+  // where the visitor's Better Auth/gallery session cookies are not forwarded.
+  // Load same-origin gallery media directly in the browser so its cookies are sent.
+  const isProtectedGalleryMedia = mediaSrc.startsWith('/api/public/galleries/media?');
+
   return (
     <Image
       src={mediaSrc}
@@ -93,7 +98,7 @@ export function GalleryMedia({
       fill={fill}
       sizes={sizes}
       priority={priority}
-      unoptimized={unoptimized}
+      unoptimized={unoptimized || isProtectedGalleryMedia}
     />
   );
 }

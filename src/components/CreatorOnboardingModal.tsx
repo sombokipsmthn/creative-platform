@@ -273,7 +273,7 @@ export default function CreatorOnboardingModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-[min(96vw,1120px)] sm:max-w-[min(96vw,1120px)] h-full max-h-[min(92dvh,900px)] overflow-hidden p-0 rounded-2xl bg-[#FAFAFA] text-gray-900 ring-1 ring-black/5">
+      <DialogContent className="fixed left-1/2 top-1/2 z-50 flex h-[92dvh] max-h-[900px] w-[96vw] max-w-[1120px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-2xl p-0 sm:w-[96vw] md:w-[94vw] lg:w-[min(94vw,1120px)]">
         <div className="flex h-full min-h-0 flex-col bg-[#FAFAFA] text-gray-900">
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <header className="sticky top-0 z-10 border-b border-gray-100 bg-white">
@@ -286,8 +286,8 @@ export default function CreatorOnboardingModal({
               </div>
             </header>
 
-            <div className="grid min-h-0 min-w-0 grid-cols-1 lg:grid-cols-[300px_1fr]">
-              <aside className="min-h-0 border-b border-gray-100 bg-white px-4 py-6 sm:px-6 sm:py-8 lg:min-h-0 lg:border-b-0 lg:border-r lg:px-8 lg:py-10">
+            <div className="grid min-w-0 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)]">
+              <aside className="min-w-0 border-b border-gray-100 bg-white px-4 py-5 sm:px-6 sm:py-6 lg:border-b-0 lg:border-r lg:px-7 lg:py-8">
                 <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Setup</p>
                 <h1 className="mt-3 text-2xl font-semibold tracking-tight">Build your workspace.</h1>
                 <p className="mt-3 text-sm leading-6 text-gray-500">Complete the essentials first, then add the business details when you&apos;re ready.</p>
@@ -306,8 +306,8 @@ export default function CreatorOnboardingModal({
                 </div>
               </aside>
 
-              <section className="min-w-0 px-4 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-10">
-                <div className="mx-auto min-w-0 max-w-full">
+              <section className="min-w-0 px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-8">
+                <div className="mx-auto max-w-2xl">
                   <div className="mb-8">
                     <p className="text-xs font-medium uppercase tracking-[0.16em] text-primary">Step {currentStep} of {STEPS.length}</p>
                     <h2 className="mt-2 text-3xl font-semibold tracking-tight">{STEPS[currentStep - 1].title}</h2>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { CircleNotch as Loader2, WarningCircle as AlertCircle, Check, ArrowCounterClockwise as RotateCcw, X } from "@phosphor-icons/react"
-import Image from 'next/image'
+import { GalleryMedia } from '@/components/gallery/viewers/media'
 import { GALLERY_THEMES, type GalleryThemeId, getGalleryTheme } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'
 import { GalleryViewer } from '@/components/gallery/viewers/wrapper'
@@ -399,6 +399,15 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   }
 
   const currentCover = photos.find(p => p.id === coverPhotoId)
+  const previewImageUrl = previewPhotos[0]?.displayUrl?.trim() || previewPhotos[0]?.thumbnailUrl?.trim() || ''
+
+  // Compute theme-aware styles for the preview
+  const bgStyle = theme
+    ? {
+        backgroundColor: theme.preset.backgroundColor,
+        color: theme.preset.textColor,
+      }
+    : {}
 
   // Section navigation for desktop
   const sections = [
@@ -524,63 +533,63 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 )}
               </div>
 
-              {/* Cover photo selector */}
-              <div className="space-y-3">
-                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                  Cover Photo
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {previewPhotos.slice(0, 12).map((photo) => (
-                    <button
-                      key={photo.id}
-                      type="button"
-                      onClick={() => handleSetCover(photo.id)}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition ${
-                        photo.id === coverPhotoId
-                          ? 'border-[var(--color-accent)]'
-                          : 'border-transparent hover:border-[var(--color-accent)]'
-                      }`}
-                      aria-label={photo.id === coverPhotoId ? `${photo.filename} (current cover)` : `Set ${photo.filename} as cover`}
-                      aria-pressed={photo.id === coverPhotoId}
-                    >
-                      <Image
-                        src={photo.thumbnailUrl || photo.displayUrl}
-                        alt={photo.filename}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                        sizes="80px"
-                      />
-                      {photo.id === coverPhotoId && (
-                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                          <Check className="w-6 h-6 text-white" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                {previewPhotos.length === 0 && (
-                  <p className="text-xs text-[var(--color-text-muted)] text-center py-4">
-                    Upload photos to select a cover image
-                  </p>
-                )}
-
-                {currentCover && (
-                  <div className="border-t border-[var(--color-border-subtle)] pt-4">
-                    <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                      Focal Point X: {Math.round(focalPoint.x * 100)}%
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={focalPoint.x * 100}
-                      onChange={(e) => setFocalPoint({ ...focalPoint, x: Number(e.target.value) / 100 })}
-                      className="w-full"
-                    />
+          {/* Theme-aware cover preview */}
+          <div className="space-y-3">
+            {/* Theme-colored cover placeholder */}
+            <div className="aspect-video rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
+              {/* Show sample gallery when no real cover photo, or real photos otherwise */}
+              {previewImageUrl ? (
+                <GalleryMedia
+                  src={previewImageUrl}
+                  alt={previewPhotos[0]?.filename || 'Gallery cover preview'}
+                  fill
+                  unoptimized
+                  className="object-cover"
+                />
+              ) : (
+                <div
+                  className="absolute inset-0 flex items-center justify-center"
+                  style={{
+                    backgroundColor: theme?.preset.backgroundColor || '#F8F9FA',
+                    color: theme?.preset.textColor || '#6B7280',
+                  }}
+                >
+                  <div className="text-center">
+                    <h4 className="text-lg font-light">
+                      {previewTitle || 'My Gallery'}
+                    </h4>
+                    <p className="text-sm text-gray-400">
+                      Upload photos to see your gallery with {savedTheme?.name || 'a theme'}
+                    </p>
                   </div>
-                )}
+                </div>
+              )}
+              <div
+                className="absolute w-6 h-6 border-2 border-white rounded-full shadow-lg"
+                style={{
+                  left: `${focalPoint.x * 100}%`,
+                  top: `${focalPoint.y * 100}%`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <div className="absolute inset-0 rounded-full border border-black/30" />
+              </div>
+            </div>
+
+            <div className="border-t border-[var(--color-border-subtle)] pt-4">
+              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                Focal Point X: {Math.round(focalPoint.x * 100)}%
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+                value={focalPoint.x * 100}
+                onChange={(e) => setFocalPoint({ ...focalPoint, x: Number(e.target.value) / 100 })}
+                className="w-full"
+              />
+            </div>
 
                 {currentCover && (
                   <div className="border-t border-[var(--color-border-subtle)] pt-4">

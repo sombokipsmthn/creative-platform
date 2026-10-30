@@ -40,7 +40,7 @@ export async function GET(request: Request) {
         coverUrl: sql<string | null>`(
           SELECT
             CASE
-              WHEN COALESCE(p.display_path, p.storage_path) LIKE 'http%'
+              WHEN COALESCE(p.display_path, p.storage_path, p.display_url) LIKE 'http%'
                 THEN COALESCE(p.display_path, p.storage_path, p.display_url)
               ELSE '/api/public/galleries/media?key=' || COALESCE(p.display_path, p.storage_path)
             END

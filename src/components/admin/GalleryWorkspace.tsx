@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Eye, EyeSlash as EyeOff, Video } from "@phosphor-icons/react"
+import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, EyeSlash as EyeOff, Video, Check, CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
@@ -20,6 +20,7 @@ interface GalleryCollection {
   description: string | null
   sortOrder: number
   photo_count?: number
+  portfolioSelection?: 'inherit' | 'include' | 'exclude'
   createdAt: string
 }
 
@@ -79,6 +80,9 @@ export default function GalleryWorkspacePage() {
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [collectionTitle, setCollectionTitle] = useState('')
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
+  const [bulkSelectMode, setBulkSelectMode] = useState(false)
+  const [photoFilter, setPhotoFilter] = useState<'all' | 'included' | 'not-included' | 'published'>('all')
+  const [previewPhotoId, setPreviewPhotoId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'custom' | 'filename_asc' | 'filename_desc' | 'date_taken_new' | 'date_taken_old' | 'date_uploaded_new' | 'date_uploaded_old' | 'random'>('custom')
   const [activeCollection, setActiveCollection] = useState<string | null>(null)
   const [showCollectionPicker, setShowCollectionPicker] = useState(false)
@@ -203,10 +207,41 @@ export default function GalleryWorkspacePage() {
       setCreatingCollection(false)
     }
   }
-  const handlePortfolioSelection = async (photoId: string, selection: 'inherit' | 'include' | 'exclude') => {
-    const response = await fetch(`/api/galleries/${id}/photos`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, portfolioSelection: selection }) })
-    if (!response.ok) setError('Unable to update portfolio selection')
-    else await refreshGallery()
+  const isPortfolioIncluded = (photo: GalleryPhoto) => {
+    if (photo.portfolioSelection === 'exclude') return false
+    if (photo.portfolioSelection === 'include') return true
+    const collection = gallery?.collections?.find((item) => item.id === photo.collectionId)
+    if (collection?.portfolioSelection === 'exclude') return false
+    if (collection?.portfolioSelection === 'include') return true
+    return gallery?.portfolioPublishMode === 'all'
+  }
+
+  const updatePortfolioSelection = async (photoIds: string[], selection: 'include' | 'exclude') => {
+    if (!photoIds.length) return
+    setError(null)
+    try {
+      const responses = await Promise.all(photoIds.map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, portfolioSelection: selection }),
+      })))
+      if (responses.some((response) => !response.ok)) throw new Error('Unable to update portfolio selection')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update portfolio selection')
+    }
+  }
+
+  const handlePortfolioToggle = async (photo: GalleryPhoto) => {
+    await updatePortfolioSelection([photo.id], isPortfolioIncluded(photo) ? 'exclude' : 'include')
+  }
+
+  const previewPhoto = filteredPhotos.find((photo) => photo.id === previewPhotoId) || gallery?.photos.find((photo) => photo.id === previewPhotoId) || null
+  const previewIndex = previewPhoto ? filteredPhotos.findIndex((photo) => photo.id === previewPhoto.id) : -1
+  const goToPreview = (direction: -1 | 1) => {
+    if (!filteredPhotos.length || previewIndex < 0) return
+    const nextIndex = (previewIndex + direction + filteredPhotos.length) % filteredPhotos.length
+    setPreviewPhotoId(filteredPhotos[nextIndex].id)
   }
 
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
@@ -280,9 +315,16 @@ export default function GalleryWorkspacePage() {
     return `${seconds}s`
   }
 
-  const filteredPhotos = activeCollection
+  const collectionPhotos = activeCollection
     ? gallery?.photos?.filter(p => p.collectionId === activeCollection) || []
     : gallery?.photos || []
+
+  const filteredPhotos = collectionPhotos.filter((photo) => {
+    if (photoFilter === 'included') return isPortfolioIncluded(photo)
+    if (photoFilter === 'not-included') return !isPortfolioIncluded(photo)
+    if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
+    return true
+  })
 
   if (loading) {
     return (
@@ -422,7 +464,21 @@ export default function GalleryWorkspacePage() {
                     <span className="text-sm font-medium">
                       {selectedPhotos.size} item{selectedPhotos.size !== 1 ? 's' : ''} selected
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      <button
+                        onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'include')}
+                        className="gallery-btn gallery-btn-secondary gap-2"
+                      >
+                        <Check className="w-4 h-4" />
+                        Add to portfolio
+                      </button>
+                      <button
+                        onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'exclude')}
+                        className="gallery-btn gallery-btn-secondary gap-2"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                        Remove from portfolio
+                      </button>
                       <button
                         onClick={() => {
                           setShowCollectionPicker(true)
@@ -517,9 +573,32 @@ export default function GalleryWorkspacePage() {
 
                 {/* PHOTOS GRID */}
                 <div className="ui-card p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Photos & Videos</h2>
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold">Photos & Videos</h2>
+                      <p className="text-xs text-[var(--color-text-muted)]">Select the images you want to feature on your public portfolio.</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <SelectCompat
+                        value={photoFilter}
+                        onChange={(e) => setPhotoFilter(e.target.value as typeof photoFilter)}
+                        className="gallery-input text-sm py-2"
+                      >
+                        <option value="all">All media</option>
+                        <option value="included">In portfolio</option>
+                        <option value="not-included">Not selected</option>
+                        <option value="published">Published</option>
+                      </SelectCompat>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBulkSelectMode((current) => !current)
+                          setSelectedPhotos(new Set())
+                        }}
+                        className="gallery-btn gallery-btn-secondary"
+                      >
+                        {bulkSelectMode ? 'Done selecting' : 'Select items'}
+                      </button>
                       <SelectCompat
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -531,7 +610,7 @@ export default function GalleryWorkspacePage() {
                         <option value="date_uploaded_new">Uploaded (newest)</option>
                         <option value="date_uploaded_old">Uploaded (oldest)</option>
                       </SelectCompat>
-                      <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
+                      {bulkSelectMode && <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
                         <input
                           type="checkbox"
                           checked={selectedPhotos.size === (gallery?.photos?.length || 0) && (gallery?.photos?.length || 0) > 0}
@@ -544,7 +623,7 @@ export default function GalleryWorkspacePage() {
                           className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] cursor-pointer"
                         />
                         <span>Select All</span>
-                      </label>
+                      </label>}
                     </div>
                   </div>
 
@@ -554,6 +633,7 @@ export default function GalleryWorkspacePage() {
                         const mediaType = getMediaType(photo)
                         
                         const isSelected = selectedPhotos.has(photo.id)
+                        const isInPortfolio = isPortfolioIncluded(photo)
 
                         return (
                           <div
@@ -565,19 +645,23 @@ export default function GalleryWorkspacePage() {
                                 : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent)]'
                             )}
                           >
-                            {/* SELECTION INDICATOR - always visible on mobile, hover on desktop */}
+                            {/* One-tap portfolio curation; bulk selection is an explicit secondary mode. */}
                             <button
                               type="button"
-                              onClick={() => handlePhotoToggle(photo.id)}
-                              aria-label={`${isSelected ? 'Deselect' : 'Select'} ${photo.filename}`}
-                              aria-pressed={isSelected}
+                              onClick={() => bulkSelectMode ? handlePhotoToggle(photo.id) : void handlePortfolioToggle(photo)}
+                              aria-label={bulkSelectMode
+                                ? `${isSelected ? 'Deselect' : 'Select'} ${photo.filename} for bulk actions`
+                                : `${isInPortfolio ? 'Remove' : 'Add'} ${photo.filename} ${isInPortfolio ? 'from' : 'to'} portfolio`}
+                              aria-pressed={bulkSelectMode ? isSelected : isInPortfolio}
+                              title={bulkSelectMode ? 'Select for bulk actions' : isInPortfolio ? 'Selected for portfolio' : 'Add to portfolio'}
                               className={cn(
-                                'absolute left-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black',
-                                'md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100',
-                                isSelected && 'opacity-100'
+                                'absolute left-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                                bulkSelectMode
+                                  ? isSelected ? 'bg-[var(--color-accent)] text-white' : 'bg-black/65 text-white'
+                                  : isInPortfolio ? 'bg-[var(--color-accent)] text-white' : 'bg-black/55 text-white hover:bg-black/80'
                               )}
                             >
-                              <span className={cn('h-4 w-4 rounded-full border-2 border-white', isSelected && 'bg-[var(--color-accent)]')} />
+                              {(bulkSelectMode ? isSelected : isInPortfolio) && <Check className="h-4 w-4" weight="bold" />}
                             </button>
 
                             {/* HIDDEN INDICATOR */}
@@ -588,6 +672,12 @@ export default function GalleryWorkspacePage() {
                             )}
 
                             {/* MEDIA DISPLAY */}
+                            <button
+                              type="button"
+                              onClick={() => setPreviewPhotoId(photo.id)}
+                              aria-label={`Preview ${photo.filename}`}
+                              className="absolute inset-0 z-[1] cursor-zoom-in"
+                            />
                             {mediaType === 'video' ? (
                               <div className="relative w-full h-full">
                                 <video
@@ -596,7 +686,11 @@ export default function GalleryWorkspacePage() {
                                   poster={photo.thumbnailUrl || undefined}
                                   controls
                                   preload="metadata"
-                                  onClick={(event) => event.stopPropagation()}
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    setPreviewPhotoId(photo.id)
+                                  }}
+                                  onDoubleClick={(event) => event.stopPropagation()}
                                 />
                                 {/* Video Icon Overlay */}
                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
@@ -620,6 +714,7 @@ export default function GalleryWorkspacePage() {
                                   const target = e.target as HTMLImageElement
                                   target.src = '/og-image.svg'
                                 }}
+                                onClick={() => setPreviewPhotoId(photo.id)}
                               />
                             )}
 
@@ -633,37 +728,7 @@ export default function GalleryWorkspacePage() {
                               </p>
                             </div>
 
-                            {/* ACTIONS - always visible on mobile, hover on desktop */}
-                            <div className={cn(
-                              'pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/0 transition',
-                              'md:opacity-0 md:group-hover:opacity-100'
-                            )}>
-                              <select
-                                value={photo.portfolioSelection || 'inherit'}
-                                onClick={(e) => e.stopPropagation()}
-                                onChange={(e) => void handlePortfolioSelection(photo.id, e.target.value as 'inherit' | 'include' | 'exclude')}
-                                className="pointer-events-auto absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-[var(--color-bg-overlay)] px-1.5 py-1 text-[10px] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                aria-label={`Portfolio status for ${photo.filename}`}
-                              >
-                                <option value="inherit">Portfolio: follow set</option><option value="include">Portfolio: publish</option><option value="exclude">Portfolio: exclude</option>
-                              </select>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  void handleToggleHidden(photo.id, photo.isHidden)
-                                }}
-                                className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/90 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                title={photo.isHidden ? 'Show' : 'Hide'}
-                                aria-label={photo.isHidden ? 'Show photo' : 'Hide photo'}
-                              >
-                                {photo.isHidden ? (
-                                  <EyeOff className="w-4 h-4 text-black" />
-                                ) : (
-                                  <Eye className="w-4 h-4 text-black" />
-                                )}
-                              </button>
-                            </div>
+                            {/* Visibility is managed in the preview, not on every thumbnail. */}
                           </div>
                         )
                       })}
@@ -676,6 +741,81 @@ export default function GalleryWorkspacePage() {
                     </div>
                   )}
                 </div>
+
+                {previewPhoto && (
+                  <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-3 sm:p-6"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Preview ${previewPhoto.filename}`}
+                    onClick={() => setPreviewPhotoId(null)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Escape') setPreviewPhotoId(null)
+                      if (event.key === 'ArrowLeft') goToPreview(-1)
+                      if (event.key === 'ArrowRight') goToPreview(1)
+                    }}
+                    tabIndex={-1}
+                  >
+                    <div className="relative flex h-full max-h-[92vh] w-full max-w-7xl flex-col" onClick={(event) => event.stopPropagation()}>
+                      <div className="flex shrink-0 items-center justify-between gap-3 pb-3 text-white">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{previewPhoto.filename}</p>
+                          <p className="text-xs text-white/60">{Math.max(0, previewIndex) + 1} of {filteredPhotos.length} · {isPortfolioIncluded(previewPhoto) ? 'Selected for portfolio' : 'Not selected'}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void handlePortfolioToggle(previewPhoto)}
+                            className={cn('rounded-full px-3 py-2 text-xs font-semibold transition', isPortfolioIncluded(previewPhoto) ? 'bg-[var(--color-accent)] text-white' : 'bg-white/15 text-white hover:bg-white/25')}
+                          >
+                            <span className="inline-flex items-center gap-1.5">{isPortfolioIncluded(previewPhoto) && <Check className="h-3.5 w-3.5" />}{isPortfolioIncluded(previewPhoto) ? 'In portfolio' : 'Add to portfolio'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleToggleHidden(previewPhoto.id, previewPhoto.isHidden)}
+                            className="rounded-full bg-white/15 px-3 py-2 text-xs text-white hover:bg-white/25"
+                          >
+                            {previewPhoto.isHidden ? 'Show in gallery' : 'Hide from gallery'}
+                          </button>
+                          <button type="button" onClick={() => setPreviewPhotoId(null)} aria-label="Close preview" className="rounded-full bg-white/15 p-2 text-white hover:bg-white/25">
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl bg-black/40">
+                        {getMediaType(previewPhoto) === 'video' ? (
+                          <video
+                            key={previewPhoto.id}
+                            src={previewPhoto.displayUrl || previewPhoto.originalUrl}
+                            poster={previewPhoto.thumbnailUrl || undefined}
+                            controls
+                            autoPlay
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          <Image
+                            src={previewPhoto.displayUrl || previewPhoto.originalUrl || previewPhoto.thumbnailUrl || '/og-image.svg'}
+                            alt={previewPhoto.filename}
+                            fill
+                            unoptimized
+                            priority
+                            sizes="100vw"
+                            className="object-contain"
+                          />
+                        )}
+                      </div>
+                      <div className="flex shrink-0 items-center justify-between pt-3 text-white">
+                        <button type="button" onClick={() => goToPreview(-1)} disabled={filteredPhotos.length < 2} className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm hover:bg-white/25 disabled:opacity-40">
+                          <CaretLeft className="h-4 w-4" /> Previous
+                        </button>
+                        <span className="text-xs text-white/60">Use ← → to navigate · Esc to close</span>
+                        <button type="button" onClick={() => goToPreview(1)} disabled={filteredPhotos.length < 2} className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm hover:bg-white/25 disabled:opacity-40">
+                          Next <CaretRight className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* COLLECTIONS */}
                 <div className="ui-card p-6 space-y-4">

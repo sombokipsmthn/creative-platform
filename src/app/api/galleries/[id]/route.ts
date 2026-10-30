@@ -176,7 +176,14 @@ export async function GET(request: Request, context: Context) {
 
     const galleryRow = galleryResult[0];
 
-    const gallery = galleryRow ? { ...galleryRow, coverUrl: galleryRow.coverPath ? `/api/public/galleries/media?key=${encodeURIComponent(galleryRow.coverPath)}` : "" } : undefined;
+    const gallery = galleryRow ? {
+      ...galleryRow,
+      coverUrl: galleryRow.coverPath
+        ? galleryRow.coverPath.startsWith("http")
+          ? galleryRow.coverPath
+          : `/api/public/galleries/media?key=${encodeURIComponent(galleryRow.coverPath)}`
+        : "",
+    } : undefined;
 
 
 

@@ -5,7 +5,7 @@ import { GalleryMedia } from './media';
 import { Download, Heart } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import type { GalleryViewerProps } from './wrapper';
-import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { getGalleryFontStack, type GalleryThemeDefinition } from '@/lib/gallery/themes';
 
 interface MosaicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -64,6 +64,7 @@ export function GalleryViewerMosaic({
       style={{
         backgroundColor: theme.preset.backgroundColor,
         color: theme.preset.textColor,
+        fontFamily: getGalleryFontStack(theme.preset.fontFamily),
       }}
     >
       {/* Header */}
@@ -75,23 +76,21 @@ export function GalleryViewerMosaic({
       {/* Mosaic Grid */}
       <div className="px-6 py-8 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-6xl">
-          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [column-fill:_balance]">
+          <div className="columns-1 [column-fill:_balance]" style={{ columnCount: theme.preset.masonryColumns, columnGap: theme.preset.gridSpacing === "tight" ? "8px" : theme.preset.gridSpacing === "wide" ? "24px" : "16px" }}>
             {photos.map((photo, idx) => {
               const isFavorite = favorites.has(photo.id) || photo.isFavorite;
               const aspectRatio = getAspectRatio(idx);
 
-              const heightClass = {
-                square: 'h-64',
-                landscape: 'h-48',
-                portrait: 'h-80',
-              }[aspectRatio];
+              const ratio = theme.preset.aspectRatio === 'auto'
+                ? ({ square: '1 / 1', landscape: '3 / 2', portrait: '2 / 3' } as const)[aspectRatio]
+                : theme.preset.aspectRatio.replace(':', ' / ');
 
               return (
                 <div
                   key={photo.id}
-                  className="mb-4 break-inside-avoid overflow-hidden rounded-xl bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-105"
+                  className="mb-4 break-inside-avoid overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-[1.01]" style={{ borderRadius: theme.preset.borderRadius, marginBottom: theme.preset.gridSpacing === "tight" ? 8 : theme.preset.gridSpacing === "wide" ? 24 : 16 }}
                 >
-                  <div className={`${heightClass} relative group`}>
+                  <div className="relative w-full group" style={{ aspectRatio: ratio }}>
                     <GalleryMedia
                       src={photo.displayUrl}
                       poster={photo.thumbnailUrl}

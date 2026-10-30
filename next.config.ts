@@ -2,6 +2,13 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Gallery uploads allow files up to 100MB. The proxy buffers a copy of
+  // incoming request bodies before the route handler receives them, so leave
+  // room for multipart/form-data boundaries and metadata.
+  experimental: {
+    proxyClientMaxBodySize: '110mb',
+  },
+
   turbopack: {},
 
   // Disable trailing slash redirects to prevent 308 loops

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Video, Check, MinusCircle, CaretLeft, CaretRight, Circle, CheckCircle, FolderSimple, Eye, EyeSlash, ImageSquare } from "@phosphor-icons/react"
+import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Trash as Trash2, Video, Check, MinusCircle, CaretLeft, CaretRight, Circle, FolderSimple, Eye, EyeSlash, ImageSquare } from "@phosphor-icons/react"
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'

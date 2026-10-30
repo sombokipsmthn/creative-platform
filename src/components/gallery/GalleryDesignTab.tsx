@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { CircleNotch as Loader2, WarningCircle as AlertCircle, Check, ArrowCounterClockwise as RotateCcw, X } from "@phosphor-icons/react"
-import Image from 'next/image'
+import { GalleryMedia } from '@/components/gallery/viewers/media'
 import { GALLERY_THEMES, type GalleryThemeId, getGalleryTheme } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'
 import { SelectCompat } from '@/components/ui/select-compat';
@@ -379,6 +379,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   }
 
   const currentCover = photos.find(p => p.id === coverPhotoId)
+  const previewImageUrl = previewPhotos[0]?.displayUrl?.trim() || previewPhotos[0]?.thumbnailUrl?.trim() || ''
 
   // Compute theme-aware styles for the preview
   const theme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
@@ -523,10 +524,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
             {/* Theme-colored cover placeholder */}
             <div className="aspect-video rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
               {/* Show sample gallery when no real cover photo, or real photos otherwise */}
-              {previewPhotos.length > 0 ? (
-                <Image
-                  src={previewPhotos[0].displayUrl}
-                  alt={previewPhotos[0].filename}
+              {previewImageUrl ? (
+                <GalleryMedia
+                  src={previewImageUrl}
+                  alt={previewPhotos[0]?.filename || 'Gallery cover preview'}
                   fill
                   unoptimized
                   className="object-cover"

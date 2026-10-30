@@ -161,7 +161,23 @@ export default function AdminGalleryManagerPage() {
 
       if (galRes.ok) {
         const data = await galRes.json();
-        setGalleries(data.galleries || []);
+        const galleryRows = Array.isArray(data.galleries) ? data.galleries : [];
+        setGalleries(galleryRows.map((gallery: Record<string, unknown>) => ({
+          ...gallery,
+          client_id: (gallery.clientId ?? gallery.client_id ?? null) as string | null,
+          client_name: (gallery.clientName ?? gallery.client_name ?? null) as string | null,
+          access_pin: (gallery.accessPin ?? gallery.access_pin ?? null) as string | null,
+          allow_downloads: Boolean(gallery.allowDownloads ?? gallery.allow_downloads ?? true),
+          cover_url: (gallery.coverUrl ?? gallery.cover_url ?? null) as string | null,
+          photo_count: Number(gallery.photoCount ?? gallery.photo_count ?? 0),
+          collections_count: Number(gallery.collectionsCount ?? gallery.collections_count ?? 0),
+          favorites_count: Number(gallery.favoritesCount ?? gallery.favorites_count ?? 0),
+          selections_count: Number(gallery.selectionsCount ?? gallery.selections_count ?? 0),
+          comments_count: Number(gallery.commentsCount ?? gallery.comments_count ?? 0),
+          downloads_count: Number(gallery.downloadsCount ?? gallery.downloads_count ?? 0),
+          views_count: Number(gallery.viewsCount ?? gallery.views_count ?? 0),
+          created_at: String(gallery.createdAt ?? gallery.created_at ?? ''),
+        })) as GalleryItem[]);
       } else {
         console.error('Failed to fetch galleries:', galRes.status, galRes.statusText);
         const errorData = await galRes.json().catch(() => ({}));

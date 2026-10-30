@@ -5,7 +5,7 @@ import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Lock } from "@phosphor-icons/react"
 import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/components/gallery/viewers/wrapper'
-import { isValidThemeId } from '@/lib/gallery/themes'
+import { isValidThemeId, type GalleryThemePreset } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Input } from '@/components/ui/input'
@@ -87,6 +87,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   const [requiredPin, setRequiredPin] = useState<string | null>(null)
 
   const [themeId, setThemeId] = useState<GalleryThemeId>('minimal')
+  const [themePreset, setThemePreset] = useState<Partial<GalleryThemePreset> | undefined>(undefined)
   const [photos, setPhotos] = useState<GalleryPhoto[]>([])
   const [collections, setCollections] = useState<GalleryCollection[]>([])
 
@@ -118,6 +119,28 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         // Determine theme ID from saved theme
         const savedTheme = data.theme as SavedTheme | null
         if (savedTheme) {
+          setThemePreset({
+            layout: savedTheme.layout as GalleryThemePreset['layout'],
+            aspectRatio: savedTheme.aspect_ratio as GalleryThemePreset['aspectRatio'],
+            masonryColumns: Number(savedTheme.masonry_columns ?? 4),
+            showTitle: Boolean(savedTheme.show_title),
+            showDescription: Boolean(savedTheme.show_description),
+            showCollections: Boolean(savedTheme.show_collections),
+            showLogo: Boolean(savedTheme.show_logo),
+            accentColor: savedTheme.accent_color,
+            backgroundColor: savedTheme.background_color,
+            textColor: savedTheme.text_color,
+            borderRadius: Number(savedTheme.border_radius ?? 0),
+            fontFamily: savedTheme.font_family as GalleryThemePreset['fontFamily'],
+            coverStyle: savedTheme.cover_style as GalleryThemePreset['coverStyle'],
+            coverFocalX: Number(savedTheme.cover_focal_x ?? 50),
+            coverFocalY: Number(savedTheme.cover_focal_y ?? 50),
+            coverOverlayOpacity: Number(savedTheme.cover_overlay_opacity ?? 25),
+            gridStyle: savedTheme.grid_style as GalleryThemePreset['gridStyle'],
+            thumbnailSize: savedTheme.thumbnail_size as GalleryThemePreset['thumbnailSize'],
+            gridSpacing: savedTheme.grid_spacing as GalleryThemePreset['gridSpacing'],
+            navigationStyle: savedTheme.navigation_style as GalleryThemePreset['navigationStyle'],
+          })
           // Resolve theme ID robustly:
           // 1. Check if `type` stores a valid preset id (preset themes set type = preset id)
           // 2. Check if the lowercased name is a valid theme id
@@ -300,6 +323,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         title={title}
         description={description}
         themeId={themeId}
+        themePreset={themePreset}
         photos={photos}
         collections={collections}
         allowDownloads={allowDownloads}

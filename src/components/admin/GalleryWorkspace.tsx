@@ -616,7 +616,7 @@ export default function GalleryWorkspacePage() {
                         <option value="all">All media</option>
                         <option value="included">In portfolio</option>
                         <option value="not-included">Not selected</option>
-                        <option value="published">Published</option>
+                        <option value="published">In published gallery</option>
                       </SelectCompat>
                       <button
                         type="button"

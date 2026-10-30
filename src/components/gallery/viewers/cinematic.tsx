@@ -34,7 +34,7 @@ export function GalleryViewerCinematic({
 
   // Autoplay effect
   useEffect(() => {
-    if (!autoplay) return;
+    if (!autoplay || photos.length < 2) return;
 
     const timer = setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % photos.length);

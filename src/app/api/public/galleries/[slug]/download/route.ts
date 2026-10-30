@@ -522,7 +522,7 @@ export async function POST(
       let output =
         source.body;
 
-      let extension = preset.variant === "original" && source.contentType === "image/png" ? "png" : preset.variant === "original" && source.contentType === "image/webp" ? "webp" : "jpg";
+      let extension = preset.variant === "original" && source.contentType === "image/png" ? "png" : preset.variant === "original" && source.contentType === "image/webp" ? "webp" : preset.variant === "original" && source.contentType === "image/heic" ? "heic" : preset.variant === "original" && source.contentType === "image/heif" ? "heif" : preset.variant === "original" && source.contentType === "video/mp4" ? "mp4" : preset.variant === "original" && source.contentType === "video/quicktime" ? "mov" : preset.variant === "original" && source.contentType === "video/webm" ? "webm" : "jpg";
 
       const needsTransform =
         preset.variant !==
@@ -665,7 +665,7 @@ export async function POST(
         {
           status: 200,
           headers: {
-            "Content-Type": preset.variant === "original" && preset.max_width === null && !preset.include_watermark ? (item.name.endsWith(".png") ? "image/png" : item.name.endsWith(".webp") ? "image/webp" : "image/jpeg") : preset.format === "png" ? "image/png" : preset.format === "webp" ? "image/webp" : "image/jpeg",
+            "Content-Type": preset.variant === "original" && preset.max_width === null && !preset.include_watermark ? (item.name.endsWith(".png") ? "image/png" : item.name.endsWith(".webp") ? "image/webp" : item.name.endsWith(".heic") ? "image/heic" : item.name.endsWith(".heif") ? "image/heif" : item.name.endsWith(".mp4") ? "video/mp4" : item.name.endsWith(".mov") ? "video/quicktime" : item.name.endsWith(".webm") ? "video/webm" : "image/jpeg") : preset.format === "png" ? "image/png" : preset.format === "webp" ? "image/webp" : "image/jpeg",
             "Content-Disposition":
               `attachment; filename="${item.name}"`,
             "Content-Length":

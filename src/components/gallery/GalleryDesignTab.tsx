@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { CircleNotch as Loader2, WarningCircle as AlertCircle, Check, ArrowCounterClockwise as RotateCcw, X } from "@phosphor-icons/react"
 import { GalleryMedia } from '@/components/gallery/viewers/media'
-import { GALLERY_THEMES, type GalleryThemeId, getGalleryTheme } from '@/lib/gallery/themes'
+import { GALLERY_THEMES, type GalleryThemeId, type GalleryThemePreset, getGalleryTheme } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'
 import { GalleryViewer } from '@/components/gallery/viewers/wrapper'
 import { SelectCompat } from '@/components/ui/select-compat';
@@ -183,6 +183,8 @@ function getSampleGallery(themeId: GalleryThemeId): {
 export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: GalleryDesignTabProps) {
   const [activeSection, setActiveSection] = useState<ActiveSection>('theme')
   const [savedTheme, setSavedTheme] = useState<SavedTheme | null>(null)
+  const [draftTheme, setDraftTheme] = useState<SavedTheme | null>(null)
+  const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [loading, setLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -212,7 +214,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   // Derive current theme ID from saved theme name/type more robustly
   const currentThemeId = GALLERY_THEMES.find(
-    t => t.label === savedTheme?.name && savedTheme?.type === 'preset'
+    t => t.label === draftTheme?.name
   )?.id ?? null
 
   // Load saved theme on mount
@@ -225,6 +227,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
         if (response.ok) {
           const data = await response.json()
           setSavedTheme(data.theme)
+          setDraftTheme(data.theme)
         }
 
         // Load cover photo separately
@@ -248,30 +251,37 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     loadTheme()
   }, [galleryId])
 
-  const updateTheme = useCallback(async (updates: Partial<SavedTheme>) => {
-    if (!savedTheme) return
+  // Editing stays local. The database is only updated when the creator presses Save.
+  const updateTheme = useCallback((updates: Partial<SavedTheme>) => {
+    setDraftTheme(current => current ? { ...current, ...updates, type: 'custom' } : current)
+  }, [])
 
+  const saveTheme = useCallback(async () => {
+    if (!draftTheme || !savedTheme) return
     setIsSaving(true)
     setError(null)
     try {
+      const { id, galleryId: _galleryId, createdAt, updatedAt, ...payload } = draftTheme
       const response = await fetch(`/api/galleries/${galleryId}/theme`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates),
+        body: JSON.stringify(payload),
       })
-
-      if (response.ok) {
-        const data = await response.json()
-        setSavedTheme(data.theme)
-      } else {
-        throw new Error('Failed to save theme')
-      }
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Failed to save theme')
+      setSavedTheme(data.theme)
+      setDraftTheme(data.theme)
+      await onRefresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update design')
+      setError(err instanceof Error ? err.message : 'Failed to save design')
     } finally {
       setIsSaving(false)
     }
-  }, [savedTheme, galleryId])
+  }, [draftTheme, savedTheme, galleryId, onRefresh])
+
+  const discardThemeChanges = useCallback(() => {
+    if (savedTheme) setDraftTheme(savedTheme)
+  }, [savedTheme])
 
   const applyThemePreset = useCallback(async (themeId: GalleryThemeId | null, customName: string) => {
     if (!themeId) return
@@ -377,7 +387,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   }, [focalPoint, galleryId, onRefresh])
 
   // Build preview data: use real gallery photos when available, sample data when empty
-  const theme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
+  const baseTheme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
+  const theme = baseTheme && draftTheme ? { ...baseTheme, preset: { ...baseTheme.preset, ...draftTheme } } : null
   const sampleGallery = theme ? getSampleGallery(theme.id) : null
   const hasRealPhotos = photos.length > 0
 
@@ -387,7 +398,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   const previewCollections = hasRealPhotos ? [] : (sampleGallery?.collections || [])
   const isPreviewMode = !hasRealPhotos
 
-  if (loading || !savedTheme) {
+  if (loading || !savedTheme || !draftTheme) {
     return (
       <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-6">
         <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
@@ -421,6 +432,26 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   return (
     <div className="space-y-6">
+      {/* Draft actions */}
+      <div className="flex flex-col gap-3 rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-card)] p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">Gallery designer</h3>
+            <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${JSON.stringify(savedTheme) === JSON.stringify(draftTheme) ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+              {JSON.stringify(savedTheme) === JSON.stringify(draftTheme) ? 'All changes saved' : 'Unsaved changes'}
+            </span>
+          </div>
+          <p className="mt-1 text-xs text-[var(--color-text-muted)]">Adjust your design and see the gallery update immediately. Save when you are happy.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={discardThemeChanges} disabled={isSaving || JSON.stringify(savedTheme) === JSON.stringify(draftTheme)}>Discard</Button>
+          <Button type="button" variant="primary" size="sm" onClick={() => void saveTheme()} disabled={isSaving || JSON.stringify(savedTheme) === JSON.stringify(draftTheme)}>
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
+            {isSaving ? 'Saving…' : 'Save design'}
+          </Button>
+        </div>
+      </div>
+
       {/* Error Alert */}
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
@@ -927,22 +958,22 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 )}
               </div>
               <div className="flex items-center gap-2">
-                {theme && (
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {theme.label} theme
-                  </span>
-                )}
+                <button type="button" onClick={() => setPreviewDevice('desktop')} aria-label="Desktop preview" className={`rounded-md p-2 ${previewDevice === 'desktop' ? 'bg-[var(--color-bg-soft)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]'}`}>▣</button>
+                <button type="button" onClick={() => setPreviewDevice('mobile')} aria-label="Mobile preview" className={`rounded-md p-2 ${previewDevice === 'mobile' ? 'bg-[var(--color-bg-soft)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]'}`}>▯</button>
+                {theme && <span className="text-xs text-[var(--color-text-muted)]">{theme.label} theme</span>}
               </div>
             </div>
 
             {/* Live Gallery Preview */}
-            <div className="relative min-h-[60vh] max-h-[80vh] overflow-auto">
+            <div className="relative min-h-[60vh] max-h-[80vh] overflow-auto bg-[var(--color-bg-soft)] p-3">
+              <div className={previewDevice === 'mobile' ? 'mx-auto max-w-[390px] overflow-hidden rounded-[1.75rem] border border-black/10 bg-white shadow-xl' : 'w-full overflow-hidden'}>
               {theme && (
                 <GalleryViewer
                   id={galleryId}
                   title={previewTitle}
                   description={previewDescription}
                   themeId={theme.id}
+                  themePreset={draftTheme as unknown as GalleryThemePreset}
                   photos={previewPhotos}
                   collections={previewCollections}
                   allowDownloads={false}
@@ -961,6 +992,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   Select a theme to see preview
                 </div>
               )}
+              </div>
             </div>
 
             {/* Preview Mode Notice */}

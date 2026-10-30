@@ -65,9 +65,9 @@ export function GalleryViewerEditorial({
     >
       {/* Header */}
       <div className="border-b border-gray-200 px-6 py-8 sm:px-10 lg:px-16">
-        <h1 className="text-3xl font-serif tracking-tight sm:text-4xl md:text-5xl">{title}</h1>
+        <h1 className="text-3xl tracking-tight sm:text-4xl md:text-5xl">{title}</h1>
         {description && (
-          <p className="mt-3 max-w-2xl text-base leading-relaxed text-gray-600">{description}</p>
+          <p className="mt-3 max-w-2xl text-base leading-relaxed opacity-75">{description}</p>
         )}
       </div>
 
@@ -127,14 +127,14 @@ export function GalleryViewerEditorial({
               Gallery
             </p>
 
-            <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.max(1, Math.min(6, theme.preset.masonryColumns))}, minmax(0, 1fr))`, gap: theme.preset.gridSpacing === "tight" ? 8 : theme.preset.gridSpacing === "wide" ? 24 : 16 }}>
+            <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.max(1, Math.min(6, theme.preset.gridStyle === "vertical" ? 1 : theme.preset.masonryColumns + (theme.preset.thumbnailSize === "small" ? 1 : theme.preset.thumbnailSize === "large" ? -1 : 0)))}, minmax(0, 1fr))`, gap: theme.preset.gridSpacing === "tight" ? 8 : theme.preset.gridSpacing === "wide" ? 24 : 16 }}>
               {remaining.map((photo) => {
                 const isFavorite = favorites.has(photo.id) || photo.isFavorite;
 
                 return (
                   <div key={photo.id} className="group relative overflow-hidden bg-gray-100" style={{ borderRadius: theme.preset.borderRadius }}>
                     {/* Image */}
-                    <div className="relative aspect-square">
+                    <div className="relative" style={{ aspectRatio: theme.preset.aspectRatio === "auto" ? "1 / 1" : theme.preset.aspectRatio.replace(":", " / ") }}>
                       <GalleryMedia
                         src={photo.displayUrl}
                         poster={photo.thumbnailUrl}

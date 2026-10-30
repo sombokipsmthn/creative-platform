@@ -88,6 +88,7 @@ export default function GalleryWorkspacePage() {
   const [activeCollection, setActiveCollection] = useState<string | null>(null)
   const [showCollectionPicker, setShowCollectionPicker] = useState(false)
   const [moveDestination, setMoveDestination] = useState<string | null>(null)
+  const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const refreshGallery = useCallback(async () => {
@@ -170,6 +171,18 @@ export default function GalleryWorkspacePage() {
       setError(err instanceof Error ? err.message : 'Unable to move photos')
     }
   }
+  const handleDropPhotoIntoCollection = async (photoId: string, collectionId: string | null) => {
+    setDraggedPhotoId(null)
+    const photo = gallery?.photos.find((item) => item.id === photoId)
+    if (!photo || photo.collectionId === collectionId) return
+    setError(null)
+    try {
+      const response = await fetch(`/api/galleries/${id}/photos`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, collectionId }) })
+      if (!response.ok) throw new Error('Unable to move photo to this set')
+      await refreshGallery()
+    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to move photo') }
+  }
+
   const handleCreateCollection = async () => {
     const title = collectionTitle.trim()
 

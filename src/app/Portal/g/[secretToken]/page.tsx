@@ -140,18 +140,18 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
 
         // Transform photos
         if (data.photos && Array.isArray(data.photos)) {
-          const transformedPhotos: GalleryPhoto[] = (data.photos as RawPhoto[]).map(p => ({
+          const transformedPhotos: GalleryPhoto[] = (data.photos as Array<RawPhoto & Record<string, unknown>>).map(p => ({
             id: p.id,
             filename: p.filename,
-            displayUrl: p.display_url,
-            thumbnailUrl: p.thumbnail_url,
-            mimeType: p.mime_type || null,
-            width: p.width,
-            height: p.height,
-            sortOrder: p.sort_order,
-            isHidden: p.is_hidden,
-            isFavorite: p.is_favorite,
-            isSelected: p.is_selected,
+            displayUrl: String(p.displayUrl ?? p.display_url ?? ''),
+            thumbnailUrl: String(p.thumbnailUrl ?? p.thumbnail_url ?? ''),
+            mimeType: (p.mimeType ?? p.mime_type ?? null) as string | null,
+            width: Number(p.width) || undefined,
+            height: Number(p.height) || undefined,
+            sortOrder: Number(p.sortOrder ?? p.sort_order ?? 0),
+            isHidden: Boolean(p.isHidden ?? p.is_hidden),
+            isFavorite: Boolean(p.isFavorite ?? p.is_favorite),
+            isSelected: Boolean(p.isSelected ?? p.is_selected),
             downloadCount: 0,
           }))
           setPhotos(transformedPhotos)

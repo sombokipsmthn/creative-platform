@@ -5,6 +5,7 @@ import { CircleNotch as Loader2, WarningCircle as AlertCircle, Check, ArrowCount
 import Image from 'next/image'
 import { GALLERY_THEMES, type GalleryThemeId, getGalleryTheme } from '@/lib/gallery/themes'
 import GalleryThemeSelector from '@/components/gallery/GalleryThemeSelector'
+import { GalleryViewer } from '@/components/gallery/viewers/wrapper'
 import { SelectCompat } from '@/components/ui/select-compat';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +17,22 @@ interface GalleryPhoto {
   thumbnailUrl: string
   displayUrl: string
   filename: string
+  mimeType?: string | null
+  width?: number
+  height?: number
+  captureDate?: string
+  sortOrder: number
+  isHidden: boolean
+  isFavorite: boolean
+  isSelected: boolean
+  downloadCount: number
+}
+
+interface GalleryCollection {
+  id: string
+  title: string
+  description?: string
+  photos: GalleryPhoto[]
 }
 
 interface GalleryDesignTabProps {
@@ -57,60 +74,97 @@ interface SavedTheme {
 type ActiveSection = 'theme' | 'cover' | 'typography' | 'colors' | 'grid' | 'general'
 
 /**
- * Generates a representative sample gallery for preview purposes.
- * This creates a mock gallery with sample photos that demonstrates the
- * theme's visual characteristics without affecting actual gallery data.
- *
- * The sample content is confined to preview mode and is never inserted
- * into the actual gallery database, uploaded to production storage, or
- * counted as uploaded photos.
+ * Sample gallery data for empty galleries - used only in preview mode.
+ * Never mixed with actual gallery data.
  */
 function getSampleGallery(themeId: GalleryThemeId): {
   photos: GalleryPhoto[]
   title: string
-  collections: { id: string; title: string }[]
+  collections: Array<{ id: string; title: string; photos: GalleryPhoto[] }>
 } {
-  // Sample photography portfolio - diverse portrait and landscape images
-  const samplePhotos = [
+  const samplePhotos: GalleryPhoto[] = [
     {
       id: 'sample-1',
       filename: 'Portrait 1',
       displayUrl: '/sample-portrait-1.svg',
       thumbnailUrl: '/sample-portrait-1-thumb.svg',
+      mimeType: 'image/svg+xml',
+      width: 1200,
+      height: 800,
+      captureDate: '2024-01-15T10:00:00Z',
+      sortOrder: 0,
+      isHidden: false,
+      isFavorite: false,
+      isSelected: false,
+      downloadCount: 0,
     },
     {
       id: 'sample-2',
       filename: 'Landscape 1',
       displayUrl: '/sample-landscape-1.svg',
       thumbnailUrl: '/sample-landscape-1-thumb.svg',
+      mimeType: 'image/svg+xml',
+      width: 1200,
+      height: 800,
+      captureDate: '2024-01-16T14:30:00Z',
+      sortOrder: 1,
+      isHidden: false,
+      isFavorite: false,
+      isSelected: false,
+      downloadCount: 0,
     },
     {
       id: 'sample-3',
       filename: 'Portrait 2',
       displayUrl: '/sample-portrait-2.svg',
       thumbnailUrl: '/sample-portrait-2-thumb.svg',
+      mimeType: 'image/svg+xml',
+      width: 1200,
+      height: 800,
+      captureDate: '2024-01-17T09:15:00Z',
+      sortOrder: 2,
+      isHidden: false,
+      isFavorite: false,
+      isSelected: false,
+      downloadCount: 0,
     },
     {
       id: 'sample-4',
       filename: 'Landscape 2',
       displayUrl: '/sample-landscape-2.svg',
       thumbnailUrl: '/sample-landscape-2-thumb.svg',
+      mimeType: 'image/svg+xml',
+      width: 1200,
+      height: 800,
+      captureDate: '2024-01-18T16:45:00Z',
+      sortOrder: 3,
+      isHidden: false,
+      isFavorite: false,
+      isSelected: false,
+      downloadCount: 0,
     },
     {
       id: 'sample-5',
       filename: 'Detail Shot',
       displayUrl: '/sample-detail-1.svg',
       thumbnailUrl: '/sample-detail-1-thumb.svg',
+      mimeType: 'image/svg+xml',
+      width: 1200,
+      height: 800,
+      captureDate: '2024-01-19T11:20:00Z',
+      sortOrder: 4,
+      isHidden: false,
+      isFavorite: false,
+      isSelected: false,
+      downloadCount: 0,
     },
   ]
 
-  // Theme-appropriate collections based on the theme's layout preferences
   const sampleCollections = [
-    { id: 'collection-1', title: 'Featured' },
-    { id: 'collection-2', title: 'Recent' },
+    { id: 'collection-1', title: 'Featured', photos: [] },
+    { id: 'collection-2', title: 'Recent', photos: [] },
   ]
 
-  // Title based on theme visual character
   const themeTitles: Record<GalleryThemeId, string> = {
     minimal: 'My Photography Collection',
     editorial: 'Visual Story',
@@ -123,49 +177,6 @@ function getSampleGallery(themeId: GalleryThemeId): {
     photos: samplePhotos,
     title: themeTitles[themeId],
     collections: sampleCollections,
-  }
-}
-
-/**
- * Creates a preview adapter that supplies mock data to the gallery renderer
- * without changing persistent gallery data. This allows creators to visualize
- * their gallery with a theme even when no photos have been uploaded yet.
- */
-function useThemePreviewAdapter(
-  themeId: GalleryThemeId | null,
-  savedTheme: SavedTheme | null,
-  photos: GalleryPhoto[]
-) {
-  const [sampleGallery, setSampleGallery] = useState<{
-    photos: GalleryPhoto[]
-    title: string
-    collections: { id: string; title: string }[]
-  } | null>(null)
-
-  useEffect(() => {
-    // Initialize sample gallery when theme changes or on mount
-    if (themeId) {
-      const theme = GALLERY_THEMES.find(t => t.id === themeId)
-      if (theme) {
-        const adapter = getSampleGallery(theme.id)
-        setSampleGallery(adapter)
-      }
-    } else {
-      setSampleGallery(null)
-    }
-  }, [themeId])
-
-  // When real photos exist, use them for the preview
-  // When no real photos exist, use the sample gallery
-  const previewPhotos = photos.length > 0 ? photos : (sampleGallery?.photos || [])
-  const previewTitle = photos.length > 0 ? (savedTheme?.name || 'My Gallery') : (sampleGallery?.title || 'My Gallery')
-  const previewCollections = photos.length > 0 ? [] : (sampleGallery?.collections || [])
-
-  return {
-    previewPhotos,
-    previewTitle,
-    previewCollections,
-    sampleGallery,
   }
 }
 
@@ -196,6 +207,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   }, [])
 
   const photos = (gallery.photos as GalleryPhoto[] | undefined) || []
+  const galleryTitle = (gallery.title as string) || 'My Gallery'
+  const galleryDescription = (gallery.description as string | undefined) || undefined
 
   // Derive current theme ID from saved theme name/type more robustly
   const currentThemeId = GALLERY_THEMES.find(
@@ -363,9 +376,16 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     }
   }, [focalPoint, galleryId, onRefresh])
 
-  // Theme preview adapter must run before the loading guard to preserve hook ordering.
-  const { previewPhotos, previewTitle, previewCollections, sampleGallery } =
-    useThemePreviewAdapter(currentThemeId, savedTheme, photos)
+  // Build preview data: use real gallery photos when available, sample data when empty
+  const theme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
+  const sampleGallery = theme ? getSampleGallery(theme.id) : null
+  const hasRealPhotos = photos.length > 0
+
+  const previewPhotos = hasRealPhotos ? photos : (sampleGallery?.photos || [])
+  const previewTitle = hasRealPhotos ? galleryTitle : (sampleGallery?.title || 'My Gallery')
+  const previewDescription = hasRealPhotos ? galleryDescription : undefined
+  const previewCollections = hasRealPhotos ? [] : (sampleGallery?.collections || [])
+  const isPreviewMode = !hasRealPhotos
 
   if (loading || !savedTheme) {
     return (
@@ -379,15 +399,6 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   }
 
   const currentCover = photos.find(p => p.id === coverPhotoId)
-
-  // Compute theme-aware styles for the preview
-  const theme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
-  const bgStyle = theme
-    ? {
-        backgroundColor: theme.preset.backgroundColor,
-        color: theme.preset.textColor,
-      }
-    : {}
 
   // Section navigation for desktop
   const sections = [
@@ -409,8 +420,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
         </div>
       )}
 
-      {/* Section Navigation - Desktop */}
-      <div className="hidden md:border-b border-[var(--color-border-subtle)] flex gap-6 overflow-x-auto">
+      {/* Section Navigation - Desktop (visible at md and above) */}
+      <nav className="hidden md:flex border-b border-[var(--color-border-subtle)] gap-6 overflow-x-auto pb-3" aria-label="Design sections">
         {sections.map(section => (
           <button
             key={section.id}
@@ -424,7 +435,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
             {section.label}
           </button>
         ))}
-      </div>
+      </nav>
 
       {/* Mobile Sheet Trigger & Sheet */}
       <Sheet open={showMobileSheet} onOpenChange={setShowMobileSheet}>
@@ -463,7 +474,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
           <DialogHeader>
             <DialogTitle>Reset to Theme Defaults?</DialogTitle>
             <DialogDescription>
-              This will discard all your custom changes and restore the original &quot;{currentThemeId ? getGalleryTheme(currentThemeId).label : 'theme'}&quot; preset settings. This action cannot be undone.
+              This will discard all your custom changes and restore the original &ldquo;{currentThemeId ? getGalleryTheme(currentThemeId).label : 'theme'}&rdquo; preset settings. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
@@ -476,419 +487,506 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
         </DialogContent>
       </Dialog>
 
-      {/* THEME SECTION */}
-      {activeSection === 'theme' && (
-        <div className="space-y-4" ref={themeSelectorRef}>
-          <GalleryThemeSelector
-            galleryId={galleryId}
-            onThemeChange={applyThemePreset}
-            currentThemeId={currentThemeId}
-            isSaving={isSaving}
-          />
-          <div className="border-t border-[var(--color-border-subtle)] pt-4">
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-              Custom Theme Name (Optional)
-            </label>
-            <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
-            {customThemeName && (
-              <p className="text-xs text-[var(--color-text-muted)] mt-1">
-                Will be saved as a custom theme when you select a theme above.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+      {/* TWO-COLUMN DESIGN WORKSPACE */}
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* LEFT COLUMN: Theme Selector & Settings (25-30%) */}
+        <aside className="lg:w-[30%] flex-shrink-0 space-y-6">
+          {/* THEME SECTION */}
+          {activeSection === 'theme' && (
+            <div className="space-y-4" ref={themeSelectorRef}>
+              <GalleryThemeSelector
+                galleryId={galleryId}
+                onThemeChange={applyThemePreset}
+                currentThemeId={currentThemeId}
+                isSaving={isSaving}
+              />
+              <div className="border-t border-[var(--color-border-subtle)] pt-4">
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                  Custom Theme Name (Optional)
+                </label>
+                <Input type="text" value={customThemeName} onChange={(e) => setCustomThemeName(e.target.value)} placeholder="My Custom Theme" disabled={isSaving} />
+                {customThemeName && (
+                  <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                    Will be saved as a custom theme when you select a theme above.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
 
-      {/* COVER SECTION */}
-      {activeSection === 'cover' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Cover Settings</h3>
-            {currentThemeId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowResetDialog(true)}
-                disabled={isSaving}
-                className="text-xs text-red-600 hover:bg-red-50"
-              >
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset to Defaults
-              </Button>
-            )}
-          </div>
+          {/* COVER SECTION */}
+          {activeSection === 'cover' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Cover Settings</h3>
+                {currentThemeId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowResetDialog(true)}
+                    disabled={isSaving}
+                    className="text-xs text-red-600 hover:bg-red-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset to Defaults
+                  </Button>
+                )}
+              </div>
 
-          {/* Theme-aware cover preview */}
-          <div className="space-y-3">
-            {/* Theme-colored cover placeholder */}
-            <div className="aspect-video rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
-              {/* Show sample gallery when no real cover photo, or real photos otherwise */}
-              {previewPhotos.length > 0 ? (
-                <Image
-                  src={previewPhotos[0].displayUrl}
-                  alt={previewPhotos[0].filename}
-                  fill
-                  unoptimized
-                  className="object-cover"
-                />
-              ) : (
-                <div
-                  className="absolute inset-0 flex items-center justify-center"
-                  style={{
-                    backgroundColor: theme?.preset.backgroundColor || '#F8F9FA',
-                    color: theme?.preset.textColor || '#6B7280',
-                  }}
-                >
-                  <div className="text-center">
-                    <h4 className="text-lg font-light">
-                      {previewTitle || 'My Gallery'}
-                    </h4>
-                    <p className="text-sm text-gray-400">
-                      Upload photos to see your gallery with {savedTheme?.name || 'a theme'}
-                    </p>
+              {/* Cover photo selector */}
+              <div className="space-y-3">
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                  Cover Photo
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {previewPhotos.slice(0, 12).map((photo) => (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      onClick={() => handleSetCover(photo.id)}
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition ${
+                        photo.id === coverPhotoId
+                          ? 'border-[var(--color-accent)]'
+                          : 'border-transparent hover:border-[var(--color-accent)]'
+                      }`}
+                      aria-label={photo.id === coverPhotoId ? `${photo.filename} (current cover)` : `Set ${photo.filename} as cover`}
+                      aria-pressed={photo.id === coverPhotoId}
+                    >
+                      <Image
+                        src={photo.thumbnailUrl || photo.displayUrl}
+                        alt={photo.filename}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                        sizes="80px"
+                      />
+                      {photo.id === coverPhotoId && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Check className="w-6 h-6 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                {previewPhotos.length === 0 && (
+                  <p className="text-xs text-[var(--color-text-muted)] text-center py-4">
+                    Upload photos to select a cover image
+                  </p>
+                )}
+
+                {currentCover && (
+                  <div className="border-t border-[var(--color-border-subtle)] pt-4">
+                    <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                      Focal Point X: {Math.round(focalPoint.x * 100)}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={focalPoint.x * 100}
+                      onChange={(e) => setFocalPoint({ ...focalPoint, x: Number(e.target.value) / 100 })}
+                      className="w-full"
+                    />
                   </div>
+                )}
+
+                {currentCover && (
+                  <div className="border-t border-[var(--color-border-subtle)] pt-4">
+                    <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                      Focal Point Y: {Math.round(focalPoint.y * 100)}%
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={focalPoint.y * 100}
+                      onChange={(e) => setFocalPoint({ ...focalPoint, y: Number(e.target.value) / 100 })}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {currentCover && (
+                  <Button
+                    type="button"
+                    onClick={() => void handleSaveFocalPoint()}
+                    disabled={isSaving}
+                    variant="primary"
+                    className="w-full"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      'Save Focal Point'
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TYPOGRAPHY SECTION */}
+          {activeSection === 'typography' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Typography</h3>
+                {currentThemeId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowResetDialog(true)}
+                    disabled={isSaving}
+                    className="text-xs text-red-600 hover:bg-red-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset to Defaults
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                  Font Family
+                </label>
+                <SelectCompat
+                  value={savedTheme.fontFamily}
+                  onChange={(e) => void updateTheme({ fontFamily: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="sans">Sans Serif (Modern)</option>
+                  <option value="serif">Serif (Editorial)</option>
+                  <option value="modern">Modern (Geometric)</option>
+                  <option value="editorial">Editorial (Story)</option>
+                </SelectCompat>
+              </div>
+
+              <p className="text-xs text-[var(--color-text-muted)]">
+                Font family changes how your gallery title, descriptions, and labels appear.
+              </p>
+            </div>
+          )}
+
+          {/* COLORS SECTION */}
+          {activeSection === 'colors' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Color Scheme</h3>
+                {currentThemeId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowResetDialog(true)}
+                    disabled={isSaving}
+                    className="text-xs text-red-600 hover:bg-red-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset to Defaults
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Accent Color</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={savedTheme.accentColor}
+                    onChange={(e) => void updateTheme({ accentColor: e.target.value })}
+                    className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={savedTheme.accentColor}
+                    onChange={(e) => void updateTheme({ accentColor: e.target.value })}
+                    className="flex-1 gallery-input text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Background Color</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={savedTheme.backgroundColor}
+                    onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
+                    className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={savedTheme.backgroundColor}
+                    onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
+                    className="flex-1 gallery-input text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Text Color</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={savedTheme.textColor}
+                    onChange={(e) => void updateTheme({ textColor: e.target.value })}
+                    className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
+                  />
+                  <input
+                    type="text"
+                    value={savedTheme.textColor}
+                    onChange={(e) => void updateTheme({ textColor: e.target.value })}
+                    className="flex-1 gallery-input text-xs"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                  Border Radius: {savedTheme.borderRadius}px
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="24"
+                  value={savedTheme.borderRadius}
+                  onChange={(e) => void updateTheme({ borderRadius: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* GRID SECTION */}
+          {activeSection === 'grid' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Grid & Layout</h3>
+                {currentThemeId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowResetDialog(true)}
+                    disabled={isSaving}
+                    className="text-xs text-red-600 hover:bg-red-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset to Defaults
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Style</label>
+                <SelectCompat
+                  value={savedTheme.gridStyle}
+                  onChange={(e) => void updateTheme({ gridStyle: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="masonry">Masonry (Varied Heights)</option>
+                  <option value="vertical">Vertical (Column Stack)</option>
+                  <option value="horizontal">Horizontal (Row Stack)</option>
+                  <option value="uniform">Uniform (Equal Sizes)</option>
+                </SelectCompat>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Thumbnail Size</label>
+                <SelectCompat
+                  value={savedTheme.thumbnailSize}
+                  onChange={(e) => void updateTheme({ thumbnailSize: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="small">Small (Compact View)</option>
+                  <option value="regular">Regular (Balanced)</option>
+                  <option value="large">Large (Spacious)</option>
+                </SelectCompat>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Spacing</label>
+                <SelectCompat
+                  value={savedTheme.gridSpacing}
+                  onChange={(e) => void updateTheme({ gridSpacing: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="tight">Tight (Minimal Gap)</option>
+                  <option value="regular">Regular (Balanced Gap)</option>
+                  <option value="wide">Wide (Spacious Gap)</option>
+                </SelectCompat>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Aspect Ratio</label>
+                <SelectCompat
+                  value={savedTheme.aspectRatio}
+                  onChange={(e) => void updateTheme({ aspectRatio: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="auto">Auto (Original Proportions)</option>
+                  <option value="1:1">Square (1:1)</option>
+                  <option value="16:9">Widescreen (16:9)</option>
+                  <option value="4:3">Standard (4:3)</option>
+                  <option value="3:2">Classic (3:2)</option>
+                </SelectCompat>
+              </div>
+
+              {savedTheme.gridStyle === 'masonry' && (
+                <div>
+                  <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
+                    Masonry Columns: {savedTheme.masonryColumns}
+                  </label>
+                  <input
+                    type="range"
+                    min="1"
+                    max="6"
+                    value={savedTheme.masonryColumns}
+                    onChange={(e) => void updateTheme({ masonryColumns: parseInt(e.target.value) })}
+                    className="w-full"
+                  />
                 </div>
               )}
-              <div
-                className="absolute w-6 h-6 border-2 border-white rounded-full shadow-lg"
-                style={{
-                  left: `${focalPoint.x * 100}%`,
-                  top: `${focalPoint.y * 100}%`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <div className="absolute inset-0 rounded-full border border-black/30" />
+            </div>
+          )}
+
+          {/* GENERAL SECTION */}
+          {activeSection === 'general' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--color-text-primary)]">General Settings</h3>
+                {currentThemeId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowResetDialog(true)}
+                    disabled={isSaving}
+                    className="text-xs text-red-600 hover:bg-red-50"
+                  >
+                    <RotateCcw className="w-3 h-3 mr-1" />
+                    Reset to Defaults
+                  </Button>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Navigation Style</label>
+                <SelectCompat
+                  value={savedTheme.navigationStyle}
+                  onChange={(e) => void updateTheme({ navigationStyle: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="icons-and-text">Icons with Text</option>
+                  <option value="icons-only">Icons Only</option>
+                </SelectCompat>
+              </div>
+
+              <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">
+                <h4 className="text-xs font-medium text-[var(--color-text-primary)] uppercase tracking-widest">
+                  Visibility Options
+                </h4>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={savedTheme.showCollections}
+                    onChange={(e) => void updateTheme({ showCollections: e.target.checked })}
+                    className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
+                  />
+                  <span className="text-sm text-[var(--color-text-primary)]">Show Collections</span>
+                </label>
+              </div>
+
+              <div className="bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)] rounded-lg p-3">
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  Current theme: <span className="font-semibold text-[var(--color-text-primary)]">
+                    {savedTheme.name}
+                  </span>
+                </p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-1">Type: {savedTheme.type}</p>
+              </div>
+            </div>
+          )}
+        </aside>
+
+        {/* RIGHT COLUMN: Live Gallery Preview (70-75%) */}
+        <main className="flex-1 min-w-0 lg:w-[70%]">
+          <div className="bg-[var(--color-bg-card)] border border-[var(--color-border-subtle)] rounded-xl overflow-hidden">
+            {/* Preview Header */}
+            <div className="p-4 border-b border-[var(--color-border-subtle)] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium text-[var(--color-text-primary)] uppercase tracking-wider">
+                  Live Preview
+                </span>
+                {isPreviewMode && (
+                  <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-100 text-amber-800 rounded">
+                    Demo Content
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                {theme && (
+                  <span className="text-xs text-[var(--color-text-muted)]">
+                    {theme.label} theme
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="border-t border-[var(--color-border-subtle)] pt-4">
-              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                Focal Point X: {Math.round(focalPoint.x * 100)}%
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={focalPoint.x * 100}
-                onChange={(e) => setFocalPoint({ ...focalPoint, x: Number(e.target.value) / 100 })}
-                className="w-full"
-              />
-            </div>
-
-            <div className="border-t border-[var(--color-border-subtle)] pt-4">
-              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                Focal Point Y: {Math.round(focalPoint.y * 100)}%
-              </label>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={focalPoint.y * 100}
-                onChange={(e) => setFocalPoint({ ...focalPoint, y: Number(e.target.value) / 100 })}
-                className="w-full"
-              />
-            </div>
-
-            <Button
-              type="button"
-              onClick={() => void handleSaveFocalPoint()}
-              disabled={isSaving}
-              variant="primary"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Focal Point'
+            {/* Live Gallery Preview */}
+            <div className="relative min-h-[60vh] max-h-[80vh] overflow-auto">
+              {theme && (
+                <GalleryViewer
+                  id={galleryId}
+                  title={previewTitle}
+                  description={previewDescription}
+                  themeId={theme.id}
+                  photos={previewPhotos}
+                  collections={previewCollections}
+                  allowDownloads={false}
+                  allowFavorites={false}
+                  allowSelections={false}
+                  allowComments={false}
+                  isClient={true}
+                  onPhotoSelect={() => {}}
+                  onPhotoFavorite={() => {}}
+                  onPhotoComment={() => {}}
+                  onPhotoDownload={() => {}}
+                />
               )}
-            </Button>
-          </div>
-        </div>
-      )}
+              {!theme && (
+                <div className="flex items-center justify-center h-[60vh] text-[var(--color-text-muted)]">
+                  Select a theme to see preview
+                </div>
+              )}
+            </div>
 
-      {/* TYPOGRAPHY SECTION */}
-      {activeSection === 'typography' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Typography</h3>
-            {currentThemeId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowResetDialog(true)}
-                disabled={isSaving}
-                className="text-xs text-red-600 hover:bg-red-50"
-              >
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset to Defaults
-              </Button>
+            {/* Preview Mode Notice */}
+            {isPreviewMode && (
+              <div className="p-4 border-t border-[var(--color-border-subtle)] bg-amber-50">
+                <div className="flex items-center gap-2 text-xs text-amber-800">
+                  <span className="w-4 h-4 flex-shrink-0">ℹ</span>
+                  <span>
+                    This preview uses sample images. Upload your own photos to see them with the selected theme.
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Loading/Saving Overlay */}
+            {isSaving && (
+              <div className="absolute inset-0 bg-white/80 dark:bg-black/60 flex items-center justify-center z-10">
+                <div className="flex items-center gap-2 text-[var(--color-text-muted)]">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Saving theme...</span>
+                </div>
+              </div>
             )}
           </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-              Font Family
-            </label>
-            <SelectCompat
-              value={savedTheme.fontFamily}
-              onChange={(e) => void updateTheme({ fontFamily: e.target.value })}
-              className="w-full gallery-input"
-            >
-              <option value="sans">Sans Serif (Modern)</option>
-              <option value="serif">Serif (Editorial)</option>
-              <option value="modern">Modern (Geometric)</option>
-              <option value="editorial">Editorial (Story)</option>
-            </SelectCompat>
-          </div>
-
-          <p className="text-xs text-[var(--color-text-muted)]">
-            Font family changes how your gallery title, descriptions, and labels appear.
-          </p>
-        </div>
-      )}
-
-      {/* COLORS SECTION */}
-      {activeSection === 'colors' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Color Scheme</h3>
-            {currentThemeId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowResetDialog(true)}
-                disabled={isSaving}
-                className="text-xs text-red-600 hover:bg-red-50"
-              >
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset to Defaults
-              </Button>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Accent Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={savedTheme.accentColor}
-                onChange={(e) => void updateTheme({ accentColor: e.target.value })}
-                className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
-              />
-              <input
-                type="text"
-                value={savedTheme.accentColor}
-                onChange={(e) => void updateTheme({ accentColor: e.target.value })}
-                className="flex-1 gallery-input text-xs"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Background Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={savedTheme.backgroundColor}
-                onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
-                className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
-              />
-              <input
-                type="text"
-                value={savedTheme.backgroundColor}
-                onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
-                className="flex-1 gallery-input text-xs"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Text Color</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={savedTheme.textColor}
-                onChange={(e) => void updateTheme({ textColor: e.target.value })}
-                className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
-              />
-              <input
-                type="text"
-                value={savedTheme.textColor}
-                onChange={(e) => void updateTheme({ textColor: e.target.value })}
-                className="flex-1 gallery-input text-xs"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-              Border Radius: {savedTheme.borderRadius}px
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="24"
-              value={savedTheme.borderRadius}
-              onChange={(e) => void updateTheme({ borderRadius: parseInt(e.target.value) })}
-              className="w-full"
-            />
-          </div>
-        </div>
-      )}
-
-      {/* GRID SECTION */}
-      {activeSection === 'grid' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Grid & Layout</h3>
-            {currentThemeId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowResetDialog(true)}
-                disabled={isSaving}
-                className="text-xs text-red-600 hover:bg-red-50"
-              >
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset to Defaults
-              </Button>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Style</label>
-            <SelectCompat
-              value={savedTheme.gridStyle}
-              onChange={(e) => void updateTheme({ gridStyle: e.target.value })}
-              className="w-full gallery-input"
-            >
-              <option value="masonry">Masonry (Varied Heights)</option>
-              <option value="vertical">Vertical (Column Stack)</option>
-              <option value="horizontal">Horizontal (Row Stack)</option>
-              <option value="uniform">Uniform (Equal Sizes)</option>
-            </SelectCompat>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Thumbnail Size</label>
-            <SelectCompat
-              value={savedTheme.thumbnailSize}
-              onChange={(e) => void updateTheme({ thumbnailSize: e.target.value })}
-              className="w-full gallery-input"
-            >
-              <option value="small">Small (Compact View)</option>
-              <option value="regular">Regular (Balanced)</option>
-              <option value="large">Large (Spacious)</option>
-            </SelectCompat>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Spacing</label>
-            <SelectCompat
-              value={savedTheme.gridSpacing}
-              onChange={(e) => void updateTheme({ gridSpacing: e.target.value })}
-              className="w-full gallery-input"
-            >
-              <option value="tight">Tight (Minimal Gap)</option>
-              <option value="regular">Regular (Balanced Gap)</option>
-              <option value="wide">Wide (Spacious Gap)</option>
-            </SelectCompat>
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Aspect Ratio</label>
-            <SelectCompat
-              value={savedTheme.aspectRatio}
-              onChange={(e) => void updateTheme({ aspectRatio: e.target.value })}
-              className="w-full gallery-input"
-            >
-              <option value="auto">Auto (Original Proportions)</option>
-              <option value="1:1">Square (1:1)</option>
-              <option value="16:9">Widescreen (16:9)</option>
-              <option value="4:3">Standard (4:3)</option>
-              <option value="3:2">Classic (3:2)</option>
-            </SelectCompat>
-          </div>
-
-          {savedTheme.gridStyle === 'masonry' && (
-            <div>
-              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                Masonry Columns: {savedTheme.masonryColumns}
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="6"
-                value={savedTheme.masonryColumns}
-                onChange={(e) => void updateTheme({ masonryColumns: parseInt(e.target.value) })}
-                className="w-full"
-              />
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* GENERAL SECTION */}
-      {activeSection === 'general' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-[var(--color-text-primary)]">General Settings</h3>
-            {currentThemeId && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowResetDialog(true)}
-                disabled={isSaving}
-                className="text-xs text-red-600 hover:bg-red-50"
-              >
-                <RotateCcw className="w-3 h-3 mr-1" />
-                Reset to Defaults
-              </Button>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Navigation Style</label>
-            <SelectCompat
-              value={savedTheme.navigationStyle}
-              onChange={(e) => void updateTheme({ navigationStyle: e.target.value })}
-              className="w-full gallery-input"
-            >
-              <option value="icons-and-text">Icons with Text</option>
-              <option value="icons-only">Icons Only</option>
-            </SelectCompat>
-          </div>
-
-          <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">
-            <h4 className="text-xs font-medium text-[var(--color-text-primary)] uppercase tracking-widest">
-              Visibility Options
-            </h4>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={savedTheme.showCollections}
-                onChange={(e) => void updateTheme({ showCollections: e.target.checked })}
-                className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
-              />
-              <span className="text-sm text-[var(--color-text-primary)]">Show Collections</span>
-            </label>
-          </div>
-
-          <div className="bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)] rounded-lg p-3">
-            <p className="text-xs text-[var(--color-text-muted)]">
-              Current theme: <span className="font-semibold text-[var(--color-text-primary)]">
-                {savedTheme.name}
-              </span>
-            </p>
-            <p className="text-xs text-[var(--color-text-muted)] mt-1">Type: {savedTheme.type}</p>
-          </div>
-        </div>
-      )}
+        </main>
+      </div>
 
       {isSaving && (
         <div className="fixed bottom-4 right-4 flex items-center gap-2 text-xs text-[var(--color-text-muted)]">

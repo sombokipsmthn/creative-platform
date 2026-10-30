@@ -106,6 +106,35 @@ export default function GalleryWorkspacePage() {
   }, [id])
 
   useEffect(() => {
+    if (!previewPhotoId) return
+    const handlePreviewKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPreviewPhotoId(null)
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        setPreviewPhotoId((current) => {
+          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
+          if (currentIndex < 0 || !filteredPhotos.length) return current
+          return filteredPhotos[(currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length].id
+        })
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        setPreviewPhotoId((current) => {
+          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
+          if (currentIndex < 0 || !filteredPhotos.length) return current
+          return filteredPhotos[(currentIndex + 1) % filteredPhotos.length].id
+        })
+      }
+    }
+    document.addEventListener('keydown', handlePreviewKeys)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handlePreviewKeys)
+      document.body.style.overflow = ''
+    }
+  }, [previewPhotoId, filteredPhotos])
+
+  useEffect(() => {
     const fetchGallery = async () => {
       try {
         setLoading(true)
@@ -749,11 +778,6 @@ export default function GalleryWorkspacePage() {
                     aria-modal="true"
                     aria-label={`Preview ${previewPhoto.filename}`}
                     onClick={() => setPreviewPhotoId(null)}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Escape') setPreviewPhotoId(null)
-                      if (event.key === 'ArrowLeft') goToPreview(-1)
-                      if (event.key === 'ArrowRight') goToPreview(1)
-                    }}
                     tabIndex={-1}
                   >
                     <div className="relative flex h-full max-h-[92vh] w-full max-w-7xl flex-col" onClick={(event) => event.stopPropagation()}>

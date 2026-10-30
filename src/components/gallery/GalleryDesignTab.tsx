@@ -215,7 +215,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   // Derive current theme ID from saved theme name/type more robustly
   const currentThemeId = GALLERY_THEMES.find(
     t => t.label === draftTheme?.name
-  )?.id ?? null
+  )?.id ?? 'minimal'
 
   // Load saved theme on mount
   useEffect(() => {
@@ -253,7 +253,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   // Editing stays local. The database is only updated when the creator presses Save.
   const updateTheme = useCallback((updates: Partial<SavedTheme>) => {
-    setDraftTheme(current => current ? { ...current, ...updates, type: 'custom' } : current)
+    setDraftTheme(current => current ? { ...current, ...updates, type: updates.type ?? 'custom' } : current)
   }, [])
 
   const saveTheme = useCallback(async () => {
@@ -693,6 +693,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   <option value="serif">Serif (Editorial)</option>
                   <option value="modern">Modern (Geometric)</option>
                   <option value="editorial">Editorial (Story)</option>
+                  <option value="system-rounded">Soft Rounded</option>
                 </SelectCompat>
               </div>
 

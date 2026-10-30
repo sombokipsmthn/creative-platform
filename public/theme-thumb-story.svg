@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <!-- Story theme: narrative layout, prominent lead image, supporting images -->
+  <rect width="400" height="300" fill="#FAFAFA"/>
+
+  <!-- Header -->
+  <rect x="20" y="16" width="120" height="14" fill="#111111" opacity="0.15"/>
+  <rect x="320" y="16" width="60" height="12" fill="#111111" opacity="0.08"/>
+
+  <!-- Large lead/hero image (top, centered, wide) -->
+  <rect x="20" y="44" width="360" height="110" fill="#DDDDDD" rx="4"/>
+
+  <!-- Lead image caption -->
+  <rect x="20" y="164" width="200" height="10" fill="#111111" opacity="0.12"/>
+  <rect x="20" y="178" width="150" height="8" fill="#111111" opacity="0.08"/>
+
+  <!-- Divider/timeline line -->
+  <line x1="200" y1="194" x2="200" y2="280" stroke="#111111" stroke-width="1" opacity="0.15"/>
+
+  <!-- Supporting images - left and right alternating (vertical sequence) -->
+  <!-- Left supporting 1 -->
+  <rect x="20" y="204" width="170" height="72" fill="#E0E0E0" rx="4"/>
+  <rect x="20" y="280" width="120" height="6" fill="#111111" opacity="0.1"/>
+  <rect x="20" y="290" width="80" height="5" fill="#111111" opacity="0.06"/>
+
+  <!-- Right supporting 2 -->
+  <rect x="210" y="204" width="170" height="72" fill="#E0E0E0" rx="4"/>
+  <rect x="210" y="280" width="120" height="6" fill="#111111" opacity="0.1"/>
+  <rect x="210" y="290" width="80" height="5" fill="#111111" opacity="0.06"/>
+
+  <!-- Scroll indicator at bottom -->
+  <polyline points="200,285 205,290 210,285" fill="none" stroke="#111111" stroke-width="1.5" opacity="0.3"/>
+</svg>

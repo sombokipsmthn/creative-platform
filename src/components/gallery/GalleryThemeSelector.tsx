@@ -15,80 +15,17 @@ interface GalleryThemeSelectorProps {
 }
 
 /**
- * Generates a representative sample image URL for theme previews.
- * Uses placeholder images with consistent composition across all themes
- * so that differences between themes are easy to compare.
- *
- * The images are sourced from an existing project asset library.
- * If no project-specific assets are available, reliable unsplash-style
- * placeholders are used with consistent styling.
+ * Gets the local thumbnail asset for a theme.
  */
-function getSampleImageUrl(themeId: GalleryThemeId, index: number): string {
-  // Use project-available placeholder images first
-  // Fall back to consistent solid-color placeholders with text labels
-  const baseUrls = [
-    '/placeholder-hero-1.svg',
-    '/placeholder-hero-2.svg',
-    '/placeholder-hero-3.svg',
-    '/placeholder-hero-4.svg',
-    '/placeholder-hero-5.svg',
-  ]
-
-  // Select image based on theme and index for variety
-  const themeIndex = {
-    minimal: 0,
-    editorial: 1,
-    cinematic: 2,
-    mosaic: 3,
-    story: 4,
-  }[themeId]
-
-  // Wrap around for variety across multiple photos
-  const selectedIndex = (themeIndex + index) % baseUrls.length
-
-  return baseUrls[selectedIndex]
-}
-
-/**
- * Gets the appropriate background color for a theme's sample preview.
- */
-function getThemeBackgroundColor(themeId: GalleryThemeId): string {
-  const backgrounds: Record<GalleryThemeId, string> = {
-    minimal: '#FFFFFF',
-    editorial: '#F7F5F1',
-    cinematic: '#080808',
-    mosaic: '#FFFFFF',
-    story: '#FAFAFA',
+function getThemeThumbnail(themeId: GalleryThemeId): string {
+  const thumbnails: Record<GalleryThemeId, string> = {
+    minimal: '/theme-thumb-minimal.svg',
+    editorial: '/theme-thumb-editorial.svg',
+    cinematic: '/theme-thumb-cinematic.svg',
+    mosaic: '/theme-thumb-mosaic.svg',
+    story: '/theme-thumb-story.svg',
   }
-  return backgrounds[themeId]
-}
-
-/**
- * Gets the appropriate text color for a theme's sample preview.
- */
-function getThemeTextColor(themeId: GalleryThemeId): string {
-  const colors: Record<GalleryThemeId, string> = {
-    minimal: '#111111',
-    editorial: '#181818',
-    cinematic: '#FFFFFF',
-    mosaic: '#171717',
-    story: '#171717',
-  }
-  return colors[themeId]
-}
-
-/**
- * Gets the appropriate border radius for a theme's sample preview.
- */
-function getThemeBorderRadius(themeId: GalleryThemeId): number {
-  const radii: Record<GalleryThemeId, number> = {
-    minimal: 0,
-    editorial: 0,
-    cinematic: 0,
-    mosaic: 6,
-    story: 4,
-  }
-  return radii[themeId]
+  return thumbnails[themeId]
 }
 
 export default function GalleryThemeSelector({
@@ -127,13 +64,11 @@ export default function GalleryThemeSelector({
           break
         case 'ArrowDown':
           e.preventDefault()
-          // Move to next row (3 columns on lg, 2 on sm, 1 on mobile)
-          // Approximate: +2 for sm, +3 for lg
-          setFocusedIndex(prev => Math.min(prev + 2, GALLERY_THEMES.length - 1))
+          setFocusedIndex(prev => Math.min(prev + 1, GALLERY_THEMES.length - 1))
           break
         case 'ArrowUp':
           e.preventDefault()
-          setFocusedIndex(prev => Math.max(prev - 2, 0))
+          setFocusedIndex(prev => Math.max(prev - 1, 0))
           break
         case 'Enter':
         case ' ':
@@ -187,8 +122,8 @@ export default function GalleryThemeSelector({
         </p>
       </div>
 
-      {/* Theme grid with visual previews */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3" role="presentation">
+      {/* Theme list - single column, compact cards with thumbnails */}
+      <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1" role="presentation">
         {GALLERY_THEMES.map((theme, index) => {
           const isCurrent = currentThemeId === theme.id
           const isHovered = hoveredTheme === theme.id
@@ -206,86 +141,51 @@ export default function GalleryThemeSelector({
                 onClick={() => handleThemeSelect(theme.id)}
                 disabled={isSaving}
                 variant={isCurrent ? 'primary' : 'outline'}
-                className={`h-auto w-full justify-start p-4 text-left transition-all duration-200 ${
+                className={`w-full justify-start px-2.5 py-2 text-left transition-all duration-200 gap-2.5 ${
                   isFocused ? 'ring-2 ring-[var(--color-accent)] ring-offset-2' : ''
                 }`}
                 role="option"
                 aria-selected={isCurrent}
                 aria-label={theme.label}
+                onMouseEnter={() => setHoveredTheme(theme.id)}
+                onMouseLeave={() => setHoveredTheme(null)}
               >
-                <div className="flex items-start justify-between mb-2">
-                  <h4 className="font-semibold text-[var(--color-text-primary)]">
-                    {theme.label}
-                  </h4>
+                {/* Thumbnail */}
+                <div className="relative flex-shrink-0 w-16 h-12 rounded-lg overflow-hidden bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)]">
+                  <Image
+                    src={getThemeThumbnail(theme.id)}
+                    alt={`${theme.label} theme preview`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                    sizes="64px"
+                  />
                   {isCurrent && (
-                    <span className="text-xs font-semibold text-[var(--color-accent)]">
-                      ✓
-                    </span>
+                    <div className="absolute inset-0 bg-[var(--color-accent)]/20 flex items-center justify-center">
+                      <span className="text-xs font-semibold text-[var(--color-accent)] bg-[var(--color-accent-foreground)] px-1.5 py-0.5 rounded">
+                        ✓
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                <p className="text-xs text-[var(--color-text-muted)] mb-3">
-                  {theme.description}
-                </p>
-
-                {/* Visual preview card */}
-                <Card
-                  className={`p-3 rounded-xl transition-all duration-200 ${
-                    isCurrent
-                      ? 'border-2 border-[var(--color-accent)] shadow-lg'
-                      : 'border-transparent hover:opacity-80 hover:border-gray-200'
-                  }`}
-                  style={{
-                    backgroundColor: getThemeBackgroundColor(theme.id),
-                    color: getThemeTextColor(theme.id),
-                  }}
-                >
-                  {/* Sample gallery image */}
-                  <div
-                    className="aspect-[4/3] rounded-t-lg overflow-hidden mb-3"
-                    style={{
-                      backgroundColor: theme.preset.backgroundColor,
-                    }}
-                  >
-                    <Image
-                      src={getSampleImageUrl(theme.id, 0)}
-                      alt={theme.label}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-
-                  {/* Theme info overlay */}
+                {/* Theme info */}
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
-                    <div className="text-xs">
-                      <div className="font-medium">{theme.label}</div>
-                      <div className="text-[var(--color-text-muted)] line-clamp-2">
-                        {theme.description}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {isCurrent && (
-                        <span className="text-xs font-semibold text-[var(--color-accent)]">
-                          ✓ Selected
-                        </span>
-                      )}
-                    </div>
+                    <h4 className="font-medium text-xs text-[var(--color-text-primary)] truncate">
+                      {theme.label}
+                    </h4>
+                    {isCurrent && (
+                      <span className="text-xs font-semibold text-[var(--color-accent)] ml-2 whitespace-nowrap">
+                        Selected
+                      </span>
+                    )}
                   </div>
-                </Card>
-              </Button>
-
-              {/* Enhanced hover preview */}
-              {isHovered && (
-                <div className="absolute left-0 top-0 w-full h-full bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="text-[var(--color-text-muted)] text-sm">
-                    <div className="flex items-center gap-2">
-                      <span className="w-3 h-3 rounded-full bg-white/60" />
-                      Preview
-                    </div>
-                  </div>
+                  <p className="text-xs text-[var(--color-text-muted)] truncate mt-0.5">
+                    {theme.description}
+                  </p>
                 </div>
-              )}
+              </Button>
             </div>
           )
         })}

@@ -224,7 +224,7 @@ export default function PhotoUploader({
         aria-label="Select gallery photos and videos to upload"
       />
 
-      {/* Drop Zone */}
+      {/* Drop Zone - Compact */}
       <div
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -240,14 +240,14 @@ export default function PhotoUploader({
           }
         }}
         aria-label="Upload gallery media: drag and drop or press Enter to browse files"
-        className={`relative flex min-h-[9rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
+        className={`relative flex min-h-[6rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
           isDragging
             ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
             : 'border-[var(--color-border-subtle)] hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-soft)]'
         }`}
       >
         <Upload
-          className={`mb-3 h-8 w-8 ${
+          className={`mb-2 h-6 w-6 ${
             isDragging ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
           }`}
         />
@@ -256,7 +256,7 @@ export default function PhotoUploader({
             ? 'Drop photos to upload'
             : 'Drag & drop photos here'}
         </p>
-        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
           or{' '}
           <span className="font-medium text-[var(--color-accent)]">
             browse files

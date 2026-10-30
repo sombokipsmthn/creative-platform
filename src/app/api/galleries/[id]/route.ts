@@ -134,7 +134,29 @@ export async function GET(request: Request, context: Context) {
 
         projectName: projects.name,
 
-        coverPath: sql<string | null>`(SELECT CASE WHEN p.display_path IS NULL AND p.storage_path LIKE 'http%' THEN p.display_url ELSE COALESCE(p.display_path, p.storage_path) END FROM gallery_photos p WHERE p.gallery_id = ${galleries.id} AND p.is_hidden = false ORDER BY p.sort_order ASC, p.created_at ASC LIMIT 1)`, 
+        coverPath: sql<string | null>`(
+          SELECT COALESCE(p.display_path, p.storage_path, p.display_url)
+          FROM gallery_photos p
+          WHERE p.gallery_id = ${galleries.id}
+            AND p.id = COALESCE(
+              (
+                SELECT selected.id
+                FROM gallery_photos selected
+                WHERE selected.gallery_id = ${galleries.id}
+                  AND selected.id = ${galleries.coverPhotoId}
+                LIMIT 1
+              ),
+              (
+                SELECT fallback.id
+                FROM gallery_photos fallback
+                WHERE fallback.gallery_id = ${galleries.id}
+                  AND fallback.is_hidden = false
+                ORDER BY fallback.sort_order ASC, fallback.created_at ASC
+                LIMIT 1
+              )
+            )
+          LIMIT 1
+        )`, 
 
       })
 

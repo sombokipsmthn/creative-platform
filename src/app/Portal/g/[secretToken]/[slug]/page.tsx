@@ -78,6 +78,9 @@ export default function ClientGalleryPage({
   const [loading, setLoading] =
     useState(true);
 
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+
   useEffect(() => {
     params.then((value) =>
       setSlug(value.slug)
@@ -239,6 +242,37 @@ export default function ClientGalleryPage({
         }),
       }
     );
+  }
+
+
+  async function downloadPhoto(photo: Photo, resolution: "original" | "high" | "web") {
+    if (!slug || !gallery?.allow_downloads || isDownloading) return;
+    setIsDownloading(true);
+    setDownloadError(null);
+    try {
+      const response = await fetch(`/api/public/galleries/${slug}/download`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ photoIds: [photo.id], type: "single", resolution }),
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || "Unable to download this image.");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = resolution === "original" ? photo.filename : photo.filename.replace(/\\.[^.]+$/, "") + (resolution === "high" ? "-high-res.jpg" : "-web.jpg");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setDownloadError(error instanceof Error ? error.message : "Download failed.");
+    } finally {
+      setIsDownloading(false);
+    }
   }
 
   if (loading) {
@@ -478,18 +512,17 @@ export default function ClientGalleryPage({
             </Button>
 
             {gallery.allow_downloads && (
-              <a
-                href={
-                  visiblePhotos[
-                    viewerIndex
-                  ].original_url
-                }
-                download
-                className="absolute bottom-5 left-1/2 -translate-x-1/2 px-4 py-2.5 rounded-full bg-white text-black text-xs flex items-center gap-2"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Download
-              </a>
+              <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+                {downloadError && <p role="alert" className="rounded-lg bg-red-950/90 px-3 py-2 text-xs text-red-200">{downloadError}</p>}
+                <div className="flex items-center gap-2 rounded-full border border-white/15 bg-black/80 p-1.5 backdrop-blur-xl">
+                  <Button type="button" disabled={isDownloading} onClick={() => downloadPhoto(visiblePhotos[viewerIndex], "web")} className="rounded-full bg-white/10 px-3 py-2 text-xs text-white disabled:opacity-50">Web</Button>
+                  <Button type="button" disabled={isDownloading || visiblePhotos[viewerIndex].mime_type?.startsWith("video/")} onClick={() => downloadPhoto(visiblePhotos[viewerIndex], "high")} className="rounded-full bg-white/10 px-3 py-2 text-xs text-white disabled:opacity-50">High-res</Button>
+                  <Button type="button" disabled={isDownloading} onClick={() => downloadPhoto(visiblePhotos[viewerIndex], "original")} className="flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs text-black disabled:opacity-50">
+                    <Download className="h-3.5 w-3.5" />
+                    {isDownloading ? "Preparing…" : "Original"}
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         )}

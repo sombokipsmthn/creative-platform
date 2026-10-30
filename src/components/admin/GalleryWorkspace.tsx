@@ -737,7 +737,6 @@ export default function GalleryWorkspacePage() {
                         const mediaType = getMediaType(photo)
                         
                         const isSelected = selectedPhotos.has(photo.id)
-                        const isInPortfolio = isPortfolioIncluded(photo)
 
                         return (
                           <div
@@ -761,7 +760,7 @@ export default function GalleryWorkspacePage() {
                               title={isSelected ? 'Deselect item' : 'Select item'}
                               className={cn(
                                 'absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-white/80 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
-                                'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                                'opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100',
                                 isSelected && 'opacity-100',
                                 isSelected ? 'bg-[var(--color-accent)] text-white' : 'bg-black/55 text-white hover:bg-black/80'
                               )}

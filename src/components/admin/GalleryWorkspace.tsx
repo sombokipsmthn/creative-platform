@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Video, Check, MinusCircle, CaretLeft, CaretRight } from "@phosphor-icons/react"
+import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Video, Check, MinusCircle, CaretLeft, CaretRight, Circle, CheckCircle, FolderSimple, Eye, EyeSlash, ImageSquare } from "@phosphor-icons/react"
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
@@ -524,64 +524,83 @@ export default function GalleryWorkspacePage() {
                   }}
                 />
 
-                {/* SELECTION TOOLBAR */}
+                {/* COMPACT BULK-ACTION TOOLBAR */}
                 {selectedPhotos.size > 0 && (
-                  <div className="sticky top-0 z-10 ui-card border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center justify-between gap-4">
-                    <span className="text-sm font-medium">
-                      {selectedPhotos.size} item{selectedPhotos.size !== 1 ? 's' : ''} selected
+                  <div className="sticky top-2 z-10 ui-card flex items-center justify-between gap-2 rounded-xl border border-[var(--color-border-subtle)] px-3 py-2 shadow-sm">
+                    <span className="shrink-0 text-xs font-semibold tabular-nums">
+                      {selectedPhotos.size} selected
                     </span>
-                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                    <div className="flex min-w-0 items-center justify-end gap-1">
                       <button
+                        type="button"
                         onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'include')}
-                        className="gallery-btn gallery-btn-secondary gap-2"
+                        aria-label="Add selected items to portfolio"
+                        title="Add to portfolio"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        <Check className="w-4 h-4" />
-                        Add to portfolio
+                        <Check className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'exclude')}
-                        className="gallery-btn gallery-btn-secondary gap-2"
+                        aria-label="Remove selected items from portfolio"
+                        title="Remove from portfolio"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        <MinusCircle className="w-4 h-4" />
-                        Remove from portfolio
+                        <MinusCircle className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => {
                           setShowCollectionPicker(true)
                           setMoveDestination(null)
                         }}
-                        className="gallery-btn gallery-btn-secondary gap-2"
+                        aria-label="Move selected items to a set"
+                        title="Move to set"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        <Copy className="w-4 h-4" />
-                        Move to set
+                        <FolderSimple className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => void handleSetCover()}
                         disabled={!canSetCover}
-                        title={canSetCover ? 'Set selected image as gallery cover' : 'Select exactly one photo (not a video) to set the cover'}
-                        className="gallery-btn gallery-btn-secondary gap-2 disabled:cursor-not-allowed disabled:opacity-40"
+                        aria-label="Set selected image as gallery cover"
+                        title={canSetCover ? 'Set as cover' : 'Select exactly one image to set as cover'}
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)] disabled:cursor-not-allowed disabled:opacity-35"
                       >
-                        <Layers className="w-4 h-4" />
-                        Set as cover
+                        <ImageSquare className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
                         onClick={() => void handleBulkVisibility(!allSelectedHidden)}
-                        className="gallery-btn gallery-btn-secondary gap-2"
+                        aria-label={allSelectedHidden ? 'Show selected items in gallery' : 'Hide selected items from gallery'}
+                        title={allSelectedHidden ? 'Show in gallery' : 'Hide from gallery'}
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        {allSelectedHidden ? 'Show in gallery' : 'Hide from gallery'}
+                        {allSelectedHidden ? <Eye className="h-4 w-4" /> : <EyeSlash className="h-4 w-4" />}
                       </button>
                       <button
+                        type="button"
                         onClick={() => void handleDeletePhotos()}
-                        className="gallery-btn gallery-btn-secondary gap-2 text-destructive hover:text-destructive"
+                        aria-label="Delete selected items"
+                        title="Delete"
+                        className="rounded-lg p-2 text-destructive transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                       </button>
+                      <span className="mx-1 h-5 w-px bg-[var(--color-border-subtle)]" />
                       <button
-                        onClick={() => setSelectedPhotos(new Set())}
-                        className="gallery-btn gallery-btn-secondary"
+                        type="button"
+                        onClick={() => {
+                          setSelectedPhotos(new Set())
+                          setBulkSelectMode(false)
+                        }}
+                        aria-label="Exit selection mode"
+                        title="Clear selection"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        Clear
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -653,7 +672,7 @@ export default function GalleryWorkspacePage() {
                 )}
 
                 {/* PHOTOS GRID */}
-                <div className="ui-card p-6 space-y-4">
+                <div className="ui-card p-4 space-y-3">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h2 className="text-lg font-semibold">Photos & Videos</h2>
@@ -670,16 +689,20 @@ export default function GalleryWorkspacePage() {
                         <option value="not-included">Not selected</option>
                         <option value="published">In published gallery</option>
                       </SelectCompat>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setBulkSelectMode((current) => !current)
-                          setSelectedPhotos(new Set())
-                        }}
-                        className="gallery-btn gallery-btn-secondary"
-                      >
-                        {bulkSelectMode ? 'Done selecting' : 'Select items'}
-                      </button>
+                      {bulkSelectMode && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBulkSelectMode(false)
+                            setSelectedPhotos(new Set())
+                          }}
+                          aria-label="Exit selection mode"
+                          title="Exit selection mode"
+                          className="rounded-lg border border-[var(--color-border-subtle)] p-2 text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)]"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                       <SelectCompat
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -709,7 +732,7 @@ export default function GalleryWorkspacePage() {
                   </div>
 
                   {filteredPhotos.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
                       {filteredPhotos.map((photo) => {
                         const mediaType = getMediaType(photo)
                         
@@ -726,23 +749,24 @@ export default function GalleryWorkspacePage() {
                                 : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent)]'
                             )}
                           >
-                            {/* One-tap portfolio curation; bulk selection is an explicit secondary mode. */}
+                            {/* Small, neutral selector: nothing is selected until the user clicks it. */}
                             <button
                               type="button"
-                              onClick={() => bulkSelectMode ? handlePhotoToggle(photo.id) : void handlePortfolioToggle(photo)}
-                              aria-label={bulkSelectMode
-                                ? `${isSelected ? 'Deselect' : 'Select'} ${photo.filename} for bulk actions`
-                                : `${isInPortfolio ? 'Remove' : 'Add'} ${photo.filename} ${isInPortfolio ? 'from' : 'to'} portfolio`}
-                              aria-pressed={bulkSelectMode ? isSelected : isInPortfolio}
-                              title={bulkSelectMode ? 'Select for bulk actions' : isInPortfolio ? 'Selected for portfolio' : 'Add to portfolio'}
+                              onClick={() => {
+                                setBulkSelectMode(true)
+                                handlePhotoToggle(photo.id)
+                              }}
+                              aria-label={`${isSelected ? 'Deselect' : 'Select'} ${photo.filename}`}
+                              aria-pressed={isSelected}
+                              title={isSelected ? 'Deselect item' : 'Select item'}
                               className={cn(
-                                'absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
-                                bulkSelectMode
-                                  ? isSelected ? 'bg-[var(--color-accent)] text-white' : 'bg-black/65 text-white'
-                                  : isInPortfolio ? 'bg-[var(--color-accent)] text-white' : 'bg-black/55 text-white hover:bg-black/80'
+                                'absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-white/80 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                                'opacity-0 group-hover:opacity-100 focus-visible:opacity-100',
+                                isSelected && 'opacity-100',
+                                isSelected ? 'bg-[var(--color-accent)] text-white' : 'bg-black/55 text-white hover:bg-black/80'
                               )}
                             >
-                              {(bulkSelectMode ? isSelected : isInPortfolio) && <Check className="h-4 w-4" weight="bold" />}
+                              {isSelected ? <Check className="h-3.5 w-3.5" weight="bold" /> : <Circle className="h-3.5 w-3.5" weight="regular" />}
                             </button>
 
                             {/* MEDIA DISPLAY */}

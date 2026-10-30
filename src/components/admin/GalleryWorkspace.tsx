@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, EyeSlash as EyeOff, Video, Check, CaretLeft, CaretRight } from "@phosphor-icons/react"
+import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Video, Check, MinusCircle, CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
@@ -505,7 +505,7 @@ export default function GalleryWorkspacePage() {
                         onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'exclude')}
                         className="gallery-btn gallery-btn-secondary gap-2"
                       >
-                        <EyeOff className="w-4 h-4" />
+                        <MinusCircle className="w-4 h-4" />
                         Remove from portfolio
                       </button>
                       <button
@@ -684,7 +684,7 @@ export default function GalleryWorkspacePage() {
                               aria-pressed={bulkSelectMode ? isSelected : isInPortfolio}
                               title={bulkSelectMode ? 'Select for bulk actions' : isInPortfolio ? 'Selected for portfolio' : 'Add to portfolio'}
                               className={cn(
-                                'absolute left-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                                'absolute right-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border border-white/70 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
                                 bulkSelectMode
                                   ? isSelected ? 'bg-[var(--color-accent)] text-white' : 'bg-black/65 text-white'
                                   : isInPortfolio ? 'bg-[var(--color-accent)] text-white' : 'bg-black/55 text-white hover:bg-black/80'
@@ -692,13 +692,6 @@ export default function GalleryWorkspacePage() {
                             >
                               {(bulkSelectMode ? isSelected : isInPortfolio) && <Check className="h-4 w-4" weight="bold" />}
                             </button>
-
-                            {/* HIDDEN INDICATOR */}
-                            {photo.isHidden && (
-                              <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/70 flex items-center justify-center">
-                                <EyeOff className="w-3 h-3 text-white" />
-                              </div>
-                            )}
 
                             {/* MEDIA DISPLAY */}
                             <button
@@ -713,13 +706,7 @@ export default function GalleryWorkspacePage() {
                                   src={photo.displayUrl || photo.originalUrl}
                                   className="h-full w-full object-contain"
                                   poster={photo.thumbnailUrl || undefined}
-                                  controls
                                   preload="metadata"
-                                  onClick={(event) => {
-                                    event.stopPropagation()
-                                    setPreviewPhotoId(photo.id)
-                                  }}
-                                  onDoubleClick={(event) => event.stopPropagation()}
                                 />
                                 {/* Video Icon Overlay */}
                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">

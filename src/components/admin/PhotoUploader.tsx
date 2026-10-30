@@ -48,6 +48,7 @@ interface UploadItem {
   status: 'queued' | 'uploading' | 'uploaded' | 'failed';
   progress: number;
   error: string | null;
+  photoId?: string;
 }
 
 interface PhotoUploaderProps {
@@ -161,7 +162,8 @@ export default function PhotoUploader({
       );
 
       try {
-        const optimizedPreview = await createOptimizedPreview(item.file);
+        const optimizedPreview = item.photoId ? null : await createOptimizedPreview(item.file);
+        let photoId = item.photoId || "";
         if (optimizedPreview) {
           const previewForm = new FormData();
           previewForm.append("galleryId", galleryId);
@@ -169,9 +171,12 @@ export default function PhotoUploader({
           const previewResponse = await uploadFormData("/api/galleries/upload", previewForm, (loaded, total) => {
             setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: Math.round((loaded / total) * 70) } : i));
           });
-          const photoId = typeof previewResponse.photo?.id === "string" ? previewResponse.photo.id : "";
+          photoId = typeof previewResponse.photo?.id === "string" ? previewResponse.photo.id : "";
           if (!photoId) throw new Error("Preview uploaded, but the media record was not returned.");
-
+          setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, photoId, progress: 70 } : i));
+          onUploadComplete();
+        }
+        if (photoId) {
           const originalForm = new FormData();
           originalForm.append("galleryId", galleryId);
           originalForm.append("photoId", photoId);

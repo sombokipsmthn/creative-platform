@@ -261,7 +261,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     setIsSaving(true)
     setError(null)
     try {
-      const { id, galleryId: _galleryId, createdAt, updatedAt, ...payload } = draftTheme
+      const payload = { ...draftTheme }
       const response = await fetch(`/api/galleries/${galleryId}/theme`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -974,7 +974,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   title={previewTitle}
                   description={previewDescription}
                   themeId={theme.id}
-                  themePreset={draftTheme as unknown as GalleryThemePreset}
+                  themePreset={{ ...draftTheme, masonryColumns: previewDevice === 'mobile' ? Math.min(2, draftTheme.masonryColumns) : draftTheme.masonryColumns } as unknown as GalleryThemePreset}
                   photos={previewPhotos}
                   collections={previewCollections}
                   allowDownloads={false}

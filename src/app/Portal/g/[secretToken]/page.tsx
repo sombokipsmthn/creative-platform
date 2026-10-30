@@ -19,29 +19,29 @@ interface GalleryPageProps {
 
 interface SavedTheme {
   id: string
-  gallery_id: string
+  galleryId: string
   name: string
   type: string
   layout: string
-  accent_color: string
-  background_color: string
-  text_color: string
-  border_radius: number
-  show_title: boolean
-  show_description: boolean
-  show_collections: boolean
-  show_logo: boolean
-  masonry_columns: number
-  aspect_ratio: string
-  font_family: string
-  cover_style: string
-  cover_focal_x: number
-  cover_focal_y: number
-  cover_overlay_opacity: number
-  grid_style: string
-  thumbnail_size: string
-  grid_spacing: string
-  navigation_style: string
+  accentColor: string
+  backgroundColor: string
+  textColor: string
+  borderRadius: number
+  showTitle: boolean
+  showDescription: boolean
+  showCollections: boolean
+  showLogo: boolean
+  masonryColumns: number
+  aspectRatio: string
+  fontFamily: string
+  coverStyle: string
+  coverFocalX: number
+  coverFocalY: number
+  coverOverlayOpacity: number
+  gridStyle: string
+  thumbnailSize: string
+  gridSpacing: string
+  navigationStyle: string
 }
 
 interface RawPhoto {
@@ -121,25 +121,25 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         if (savedTheme) {
           setThemePreset({
             layout: savedTheme.layout as GalleryThemePreset['layout'],
-            aspectRatio: savedTheme.aspect_ratio as GalleryThemePreset['aspectRatio'],
-            masonryColumns: Number(savedTheme.masonry_columns ?? 4),
-            showTitle: Boolean(savedTheme.show_title),
-            showDescription: Boolean(savedTheme.show_description),
-            showCollections: Boolean(savedTheme.show_collections),
-            showLogo: Boolean(savedTheme.show_logo),
-            accentColor: savedTheme.accent_color,
-            backgroundColor: savedTheme.background_color,
-            textColor: savedTheme.text_color,
-            borderRadius: Number(savedTheme.border_radius ?? 0),
-            fontFamily: savedTheme.font_family as GalleryThemePreset['fontFamily'],
-            coverStyle: savedTheme.cover_style as GalleryThemePreset['coverStyle'],
-            coverFocalX: Number(savedTheme.cover_focal_x ?? 50),
-            coverFocalY: Number(savedTheme.cover_focal_y ?? 50),
-            coverOverlayOpacity: Number(savedTheme.cover_overlay_opacity ?? 25),
-            gridStyle: savedTheme.grid_style as GalleryThemePreset['gridStyle'],
-            thumbnailSize: savedTheme.thumbnail_size as GalleryThemePreset['thumbnailSize'],
-            gridSpacing: savedTheme.grid_spacing as GalleryThemePreset['gridSpacing'],
-            navigationStyle: savedTheme.navigation_style as GalleryThemePreset['navigationStyle'],
+            aspectRatio: savedTheme.aspectRatio as GalleryThemePreset['aspectRatio'],
+            masonryColumns: Number(savedTheme.masonryColumns ?? 4),
+            showTitle: Boolean(savedTheme.showTitle),
+            showDescription: Boolean(savedTheme.showDescription),
+            showCollections: Boolean(savedTheme.showCollections),
+            showLogo: Boolean(savedTheme.showLogo),
+            accentColor: savedTheme.accentColor,
+            backgroundColor: savedTheme.backgroundColor,
+            textColor: savedTheme.textColor,
+            borderRadius: Number(savedTheme.borderRadius ?? 0),
+            fontFamily: savedTheme.fontFamily as GalleryThemePreset['fontFamily'],
+            coverStyle: savedTheme.coverStyle as GalleryThemePreset['coverStyle'],
+            coverFocalX: Number(savedTheme.coverFocalX ?? 50),
+            coverFocalY: Number(savedTheme.coverFocalY ?? 50),
+            coverOverlayOpacity: Number(savedTheme.coverOverlayOpacity ?? 25),
+            gridStyle: savedTheme.gridStyle as GalleryThemePreset['gridStyle'],
+            thumbnailSize: savedTheme.thumbnailSize as GalleryThemePreset['thumbnailSize'],
+            gridSpacing: savedTheme.gridSpacing as GalleryThemePreset['gridSpacing'],
+            navigationStyle: savedTheme.navigationStyle as GalleryThemePreset['navigationStyle'],
           })
           // Resolve theme ID robustly:
           // 1. Check if `type` stores a valid preset id (preset themes set type = preset id)

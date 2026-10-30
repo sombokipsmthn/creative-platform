@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { GalleryMedia } from './media';
 import { Download, Heart, CaretDown as ChevronDown } from "@phosphor-icons/react";
 import type { GalleryViewerProps } from './wrapper';
-import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { getGalleryFontStack, type GalleryThemeDefinition } from '@/lib/gallery/themes';
 import { Button } from '@/components/ui/button';
 
 interface CinematicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
@@ -21,6 +21,7 @@ interface CinematicViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
  */
 export function GalleryViewerCinematic({
   title,
+  theme,
   photos,
   allowDownloads,
   allowFavorites,
@@ -93,7 +94,7 @@ export function GalleryViewerCinematic({
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
+    <div className="relative min-h-screen overflow-hidden bg-black" style={{ backgroundColor: theme.preset.backgroundColor, color: theme.preset.textColor, fontFamily: getGalleryFontStack(theme.preset.fontFamily) }}>
       {/* Full-screen Image */}
       <div className="absolute inset-0">
         <GalleryMedia

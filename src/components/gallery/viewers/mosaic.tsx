@@ -76,7 +76,16 @@ export function GalleryViewerMosaic({
       {/* Mosaic Grid */}
       <div className="px-6 py-8 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-6xl">
-          <div className="columns-1 [column-fill:_balance]" style={{ columnCount: theme.preset.masonryColumns, columnGap: theme.preset.gridSpacing === "tight" ? "8px" : theme.preset.gridSpacing === "wide" ? "24px" : "16px" }}>
+          <div
+            className={theme.preset.gridStyle === 'uniform' ? 'grid' : theme.preset.gridStyle === 'horizontal' ? 'flex overflow-x-auto' : 'columns-1 [column-fill:_balance]'}
+            style={{
+              ...(theme.preset.gridStyle === 'uniform'
+                ? { gridTemplateColumns: `repeat(${theme.preset.masonryColumns}, minmax(0, 1fr))`, gap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }
+                : theme.preset.gridStyle === 'horizontal'
+                  ? { gap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }
+                  : { columnCount: theme.preset.gridStyle === 'vertical' ? 1 : theme.preset.masonryColumns, columnGap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }),
+            }}
+          >
             {photos.map((photo, idx) => {
               const isFavorite = favorites.has(photo.id) || photo.isFavorite;
               const aspectRatio = getAspectRatio(idx);
@@ -88,7 +97,7 @@ export function GalleryViewerMosaic({
               return (
                 <div
                   key={photo.id}
-                  className="mb-4 break-inside-avoid overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-[1.01]" style={{ borderRadius: theme.preset.borderRadius, marginBottom: theme.preset.gridSpacing === "tight" ? 8 : theme.preset.gridSpacing === "wide" ? 24 : 16 }}
+                  className={`mb-4 break-inside-avoid overflow-hidden bg-slate-100 dark:bg-zinc-900 transition-transform hover:scale-[1.01] ${theme.preset.gridStyle === 'uniform' ? '' : ''}`} style={{ borderRadius: theme.preset.borderRadius, marginBottom: theme.preset.gridStyle === 'uniform' || theme.preset.gridStyle === 'horizontal' ? 0 : theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16, minWidth: theme.preset.gridStyle === 'horizontal' ? 'min(78vw, 420px)' : undefined, flexShrink: theme.preset.gridStyle === 'horizontal' ? 0 : undefined }}
                 >
                   <div className="relative w-full group" style={{ aspectRatio: ratio }}>
                     <GalleryMedia

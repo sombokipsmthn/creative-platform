@@ -685,7 +685,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   Font Family
                 </label>
                 <SelectCompat
-                  value={savedTheme.fontFamily}
+                  value={draftTheme.fontFamily}
                   onChange={(e) => void updateTheme({ fontFamily: e.target.value })}
                   className="w-full gallery-input"
                 >
@@ -727,13 +727,13 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={savedTheme.accentColor}
+                    value={draftTheme.accentColor}
                     onChange={(e) => void updateTheme({ accentColor: e.target.value })}
                     className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
                   />
                   <input
                     type="text"
-                    value={savedTheme.accentColor}
+                    value={draftTheme.accentColor}
                     onChange={(e) => void updateTheme({ accentColor: e.target.value })}
                     className="flex-1 gallery-input text-xs"
                   />
@@ -745,13 +745,13 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={savedTheme.backgroundColor}
+                    value={draftTheme.backgroundColor}
                     onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
                     className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
                   />
                   <input
                     type="text"
-                    value={savedTheme.backgroundColor}
+                    value={draftTheme.backgroundColor}
                     onChange={(e) => void updateTheme({ backgroundColor: e.target.value })}
                     className="flex-1 gallery-input text-xs"
                   />
@@ -763,13 +763,13 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
-                    value={savedTheme.textColor}
+                    value={draftTheme.textColor}
                     onChange={(e) => void updateTheme({ textColor: e.target.value })}
                     className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
                   />
                   <input
                     type="text"
-                    value={savedTheme.textColor}
+                    value={draftTheme.textColor}
                     onChange={(e) => void updateTheme({ textColor: e.target.value })}
                     className="flex-1 gallery-input text-xs"
                   />
@@ -778,13 +778,13 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                  Border Radius: {savedTheme.borderRadius}px
+                  Border Radius: {draftTheme.borderRadius}px
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="24"
-                  value={savedTheme.borderRadius}
+                  value={draftTheme.borderRadius}
                   onChange={(e) => void updateTheme({ borderRadius: parseInt(e.target.value) })}
                   className="w-full"
                 />
@@ -814,7 +814,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Style</label>
                 <SelectCompat
-                  value={savedTheme.gridStyle}
+                  value={draftTheme.gridStyle}
                   onChange={(e) => void updateTheme({ gridStyle: e.target.value })}
                   className="w-full gallery-input"
                 >
@@ -828,7 +828,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Thumbnail Size</label>
                 <SelectCompat
-                  value={savedTheme.thumbnailSize}
+                  value={draftTheme.thumbnailSize}
                   onChange={(e) => void updateTheme({ thumbnailSize: e.target.value })}
                   className="w-full gallery-input"
                 >
@@ -841,7 +841,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Grid Spacing</label>
                 <SelectCompat
-                  value={savedTheme.gridSpacing}
+                  value={draftTheme.gridSpacing}
                   onChange={(e) => void updateTheme({ gridSpacing: e.target.value })}
                   className="w-full gallery-input"
                 >
@@ -854,7 +854,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Aspect Ratio</label>
                 <SelectCompat
-                  value={savedTheme.aspectRatio}
+                  value={draftTheme.aspectRatio}
                   onChange={(e) => void updateTheme({ aspectRatio: e.target.value })}
                   className="w-full gallery-input"
                 >
@@ -866,16 +866,16 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 </SelectCompat>
               </div>
 
-              {savedTheme.gridStyle === 'masonry' && (
+              {draftTheme.gridStyle === 'masonry' && (
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">
-                    Masonry Columns: {savedTheme.masonryColumns}
+                    Masonry Columns: {draftTheme.masonryColumns}
                   </label>
                   <input
                     type="range"
                     min="1"
                     max="6"
-                    value={savedTheme.masonryColumns}
+                    value={draftTheme.masonryColumns}
                     onChange={(e) => void updateTheme({ masonryColumns: parseInt(e.target.value) })}
                     className="w-full"
                   />
@@ -906,7 +906,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Navigation Style</label>
                 <SelectCompat
-                  value={savedTheme.navigationStyle}
+                  value={draftTheme.navigationStyle}
                   onChange={(e) => void updateTheme({ navigationStyle: e.target.value })}
                   className="w-full gallery-input"
                 >
@@ -923,7 +923,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={savedTheme.showCollections}
+                    checked={draftTheme.showCollections}
                     onChange={(e) => void updateTheme({ showCollections: e.target.checked })}
                     className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
                   />
@@ -934,10 +934,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div className="bg-[var(--color-bg-soft)] border border-[var(--color-border-subtle)] rounded-lg p-3">
                 <p className="text-xs text-[var(--color-text-muted)]">
                   Current theme: <span className="font-semibold text-[var(--color-text-primary)]">
-                    {savedTheme.name}
+                    {draftTheme.name}
                   </span>
                 </p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">Type: {savedTheme.type}</p>
+                <p className="text-xs text-[var(--color-text-muted)] mt-1">Type: {draftTheme.type}</p>
               </div>
             </div>
           )}

@@ -364,6 +364,16 @@ export default function GalleryWorkspacePage() {
     if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
     return true
   })
+  const filterPhotos = (items: GalleryPhoto[]) => items.filter((photo) => {
+    if (photoFilter === 'included') return isPortfolioIncluded(photo)
+    if (photoFilter === 'not-included') return !isPortfolioIncluded(photo)
+    if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
+    return true
+  })
+  const photoGroups = activeCollection
+    ? [{ id: activeCollection, title: gallery?.collections.find((item) => item.id === activeCollection)?.title || 'Set', photos: filterPhotos(collectionPhotos) }]
+    : [{ id: '__unassigned__', title: 'Unassigned', photos: filterPhotos(gallery?.photos.filter((photo) => !photo.collectionId) || []) }, ...(gallery?.collections || []).map((item) => ({ id: item.id, title: item.title, photos: filterPhotos(gallery?.photos.filter((photo) => photo.collectionId === item.id) || []) }))]
+
   const selectedPhotoRecords = (gallery?.photos || []).filter((photo) => selectedPhotos.has(photo.id))
   const allSelectedHidden = selectedPhotoRecords.length > 0 && selectedPhotoRecords.every((photo) => photo.isHidden)
   const canSetCover = selectedPhotoRecords.length === 1 && getMediaType(selectedPhotoRecords[0]) === 'image'

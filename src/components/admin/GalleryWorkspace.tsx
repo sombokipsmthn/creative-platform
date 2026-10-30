@@ -866,6 +866,7 @@ export default function GalleryWorkspacePage() {
                   ) : (
                     <div className="py-12 text-center"><p className="text-sm text-[var(--color-text-muted)]">No media matches the current filter.</p></div>
                   )}
+                </div>
 
                 {previewPhoto && (
                   <div

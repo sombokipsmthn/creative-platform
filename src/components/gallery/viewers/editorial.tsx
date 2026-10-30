@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { GalleryMedia } from './media';
 import { Download, Heart } from "@phosphor-icons/react";
 import type { GalleryViewerProps } from './wrapper';
-import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { getGalleryFontStack, type GalleryThemeDefinition } from '@/lib/gallery/themes';
 import { Button } from '@/components/ui/button';
 
 interface EditorialViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
@@ -60,6 +60,7 @@ export function GalleryViewerEditorial({
       style={{
         backgroundColor: theme.preset.backgroundColor,
         color: theme.preset.textColor,
+        fontFamily: getGalleryFontStack(theme.preset.fontFamily),
       }}
     >
       {/* Header */}
@@ -126,12 +127,12 @@ export function GalleryViewerEditorial({
               Gallery
             </p>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.max(1, Math.min(6, theme.preset.masonryColumns))}, minmax(0, 1fr))`, gap: theme.preset.gridSpacing === "tight" ? 8 : theme.preset.gridSpacing === "wide" ? 24 : 16 }}>
               {remaining.map((photo) => {
                 const isFavorite = favorites.has(photo.id) || photo.isFavorite;
 
                 return (
-                  <div key={photo.id} className="group relative overflow-hidden bg-gray-100">
+                  <div key={photo.id} className="group relative overflow-hidden bg-gray-100" style={{ borderRadius: theme.preset.borderRadius }}>
                     {/* Image */}
                     <div className="relative aspect-square">
                       <GalleryMedia

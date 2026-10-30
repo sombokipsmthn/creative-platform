@@ -352,7 +352,7 @@ export default function AdminGalleryManagerPage() {
         {errorMessage && (
           <div className="ui-alert ui-alert-error">
             <div className="flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
               <span>{errorMessage}</span>
             </div>
             <button onClick={() => setErrorMessage(null)} className="ml-auto hover:rotate-90 transition-transform">✕</button>
@@ -581,7 +581,7 @@ export default function AdminGalleryManagerPage() {
                               <span className="ui-meta text-[8px] uppercase">Proofs</span>
                             </div>
                             <div className="p-3 bg-muted rounded-2xl flex flex-col items-center gap-1">
-                              <MessageSquare className="w-3.5 h-3.5 text-blue-500" />
+                              <MessageSquare className="w-3.5 h-3.5 text-[var(--color-info)]" />
                               <span className="text-[11px] font-bold text-foreground">{gal.comments_count || 0}</span>
                               <span className="ui-meta text-[8px] uppercase">Chat</span>
                             </div>

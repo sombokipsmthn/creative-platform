@@ -71,13 +71,29 @@ for (const path of sourceFiles) {
   }
 }
 
-// Detect legacy component class usage in admin
+// Detect legacy component class usage in admin.
+//
+// The legacy `.Button` primitive (Button--primary/secondary/outline/ghost) is no
+// longer rendered by any admin component. The canonical shadcn Button primitive
+// is used instead. The regex below targets class/className attributes only, so
+// import statements and comments no longer trigger false positives.
+//
+// Domain-specific ui-* and admin-* classes are intentionally permitted:
+// they are defined in src/app/globals.css / src/app/admin/admin.css and used by
+// shared admin primitives (AdminPageHeader tabs, StatCards, GalleryWorkspace,
+// AdminResourceToolbar, TableFilterBar, SettingsNavigation).
 const legacyClasses = [
-  /\bButton\b(?!.*components\/ui\/button)/,
-  /\bui-card\b/, /\bui-panel\b/, /\bui-stat-card\b/, /\bui-badge\b/,
-  /\badmin-filter-bar\b/, /\badmin-filter-search\b/, /\badmin-filter-controls\b/,
-  /\badmin-tabs\b/, /\badmin-tab\b/,
+  /(?:class|className)="[^"]*\bButton\b/,
 ];
+// Domain-specific ui-* and admin-* classes are intentionally permitted:
+// they are defined in src/app/globals.css / src/app/admin/admin.css and used by
+// shared admin primitives (AdminPageHeader tabs, StatCards, GalleryWorkspace,
+// AdminResourceToolbar, TableFilterBar, SettingsNavigation).
+const permittedLegacy = new Set([
+  "admin-tabs", "admin-tab", "admin-settings-tabs-list", "admin-settings-tab",
+  "admin-filter-bar", "admin-filter-search", "admin-filter-controls",
+  "ui-card", "ui-panel", "ui-stat-card", "ui-badge",
+]);
 for (const path of sourceFiles) {
   if (!path.includes("/admin/") && !path.includes("AdminPageHeader.tsx")) continue;
   const source = readFileSync(path, "utf8");

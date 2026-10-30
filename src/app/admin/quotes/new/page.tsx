@@ -1363,10 +1363,10 @@ export default function NewQuotePage() {
   ======================================================= */
 
   const inputClass =
-    "mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary";
+    "mt-2 w-full px-4 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none focus:border-primary";
 
   const labelClass =
-    "text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600";
+    "text-[10px] font-sans uppercase tracking-widest text-muted-foreground/70";
 
   /* =======================================================
      PAGE
@@ -1398,11 +1398,11 @@ export default function NewQuotePage() {
                 Sales & Production
               </p>
 
-              <h1 className="mt-2 text-4xl font-light tracking-tight text-slate-900 dark:text-white">
+              <h1 className="mt-2 text-4xl font-light tracking-tight text-foreground">
                 New Quote
               </h1>
 
-              <p className="mt-2 text-sm text-slate-500 dark:text-zinc-500">
+              <p className="mt-2 text-sm text-muted-foreground">
                 Build a production
                 estimate from
                 equipment, crew
@@ -1414,7 +1414,7 @@ export default function NewQuotePage() {
             <div className="flex gap-3">
               <Link
                 href="/admin/quotes"
-                className="px-5 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-xs font-sans uppercase tracking-widest text-slate-600 dark:text-zinc-400"
+                className="px-5 py-3 rounded-xl border border-border text-xs font-sans uppercase tracking-widest text-muted-foreground"
               >
                 Cancel
               </Link>
@@ -1436,8 +1436,8 @@ export default function NewQuotePage() {
           ================================================= */}
 
           {error && (
-            <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-5 py-4">
-              <p className="text-sm text-red-600 dark:text-red-400">
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-5 py-4">
+              <p className="text-sm text-destructive">
                 {error}
               </p>
             </div>
@@ -1447,13 +1447,13 @@ export default function NewQuotePage() {
               QUOTE DETAILS
           ================================================= */}
 
-          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
+          <section className="rounded-2xl border border-border bg-card p-6">
             <div className="mb-6">
-              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+              <h2 className="text-lg font-medium text-foreground">
                 Quote Details
               </h2>
 
-              <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Client and project
                 information.
               </p>
@@ -1796,17 +1796,17 @@ export default function NewQuotePage() {
               LINE ITEMS
           ================================================= */}
 
-          <section className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-visible">
+          <section className="rounded-2xl border border-border bg-card overflow-visible">
             {/* HEADER */}
 
-            <div className="p-6 border-b border-slate-200 dark:border-zinc-800">
+            <div className="p-6 border-b border-border">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                  <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+                  <h2 className="text-lg font-medium text-foreground">
                     Line Items
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Select a category
                     first. The
                     description
@@ -1832,7 +1832,7 @@ export default function NewQuotePage() {
                     onClick={
                       addCustomItem
                     }
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-[10px] font-sans uppercase tracking-widest"
+                    className="px-4 py-2.5 rounded-xl border border-border text-muted-foreground text-[10px] font-sans uppercase tracking-widest"
                   >
                     + Custom Item
                   </button>
@@ -1842,7 +1842,7 @@ export default function NewQuotePage() {
 
             {/* LINE ITEM ROWS */}
 
-            <div className="divide-y divide-slate-100 dark:divide-zinc-900">
+            <div className="divide-y divide-border/60">
               {items.map(
                 (
                   item,
@@ -1879,7 +1879,7 @@ export default function NewQuotePage() {
                               1}
                           </span>
 
-                          <span className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                          <span className="text-xs font-sans uppercase tracking-widest text-muted-foreground/70">
                             {item.category ||
                               "Line Item"}
                           </span>
@@ -1892,7 +1892,7 @@ export default function NewQuotePage() {
                               item.id
                             )
                           }
-                          className="text-xs text-red-500 hover:text-red-700"
+                          className="text-xs text-destructive hover:text-destructive"
                         >
                           Remove
                         </button>
@@ -2031,7 +2031,7 @@ export default function NewQuotePage() {
                                     ? "Select a category first"
                                     : `Search ${item.category.toLowerCase()}...`
                                 }
-                                className={`w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none ${!item.category
+                                className={`w-full px-4 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none ${!item.category
                                   ? "opacity-60 cursor-not-allowed"
                                   : "focus:border-primary"
                                   }`}
@@ -2041,16 +2041,16 @@ export default function NewQuotePage() {
 
                               {isOpen &&
                                 item.category && (
-                                  <div className="absolute z-[100] mt-2 left-0 right-0 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xl overflow-hidden">
-                                    <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-900 flex items-center justify-between">
-                                      <p className="text-[10px] font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+                                  <div className="absolute z-[100] mt-2 left-0 right-0 rounded-xl border border-border bg-card shadow-xl overflow-hidden">
+                                    <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
+                                      <p className="text-[10px] font-sans uppercase tracking-widest text-muted-foreground/70">
                                         {
                                           item.category
                                         }{" "}
                                         options
                                       </p>
 
-                                      <span className="text-[10px] font-sans text-slate-400 dark:text-zinc-600">
+                                      <span className="text-[10px] font-sans text-muted-foreground/70">
                                         {
                                           options.length
                                         }{" "}
@@ -2083,13 +2083,13 @@ export default function NewQuotePage() {
                                           }));
                                           setOpenDescriptionSearch(null);
                                         }}
-                                        className="flex w-full items-center justify-between gap-3 border-b border-slate-100 bg-primary/5 px-4 py-3 text-left transition hover:bg-primary/10 dark:border-zinc-900"
+                                        className="flex w-full items-center justify-between gap-3 border-b border-border/60 bg-primary/5 px-4 py-3 text-left transition hover:bg-primary/10 dark:border-border/60"
                                       >
                                         <span className="min-w-0">
-                                          <span className="block text-xs font-medium text-slate-900 dark:text-white">
+                                          <span className="block text-xs font-medium text-foreground">
                                             Use custom description
                                           </span>
-                                          <span className="mt-1 block truncate text-xs text-slate-500 dark:text-zinc-400">
+                                          <span className="mt-1 block truncate text-xs text-muted-foreground">
                                             {searchValue.trim()}
                                           </span>
                                         </span>
@@ -2103,13 +2103,13 @@ export default function NewQuotePage() {
                                       {options.length ===
                                         0 ? (
                                         <div className="px-4 py-8 text-center">
-                                          <p className="text-xs text-slate-500 dark:text-zinc-500">
+                                          <p className="text-xs text-muted-foreground">
                                             No matching{" "}
                                             {item.category.toLowerCase()}{" "}
                                             items found.
                                           </p>
 
-                                          <p className="mt-1 text-[10px] text-slate-400 dark:text-zinc-600">
+                                          <p className="mt-1 text-[10px] text-muted-foreground/70">
                                             Try another search term.
                                           </p>
                                         </div>
@@ -2129,19 +2129,19 @@ export default function NewQuotePage() {
                                                   option
                                                 )
                                               }
-                                              className="w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900 border-b border-slate-100 dark:border-zinc-900 last:border-b-0 transition"
+                                              className="w-full text-left px-4 py-3 hover:bg-muted dark:hover:bg-muted border-b border-border/60 last:border-b-0 transition"
                                             >
                                               <div className="flex items-start justify-between gap-3">
                                                 <div className="flex min-w-0 items-start gap-3">
-                                                  {option.type === "equipment" && (option.imageUrl ? <img src={option.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-10 w-10 shrink-0 rounded-md border border-slate-200 dark:border-zinc-800 bg-white object-contain" /> : <div className="h-10 w-10 shrink-0 rounded-md border border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900" />)}
+                                                  {option.type === "equipment" && (option.imageUrl ? <img src={option.imageUrl} alt="" loading="lazy" referrerPolicy="no-referrer" className="h-10 w-10 shrink-0 rounded-md border border-border bg-white object-contain" /> : <div className="h-10 w-10 shrink-0 rounded-md border border-border bg-muted/40 dark:bg-muted" />)}
                                                   <div className="min-w-0">
-                                                  <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
+                                                  <p className="text-sm font-medium text-foreground truncate">
                                                     {
                                                       option.label
                                                     }
                                                   </p>
 
-                                                  <p className="mt-1 text-[10px] uppercase tracking-wider text-slate-400 dark:text-zinc-600">
+                                                  <p className="mt-1 text-[10px] uppercase tracking-wider text-muted-foreground/70">
                                                     {option.type ===
                                                       "equipment"
                                                       ? `${option.category}${option.subcategory
@@ -2158,7 +2158,7 @@ export default function NewQuotePage() {
 
                                                 {option.rate >
                                                   0 && (
-                                                    <span className="shrink-0 text-xs font-sans text-slate-600 dark:text-zinc-400">
+                                                    <span className="shrink-0 text-xs font-sans text-muted-foreground">
                                                       {formatAmount(
                                                         option.rate,
                                                         currency
@@ -2213,7 +2213,7 @@ export default function NewQuotePage() {
                                   )
                                 )
                               }
-                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none focus:border-primary"
                             />
                           </label>
                         </div>
@@ -2247,7 +2247,7 @@ export default function NewQuotePage() {
                                     .value
                                 )
                               }
-                              className="mt-2 w-full px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
+                              className="mt-2 w-full px-3 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none focus:border-primary"
                             />
                           </label>
                         </div>
@@ -2269,7 +2269,7 @@ export default function NewQuotePage() {
                             </span>
 
                             <div className="relative mt-2">
-                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-sans text-slate-400 dark:text-zinc-600">
+                              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-sans text-muted-foreground/70">
                                 {
                                   currency
                                 }
@@ -2297,7 +2297,7 @@ export default function NewQuotePage() {
                                   )
                                 }
                                 placeholder="0"
-                                className="w-full px-4 py-3 pl-14 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm font-medium text-slate-900 dark:text-white outline-none focus:border-primary"
+                                className="w-full px-4 py-3 pl-14 rounded-xl border border-border bg-white dark:bg-muted text-sm font-medium text-foreground outline-none focus:border-primary"
                               />
                             </div>
                           </label>
@@ -2332,7 +2332,7 @@ export default function NewQuotePage() {
                               )
                             }
                             placeholder="Optional notes"
-                            className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
+                            className="mt-2 w-full px-4 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none focus:border-primary"
                           />
                         </label>
                       </div>
@@ -2344,7 +2344,7 @@ export default function NewQuotePage() {
 
             {/* ADD BUTTONS */}
 
-            <div className="p-6 border-t border-slate-200 dark:border-zinc-800 flex flex-col sm:flex-row gap-3">
+            <div className="p-6 border-t border-border flex flex-col sm:flex-row gap-3">
               <button
                 type="button"
                 onClick={
@@ -2360,7 +2360,7 @@ export default function NewQuotePage() {
                 onClick={
                   addCustomItem
                 }
-                className="px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 text-xs font-sans uppercase tracking-widest"
+                className="px-4 py-3 rounded-xl border border-border text-muted-foreground text-xs font-sans uppercase tracking-widest"
               >
                 + Add Custom Line
               </button>
@@ -2374,8 +2374,8 @@ export default function NewQuotePage() {
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* TERMS */}
 
-            <div className="border-t border-slate-200 dark:border-zinc-800 pt-6">
-              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+            <div className="border-t border-border pt-6">
+              <h2 className="text-lg font-medium text-foreground">
                 Terms
               </h2>
 
@@ -2406,12 +2406,12 @@ export default function NewQuotePage() {
                         )
                       }
                       placeholder="e.g. 50% deposit, balance on completion"
-                      className="mt-2 w-full px-4 py-3 pr-32 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary"
+                      className="mt-2 w-full px-4 py-3 pr-32 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none focus:border-primary"
                     />
 
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
                       <SelectCompat
-                        className="bg-transparent text-xs text-slate-500 dark:text-zinc-400 px-1 py-1 outline-none"
+                        className="bg-transparent text-xs text-muted-foreground px-1 py-1 outline-none"
                         onChange={(
                           event
                         ) => {
@@ -2519,7 +2519,7 @@ export default function NewQuotePage() {
                     }
                     rows={5}
                     placeholder="Additional quote notes..."
-                    className="mt-2 w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none focus:border-primary resize-none"
+                    className="mt-2 w-full px-4 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none focus:border-primary resize-none"
                   />
                 </label>
               </div>
@@ -2527,8 +2527,8 @@ export default function NewQuotePage() {
 
             {/* PRICING */}
 
-            <div className="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6">
-              <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+            <div className="rounded-2xl border border-border bg-card p-6">
+              <h2 className="text-lg font-medium text-foreground">
                 Pricing
               </h2>
 
@@ -2536,11 +2536,11 @@ export default function NewQuotePage() {
                 {/* SUBTOTAL */}
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-slate-500 dark:text-zinc-500">
+                  <span className="text-sm text-muted-foreground">
                     Subtotal
                   </span>
 
-                  <span className="font-medium text-slate-900 dark:text-white">
+                  <span className="font-medium text-foreground">
                     {formatAmount(
                       subtotal,
                       currency
@@ -2576,7 +2576,7 @@ export default function NewQuotePage() {
                           | "fixed"
                         )
                       }
-                      className="px-3 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
+                      className="px-3 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none"
                     >
                       <option value="none">
                         None
@@ -2615,7 +2615,7 @@ export default function NewQuotePage() {
                         discountType ===
                         "none"
                       }
-                      className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-sm text-slate-900 dark:text-white outline-none"
+                      className="flex-1 px-4 py-3 rounded-xl border border-border bg-white dark:bg-muted text-sm text-foreground outline-none"
                     />
                   </div>
                 </div>
@@ -2623,11 +2623,11 @@ export default function NewQuotePage() {
                 {/* DISCOUNT AMOUNT */}
 
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-500 dark:text-zinc-500">
+                  <span className="text-muted-foreground">
                     Discount amount
                   </span>
 
-                  <span className="text-slate-900 dark:text-white">
+                  <span className="text-foreground">
                     -{" "}
                     {formatAmount(
                       discountAmount,
@@ -2675,8 +2675,8 @@ export default function NewQuotePage() {
 
                 {/* TOTAL */}
 
-                <div className="pt-5 border-t border-slate-200 dark:border-zinc-800 flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-900 dark:text-white">
+                <div className="pt-5 border-t border-border flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground">
                     Total
                   </span>
 

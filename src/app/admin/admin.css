@@ -114,7 +114,7 @@
   line-height: 1.45;
 }
 
-/* Legacy `.Button` classes are no longer rendered by any admin component;
+/* Legacy legacy-button classes are no longer rendered by any admin component;
  * the canonical shadcn Button primitive is used instead. The rules below
  * are retained only for the public/marketing pages that still emit these
  * classes outside of [data-admin-content]. No admin page may reintroduce

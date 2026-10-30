@@ -61,7 +61,10 @@
       "WebFetch(domain:vercel.com)",
       "Bash(pkill -f \"next dev\")",
       "Bash(pkill -f \"next start\")",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:responsive-admin)",
+      "Bash(python3 *)",
+      "Skill(commit-commands:commit)"
     ]
   },
   "skillOverrides": {}

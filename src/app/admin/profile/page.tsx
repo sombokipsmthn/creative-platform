@@ -185,7 +185,7 @@ export default function AdminProfilePage() {
   return (
     <main className="min-h-screen min-h-screen">
       <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
-        <div className="mb-8 flex flex-col gap-4 border-b border-slate-200 dark:border-zinc-800/80 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="mb-8 flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <Link
               href="/admin"
@@ -201,7 +201,7 @@ export default function AdminProfilePage() {
           </div>
 
           <span className="ui-badge">
-            <span className="ui-badge-dot bg-emerald-500" />
+            <span className="ui-badge-dot bg-[var(--color-success)]" />
             Authenticated creator
           </span>
         </div>
@@ -209,7 +209,7 @@ export default function AdminProfilePage() {
         <form onSubmit={handleSave} className="space-y-6">
           <section className="rounded-xl border bg-card text-card-foreground shadow-sm p-5 sm:p-7">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-zinc-800 bg-slate-100 dark:bg-zinc-900">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
                 {avatar ? (
                   <Image
                     src={avatar}
@@ -219,7 +219,7 @@ export default function AdminProfilePage() {
                     unoptimized
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-slate-400 dark:text-zinc-500">
+                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-muted-foreground/70">
                     {initials}
                   </div>
                 )}
@@ -252,7 +252,7 @@ export default function AdminProfilePage() {
             </div>
           </section>
           <section className="rounded-xl border bg-card text-card-foreground shadow-sm">
-            <div className="border-b border-slate-200 dark:border-zinc-800 px-5 py-4 sm:px-7">
+            <div className="border-b border-border px-5 py-4 sm:px-7">
               <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">Identity</p>
               <h2 className="text-2xl font-semibold tracking-tight">Creator details</h2>
             </div>

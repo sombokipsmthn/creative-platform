@@ -64,7 +64,7 @@ export default function ContractDetailPage({
   if (error) {
     return (
       <div className="min-h-screen p-6">
-        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 p-4 mb-6">
+        <div className="bg-destructive/10/30 border border-destructive/30 text-destructive p-4 mb-6">
           <p>{error}</p>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default function ContractDetailPage({
       <header className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">{contract.title}</h1>
+            <h1 className="text-3xl font-bold text-foreground dark:text-gray-50">{contract.title}</h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">Contract #{contract.contractNumber}</p>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -179,7 +179,7 @@ export default function ContractDetailPage({
 
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Client</h3>
-          <p className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-50">
+          <p className="mt-2 text-sm font-medium text-foreground dark:text-gray-50">
             {contract.client?.name || 'Unknown'}
           </p>
           {contract.client?.company && (
@@ -189,14 +189,14 @@ export default function ContractDetailPage({
 
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Project</h3>
-          <p className="mt-2 text-sm text-gray-900 dark:text-gray-50">
+          <p className="mt-2 text-sm text-foreground dark:text-gray-50">
             {contract.project ? contract.project.name : 'None'}
           </p>
         </div>
 
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
           <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Financials</h3>
-          <p className="mt-2 text-sm text-gray-900 dark:text-gray-50">
+          <p className="mt-2 text-sm text-foreground dark:text-gray-50">
             {contract.currency}
             {contract.totalAmount != null ? ` ${formatCurrency(contract.totalAmount)}` : ' —'}
           </p>
@@ -205,7 +205,7 @@ export default function ContractDetailPage({
 
       {/* Public signing section */}
       <div className="rounded-xl border bg-card text-card-foreground shadow-sm mb-6 border-primary dark:border-primary bg-primary/10 dark:bg-primary/15">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">Client signing link</h2>
+        <h2 className="text-lg font-semibold text-foreground dark:text-gray-50">Client signing link</h2>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Share this secure link with the client to view and sign the contract.
         </p>
@@ -217,7 +217,7 @@ export default function ContractDetailPage({
 
       {/* Contract content */}
       <div className="rounded-xl border bg-card text-card-foreground shadow-sm mb-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-6">Contract Document</h2>
+        <h2 className="text-lg font-semibold text-foreground dark:text-gray-50 mb-6">Contract Document</h2>
         <div className="prose prose-sm dark:prose-invert max-w-none">
           <ContractDocument content={contract.content || ''} />
         </div>
@@ -226,7 +226,7 @@ export default function ContractDetailPage({
       {/* Activity history */}
       {events.length > 0 && (
         <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50 mb-4">Activity History</h2>
+          <h2 className="text-lg font-semibold text-foreground dark:text-gray-50 mb-4">Activity History</h2>
           <div className="space-y-3">
             {events.map((event) => (
               <div key={event.id} className="flex items-center space-x-3 text-sm">
@@ -234,7 +234,7 @@ export default function ContractDetailPage({
                   <FilePlus className="h-3 w-3" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 dark:text-gray-50">{formatEventType(event.eventType)}</p>
+                  <p className="font-medium text-foreground dark:text-gray-50">{formatEventType(event.eventType)}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
                     {new Date(event.createdAt).toLocaleString()}
                   </p>
@@ -251,23 +251,23 @@ export default function ContractDetailPage({
 function getStatusColor(status: string) {
   switch (status) {
     case 'draft':
-      return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
+      return 'bg-gray-100 dark:bg-card text-gray-800 dark:text-gray-200';
     case 'sent':
-      return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200';
+      return 'bg-[var(--color-info)]/10 dark:bg-[var(--color-info)]/20 text-[var(--color-info)] dark:text-[var(--color-info)]';
     case 'viewed':
-      return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200';
+      return 'bg-[var(--color-warning)]/10 dark:bg-[var(--color-warning)]/20 text-[var(--color-warning)] dark:text-[var(--color-warning)]';
     case 'awaiting_signature':
       return 'bg-primary/10 dark:bg-primary/15 text-primary dark:text-primary';
     case 'signed':
-      return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
+      return 'bg-[var(--color-success)]/10 dark:bg-[var(--color-success)]/20 text-[var(--color-success)] dark:text-[var(--color-success)]';
     case 'declined':
-      return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+      return 'bg-destructive/10 dark:bg-destructive/20 text-destructive dark:text-destructive';
     case 'expired':
-      return 'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-300';
+      return 'bg-muted text-muted-foreground dark:text-muted-foreground';
     case 'cancelled':
-      return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+      return 'bg-destructive/10 dark:bg-destructive/20 text-destructive dark:text-destructive';
     default:
-      return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200';
+      return 'bg-muted text-foreground dark:text-foreground';
   }
 }
 

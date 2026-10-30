@@ -308,7 +308,7 @@ export default function InvoicesPage() {
 
         {error && !loading && (
           <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm text-destructive">{error}</p>
           </div>
         )}
 
@@ -470,7 +470,7 @@ export default function InvoicesPage() {
                 Previous
               </Button>
 
-              <div className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-slate-900 px-2 text-[10px] font-sans text-white dark:bg-zinc-800">
+              <div className="flex h-8 min-w-8 items-center justify-center rounded-lg bg-primary px-2 text-[10px] font-sans text-white dark:bg-accent">
                 {pagination.page}
               </div>
 

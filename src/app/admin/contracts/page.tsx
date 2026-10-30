@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { ArrowUpRight, CheckCircle as CheckCircle2, FilePlus, Signature as FileSignature, CircleNotch as Loader2, Plus, ArrowsClockwise as RefreshCw, Trash as Trash2 } from "@phosphor-icons/react";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ArrowUpRight, CheckCircle as CheckCircle2, FilePlus, Signature as FileSignature, CircleNotch as Loader2, Plus, ArrowsClockwise as RefreshCw, Trash as Trash2, FileText, FolderOpen } from "@phosphor-icons/react";
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,6 +13,8 @@ import AdminDataTable from '@/components/admin/AdminDataTable';
 import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
 import StatusBadge from '@/components/admin/StatusBadge';
 import StatCards from '@/components/admin/StatCards';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TemplateLibrary } from '@/components/contracts/TemplateLibrary';
 
 type Contract = {
   id: string;
@@ -46,6 +48,7 @@ type Stats = {
 
 export default function ContractsPage() {
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<'contracts' | 'templates' | 'my-templates'>('contracts');
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [stats, setStats] = useState<Stats>({
@@ -163,152 +166,179 @@ export default function ContractsPage() {
           </div>
         </StandardCreationDialog>
 
-        {/* SUMMARY */}
-        <StatCards
-            stats={[
-              { label: 'Total Contracts', value: String(stats.total), detail: '', color: 'default' },
-              { label: 'Drafts', value: String(stats.draft), detail: '', color: 'default' },
-              { label: 'Sent', value: String(stats.sent), detail: '', color: 'accent' },
-              { label: 'Awaiting Signature', value: String(stats.awaiting_signature), detail: '', color: 'info' },
-            ]}
-            columns={4}
-          />
+        {/* TABS */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'contracts' | 'templates' | 'my-templates')}>
+          <TabsList className="w-full">
+            <TabsTrigger value="contracts">All Contracts</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
+            <TabsTrigger value="my-templates">My Templates</TabsTrigger>
+          </TabsList>
 
-        {/* Admin Resource Toolbar */}
-        <AdminResourceToolbar
-          search={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search contracts by title, client, number…"
-          filters={[
-            {
-              id: 'status',
-              label: 'Status',
-              value: status,
-              options: [
-                { label: 'All Statuses', value: 'all' },
-                { label: 'Draft', value: 'draft' },
-                { label: 'Sent', value: 'sent' },
-                { label: 'Viewed', value: 'viewed' },
-                { label: 'Awaiting Signature', value: 'awaiting_signature' },
-                { label: 'Signed', value: 'signed' },
-                { label: 'Declined', value: 'declined' },
-                { label: 'Expired', value: 'expired' },
-                { label: 'Cancelled', value: 'cancelled' },
-              ],
-            },
-            {
-              id: 'clientId',
-              label: 'Client',
-              value: clientId,
-              options: [
-                { label: 'All Clients', value: 'all' },
-                ...clients.map((client) => ({
-                  label: client.name + (client.company ? ` (${client.company})` : ''),
-                  value: client.id,
-                })),
-              ],
-            },
-          ] as AdminFilterConfig[]}
-          onFilterChange={(id, value) => {
-            if (id === 'status') setStatus(value ?? 'all');
-            if (id === 'clientId') setClientId(value ?? 'all');
-          }}
-          onClearAll={() => {
-            setSearch('');
-            setStatus('all');
-            setClientId('all');
-          }}
-          secondaryActions={[
-            {
-              label: 'Refresh',
-              onClick: () => void loadContracts(true),
-              variant: 'ghost',
-              size: 'icon',
-              icon: <RefreshCw className="h-4 w-4" />,
-            } as AdminToolbarAction,
-          ]}
-          resultCount={stats.total}
-          filteredCount={contracts.length}
-          resultLabel="Contracts"
-          loading={loading}
-        />
+          <TabsContent value="contracts" className="space-y-6">
+            {/* SUMMARY */}
+            <StatCards
+                stats={[
+                  { label: 'Total Contracts', value: String(stats.total), detail: '', color: 'default' },
+                  { label: 'Drafts', value: String(stats.draft), detail: '', color: 'default' },
+                  { label: 'Sent', value: String(stats.sent), detail: '', color: 'accent' },
+                  { label: 'Awaiting Signature', value: String(stats.awaiting_signature), detail: '', color: 'info' },
+                ]}
+                columns={4}
+              />
 
-        {/* TABLE */}
-        <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
-          {loading ? (
-            <div className="space-y-4 p-6" role="status" aria-label="Loading contracts">
-              <span className="sr-only">Loading contracts…</span>
-              {[0, 1, 2, 3, 4].map((row) => <div key={row} className="flex gap-4">{[0, 1, 2, 3, 4].map((column) => <Skeleton key={column} className="h-8 flex-1" />)}</div>)}
-            </div>
-          ) : contracts.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-8 text-center sm:p-12">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <FilePlus className="h-6 w-6" />
-              </div>
-
-              <h2 className="mt-4 text-xl font-semibold tracking-tight">{Number(stats.total) === 0 ? 'No contracts yet' : 'No matching contracts'}</h2>
-
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                {Number(stats.total) === 0
-                  ? 'Create a contract or browse templates to get started.'
-                  : 'Try changing your search or filters to find a contract.'}
-              </p>
-
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                {Number(stats.total) === 0 ? (
-                  <>
-                    <Button type="button" variant="primary" onClick={() => setIsCreateOpen(true)}>
-                      Create first contract
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => window.location.assign('/admin/contracts/templates')}>
-                      Browse templates
-                    </Button>
-                  </>
-                ) : (
-                  <Button type="button" variant="outline" onClick={() => { setSearch(''); setStatus('all'); setClientId('all'); }}>
-                    Clear filters
-                  </Button>
-                )}
-              </div>
-            </div>
-          ) : (
-            <AdminDataTable
-              rows={contracts}
-              getRowLabel={(contract) => contract.title}
-              mobileCard={(contract, actions) => (
-                <div className="min-w-0 space-y-3">
-                  <div className="flex min-w-0 items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="break-words font-medium">{contract.title}</p>
-                      <p className="break-all text-xs text-muted-foreground">#{contract.contractNumber}</p>
-                    </div>
-                    {actions}
-                  </div>
-                  <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm">
-                    <span className="min-w-0 break-words">{contract.clientName}</span>
-                    <StatusBadge status={contract.status} />
-                  </div>
-                  {contract.projectName && <p className="break-words text-xs text-muted-foreground">{contract.projectName}</p>}
-                </div>
-              )}
-              columns={[
-                { id: 'contract', header: 'Contract', cell: (contract) => <div><p className="font-medium">{contract.title}</p><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></div>, accessor: (contract) => contract.title, sortable: true },
-                { id: 'client', header: 'Client', accessor: (contract) => contract.clientName },
-                { id: 'project', header: 'Project', accessor: (contract) => contract.projectName || 'None', hideOnMobile: true },
-                { id: 'status', header: 'Status', cell: (contract) => <StatusBadge status={contract.status} />, accessor: (contract) => contract.status },
-                { id: 'created', header: 'Created', cell: (contract) => new Date(contract.createdAt).toLocaleDateString(), accessor: (contract) => contract.createdAt, hideOnMobile: true },
-                { id: 'signed', header: 'Signed', cell: (contract) => contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '—', accessor: (contract) => contract.signedAt, hideOnMobile: true },
+            {/* Admin Resource Toolbar */}
+            <AdminResourceToolbar
+              search={search}
+              onSearchChange={setSearch}
+              searchPlaceholder="Search contracts by title, client, number…"
+              filters={[
+                {
+                  id: 'status',
+                  label: 'Status',
+                  value: status,
+                  options: [
+                    { label: 'All Statuses', value: 'all' },
+                    { label: 'Draft', value: 'draft' },
+                    { label: 'Sent', value: 'sent' },
+                    { label: 'Viewed', value: 'viewed' },
+                    { label: 'Awaiting Signature', value: 'awaiting_signature' },
+                    { label: 'Signed', value: 'signed' },
+                    { label: 'Declined', value: 'declined' },
+                    { label: 'Expired', value: 'expired' },
+                    { label: 'Cancelled', value: 'cancelled' },
+                  ],
+                },
+                {
+                  id: 'clientId',
+                  label: 'Client',
+                  value: clientId,
+                  options: [
+                    { label: 'All Clients', value: 'all' },
+                    ...clients.map((client) => ({
+                      label: client.name + (client.company ? ` (${client.company})` : ''),
+                      value: client.id,
+                    })),
+                  ],
+                },
+              ] as AdminFilterConfig[]}
+              onFilterChange={(id, value) => {
+                if (id === 'status') setStatus(value ?? 'all');
+                if (id === 'clientId') setClientId(value ?? 'all');
+              }}
+              onClearAll={() => {
+                setSearch('');
+                setStatus('all');
+                setClientId('all');
+              }}
+              secondaryActions={[
+                {
+                  label: 'Refresh',
+                  onClick: () => void loadContracts(true),
+                  variant: 'ghost',
+                  size: 'icon',
+                  icon: <RefreshCw className="h-4 w-4" />,
+                } as AdminToolbarAction,
               ]}
-              rowActions={[
-                { label: 'View', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}`) },
-                { label: 'Edit', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/edit`) },
-                { label: 'Send', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/send`) },
-                { label: 'Duplicate', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/duplicate`) },
-                { label: 'Delete', destructive: true, onSelect: () => window.location.reload() },
-              ]}
+              resultCount={stats.total}
+              filteredCount={contracts.length}
+              resultLabel="Contracts"
+              loading={loading}
             />
-          )}
-        </div>
+
+            {/* TABLE */}
+            <div className="rounded-xl border bg-card text-card-foreground shadow-sm">
+              {loading ? (
+                <div className="space-y-4 p-6" role="status" aria-label="Loading contracts">
+                  <span className="sr-only">Loading contracts…</span>
+                  {[0, 1, 2, 3, 4].map((row) => <div key={row} className="flex gap-4">{[0, 1, 2, 3, 4].map((column) => <Skeleton key={column} className="h-8 flex-1" />)}</div>)}
+                </div>
+              ) : contracts.length === 0 ? (
+                <div className="rounded-xl border border-dashed p-8 text-center sm:p-12">
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    <FilePlus className="h-6 w-6" />
+                  </div>
+
+                  <h2 className="mt-4 text-xl font-semibold tracking-tight">{Number(stats.total) === 0 ? 'No contracts yet' : 'No matching contracts'}</h2>
+
+                  <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                    {Number(stats.total) === 0
+                      ? 'Create a contract or browse templates to get started.'
+                      : 'Try changing your search or filters to find a contract.'}
+                  </p>
+
+                  <div className="mt-5 flex flex-wrap justify-center gap-2">
+                    {Number(stats.total) === 0 ? (
+                      <>
+                        <Button type="button" variant="primary" onClick={() => setIsCreateOpen(true)}>
+                          Create first contract
+                        </Button>
+                        <Button type="button" variant="outline" onClick={() => setActiveTab('templates')}>
+                          Browse templates
+                        </Button>
+                      </>
+                    ) : (
+                      <Button type="button" variant="outline" onClick={() => { setSearch(''); setStatus('all'); setClientId('all'); }}>
+                        Clear filters
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <AdminDataTable
+                  rows={contracts}
+                  getRowLabel={(contract) => contract.title}
+                  mobileCard={(contract, actions) => (
+                    <div className="min-w-0 space-y-3">
+                      <div className="flex min-w-0 items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="break-words font-medium">{contract.title}</p>
+                          <p className="break-all text-xs text-muted-foreground">#{contract.contractNumber}</p>
+                        </div>
+                        {actions}
+                      </div>
+                      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 border-t pt-3 text-sm">
+                        <span className="min-w-0 break-words">{contract.clientName}</span>
+                        <StatusBadge status={contract.status} />
+                      </div>
+                      {contract.projectName && <p className="break-words text-xs text-muted-foreground">{contract.projectName}</p>}
+                    </div>
+                  )}
+                  columns={[
+                    { id: 'contract', header: 'Contract', cell: (contract) => <div><p className="font-medium">{contract.title}</p><p className="text-xs text-muted-foreground">#{contract.contractNumber}</p></div>, accessor: (contract) => contract.title, sortable: true },
+                    { id: 'client', header: 'Client', accessor: (contract) => contract.clientName },
+                    { id: 'project', header: 'Project', accessor: (contract) => contract.projectName || 'None', hideOnMobile: true },
+                    { id: 'status', header: 'Status', cell: (contract) => <StatusBadge status={contract.status} />, accessor: (contract) => contract.status },
+                    { id: 'created', header: 'Created', cell: (contract) => new Date(contract.createdAt).toLocaleDateString(), accessor: (contract) => contract.createdAt, hideOnMobile: true },
+                    { id: 'signed', header: 'Signed', cell: (contract) => contract.signedAt ? new Date(contract.signedAt).toLocaleDateString() : '—', accessor: (contract) => contract.signedAt, hideOnMobile: true },
+                  ]}
+                  rowActions={[
+                    { label: 'View', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}`) },
+                    { label: 'Edit', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/edit`) },
+                    { label: 'Send', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/send`) },
+                    { label: 'Duplicate', hidden: (contract) => contract.status !== 'draft', onSelect: (contract) => window.location.assign(`/admin/contracts/${contract.id}/duplicate`) },
+                    { label: 'Delete', destructive: true, onSelect: () => window.location.reload() },
+                  ]}
+                />
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="templates" className="space-y-6">
+            <TemplateLibrary
+              onUseTemplate={(template) => router.push(`/admin/contracts/builder?templateId=${template.id}`)}
+              showBlankOption={true}
+            />
+          </TabsContent>
+
+          <TabsContent value="my-templates" className="space-y-6">
+            <TemplateLibrary
+              onUseTemplate={(template) => router.push(`/admin/contracts/builder?templateId=${template.id}`)}
+              showBlankOption={false}
+              emptyMessage="No custom templates yet. Save a contract as a template to see it here."
+              categories={['Photography', 'Video', 'Design', 'Creative Services', 'General Business', 'Legal & Protection', 'Consulting', 'Events']}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

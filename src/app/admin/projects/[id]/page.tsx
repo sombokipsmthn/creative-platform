@@ -368,7 +368,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
       <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
         <div className="mx-auto max-w-7xl flex items-center justify-center p-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-3 text-sm text-slate-500 dark:text-zinc-500 uppercase tracking-widest">Loading project…</span>
+          <span className="ml-3 text-sm text-muted-foreground uppercase tracking-widest">Loading project…</span>
         </div>
       </div>
     );
@@ -379,7 +379,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
       <div className="min-h-screen px-4 py-8 font-sans transition-colors duration-300 sm:px-6 lg:px-10 lg:py-10">
         <div className="mx-auto max-w-7xl space-y-6">
           <AdminPageHeader title="Projects" breadcrumb={{ label: 'Dashboard', href: '/admin' }} />
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
+          <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive">
             {error}
           </div>
           <Link href="/admin/projects" className="text-xs font-sans uppercase tracking-widest text-primary hover:underline">
@@ -412,19 +412,19 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
         />
 
         {error && (
-          <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">
+          <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-xs text-destructive">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="p-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-xs text-emerald-700 dark:text-emerald-300">
+          <div className="p-3 rounded-lg border border-[var(--color-success)]/30 bg-[var(--color-success)]/10 text-xs text-[var(--color-success)]">
             {success}
           </div>
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-zinc-800">
+        <div className="flex gap-2 overflow-x-auto pb-2 border-b border-border">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -433,7 +433,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
               className={`px-4 py-2 text-xs font-sans uppercase tracking-widest rounded-t-lg transition ${
                 activeTab === tab.id
                   ? 'bg-primary text-white'
-                  : 'bg-slate-100 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-800'
+                  : 'bg-muted text-muted-foreground hover:bg-accent dark:hover:bg-accent'
               }`}
             >
               {tab.label}
@@ -443,7 +443,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
         {/* Basic Info Tab */}
         {activeTab === 'basic' && (
-          <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
+          <div className="space-y-6 p-6 border border-border rounded-2xl bg-card/60">
             <div className="space-y-1">
               <label className="text-sm font-medium leading-none">Project Name *</label>
               <Input
@@ -567,7 +567,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
         {/* Story Tab */}
         {activeTab === 'story' && (
-          <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
+          <div className="space-y-6 p-6 border border-border rounded-2xl bg-card/60">
             <div className="space-y-1">
               <label className="text-sm font-medium leading-none">Overview</label>
               <Textarea rows={4} value={form.storyOverview} onChange={(e) => handleChange('storyOverview', e.target.value)} placeholder="Project overview and context..." />
@@ -593,9 +593,9 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
         {/* Media Tab */}
         {activeTab === 'media' && (
-          <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
+          <div className="space-y-6 p-6 border border-border rounded-2xl bg-card/60">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Project Media</h3>
+              <h3 className="text-sm font-semibold text-foreground">Project Media</h3>
               <Button variant="secondary" size="sm" disabled={uploading} className="text-xs">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Upload className="h-4 w-4 mr-1" />}
                 {uploading ? 'Uploading…' : 'Add Media'}
@@ -603,13 +603,13 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             </div>
 
             {project?.media && project.media.length === 0 ? (
-              <div className="p-8 text-center border border-dashed border-slate-300 dark:border-zinc-800 rounded-xl">
-                <p className="text-sm text-slate-500 dark:text-zinc-400">No media uploaded yet.</p>
+              <div className="p-8 text-center border border-dashed border-border rounded-xl">
+                <p className="text-sm text-muted-foreground">No media uploaded yet.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {project?.media.map((media) => (
-                  <div key={media.id} className="relative border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden group">
+                  <div key={media.id} className="relative border border-border rounded-xl overflow-hidden group">
                     <div className="relative aspect-4/3">
                       <img src={resolveImage(media.displayUrl)} alt={media.altText || ''} className="object-cover w-full h-full" />
                       {media.isCover && (
@@ -617,7 +617,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                       )}
                     </div>
                     <div className="p-3 space-y-1">
-                      <p className="text-xs font-medium text-slate-900 dark:text-white truncate">{media.filename}</p>
+                      <p className="text-xs font-medium text-foreground truncate">{media.filename}</p>
                       <Input
                         type="text"
                         value={media.altText || ''}
@@ -652,7 +652,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
 
         {/* Settings Tab */}
         {activeTab === 'settings' && (
-          <div className="space-y-6 p-6 border border-slate-200 dark:border-zinc-800 rounded-2xl bg-white dark:bg-zinc-950/40">
+          <div className="space-y-6 p-6 border border-border rounded-2xl bg-card/60">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
                 <label className="text-sm font-medium leading-none">Status</label>
@@ -681,19 +681,19 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
                 id="featured"
                 checked={form.featured}
                 onChange={(e) => handleChange('featured', e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-ring"
+                className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
               />
-              <label htmlFor="featured" className="text-sm text-slate-700 dark:text-zinc-300">Featured project</label>
+              <label htmlFor="featured" className="text-sm text-secondary-foreground">Featured project</label>
             </div>
 
-            <div className="border-t border-slate-200 dark:border-zinc-800 pt-4 space-y-2">
+            <div className="border-t border-border pt-4 space-y-2">
               <p className="text-sm font-medium leading-none">Project Status</p>
               <p className="text-sm text-muted-foreground">Published projects are visible to the public at /work/{form.slug || '[slug]'}.</p>
             </div>
 
             {previewUrl && (
-              <div className="flex items-center gap-3 p-4 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl">
-                <Eye className="h-5 w-5 text-slate-400" />
+              <div className="flex items-center gap-3 p-4 bg-muted/60 border border-border rounded-xl">
+                <Eye className="h-5 w-5 text-muted-foreground/70" />
                 <Link href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
                   View public page
                 </Link>
@@ -701,7 +701,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             )}
 
             {project?.publishedAt && (
-              <div className="text-xs font-sans uppercase tracking-widest text-slate-400 dark:text-zinc-600">
+              <div className="text-xs font-sans uppercase tracking-widest text-muted-foreground/70">
                 Published at {new Date(project.publishedAt).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' })}
               </div>
             )}
@@ -730,7 +730,7 @@ export default function ProjectEditPage({ params }: { params: Promise<{ id: stri
             <Trash2 className="h-3.5 w-3.5 mr-1" />
             Delete
           </Button>
-          <Link href="/admin/projects" className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-slate-500 hover:text-primary transition">
+          <Link href="/admin/projects" className="inline-flex items-center gap-2 text-xs font-sans uppercase tracking-widest text-muted-foreground hover:text-primary transition">
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to projects
           </Link>

@@ -36,6 +36,13 @@
       "when": 1793307420000,
       "tag": "0046_make_auth_user_id_nullable",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793307907805,
+      "tag": "0005_restore_portfolio_query_columns",
+      "breakpoints": true
     }
   ]
 }

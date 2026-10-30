@@ -62,7 +62,7 @@ export default function ContractTemplatesPage() {
   if (error) {
     return (
       <div className="min-h-screen p-6">
-        <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-700 dark:text-red-300 p-4 mb-6">
+        <div className="bg-destructive/10/30 border border-destructive/30 text-destructive p-4 mb-6">
           <p>{error}</p>
         </div>
       </div>
@@ -76,7 +76,7 @@ export default function ContractTemplatesPage() {
         <header className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-50">
+              <h1 className="text-3xl font-bold text-foreground dark:text-gray-50">
                 Contract Templates
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -113,7 +113,7 @@ export default function ContractTemplatesPage() {
               aria-labelledby="template-preview-title"
               onClick={(event) => event.stopPropagation()}
             >
-              <header className="flex items-start justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-5">
+              <header className="flex items-start justify-between border-b border-border dark:border-border px-6 py-5">
                 <div>
                   <p className="text-sm text-muted-foreground">{previewTemplate.category}</p>
                   <h2 id="template-preview-title" className="mt-1 text-xl font-semibold">
@@ -126,14 +126,14 @@ export default function ContractTemplatesPage() {
                 <Button type="button" variant="ghost" size="icon-sm" aria-label="Close preview" onClick={() => setPreviewTemplate(null)} className="px-2">✕</Button>
               </header>
               <div className="max-h-[calc(90vh-10rem)] overflow-y-auto px-6 py-6">
-                <article className="whitespace-pre-wrap text-sm leading-7 bg-gray-50 dark:bg-gray-900/50 p-6 rounded-lg border border-gray-200 dark:border-gray-700 font-mono text-xs">
+                <article className="whitespace-pre-wrap text-sm leading-7 bg-muted/40 dark:bg-gray-900/50 p-6 rounded-lg border border-border dark:border-border font-mono text-xs">
                   {previewTemplate.content}
                 </article>
                 <p className="mt-4 text-xs text-gray-600 dark:text-gray-400">
                   Items shown as [Add field name] will be filled in as you edit the contract.
                 </p>
               </div>
-              <footer className="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4">
+              <footer className="flex justify-end gap-3 border-t border-border dark:border-border px-6 py-4">
                 <Button type="button" variant="secondary" onClick={() => setPreviewTemplate(null)}>Close</Button>
                 <Button type="button" variant="primary" onClick={() => { handleUseTemplate(previewTemplate); setPreviewTemplate(null); }}>Use Template <ArrowRight className="h-4 w-4" /></Button>
               </footer>
@@ -151,7 +151,7 @@ export default function ContractTemplatesPage() {
             templates.map((template) => (
               <article
                 key={template.id}
-                className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white dark:bg-card rounded-lg border border-border dark:border-border p-6 shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex items-start gap-4 flex-1">
@@ -159,10 +159,10 @@ export default function ContractTemplatesPage() {
                       <FilePlus className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
+                      <h2 className="text-lg font-semibold text-foreground dark:text-gray-50">
                         {template.name}
                       </h2>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mb-2">
+                      <p className="text-xs text-muted-foreground dark:text-muted-foreground mb-2">
                         {template.category}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400">

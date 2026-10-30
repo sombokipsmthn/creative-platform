@@ -439,7 +439,7 @@ export default function AdminProjectsPage() {
         />
 
         {error && !isAddProjectOpen && !selectedProject && (
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
+          <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive">
             {error}
           </div>
         )}
@@ -564,13 +564,13 @@ export default function AdminProjectsPage() {
         />
 
         {isAddProjectOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-foreground">
+            <div className="max-w-xl w-full p-8 border border-border bg-card rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
               <Button
                 onClick={closeCreateModal}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
+                className="absolute top-6 right-6 text-muted-foreground/70 hover:text-foreground dark:hover:text-white disabled:opacity-50"
               >
                 ✕
               </Button>
@@ -580,7 +580,7 @@ export default function AdminProjectsPage() {
                 <h2 className="text-2xl font-semibold tracking-tight">New Project</h2>
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-xs text-destructive">{error}</div>}
 
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-1">
@@ -792,18 +792,18 @@ export default function AdminProjectsPage() {
         )}
 
         {selectedProject && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-foreground">
+            <div className="max-w-xl w-full p-8 border border-border bg-card rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
               <Button
                 onClick={() => setSelectedProject(null)}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white"
+                className="absolute top-6 right-6 text-muted-foreground/70 hover:text-foreground dark:hover:text-white"
               >
                 ✕
               </Button>
 
-              <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
+              <div className="space-y-2 border-b border-border pb-5">
                 {selectedProject.client && (
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full">
@@ -813,20 +813,20 @@ export default function AdminProjectsPage() {
                   </div>
                 )}
                 <h2 className="text-2xl font-light">{selectedProject.name}</h2>
-                <p className="text-xs font-sans text-slate-600 dark:text-zinc-400">
+                <p className="text-xs font-sans text-muted-foreground">
                   {statusLabel(selectedProject.status)} • {formatDate(selectedProject.createdAt)}
                 </p>
                 {selectedProject.description && (
-                  <p className="text-sm text-slate-500 dark:text-zinc-500 mt-2">
+                  <p className="text-sm text-muted-foreground mt-2">
                     {selectedProject.description}
                   </p>
                 )}
 
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-xs text-destructive">{error}</div>}
 
-              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
+              <div className="p-6 bg-muted/60 border border-border rounded-xl space-y-4">
                 <div>
                   <p className="text-sm font-medium leading-none">Project Status</p>
                   <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
@@ -855,14 +855,14 @@ export default function AdminProjectsPage() {
 
               <div className="space-y-2">
                 <p className="text-sm font-medium leading-none">Description</p>
-                <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">
+                <p className="text-sm text-secondary-foreground whitespace-pre-wrap">
                   {selectedProject.description || 'No description.'}
                 </p>
               </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium leading-none">Details</p>
-                <div className="grid gap-4 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
+                <div className="grid gap-4 text-[10px] font-sans uppercase text-muted-foreground/70">
                   <div>Client: {selectedProject.client?.name || 'None'}</div>
                   <div>
                     {selectedProject.totalAmount !== null ? (
@@ -882,7 +882,7 @@ export default function AdminProjectsPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border text-[10px] font-sans uppercase text-muted-foreground/70">
                 <div>Created {formatDate(selectedProject.createdAt)}</div>
                 <div className="text-right">Updated {formatDate(selectedProject.updatedAt)}</div>
               </div>

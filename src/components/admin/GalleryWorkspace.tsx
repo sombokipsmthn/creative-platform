@@ -52,6 +52,7 @@ interface GalleryData {
   category?: string | null
   slug: string
   status: string
+  coverPhotoId?: string | null
   portfolioPublishMode?: 'none' | 'all' | 'selected'
   allowDownloads?: boolean
   allowFavorites?: boolean
@@ -156,14 +157,12 @@ export default function GalleryWorkspacePage() {
     if (selectedPhotos.size === 0) return
     setError(null)
     try {
-      for (const photoId of selectedPhotos) {
-        await fetch(`/api/galleries/${id}/photos`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ photoId, collectionId }),
-        })
-      }
-      setSelectedPhotos(new Set())
+      const responses = await Promise.all(Array.from(selectedPhotos).map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, collectionId }),
+      })))
+      if (responses.some((response) => !response.ok)) throw new Error('Unable to move all selected items')
       setShowCollectionPicker(false)
       setMoveDestination(null)
       await refreshGallery()
@@ -239,14 +238,48 @@ export default function GalleryWorkspacePage() {
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
     setError(null)
     try {
-      await fetch(`/api/galleries/${id}/photos`, {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoId, isHidden: !isHidden }),
       })
+      if (!response.ok) throw new Error('Unable to update photo visibility')
       await refreshGallery()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update photo')
+    }
+  }
+
+  const handleBulkVisibility = async (isHidden: boolean) => {
+    if (!selectedPhotos.size) return
+    setError(null)
+    try {
+      const responses = await Promise.all(Array.from(selectedPhotos).map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isHidden }),
+      })))
+      if (responses.some((response) => !response.ok)) throw new Error('Unable to update all selected items')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update selected item visibility')
+    }
+  }
+
+  const handleSetCover = async () => {
+    if (selectedPhotos.size !== 1) return
+    const [photoId] = Array.from(selectedPhotos)
+    setError(null)
+    try {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isCover: true }),
+      })
+      if (!response.ok) throw new Error('Unable to set gallery cover')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to set gallery cover')
     }
   }
 
@@ -256,11 +289,12 @@ export default function GalleryWorkspacePage() {
     
     setError(null)
     try {
-      await fetch(`/api/galleries/${id}/photos`, {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoIds: Array.from(selectedPhotos) }),
       })
+      if (!response.ok) throw new Error('Unable to delete selected items')
       setSelectedPhotos(new Set())
       await refreshGallery()
     } catch (err) {
@@ -317,6 +351,8 @@ export default function GalleryWorkspacePage() {
     if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
     return true
   })
+  const selectedPhotoRecords = (gallery?.photos || []).filter((photo) => selectedPhotos.has(photo.id))
+  const allSelectedHidden = selectedPhotoRecords.length > 0 && selectedPhotoRecords.every((photo) => photo.isHidden)
 
   const previewPhoto = filteredPhotos.find((photo) => photo.id === previewPhotoId) || gallery?.photos.find((photo) => photo.id === previewPhotoId) || null
   const previewIndex = previewPhoto ? filteredPhotos.findIndex((photo) => photo.id === previewPhoto.id) : -1
@@ -516,7 +552,22 @@ export default function GalleryWorkspacePage() {
                         className="gallery-btn gallery-btn-secondary gap-2"
                       >
                         <Copy className="w-4 h-4" />
-                        Move
+                        Move to set
+                      </button>
+                      <button
+                        onClick={() => void handleSetCover()}
+                        disabled={selectedPhotos.size !== 1}
+                        title={selectedPhotos.size === 1 ? 'Set selected image as gallery cover' : 'Select exactly one image to set the cover'}
+                        className="gallery-btn gallery-btn-secondary gap-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <Layers className="w-4 h-4" />
+                        Set as cover
+                      </button>
+                      <button
+                        onClick={() => void handleBulkVisibility(!allSelectedHidden)}
+                        className="gallery-btn gallery-btn-secondary gap-2"
+                      >
+                        {allSelectedHidden ? 'Show in gallery' : 'Hide from gallery'}
                       </button>
                       <button
                         onClick={() => void handleDeletePhotos()}

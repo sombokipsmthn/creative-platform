@@ -106,7 +106,17 @@ async function getGallery(
 async function getPreset(
   galleryId: string,
   presetId?: string | null,
+  resolution?: string | null,
 ): Promise<Preset> {
+  if (!presetId && resolution === "original") {
+    return { id: "", name: "Original", variant: "original", max_width: null, quality: 100, format: "jpg", include_watermark: false };
+  }
+  if (!presetId && resolution === "high") {
+    return { id: "", name: "High resolution", variant: "original", max_width: 4000, quality: 92, format: "jpg", include_watermark: false };
+  }
+  if (!presetId && resolution === "web") {
+    return { id: "", name: "Web", variant: "display", max_width: 2048, quality: 85, format: "jpg", include_watermark: false };
+  }
   const result =
     await db.execute(sql`
       SELECT
@@ -372,6 +382,7 @@ export async function POST(
           "string"
           ? body.presetId
           : null,
+        typeof body.resolution === "string" ? body.resolution : null,
       );
 
     const watermark =

@@ -51,6 +51,8 @@ export function GalleryViewerMosaic({
     onPhotoFavorite?.(photoId, newFavorites.has(photoId));
   };
 
+  const effectiveColumns = Math.max(1, Math.min(6, theme.preset.masonryColumns + (theme.preset.thumbnailSize === 'small' ? 1 : theme.preset.thumbnailSize === 'large' ? -1 : 0)));
+
   // Calculate aspect ratios for varied layout
   // Cycle through different ratios for visual interest
   const getAspectRatio = (index: number): 'square' | 'landscape' | 'portrait' => {
@@ -69,8 +71,8 @@ export function GalleryViewerMosaic({
     >
       {/* Header */}
       <div className="border-b border-slate-200 dark:border-zinc-800 px-6 py-8 sm:px-10 lg:px-16">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">{title}</h1>
-        {description && <p className="mt-2 max-w-2xl text-base text-slate-600 dark:text-zinc-400">{description}</p>}
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-2xl text-base opacity-75">{description}</p>}
       </div>
 
       {/* Mosaic Grid */}
@@ -80,10 +82,10 @@ export function GalleryViewerMosaic({
             className={theme.preset.gridStyle === 'uniform' ? 'grid' : theme.preset.gridStyle === 'horizontal' ? 'flex overflow-x-auto' : 'columns-1 [column-fill:_balance]'}
             style={{
               ...(theme.preset.gridStyle === 'uniform'
-                ? { gridTemplateColumns: `repeat(${theme.preset.masonryColumns}, minmax(0, 1fr))`, gap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }
+                ? { gridTemplateColumns: `repeat(${effectiveColumns}, minmax(0, 1fr))`, gap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }
                 : theme.preset.gridStyle === 'horizontal'
                   ? { gap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }
-                  : { columnCount: theme.preset.gridStyle === 'vertical' ? 1 : theme.preset.masonryColumns, columnGap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }),
+                  : { columnCount: theme.preset.gridStyle === 'vertical' ? 1 : effectiveColumns, columnGap: theme.preset.gridSpacing === 'tight' ? 8 : theme.preset.gridSpacing === 'wide' ? 24 : 16 }),
             }}
           >
             {photos.map((photo, idx) => {

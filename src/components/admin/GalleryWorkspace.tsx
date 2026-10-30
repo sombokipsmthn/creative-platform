@@ -267,7 +267,7 @@ export default function GalleryWorkspacePage() {
   }
 
   const handleSetCover = async () => {
-    if (selectedPhotos.size !== 1) return
+    if (!canSetCover) return
     const [photoId] = Array.from(selectedPhotos)
     setError(null)
     try {
@@ -353,6 +353,7 @@ export default function GalleryWorkspacePage() {
   })
   const selectedPhotoRecords = (gallery?.photos || []).filter((photo) => selectedPhotos.has(photo.id))
   const allSelectedHidden = selectedPhotoRecords.length > 0 && selectedPhotoRecords.every((photo) => photo.isHidden)
+  const canSetCover = selectedPhotoRecords.length === 1 && getMediaType(selectedPhotoRecords[0]) === 'image'
 
   const previewPhoto = filteredPhotos.find((photo) => photo.id === previewPhotoId) || gallery?.photos.find((photo) => photo.id === previewPhotoId) || null
   const previewIndex = previewPhoto ? filteredPhotos.findIndex((photo) => photo.id === previewPhoto.id) : -1
@@ -556,8 +557,8 @@ export default function GalleryWorkspacePage() {
                       </button>
                       <button
                         onClick={() => void handleSetCover()}
-                        disabled={selectedPhotos.size !== 1}
-                        title={selectedPhotos.size === 1 ? 'Set selected image as gallery cover' : 'Select exactly one image to set the cover'}
+                        disabled={!canSetCover}
+                        title={canSetCover ? 'Set selected image as gallery cover' : 'Select exactly one photo (not a video) to set the cover'}
                         className="gallery-btn gallery-btn-secondary gap-2 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <Layers className="w-4 h-4" />

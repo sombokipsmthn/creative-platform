@@ -754,9 +754,14 @@ export default function GalleryWorkspacePage() {
                     </div>
                   </div>
 
-                  {filteredPhotos.length > 0 ? (
+                  {photoGroups.length > 0 ? (
+                    <div className="space-y-7">
+                      {photoGroups.map((group) => (
+                        <section key={group.id} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedPhotoId) void handleDropPhotoIntoCollection(draggedPhotoId, group.id === '__unassigned__' ? null : group.id) }} className={cn('rounded-xl border p-3 transition-colors sm:p-4', draggedPhotoId ? 'border-dashed border-[var(--color-accent)]/60 bg-[var(--color-accent-soft)]/20' : 'border-[var(--color-border-subtle)]')}>
+                          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">{group.title}</h3><p className="text-xs text-[var(--color-text-muted)]">{group.photos.length} {group.photos.length === 1 ? 'item' : 'items'} · Drop images here to move them</p></div>{draggedPhotoId && <span className="text-xs text-[var(--color-accent)]">Drop to move</span>}</div>
+                          {group.photos.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
-                      {filteredPhotos.map((photo) => {
+                      {group.photos.map((photo) => {
                         const mediaType = getMediaType(photo)
                         
                         const isSelected = selectedPhotos.has(photo.id)
@@ -764,6 +769,9 @@ export default function GalleryWorkspacePage() {
                         return (
                           <div
                             key={photo.id}
+                            draggable
+                            onDragStart={() => setDraggedPhotoId(photo.id)}
+                            onDragEnd={() => setDraggedPhotoId(null)}
                             className={cn(
                               'group relative aspect-square overflow-hidden rounded-lg border transition-colors',
                               isSelected
@@ -847,14 +855,15 @@ export default function GalleryWorkspacePage() {
                         )
                       })}
                     </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-sm text-[var(--color-text-muted)]">
-                        No photos in this gallery yet. Use the upload area above to add photos.
-                      </p>
+                          ) : (
+                            <div className="flex min-h-24 items-center justify-center rounded-lg border border-dashed border-[var(--color-border-subtle)] px-4 py-6 text-center text-xs text-[var(--color-text-muted)]">This set is empty. Drag photos here to add them.</div>
+                          )}
+                        </section>
+                      ))}
                     </div>
+                  ) : (
+                    <div className="py-12 text-center"><p className="text-sm text-[var(--color-text-muted)]">No media matches the current filter.</p></div>
                   )}
-                </div>
 
                 {previewPhoto && (
                   <div

@@ -106,35 +106,6 @@ export default function GalleryWorkspacePage() {
   }, [id])
 
   useEffect(() => {
-    if (!previewPhotoId) return
-    const handlePreviewKeys = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setPreviewPhotoId(null)
-      if (event.key === 'ArrowLeft') {
-        event.preventDefault()
-        setPreviewPhotoId((current) => {
-          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
-          if (currentIndex < 0 || !filteredPhotos.length) return current
-          return filteredPhotos[(currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length].id
-        })
-      }
-      if (event.key === 'ArrowRight') {
-        event.preventDefault()
-        setPreviewPhotoId((current) => {
-          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
-          if (currentIndex < 0 || !filteredPhotos.length) return current
-          return filteredPhotos[(currentIndex + 1) % filteredPhotos.length].id
-        })
-      }
-    }
-    document.addEventListener('keydown', handlePreviewKeys)
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', handlePreviewKeys)
-      document.body.style.overflow = ''
-    }
-  }, [previewPhotoId, filteredPhotos])
-
-  useEffect(() => {
     const fetchGallery = async () => {
       try {
         setLoading(true)
@@ -265,14 +236,6 @@ export default function GalleryWorkspacePage() {
     await updatePortfolioSelection([photo.id], isPortfolioIncluded(photo) ? 'exclude' : 'include')
   }
 
-  const previewPhoto = filteredPhotos.find((photo) => photo.id === previewPhotoId) || gallery?.photos.find((photo) => photo.id === previewPhotoId) || null
-  const previewIndex = previewPhoto ? filteredPhotos.findIndex((photo) => photo.id === previewPhoto.id) : -1
-  const goToPreview = (direction: -1 | 1) => {
-    if (!filteredPhotos.length || previewIndex < 0) return
-    const nextIndex = (previewIndex + direction + filteredPhotos.length) % filteredPhotos.length
-    setPreviewPhotoId(filteredPhotos[nextIndex].id)
-  }
-
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
     setError(null)
     try {
@@ -354,6 +317,43 @@ export default function GalleryWorkspacePage() {
     if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
     return true
   })
+
+  const previewPhoto = filteredPhotos.find((photo) => photo.id === previewPhotoId) || gallery?.photos.find((photo) => photo.id === previewPhotoId) || null
+  const previewIndex = previewPhoto ? filteredPhotos.findIndex((photo) => photo.id === previewPhoto.id) : -1
+  const goToPreview = (direction: -1 | 1) => {
+    if (!filteredPhotos.length || previewIndex < 0) return
+    const nextIndex = (previewIndex + direction + filteredPhotos.length) % filteredPhotos.length
+    setPreviewPhotoId(filteredPhotos[nextIndex].id)
+  }
+
+  useEffect(() => {
+    if (!previewPhotoId) return
+    const handlePreviewKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPreviewPhotoId(null)
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        setPreviewPhotoId((current) => {
+          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
+          if (currentIndex < 0 || !filteredPhotos.length) return current
+          return filteredPhotos[(currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length].id
+        })
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        setPreviewPhotoId((current) => {
+          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
+          if (currentIndex < 0 || !filteredPhotos.length) return current
+          return filteredPhotos[(currentIndex + 1) % filteredPhotos.length].id
+        })
+      }
+    }
+    document.addEventListener('keydown', handlePreviewKeys)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handlePreviewKeys)
+      document.body.style.overflow = ''
+    }
+  }, [previewPhotoId, filteredPhotos])
 
   if (loading) {
     return (

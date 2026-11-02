@@ -4,12 +4,13 @@
 import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Lock } from "@phosphor-icons/react"
-import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/components/gallery/viewers/wrapper'
+import { GalleryViewer, type GalleryPhoto, type GalleryCollection, type GalleryViewerProps } from '@/components/gallery/viewers/wrapper'
 import { isValidThemeId, type GalleryThemePreset } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { useDesignSystem } from '@/components/ui/DesignSystemProvider';
 
 interface GalleryPageProps {
   params: Promise<{
@@ -35,6 +36,7 @@ interface SavedTheme {
   aspectRatio: string
   fontFamily: string
   coverStyle: string
+  coverComposition: string
   coverFocalX: number
   coverFocalY: number
   coverOverlayOpacity: number
@@ -42,6 +44,20 @@ interface SavedTheme {
   thumbnailSize: string
   gridSpacing: string
   navigationStyle: string
+  imageLayout: string
+  imageOrientation: string
+  imageSizing: string
+  galleryWidth: string
+  coverImageId: string | null
+  studioName: string | null
+  logoUrl: string | null
+  logoLightUrl: string | null
+  logoDarkUrl: string | null
+  logoTransparentUrl: string | null
+  logoSize: string | null
+  brandColor: string | null
+  coverBrandingVisible: boolean
+  navBrandingVisible: boolean
 }
 
 interface RawPhoto {
@@ -72,6 +88,8 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   const resolvedParams = use(params)
   const token = resolvedParams.secretToken
 
+  const { theme } = useDesignSystem()
+
   const [loading, setLoading] = useState(true)
   const [verified, setVerified] = useState(false)
   const [pinError, setPinError] = useState(false)
@@ -87,7 +105,16 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   const [requiredPin, setRequiredPin] = useState<string | null>(null)
 
   const [themeId, setThemeId] = useState<GalleryThemeId>('minimal')
-  const [themePreset, setThemePreset] = useState<Partial<GalleryThemePreset> | undefined>(undefined)
+  const [themePreset, setThemePreset] = useState<GalleryViewerProps['themePreset']>(undefined)
+
+  // Apply design system theme on mount
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+  }, [theme])
   const [photos, setPhotos] = useState<GalleryPhoto[]>([])
   const [collections, setCollections] = useState<GalleryCollection[]>([])
 
@@ -133,6 +160,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             borderRadius: Number(savedTheme.borderRadius ?? 0),
             fontFamily: savedTheme.fontFamily as GalleryThemePreset['fontFamily'],
             coverStyle: savedTheme.coverStyle as GalleryThemePreset['coverStyle'],
+            coverComposition: savedTheme.coverComposition as GalleryThemePreset['coverComposition'],
             coverFocalX: Number(savedTheme.coverFocalX ?? 50),
             coverFocalY: Number(savedTheme.coverFocalY ?? 50),
             coverOverlayOpacity: Number(savedTheme.coverOverlayOpacity ?? 25),
@@ -140,6 +168,20 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             thumbnailSize: savedTheme.thumbnailSize as GalleryThemePreset['thumbnailSize'],
             gridSpacing: savedTheme.gridSpacing as GalleryThemePreset['gridSpacing'],
             navigationStyle: savedTheme.navigationStyle as GalleryThemePreset['navigationStyle'],
+            imageLayout: savedTheme.imageLayout as GalleryThemePreset['imageLayout'],
+            imageOrientation: savedTheme.imageOrientation as GalleryThemePreset['imageOrientation'],
+            imageSizing: savedTheme.imageSizing as GalleryThemePreset['imageSizing'],
+            galleryWidth: savedTheme.galleryWidth as GalleryThemePreset['galleryWidth'],
+            coverImageId: savedTheme.coverImageId ?? null,
+            studioName: savedTheme.studioName ?? undefined,
+            logoUrl: savedTheme.logoUrl ?? undefined,
+            logoLightUrl: savedTheme.logoLightUrl ?? undefined,
+            logoDarkUrl: savedTheme.logoDarkUrl ?? undefined,
+            logoTransparentUrl: savedTheme.logoTransparentUrl ?? undefined,
+            logoSize: savedTheme.logoSize ?? undefined,
+            brandColor: savedTheme.brandColor ?? undefined,
+            coverBrandingVisible: savedTheme.coverBrandingVisible,
+            navBrandingVisible: savedTheme.navBrandingVisible,
           })
           // Resolve theme ID robustly:
           // 1. Check if `type` stores a valid preset id (preset themes set type = preset id)

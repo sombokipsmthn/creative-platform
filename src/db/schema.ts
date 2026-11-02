@@ -502,7 +502,7 @@ export const galleryThemes = pgTable("gallery_themes", {
   galleryId: uuid("gallery_id").notNull().unique().references(() => galleries.id, { onDelete: "cascade" }),
   name: text("name").default("Default").notNull(),
   type: text("type").default("preset").notNull(),
-  layout: text("layout").default("masonry").notNull(),
+  layout: text("layout").default("small_columns").notNull(),
   accentColor: text("accent_color").default("#000000").notNull(),
   backgroundColor: text("background_color").default("#ffffff").notNull(),
   textColor: text("text_color").default("#000000").notNull(),
@@ -514,14 +514,21 @@ export const galleryThemes = pgTable("gallery_themes", {
   masonryColumns: integer("masonry_columns").default(4).notNull(),
   aspectRatio: text("aspect_ratio").default("auto").notNull(),
   fontFamily: text("font_family").default("sans").notNull(),
-  coverStyle: text("cover_style").default("image").notNull(),
+  coverStyle: text("cover_style").default("full_image").notNull(),
   coverFocalX: integer("cover_focal_x").default(50).notNull(),
   coverFocalY: integer("cover_focal_y").default(50).notNull(),
   coverOverlayOpacity: integer("cover_overlay_opacity").default(25).notNull(),
   gridStyle: text("grid_style").default("masonry").notNull(),
   thumbnailSize: text("thumbnail_size").default("regular").notNull(),
-  gridSpacing: text("grid_spacing").default("regular").notNull(),
+  gridSpacing: text("grid_spacing").default("comfortable").notNull(),
   navigationStyle: text("navigation_style").default("icons-and-text").notNull(),
+  // New layout & design configuration
+  imageLayout: text("image_layout").default("small_columns").notNull(), // small_columns, small_rows, large_rows
+  imageOrientation: text("image_orientation").default("balanced").notNull(), // portrait, landscape, balanced
+  imageSizing: text("image_sizing").default("medium").notNull(), // small, medium, large
+  galleryWidth: text("gallery_width").default("focused").notNull(), // focused, wide, full
+  coverComposition: text("cover_composition").default("full_image").notNull(), // full_image, framed, split, offset, centered, minimal, label, editorial
+  coverImageId: uuid("cover_image_id"), // FK to gallery_photos.id
   customCSS: text("custom_css"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull()});
@@ -831,3 +838,75 @@ export const creatorGalleryDefaults = pgTable("creator_gallery_defaults", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+// ---------------------------------------------------------------------------
+// Creator branding assets
+// ---------------------------------------------------------------------------
+export const creatorBranding = pgTable("creator_branding", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().unique().references(() => users.id, { onDelete: "cascade" }),
+  studioName: text("studio_name"),
+  logoUrl: text("logo_url"),
+  logoPath: text("logo_path"),
+  logoLightUrl: text("logo_light_url"),
+  logoLightPath: text("logo_light_path"),
+  logoDarkUrl: text("logo_dark_url"),
+  logoDarkPath: text("logo_dark_path"),
+  logoTransparentUrl: text("logo_transparent_url"),
+  logoTransparentPath: text("logo_transparent_path"),
+  logoSvgUrl: text("logo_svg_url"),
+  logoSvgPath: text("logo_svg_path"),
+  logoSize: text("logo_size").default("medium").notNull(), // small, medium, large
+  brandColor: text("brand_color").default("#000000").notNull(),
+  brandColorLight: text("brand_color_light").default("#FFFFFF").notNull(),
+  coverBrandingVisible: boolean("cover_branding_visible").default(true).notNull(),
+  navBrandingVisible: boolean("nav_branding_visible").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// ---------------------------------------------------------------------------
+// Subscription & entitlement infrastructure
+// ---------------------------------------------------------------------------
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  priceAmount: integer("price_amount").default(0).notNull(),
+  currency: text("currency").default("KES").notNull(),
+  billingInterval: text("billing_interval").default("monthly").notNull(), // monthly, yearly
+  features: jsonb("features").default([]).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  planId: uuid("plan_id").notNull().references(() => subscriptionPlans.id, { onDelete: "cascade" }),
+  status: text("status").default("active").notNull(), // active, trialing, past_due, canceled, expired
+  trialEndsAt: timestamp("trial_ends_at"),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  canceledAt: timestamp("canceled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userStatusIdx: index("subscriptions_user_status_idx").on(table.userId, table.status),
+}));
+
+export const entitlements = pgTable("entitlements", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  featureKey: text("feature_key").notNull(), // e.g. 'custom_branding'
+  enabled: boolean("enabled").default(true).notNull(),
+  source: text("source").default("subscription").notNull(), // subscription, manual, trial
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userFeatureUnique: unique("entitlements_user_feature_unique").on(table.userId, table.featureKey),
+  userFeatureIdx: index("entitlements_user_feature_idx").on(table.userId, table.featureKey),
+}));

@@ -14,6 +14,19 @@ export type GalleryThemeCategory =
 
 export type GalleryFontFamily = 'sans' | 'serif' | 'modern' | 'editorial' | 'system-rounded';
 export type GalleryCoverStyle = 'image' | 'split' | 'centered' | 'minimal' | 'immersive' | 'none';
+export type GalleryCoverComposition =
+  | 'full_image'
+  | 'framed'
+  | 'split'
+  | 'offset'
+  | 'centered'
+  | 'minimal'
+  | 'label'
+  | 'editorial';
+export type GalleryImageLayout = 'small_columns' | 'small_rows' | 'large_rows';
+export type GalleryImageOrientation = 'portrait' | 'landscape' | 'balanced';
+export type GalleryImageSizing = 'small' | 'medium' | 'large';
+export type GalleryGalleryWidth = 'focused' | 'wide' | 'full';
 export type GalleryGridStyle = 'masonry' | 'vertical' | 'horizontal' | 'uniform';
 export type GalleryThumbnailSize = 'small' | 'regular' | 'large';
 export type GalleryGridSpacing = 'tight' | 'regular' | 'wide';
@@ -33,6 +46,7 @@ export interface GalleryThemePreset {
   borderRadius: number;
   fontFamily: GalleryFontFamily;
   coverStyle: GalleryCoverStyle;
+  coverComposition: GalleryCoverComposition;
   coverFocalX: number;
   coverFocalY: number;
   coverOverlayOpacity: number;
@@ -40,6 +54,10 @@ export interface GalleryThemePreset {
   thumbnailSize: GalleryThumbnailSize;
   gridSpacing: GalleryGridSpacing;
   navigationStyle: GalleryNavigationStyle;
+  imageLayout: GalleryImageLayout;
+  imageOrientation: GalleryImageOrientation;
+  imageSizing: GalleryImageSizing;
+  galleryWidth: GalleryGalleryWidth;
 }
 
 export interface GalleryThemeDefinition {
@@ -78,6 +96,7 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       borderRadius: 0,
       fontFamily: 'sans',
       coverStyle: 'minimal',
+      coverComposition: 'minimal',
       coverFocalX: 50,
       coverFocalY: 50,
       coverOverlayOpacity: 15,
@@ -85,6 +104,10 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       thumbnailSize: 'large',
       gridSpacing: 'wide',
       navigationStyle: 'icons-and-text',
+      imageLayout: 'small_columns',
+      imageOrientation: 'balanced',
+      imageSizing: 'medium',
+      galleryWidth: 'focused',
     },
     customizable: { colors: true, cover: true, grid: true, typography: true },
   },
@@ -115,6 +138,11 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       thumbnailSize: 'regular',
       gridSpacing: 'regular',
       navigationStyle: 'icons-and-text',
+      coverComposition: "minimal",
+      imageLayout: "small_columns",
+      imageOrientation: "portrait",
+      imageSizing: "small",
+      galleryWidth: "focused"
     },
     customizable: { colors: true, cover: true, grid: true, typography: true },
   },
@@ -145,6 +173,11 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       thumbnailSize: 'large',
       gridSpacing: 'tight',
       navigationStyle: 'icons-only',
+      coverComposition: "minimal",
+      imageLayout: "small_columns",
+      imageOrientation: "portrait",
+      imageSizing: "small",
+      galleryWidth: "focused"
     },
     customizable: { colors: true, cover: true, grid: false, typography: true },
   },
@@ -175,6 +208,11 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       thumbnailSize: 'regular',
       gridSpacing: 'regular',
       navigationStyle: 'icons-and-text',
+      coverComposition: "minimal",
+      imageLayout: "small_columns",
+      imageOrientation: "portrait",
+      imageSizing: "small",
+      galleryWidth: "focused"
     },
     customizable: { colors: true, cover: true, grid: true, typography: true },
   },
@@ -205,6 +243,11 @@ export const GALLERY_THEMES: GalleryThemeDefinition[] = [
       thumbnailSize: 'large',
       gridSpacing: 'wide',
       navigationStyle: 'icons-and-text',
+      coverComposition: "minimal",
+      imageLayout: "small_columns",
+      imageOrientation: "portrait",
+      imageSizing: "small",
+      galleryWidth: "focused"
     },
     customizable: { colors: true, cover: true, grid: true, typography: true },
   },

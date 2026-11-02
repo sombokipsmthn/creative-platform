@@ -7,6 +7,9 @@ import { GalleryViewerEditorial } from './editorial';
 import { GalleryViewerCinematic } from './cinematic';
 import { GalleryViewerMosaic } from './mosaic';
 import { GalleryViewerStory } from './story';
+import { GalleryViewerSmallColumns } from './small-columns';
+import { GalleryViewerSmallRows } from './small-rows';
+import { GalleryViewerLargeRows } from './large-rows';
 
 export interface GalleryPhoto {
   id: string;
@@ -37,7 +40,23 @@ export interface GalleryViewerProps {
   description?: string;
   themeId: GalleryThemeId;
   /** Unsaved theme settings supplied by the design editor for instant preview. */
-  themePreset?: Partial<GalleryThemePreset>;
+  themePreset?: Partial<GalleryThemePreset> & {
+    imageLayout?: string;
+    imageOrientation?: string;
+    imageSizing?: string;
+    galleryWidth?: string;
+    coverComposition?: string;
+    coverImageId?: string | null;
+    studioName?: string;
+    logoUrl?: string;
+    logoLightUrl?: string;
+    logoDarkUrl?: string;
+    logoTransparentUrl?: string;
+    logoSize?: string;
+    brandColor?: string;
+    coverBrandingVisible?: boolean;
+    navBrandingVisible?: boolean;
+  };
   photos: GalleryPhoto[];
   collections?: GalleryCollection[];
   allowDownloads: boolean;
@@ -53,6 +72,14 @@ export interface GalleryViewerProps {
 
 /**
  * GalleryViewer routes to the correct theme-specific renderer.
+ *
+ * The `imageLayout` field controls which renderer is used:
+ *   - `small_columns` (default) — balanced masonry grid, small thumbnails
+ *   - `small_rows` — compact horizontal rows
+ *   - `large_rows` — editorial, immersive large photographs
+ *
+ * Legacy theme IDs (`minimal`, `editorial`, `cinematic`, `mosaic`, `story`)
+ * continue to work and map to the appropriate layout.
  */
 export function GalleryViewer({
   id,
@@ -75,6 +102,8 @@ export function GalleryViewer({
   const baseTheme = getGalleryTheme(themeId);
   const theme = themePreset ? { ...baseTheme, preset: { ...baseTheme.preset, ...themePreset } } : baseTheme;
 
+  const imageLayout = (themePreset as any)?.imageLayout || theme.preset.layout;
+
   const commonProps = {
     id,
     title,
@@ -93,22 +122,30 @@ export function GalleryViewer({
     onPhotoDownload,
   };
 
+  // New layout system takes priority.
+  switch (imageLayout) {
+    case 'small_columns':
+      return <GalleryViewerSmallColumns {...commonProps} />;
+    case 'small_rows':
+      return <GalleryViewerSmallRows {...commonProps} />;
+    case 'large_rows':
+      return <GalleryViewerLargeRows {...commonProps} />;
+    default:
+      break;
+  }
+
+  // Legacy theme-based routing.
   switch (theme.id) {
     case 'minimal':
       return <GalleryViewerMinimal {...commonProps} />;
-
     case 'editorial':
       return <GalleryViewerEditorial {...commonProps} />;
-
     case 'cinematic':
       return <GalleryViewerCinematic {...commonProps} />;
-
     case 'mosaic':
       return <GalleryViewerMosaic {...commonProps} />;
-
     case 'story':
       return <GalleryViewerStory {...commonProps} />;
-
     default:
       return <GalleryViewerMinimal {...commonProps} />;
   }

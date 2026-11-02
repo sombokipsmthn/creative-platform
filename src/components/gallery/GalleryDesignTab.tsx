@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { useDesignSystem } from '@/components/ui/DesignSystemProvider';
 
 interface GalleryPhoto {
   id: string
@@ -60,6 +61,7 @@ interface SavedTheme {
   customCSS: string | null
   fontFamily: string
   coverStyle: string
+  coverComposition: string
   coverFocalX: number
   coverFocalY: number
   coverOverlayOpacity: number
@@ -67,6 +69,10 @@ interface SavedTheme {
   thumbnailSize: string
   gridSpacing: string
   navigationStyle: string
+  imageLayout: string
+  imageOrientation: string
+  imageSizing: string
+  galleryWidth: string
   createdAt: string
   updatedAt: string
 }
@@ -182,6 +188,7 @@ function getSampleGallery(themeId: GalleryThemeId): {
 
 export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: GalleryDesignTabProps) {
   const [activeSection, setActiveSection] = useState<ActiveSection>('theme')
+  const { theme: systemTheme, setTheme } = useDesignSystem()
   const [savedTheme, setSavedTheme] = useState<SavedTheme | null>(null)
   const [draftTheme, setDraftTheme] = useState<SavedTheme | null>(null)
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop')
@@ -306,6 +313,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
       aspectRatio: preset.aspectRatio,
       fontFamily: preset.fontFamily,
       coverStyle: preset.coverStyle,
+      coverComposition: preset.coverComposition,
       coverFocalX: preset.coverFocalX,
       coverFocalY: preset.coverFocalY,
       coverOverlayOpacity: preset.coverOverlayOpacity,
@@ -313,6 +321,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
       thumbnailSize: preset.thumbnailSize,
       gridSpacing: preset.gridSpacing,
       navigationStyle: preset.navigationStyle,
+      imageLayout: preset.imageLayout,
+      imageOrientation: preset.imageOrientation,
+      imageSizing: preset.imageSizing,
+      galleryWidth: preset.galleryWidth,
     } as Partial<SavedTheme>)
   }, [updateTheme])
 
@@ -338,6 +350,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
       aspectRatio: preset.aspectRatio,
       fontFamily: preset.fontFamily,
       coverStyle: preset.coverStyle,
+      coverComposition: preset.coverComposition,
       coverFocalX: preset.coverFocalX,
       coverFocalY: preset.coverFocalY,
       coverOverlayOpacity: preset.coverOverlayOpacity,
@@ -345,6 +358,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
       thumbnailSize: preset.thumbnailSize,
       gridSpacing: preset.gridSpacing,
       navigationStyle: preset.navigationStyle,
+      imageLayout: preset.imageLayout,
+      imageOrientation: preset.imageOrientation,
+      imageSizing: preset.imageSizing,
+      galleryWidth: preset.galleryWidth,
     } as Partial<SavedTheme>)
     setShowResetDialog(false)
   }, [currentThemeId, updateTheme])
@@ -388,8 +405,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
 
   // Build preview data: use real gallery photos when available, sample data when empty
   const baseTheme = currentThemeId ? GALLERY_THEMES.find(t => t.id === currentThemeId) : null
-  const theme = baseTheme && draftTheme ? { ...baseTheme, preset: { ...baseTheme.preset, ...draftTheme } } : null
-  const sampleGallery = theme ? getSampleGallery(theme.id) : null
+  const mergedTheme = baseTheme && draftTheme ? { ...baseTheme, preset: { ...baseTheme.preset, ...draftTheme } } : null
+  const sampleGallery = mergedTheme ? getSampleGallery(mergedTheme.id) : null
   const hasRealPhotos = photos.length > 0
 
   const previewPhotos = hasRealPhotos ? photos : (sampleGallery?.photos || [])
@@ -413,10 +430,10 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   const previewImageUrl = previewPhotos[0]?.displayUrl?.trim() || previewPhotos[0]?.thumbnailUrl?.trim() || ''
 
   // Compute theme-aware styles for the preview
-  const bgStyle = theme
+  const bgStyle = mergedTheme
     ? {
-        backgroundColor: theme.preset.backgroundColor,
-        color: theme.preset.textColor,
+        backgroundColor: mergedTheme.preset.backgroundColor,
+        color: mergedTheme.preset.textColor,
       }
     : {}
 
@@ -581,8 +598,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                 <div
                   className="absolute inset-0 flex items-center justify-center"
                   style={{
-                    backgroundColor: theme?.preset.backgroundColor || '#F8F9FA',
-                    color: theme?.preset.textColor || '#6B7280',
+                    backgroundColor: mergedTheme?.preset.backgroundColor || '#F8F9FA',
+                    color: mergedTheme?.preset.textColor || '#6B7280',
                   }}
                 >
                   <div className="text-center">
@@ -657,6 +674,24 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                     )}
                   </Button>
                 )}
+
+                <div className="border-t border-[var(--color-border-subtle)] pt-4">
+                  <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Cover Composition</label>
+                  <SelectCompat
+                    value={draftTheme.coverComposition || 'full_image'}
+                    onChange={(e) => void updateTheme({ coverComposition: e.target.value })}
+                    className="w-full gallery-input"
+                  >
+                    <option value="full_image">Full Image (Bleed)</option>
+                    <option value="framed">Framed (Bordered)</option>
+                    <option value="split">Split (Image + Text)</option>
+                    <option value="offset">Offset (Asymmetric)</option>
+                    <option value="centered">Centered</option>
+                    <option value="minimal">Minimal (Text Only)</option>
+                    <option value="label">Label (Typography)</option>
+                    <option value="editorial">Editorial (Magazine)</option>
+                  </SelectCompat>
+                </div>
               </div>
             </div>
           )}
@@ -881,6 +916,58 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   />
                 </div>
               )}
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Image Layout</label>
+                <SelectCompat
+                  value={draftTheme.imageLayout || 'small_columns'}
+                  onChange={(e) => void updateTheme({ imageLayout: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="small_columns">Small Columns (Masonry Grid)</option>
+                  <option value="small_rows">Small Rows (Horizontal Strips)</option>
+                  <option value="large_rows">Large Rows (Editorial)</option>
+                </SelectCompat>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Image Orientation</label>
+                <SelectCompat
+                  value={draftTheme.imageOrientation || 'balanced'}
+                  onChange={(e) => void updateTheme({ imageOrientation: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="balanced">Balanced (Mixed)</option>
+                  <option value="portrait">Portrait Optimized</option>
+                  <option value="landscape">Landscape Optimized</option>
+                </SelectCompat>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Image Sizing</label>
+                <SelectCompat
+                  value={draftTheme.imageSizing || 'medium'}
+                  onChange={(e) => void updateTheme({ imageSizing: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="small">Small (Compact)</option>
+                  <option value="medium">Medium (Balanced)</option>
+                  <option value="large">Large (Spacious)</option>
+                </SelectCompat>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Gallery Width</label>
+                <SelectCompat
+                  value={draftTheme.galleryWidth || 'focused'}
+                  onChange={(e) => void updateTheme({ galleryWidth: e.target.value })}
+                  className="w-full gallery-input"
+                >
+                  <option value="focused">Focused (Narrow)</option>
+                  <option value="wide">Wide</option>
+                  <option value="full">Full Width</option>
+                </SelectCompat>
+              </div>
             </div>
           )}
 
@@ -961,19 +1048,19 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
               <div className="flex items-center gap-2">
                 <button type="button" onClick={() => setPreviewDevice('desktop')} aria-label="Desktop preview" className={`rounded-md p-2 ${previewDevice === 'desktop' ? 'bg-[var(--color-bg-soft)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]'}`}>▣</button>
                 <button type="button" onClick={() => setPreviewDevice('mobile')} aria-label="Mobile preview" className={`rounded-md p-2 ${previewDevice === 'mobile' ? 'bg-[var(--color-bg-soft)] text-[var(--color-text-primary)]' : 'text-[var(--color-text-muted)]'}`}>▯</button>
-                {theme && <span className="text-xs text-[var(--color-text-muted)]">{theme.label} theme</span>}
+                {mergedTheme && <span className="text-xs text-[var(--color-text-muted)]">{mergedTheme.label} theme</span>}
               </div>
             </div>
 
             {/* Live Gallery Preview */}
             <div className="relative min-h-[60vh] max-h-[80vh] overflow-auto bg-[var(--color-bg-soft)] p-3">
               <div className={previewDevice === 'mobile' ? 'mx-auto max-w-[390px] overflow-hidden rounded-[1.75rem] border border-black/10 bg-white shadow-xl' : 'w-full overflow-hidden'}>
-              {theme && (
+              {mergedTheme && (
                 <GalleryViewer
                   id={galleryId}
                   title={previewTitle}
                   description={previewDescription}
-                  themeId={theme.id}
+                  themeId={mergedTheme.id}
                   themePreset={{ ...draftTheme, masonryColumns: previewDevice === 'mobile' ? Math.min(2, draftTheme.masonryColumns) : draftTheme.masonryColumns } as unknown as GalleryThemePreset}
                   photos={previewPhotos}
                   collections={previewCollections}
@@ -988,7 +1075,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   onPhotoDownload={() => {}}
                 />
               )}
-              {!theme && (
+              {!mergedTheme && (
                 <div className="flex items-center justify-center h-[60vh] text-[var(--color-text-muted)]">
                   Select a theme to see preview
                 </div>

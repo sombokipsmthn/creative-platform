@@ -14,6 +14,7 @@ export function GalleryMedia({
   sizes,
   priority = false,
   unoptimized = false,
+  style,
 }: {
   src?: string | null;
   poster?: string | null;
@@ -26,6 +27,7 @@ export function GalleryMedia({
   sizes?: string;
   priority?: boolean;
   unoptimized?: boolean;
+  style?: React.CSSProperties;
 }) {
   // Media records can be incomplete while uploads/thumbnails are processing.
   // Never pass an empty, missing, or non-string URL to the browser or Next Image.
@@ -45,10 +47,11 @@ export function GalleryMedia({
                 inset: 0,
                 width: '100%',
                 height: '100%',
+                ...style,
               }
             : width && height
-              ? { width, height }
-              : undefined
+              ? { width, height, ...style }
+              : style
         }
       >
         <span className="px-3 text-center text-xs text-gray-400">
@@ -76,8 +79,9 @@ export function GalleryMedia({
                 inset: 0,
                 width: '100%',
                 height: '100%',
+                ...style,
               }
-            : undefined
+            : style
         }
       />
     );
@@ -99,6 +103,7 @@ export function GalleryMedia({
       sizes={sizes}
       priority={priority}
       unoptimized={unoptimized || isProtectedGalleryMedia}
+      style={style}
     />
   );
 }

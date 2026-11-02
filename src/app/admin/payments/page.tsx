@@ -1,13 +1,30 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { CalendarDots as CalendarDays, CheckCircle as CheckCircle2, CreditCard, Funnel as Filter, CircleNotch as Loader2, Plus, MagnifyingGlass as Search, Wallet, X } from "@phosphor-icons/react";
+import { CalendarDots as CalendarDays, CheckCircle as CheckCircle2, CreditCard, Funnel as Filter, CircleNotch as Loader2, Plus, MagnifyingGlass as Search, Wallet, X, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react";
 import { AdminPageHeader } from '@/components/ui/AdminPageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import StatusBadge from '@/components/admin/StatusBadge';
 import AdminDataTable from '@/components/admin/AdminDataTable';
+import { AdminResourceToolbar, type AdminFilterConfig, type AdminToolbarAction } from '@/components/admin/AdminResourceToolbar';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type Client = { id: string; name: string; company?: string | null };
 type Project = { id: string; name: string; clientId?: string | null };
@@ -84,11 +101,47 @@ export default function PaymentsPage() {
       <Metric icon={<CalendarDays className="h-4 w-4" />} label="Awaiting payment" values={[`${summary?.awaitingPayment ?? 0} invoice${summary?.awaitingPayment === 1 ? '' : 's'}`]} />
       <Metric icon={<CheckCircle2 className="h-4 w-4" />} label="Payments recorded" values={[`${summary?.paymentsRecorded ?? 0} this month`]} />
     </div>
-    <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800 dark:bg-zinc-900/40 lg:flex-row lg:items-center">
-      <div className="relative min-w-0 flex-1"><Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input value={filters.search} onChange={(event) => setFilters({ ...filters, search: event.target.value })} placeholder="Search client, invoice or transaction reference" className="pl-10" /></div>
-      <select aria-label="Payment method" value={filters.method} onChange={(event) => setFilters({ ...filters, method: event.target.value })} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">All methods</option>{methods.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
-      <select aria-label="Payment status" value={filters.status} onChange={(event) => setFilters({ ...filters, status: event.target.value })} className="h-10 rounded-md border bg-background px-3 text-sm"><option value="">All statuses</option>{statuses.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select>
-      <Input aria-label="Payments from date" type="date" value={filters.from} onChange={(event) => setFilters({ ...filters, from: event.target.value })} className="w-auto" /><Input aria-label="Payments to date" type="date" value={filters.to} onChange={(event) => setFilters({ ...filters, to: event.target.value })} className="w-auto" /><Filter className="hidden h-4 w-4 text-muted-foreground lg:block" />
+    <AdminResourceToolbar
+      search={filters.search}
+      onSearchChange={(value) => setFilters({ ...filters, search: value })}
+      searchPlaceholder="Search client, invoice or transaction reference"
+      filters={[
+        {
+          id: 'method',
+          label: 'Method',
+          value: filters.method,
+          options: [{ label: 'All methods', value: 'all' }, ...methods.map((m) => ({ label: m.label, value: m.value }))],
+          showAllOption: true,
+        },
+        {
+          id: 'status',
+          label: 'Status',
+          value: filters.status,
+          options: [{ label: 'All statuses', value: 'all' }, ...statuses.map((s) => ({ label: s.label, value: s.value }))],
+          showAllOption: true,
+        },
+      ] as AdminFilterConfig[]}
+      onFilterChange={(id, value) => setFilters({ ...filters, [id]: value })}
+      onClearAll={() => setFilters({ search: '', method: '', status: '', from: '', to: '' })}
+      secondaryActions={[
+        {
+          label: '',
+          onClick: () => load(),
+          variant: 'outline',
+          size: 'sm',
+          icon: <RefreshCw className="h-3.5 w-3.5" />,
+        } as AdminToolbarAction,
+      ]}
+      resultCount={rows.length}
+      filteredCount={rows.length}
+      resultLabel="Payments"
+      loading={loading}
+    />
+    <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 lg:flex-row lg:items-center">
+      <Label htmlFor="payments-from" className="sr-only">Payments from date</Label>
+      <Input id="payments-from" type="date" value={filters.from} onChange={(event) => setFilters({ ...filters, from: event.target.value })} className="w-auto" />
+      <Label htmlFor="payments-to" className="sr-only">Payments to date</Label>
+      <Input id="payments-to" type="date" value={filters.to} onChange={(event) => setFilters({ ...filters, to: event.target.value })} className="w-auto" />
     </div>
     <Card><CardContent className="p-0">{loading ? <div className="grid gap-3 p-6"><Loader2 className="mx-auto h-6 w-6 animate-spin text-muted-foreground" /></div> : error ? <div className="p-10 text-center"><p className="font-medium">Payments unavailable</p><p className="mt-1 text-sm text-muted-foreground">{error}</p><Button variant="secondary" className="mt-4" onClick={() => void load()}>Retry</Button></div> : rows.length === 0 ? <div className="p-12 text-center"><Wallet className="mx-auto h-10 w-10 text-muted-foreground" /><h2 className="mt-4 text-lg font-semibold">Start tracking payments</h2><p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Record payments received through M-Pesa, bank transfer, cash or another channel. The ledger keeps confirmed receipts separate from payments awaiting verification.</p><Button className="mt-5" onClick={openForm}><Plus className="mr-2 h-4 w-4" />Record payment</Button></div>  : <AdminDataTable<Row>
           rows={rows}
@@ -108,18 +161,115 @@ export default function PaymentsPage() {
             { label: 'Reverse', hidden: ({ payment }) => payment.status !== 'confirmed', onSelect: ({ payment }) => void paymentAction(payment.id, 'reverse') },
           ]}
         />}</CardContent></Card>
-    {formOpen && <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" role="dialog" aria-modal="true" aria-labelledby="record-payment-title"><div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border bg-background p-6 shadow-xl"><div className="flex items-start justify-between"><div><h2 id="record-payment-title" className="text-xl font-semibold">Record payment</h2><p className="mt-1 text-sm text-muted-foreground">Manual tracking only. No transaction is initiated.</p></div><Button variant="ghost" size="icon" onClick={() => setFormOpen(false)} aria-label="Close"><X className="h-4 w-4" /></Button></div><form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2">
-      <Field label="Client" required><select required value={form.clientId} onChange={(event) => updateForm('clientId', event.target.value)} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">Select client</option>{clients.map((client) => <option key={client.id} value={client.id}>{client.company ? `${client.company} · ${client.name}` : client.name}</option>)}</select></Field>
-      <Field label="Amount received" required><Input required min="1" step="1" type="number" value={form.amount} onChange={(event) => updateForm('amount', event.target.value)} placeholder="Amount in minor units" /></Field>
-      <Field label="Currency" required><select required value={form.currency} onChange={(event) => updateForm('currency', event.target.value)} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="KES">KES</option>{currencies.filter((currency) => currency !== 'KES').map((currency) => <option key={currency} value={currency}>{currency}</option>)}</select></Field>
-      <Field label="Payment date" required><Input required type="date" value={form.paidAt} onChange={(event) => updateForm('paidAt', event.target.value)} /></Field>
-      <Field label="Payment method" required><select required value={form.method} onChange={(event) => updateForm('method', event.target.value)} className="h-10 w-full rounded-md border bg-background px-3 text-sm">{methods.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></Field>
-      <Field label="Status" required><select required value={form.status} onChange={(event) => updateForm('status', event.target.value)} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="confirmed">Received</option><option value="pending_verification">Pending verification</option></select></Field>
-      <Field label="Related invoice"><select value={form.invoiceId} onChange={(event) => updateForm('invoiceId', event.target.value)} disabled={!form.clientId} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">Standalone payment</option>{clientInvoices.map((invoice) => <option key={invoice.id} value={invoice.id}>{invoice.invoiceNumber} · {money(invoice.total, invoice.currency)}</option>)}</select>{selectedInvoice && <span className="mt-1 block text-xs text-muted-foreground">Invoice total {money(selectedInvoice.total, selectedInvoice.currency)}. Confirmed balance is validated on the server.</span>}</Field>
-      <Field label="Related project"><select value={form.projectId} onChange={(event) => updateForm('projectId', event.target.value)} disabled={!form.clientId} className="h-10 w-full rounded-md border bg-background px-3 text-sm"><option value="">No project</option>{projects.filter((project) => !project.clientId || project.clientId === form.clientId).map((project) => <option key={project.id} value={project.id}>{project.name}</option>)}</select></Field>
-      <Field label="Transaction reference"><Input value={form.transactionReference} onChange={(event) => updateForm('transactionReference', event.target.value)} placeholder="M-Pesa code or bank reference" /></Field><Field label="Notes"><Input value={form.notes} onChange={(event) => updateForm('notes', event.target.value)} placeholder="Optional context" /></Field>
-      {formError && <p className="sm:col-span-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{formError}</p>}<div className="flex justify-end gap-2 sm:col-span-2"><Button type="button" variant="secondary" onClick={() => setFormOpen(false)}>Cancel</Button><Button type="submit" disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{saving ? 'Saving…' : 'Save payment'}</Button></div>
-    </form></div></div>}
+    {formOpen && (
+      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+        <DialogContent className="max-h-[90vh] w-full max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Record payment</DialogTitle>
+            <DialogDescription>Manual tracking only. No transaction is initiated.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submit} className="mt-6 grid gap-4 sm:grid-cols-2">
+            <Field label="Client" required>
+              <Select value={form.clientId} onValueChange={(value) => updateForm('clientId', value)} required>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select client" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Select client</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.company ? `${client.company} · ${client.name}` : client.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Amount received" required>
+              <Input required min="1" step="1" type="number" value={form.amount} onChange={(event) => updateForm('amount', event.target.value)} placeholder="Amount in minor units" />
+            </Field>
+            <Field label="Currency" required>
+              <Select value={form.currency} onValueChange={(value) => updateForm('currency', value)} required>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="KES">KES</SelectItem>
+                  {currencies.filter((currency) => currency !== 'KES').map((currency) => (
+                    <SelectItem key={currency} value={currency}>{currency}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Payment date" required>
+              <Input required type="date" value={form.paidAt} onChange={(event) => updateForm('paidAt', event.target.value)} />
+            </Field>
+            <Field label="Payment method" required>
+              <Select value={form.method} onValueChange={(value) => updateForm('method', value)} required>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  {methods.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>{item.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Status" required>
+              <Select value={form.status} onValueChange={(value) => updateForm('status', value)} required>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="confirmed">Received</SelectItem>
+                  <SelectItem value="pending_verification">Pending verification</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Related invoice">
+              <Select value={form.invoiceId} onValueChange={(value) => updateForm('invoiceId', value)} disabled={!form.clientId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Standalone payment" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Standalone payment</SelectItem>
+                  {clientInvoices.map((invoice) => (
+                    <SelectItem key={invoice.id} value={invoice.id}>
+                      {invoice.invoiceNumber} · {money(invoice.total, invoice.currency)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedInvoice && <span className="mt-1 block text-xs text-muted-foreground">Invoice total {money(selectedInvoice.total, selectedInvoice.currency)}. Confirmed balance is validated on the server.</span>}
+            </Field>
+            <Field label="Related project">
+              <Select value={form.projectId} onValueChange={(value) => updateForm('projectId', value)} disabled={!form.clientId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="No project" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No project</SelectItem>
+                  {projects.filter((project) => !project.clientId || project.clientId === form.clientId).map((project) => (
+                    <SelectItem key={project.id} value={project.id}>{project.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <Field label="Transaction reference">
+              <Input value={form.transactionReference} onChange={(event) => updateForm('transactionReference', event.target.value)} placeholder="M-Pesa code or bank reference" />
+            </Field>
+            <Field label="Notes">
+              <Input value={form.notes} onChange={(event) => updateForm('notes', event.target.value)} placeholder="Optional context" />
+            </Field>
+      {formError && <p className="sm:col-span-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">{formError}</p>}
+            <DialogFooter className="flex justify-end gap-2 sm:col-span-2">
+              <Button type="button" variant="secondary" onClick={() => setFormOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={saving}>{saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{saving ? 'Saving…' : 'Save payment'}</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    )}
   </div></div>;
 }
 function Field({ label: fieldLabel, required, children }: { label: string; required?: boolean; children: React.ReactNode }) { return <label className="grid gap-1.5 text-sm"><span className="font-medium">{fieldLabel}{required && <span className="text-destructive"> *</span>}</span>{children}</label>; }

@@ -1,5 +1,8 @@
 import { getLocalAuthBypassState } from "./lib/auth/local-bypass";
 import { NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
+import { creatorWorkspaceBranding, users } from "./db/schema";
 
 async function hasAuthenticatedSession(request: Request): Promise<boolean> {
   try {
@@ -43,6 +46,49 @@ function isOnboardingRoute(pathname: string) {
   return pathname.startsWith("/admin/onboarding");
 }
 
+function isPortfolioRoute(pathname: string) {
+  return pathname.startsWith("/p/") || pathname.startsWith("/portfolio/");
+}
+
+async function handleCustomDomain(request: Request): Promise<NextResponse | null> {
+  const url = new URL(request.url);
+  const hostname = url.hostname;
+
+  // Skip if this is our own domain
+  const isOwnDomain = hostname.includes('localhost') ||
+    hostname.includes('.vercel.app') ||
+    hostname.includes('kipsmthn.com') ||
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/https?:\/\//, '').replace(/\/.*$/, '') === hostname;
+
+  if (isOwnDomain) {
+    return null;
+  }
+
+  // Try to find a user with this custom domain
+  try {
+    const branding = await db.query.creatorWorkspaceBranding.findFirst({
+      where: eq(creatorWorkspaceBranding.customDomain, hostname),
+    });
+
+    if (branding) {
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, branding.userId),
+      });
+
+      if (user?.handle) {
+        // Rewrite to the public portfolio page
+        const rewrittenUrl = new URL(url);
+        rewrittenUrl.pathname = `/p/${user.handle}`;
+        return NextResponse.rewrite(rewrittenUrl);
+      }
+    }
+  } catch (error) {
+    console.error('Custom domain middleware error:', error);
+  }
+
+  return null;
+}
+
 export default async function customMiddleware(request: Request) {
   const url = new URL(request.url);
   const pathname = url.pathname;
@@ -58,6 +104,12 @@ export default async function customMiddleware(request: Request) {
       path: "/",
     });
     return response;
+  }
+
+  // Handle custom domains for portfolio routes
+  const customDomainResponse = await handleCustomDomain(request);
+  if (customDomainResponse) {
+    return customDomainResponse;
   }
 
   if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {

@@ -157,7 +157,7 @@ function MetricCard({ label, value, detail, href, icon, trend }: { label: string
         <p className="mt-1 break-words text-2xl font-semibold tracking-tight text-foreground tabular-nums [overflow-wrap:anywhere]">{value}</p>
         <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
         {trend && (
-          <p className="mt-2 flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+          <p className="mt-2 flex items-center gap-1 text-xs font-medium text-[var(--color-success)] dark:text-[var(--color-success)]">
             <TrendingUp className="h-3 w-3" />
             {trend.value > 0 ? '+' : ''}{trend.value}% {trend.label}
           </p>
@@ -174,7 +174,7 @@ function AttentionItem({ icon, title, detail, count, href, urgent }: { icon: Rea
       className="flex min-w-0 items-center justify-between gap-3 px-4 py-4 transition hover:bg-muted/50 sm:gap-4 sm:px-5"
     >
       <div className="flex min-w-0 items-center gap-3">
-        <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${urgent ? 'bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-300'}`}>
+        <span className={`flex h-9 w-9 items-center justify-center rounded-xl ${urgent ? 'bg-destructive/10 text-destructive' : 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'}`}>
           {icon}
         </span>
         <div className="min-w-0">
@@ -182,7 +182,7 @@ function AttentionItem({ icon, title, detail, count, href, urgent }: { icon: Rea
           <p className="break-words text-sm text-muted-foreground">{detail}</p>
         </div>
       </div>
-      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${urgent ? 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300' : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'}`}>
+      <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${urgent ? 'bg-destructive/10 text-destructive' : 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]'}`}>
         {count}
       </span>
     </Link>
@@ -214,8 +214,8 @@ function CalendarEventItem({ event, onClick }: { event: CalendarEvent; onClick?:
   const categoryMeta: Record<string, { icon: typeof LayoutDashboard; tone: string }> = {
     Project: { icon: LayoutDashboard, tone: 'bg-primary/10 text-primary' },
     Quotation: { icon: FileText, tone: 'bg-secondary/10 text-secondary-foreground' },
-    Invoice: { icon: Receipt, tone: 'bg-amber-500/15 text-amber-700 dark:text-amber-300' },
-    Gallery: { icon: GalleryHorizontalEnd, tone: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300' },
+    Invoice: { icon: Receipt, tone: 'bg-[var(--color-warning)]/15 text-[var(--color-warning)]' },
+    Gallery: { icon: GalleryHorizontalEnd, tone: 'bg-[var(--color-success)]/15 text-[var(--color-success)]' },
     Contract: { icon: FileText, tone: 'bg-muted text-muted-foreground' },
     'Studio event': { icon: CalendarDays, tone: 'bg-primary/10 text-primary' },
   };
@@ -476,7 +476,7 @@ export default function StudioCommandCenterPage() {
     <main className="admin-dashboard-page bg-background">
       <header className="border-b border-border"><div className="ui-shell py-4 sm:py-5"><AdminPageHeader title="Studio Command Center" description={`${format(new Date(), 'EEEE, MMMM d')} · Welcome back, ${name.split(' ')[0]}.`} breadcrumb={{ label: 'Dashboard', href: '/admin' }} primaryAction={<div className="flex flex-wrap gap-2"><Link href="/admin/calendar"><Button><CalendarDays className="mr-2 h-4 w-4" />New Studio Event</Button></Link><div className="flex flex-wrap gap-1">{ranges.map(opt => <Button key={opt.value} type="button" onClick={() => setRange(opt.value)} variant={range === opt.value ? 'secondary' : 'ghost'} size="sm">{opt.label}</Button>)}</div></div>} /></div></header>
       <div className="ui-shell admin-dashboard-content py-4 sm:py-5">
-        {error && <div role="alert" className="mb-6 flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-950 dark:bg-red-950/20 dark:text-red-300"><AlertCircle className="h-4 w-4 shrink-0" /><span>{error}</span></div>}
+        {error && <div role="alert" className="mb-6 flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive dark:border-destructive/30 dark:bg-destructive/10 dark:text-destructive"><AlertCircle className="h-4 w-4 shrink-0" /><span>{error}</span></div>}
         {loading && !stats && <LoadingSkeleton count={6} />}
         {stats && <>
           <div className="mb-6 grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(18rem,0.8fr)] 2xl:gap-6">
@@ -494,7 +494,7 @@ export default function StudioCommandCenterPage() {
               {(stats.quotes.statuses.draft || 0) + (stats.quotes.statuses.sent || 0) > 0 && <AttentionItem icon={<FileText className="h-4 w-4" />} title="Quotes awaiting action" detail={`${stats.quotes.statuses.draft || 0} draft · ${stats.quotes.statuses.sent || 0} sent`} count={(stats.quotes.statuses.draft || 0) + (stats.quotes.statuses.sent || 0)} href="/admin/quotes" />}
               {stats.attention.activeProjects > 0 && <AttentionItem icon={<LayoutDashboard className="h-4 w-4" />} title="Active projects" detail="Projects in production" count={stats.attention.activeProjects} href="/admin/projects?status=active" />}
               {stats.attention.activeGalleries > 0 && <AttentionItem icon={<GalleryHorizontalEnd className="h-4 w-4" />} title="Active galleries" detail="Galleries live for clients" count={stats.attention.activeGalleries} href="/admin/galleries" />}
-              {!stats.attention.overdueInvoices && !stats.attention.pendingQuotes && !stats.attention.activeProjects && !stats.attention.activeGalleries && <div className="px-4 py-8 text-center"><CheckCircle2 className="mx-auto h-9 w-9 text-emerald-600" /><p className="mt-3 text-sm font-medium">All caught up</p><p className="mt-1 text-sm text-muted-foreground">Nothing needs your attention now.</p></div>}
+              {!stats.attention.overdueInvoices && !stats.attention.pendingQuotes && !stats.attention.activeProjects && !stats.attention.activeGalleries && <div className="px-4 py-8 text-center"><CheckCircle2 className="mx-auto h-9 w-9 text-[var(--color-success)]" /><p className="mt-3 text-sm font-medium">All caught up</p><p className="mt-1 text-sm text-muted-foreground">Nothing needs your attention now.</p></div>}
             </div></Panel>
           </div>
           <Panel className="mb-6" eyebrow="Business pulse" title={`Performance ${rangeLabels[range]}`}><div className="grid grid-cols-1 min-[420px]:grid-cols-2 md:grid-cols-3 2xl:grid-cols-6 gap-3">

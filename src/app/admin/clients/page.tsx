@@ -327,7 +327,7 @@ export default function AdminClientsPage() {
         />
 
         {error && !isAddClientOpen && !selectedClient && (
-          <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-sm text-red-700 dark:text-red-300">
+          <div className="p-4 rounded-xl border border-destructive/30 bg-destructive/10 text-sm text-destructive">
             {error}
           </div>
         )}
@@ -411,13 +411,13 @@ export default function AdminClientsPage() {
         />
 
         {isAddClientOpen && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-foreground">
+            <div className="max-w-xl w-full p-8 border border-border bg-card rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
               <Button
                 onClick={closeCreateModal}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white disabled:opacity-50"
+                className="absolute top-6 right-6 text-muted-foreground/70 hover:text-foreground dark:hover:text-white disabled:opacity-50"
               >
                 ✕
               </Button>
@@ -427,7 +427,7 @@ export default function AdminClientsPage() {
                 <h2 className="text-2xl font-semibold tracking-tight">Register New Client</h2>
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-xs text-destructive">{error}</div>}
 
               <form onSubmit={handleCreateClient} className="space-y-4">
                 <div className="space-y-1">
@@ -525,34 +525,34 @@ export default function AdminClientsPage() {
         )}
 
         {selectedClient && (
-          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-slate-900 dark:text-white">
-            <div className="max-w-xl w-full p-8 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-6 text-foreground">
+            <div className="max-w-xl w-full p-8 border border-border bg-card rounded-xl space-y-6 relative shadow-2xl max-h-[90vh] overflow-y-auto">
               <Button
                 onClick={() => setSelectedClient(null)}
                 variant="ghost"
                 size="icon"
-                className="absolute top-6 right-6 text-slate-400 dark:text-zinc-500 hover:text-slate-900 dark:hover:text-white"
+                className="absolute top-6 right-6 text-muted-foreground/70 hover:text-foreground dark:hover:text-white"
               >
                 ✕
               </Button>
 
-              <div className="space-y-2 border-b border-slate-200 dark:border-zinc-800 pb-5">
+              <div className="space-y-2 border-b border-border pb-5">
                 {selectedClient.company && <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-sans bg-primary/10 text-primary dark:text-primary rounded-full">{selectedClient.company}</span>}
                 <h2 className="text-2xl font-light">{selectedClient.name}</h2>
-                <p className="text-xs font-sans text-slate-600 dark:text-zinc-400 break-words">
+                <p className="text-xs font-sans text-muted-foreground break-words">
                   {[selectedClient.email, selectedClient.phone, selectedClient.website].filter(Boolean).join(' • ') || 'No contact details'}
                 </p>
                 {selectedClient.kraPin && (
-                  <p className="text-xs font-sans text-slate-500 dark:text-zinc-500 mt-1">
+                  <p className="text-xs font-sans text-muted-foreground mt-1">
                     KRA PIN: {selectedClient.kraPin}
                   </p>
                 )}
 
               </div>
 
-              {error && <div className="p-3 rounded-lg border border-red-500/30 bg-red-500/10 text-xs text-red-700 dark:text-red-300">{error}</div>}
+              {error && <div className="p-3 rounded-lg border border-destructive/30 bg-destructive/10 text-xs text-destructive">{error}</div>}
 
-              <div className="p-6 bg-slate-100 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-xl space-y-4">
+              <div className="p-6 bg-muted/60 border border-border rounded-xl space-y-4">
                 <div>
                   <p className="text-sm font-medium leading-none">Client Status</p>
                   <p className="text-sm text-muted-foreground">Changes are saved directly to the database.</p>
@@ -575,10 +575,10 @@ export default function AdminClientsPage() {
 
               <div className="space-y-2">
                 <p className="text-sm font-medium leading-none">Internal Notes</p>
-                <p className="text-sm text-slate-700 dark:text-zinc-300 whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
+                <p className="text-sm text-secondary-foreground whitespace-pre-wrap">{selectedClient.notes || 'No internal notes.'}</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200 dark:border-zinc-800 text-[10px] font-sans uppercase text-slate-400 dark:text-zinc-600">
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border text-[10px] font-sans uppercase text-muted-foreground/70">
                 <div>Created {formatDate(selectedClient.createdAt)}</div>
                 <div className="text-right">Updated {formatDate(selectedClient.updatedAt)}</div>
               </div>

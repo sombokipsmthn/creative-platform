@@ -71,10 +71,10 @@ export default function TableFilterBar({
 
   return (
     <div className="admin-filter-bar ui-fade-in">
-      <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-slate-200 bg-slate-100 p-4 dark:border-zinc-800/80 dark:bg-zinc-900/40 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col items-stretch gap-4 rounded-2xl border border-border bg-card p-4 md:flex-row md:items-center md:justify-between">
         <div className="admin-filter-search">
           <div className="relative w-full md:w-96">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-text-faint)]" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="search"
               placeholder={`Search ${itemLabel.toLowerCase()} by name, client, status...`}
@@ -150,7 +150,7 @@ export default function TableFilterBar({
 
               {actionsOpen && (
                 <div
-                  className="absolute right-0 top-[calc(100%+0.5rem)] z-30 min-w-48 overflow-hidden rounded-xl border border-[var(--color-border-subtle)] bg-[var(--color-bg-elevated)] p-1 shadow-xl"
+                  className="absolute right-0 top-[calc(100%+0.5rem)] z-30 min-w-48 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-xl"
                   role="menu"
                 >
                   {actions.map((action) => (
@@ -159,7 +159,7 @@ export default function TableFilterBar({
                       type="button"
                       variant="ghost"
                       role="menuitem"
-                      className={`w-full justify-start rounded-lg px-3 py-2.5 text-left text-xs font-medium ${action.destructive ? 'text-[var(--color-danger)]' : 'text-[var(--color-text-primary)]'}`}
+                      className={`w-full justify-start rounded-lg px-3 py-2.5 text-left text-xs font-medium ${action.destructive ? 'text-destructive' : 'text-foreground'}`}
                       onClick={() => {
                         setActionsOpen(false);
                         action.onClick();

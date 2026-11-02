@@ -4,6 +4,43 @@ import { useEffect, useRef, useState } from 'react';
 import { Upload, X, Check, CircleNotch as Loader2, Trash as Trash2, ArrowsClockwise as RefreshCw } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 
+
+async function createOptimizedPreview(file: File): Promise<File | null> {
+  if (!file.type.startsWith("image/") || file.type === "image/heic" || file.type === "image/heif") return null;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) { bitmap.close(); return null; }
+    context.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.84));
+    if (!blob) return null;
+    return new File([blob], file.name.replace(/\.[^.]+$/, "") + "-preview.jpg", { type: "image/jpeg", lastModified: file.lastModified });
+  } catch { return null; }
+}
+
+function uploadFormData(url: string, form: FormData, onProgress: (loaded: number, total: number) => void) {
+  return new Promise<Record<string, any>>((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("POST", url);
+    request.upload.onprogress = (event) => { if (event.lengthComputable) onProgress(event.loaded, event.total); };
+    request.onload = () => {
+      let response: Record<string, any> = {};
+      try { response = JSON.parse(request.responseText); } catch { /* handled below */ }
+      if (request.status >= 200 && request.status < 300) resolve(response);
+      else reject(new Error(response.error || "Upload failed."));
+    };
+    request.onerror = () => reject(new Error("Network error while uploading."));
+    request.send(form);
+  });
+}
+
 interface UploadItem {
   id: string;
   file: File;
@@ -11,6 +48,7 @@ interface UploadItem {
   status: 'queued' | 'uploading' | 'uploaded' | 'failed';
   progress: number;
   error: string | null;
+  photoId?: string;
 }
 
 interface PhotoUploaderProps {
@@ -124,27 +162,36 @@ export default function PhotoUploader({
       );
 
       try {
-        await new Promise<void>((resolve, reject) => {
-          const request = new XMLHttpRequest();
-          request.open('POST', '/api/galleries/upload');
-          request.upload.onprogress = (event) => {
-            if (event.lengthComputable) {
-              setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: Math.round((event.loaded / event.total) * 100) } : i));
-            }
-          };
-          request.onload = () => {
-            if (request.status >= 200 && request.status < 300) resolve();
-            else {
-              try { reject(new Error(JSON.parse(request.responseText).error || 'Upload failed.')); }
-              catch { reject(new Error('Upload failed.')); }
-            }
-          };
-          request.onerror = () => reject(new Error('Network error while uploading.'));
+        const optimizedPreview = item.photoId ? null : await createOptimizedPreview(item.file);
+        let photoId = item.photoId || "";
+        if (optimizedPreview) {
+          const previewForm = new FormData();
+          previewForm.append("galleryId", galleryId);
+          previewForm.append("file", optimizedPreview);
+          const previewResponse = await uploadFormData("/api/galleries/upload", previewForm, (loaded, total) => {
+            setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: Math.round((loaded / total) * 70) } : i));
+          });
+          photoId = typeof previewResponse.photo?.id === "string" ? previewResponse.photo.id : "";
+          if (!photoId) throw new Error("Preview uploaded, but the media record was not returned.");
+          setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, photoId, progress: 70 } : i));
+          onUploadComplete();
+        }
+        if (photoId) {
+          const originalForm = new FormData();
+          originalForm.append("galleryId", galleryId);
+          originalForm.append("photoId", photoId);
+          originalForm.append("file", item.file);
+          await uploadFormData("/api/galleries/upload/original", originalForm, (loaded, total) => {
+            setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: 70 + Math.round((loaded / total) * 30) } : i));
+          });
+        } else {
           const form = new FormData();
-          form.append('galleryId', galleryId);
-          form.append('file', item.file);
-          request.send(form);
-        });
+          form.append("galleryId", galleryId);
+          form.append("file", item.file);
+          await uploadFormData("/api/galleries/upload", form, (loaded, total) => {
+            setUploadItems((prev) => prev.map((i) => i.id === item.id ? { ...i, progress: Math.round((loaded / total) * 100) } : i));
+          });
+        }
 
         setUploadItems((prev) =>
           prev.map((i) =>
@@ -224,7 +271,7 @@ export default function PhotoUploader({
         aria-label="Select gallery photos and videos to upload"
       />
 
-      {/* Drop Zone */}
+      {/* Drop Zone - Compact */}
       <div
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -240,14 +287,14 @@ export default function PhotoUploader({
           }
         }}
         aria-label="Upload gallery media: drag and drop or press Enter to browse files"
-        className={`relative flex min-h-[9rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors ${
+        className={`relative flex min-h-[6rem] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-4 text-center transition-colors ${
           isDragging
             ? 'border-[var(--color-accent)] bg-[var(--color-accent-light)]'
             : 'border-[var(--color-border-subtle)] hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-soft)]'
         }`}
       >
         <Upload
-          className={`mb-3 h-8 w-8 ${
+          className={`mb-2 h-6 w-6 ${
             isDragging ? 'text-[var(--color-accent)]' : 'text-[var(--color-text-muted)]'
           }`}
         />
@@ -256,7 +303,7 @@ export default function PhotoUploader({
             ? 'Drop photos to upload'
             : 'Drag & drop photos here'}
         </p>
-        <p className="mt-1 text-xs text-[var(--color-text-muted)]">
+        <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
           or{' '}
           <span className="font-medium text-[var(--color-accent)]">
             browse files

@@ -72,16 +72,24 @@ export function ContractBuilder({
       if (!res.ok) throw new Error('Failed to fetch templates');
       return res.json();
     },
-    enabled: !!templateId,
+    enabled: true, // Always load templates so we can handle missing templateId gracefully
   });
 
   // Set template when loaded
   useEffect(() => {
-    if (templateId && templatesQuery.data && !template) {
+    if (!templatesQuery.data) return;
+
+    if (templateId) {
       const found = templatesQuery.data.find((t: ContractTemplate) => t.id === templateId);
-      if (found) setTemplate(found);
+      if (found) {
+        setTemplate(found);
+      } else if (!templatesQuery.isLoading) {
+        // Template ID was provided but not found - show error
+        setError('Template not found. Please select a valid template from the library.');
+      }
     }
-  }, [templateId, templatesQuery.data, template]);
+    // When no templateId, don't wait for a template - let user start blank or select one
+  }, [templateId, templatesQuery.data, templatesQuery.isLoading]);
 
   // Initialize values from client/project when they change
   useEffect(() => {
@@ -368,14 +376,35 @@ export function ContractBuilder({
     setValidationErrors((prev) => prev.filter((f) => f !== key));
   };
 
-  const isLoading = clientsQuery.isLoading || projectsQuery.isLoading || !template;
+  // Loading states: wait for clients/projects queries, or wait for template when one was requested
+  const isLoadingQueries = clientsQuery.isLoading || projectsQuery.isLoading;
+  const isLoadingTemplate = !!templateId && templatesQuery.isLoading;
+  const hasTemplateError = templateId && templatesQuery.isError;
 
-  if (isLoading) {
+  if (isLoadingQueries || isLoadingTemplate) {
     return (
       <div className="ui-page min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-gray-600 dark:text-gray-400">Loading contract builder...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasTemplateError) {
+    return (
+      <div className="ui-page min-h-screen flex items-center justify-center">
+        <div className="max-w-md text-center space-y-4">
+          <AlertCircle className="h-12 w-12 mx-auto text-destructive" />
+          <h2 className="text-xl font-semibold">Template not found</h2>
+          <p className="text-sm text-muted-foreground">
+            The template you&apos;re looking for doesn&apos;t exist or has been removed.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <Button onClick={() => router.push('/admin/contracts/templates')}>Browse Templates</Button>
+            <Button onClick={() => router.push('/admin/contracts')} variant="secondary">Back to Contracts</Button>
+          </div>
         </div>
       </div>
     );

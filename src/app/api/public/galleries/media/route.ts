@@ -16,6 +16,7 @@ export async function GET(request: Request) {
 
     const rows = await db.select({
       galleryId: galleryPhotos.galleryId,
+      originalPath: galleryPhotos.originalPath,
       isHidden: galleryPhotos.isHidden,
       clientVisibility: galleryCollections.clientVisibility,
       photoSelection: galleryPhotos.portfolioSelection,
@@ -86,6 +87,7 @@ export async function GET(request: Request) {
       collectionSelection: null,
       photoSelection: null,
     }));
+    if (media.originalPath === key && !owned) return NextResponse.json({ error: "Not available." }, { status: 403 });
     if (!owned && !authorizedSession && !publicPortfolio) return NextResponse.json({ error: expired ? "Gallery expired." : "Unauthorized." }, { status: expired ? 410 : 401 });
 
     const object = await getGalleryStorage().getObject(key);

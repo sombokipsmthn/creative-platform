@@ -5,7 +5,7 @@ import { GalleryMedia } from './media';
 import { Download, Heart, CaretDown as ChevronDown } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import type { GalleryViewerProps } from './wrapper';
-import type { GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { getGalleryFontStack, type GalleryThemeDefinition } from '@/lib/gallery/themes';
 
 interface StoryViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -121,6 +121,7 @@ export function GalleryViewerStory({
       style={{
         backgroundColor: theme.preset.backgroundColor,
         color: theme.preset.textColor,
+        fontFamily: getGalleryFontStack(theme.preset.fontFamily),
       }}
     >
       {/* Header */}

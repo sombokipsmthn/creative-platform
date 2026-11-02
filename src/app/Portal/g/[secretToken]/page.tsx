@@ -5,7 +5,7 @@ import { use, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Lock } from "@phosphor-icons/react"
 import { GalleryViewer, type GalleryPhoto, type GalleryCollection } from '@/components/gallery/viewers/wrapper'
-import { isValidThemeId } from '@/lib/gallery/themes'
+import { isValidThemeId, type GalleryThemePreset } from '@/lib/gallery/themes'
 import type { GalleryThemeId } from '@/lib/gallery/themes'
 import ThemeToggle from '@/components/ThemeToggle'
 import { Input } from '@/components/ui/input'
@@ -19,29 +19,29 @@ interface GalleryPageProps {
 
 interface SavedTheme {
   id: string
-  gallery_id: string
+  galleryId: string
   name: string
   type: string
   layout: string
-  accent_color: string
-  background_color: string
-  text_color: string
-  border_radius: number
-  show_title: boolean
-  show_description: boolean
-  show_collections: boolean
-  show_logo: boolean
-  masonry_columns: number
-  aspect_ratio: string
-  font_family: string
-  cover_style: string
-  cover_focal_x: number
-  cover_focal_y: number
-  cover_overlay_opacity: number
-  grid_style: string
-  thumbnail_size: string
-  grid_spacing: string
-  navigation_style: string
+  accentColor: string
+  backgroundColor: string
+  textColor: string
+  borderRadius: number
+  showTitle: boolean
+  showDescription: boolean
+  showCollections: boolean
+  showLogo: boolean
+  masonryColumns: number
+  aspectRatio: string
+  fontFamily: string
+  coverStyle: string
+  coverFocalX: number
+  coverFocalY: number
+  coverOverlayOpacity: number
+  gridStyle: string
+  thumbnailSize: string
+  gridSpacing: string
+  navigationStyle: string
 }
 
 interface RawPhoto {
@@ -87,6 +87,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   const [requiredPin, setRequiredPin] = useState<string | null>(null)
 
   const [themeId, setThemeId] = useState<GalleryThemeId>('minimal')
+  const [themePreset, setThemePreset] = useState<Partial<GalleryThemePreset> | undefined>(undefined)
   const [photos, setPhotos] = useState<GalleryPhoto[]>([])
   const [collections, setCollections] = useState<GalleryCollection[]>([])
 
@@ -118,6 +119,28 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         // Determine theme ID from saved theme
         const savedTheme = data.theme as SavedTheme | null
         if (savedTheme) {
+          setThemePreset({
+            layout: savedTheme.layout as GalleryThemePreset['layout'],
+            aspectRatio: savedTheme.aspectRatio as GalleryThemePreset['aspectRatio'],
+            masonryColumns: Number(savedTheme.masonryColumns ?? 4),
+            showTitle: Boolean(savedTheme.showTitle),
+            showDescription: Boolean(savedTheme.showDescription),
+            showCollections: Boolean(savedTheme.showCollections),
+            showLogo: Boolean(savedTheme.showLogo),
+            accentColor: savedTheme.accentColor,
+            backgroundColor: savedTheme.backgroundColor,
+            textColor: savedTheme.textColor,
+            borderRadius: Number(savedTheme.borderRadius ?? 0),
+            fontFamily: savedTheme.fontFamily as GalleryThemePreset['fontFamily'],
+            coverStyle: savedTheme.coverStyle as GalleryThemePreset['coverStyle'],
+            coverFocalX: Number(savedTheme.coverFocalX ?? 50),
+            coverFocalY: Number(savedTheme.coverFocalY ?? 50),
+            coverOverlayOpacity: Number(savedTheme.coverOverlayOpacity ?? 25),
+            gridStyle: savedTheme.gridStyle as GalleryThemePreset['gridStyle'],
+            thumbnailSize: savedTheme.thumbnailSize as GalleryThemePreset['thumbnailSize'],
+            gridSpacing: savedTheme.gridSpacing as GalleryThemePreset['gridSpacing'],
+            navigationStyle: savedTheme.navigationStyle as GalleryThemePreset['navigationStyle'],
+          })
           // Resolve theme ID robustly:
           // 1. Check if `type` stores a valid preset id (preset themes set type = preset id)
           // 2. Check if the lowercased name is a valid theme id
@@ -140,18 +163,18 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
 
         // Transform photos
         if (data.photos && Array.isArray(data.photos)) {
-          const transformedPhotos: GalleryPhoto[] = (data.photos as RawPhoto[]).map(p => ({
+          const transformedPhotos: GalleryPhoto[] = (data.photos as Array<RawPhoto & Record<string, unknown>>).map(p => ({
             id: p.id,
             filename: p.filename,
-            displayUrl: p.display_url,
-            thumbnailUrl: p.thumbnail_url,
-            mimeType: p.mime_type || null,
-            width: p.width,
-            height: p.height,
-            sortOrder: p.sort_order,
-            isHidden: p.is_hidden,
-            isFavorite: p.is_favorite,
-            isSelected: p.is_selected,
+            displayUrl: String(p.displayUrl ?? p.display_url ?? ''),
+            thumbnailUrl: String(p.thumbnailUrl ?? p.thumbnail_url ?? ''),
+            mimeType: (p.mimeType ?? p.mime_type ?? null) as string | null,
+            width: Number(p.width) || undefined,
+            height: Number(p.height) || undefined,
+            sortOrder: Number(p.sortOrder ?? p.sort_order ?? 0),
+            isHidden: Boolean(p.isHidden ?? p.is_hidden),
+            isFavorite: Boolean(p.isFavorite ?? p.is_favorite),
+            isSelected: Boolean(p.isSelected ?? p.is_selected),
             downloadCount: 0,
           }))
           setPhotos(transformedPhotos)
@@ -300,6 +323,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         title={title}
         description={description}
         themeId={themeId}
+        themePreset={themePreset}
         photos={photos}
         collections={collections}
         allowDownloads={allowDownloads}

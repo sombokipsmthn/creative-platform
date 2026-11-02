@@ -1,4 +1,4 @@
-import { del, head, put } from "@vercel/blob";
+import { del, list, put } from "@vercel/blob";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -28,6 +28,13 @@ function safeObjectPath(objectPath: string) {
   return normalized;
 }
 
+function pathFromPathOrUrl(pathOrUrl: string) {
+  if (pathOrUrl.includes("?key=")) {
+    return new URL(pathOrUrl, "http://localhost").searchParams.get("key") || "";
+  }
+  return pathOrUrl;
+}
+
 function localRoot() {
   return path.join(process.cwd(), ".local-storage");
 }
@@ -53,18 +60,14 @@ class LocalStorage implements GalleryStorage {
   }
 
   async deleteObject(pathOrUrl: string) {
-    const objectPath = pathOrUrl.includes("?key=")
-      ? new URL(pathOrUrl, "http://localhost").searchParams.get("key") || ""
-      : pathOrUrl;
+    const objectPath = pathFromPathOrUrl(pathOrUrl);
     try { await unlink(localObjectPath(objectPath)); } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
   }
 
   async getObject(objectPath: string) {
-    const normalizedPath = objectPath.includes("?key=")
-      ? new URL(objectPath, "http://localhost").searchParams.get("key") || ""
-      : objectPath;
+    const normalizedPath = pathFromPathOrUrl(objectPath);
     const filePath = localObjectPath(normalizedPath);
     try {
       const body = await readFile(filePath);
@@ -74,8 +77,7 @@ class LocalStorage implements GalleryStorage {
         ".heic": "image/heic", ".heif": "image/heif", ".mp4": "video/mp4", ".mov": "video/quicktime",
         ".avi": "video/x-msvideo", ".mkv": "video/x-matroska", ".webm": "video/webm", ".flv": "video/x-flv", ".wmv": "video/x-ms-wmv",
       };
-      const contentType = contentTypes[extension] || "application/octet-stream";
-      return { body, contentType };
+      return { body, contentType: contentTypes[extension] || "application/octet-stream" };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
       throw error;
@@ -101,16 +103,21 @@ function r2PublicUrl(objectPath: string) {
 }
 
 class VercelBlobStorage implements GalleryStorage {
-  private async resolveUrl(pathOrUrl: string): Promise<string> {
-    if (pathOrUrl.includes("?key=")) {
-      const key = new URL(pathOrUrl, "http://localhost").searchParams.get("key") || "";
-      return this.resolveUrl(key);
-    }
-    if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  private async resolveUrl(pathOrUrl: string): Promise<string | null> {
+    const normalizedPath = pathFromPathOrUrl(pathOrUrl);
+    if (/^https?:\/\//i.test(normalizedPath)) return normalizedPath;
+
+    const objectPath = safeObjectPath(normalizedPath);
     const token = process.env.BLOB_READ_WRITE_TOKEN;
     if (!token) throw new Error("Vercel Blob storage is not configured. Set BLOB_READ_WRITE_TOKEN.");
-    return (await head(pathOrUrl, { token })).url;
+
+    // @vercel/blob head() requires a Blob URL, not the pathname stored in
+    // gallery_photos. Resolve the pathname to its URL through Blob listing.
+    const result = await list({ prefix: objectPath, limit: 1000, token });
+    const blob = result.blobs.find((item) => item.pathname === objectPath);
+    return blob?.url ?? null;
   }
+
   async putObject(input: { path: string; body: Buffer | Uint8Array; contentType: string }) {
     const body = Buffer.isBuffer(input.body) ? input.body : Buffer.from(input.body);
     const token = process.env.BLOB_READ_WRITE_TOKEN;
@@ -119,17 +126,17 @@ class VercelBlobStorage implements GalleryStorage {
     const objectPath = safeObjectPath(blob.pathname);
     return { path: objectPath, url: `/api/public/galleries/media?key=${encodeURIComponent(objectPath)}`, size: body.byteLength, contentType: input.contentType };
   }
+
   async deleteObject(pathOrUrl: string): Promise<void> {
     const token = process.env.BLOB_READ_WRITE_TOKEN;
     if (!token) throw new Error("Vercel Blob storage is not configured. Set BLOB_READ_WRITE_TOKEN.");
-    if (pathOrUrl.includes("?key=")) {
-      const key = new URL(pathOrUrl, "http://localhost").searchParams.get("key") || "";
-      return this.deleteObject(key);
-    }
-    await del(await this.resolveUrl(pathOrUrl), { token });
+    const url = await this.resolveUrl(pathOrUrl);
+    if (url) await del(url, { token });
   }
+
   async getObject(objectPath: string) {
     const url = await this.resolveUrl(objectPath);
+    if (!url) return null;
     const response = await fetch(url, { cache: "no-store" });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error(`Vercel Blob read failed (${response.status}).`);
@@ -145,22 +152,20 @@ class R2Storage implements GalleryStorage {
     if (!response.ok) throw new Error(`R2 upload failed (${response.status}): ${await response.text()}`);
     return { path: safeObjectPath(input.path), url: r2PublicUrl(input.path), size: body.byteLength, contentType: input.contentType };
   }
+
   async deleteObject(pathOrUrl: string) {
-    const objectPath = pathOrUrl.includes("?key=")
-      ? new URL(pathOrUrl, "http://localhost").searchParams.get("key") || ""
-      : pathOrUrl.startsWith("http") ? decodeURIComponent(new URL(pathOrUrl).pathname.split("/objects/")[1] || "") : pathOrUrl;
+    const rawPath = pathFromPathOrUrl(pathOrUrl);
+    const objectPath = rawPath.startsWith("http") ? decodeURIComponent(new URL(rawPath).pathname.split("/objects/")[1] || "") : rawPath;
     if (!objectPath) return;
     safeObjectPath(objectPath);
     const { token } = getR2Config();
     const response = await fetch(r2ObjectUrl(objectPath), { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok && response.status !== 404) throw new Error(`R2 delete failed (${response.status}).`);
   }
+
   async getObject(objectPath: string) {
-    const { token } = getR2Config();
-    const normalizedPath = objectPath.includes("?key=")
-      ? new URL(objectPath, "http://localhost").searchParams.get("key") || ""
-      : objectPath;
-    const response = await fetch(r2ObjectUrl(safeObjectPath(normalizedPath)), { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+    const normalizedPath = pathFromPathOrUrl(objectPath);
+    const response = await fetch(r2ObjectUrl(safeObjectPath(normalizedPath)), { headers: { Authorization: `Bearer ${getR2Config().token}` }, cache: "no-store" });
     if (response.status === 404) return null;
     if (!response.ok) throw new Error(`R2 read failed (${response.status}).`);
     return { body: Buffer.from(await response.arrayBuffer()), contentType: response.headers.get("content-type") || "application/octet-stream" };

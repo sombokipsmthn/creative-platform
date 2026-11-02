@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FilePlus, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
+import { Button } from '@/components/ui/button';
 import { formatCurrency } from '@/lib/utils';
 import type { Contract, ContractEvent } from '@/lib/types/contracts';
 
@@ -55,7 +56,7 @@ export default function ContractDetailContent({
   if (error) {
     return (
       <div className="p-6">
-        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+        <div className="bg-destructive/10 border-l-4 border-destructive text-destructive p-4 mb-6">
           <p>{error}</p>
         </div>
       </div>
@@ -66,9 +67,9 @@ export default function ContractDetailContent({
     return (
       <div className="p-6">
         <p>Contract not found.</p>
-        <Link href="/admin/contracts" className="Button Button--secondary">
-          Back to Contracts
-        </Link>
+        <Button asChild variant="secondary" className="mt-4">
+          <Link href="/admin/contracts">Back to Contracts</Link>
+        </Button>
       </div>
     );
   }
@@ -109,42 +110,33 @@ export default function ContractDetailContent({
       <header className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <h1 className="text-3xl font-bold text-gray-900">{contract.title}</h1>
-            <p className="text-sm text-gray-500">Contract #{contract.contractNumber}</p>
+            <h1 className="text-3xl font-bold text-foreground">{contract.title}</h1>
+            <p className="text-sm text-muted-foreground">Contract #{contract.contractNumber}</p>
           </div>
-          <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
-            <Link
-              href={`/admin/contracts/${contractId}/edit`}
-              className="Button Button--secondary"
-            >
-              Edit Contract
-            </Link>
-            <button
+          <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
+            <Button asChild variant="secondary">
+              <Link href={`/admin/contracts/${contractId}/edit`}>Edit Contract</Link>
+            </Button>
+            <Button
               onClick={handleSend}
-              className="Button Button--primary"
+              variant="primary"
               disabled={contract.status !== 'draft'}
             >
               Send Contract
-            </button>
-            <button
-              onClick={handleSaveAsTemplate}
-              className="Button Button--outline"
-            >
+            </Button>
+            <Button onClick={handleSaveAsTemplate} variant="outline">
               Save as Template
-            </button>
-            <Link
-              href="/admin/contracts"
-              className="Button Button--ghost"
-            >
-              Back to Contracts
-            </Link>
+            </Button>
+            <Button asChild variant="ghost">
+              <Link href="/admin/contracts">Back to Contracts</Link>
+            </Button>
           </div>
         </div>
       </header>
 
       <div className="grid gap-6 mb-8 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Status</h2>
+        <div className="bg-white dark:bg-card rounded-xl p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground">Status</h2>
           <p className="mt-2">
             <span className={`px-3 py-1 text-xs font-medium rounded-full ${
               getStatusColor(contract.status)
@@ -153,61 +145,61 @@ export default function ContractDetailContent({
             </span>
           </p>
           {contract.sentAt && (
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Sent: {new Date(contract.sentAt).toLocaleDateString()}
             </p>
           )}
           {contract.signedAt && (
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Signed: {new Date(contract.signedAt).toLocaleDateString()}
             </p>
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Client</h2>
+        <div className="bg-white dark:bg-card rounded-xl p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground">Client</h2>
           <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-foreground">
               {contract.client?.name || 'Unknown'}
             </p>
             {contract.client?.company && (
-              <p className="text-xs text-gray-500">{contract.client.company}</p>
+              <p className="text-xs text-muted-foreground">{contract.client.company}</p>
             )}
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {contract.client?.email || 'No email'}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted-foreground">
               {contract.client?.phone || 'No phone'}
             </p>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Project</h2>
-          <p className="mt-2 text-sm text-gray-500">
+        <div className="bg-white dark:bg-card rounded-xl p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground">Project</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
             {contract.project ? contract.project.name : 'None'}
           </p>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-900">Financials</h2>
+        <div className="bg-white dark:bg-card rounded-xl p-6 shadow-sm">
+          <h2 className="text-xl font-semibold text-foreground">Financials</h2>
           <div className="space-y-2">
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Currency: {contract.currency}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Total Amount: {contract.totalAmount != null ? formatCurrency(contract.totalAmount) : '-'}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900">Contract Content</h2>
+      <div className="bg-white dark:bg-card rounded-xl shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-border dark:border-border">
+          <h2 className="text-xl font-semibold text-foreground">Contract Content</h2>
         </div>
         <div className="p-6 space-y-4">
-          <div className="whitespace-pre-wrap text-sm text-gray-900">
+          <div className="whitespace-pre-wrap text-sm text-foreground">
             {contract.content}
           </div>
         </div>
@@ -215,7 +207,7 @@ export default function ContractDetailContent({
 
       {events.length > 0 && (
         <div className="mt-8">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Activity History</h2>
+          <h2 className="text-xl font-semibold text-foreground mb-4">Activity History</h2>
           <div className="space-y-3">
             {events.map((event) => (
               <div key={event.id} className="flex items-center space-x-3 text-sm">
@@ -223,8 +215,8 @@ export default function ContractDetailContent({
                   <FilePlus className="h-3 w-3" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-gray-900">{formatEventType(event.eventType)}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-medium text-foreground">{formatEventType(event.eventType)}</p>
+                  <p className="text-xs text-muted-foreground">
                     {new Date(event.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -240,23 +232,23 @@ export default function ContractDetailContent({
 function getStatusColor(status: string) {
   switch (status) {
     case 'draft':
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-muted text-foreground';
     case 'sent':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-[var(--color-info)]/10 text-[var(--color-info)]';
     case 'viewed':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-[var(--color-warning)]/10 text-[var(--color-warning)]';
     case 'awaiting_signature':
       return 'bg-primary/10 text-primary';
     case 'signed':
-      return 'bg-green-100 text-green-800';
+      return 'bg-[var(--color-success)]/10 text-[var(--color-success)]';
     case 'declined':
-      return 'bg-red-100 text-red-800';
+      return 'bg-destructive/10 text-destructive';
     case 'expired':
-      return 'bg-gray-300 text-gray-600';
+      return 'bg-muted text-muted-foreground';
     case 'cancelled':
-      return 'bg-red-100 text-red-800';
+      return 'bg-destructive/10 text-destructive';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-muted text-foreground';
   }
 }
 

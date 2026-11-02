@@ -113,7 +113,7 @@ export default function AdminGalleryDefaultsPage() {
     return (
       <main className="min-h-screen">
         <div className="mx-auto w-full max-w-7xl py-8 sm:py-10">
-          <div className="flex items-center gap-3 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-300">
+          <div className="flex items-center gap-3 p-4 rounded-xl border border-destructive/20 bg-destructive/5 text-destructive dark:border-destructive/20 dark:bg-destructive/5 dark:text-destructive-foreground">
             <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="mt-2">
               Try again
             </Button>

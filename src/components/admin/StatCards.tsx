@@ -20,11 +20,11 @@ export default function StatCards({ stats, columns = 4 }: StatCardsProps) {
 
   const colorClasses = {
     default: 'text-[var(--color-text-muted)]',
-    success: 'text-emerald-600 dark:text-emerald-400',
-    warning: 'text-amber-600 dark:text-amber-400',
-    danger: 'text-red-600 dark:text-red-400',
-    info: 'text-blue-600 dark:text-blue-400',
-    accent: 'text-orange-600 dark:text-orange-400',
+    success: 'text-[var(--color-success)] dark:text-[var(--color-success)]',
+    warning: 'text-[var(--color-warning)] dark:text-[var(--color-warning)]',
+    danger: 'text-[var(--color-danger)] dark:text-[var(--color-danger)]',
+    info: 'text-[var(--color-info)] dark:text-[var(--color-info)]',
+    accent: 'text-[var(--color-accent)] dark:text-[var(--color-accent)]',
   };
 
   return (

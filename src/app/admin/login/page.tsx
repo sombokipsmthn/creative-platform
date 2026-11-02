@@ -39,11 +39,11 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#09090b] px-6 py-12">
+    <main className="min-h-screen flex items-center justify-center bg-muted/40 dark:bg-[#09090b] px-6 py-12">
       <div className="w-full max-w-md">
         <Link
           href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground"
         >
           ← Go back
         </Link>
@@ -53,18 +53,18 @@ export default function AdminLoginPage() {
             K
           </div>
 
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Sign in to your workspace
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">
+          <p className="mt-2 text-sm text-muted-foreground">
             Welcome back to KIPSMTHN
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
+            <label htmlFor="email" className="block text-xs font-medium text-secondary-foreground">
               Email
             </label>
             <input
@@ -74,13 +74,13 @@ export default function AdminLoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="your@email.com"
               required
-              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:border-primary dark:bg-zinc-950"
+              className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:border-primary dark:bg-card"
               disabled={isLoading}
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
+            <label htmlFor="password" className="block text-xs font-medium text-secondary-foreground">
               Password
             </label>
             <input
@@ -90,13 +90,13 @@ export default function AdminLoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full rounded-xl border border-slate-200 dark:border-zinc-800 px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:border-primary dark:bg-zinc-950"
+              className="w-full rounded-xl border border-border px-4 py-3 text-sm focus:ring-2 focus:ring-ring focus:border-primary dark:bg-card"
               disabled={isLoading}
             />
           </div>
 
           {error && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400">
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive dark:border-destructive/30 dark:bg-destructive/10 dark:text-destructive">
               {error}
             </div>
           )}
@@ -111,7 +111,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-xs text-slate-500 dark:text-zinc-400">
+          <p className="text-xs text-muted-foreground">
             Don&apos;t have an account?{' '}
             <Link href="/admin/onboarding" className="text-primary hover:text-primary dark:text-primary dark:hover:text-primary font-medium">
               Get started

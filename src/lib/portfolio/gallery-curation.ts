@@ -130,7 +130,9 @@ export async function getCuratedGalleryMedia(creatorId: string) {
 
       ...entry.photo,
 
-      originalUrl: galleryMediaProxyUrl(entry.photo.originalPath || entry.photo.storagePath) || entry.photo.originalUrl,
+      originalUrl: galleryMediaProxyUrl(entry.photo.displayPath || entry.photo.storagePath) || entry.photo.displayUrl,
+
+      originalPath: null,
 
       displayUrl: galleryMediaProxyUrl(entry.photo.displayPath || entry.photo.storagePath) || entry.photo.displayUrl,
 

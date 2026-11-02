@@ -10,6 +10,8 @@ import {
   LinkSimple,
   CircleNotch as Loader2,
   FloppyDisk as Save,
+  Link as LinkIcon,
+  Monitor as PreviewIcon,
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -113,8 +115,21 @@ export default function PortfolioAdminPage() {
     }
   }
 
+  const [previewMode, setPreviewMode] = useState<'full' | 'gallery'>('full');
+
   function toggleProject(id: string) {
     setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
+  }
+
+  async function copyPreviewUrl() {
+    if (!data?.user.handle) return;
+    try {
+      const previewUrl = `${window.location.origin}/admin/portfolio?preview=true`;
+      await navigator.clipboard.writeText(previewUrl);
+      setMessage("Preview URL copied. Share this link for draft portfolio preview.");
+    } catch {
+      setMessage("Could not copy preview URL.");
+    }
   }
 
   if (!data) {
@@ -152,6 +167,20 @@ export default function PortfolioAdminPage() {
     projects: [...data.galleryPreviewProjects, ...selectedProjects],
   };
 
+  // Build gallery preview data for the gallery-only view
+  const galleryPreviewData: PortfolioData = {
+    ...data,
+    portfolio: {
+      ...data.portfolio,
+      headline,
+      contactEmail,
+      layout,
+      selectedProjectIds: selected,
+      isPublished: published,
+    },
+    projects: [...data.galleryPreviewProjects],
+  };
+
   if (preview) {
     return (
       <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-10 lg:py-10">
@@ -160,10 +189,34 @@ export default function PortfolioAdminPage() {
             title="Portfolio preview"
             description="Preview the selected projects and presentation settings before publishing."
             breadcrumb={{ label: "Portfolio editor", href: "/admin/portfolio" }}
-            primaryAction={<Button variant="outline" size="sm" onClick={() => setPreview(false)}>Back to editor</Button>}
+            primaryAction={
+              <>
+                <Button
+                  variant={previewMode === 'gallery' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setPreviewMode('gallery')}
+                >
+                  <Images className="h-4 w-4" aria-hidden="true" /> Gallery only
+                </Button>
+                <Button
+                  variant={previewMode === 'full' ? 'primary' : 'outline'}
+                  size="sm"
+                  onClick={() => setPreviewMode('full')}
+                >
+                  <LinkIcon className="h-4 w-4" aria-hidden="true" /> Full portfolio
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setPreview(false)}>
+                  Back to editor
+                </Button>
+              </>
+            }
           />
           <div className="mt-6 overflow-hidden rounded-2xl border bg-background">
-            <PortfolioRenderer data={previewData} preview />
+            {previewMode === 'gallery' ? (
+              <PortfolioRenderer data={galleryPreviewData} preview />
+            ) : (
+              <PortfolioRenderer data={previewData} preview />
+            )}
           </div>
         </div>
       </div>
@@ -291,8 +344,10 @@ export default function PortfolioAdminPage() {
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="primary" disabled={saving} onClick={() => void save()}>{saving ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Save className="h-4 w-4" aria-hidden="true" />}{saving ? "Saving…" : "Save draft"}</Button>
             <Button type="button" variant="outline" onClick={() => setPreview(true)}><Eye className="h-4 w-4" aria-hidden="true" />Preview</Button>
+            <Button type="button" variant="outline" onClick={() => void copyPreviewUrl()}><PreviewIcon className="h-4 w-4" aria-hidden="true" />Share Preview</Button>
             {published ? <Button type="button" variant="outline" disabled={saving} onClick={() => void save(false)}>Unpublish</Button> : <Button type="button" variant="secondary" disabled={saving} onClick={() => void save(true)}>Publish portfolio</Button>}
             {data.user.handle && published && <Button type="button" variant="ghost" onClick={() => void copyPublicUrl()}><Copy className="h-4 w-4" aria-hidden="true" />Copy public URL</Button>}
+            {data.user.handle && <Button type="button" variant="ghost" onClick={() => { window.open(`/p/${data.user.handle}`, '_blank'); }}><ExternalLink className="h-4 w-4" aria-hidden="true" />Open Public</Button>}
           </div>
           <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground" role="status" aria-live="polite">
             {message && <span>{message}</span>}

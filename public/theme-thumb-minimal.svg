@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <!-- Minimal theme: airy white background, restrained grid -->
+  <rect width="400" height="300" fill="#FFFFFF"/>
+
+  <!-- Header area -->
+  <rect x="20" y="16" width="80" height="12" fill="#111111" opacity="0.15"/>
+  <rect x="300" y="16" width="60" height="12" fill="#111111" opacity="0.1"/>
+
+  <!-- Main gallery grid - 3 columns, wide spacing -->
+  <rect x="20" y="50" width="112" height="84" fill="#E5E7EB" rx="0"/>
+  <rect x="144" y="50" width="112" height="84" fill="#D1D5DB" rx="0"/>
+  <rect x="268" y="50" width="112" height="84" fill="#E5E7EB" rx="0"/>
+
+  <rect x="20" y="146" width="112" height="84" fill="#D1D5DB" rx="0"/>
+  <rect x="144" y="146" width="112" height="84" fill="#E5E7EB" rx="0"/>
+  <rect x="268" y="146" width="112" height="84" fill="#D1D5DB" rx="0"/>
+
+  <!-- Footer nav hint -->
+  <rect x="20" y="252" width="60" height="4" fill="#111111" opacity="0.08"/>
+  <rect x="160" y="252" width="80" height="4" fill="#111111" opacity="0.12"/>
+  <rect x="320" y="252" width="60" height="4" fill="#111111" opacity="0.08"/>
+</svg>

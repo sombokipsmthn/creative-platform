@@ -6,7 +6,7 @@ export default function NewInvoicePage() {
           Create Invoice
         </h1>
 
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-3 text-sm text-[var(--color-text-muted)]">
           Invoice creation flow coming soon.
         </p>
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Copy, Trash as Trash2, Eye, EyeSlash as EyeOff, Video } from "@phosphor-icons/react"
+import { Heart, Stack as Layers, CircleNotch as Loader2, Palette, Plus, Gear as Settings, Upload, X, Trash as Trash2, Video, Check, MinusCircle, CaretLeft, CaretRight, Circle, FolderSimple, Eye, EyeSlash, ImageSquare } from "@phosphor-icons/react"
 import { useParams } from 'next/navigation'
 import Image from 'next/image'
 import { transformGalleryResponse } from '@/lib/gallery/transform'
@@ -20,6 +20,7 @@ interface GalleryCollection {
   description: string | null
   sortOrder: number
   photo_count?: number
+  portfolioSelection?: 'inherit' | 'include' | 'exclude'
   createdAt: string
 }
 
@@ -51,6 +52,7 @@ interface GalleryData {
   category?: string | null
   slug: string
   status: string
+  coverPhotoId?: string | null
   portfolioPublishMode?: 'none' | 'all' | 'selected'
   allowDownloads?: boolean
   allowFavorites?: boolean
@@ -79,10 +81,13 @@ export default function GalleryWorkspacePage() {
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [collectionTitle, setCollectionTitle] = useState('')
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
+  const [bulkSelectMode, setBulkSelectMode] = useState(false)
+  const [photoFilter, setPhotoFilter] = useState<'all' | 'included' | 'not-included' | 'published'>('all')
+  const [previewPhotoId, setPreviewPhotoId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<'custom' | 'filename_asc' | 'filename_desc' | 'date_taken_new' | 'date_taken_old' | 'date_uploaded_new' | 'date_uploaded_old' | 'random'>('custom')
-  const [activeCollection, setActiveCollection] = useState<string | null>(null)
   const [showCollectionPicker, setShowCollectionPicker] = useState(false)
   const [moveDestination, setMoveDestination] = useState<string | null>(null)
+  const [draggedPhotoId, setDraggedPhotoId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const refreshGallery = useCallback(async () => {
@@ -152,14 +157,12 @@ export default function GalleryWorkspacePage() {
     if (selectedPhotos.size === 0) return
     setError(null)
     try {
-      for (const photoId of selectedPhotos) {
-        await fetch(`/api/galleries/${id}/photos`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ photoId, collectionId }),
-        })
-      }
-      setSelectedPhotos(new Set())
+      const responses = await Promise.all(Array.from(selectedPhotos).map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, collectionId }),
+      })))
+      if (responses.some((response) => !response.ok)) throw new Error('Unable to move all selected items')
       setShowCollectionPicker(false)
       setMoveDestination(null)
       await refreshGallery()
@@ -167,6 +170,18 @@ export default function GalleryWorkspacePage() {
       setError(err instanceof Error ? err.message : 'Unable to move photos')
     }
   }
+  const handleDropPhotoIntoCollection = async (photoId: string, collectionId: string | null) => {
+    setDraggedPhotoId(null)
+    const photo = gallery?.photos.find((item) => item.id === photoId)
+    if (!photo || photo.collectionId === collectionId) return
+    setError(null)
+    try {
+      const response = await fetch(`/api/galleries/${id}/photos`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, collectionId }) })
+      if (!response.ok) throw new Error('Unable to move photo to this set')
+      await refreshGallery()
+    } catch (err) { setError(err instanceof Error ? err.message : 'Unable to move photo') }
+  }
+
   const handleCreateCollection = async () => {
     const title = collectionTitle.trim()
 
@@ -203,23 +218,80 @@ export default function GalleryWorkspacePage() {
       setCreatingCollection(false)
     }
   }
-  const handlePortfolioSelection = async (photoId: string, selection: 'inherit' | 'include' | 'exclude') => {
-    const response = await fetch(`/api/galleries/${id}/photos`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photoId, portfolioSelection: selection }) })
-    if (!response.ok) setError('Unable to update portfolio selection')
-    else await refreshGallery()
+  const isPortfolioIncluded = (photo: GalleryPhoto) => {
+    if (photo.portfolioSelection === 'exclude') return false
+    if (photo.portfolioSelection === 'include') return true
+    const collection = gallery?.collections?.find((item) => item.id === photo.collectionId)
+    if (collection?.portfolioSelection === 'exclude') return false
+    if (collection?.portfolioSelection === 'include') return true
+    return gallery?.portfolioPublishMode === 'all'
+  }
+
+  const updatePortfolioSelection = async (photoIds: string[], selection: 'include' | 'exclude') => {
+    if (!photoIds.length) return
+    setError(null)
+    try {
+      const responses = await Promise.all(photoIds.map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, portfolioSelection: selection }),
+      })))
+      if (responses.some((response) => !response.ok)) throw new Error('Unable to update portfolio selection')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update portfolio selection')
+    }
+  }
+
+  const handlePortfolioToggle = async (photo: GalleryPhoto) => {
+    await updatePortfolioSelection([photo.id], isPortfolioIncluded(photo) ? 'exclude' : 'include')
   }
 
   const handleToggleHidden = async (photoId: string, isHidden: boolean) => {
     setError(null)
     try {
-      await fetch(`/api/galleries/${id}/photos`, {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoId, isHidden: !isHidden }),
       })
+      if (!response.ok) throw new Error('Unable to update photo visibility')
       await refreshGallery()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to update photo')
+    }
+  }
+
+  const handleBulkVisibility = async (isHidden: boolean) => {
+    if (!selectedPhotos.size) return
+    setError(null)
+    try {
+      const responses = await Promise.all(Array.from(selectedPhotos).map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isHidden }),
+      })))
+      if (responses.some((response) => !response.ok)) throw new Error('Unable to update all selected items')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to update selected item visibility')
+    }
+  }
+
+  const handleSetCover = async () => {
+    if (!canSetCover) return
+    const [photoId] = Array.from(selectedPhotos)
+    setError(null)
+    try {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ photoId, isCover: true }),
+      })
+      if (!response.ok) throw new Error('Unable to set gallery cover')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to set gallery cover')
     }
   }
 
@@ -229,11 +301,12 @@ export default function GalleryWorkspacePage() {
     
     setError(null)
     try {
-      await fetch(`/api/galleries/${id}/photos`, {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ photoIds: Array.from(selectedPhotos) }),
       })
+      if (!response.ok) throw new Error('Unable to delete selected items')
       setSelectedPhotos(new Set())
       await refreshGallery()
     } catch (err) {
@@ -280,9 +353,69 @@ export default function GalleryWorkspacePage() {
     return `${seconds}s`
   }
 
-  const filteredPhotos = activeCollection
-    ? gallery?.photos?.filter(p => p.collectionId === activeCollection) || []
-    : gallery?.photos || []
+  const collectionPhotos = gallery?.photos || []
+
+  const filteredPhotos = collectionPhotos.filter((photo) => {
+    if (photoFilter === 'included') return isPortfolioIncluded(photo)
+    if (photoFilter === 'not-included') return !isPortfolioIncluded(photo)
+    if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
+    return true
+  })
+  const filterPhotos = (items: GalleryPhoto[]) => items.filter((photo) => {
+    if (photoFilter === 'included') return isPortfolioIncluded(photo)
+    if (photoFilter === 'not-included') return !isPortfolioIncluded(photo)
+    if (photoFilter === 'published') return gallery?.status === 'published' && isPortfolioIncluded(photo) && !photo.isHidden
+    return true
+  })
+  const photoGroups = [
+    { id: '__unassigned__', title: 'Unassigned', photos: filterPhotos(gallery?.photos.filter((photo) => !photo.collectionId) || []) },
+    ...(gallery?.collections || []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      photos: filterPhotos(gallery?.photos.filter((photo) => photo.collectionId === item.id) || []),
+    })),
+  ]
+
+  const selectedPhotoRecords = (gallery?.photos || []).filter((photo) => selectedPhotos.has(photo.id))
+  const allSelectedHidden = selectedPhotoRecords.length > 0 && selectedPhotoRecords.every((photo) => photo.isHidden)
+  const canSetCover = selectedPhotoRecords.length === 1 && getMediaType(selectedPhotoRecords[0]) === 'image'
+
+  const previewPhoto = filteredPhotos.find((photo) => photo.id === previewPhotoId) || gallery?.photos.find((photo) => photo.id === previewPhotoId) || null
+  const previewIndex = previewPhoto ? filteredPhotos.findIndex((photo) => photo.id === previewPhoto.id) : -1
+  const goToPreview = (direction: -1 | 1) => {
+    if (!filteredPhotos.length || previewIndex < 0) return
+    const nextIndex = (previewIndex + direction + filteredPhotos.length) % filteredPhotos.length
+    setPreviewPhotoId(filteredPhotos[nextIndex].id)
+  }
+
+  useEffect(() => {
+    if (!previewPhotoId) return
+    const handlePreviewKeys = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setPreviewPhotoId(null)
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault()
+        setPreviewPhotoId((current) => {
+          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
+          if (currentIndex < 0 || !filteredPhotos.length) return current
+          return filteredPhotos[(currentIndex - 1 + filteredPhotos.length) % filteredPhotos.length].id
+        })
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault()
+        setPreviewPhotoId((current) => {
+          const currentIndex = filteredPhotos.findIndex((photo) => photo.id === current)
+          if (currentIndex < 0 || !filteredPhotos.length) return current
+          return filteredPhotos[(currentIndex + 1) % filteredPhotos.length].id
+        })
+      }
+    }
+    document.addEventListener('keydown', handlePreviewKeys)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handlePreviewKeys)
+      document.body.style.overflow = ''
+    }
+  }, [previewPhotoId, filteredPhotos])
 
   if (loading) {
     return (
@@ -348,7 +481,7 @@ export default function GalleryWorkspacePage() {
               <div className="flex flex-wrap items-center gap-2">
                 {gallery.slug && (
                   <a
-                    href={`/portal/g/${gallery.id}`}
+                    href={`/Portal/g/${gallery.slug}`}
                     target="_blank"
                     rel="noreferrer"
                     className="gallery-btn gallery-btn-secondary"
@@ -416,35 +549,83 @@ export default function GalleryWorkspacePage() {
                   }}
                 />
 
-                {/* SELECTION TOOLBAR */}
+                {/* COMPACT BULK-ACTION TOOLBAR */}
                 {selectedPhotos.size > 0 && (
-                  <div className="sticky top-0 z-10 ui-card border border-[var(--color-border-subtle)] rounded-lg p-4 flex items-center justify-between gap-4">
-                    <span className="text-sm font-medium">
-                      {selectedPhotos.size} item{selectedPhotos.size !== 1 ? 's' : ''} selected
+                  <div className="sticky top-2 z-10 ui-card flex items-center justify-between gap-2 rounded-xl border border-[var(--color-border-subtle)] px-3 py-2 shadow-sm">
+                    <span className="shrink-0 text-xs font-semibold tabular-nums">
+                      {selectedPhotos.size} selected
                     </span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex min-w-0 items-center justify-end gap-1">
                       <button
+                        type="button"
+                        onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'include')}
+                        aria-label="Add selected items to portfolio"
+                        title="Add to portfolio"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
+                      >
+                        <Check className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void updatePortfolioSelection(Array.from(selectedPhotos), 'exclude')}
+                        aria-label="Remove selected items from portfolio"
+                        title="Remove from portfolio"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
+                      >
+                        <MinusCircle className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => {
                           setShowCollectionPicker(true)
                           setMoveDestination(null)
                         }}
-                        className="gallery-btn gallery-btn-secondary gap-2"
+                        aria-label="Move selected items to a set"
+                        title="Move to set"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        <Copy className="w-4 h-4" />
-                        Move
+                        <FolderSimple className="h-4 w-4" />
                       </button>
                       <button
+                        type="button"
+                        onClick={() => void handleSetCover()}
+                        disabled={!canSetCover}
+                        aria-label="Set selected image as gallery cover"
+                        title={canSetCover ? 'Set as cover' : 'Select exactly one image to set as cover'}
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)] disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        <ImageSquare className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleBulkVisibility(!allSelectedHidden)}
+                        aria-label={allSelectedHidden ? 'Show selected items in gallery' : 'Hide selected items from gallery'}
+                        title={allSelectedHidden ? 'Show in gallery' : 'Hide from gallery'}
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
+                      >
+                        {allSelectedHidden ? <Eye className="h-4 w-4" /> : <EyeSlash className="h-4 w-4" />}
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => void handleDeletePhotos()}
-                        className="gallery-btn gallery-btn-secondary gap-2 text-destructive hover:text-destructive"
+                        aria-label="Delete selected items"
+                        title="Delete"
+                        className="rounded-lg p-2 text-destructive transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        <Trash2 className="w-4 h-4" />
-                        Delete
+                        <Trash2 className="h-4 w-4" />
                       </button>
+                      <span className="mx-1 h-5 w-px bg-[var(--color-border-subtle)]" />
                       <button
-                        onClick={() => setSelectedPhotos(new Set())}
-                        className="gallery-btn gallery-btn-secondary"
+                        type="button"
+                        onClick={() => {
+                          setSelectedPhotos(new Set())
+                          setBulkSelectMode(false)
+                        }}
+                        aria-label="Exit selection mode"
+                        title="Clear selection"
+                        className="rounded-lg p-2 transition hover:bg-[var(--color-bg-soft)]"
                       >
-                        Clear
+                        <X className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
@@ -516,10 +697,37 @@ export default function GalleryWorkspacePage() {
                 )}
 
                 {/* PHOTOS GRID */}
-                <div className="ui-card p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Photos & Videos</h2>
-                    <div className="flex items-center gap-2">
+                <div className="ui-card p-4 space-y-3">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h2 className="text-lg font-semibold">Photos & Videos</h2>
+                      <p className="text-xs text-[var(--color-text-muted)]">Select the images you want to feature on your public portfolio.</p>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <SelectCompat
+                        value={photoFilter}
+                        onChange={(e) => setPhotoFilter(e.target.value as typeof photoFilter)}
+                        className="gallery-input text-sm py-2"
+                      >
+                        <option value="all">All media</option>
+                        <option value="included">In portfolio</option>
+                        <option value="not-included">Not selected</option>
+                        <option value="published">In published gallery</option>
+                      </SelectCompat>
+                      {bulkSelectMode && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setBulkSelectMode(false)
+                            setSelectedPhotos(new Set())
+                          }}
+                          aria-label="Exit selection mode"
+                          title="Exit selection mode"
+                          className="rounded-lg border border-[var(--color-border-subtle)] p-2 text-[var(--color-text-muted)] transition hover:bg-[var(--color-bg-soft)]"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      )}
                       <SelectCompat
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -531,7 +739,7 @@ export default function GalleryWorkspacePage() {
                         <option value="date_uploaded_new">Uploaded (newest)</option>
                         <option value="date_uploaded_old">Uploaded (oldest)</option>
                       </SelectCompat>
-                      <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
+                      {bulkSelectMode && <label className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)] cursor-pointer transition text-sm font-medium">
                         <input
                           type="checkbox"
                           checked={selectedPhotos.size === (gallery?.photos?.length || 0) && (gallery?.photos?.length || 0) > 0}
@@ -544,13 +752,18 @@ export default function GalleryWorkspacePage() {
                           className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)] cursor-pointer"
                         />
                         <span>Select All</span>
-                      </label>
+                      </label>}
                     </div>
                   </div>
 
-                  {filteredPhotos.length > 0 ? (
-                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
-                      {filteredPhotos.map((photo) => {
+                  {photoGroups.length > 0 ? (
+                    <div className="space-y-7">
+                      {photoGroups.map((group) => (
+                        <section key={group.id} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedPhotoId) void handleDropPhotoIntoCollection(draggedPhotoId, group.id === '__unassigned__' ? null : group.id) }} className={cn('rounded-xl border p-3 transition-colors sm:p-4', draggedPhotoId ? 'border-dashed border-[var(--color-accent)]/60 bg-[var(--color-accent-soft)]/20' : 'border-[var(--color-border-subtle)]')}>
+                          <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">{group.title}</h3><p className="text-xs text-[var(--color-text-muted)]">{group.photos.length} {group.photos.length === 1 ? 'item' : 'items'} · Drop images here to move them</p></div>{draggedPhotoId && <span className="text-xs text-[var(--color-accent)]">Drop to move</span>}</div>
+                          {group.photos.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                      {group.photos.map((photo) => {
                         const mediaType = getMediaType(photo)
                         
                         const isSelected = selectedPhotos.has(photo.id)
@@ -558,6 +771,9 @@ export default function GalleryWorkspacePage() {
                         return (
                           <div
                             key={photo.id}
+                            draggable
+                            onDragStart={() => setDraggedPhotoId(photo.id)}
+                            onDragEnd={() => setDraggedPhotoId(null)}
                             className={cn(
                               'group relative aspect-square overflow-hidden rounded-lg border transition-colors',
                               isSelected
@@ -565,38 +781,40 @@ export default function GalleryWorkspacePage() {
                                 : 'border-[var(--color-border-subtle)] bg-[var(--color-bg-soft)] hover:border-[var(--color-accent)]'
                             )}
                           >
-                            {/* SELECTION INDICATOR - always visible on mobile, hover on desktop */}
+                            {/* Small, neutral selector: nothing is selected until the user clicks it. */}
                             <button
                               type="button"
-                              onClick={() => handlePhotoToggle(photo.id)}
+                              onClick={() => {
+                                setBulkSelectMode(true)
+                                handlePhotoToggle(photo.id)
+                              }}
                               aria-label={`${isSelected ? 'Deselect' : 'Select'} ${photo.filename}`}
                               aria-pressed={isSelected}
+                              title={isSelected ? 'Deselect item' : 'Select item'}
                               className={cn(
-                                'absolute left-2 top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black',
-                                'md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100',
-                                isSelected && 'opacity-100'
+                                'absolute right-2 top-2 z-20 flex h-6 w-6 items-center justify-center rounded-full border border-white/80 shadow-md transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white',
+                                'opacity-100 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100',
+                                isSelected && 'opacity-100',
+                                isSelected ? 'bg-[var(--color-accent)] text-white' : 'bg-black/55 text-white hover:bg-black/80'
                               )}
                             >
-                              <span className={cn('h-4 w-4 rounded-full border-2 border-white', isSelected && 'bg-[var(--color-accent)]')} />
+                              {isSelected ? <Check className="h-3.5 w-3.5" weight="bold" /> : <Circle className="h-3.5 w-3.5" weight="regular" />}
                             </button>
 
-                            {/* HIDDEN INDICATOR */}
-                            {photo.isHidden && (
-                              <div className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/70 flex items-center justify-center">
-                                <EyeOff className="w-3 h-3 text-white" />
-                              </div>
-                            )}
-
                             {/* MEDIA DISPLAY */}
+                            <button
+                              type="button"
+                              onClick={() => setPreviewPhotoId(photo.id)}
+                              aria-label={`Preview ${photo.filename}`}
+                              className="absolute inset-0 z-[1] cursor-zoom-in"
+                            />
                             {mediaType === 'video' ? (
                               <div className="relative w-full h-full">
                                 <video
                                   src={photo.displayUrl || photo.originalUrl}
                                   className="h-full w-full object-contain"
                                   poster={photo.thumbnailUrl || undefined}
-                                  controls
                                   preload="metadata"
-                                  onClick={(event) => event.stopPropagation()}
                                 />
                                 {/* Video Icon Overlay */}
                                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20">
@@ -620,6 +838,7 @@ export default function GalleryWorkspacePage() {
                                   const target = e.target as HTMLImageElement
                                   target.src = '/og-image.svg'
                                 }}
+                                onClick={() => setPreviewPhotoId(photo.id)}
                               />
                             )}
 
@@ -633,49 +852,91 @@ export default function GalleryWorkspacePage() {
                               </p>
                             </div>
 
-                            {/* ACTIONS - always visible on mobile, hover on desktop */}
-                            <div className={cn(
-                              'pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2 bg-black/0 transition',
-                              'md:opacity-0 md:group-hover:opacity-100'
-                            )}>
-                              <select
-                                value={photo.portfolioSelection || 'inherit'}
-                                onClick={(e) => e.stopPropagation()}
-                                onChange={(e) => void handlePortfolioSelection(photo.id, e.target.value as 'inherit' | 'include' | 'exclude')}
-                                className="pointer-events-auto absolute bottom-2 left-2 z-20 max-w-[calc(100%-1rem)] rounded bg-[var(--color-bg-overlay)] px-1.5 py-1 text-[10px] text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                aria-label={`Portfolio status for ${photo.filename}`}
-                              >
-                                <option value="inherit">Portfolio: follow set</option><option value="include">Portfolio: publish</option><option value="exclude">Portfolio: exclude</option>
-                              </select>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  void handleToggleHidden(photo.id, photo.isHidden)
-                                }}
-                                className="pointer-events-auto flex h-9 w-9 items-center justify-center rounded-full bg-white/90 transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                                title={photo.isHidden ? 'Show' : 'Hide'}
-                                aria-label={photo.isHidden ? 'Show photo' : 'Hide photo'}
-                              >
-                                {photo.isHidden ? (
-                                  <EyeOff className="w-4 h-4 text-black" />
-                                ) : (
-                                  <Eye className="w-4 h-4 text-black" />
-                                )}
-                              </button>
-                            </div>
+                            {/* Visibility is managed in the preview, not on every thumbnail. */}
                           </div>
                         )
                       })}
                     </div>
-                  ) : (
-                    <div className="text-center py-12">
-                      <p className="text-sm text-[var(--color-text-muted)]">
-                        No photos in this gallery yet. Use the upload area above to add photos.
-                      </p>
+                          ) : (
+                            <div className="flex min-h-24 items-center justify-center rounded-lg border border-dashed border-[var(--color-border-subtle)] px-4 py-6 text-center text-xs text-[var(--color-text-muted)]">This set is empty. Drag photos here to add them.</div>
+                          )}
+                        </section>
+                      ))}
                     </div>
+                  ) : (
+                    <div className="py-12 text-center"><p className="text-sm text-[var(--color-text-muted)]">No media matches the current filter.</p></div>
                   )}
                 </div>
+
+                {previewPhoto && (
+                  <div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-3 sm:p-6"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Preview ${previewPhoto.filename}`}
+                    onClick={() => setPreviewPhotoId(null)}
+                    tabIndex={-1}
+                  >
+                    <div className="relative flex h-full max-h-[92vh] w-full max-w-7xl flex-col" onClick={(event) => event.stopPropagation()}>
+                      <div className="flex shrink-0 items-center justify-between gap-3 pb-3 text-white">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{previewPhoto.filename}</p>
+                          <p className="text-xs text-white/60">{Math.max(0, previewIndex) + 1} of {filteredPhotos.length} · {isPortfolioIncluded(previewPhoto) ? 'Selected for portfolio' : 'Not selected'}</p>
+                        </div>
+                        <div className="flex shrink-0 items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => void handlePortfolioToggle(previewPhoto)}
+                            className={cn('rounded-full px-3 py-2 text-xs font-semibold transition', isPortfolioIncluded(previewPhoto) ? 'bg-[var(--color-accent)] text-white' : 'bg-white/15 text-white hover:bg-white/25')}
+                          >
+                            <span className="inline-flex items-center gap-1.5">{isPortfolioIncluded(previewPhoto) && <Check className="h-3.5 w-3.5" />}{isPortfolioIncluded(previewPhoto) ? 'In portfolio' : 'Add to portfolio'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => void handleToggleHidden(previewPhoto.id, previewPhoto.isHidden)}
+                            className="rounded-full bg-white/15 px-3 py-2 text-xs text-white hover:bg-white/25"
+                          >
+                            {previewPhoto.isHidden ? 'Show in gallery' : 'Hide from gallery'}
+                          </button>
+                          <button type="button" onClick={() => setPreviewPhotoId(null)} aria-label="Close preview" className="rounded-full bg-white/15 p-2 text-white hover:bg-white/25">
+                            <X className="h-5 w-5" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl bg-black/40">
+                        {getMediaType(previewPhoto) === 'video' ? (
+                          <video
+                            key={previewPhoto.id}
+                            src={previewPhoto.displayUrl || previewPhoto.originalUrl}
+                            poster={previewPhoto.thumbnailUrl || undefined}
+                            controls
+                            autoPlay
+                            className="h-full w-full object-contain"
+                          />
+                        ) : (
+                          <Image
+                            src={previewPhoto.displayUrl || previewPhoto.originalUrl || previewPhoto.thumbnailUrl || '/og-image.svg'}
+                            alt={previewPhoto.filename}
+                            fill
+                            unoptimized
+                            priority
+                            sizes="100vw"
+                            className="object-contain"
+                          />
+                        )}
+                      </div>
+                      <div className="flex shrink-0 items-center justify-between pt-3 text-white">
+                        <button type="button" onClick={() => goToPreview(-1)} disabled={filteredPhotos.length < 2} className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm hover:bg-white/25 disabled:opacity-40">
+                          <CaretLeft className="h-4 w-4" /> Previous
+                        </button>
+                        <span className="text-xs text-white/60">Use ← → to navigate · Esc to close</span>
+                        <button type="button" onClick={() => goToPreview(1)} disabled={filteredPhotos.length < 2} className="inline-flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm hover:bg-white/25 disabled:opacity-40">
+                          Next <CaretRight className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* COLLECTIONS */}
                 <div className="ui-card p-6 space-y-4">
@@ -712,41 +973,7 @@ export default function GalleryWorkspacePage() {
                     </button>
                   </div>
 
-                  {gallery.collections && gallery.collections.length > 0 ? (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setActiveCollection(null)}
-                        className={`w-full text-left p-3 rounded-lg border transition ${
-                          activeCollection === null
-                            ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
-                            : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
-                        }`}
-                      >
-                        <span className="font-medium">All Photos & Videos</span>
-                        <span className="text-xs ml-2 opacity-70">
-                          {gallery.photos?.length || 0} items
-                        </span>
-                      </button>
-                      {gallery.collections.map((collection) => (
-                        <button
-                          key={collection.id}
-                          onClick={() => setActiveCollection(collection.id)}
-                          className={`w-full text-left p-3 rounded-lg border transition ${
-                            activeCollection === collection.id
-                              ? 'bg-[var(--color-accent-soft)] border-[var(--color-accent)] text-[var(--color-accent)]'
-                              : 'border-[var(--color-border-subtle)] hover:bg-[var(--color-bg-soft)]'
-                          }`}
-                        >
-                          <span className="font-medium">{collection.title}</span>
-                          <span className="text-xs ml-2 opacity-70">
-                            {collection.photo_count || 0} items
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="ui-body">No collections yet. Create one to organize your photos and videos.</p>
-                  )}
+                  <p className="text-xs text-[var(--color-text-muted)]">Your sets and their photos are organised in the grids above. Drag any image into another set to move it.</p>
                 </div>
               </section>
             )}

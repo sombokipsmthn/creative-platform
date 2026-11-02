@@ -12,7 +12,7 @@ export type GalleryThemeCategory =
   | 'playful'
   | 'narrative';
 
-export type GalleryFontFamily = 'sans' | 'serif' | 'modern' | 'editorial';
+export type GalleryFontFamily = 'sans' | 'serif' | 'modern' | 'editorial' | 'system-rounded';
 export type GalleryCoverStyle = 'image' | 'split' | 'centered' | 'minimal' | 'immersive' | 'none';
 export type GalleryGridStyle = 'masonry' | 'vertical' | 'horizontal' | 'uniform';
 export type GalleryThumbnailSize = 'small' | 'regular' | 'large';
@@ -221,4 +221,24 @@ export function getAllThemeIds(): GalleryThemeId[] {
 
 export function isValidThemeId(id: string | null | undefined): id is GalleryThemeId {
   return Boolean(id && GALLERY_THEMES.some((theme) => theme.id === id));
+}
+
+
+/** Curated font choices used by the visual gallery designer. */
+export const GALLERY_FONT_OPTIONS = [
+  { value: 'sans', label: 'Modern Sans', detail: 'Clean, neutral and versatile' },
+  { value: 'serif', label: 'Editorial Serif', detail: 'Elegant, classic and expressive' },
+  { value: 'modern', label: 'Geometric Sans', detail: 'Contemporary with a little character' },
+  { value: 'editorial', label: 'Literary Serif', detail: 'Warm, thoughtful and narrative' },
+  { value: 'system-rounded', label: 'Soft Rounded', detail: 'Friendly and understated' },
+] as const;
+
+export function getGalleryFontStack(family?: string): string {
+  switch (family) {
+    case 'serif': return 'Georgia, "Times New Roman", serif';
+    case 'editorial': return '"Palatino Linotype", "Book Antiqua", Palatino, serif';
+    case 'modern': return '"Trebuchet MS", Arial, sans-serif';
+    case 'system-rounded': return 'ui-rounded, "Arial Rounded MT Bold", Arial, sans-serif';
+    default: return 'Arial, Helvetica, sans-serif';
+  }
 }

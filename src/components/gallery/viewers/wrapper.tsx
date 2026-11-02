@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { getGalleryTheme, type GalleryThemeId } from '@/lib/gallery/themes';
+import { getGalleryTheme, type GalleryThemeId, type GalleryThemePreset } from '@/lib/gallery/themes';
 import { GalleryViewerMinimal } from './minimal';
 import { GalleryViewerEditorial } from './editorial';
 import { GalleryViewerCinematic } from './cinematic';
@@ -36,6 +36,8 @@ export interface GalleryViewerProps {
   title: string;
   description?: string;
   themeId: GalleryThemeId;
+  /** Unsaved theme settings supplied by the design editor for instant preview. */
+  themePreset?: Partial<GalleryThemePreset>;
   photos: GalleryPhoto[];
   collections?: GalleryCollection[];
   allowDownloads: boolean;
@@ -57,6 +59,7 @@ export function GalleryViewer({
   title,
   description,
   themeId,
+  themePreset,
   photos,
   collections,
   allowDownloads,
@@ -69,7 +72,8 @@ export function GalleryViewer({
   onPhotoComment,
   onPhotoDownload,
 }: GalleryViewerProps) {
-  const theme = getGalleryTheme(themeId);
+  const baseTheme = getGalleryTheme(themeId);
+  const theme = themePreset ? { ...baseTheme, preset: { ...baseTheme.preset, ...themePreset } } : baseTheme;
 
   const commonProps = {
     id,

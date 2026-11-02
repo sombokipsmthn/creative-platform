@@ -2,12 +2,26 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Gallery uploads allow files up to 100MB. The proxy buffers a copy of
+  // incoming request bodies before the route handler receives them, so leave
+  // room for multipart/form-data boundaries and metadata.
+  experimental: {
+    proxyClientMaxBodySize: '110mb',
+  },
+
   turbopack: {},
 
   // Disable trailing slash redirects to prevent 308 loops
   trailingSlash: false,
 
   images: {
+    // Gallery media is served through a same-origin API route with a
+    // dynamic ?key= query parameter. Omitting "search" allows that query.
+    localPatterns: [
+      {
+        pathname: '/api/public/galleries/media',
+      },
+    ],
     remotePatterns: [
       { protocol: 'https', hostname: 'unavatar.io' },
       { protocol: 'https', hostname: 'github.com' },
@@ -20,7 +34,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.public.blob.vercel-storage.com' },
     ],
   },
-
 
   webpack: (config, { isServer }) => {
     if (!isServer) {

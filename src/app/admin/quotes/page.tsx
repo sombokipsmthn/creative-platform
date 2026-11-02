@@ -241,7 +241,7 @@ export default function QuotesPage() {
         {/* ERROR */}
         {error && (
           <div className="rounded-xl border bg-card text-card-foreground shadow-sm p-4">
-            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <p className="text-sm text-[var(--color-danger)] dark:text-[var(--color-danger)]">{error}</p>
           </div>
         )}
 

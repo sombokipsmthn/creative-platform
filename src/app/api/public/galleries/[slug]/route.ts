@@ -113,10 +113,17 @@ export async function GET(
       );
 
       if (!existingSession) {
-        return NextResponse.json(
-          { error: "Gallery requires PIN access." },
-          { status: 401 },
-        );
+        const { accessPin: _accessPin, ...lockedGallery } = gallery;
+
+        return NextResponse.json({
+          gallery: lockedGallery,
+          requiresPin: true,
+          collections: [],
+          photos: [],
+          approval: null,
+          theme: null,
+          sessionId: null,
+        });
       }
     }
 

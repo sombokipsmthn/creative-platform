@@ -58,6 +58,17 @@ export interface GalleryThemePreset {
   imageOrientation: GalleryImageOrientation;
   imageSizing: GalleryImageSizing;
   galleryWidth: GalleryGalleryWidth;
+  // Branding fields (from creator_branding table)
+  studioName?: string | null;
+  logoUrl?: string | null;
+  logoLightUrl?: string | null;
+  logoDarkUrl?: string | null;
+  logoTransparentUrl?: string | null;
+  logoSvgUrl?: string | null;
+  logoSize?: string | null;
+  brandColor?: string | null;
+  coverBrandingVisible?: boolean;
+  navBrandingVisible?: boolean;
 }
 
 export interface GalleryThemeDefinition {

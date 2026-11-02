@@ -144,8 +144,9 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         setRequiredPin(gal.access_pin || null)
 
         // Determine theme ID from saved theme
-        const savedTheme = data.theme as SavedTheme | null
+        const savedTheme = data.theme as (SavedTheme & { branding?: typeof import("@/db/schema").creatorBranding.$inferSelect }) | null
         if (savedTheme) {
+          const branding = savedTheme.branding
           setThemePreset({
             layout: savedTheme.layout as GalleryThemePreset['layout'],
             aspectRatio: savedTheme.aspectRatio as GalleryThemePreset['aspectRatio'],
@@ -173,15 +174,15 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
             imageSizing: savedTheme.imageSizing as GalleryThemePreset['imageSizing'],
             galleryWidth: savedTheme.galleryWidth as GalleryThemePreset['galleryWidth'],
             coverImageId: savedTheme.coverImageId ?? null,
-            studioName: savedTheme.studioName ?? undefined,
-            logoUrl: savedTheme.logoUrl ?? undefined,
-            logoLightUrl: savedTheme.logoLightUrl ?? undefined,
-            logoDarkUrl: savedTheme.logoDarkUrl ?? undefined,
-            logoTransparentUrl: savedTheme.logoTransparentUrl ?? undefined,
-            logoSize: savedTheme.logoSize ?? undefined,
-            brandColor: savedTheme.brandColor ?? undefined,
-            coverBrandingVisible: savedTheme.coverBrandingVisible,
-            navBrandingVisible: savedTheme.navBrandingVisible,
+            studioName: branding?.studioName ?? savedTheme.studioName ?? undefined,
+            logoUrl: branding?.logoLightUrl ?? savedTheme.logoUrl ?? undefined,
+            logoLightUrl: branding?.logoLightUrl ?? savedTheme.logoLightUrl ?? undefined,
+            logoDarkUrl: branding?.logoDarkUrl ?? savedTheme.logoDarkUrl ?? undefined,
+            logoTransparentUrl: branding?.logoTransparentUrl ?? savedTheme.logoTransparentUrl ?? undefined,
+            logoSize: branding?.logoSize ?? savedTheme.logoSize ?? undefined,
+            brandColor: branding?.brandColor ?? savedTheme.brandColor ?? undefined,
+            coverBrandingVisible: branding?.coverBrandingVisible ?? savedTheme.coverBrandingVisible ?? true,
+            navBrandingVisible: branding?.navBrandingVisible ?? savedTheme.navBrandingVisible ?? true,
           })
           // Resolve theme ID robustly:
           // 1. Check if `type` stores a valid preset id (preset themes set type = preset id)

@@ -520,7 +520,7 @@ export const galleryThemes = pgTable("gallery_themes", {
   coverOverlayOpacity: integer("cover_overlay_opacity").default(25).notNull(),
   gridStyle: text("grid_style").default("masonry").notNull(),
   thumbnailSize: text("thumbnail_size").default("regular").notNull(),
-  gridSpacing: text("grid_spacing").default("comfortable").notNull(),
+  gridSpacing: text("grid_spacing").default("regular").notNull(),
   navigationStyle: text("navigation_style").default("icons-and-text").notNull(),
   // New layout & design configuration
   imageLayout: text("image_layout").default("small_columns").notNull(), // small_columns, small_rows, large_rows

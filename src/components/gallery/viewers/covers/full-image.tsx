@@ -23,10 +23,13 @@ export interface CoverRendererProps {
   showTitle?: boolean;
   showDescription?: boolean;
   showBranding?: boolean;
-  studioName?: string;
-  logoUrl?: string;
-  logoSize?: string;
-  brandColor?: string;
+  studioName?: string | null;
+  logoUrl?: string | null;
+  logoLightUrl?: string | null;
+  logoDarkUrl?: string | null;
+  logoTransparentUrl?: string | null;
+  logoSize?: string | null;
+  brandColor?: string | null;
   className?: string;
 }
 

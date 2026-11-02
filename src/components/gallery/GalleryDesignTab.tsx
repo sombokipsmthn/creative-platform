@@ -73,11 +73,36 @@ interface SavedTheme {
   imageOrientation: string
   imageSizing: string
   galleryWidth: string
+  coverImageId: string | null
+  // Branding fields (from creator_branding table)
+  studioName: string | null
+  logoUrl: string | null
+  logoLightUrl: string | null
+  logoDarkUrl: string | null
+  logoTransparentUrl: string | null
+  logoSvgUrl: string | null
+  logoSize: string | null
+  brandColor: string | null
+  coverBrandingVisible: boolean
+  navBrandingVisible: boolean
+  canUseBranding?: boolean
   createdAt: string
   updatedAt: string
 }
 
-type ActiveSection = 'theme' | 'cover' | 'typography' | 'colors' | 'grid' | 'general'
+type ActiveSection = 'theme' | 'cover' | 'typography' | 'colors' | 'grid' | 'general' | 'branding'
+
+interface CreatorBranding {
+  studioName: string | null
+  logoLightUrl: string | null
+  logoDarkUrl: string | null
+  logoTransparentUrl: string | null
+  logoSvgUrl: string | null
+  logoSize: string
+  brandColor: string
+  coverBrandingVisible: boolean
+  navBrandingVisible: boolean
+}
 
 /**
  * Sample gallery data for empty galleries - used only in preview mode.
@@ -201,6 +226,8 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
   const [showResetDialog, setShowResetDialog] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [showMobileSheet, setShowMobileSheet] = useState(false)
+  const [creatorBranding, setCreatorBranding] = useState<CreatorBranding | null>(null)
+  const [canUseBranding, setCanUseBranding] = useState(false)
 
   // For keyboard navigation in theme selector
   const themeSelectorRef = useRef<HTMLDivElement>(null)
@@ -224,7 +251,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     t => t.label === draftTheme?.name
   )?.id ?? 'minimal'
 
-  // Load saved theme on mount
+  // Load saved theme and creator branding on mount
   useEffect(() => {
     const loadTheme = async () => {
       try {
@@ -247,6 +274,14 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
           if (fp) {
             setFocalPoint({ x: fp.x ?? 0.5, y: fp.y ?? 0.5 })
           }
+        }
+
+        // Load creator branding and check entitlement
+        const brandingResponse = await fetch(`/api/creator/branding`)
+        if (brandingResponse.ok) {
+          const brandingData = await brandingResponse.json()
+          setCreatorBranding(brandingData.branding)
+          setCanUseBranding(brandingData.canUseBranding)
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load design settings')
@@ -445,6 +480,7 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
     { id: 'colors' as const, label: 'Colors' },
     { id: 'grid' as const, label: 'Grid' },
     { id: 'general' as const, label: 'General' },
+    { id: 'branding' as const, label: 'Branding' },
   ]
 
   return (
@@ -1025,6 +1061,147 @@ export default function GalleryDesignTab({ galleryId, gallery, onRefresh }: Gall
                   </span>
                 </p>
                 <p className="text-xs text-[var(--color-text-muted)] mt-1">Type: {draftTheme.type}</p>
+              </div>
+            </div>
+          )}
+
+          {/* BRANDING SECTION */}
+          {activeSection === 'branding' && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-[var(--color-text-primary)]">Creator Branding</h3>
+                <p className="text-xs text-[var(--color-text-muted)]">
+                  {canUseBranding ? 'Custom branding enabled' : 'Upgrade to enable custom branding'}
+                </p>
+              </div>
+
+              {!canUseBranding && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-sm text-amber-800">
+                    Custom branding is a paid feature. <a href="/settings/billing" className="underline hover:text-amber-600">Upgrade your plan</a> to unlock.
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Studio Name</label>
+                <Input
+                  value={draftTheme.studioName || ''}
+                  onChange={(e) => void updateTheme({ studioName: e.target.value || null })}
+                  placeholder="Your Studio Name"
+                  className="gallery-input"
+                  disabled={!canUseBranding}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Brand Color</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={draftTheme.brandColor || '#000000'}
+                    onChange={(e) => void updateTheme({ brandColor: e.target.value })}
+                    className="w-12 h-10 rounded-lg border border-[var(--color-border-subtle)] cursor-pointer"
+                    disabled={!canUseBranding}
+                  />
+                  <input
+                    type="text"
+                    value={draftTheme.brandColor || '#000000'}
+                    onChange={(e) => void updateTheme({ brandColor: e.target.value })}
+                    className="flex-1 gallery-input text-xs"
+                    disabled={!canUseBranding}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Logo (Light)</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={draftTheme.logoLightUrl || ''}
+                    onChange={(e) => void updateTheme({ logoLightUrl: e.target.value || null })}
+                    placeholder="https://example.com/logo-light.png"
+                    className="flex-1 gallery-input"
+                    disabled={!canUseBranding}
+                  />
+                  {draftTheme.logoLightUrl && (
+                    <img src={draftTheme.logoLightUrl} alt="Logo preview" className="h-8 w-auto rounded" />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Logo (Dark)</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={draftTheme.logoDarkUrl || ''}
+                    onChange={(e) => void updateTheme({ logoDarkUrl: e.target.value || null })}
+                    placeholder="https://example.com/logo-dark.png"
+                    className="flex-1 gallery-input"
+                    disabled={!canUseBranding}
+                  />
+                  {draftTheme.logoDarkUrl && (
+                    <img src={draftTheme.logoDarkUrl} alt="Logo preview" className="h-8 w-auto rounded" />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Logo (Transparent)</label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={draftTheme.logoTransparentUrl || ''}
+                    onChange={(e) => void updateTheme({ logoTransparentUrl: e.target.value || null })}
+                    placeholder="https://example.com/logo-transparent.png"
+                    className="flex-1 gallery-input"
+                    disabled={!canUseBranding}
+                  />
+                  {draftTheme.logoTransparentUrl && (
+                    <img src={draftTheme.logoTransparentUrl} alt="Logo preview" className="h-8 w-auto rounded bg-gray-100" />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-2">Logo Size</label>
+                <SelectCompat
+                  value={draftTheme.logoSize || 'medium'}
+                  onChange={(e) => void updateTheme({ logoSize: e.target.value })}
+                  className="w-full gallery-input"
+                  disabled={!canUseBranding}
+                >
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                </SelectCompat>
+              </div>
+
+              <div className="border-t border-[var(--color-border-subtle)] pt-4 space-y-3">
+                <h4 className="text-xs font-medium text-[var(--color-text-primary)] uppercase tracking-widest">
+                  Visibility
+                </h4>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={draftTheme.coverBrandingVisible}
+                    onChange={(e) => void updateTheme({ coverBrandingVisible: e.target.checked })}
+                    className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
+                    disabled={!canUseBranding}
+                  />
+                  <span className="text-sm text-[var(--color-text-primary)]">Show branding on cover</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={draftTheme.navBrandingVisible}
+                    onChange={(e) => void updateTheme({ navBrandingVisible: e.target.checked })}
+                    className="w-4 h-4 rounded border-[var(--color-border-subtle)] accent-[var(--color-accent)]"
+                    disabled={!canUseBranding}
+                  />
+                  <span className="text-sm text-[var(--color-text-primary)]">Show branding in navigation</span>
+                </label>
               </div>
             </div>
           )}

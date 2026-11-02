@@ -5,6 +5,9 @@ import { sql } from "drizzle-orm";
 import { db } from "@/db";
 import { getLocalUser } from "@/lib/auth/get-local-user";
 import { getGalleryTheme, isValidThemeId } from "@/lib/gallery/themes";
+import { creatorBranding } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { canUseCustomBranding } from "@/lib/entitlements";
 
 type Context = {
   params: Promise<{ id: string }>;
@@ -25,8 +28,18 @@ async function getCreator() {
   }
 }
 
-function normalizeTheme(row: ThemeRow | undefined) {
+async function normalizeTheme(row: ThemeRow | undefined, creatorId: string) {
   if (!row) return null;
+
+  // Get creator branding
+  const [branding] = await db
+    .select()
+    .from(creatorBranding)
+    .where(eq(creatorBranding.userId, creatorId))
+    .limit(1);
+
+  // Check entitlement
+  const canUseBranding = await canUseCustomBranding(creatorId);
 
   return {
     id: String(row.id),
@@ -62,6 +75,18 @@ function normalizeTheme(row: ThemeRow | undefined) {
     coverImageId: row.cover_image_id ? String(row.cover_image_id) : null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    // Branding fields
+    studioName: branding?.studioName ?? null,
+    logoUrl: branding?.logoLightUrl ?? null,
+    logoLightUrl: branding?.logoLightUrl ?? null,
+    logoDarkUrl: branding?.logoDarkUrl ?? null,
+    logoTransparentUrl: branding?.logoTransparentUrl ?? null,
+    logoSvgUrl: branding?.logoSvgUrl ?? null,
+    logoSize: branding?.logoSize ?? 'medium',
+    brandColor: branding?.brandColor ?? '#000000',
+    coverBrandingVisible: branding?.coverBrandingVisible ?? true,
+    navBrandingVisible: branding?.navBrandingVisible ?? true,
+    canUseBranding,
   };
 }
 
@@ -163,7 +188,7 @@ export async function GET(_request: Request, context: Context) {
 
     const theme = await ensureTheme(galleryId);
     return NextResponse.json({
-      theme: normalizeTheme(theme),
+      theme: await normalizeTheme(theme, creator.id),
       gallery: {
         id: gallery.id,
         title: gallery.title,
@@ -233,7 +258,7 @@ export async function PATCH(request: Request, context: Context) {
       coverOverlayOpacity: value("coverOverlayOpacity", preset?.coverOverlayOpacity ?? Number(current.cover_overlay_opacity ?? 25)),
       gridStyle: value("gridStyle", preset?.gridStyle ?? String(current.grid_style || "masonry")),
       thumbnailSize: value("thumbnailSize", preset?.thumbnailSize ?? String(current.thumbnail_size || "regular")),
-      gridSpacing: value("gridSpacing", preset?.gridSpacing ?? String(current.grid_spacing || "comfortable")),
+      gridSpacing: value("gridSpacing", preset?.gridSpacing ?? String(current.grid_spacing || "regular")),
       navigationStyle: value("navigationStyle", preset?.navigationStyle ?? String(current.navigation_style || "icons-and-text")),
       imageLayout: value("imageLayout", preset?.imageLayout ?? String(current.image_layout || "small_columns")),
       imageOrientation: value("imageOrientation", preset?.imageOrientation ?? String(current.image_orientation || "balanced")),
@@ -279,7 +304,7 @@ export async function PATCH(request: Request, context: Context) {
       RETURNING *
     `);
 
-    return NextResponse.json({ theme: normalizeTheme(result.rows[0] as ThemeRow) });
+    return NextResponse.json({ theme: await normalizeTheme(result.rows[0] as ThemeRow, creator.id) });
   } catch (error) {
     console.error("PATCH /api/galleries/[id]/theme failed:", error);
     return NextResponse.json(

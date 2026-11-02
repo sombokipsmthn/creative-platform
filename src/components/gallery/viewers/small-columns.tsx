@@ -6,6 +6,7 @@ import { Download, Heart } from "@phosphor-icons/react";
 import { Button } from '@/components/ui/button';
 import type { GalleryViewerProps } from './wrapper';
 import { getGalleryFontStack, type GalleryThemeDefinition } from '@/lib/gallery/themes';
+import { GalleryCoverRenderer, type CoverPhoto } from './covers';
 
 interface SmallColumnsViewerProps extends Omit<GalleryViewerProps, 'themeId'> {
   theme: GalleryThemeDefinition;
@@ -69,7 +70,7 @@ export function GalleryViewerSmallColumns({
   // Column count from theme, clamped to a sensible range.
   const columns = Math.max(2, Math.min(6, theme.preset.masonryColumns || 4));
 
-  // Spacing map — compact / comfortable / spacious.
+  // Spacing map — tight / comfortable / spacious.
   const gapClass =
     theme.preset.gridSpacing === 'tight' ? 'gap-2' :
     theme.preset.gridSpacing === 'wide' ? 'gap-5' : 'gap-3';
@@ -81,8 +82,8 @@ export function GalleryViewerSmallColumns({
 
   // Gallery width — focused / wide / full.
   const widthClass =
-    theme.preset.layout === 'fullscreen' ? 'max-w-full' :
-    theme.preset.thumbnailSize === 'large' ? 'max-w-7xl' : 'max-w-6xl';
+    theme.preset.galleryWidth === 'full' ? 'max-w-full' :
+    theme.preset.galleryWidth === 'wide' ? 'max-w-7xl' : 'max-w-6xl';
 
   return (
     <div
@@ -102,6 +103,36 @@ export function GalleryViewerSmallColumns({
           </p>
         )}
       </div>
+
+      {/* Cover */}
+      <GalleryCoverRenderer
+        theme={theme}
+        composition={theme.preset.coverComposition as any}
+        coverPhoto={photos[0] ? {
+          id: photos[0].id,
+          filename: photos[0].filename,
+          displayUrl: photos[0].displayUrl,
+          thumbnailUrl: photos[0].thumbnailUrl,
+          mimeType: photos[0].mimeType,
+          width: photos[0].width,
+          height: photos[0].height,
+        } : null}
+        title={title}
+        description={description}
+        focalX={theme.preset.coverFocalX}
+        focalY={theme.preset.coverFocalY}
+        overlayOpacity={theme.preset.coverOverlayOpacity}
+        showTitle={theme.preset.showTitle}
+        showDescription={theme.preset.showDescription}
+        showBranding={theme.preset.coverBrandingVisible ?? true}
+        studioName={theme.preset.studioName}
+        logoUrl={theme.preset.logoLightUrl || theme.preset.logoUrl}
+        logoLightUrl={theme.preset.logoLightUrl}
+        logoDarkUrl={theme.preset.logoDarkUrl}
+        logoTransparentUrl={theme.preset.logoTransparentUrl}
+        logoSize={theme.preset.logoSize}
+        brandColor={theme.preset.brandColor}
+      />
 
       {/* Masonry Grid */}
       <div className={`mx-auto ${widthClass} px-6 pb-20 sm:px-10 lg:px-16`}>

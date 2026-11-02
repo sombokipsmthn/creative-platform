@@ -68,7 +68,7 @@ DROP INDEX "users_email_verified_idx";--> statement-breakpoint
 DROP INDEX "users_created_at_idx";--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "layout" SET DEFAULT 'small_columns';--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "cover_style" SET DEFAULT 'full_image';--> statement-breakpoint
-ALTER TABLE "gallery_themes" ALTER COLUMN "grid_spacing" SET DEFAULT 'comfortable';--> statement-breakpoint
+ALTER TABLE "gallery_themes" ALTER COLUMN "grid_spacing" SET DEFAULT 'regular';--> statement-breakpoint
 ALTER TABLE "equipment" ADD COLUMN "image_url" text;--> statement-breakpoint
 ALTER TABLE "gallery_themes" ADD COLUMN "image_layout" text DEFAULT 'small_columns' NOT NULL;--> statement-breakpoint
 ALTER TABLE "gallery_themes" ADD COLUMN "image_orientation" text DEFAULT 'balanced' NOT NULL;--> statement-breakpoint

@@ -564,6 +564,13 @@ export async function PATCH(
 
     const photoId = photoIds[0];
     const photoIdList = sql.join(photoIds.map((value) => sql`${value}`), sql`, `);
+    const ownedPhotos = await db.execute(sql`
+      SELECT id FROM gallery_photos
+      WHERE gallery_id = ${galleryId} AND id IN (${photoIdList})
+    `);
+    if (ownedPhotos.rows.length !== photoIds.length) {
+      return NextResponse.json({ error: "One or more photos were not found in this gallery." }, { status: 404 });
+    }
 
     if (["inherit", "include", "exclude"].includes(body.portfolioSelection)) {
       await db.execute(sql`

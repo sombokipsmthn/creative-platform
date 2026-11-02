@@ -62,10 +62,10 @@ CREATE TABLE "subscriptions" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-DROP INDEX "users_email_idx";--> statement-breakpoint
-DROP INDEX "users_auth_user_id_idx";--> statement-breakpoint
-DROP INDEX "users_email_verified_idx";--> statement-breakpoint
-DROP INDEX "users_created_at_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "users_email_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "users_auth_user_id_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "users_email_verified_idx";--> statement-breakpoint
+DROP INDEX IF EXISTS "users_created_at_idx";--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "layout" SET DEFAULT 'small_columns';--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "cover_style" SET DEFAULT 'full_image';--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "grid_spacing" SET DEFAULT 'regular';--> statement-breakpoint

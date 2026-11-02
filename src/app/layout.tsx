@@ -4,6 +4,7 @@ import './globals.css';
 import { CreatorProvider } from '@/context/CreatorContext';
 import ThemeScript from '@/components/ThemeScript';
 import QueryProvider from '@/components/QueryProvider';
+import { DesignSystemProvider } from '@/components/ui/DesignSystemProvider';
 import { validateEnv } from '@/lib/env';
 import { Analytics } from '@vercel/analytics/next';
 import { Outfit } from "next/font/google";
@@ -57,7 +58,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="font-sans antialiased selection:bg-primary selection:text-white">
         <QueryProvider>
-          <CreatorProvider>{children}</CreatorProvider>
+          <DesignSystemProvider>
+            <CreatorProvider>{children}</CreatorProvider>
+          </DesignSystemProvider>
         </QueryProvider>
         <Analytics />
       </body>

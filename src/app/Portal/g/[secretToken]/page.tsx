@@ -138,9 +138,9 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         setGalleryId(gal.id)
         setTitle(gal.title || 'Gallery')
         setDescription(gal.description)
-        setAllowDownloads(gal.allow_downloads !== false)
-        setAllowFavorites(gal.allow_favorites !== false)
-        setAllowSelections(gal.allow_selections !== false)
+        setAllowDownloads(gal.allowDownloads !== false)
+        setAllowFavorites(gal.allowFavorites !== false)
+        setAllowSelections(gal.allowSelections !== false)
         setRequiresPin(Boolean(data.requiresPin))
 
         // Determine theme ID from saved theme

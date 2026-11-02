@@ -69,20 +69,20 @@ DROP INDEX IF EXISTS "users_created_at_idx";--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "layout" SET DEFAULT 'small_columns';--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "cover_style" SET DEFAULT 'full_image';--> statement-breakpoint
 ALTER TABLE "gallery_themes" ALTER COLUMN "grid_spacing" SET DEFAULT 'regular';--> statement-breakpoint
-ALTER TABLE "equipment" ADD COLUMN "image_url" text;--> statement-breakpoint
-ALTER TABLE "gallery_themes" ADD COLUMN "image_layout" text DEFAULT 'small_columns' NOT NULL;--> statement-breakpoint
-ALTER TABLE "gallery_themes" ADD COLUMN "image_orientation" text DEFAULT 'balanced' NOT NULL;--> statement-breakpoint
-ALTER TABLE "gallery_themes" ADD COLUMN "image_sizing" text DEFAULT 'medium' NOT NULL;--> statement-breakpoint
-ALTER TABLE "gallery_themes" ADD COLUMN "gallery_width" text DEFAULT 'focused' NOT NULL;--> statement-breakpoint
-ALTER TABLE "gallery_themes" ADD COLUMN "cover_composition" text DEFAULT 'full_image' NOT NULL;--> statement-breakpoint
-ALTER TABLE "gallery_themes" ADD COLUMN "cover_image_id" uuid;--> statement-breakpoint
+ALTER TABLE "equipment" ADD COLUMN IF NOT EXISTS "image_url" text;--> statement-breakpoint
+ALTER TABLE "gallery_themes" ADD COLUMN IF NOT EXISTS "image_layout" text DEFAULT 'small_columns' NOT NULL;--> statement-breakpoint
+ALTER TABLE "gallery_themes" ADD COLUMN IF NOT EXISTS "image_orientation" text DEFAULT 'balanced' NOT NULL;--> statement-breakpoint
+ALTER TABLE "gallery_themes" ADD COLUMN IF NOT EXISTS "image_sizing" text DEFAULT 'medium' NOT NULL;--> statement-breakpoint
+ALTER TABLE "gallery_themes" ADD COLUMN IF NOT EXISTS "gallery_width" text DEFAULT 'focused' NOT NULL;--> statement-breakpoint
+ALTER TABLE "gallery_themes" ADD COLUMN IF NOT EXISTS "cover_composition" text DEFAULT 'full_image' NOT NULL;--> statement-breakpoint
+ALTER TABLE "gallery_themes" ADD COLUMN IF NOT EXISTS "cover_image_id" uuid;--> statement-breakpoint
 ALTER TABLE "creator_branding" ADD CONSTRAINT "creator_branding_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "entitlements" ADD CONSTRAINT "entitlements_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_plan_id_subscription_plans_id_fk" FOREIGN KEY ("plan_id") REFERENCES "public"."subscription_plans"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "entitlements_user_feature_idx" ON "entitlements" USING btree ("user_id","feature_key");--> statement-breakpoint
-CREATE INDEX "subscriptions_user_status_idx" ON "subscriptions" USING btree ("user_id","status");--> statement-breakpoint
-CREATE INDEX "user_email_idx" ON "users" USING btree ("email");--> statement-breakpoint
-CREATE INDEX "user_auth_user_id_idx" ON "users" USING btree ("auth_user_id");--> statement-breakpoint
-CREATE INDEX "user_email_verified_idx" ON "users" USING btree ("email_verified");--> statement-breakpoint
-CREATE INDEX "user_created_at_idx" ON "users" USING btree ("created_at");
+CREATE INDEX IF NOT EXISTS "entitlements_user_feature_idx" ON "entitlements" USING btree ("user_id","feature_key");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "subscriptions_user_status_idx" ON "subscriptions" USING btree ("user_id","status");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_email_idx" ON "users" USING btree ("email");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_auth_user_id_idx" ON "users" USING btree ("auth_user_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_email_verified_idx" ON "users" USING btree ("email_verified");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "user_created_at_idx" ON "users" USING btree ("created_at");

@@ -102,7 +102,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   const [allowFavorites, setAllowFavorites] = useState(true)
   const [allowSelections, setAllowSelections] = useState(true)
   const [allowComments, setAllowComments] = useState(false)
-  const [requiredPin, setRequiredPin] = useState<string | null>(null)
+  const [requiresPin, setRequiresPin] = useState(false)
 
   const [themeId, setThemeId] = useState<GalleryThemeId>('minimal')
   const [themePreset, setThemePreset] = useState<GalleryViewerProps['themePreset']>(undefined)
@@ -141,7 +141,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         setAllowDownloads(gal.allow_downloads !== false)
         setAllowFavorites(gal.allow_favorites !== false)
         setAllowSelections(gal.allow_selections !== false)
-        setRequiredPin(gal.access_pin || null)
+        setRequiresPin(Boolean(data.requiresPin))
 
         // Determine theme ID from saved theme
         const savedTheme = data.theme as (SavedTheme & { branding?: typeof import("@/db/schema").creatorBranding.$inferSelect }) | null
@@ -235,7 +235,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         }
 
         // Auto-verify if no PIN is required
-        if (!gal.access_pin) {
+        if (!data.requiresPin) {
           setVerified(true)
         }
       } catch (error) {
@@ -248,12 +248,30 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
     fetchGallery()
   }, [token])
 
-  const handleVerifyPin = (e: React.FormEvent) => {
+  const handleVerifyPin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!requiredPin || pin.trim() === requiredPin.trim()) {
-      setVerified(true)
+    if (!pin.trim()) {
+      setPinError(true)
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/public/galleries/${token}/access`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: pin.trim() }),
+      })
+
+      if (!response.ok) {
+        setPinError(true)
+        return
+      }
+
       setPinError(false)
-    } else {
+      setVerified(true)
+      window.location.reload()
+    } catch (error) {
+      console.error('Failed to verify gallery PIN:', error)
       setPinError(true)
     }
   }

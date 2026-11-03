@@ -195,13 +195,22 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const collectionId = body.collectionId;
+    const collectionId = typeof body.collectionId === "string" ? body.collectionId : "";
 
     if (!collectionId) {
       return NextResponse.json(
         { error: "collectionId is required." },
         { status: 400 }
       );
+    }
+
+    const existing = await db.execute(sql`
+      SELECT id FROM gallery_collections
+      WHERE id = ${collectionId} AND gallery_id = ${id}
+      LIMIT 1
+    `);
+    if (!existing.rows[0]) {
+      return NextResponse.json({ error: "Set not found." }, { status: 404 });
     }
 
     const title =
@@ -297,20 +306,22 @@ export async function DELETE(
       );
     }
 
-    // Set collection_id to null on any photos belonging to this collection
-    await db.execute(sql`
-      UPDATE gallery_photos
-      SET collection_id = NULL,
-          updated_at = now()
-      WHERE gallery_id = ${id}
-        AND collection_id = ${collectionId}
-    `);
-
-    // Delete the collection
+    // Unassign the set's photos and delete the set in one statement.
+    // The data-modifying CTE ensures photos are never deleted with their set.
     const result = await db.execute(sql`
+      WITH owned_set AS (
+        SELECT id FROM gallery_collections
+        WHERE id = ${collectionId} AND gallery_id = ${id}
+      ),
+      unassigned AS (
+        UPDATE gallery_photos
+        SET collection_id = NULL, updated_at = now()
+        WHERE gallery_id = ${id}
+          AND collection_id IN (SELECT id FROM owned_set)
+        RETURNING id
+      )
       DELETE FROM gallery_collections
-      WHERE id = ${collectionId}
-        AND gallery_id = ${id}
+      WHERE id IN (SELECT id FROM owned_set)
       RETURNING id
     `);
 

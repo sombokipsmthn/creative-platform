@@ -80,6 +80,9 @@ export default function GalleryWorkspacePage() {
   const [publishing, setPublishing] = useState(false)
   const [creatingCollection, setCreatingCollection] = useState(false)
   const [collectionTitle, setCollectionTitle] = useState('')
+  const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null)
+  const [editingCollectionTitle, setEditingCollectionTitle] = useState('')
+  const [savingCollection, setSavingCollection] = useState(false)
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
   const [bulkSelectMode, setBulkSelectMode] = useState(false)
   const [photoFilter, setPhotoFilter] = useState<'all' | 'included' | 'not-included' | 'published'>('all')
@@ -157,12 +160,15 @@ export default function GalleryWorkspacePage() {
     if (selectedPhotos.size === 0) return
     setError(null)
     try {
-      const responses = await Promise.all(Array.from(selectedPhotos).map((photoId) => fetch(`/api/galleries/${id}/photos`, {
+      const response = await fetch(`/api/galleries/${id}/photos`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photoId, collectionId }),
-      })))
-      if (responses.some((response) => !response.ok)) throw new Error('Unable to move all selected items')
+        body: JSON.stringify({ photoIds: Array.from(selectedPhotos), collectionId }),
+      })
+      const body = await response.json().catch(() => null) as { error?: string } | null
+      if (!response.ok) throw new Error(body?.error || 'Unable to move selected items')
+      setSelectedPhotos(new Set())
+      setBulkSelectMode(false)
       setShowCollectionPicker(false)
       setMoveDestination(null)
       await refreshGallery()
@@ -180,6 +186,46 @@ export default function GalleryWorkspacePage() {
       if (!response.ok) throw new Error('Unable to move photo to this set')
       await refreshGallery()
     } catch (err) { setError(err instanceof Error ? err.message : 'Unable to move photo') }
+  }
+
+  const handleSaveCollection = async (collectionId: string) => {
+    const title = editingCollectionTitle.trim()
+    if (!title || savingCollection) return
+    setSavingCollection(true)
+    setError(null)
+    try {
+      const response = await fetch(`/api/galleries/${id}/collections`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collectionId, title }),
+      })
+      const body = await response.json().catch(() => null) as { error?: string } | null
+      if (!response.ok) throw new Error(body?.error || 'Unable to rename set')
+      setEditingCollectionId(null)
+      setEditingCollectionTitle('')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to rename set')
+    } finally {
+      setSavingCollection(false)
+    }
+  }
+
+  const handleDeleteCollection = async (collectionId: string, title: string) => {
+    if (!confirm(`Delete "${title}"? Its photos will be moved to Unassigned, not deleted.`)) return
+    setError(null)
+    try {
+      const response = await fetch(`/api/galleries/${id}/collections`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ collectionId }),
+      })
+      const body = await response.json().catch(() => null) as { error?: string } | null
+      if (!response.ok) throw new Error(body?.error || 'Unable to delete set')
+      await refreshGallery()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to delete set')
+    }
   }
 
   const handleCreateCollection = async () => {
@@ -759,7 +805,7 @@ export default function GalleryWorkspacePage() {
                   {photoGroups.length > 0 ? (
                     <div className="space-y-7">
                       {photoGroups.map((group) => (
-                        <section key={group.id} onDragOver={(event) => event.preventDefault()} onDrop={() => { if (draggedPhotoId) void handleDropPhotoIntoCollection(draggedPhotoId, group.id === '__unassigned__' ? null : group.id) }} className={cn('rounded-xl border p-3 transition-colors sm:p-4', draggedPhotoId ? 'border-dashed border-[var(--color-accent)]/60 bg-[var(--color-accent-soft)]/20' : 'border-[var(--color-border-subtle)]')}>
+                        <section key={group.id} onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = 'move' }} onDrop={(event) => { event.preventDefault(); const photoId = event.dataTransfer.getData('text/plain') || draggedPhotoId; if (photoId) void handleDropPhotoIntoCollection(photoId, group.id === '__unassigned__' ? null : group.id) }} className={cn('rounded-xl border p-3 transition-colors sm:p-4', draggedPhotoId ? 'border-dashed border-[var(--color-accent)]/60 bg-[var(--color-accent-soft)]/20' : 'border-[var(--color-border-subtle)]')}>
                           <div className="mb-3 flex items-center justify-between gap-3"><div><h3 className="text-sm font-semibold">{group.title}</h3><p className="text-xs text-[var(--color-text-muted)]">{group.photos.length} {group.photos.length === 1 ? 'item' : 'items'} · Drop images here to move them</p></div>{draggedPhotoId && <span className="text-xs text-[var(--color-accent)]">Drop to move</span>}</div>
                           {group.photos.length > 0 ? (
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
@@ -772,7 +818,11 @@ export default function GalleryWorkspacePage() {
                           <div
                             key={photo.id}
                             draggable
-                            onDragStart={() => setDraggedPhotoId(photo.id)}
+                            onDragStart={(event) => {
+                              event.dataTransfer.effectAllowed = 'move'
+                              event.dataTransfer.setData('text/plain', photo.id)
+                              setDraggedPhotoId(photo.id)
+                            }}
                             onDragEnd={() => setDraggedPhotoId(null)}
                             className={cn(
                               'group relative aspect-square overflow-hidden rounded-lg border transition-colors',
@@ -938,18 +988,11 @@ export default function GalleryWorkspacePage() {
                   </div>
                 )}
 
-                {/* COLLECTIONS */}
-                <div className="ui-card p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-lg font-semibold">Collections</h2>
-                    <button
-                      type="button"
-                      onClick={() => document.getElementById('new-collection-input')?.focus()}
-                      className="gallery-btn gallery-btn-secondary gap-2"
-                    >
-                      <Plus className="w-4 h-4" />
-                      New
-                    </button>
+                {/* SET MANAGEMENT */}
+                <div className="ui-card space-y-4 p-6">
+                  <div>
+                    <h2 className="text-lg font-semibold">Manage sets</h2>
+                    <p className="mt-1 text-xs text-[var(--color-text-muted)]">Create, rename or remove sets. Removing a set sends its photos to Unassigned.</p>
                   </div>
 
                   <div className="flex gap-2">
@@ -957,11 +1000,10 @@ export default function GalleryWorkspacePage() {
                       id="new-collection-input"
                       value={collectionTitle}
                       onChange={(event) => setCollectionTitle(event.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') void handleCreateCollection()
-                      }}
-                      placeholder="e.g. Ceremony, Portraits"
-                      className="gallery-input flex-1"
+                      onKeyDown={(event) => { if (event.key === 'Enter') void handleCreateCollection() }}
+                      placeholder="New set name, e.g. Ceremony"
+                      aria-label="New set name"
+                      className="gallery-input min-w-0 flex-1"
                     />
                     <button
                       type="button"
@@ -969,11 +1011,55 @@ export default function GalleryWorkspacePage() {
                       disabled={creatingCollection || !collectionTitle.trim()}
                       className="gallery-btn gallery-btn-secondary shrink-0"
                     >
-                      {creatingCollection ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                      {creatingCollection ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                      <span className="hidden sm:inline">Add set</span>
                     </button>
                   </div>
 
-                  <p className="text-xs text-[var(--color-text-muted)]">Your sets and their photos are organised in the grids above. Drag any image into another set to move it.</p>
+                  {gallery.collections.length > 0 ? (
+                    <div className="divide-y divide-[var(--color-border-subtle)]">
+                      {gallery.collections.map((collection) => (
+                        <div key={collection.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0 last:pb-0">
+                          {editingCollectionId === collection.id ? (
+                            <>
+                              <input
+                                autoFocus
+                                value={editingCollectionTitle}
+                                onChange={(event) => setEditingCollectionTitle(event.target.value)}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter') void handleSaveCollection(collection.id)
+                                  if (event.key === 'Escape') { setEditingCollectionId(null); setEditingCollectionTitle('') }
+                                }}
+                                aria-label={`Rename ${collection.title}`}
+                                className="gallery-input min-w-0 flex-1"
+                              />
+                              <button type="button" onClick={() => void handleSaveCollection(collection.id)} disabled={savingCollection || !editingCollectionTitle.trim()} className="gallery-btn gallery-btn-primary">Save</button>
+                              <button type="button" onClick={() => { setEditingCollectionId(null); setEditingCollectionTitle('') }} className="gallery-btn gallery-btn-secondary">Cancel</button>
+                            </>
+                          ) : (
+                            <>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium">{collection.title}</p>
+                                <p className="text-xs text-[var(--color-text-muted)]">{collection.photo_count || 0} photos</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => { setEditingCollectionId(collection.id); setEditingCollectionTitle(collection.title) }}
+                                className="gallery-btn gallery-btn-secondary"
+                              >Rename</button>
+                              <button
+                                type="button"
+                                onClick={() => void handleDeleteCollection(collection.id, collection.title)}
+                                className="gallery-btn gallery-btn-secondary text-destructive"
+                              ><Trash2 className="h-4 w-4" /> Delete</button>
+                            </>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="rounded-lg border border-dashed border-[var(--color-border-subtle)] p-4 text-sm text-[var(--color-text-muted)]">No sets yet. Create your first set above.</p>
+                  )}
                 </div>
               </section>
             )}

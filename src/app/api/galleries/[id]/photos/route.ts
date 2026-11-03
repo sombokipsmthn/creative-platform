@@ -541,26 +541,42 @@ export async function PATCH(
     const body =
       await request.json();
 
-    const photoId =
-      body.photoId;
+    const photoIds: string[] = Array.isArray(body.photoIds)
+      ? [...new Set(body.photoIds.filter((value: unknown): value is string => typeof value === "string" && value.length > 0))]
+      : typeof body.photoId === "string" && body.photoId.length > 0
+        ? [body.photoId]
+        : [];
 
-    if (!photoId) {
-      return NextResponse.json(
-        {
-          error:
-            "photoId is required.",
-        },
-        {
-          status: 400,
-        },
-      );
+    if (!photoIds.length) {
+      return NextResponse.json({ error: "photoId or photoIds is required." }, { status: 400 });
+    }
+
+    if (body.collectionId !== undefined && body.collectionId !== null && body.collectionId !== "") {
+      const destination = await db.execute(sql`
+        SELECT id FROM gallery_collections
+        WHERE id = ${body.collectionId} AND gallery_id = ${galleryId}
+        LIMIT 1
+      `);
+      if (!destination.rows[0]) {
+        return NextResponse.json({ error: "Destination set not found." }, { status: 404 });
+      }
+    }
+
+    const photoId = photoIds[0];
+    const photoIdList = sql.join(photoIds.map((value) => sql`${value}`), sql`, `);
+    const ownedPhotos = await db.execute(sql`
+      SELECT id FROM gallery_photos
+      WHERE gallery_id = ${galleryId} AND id IN (${photoIdList})
+    `);
+    if (ownedPhotos.rows.length !== photoIds.length) {
+      return NextResponse.json({ error: "One or more photos were not found in this gallery." }, { status: 404 });
     }
 
     if (["inherit", "include", "exclude"].includes(body.portfolioSelection)) {
       await db.execute(sql`
         UPDATE gallery_photos
         SET portfolio_selection = ${body.portfolioSelection}, updated_at = now()
-        WHERE id = ${photoId} AND gallery_id = ${galleryId}
+        WHERE id IN (${photoIdList}) AND gallery_id = ${galleryId}
       `);
     }
 
@@ -570,14 +586,8 @@ export async function PATCH(
     ) {
       await db.execute(sql`
         UPDATE gallery_photos
-        SET
-          collection_id = ${
-            body.collectionId ||
-            null
-          },
-          updated_at = now()
-        WHERE id = ${photoId}
-          AND gallery_id = ${galleryId}
+        SET collection_id = ${body.collectionId || null}, updated_at = now()
+        WHERE id IN (${photoIdList}) AND gallery_id = ${galleryId}
       `);
     }
 
@@ -592,7 +602,7 @@ export async function PATCH(
             body.isHidden,
           )},
           updated_at = now()
-        WHERE id = ${photoId}
+        WHERE id IN (${photoIdList})
           AND gallery_id = ${galleryId}
       `);
     }
@@ -608,7 +618,7 @@ export async function PATCH(
             body.isFavorite,
           )},
           updated_at = now()
-        WHERE id = ${photoId}
+        WHERE id IN (${photoIdList})
           AND gallery_id = ${galleryId}
       `);
     }
@@ -624,34 +634,36 @@ export async function PATCH(
             body.isSelected,
           )},
           updated_at = now()
-        WHERE id = ${photoId}
+        WHERE id IN (${photoIdList})
           AND gallery_id = ${galleryId}
       `);
     }
 
     if (body.isCover) {
+      if (photoIds.length !== 1) {
+        return NextResponse.json({ error: "Select exactly one photo to set as cover." }, { status: 400 });
+      }
       await db.execute(sql`
         UPDATE galleries
-        SET
-          cover_photo_id = ${photoId},
-          updated_at = now()
-        WHERE id = ${galleryId}
-          AND creator_id = ${creator.id}
+        SET cover_photo_id = ${photoId}, updated_at = now()
+        WHERE id = ${galleryId} AND creator_id = ${creator.id}
       `);
     }
 
-    const result =
-      await db.execute(sql`
-        SELECT *
-        FROM gallery_photos
-        WHERE id = ${photoId}
-          AND gallery_id = ${galleryId}
-        LIMIT 1
-      `);
+    const result = await db.execute(sql`
+      SELECT *
+      FROM gallery_photos
+      WHERE id IN (${photoIdList}) AND gallery_id = ${galleryId}
+      ORDER BY sort_order ASC, created_at ASC
+    `);
+
+    if (result.rows.length !== photoIds.length) {
+      return NextResponse.json({ error: "One or more photos were not found in this gallery." }, { status: 404 });
+    }
 
     return NextResponse.json({
-      photo:
-        result.rows[0],
+      photo: result.rows[0],
+      photos: result.rows,
     });
   } catch (error) {
     console.error(

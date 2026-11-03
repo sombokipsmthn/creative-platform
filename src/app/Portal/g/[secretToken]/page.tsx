@@ -103,7 +103,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
   const [allowFavorites, setAllowFavorites] = useState(true)
   const [allowSelections, setAllowSelections] = useState(true)
   const [allowComments, setAllowComments] = useState(false)
-  const [requiredPin, setRequiredPin] = useState<string | null>(null)
+  const [requiresPin, setRequiresPin] = useState(false)
 
   const [themeId, setThemeId] = useState<GalleryThemeId>('minimal')
   const [themePreset, setThemePreset] = useState<GalleryViewerProps['themePreset']>(undefined)
@@ -139,10 +139,10 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         setGalleryId(gal.id)
         setTitle(gal.title || 'Gallery')
         setDescription(gal.description)
-        setAllowDownloads(gal.allow_downloads !== false)
-        setAllowFavorites(gal.allow_favorites !== false)
-        setAllowSelections(gal.allow_selections !== false)
-        setRequiredPin(gal.access_pin || null)
+        setAllowDownloads(gal.allowDownloads !== false)
+        setAllowFavorites(gal.allowFavorites !== false)
+        setAllowSelections(gal.allowSelections !== false)
+        setRequiresPin(Boolean(data.requiresPin))
 
         // Determine theme ID from saved theme
         const savedTheme = data.theme as (SavedTheme & { branding?: typeof import("@/db/schema").creatorBranding.$inferSelect }) | null
@@ -236,7 +236,7 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
         }
 
         // Auto-verify if no PIN is required
-        if (!gal.access_pin) {
+        if (!data.requiresPin) {
           setVerified(true)
         }
       } catch (error) {
@@ -261,7 +261,10 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
     if (isValid) {
       setVerified(true)
       setPinError(false)
-    } else {
+      setVerified(true)
+      window.location.reload()
+    } catch (error) {
+      console.error('Failed to verify gallery PIN:', error)
       setPinError(true)
     }
   }

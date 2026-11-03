@@ -37,6 +37,9 @@ export async function GET(
         description: galleries.description,
         category: galleries.category,
         accessPin: galleries.accessPin,
+        allowDownloads: galleries.allowDownloads,
+        allowFavorites: galleries.allowFavorites,
+        allowSelections: galleries.allowSelections,
         status: galleries.status,
         coverPhotoId: galleries.coverPhotoId,
         publishedAt: galleries.publishedAt,
@@ -113,10 +116,17 @@ export async function GET(
       );
 
       if (!existingSession) {
-        return NextResponse.json(
-          { error: "Gallery requires PIN access." },
-          { status: 401 },
-        );
+        const { accessPin: _accessPin, ...lockedGallery } = gallery;
+
+        return NextResponse.json({
+          gallery: lockedGallery,
+          requiresPin: true,
+          collections: [],
+          photos: [],
+          approval: null,
+          theme: null,
+          sessionId: null,
+        });
       }
     }
 

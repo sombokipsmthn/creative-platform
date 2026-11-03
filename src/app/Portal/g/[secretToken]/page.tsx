@@ -11,6 +11,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useDesignSystem } from '@/components/ui/DesignSystemProvider';
+import { comparePin } from '@/lib/gallery/pin';
 
 interface GalleryPageProps {
   params: Promise<{
@@ -250,23 +251,15 @@ export default function ClientGalleryPage({ params }: GalleryPageProps) {
 
   const handleVerifyPin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!pin.trim()) {
-      setPinError(true)
+    if (!requiredPin) {
+      setVerified(true)
+      setPinError(false)
       return
     }
 
-    try {
-      const response = await fetch(`/api/public/galleries/${token}/access`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin: pin.trim() }),
-      })
-
-      if (!response.ok) {
-        setPinError(true)
-        return
-      }
-
+    const isValid = await comparePin(pin.trim(), requiredPin)
+    if (isValid) {
+      setVerified(true)
       setPinError(false)
       setVerified(true)
       window.location.reload()

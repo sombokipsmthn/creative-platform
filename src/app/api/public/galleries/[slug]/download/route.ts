@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 
 import { NextResponse } from "next/server";
-import { sql } from "drizzle-orm";
+import { sql, inArray } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
@@ -461,7 +461,7 @@ export async function POST(
               WHERE p.gallery_id = ${gallery.id}
                 AND p.is_hidden = false
                 AND COALESCE(c.client_visibility, 'all') IN ('all', 'authorized', 'guest')
-                AND p.id = ANY(${photoIds}::uuid[])
+                AND ${inArray(sql`p.id`, photoIds)}
               ORDER BY sort_order ASC
             `,
           )

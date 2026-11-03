@@ -169,8 +169,8 @@ export const galleryPhotos = pgTable("gallery_photos", {
 	watermarkPath: text("watermark_path"),
 	processingStatus: text("processing_status").default('ready').notNull(),
 	processingError: text("processing_error"),
-	altText: text("alt_text").default('),
-	caption: text().default('),
+	altText: text("alt_text").default('').notNull(),
+	caption: text("caption").default('').notNull(),
 	isCover: boolean("is_cover").default(false).notNull(),
 	portfolioSelection: text("portfolio_selection").default('inherit').notNull(),
 }, (table) => [

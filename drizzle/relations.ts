@@ -187,9 +187,6 @@ export const invoicesRelations = relations(invoices, ({one, many}) => ({
 	payments_invoiceId: many(payments, {
 		relationName: "payments_invoiceId_invoices_id"
 	}),
-	payments_invoiceId: many(payments, {
-		relationName: "payments_invoiceId_invoices_id"
-	}),
 }));
 
 export const quotesRelations = relations(quotes, ({one, many}) => ({
@@ -425,11 +422,6 @@ export const paymentsRelations = relations(payments, ({one, many}) => ({
 	user: one(users, {
 		fields: [payments.creatorId],
 		references: [users.id]
-	}),
-	invoice_invoiceId: one(invoices, {
-		fields: [payments.invoiceId],
-		references: [invoices.id],
-		relationName: "payments_invoiceId_invoices_id"
 	}),
 	invoice_invoiceId: one(invoices, {
 		fields: [payments.invoiceId],

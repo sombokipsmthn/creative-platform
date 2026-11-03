@@ -172,10 +172,16 @@ export async function deleteContract(id: string) {
 }
 
 export async function sendContract(id: string) {
-      const user = await getCurrentUser();
-    if (!user) throw new Error("Unauthenticated");
-    const userId = user.id;
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Unauthenticated");
+  const userId = user.id;
   if (!userId) throw new Error('Unauthenticated');
+
+  const contract = await fetchContract(id);
+  if (!contract) throw new Error('Contract not found or unauthorized');
+  if (contract.status !== 'draft') {
+    throw new Error('Contract must be in draft status before sending');
+  }
 
   const [updatedContract] = await db.update(contracts).set({
     status: 'sent',

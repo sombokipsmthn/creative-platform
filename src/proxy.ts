@@ -98,7 +98,7 @@ export default async function customMiddleware(request: Request) {
   if (bypassState.enabled) {
     const response = NextResponse.next();
     response.cookies.set("local-auth-bypass", "1", {
-      httpOnly: false,
+      httpOnly: true,
       sameSite: "lax",
       secure: false,
       path: "/",
@@ -112,7 +112,8 @@ export default async function customMiddleware(request: Request) {
     return customDomainResponse;
   }
 
-  if (isOnboardingRoute(pathname) || isAdminRoute(pathname)) {
+  // Protect all admin and onboarding routes — check auth before any other logic
+  if (pathname.startsWith("/admin") || pathname.startsWith("/admin/onboarding")) {
     if (!(await hasAuthenticatedSession(request))) {
       const signInUrl = new URL("/sign-in", url.origin);
       signInUrl.searchParams.set("redirect", pathname);

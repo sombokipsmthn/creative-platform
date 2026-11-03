@@ -73,7 +73,18 @@ async function syncInvoiceStatus(tx: any, invoiceId: string, userId: string) {
   if (!invoice || invoice.status === "cancelled") return;
   const records = await tx.select({ amount: payments.amount, status: payments.status }).from(payments).where(and(eq(payments.invoiceId, invoiceId), eq(payments.creatorId, userId)));
   const paid = confirmedAmount(records);
-  const nextStatus = paid >= invoice.total && invoice.total > 0 ? "paid" : invoice.status === "paid" ? "sent" : invoice.status;
+  const now = new Date();
+  let nextStatus: string;
+  if (invoice.status === "cancelled") return;
+  if (paid >= invoice.total && invoice.total > 0) {
+    nextStatus = "paid";
+  } else if (invoice.status === "paid") {
+    nextStatus = "sent";
+  } else if (invoice.dueDate && invoice.dueDate < now && paid < invoice.total) {
+    nextStatus = "overdue";
+  } else {
+    nextStatus = invoice.status;
+  }
   if (nextStatus !== invoice.status) await tx.update(invoices).set({ status: nextStatus, updatedAt: new Date() }).where(and(eq(invoices.id, invoiceId), eq(invoices.creatorId, userId)));
 }
 
@@ -148,9 +159,10 @@ export async function recordPayment(userId: string, payload: Record<string, unkn
   if (!paidAt) throw new ApiError("Payment date is invalid", 400);
   const reference = clean(payload.reference) ?? `PAY-${Date.now().toString(36).toUpperCase()}`;
   return db.transaction(async (tx) => {
-    if (invoice && status === "confirmed") {
+    if (invoice) {
       const existing = await tx.select({ amount: payments.amount, status: payments.status }).from(payments).where(and(eq(payments.invoiceId, invoice.id), eq(payments.creatorId, userId)));
-      if (confirmedAmount(existing) + amount > invoice.total) throw new ApiError("Payment exceeds the available invoice balance", 409);
+      const totalCommitted = existing.reduce((sum, payment) => sum + payment.amount, 0);
+      if (totalCommitted + amount > invoice.total) throw new ApiError("Payment exceeds the available invoice balance", 409);
     }
     const [payment] = await tx.insert(payments).values({ creatorId: userId, clientId, invoiceId, projectId: project?.id ?? null, reference, amount, currency, method: assertMethod(payload.method), origin: "manual", status, paidAt, confirmedAt: status === "confirmed" ? new Date() : null, confirmedBy: status === "confirmed" ? userId : null, transactionReference: clean(payload.transactionReference), evidenceReference: clean(payload.evidenceReference), notes: clean(payload.notes) }).returning();
     if (!payment) throw new ApiError("Payment could not be recorded", 500);

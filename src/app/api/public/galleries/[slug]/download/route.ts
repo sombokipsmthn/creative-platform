@@ -282,11 +282,11 @@ async function getSource(
     return null;
   }
 
-  return getGalleryStorage().getObject(
-    isR2
-      ? path || ""
-      : url || "",
-  );
+  // Use the storage path (key) for all providers.
+  // `url` is a proxy URL (/api/public/galleries/media?key=...) which getObject()
+  // cannot resolve for Vercel Blob or local storage; only `path` contains the
+  // actual storage key.
+  return getGalleryStorage().getObject(path || "");
 }
 
 export async function POST(

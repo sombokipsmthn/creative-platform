@@ -191,7 +191,7 @@ export default function EquipmentCatalog({
               className={`shrink-0 rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${
                 selected
                   ? "bg-primary text-white"
-                  : "btn-secondary"
+                  : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
               }`}
             >
               {displayCategory(category)}
@@ -217,7 +217,7 @@ export default function EquipmentCatalog({
               setQuery("");
               setActiveCategory("All");
             }}
-            className="mt-6 inline-flex rounded-full px-5 py-2.5 text-xs font-sans uppercase tracking-widest btn-primary"
+            className="mt-6 inline-flex rounded-full px-5 py-2.5 text-xs font-sans uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90"
           >
             Reset filters
           </button>
@@ -282,7 +282,7 @@ export default function EquipmentCatalog({
                       type="button"
                       onClick={() => toggleSelected(item.id)}
                       className={`rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest transition ${
-                        selected ? "btn-primary" : "btn-secondary"
+                        selected ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
                       }`}
                       aria-pressed={selected}
                     >
@@ -315,13 +315,13 @@ export default function EquipmentCatalog({
               <button
                 type="button"
                 onClick={() => setSelectedIds([])}
-                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest btn-secondary"
+                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest bg-secondary text-secondary-foreground hover:bg-secondary/80"
               >
                 Clear kit
               </button>
               <Link
                 href={inquiryMailto(selectedItems)}
-                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest btn-primary"
+                className="rounded-full px-4 py-2 text-xs font-sans uppercase tracking-widest bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 Request quote
               </Link>

@@ -177,7 +177,7 @@ export default function EditCreatorProfileModal({
 
           <button
             type="submit"
-            className="w-full py-3.5 btn-primary text-xs font-sans uppercase tracking-widest rounded-lg transition-colors shadow-md cursor-pointer"
+            className="w-full py-3.5 bg-primary text-primary-foreground hover:bg-primary/90 text-xs font-sans uppercase tracking-widest rounded-lg transition-colors shadow-md cursor-pointer"
           >
             Save Profile Changes
           </button>

@@ -1,0 +1,1 @@
+ALTER TABLE "gallery_themes" ALTER COLUMN "grid_spacing" SET DEFAULT 'regular';

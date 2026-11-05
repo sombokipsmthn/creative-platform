@@ -579,3 +579,105 @@ After any material change to the implementation:
 - Requested local port convention: Next.js app on port 3000 by default; other local resources use distinct documented ports. Verify configuration before claiming this is implemented.
 - Development data reset: never target production; verify actual database identity; preserve the equipment catalogue and migration history; delete only media objects positively linked to deleted records; require explicit approval for destructive execution.
 - Use `docs/PROJECT-HANDBOOK.md` as the canonical reference for these decisions and `docs/DOCUMENTATION-INDEX.md` to locate specialist documentation.
+
+
+## 15. Product modularization and subscription model (2026-11-05)
+
+> **Planned product architecture.** This section defines intended product scope and module ownership. It is not a claim that paid subscriptions, entitlements, or every feature below are implemented.
+
+KIPSMTHN Creative Platform is intended to be one connected creative-business operating system built around a shared **Core** and three independently purchasable paid modules: **Creative Intelligence**, **Operations**, and **Financial Intelligence**. These are logical product/entitlement boundaries within one platform, not separate applications or duplicated data stores.
+
+### 15.1 Core — shared foundation
+
+Core is the baseline experience and should remain useful without paid modules. It includes:
+
+- Creator identity, account, profile, and workspace/business settings.
+- Command Centre/dashboard for core activity, reminders, and next actions.
+- Shared client and project records.
+- Basic public portfolio presence and publishing.
+- Basic gallery creation, organisation, and sharing.
+- Shared notifications, preferences, and account controls.
+
+The Core dashboard must not require paid-module data. Paid metrics/actions should be shown only when the relevant module is entitled. Basic portfolio and gallery access remain part of Core.
+
+### 15.2 Creative Intelligence — advanced creative and client delivery
+
+Creative Intelligence owns advanced portfolio, media, gallery, and client-delivery functionality:
+
+- Advanced gallery presentation, themes, layouts, and customisation.
+- Proofing, comments, favourites, selections, and approval/change-request workflows.
+- Controlled downloads, presets, watermarks, expiry, and delivery permissions.
+- Portfolio storytelling, case studies, and creative content curation.
+- Gallery/portfolio engagement analytics.
+- Advanced media organisation and client-facing presentation.
+
+Core includes basic portfolio and gallery capabilities; Creative Intelligence expands these into advanced creative presentation and controlled client delivery.
+
+### 15.3 Operations — planning and execution
+
+Operations owns the planning, coordination, and execution of client work:
+
+- Calendar, scheduling, availability, and booking coordination.
+- Enquiry/client-work pipeline where applicable.
+- Project plans, tasks, milestones, deadlines, and dependencies.
+- Production schedules, call sheets, shot lists, locations, and crew coordination.
+- Team/staff coordination and resource allocation.
+- Equipment catalogue, availability, assignment, and utilisation for production.
+- Contracts, templates, agreement lifecycle, and client obligations.
+
+Operations is broader than a calendar: it is where the creator organises, assigns, coordinates, and completes the work.
+
+**Contract ownership:** Contracts belong to Operations. Operations owns templates, drafting, sending, review/signature, agreement status, client/project associations, deliverables, milestones, obligations, signed-document access, and expiry/renewal reminders. Financial Intelligence consumes linked monetary terms—such as agreed fees, deposits, payment schedules, and cancellation charges—to support quotes, invoices, payment tracking, and reporting. It does not own the legal agreement lifecycle. Preserve appropriate read-only access to executed contracts if an Operations subscription expires.
+
+### 15.4 Financial Intelligence — financial management
+
+Financial Intelligence owns the financial lifecycle:
+
+- Quotes/proposals, quote items, approval/acceptance.
+- Invoices, credit/debit notes, and invoice lifecycle.
+- Payments, instalments, schedules, refunds, and reconciliation tracking.
+- Expenses, purchases, receipts, and cost tracking.
+- Revenue, cash flow, profitability, forecasting, and financial analytics.
+- Financial documents, reports, and accountant exports.
+- Multi-currency handling and jurisdiction-aware tax adaptation.
+
+Operational equipment/personnel/production costs may feed quote costing and expense workflows, but Financial Intelligence owns the resulting monetary records and calculations.
+
+Tax adaptation is based on business registration and actual obligations, not IP address, nationality, or client location. Kenya-specific capabilities may include KRA PIN details, configurable VAT/tax classifications, withholding-tax records, eTIMS reference/status tracking, KES reporting, tax-readiness indicators, and accountant-oriented exports. Do not claim direct KRA/eTIMS integration or certification without a separately verified and authorised integration. Keep the financial engine extensible to other jurisdictions.
+
+### 15.5 Shared records and end-to-end workflow
+
+Clients and projects are shared Core records. Modules extend these records through explicit, permission-checked relationships; they must not create duplicate client/project sources of truth.
+
+Intended workflow:
+
+1. Public/Core enquiry creates or updates a shared client and project.
+2. Operations plans the engagement, schedules resources, and prepares the contract.
+3. Financial Intelligence prepares the quote and records accepted financial terms.
+4. Operations manages agreement execution, milestones, schedule, and delivery obligations.
+5. Financial Intelligence issues invoices and tracks payments, expenses, and financial status.
+6. Creative Intelligence manages advanced gallery presentation, proofing, selections, approvals, and final delivery.
+7. Core provides the shared overview and next actions.
+
+Cross-module references must be explicit and permission-checked. No module may assume every user subscribes to every other module.
+
+### 15.6 Subscription and entitlement principles
+
+- Core is the baseline; the three paid modules can be purchased independently.
+- Bundles or higher-tier plans may include multiple/all modules.
+- Enforce entitlements server-side across pages, APIs, mutations, and data access. Navigation hiding alone is insufficient.
+- Use explicit, composable module entitlements rather than scattered plan-name checks.
+- Core must continue working when paid modules are absent, expired, or unavailable.
+- Preserve user-owned historical records after cancellation/expiry; use suitable read-only, export, or limited-access behavior instead of deleting or holding business records hostage.
+- Distinguish missing entitlement from missing data and technical errors.
+- Audit the existing feature-level entitlement system before assuming it supports independent modules and bundles.
+
+### 15.7 Modularization implementation guardrails
+
+The current codebase must be mapped to these target boundaries before implementation. Audit routes, APIs, schema tables, services, components, background jobs, dashboard metrics, and cross-module dependencies. Investigate duplicate or overlapping calendar/studio-event models before consolidating them. Ensure Core dashboard metrics do not fail when a paid module is unavailable.
+
+This specification update does not authorize an immediate schema, migration, route, or entitlement rewrite. Preserve existing data and behavior while planning future changes. Implementation status must be classified as implemented/verified, partially implemented, requested/planned, or blocked/unverified.
+
+### 15.8 Decisions still open
+
+The module names and ownership boundaries above are the working product direction recorded on 2026-11-05. Exact pricing, tiers, feature limits, trials, billing provider, grandfathering, and upgrade/downgrade UX remain undecided and must not be invented.

@@ -186,3 +186,133 @@ If documents conflict, use this order:
 6. `CHANGELOG.md`, audit summaries, implementation plans, `docs/archive/`, and `docs/soc2/` evidence for historical context unless explicitly revalidated.
 
 When a discrepancy is found, fix the relevant active document and add a short entry to the documentation changelog. Do not silently delete historical evidence.
+
+
+## 15. Product modularization and subscription direction (2026-11-05)
+
+> **Product direction / planned architecture.** This section records the intended modular product model. It does not claim that subscription billing, module entitlements, feature gating, or every listed capability is implemented. Validate current code before implementation and keep status classifications honest.
+
+### Product model
+
+KIPSMTHN Creative Platform is intended to operate as one connected creative-business platform with a shared **Core** and three independently valuable paid modules:
+
+1. **Core** — the foundation of the platform.
+2. **Creative Intelligence** — advanced creative presentation, gallery management, and client delivery.
+3. **Operations** — planning, scheduling, coordination, and execution of client work.
+4. **Financial Intelligence** — quotes, invoicing, payments, expenses, and financial management.
+
+The modules are product and entitlement boundaries, not separate applications or disconnected databases. They must share the same creator identity, client records, project records, files/references, and workflow context. A creator should experience one coherent workspace even when they subscribe to multiple modules.
+
+### Core — shared platform foundation
+
+Core is the baseline experience and should provide useful value without requiring a paid module. Intended scope:
+
+- Creator account, identity, profile, and business/workspace settings.
+- Command Centre/dashboard with core activity, reminders, and next actions.
+- Shared client and project records at the foundational level.
+- Basic public portfolio presence and publishing.
+- Basic gallery creation, organisation, and sharing, sufficient for a creator to present and deliver work simply.
+- Shared notifications, preferences, and account-level controls.
+
+The Core dashboard must not depend on paid-module data being available. Paid-module metrics and actions should appear only when the relevant entitlement exists, with clear upgrade pathways where appropriate. Core must remain usable when all paid modules are inactive.
+
+### Creative Intelligence — paid creative and delivery module
+
+Creative Intelligence owns advanced portfolio, media, gallery, and client-delivery capabilities, including:
+
+- Advanced gallery presentation, layout, themes, and customisation.
+- Client proofing and review workflows.
+- Comments, favourites, selections, and approval/change-request workflows.
+- Controlled downloads, download presets, watermarks, expiry rules, and delivery permissions.
+- Rich portfolio storytelling, case studies, and creative content curation.
+- Gallery/portfolio engagement and delivery analytics.
+- Advanced media organisation and client-facing presentation.
+
+**Boundary:** Core retains basic portfolio and gallery functionality. Creative Intelligence adds advanced creative presentation, proofing, selection, and controlled delivery. Do not make a creator's basic portfolio or basic gallery access disappear solely because a paid module is inactive.
+
+### Operations — paid planning and execution module
+
+Operations owns the non-financial work required to organise and deliver client engagements:
+
+- Calendar, scheduling, availability, and booking coordination.
+- Enquiry and client-work pipeline where applicable.
+- Project planning, tasks, milestones, deadlines, and dependencies.
+- Production planning, shoot schedules, call sheets, shot lists, locations, and crew coordination.
+- Team/staff coordination and resource allocation.
+- Equipment catalogue workflows, availability, assignment, and utilisation for production.
+- Contract creation, templates, agreement lifecycle, and client obligations.
+
+Operations is more than a calendar. It is the system for planning, assigning, coordinating, and completing the work.
+
+#### Contract ownership
+
+Contracts belong to **Operations** because they define the agreement and obligations governing the work. Operations owns:
+
+- Contract templates and reusable clauses.
+- Drafting, sending, review, signing, and lifecycle status.
+- Links to the relevant client and project.
+- Deliverables, milestones, deadlines, responsibilities, and non-financial obligations.
+- Signed-document storage and access.
+- Expiry, renewal, and relevant obligation reminders.
+
+Contracts also connect to Financial Intelligence. Financial Intelligence may read the contract's agreed fees, deposit requirements, payment schedule, cancellation charges, and other monetary terms to support quotes, invoices, payment tracking, and financial reporting. It does not become the owner of the legal agreement lifecycle.
+
+If Operations access expires, preserve appropriate historical/read-only access to executed contracts and their records. Do not hold signed agreements hostage behind an active subscription.
+
+### Financial Intelligence — paid financial management module
+
+Financial Intelligence owns the financial lifecycle and reporting for the creator's business:
+
+- Quotes, proposals, quote items, and quote approval/acceptance.
+- Invoices, credit/debit notes, and invoice lifecycle.
+- Payment records, instalments, payment schedules, refunds, and reconciliation tracking.
+- Expenses, purchases, receipts, and cost tracking.
+- Revenue, cash-flow, profitability, forecasting, and financial analytics.
+- Financial documents, reports, and accountant exports.
+- Currency handling and jurisdiction-aware tax configuration/adaptation.
+
+Equipment, personnel, and production costs may originate in Operations or shared records and feed into quote costing and expense workflows. Financial Intelligence owns the monetary records and calculations; it should not duplicate operational resources.
+
+Tax adaptation must be based on the creator/business's registration and actual tax obligations, not inferred from IP address, nationality, or a client's location. Kenya-specific needs may include KRA PIN details, configurable VAT/tax classifications, withholding-tax records, eTIMS reference/status tracking, KES reporting, tax-readiness indicators, and accountant-oriented exports. Do not claim direct KRA/eTIMS integration or certification unless a separately verified, authorised integration exists. Keep the underlying financial engine suitable for other jurisdictions.
+
+### Shared records and cross-module workflows
+
+Clients and projects are shared foundation records, not copied into each module. Modules attach their own capabilities and records to those shared entities through stable relationships and ownership checks.
+
+Intended connected workflow:
+
+1. A visitor makes an enquiry through the public/Core experience.
+2. The creator creates or updates a shared client and project record.
+3. Operations plans the work, schedules resources, and prepares the contract.
+4. Financial Intelligence prepares the quote and records accepted financial terms.
+5. Operations manages contract execution, milestones, schedule, and delivery obligations.
+6. Financial Intelligence issues invoices and tracks payments, expenses, and financial status.
+7. Creative Intelligence manages advanced gallery presentation, proofing, selections, approvals, and final client delivery.
+8. Core provides the shared overview and next actions, while each module owns its detailed workflow.
+
+A module may reference another module's records only through explicit, permission-checked integration contracts. Avoid duplicated sources of truth, circular ownership, or hidden assumptions that all modules are subscribed.
+
+### Subscription and entitlement principles
+
+- Core is the baseline; Creative Intelligence, Operations, and Financial Intelligence are separately purchasable modules.
+- Bundles or higher-tier plans may include multiple/all paid modules, without changing the underlying module boundaries.
+- Entitlements must be enforced server-side for protected pages, APIs, mutations, and data access. Hiding navigation alone is not access control.
+- Module checks should be explicit and composable; do not scatter hard-coded plan-name checks throughout the application.
+- Shared Core functionality must not break when a paid module is absent, expired, or unavailable.
+- If a subscription expires or is cancelled, preserve user-owned historical records. Provide an appropriate read-only, export, or limited-access mode rather than deleting or locking away business records.
+- Clearly distinguish a feature being unavailable for lack of entitlement from a technical error or missing data.
+- Subscription state and module access must be designed to support independent modules and bundles; the current feature-level entitlement implementation must be audited before being treated as sufficient.
+
+### Architecture guardrails for modularization
+
+- Treat these boundaries as the target product architecture, not a mandate to rewrite the current codebase immediately.
+- First map existing routes, APIs, schema tables, services, components, background jobs, dashboard metrics, and integrations to the proposed module ownership.
+- Identify cross-module dependencies and existing duplicate systems before moving or deleting anything. In particular, investigate the existing calendar/studio-event models and APIs before consolidating them.
+- Keep shared identity, client, project, and file ownership in the Core/shared platform layer.
+- Make dashboard widgets resilient to missing paid modules; Core dashboard rendering must not fail because Financial Intelligence or another module is not subscribed.
+- Preserve current functionality and data during any future modularisation. Do not change schemas, migrations, routes, or entitlement behavior solely because this specification has been updated.
+- Record each feature as implemented/verified, partially implemented, requested/planned, or blocked/unverified. The codebase and tests determine implementation status; this section determines intended product direction.
+
+### Current decision status
+
+The module names and responsibility boundaries in this section are the working product direction recorded on 2026-11-05. Detailed pricing, packaging tiers, exact feature limits, trial rules, billing provider, grandfathering rules, and final upgrade/downgrade UX remain to be specified. Do not invent these details during implementation.

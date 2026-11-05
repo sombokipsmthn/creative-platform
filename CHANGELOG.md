@@ -12,6 +12,13 @@
 
 All notable changes to the KIPSMTHN Creative Platform will be documented in this file.
 
+## Product modularization direction — 2026-11-05
+
+- Recorded the shared Core plus Creative Intelligence, Operations, and Financial Intelligence product model in the Project Handbook and product specification.
+- Defined module responsibilities, including Contracts under Operations with monetary-term integration into Financial Intelligence.
+- Documented shared client/project records, end-to-end workflows, server-side entitlement principles, historical-data access after subscription expiry, and modularization audit guardrails.
+- Marked the model as planned product direction; pricing, tiers, limits, trials, billing provider, and detailed upgrade/downgrade behavior remain undecided. No application code or database schema changed.
+
 ## [2.0.0] - 2026-09-02
 
 ### Added

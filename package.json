@@ -74,7 +74,7 @@
     "react-dom": "19.3.1",
     "react-router-dom": "^7.18.5",
     "react-server-dom-webpack": "^19.3.1",
-    "read-excel-file": "^6.0.3",
+    "read-excel-file": "^9.3.14",
     "recharts": "^3.10.1",
     "resend": "^6.35.0",
     "shadcn": "^4.22.1",

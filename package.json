@@ -100,7 +100,7 @@
     "@types/sharp": "^0.32.0",
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-react": "^6.1.2",
-    "@vitejs/plugin-rsc": "^0.5.38",
+    "@vitejs/plugin-rsc": "^0.5.39",
     "axe-core": "^4.14.0",
     "drizzle-kit": "^0.31.4",
     "eslint": "^10.13.0",
